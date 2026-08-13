@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ASJ MASTER PROFIL</title>
+  <link rel="manifest" href="/manifest.webmanifest?v=8f163ba13c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#020617">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=b90abf8d0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ASJ Portal">
+  <!-- FIX 2026-08-12: Tailwind CDN (v3 JIT in-browser) diganti bundel Vite
+       (src/main.js -> main.css, Tailwind v4) supaya warning produksi hilang,
+       kelas konsisten dengan halaman lain, dan tidak ada JS runtime eksternal. -->
+  <link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css?v=8230c4590e">
+  <link rel="stylesheet" href="/fonts/fonts.css?v=1dd324a9c7">
+  <!-- Preload font kritis (Montserrat, UI font) — href & url() di fonts.css memakai ?v yang sama. -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/montserrat-latin.woff2?v=9b1446d51c" crossorigin>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif}
+    body{background:#020617;color:#fff;padding-bottom:90px}
+    .hero{height:220px;position:relative;overflow:hidden}
+    .bg-hero{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.35)}
+    .overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.25),#020617)}
+    .header{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:100%;z-index:10}
+    .logo{width:80px;height:80px;border-radius:50%;margin:auto;box-shadow:0 10px 25px rgba(0,0,0,.5)}
+    .title{font-size:24px;font-weight:900;margin-top:10px;text-transform:uppercase;color:#38bdf8}
+    .sub{font-size:11px;margin-top:5px;color:#cbd5e1;letter-spacing:2px}
+    .container{max-width:600px;margin:auto;padding:15px;margin-top:-30px;position:relative;z-index:20}
+    .glass{background:rgba(15,23,42,.95);border:1px solid #1e293b;border-radius:24px;padding:25px;box-shadow:0 25px 50px rgba(0,0,0,.5)}
+    .stepper{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;position:relative}
+    .stepper::before{content:'';position:absolute;top:15px;left:10%;right:10%;height:2px;background:#334155;z-index:1}
+    .step{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:5px;width:20%}
+    .circle{width:32px;height:32px;border-radius:50%;background:#1e293b;border:2px solid #334155;display:flex;justify-content:center;align-items:center;font-size:12px;font-weight:800;color:#64748b;transition:.3s}
+    .step-text{font-size:9px;font-weight:800;color:#64748b;text-align:center;transition:.3s}
+    .step.active .circle{background:#38bdf8;border-color:#38bdf8;color:#020617;box-shadow:0 0 15px rgba(56,189,248,.4)}
+    .step.active .step-text{color:#38bdf8}
+    .step.completed .circle{background:#0284c7;border-color:#0284c7;color:#fff}
+    .step-content{display:none;animation:fadeIn .4s ease}
+    .step-content.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .section-title{font-size:13px;font-weight:800;color:#38bdf8;margin:20px 0 10px 0;border-bottom:1px solid #1e293b;padding-bottom:5px;text-transform:uppercase;letter-spacing:1px}
+    .form-group{margin-bottom:15px}
+    .label{display:block;font-size:11px;font-weight:800;margin-bottom:6px;color:#cbd5e1;text-transform:uppercase}
+    .input{width:100%;padding:12px 15px;background:#020617;border:1px solid #334155;border-radius:12px;color:white;font-size:13px;transition:.2s}
+    .input:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+    .input:disabled{background:#0f172a;opacity:0.5;cursor:not-allowed;}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .dynamic-box{background:#0f172a;border:1px dashed #334155;padding:15px;border-radius:12px;margin-bottom:10px}
+    .box-title{font-size:10px;color:#94a3b8;font-weight:800;margin-bottom:10px}
+    .nav-bar{position:fixed;bottom:0;left:0;width:100%;background:rgba(2,6,23,.95);border-top:1px solid #1e293b;padding:15px 20px;z-index:50;display:flex;justify-content:space-between;gap:15px}
+    .btn{flex:1;padding:15px;border-radius:14px;font-size:13px;font-weight:800;text-align:center;transition:.3s;cursor:pointer;border:none}
+    .btn-prev{background:#1e293b;color:#cbd5e1}
+    .btn-next{background:#38bdf8;color:#020617;box-shadow:0 5px 15px rgba(56,189,248,.3)}
+    .file-card{background:#0f172a;border:1px solid #334155;border-radius:16px;padding:15px;margin-bottom:15px;display:flex;justify-content:space-between;align-items:center}
+    .file-btn{background:#38bdf8;color:#020617;padding:8px 15px;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer}
+    .file-info{font-size:10px;color:#94a3b8;margin-top:5px;word-break:break-all}
+  </style>
+  <script type="module" crossorigin src="/assets/masterFull-DONYcaRI.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-DEfa6N4x.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BNVm_Ism.css">
+</head>
+<body>
+  <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-link" data-lang="a11y.skip_to_content">Lewati ke konten utama</a>
+  <div id="loading" class="hidden fixed inset-0 bg-slate-950/90 z-[999] flex flex-col items-center justify-center text-white">
+      <i class="fas fa-spinner fa-spin text-5xl text-sky-500 mb-4"></i>
+      <h2 class="text-xl font-bold" id="loadingText">Menyinkronkan Data…</h2>
+  </div>
+
+  <div class="hero">
+    <img class="bg-hero" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1600&q=80" alt="">
+    <div class="overlay"></div>
+    <div class="header">
+      <img class="logo" src="/assets/logo.png?v=5d2cdd9479" alt="Logo ASJ">
+      <div class="title">ASJ DOSSIER</div>
+      <div class="sub">MASTER DATABASE SYSTEM</div>
+    </div>
+    <button onclick="toggleFormLanguage()" class="absolute top-3 right-3 z-10 px-3 py-1.5 bg-sky-600/80 hover:bg-sky-500 text-white rounded-full text-[11px] font-bold shadow-lg border border-sky-400/40 transition"><i class="fas fa-language mr-1"></i><span id="lang-btn-mf">JP</span></button>
+  </div>
+
+  <div class="container" id="main-content" tabindex="-1">
+    <div class="glass">
+      
+      <!-- STEPPER -->
+      <div class="stepper">
+        <div class="step active" id="ind-1"><div class="circle"><i class="fas fa-user"></i></div><div class="step-text">Data Diri</div></div>
+        <div class="step" id="ind-2"><div class="circle"><i class="fas fa-heartbeat"></i></div><div class="step-text">Medis & Wawancara</div></div>
+        <div class="step" id="ind-3"><div class="circle"><i class="fas fa-briefcase"></i></div><div class="step-text">Riwayat</div></div>
+        <div class="step" id="ind-4"><div class="circle"><i class="fas fa-users"></i></div><div class="step-text">Keluarga</div></div>
+        <div class="step" id="ind-5"><div class="circle"><i class="fas fa-file-alt"></i></div><div class="step-text">Dokumen</div></div>
+      </div>
+
+      <!-- STEP 1: IDENTITAS -->
+      <div id="step-1" class="step-content active">
+        <div class="bg-sky-900/20 border border-sky-500/30 p-3 rounded-xl mb-4 text-xs text-sky-400 font-bold">
+            <i class="fas fa-info-circle mr-1"></i> Form terhubung ke WA: <span id="wa-display"></span>
+        </div>
+        <input type="hidden" id="wa" value="">
+
+        <div class="section-title" data-lang="form.mf_identitas">Identitas Dasar</div>
+        <div class="form-group"><label class="label" data-lang="form.mf_nama">Nama Lengkap (KTP)</label><input id="nama" class="input" value=""></div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_furigana">Furigana (Katakana)</label><input id="furigana" class="input" placeholder="Teks Jepang" data-lang-placeholder="form.mf_ph_teks_jepang"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_panggilan">Nama Panggilan</label><input id="panggilan" class="input"></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_panggilan_ktk">Panggilan (Katakana)</label><input id="panggilanKatakana" class="input" placeholder="Teks Jepang" data-lang-placeholder="form.mf_ph_teks_jepang"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_tempat_lahir">Tempat Lahir</label><input id="tempatLahir" class="input" placeholder="Otomatis diterjemahkan ke Jepang saat disimpan" data-lang-placeholder="form.mf_ph_auto_jp"></div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_tgl_lahir">Tgl Lahir</label><input id="tglLahir" type="date" class="input"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_gender">Gender</label><select id="gender" class="input"><option value="LAKI-LAKI">LAKI-LAKI</option><option value="PEREMPUAN">PEREMPUAN</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_usia">Usia</label><input id="usia" type="number" class="input"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_agama">Agama</label><select id="agama" class="input"><option value="ISLAM">ISLAM</option><option value="KRISTEN">KRISTEN</option><option value="HINDU">HINDU</option><option value="BUDHA">BUDHA</option><option value="KATHOLIK">KATHOLIK</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_status_nikah">Status Nikah</label><select id="statusNikah" class="input"><option value="BELUM MENIKAH">BELUM MENIKAH</option><option value="MENIKAH">MENIKAH</option><option value="CERAI">CERAI</option></select></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_anak">Jumlah Anak</label><input id="anak" type="number" class="input" placeholder="0 jika tidak ada" data-lang-placeholder="form.mf_ph_0_jika"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_ktp">KTP (NIK)</label><input id="ktp" type="number" class="input"></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_sim">SIM</label><input id="sim" class="input" placeholder="A / C / A & C (Kosongkan jika tidak ada)" data-lang-placeholder="form.mf_ph_sim"></div>
+
+        <div class="section-title" data-lang="form.mf_kontak">Kontak & Fisik</div>
+        <div class="form-group"><label class="label" data-lang="form.mf_alamat">Alamat Lengkap</label><textarea id="alamat" rows="2" class="input" placeholder="Otomatis diterjemahkan ke Jepang saat disimpan" data-lang-placeholder="form.mf_ph_auto_jp"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_email">Email Aktif</label><input id="email" type="email" class="input"></div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_tb">Tinggi (CM)</label><input id="tb" type="number" class="input"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_bb">Berat (KG)</label><input id="bb" type="number" class="input"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_goldar">Gol. Darah</label><select id="goldar" class="input"><option value="-">Pilih</option><option value="A">A</option><option value="B">B</option><option value="AB">AB</option><option value="O">O</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_tangan">Tangan Dominan</label><select id="tangan" class="input"><option value="KANAN">KANAN</option><option value="KIRI">KIRI</option></select></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_baju">Ukuran Baju</label><input id="baju" class="input" placeholder="S/M/L/XL" data-lang-placeholder="form.mf_ph_baju"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_sepatu">Ukuran Sepatu (CM)</label><input id="sepatu" type="number" class="input"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_topi">Ukuran Topi (S/M/L)</label><input id="topi" class="input"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_tahan_ac">Tahan Kerja Tanpa AC?</label><select id="tahanAc" class="input"><option value="YA">YA</option><option value="TIDAK">TIDAK</option></select></div>
+        </div>
+      </div>
+
+      <!-- STEP 2: MEDIS & PERSONALITI -->
+      <div id="step-2" class="step-content">
+        <div class="section-title" data-lang="form.mf_medis_title">Catatan Medis</div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_mata_kiri">Mata Kiri (Visus)</label><input id="mataKiri" class="input" placeholder="Normal / Minus 1" data-lang-placeholder="form.mf_ph_visus"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_mata_kanan">Mata Kanan (Visus)</label><input id="mataKanan" class="input" placeholder="Normal / Minus 1" data-lang-placeholder="form.mf_ph_visus"></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_kacamata">Berkacamata?</label><select id="kacamata" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_buta_warna">Buta Warna?</label><select id="butaWarna" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+        </div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_tato">Bertato?</label><select id="tato" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_tindik">Bertindik?</label><select id="tindik" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_merokok">Merokok?</label><select id="merokok" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_alkohol">Minum Alkohol?</label><select id="alkohol" class="input"><option value="TIDAK">TIDAK</option><option value="YA">YA</option></select></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_penyakit">Riwayat Penyakit Berat (Jujur)</label><textarea id="penyakit" rows="2" class="input" placeholder="Deskripsikan jika ada…" data-lang-placeholder="form.mf_ph_deskripsi"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_alergi">Riwayat Alergi</label><textarea id="alergi" rows="2" class="input" placeholder="Deskripsikan alergi obat/makanan jika ada…" data-lang-placeholder="form.mf_ph_alergi"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_laka">Riwayat Kecelakaan / Operasi</label><textarea id="laka" rows="2" class="input" placeholder="Deskripsikan jika ada…" data-lang-placeholder="form.mf_ph_deskripsi"></textarea></div>
+
+        <div class="section-title" data-lang="form.mf_wawancara">Wawancara & Jiko PR (CV)</div>
+        <div class="form-group"><label class="label" data-lang="form.mf_promosi">Jiko PR (Promosi Diri)</label><textarea id="promosi" rows="3" class="input" placeholder="Tuliskan kelebihan dan dedikasi Anda agar perusahaan Jepang tertarik." data-lang-placeholder="form.mf_ph_promosi"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_kelebihan">Kelebihan Sifat</label><input id="kelebihan" class="input" placeholder="Disiplin, Pekerja Keras, dll" data-lang-placeholder="form.mf_ph_kelebihan"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_kekurangan">Kekurangan Sifat (Beserta Solusi)</label><input id="kekurangan" class="input" placeholder="Pelupa (Tapi saya selalu mencatat), dll" data-lang-placeholder="form.mf_ph_kekurangan"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_keahlian">Keahlian Khusus / Lisensi</label><input id="keahlianKhusus" class="input" placeholder="Mengelas, Alat Berat, dll (Kosongkan jika tidak ada)" data-lang-placeholder="form.mf_ph_keahlian"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_hobi">Hobi & Minat</label><input id="hobi" class="input" placeholder="Memancing, Olahraga, dll (Otomatis diterjemahkan ke Jepang)" data-lang-placeholder="form.mf_ph_hobi"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_alasan_bidang">Alasan Memilih Bidang Kerja Ini</label><textarea id="alasanBidang" rows="2" class="input"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_motivasi">Motivasi Ke Jepang</label><textarea id="motivasiJepang" rows="2" class="input"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_keinginan">Keinginan Pribadi (Target)</label><textarea id="keinginan" rows="2" class="input"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_rencana_pulang">Rencana Setelah Pulang</label><textarea id="rencanaPulang" rows="2" class="input"></textarea></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_tujuan_jepang">Tujuan Kerja di Jepang</label><input id="tujuanJepang" class="input"></div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_lama_jepang">Rencana Lama di Jepang (Thn)</label><input id="lamaJepang" type="number" class="input" placeholder="Misal: 3" data-lang-placeholder="form.mf_ph_misal3"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_gaji_yen">Harapan Gaji (Yen)</label><input id="gajiYen" type="number" class="input" placeholder="Misal: 200000" data-lang-placeholder="form.mf_ph_misal_gaji"></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_tabungan">Target Tabungan (Rp/Yen)</label><input id="tabungan" class="input" placeholder="Misal: 300 Juta" data-lang-placeholder="form.mf_ph_misal_tabungan"></div>
+      </div>
+
+      <!-- STEP 3: RIWAYAT BULAN & TAHUN -->
+      <div id="step-3" class="step-content">
+        <div class="section-title" data-lang="form.mf_riwayat_pendidikan">Riwayat Pendidikan (Maks 5)</div>
+        <div id="edu-container"></div>
+        <div class="section-title mt-6" data-lang="form.mf_riwayat_pekerjaan">Riwayat Pekerjaan (Maks 3)</div>
+        <div id="job-container"></div>
+      </div>
+
+      <!-- STEP 4: KELUARGA & KONTAK -->
+      <div id="step-4" class="step-content">
+        <div class="section-title" data-lang="form.mf_keluarga_maks">Anggota Keluarga (Maks 5)</div>
+        <div id="fam-container"></div>
+        
+        <div class="section-title mt-6" data-lang="form.mf_darurat">Kontak Darurat (Wajib)</div>
+        <div class="dynamic-box border-sky-500/50">
+            <div class="form-group"><label class="label" data-lang="form.mf_darurat_nama">Nama Kontak Darurat</label><input id="daruratNama" class="input py-2"></div>
+            <div class="row">
+                <div class="form-group"><label class="label" data-lang="form.mf_hubungan">Hubungan</label><input id="daruratHubungan" class="input py-2" placeholder="Istri / Orang Tua" data-lang-placeholder="form.mf_ph_istri_ortu"></div>
+                <div class="form-group"><label class="label" data-lang="form.mf_darurat_wa">No. WA Darurat</label><input id="daruratWa" type="number" class="input py-2"></div>
+            </div>
+        </div>
+
+        <div class="section-title mt-6" data-lang="form.mf_kenalan">Kenalan di Jepang</div>
+        <div class="dynamic-box">
+            <div class="row">
+                <div class="form-group"><label class="label" data-lang="form.mf_kenalan_nama">Nama Kenalan</label><input id="kenalanNama" class="input py-2" placeholder="Kosongkan jika tidak ada (Otomatis ke katakana)" data-lang-placeholder="form.mf_ph_kenalan"></div>
+                <div class="form-group"><label class="label" data-lang="form.mf_kenalan_usia">Usia</label><input id="kenalanUsia" type="number" class="input py-2" placeholder="Misal: 30" data-lang-placeholder="form.mf_ph_misal30"></div>
+            </div>
+            <div class="row">
+                <div class="form-group"><label class="label" data-lang="form.mf_kenalan_hubungan">Hubungan</label><input id="kenalanHubungan" class="input py-2" placeholder="Teman / Saudara" data-lang-placeholder="form.mf_ph_teman"></div>
+                <div class="form-group"><label class="label" data-lang="form.mf_kenalan_pekerjaan">Pekerjaan</label><input id="kenalanPekerjaan" class="input py-2" placeholder="Karyawan / Mahasiswa" data-lang-placeholder="form.mf_ph_karyawan"></div>
+            </div>
+            <div class="form-group"><label class="label" data-lang="form.mf_kenalan_alamat">Alamat di Jepang</label><input id="kenalanAlamat" class="input py-2" placeholder="Kota / Prefektur (Otomatis diterjemahkan)" data-lang-placeholder="form.mf_ph_kota"></div>
+        </div>
+      </div>
+
+      <!-- STEP 5: DOKUMEN -->
+      <div id="step-5" class="step-content">
+        <div class="section-title" data-lang="form.mf_status_paspor">Status & Paspor</div>
+        <div class="form-group"><label class="label" data-lang="form.mf_eks_jepang">Status Eks Jepang</label><select id="eksJepang" class="input"><option value="BELUM PERNAH">BELUM PERNAH</option><option value="EKS MAGANG">EKS MAGANG</option><option value="EKS TOKUTEI GINO">EKS TOKUTEI GINO</option></select></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_no_coe">No. COE (Bagi Eks Jepang)</label><input id="noCoe" class="input" placeholder="Kosongkan jika tidak ada" data-lang-placeholder="form.mf_ph_kosongkan"></div>
+        
+        <div class="form-group mt-4"><label class="label" data-lang="form.mf_no_paspor">No. Paspor</label><input id="noPaspor" class="input" placeholder="Kosongkan jika belum punya" data-lang-placeholder="form.mf_ph_belum_punya"></div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_tgl_terbit">Tgl Terbit</label><input id="tglTerbitPaspor" type="date" class="input"></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_exp">Tgl Expired</label><input id="expPaspor" type="date" class="input"></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_kota_paspor">Kota Penerbitan</label><input id="kotaPaspor" class="input" placeholder="Misal: SURABAYA" data-lang-placeholder="form.mf_ph_surabaya"></div>
+
+        <div class="section-title mt-6" data-lang="form.mf_sertifikasi">Sertifikasi & Bahasa (資格・言語)</div>
+        <div class="row">
+            <div class="form-group"><label class="label" data-lang="form.mf_bhs_jepang">Sertifikat Bahasa Jepang (日本語能力)</label><select id="bhsJepang" class="input"><option value="-">Pilih / 選択</option><option value="N1">N1</option><option value="N2">N2</option><option value="N3">N3</option><option value="N4">N4</option><option value="N5">N5</option><option value="JFT BASIC A2">JFT BASIC A2</option><option value="BELUM LULUS">BELUM LULUS</option><option value="BELUM TES">BELUM TES</option></select></div>
+            <div class="form-group"><label class="label" data-lang="form.mf_nilai">Nilai / Skor Ujian (点数)</label><input id="nilai" class="input" placeholder="Misal: 120/180" data-lang-placeholder="form.mf_ph_nilai"></div>
+        </div>
+        <div class="form-group"><label class="label" data-lang="form.mf_lisensi">Sertifikat Lisensi / SSW 1 (特定技能)</label><select id="lisensi" class="input" onchange="onSswSelect('lisensi')"></select><input id="lisensi_manual" class="input hidden" placeholder="Ketik bidang SSW lain / その他の職種を入力" data-lang-placeholder="form.mf_ph_jabatan_lain"></div>
+        <div class="form-group"><label class="label" data-lang="form.mf_ssw2">SSW 2 — Opsional (特定技能2)</label><select id="lisensi2" class="input" onchange="onSswSelect('lisensi2')"></select><input id="lisensi2_manual" class="input hidden" placeholder="Ketik bidang SSW lain / その他の職種を入力" data-lang-placeholder="form.mf_ph_jabatan_lain"></div>
+
+        <div class="section-title mt-6" data-lang="form.mf_upload">Upload Dokumen (MAX 2MB)</div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_photo">PAS PHOTO (JPG/PNG)</div>
+                <div id="photoInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('photo').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="photo" accept=".jpg,.jpeg,.png" class="hidden" onchange="handleFile(this, 'photoInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_jft_file">SERTIFIKAT JFT (PDF)</div>
+                <div id="jftInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('jft').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="jft" accept=".pdf" class="hidden" onchange="handleFile(this, 'jftInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_ssw_file">SERTIFIKAT SSW (PDF)</div>
+                <div id="sswInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('ssw').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ssw" accept=".pdf" class="hidden" onchange="handleFile(this, 'sswInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_ijazah_sd_file">IJAZAH SD (PDF)</div>
+                <div id="ijazahSdInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('ijazahSd').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ijazahSd" accept=".pdf" class="hidden" onchange="handleFile(this, 'ijazahSdInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_ijazah_smp_file">IJAZAH SMP (PDF)</div>
+                <div id="ijazahSmpInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('ijazahSmp').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ijazahSmp" accept=".pdf" class="hidden" onchange="handleFile(this, 'ijazahSmpInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_ijazah_sma_file">IJAZAH SMA (PDF)</div>
+                <div id="ijazahSmaInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('ijazahSma').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ijazahSma" accept=".pdf" class="hidden" onchange="handleFile(this, 'ijazahSmaInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_univ_file">IJAZAH UNIVERSITAS (PDF)</div>
+                <div id="univInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('univ').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="univ" accept=".pdf" class="hidden" onchange="handleFile(this, 'univInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_ktp_file">KTP (PDF)</div>
+                <div id="ktpInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('ktp').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ktp" accept=".pdf" class="hidden" onchange="handleFile(this, 'ktpInfo')">
+        </div>
+        <div class="file-card">
+            <div>
+                <div class="text-xs font-bold text-white" data-lang="form.mf_kk_file">KK (PDF)</div>
+                <div id="kkInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
+            </div>
+            <button onclick="document.getElementById('kk').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="kk" accept=".pdf" class="hidden" onchange="handleFile(this, 'kkInfo')">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button id="btnPrev" class="btn btn-prev" onclick="changeStep(-1)" style="display:none;"><i class="fas fa-arrow-left mr-1"></i> <span data-lang="form.mf_kembali">Kembali</span></button>
+    <button onclick="submitMaster(true)" class="btn bg-amber-600 text-white ml-2"><i class="fas fa-save mr-1"></i> <span data-lang="form.mf_draft">Draft</span></button>
+    <button id="btnNext" class="btn btn-next" onclick="changeStep(1)"><span data-lang="form.mf_lanjut">Lanjut</span> <i class="fas fa-arrow-right ml-1"></i></button>
+    <button id="btnSubmit" class="btn btn-next bg-emerald-500 hidden" onclick="submitMaster(false)"><i class="fas fa-check mr-1"></i> <span data-lang="form.mf_simpan_final">Simpan Final</span></button>
+  </div>
+
+  <!-- Login gate: form terhubung ke akun kandidat (nomor WA dari URL/QR saja
+       tidak cukup untuk membaca/mengubah data - wajib password + session server) -->
+  <div id="login-gate" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
+    <div class="bg-[#0b1220] border border-sky-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-4">
+        <div class="text-2xl mb-1"><i class="fas fa-lock text-sky-400"></i></div>
+        <div class="font-bold text-white text-sm" data-lang="form.mf_gate_title">Verifikasi Akun Kandidat</div>
+        <div class="text-slate-400 text-xs mt-1"><span data-lang="form.mf_wa">Form terhubung ke WA</span> <span id="gate-wa" class="text-sky-400 font-bold"></span></div>
+        <div class="text-slate-500 text-[11px] mt-1" data-lang="form.mf_gate_desc">Masukkan password akun kandidat Anda untuk mengisi / memperbarui data.</div>
+      </div>
+      <label for="gate-pass" class="label" data-lang="form.mf_password">Password kandidat</label>
+      <input id="gate-pass" type="password" class="input" placeholder="Password kandidat" data-lang-placeholder="form.mf_ph_gate" onkeydown="if(event.key==='Enter') gateLogin()">
+      <button id="gate-btn" onclick="gateLogin()" class="w-full mt-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl py-2.5 text-sm font-bold" data-lang="form.mf_masuk">Masuk</button>
+      <div id="gate-msg" class="text-rose-400 text-xs text-center mt-2 min-h-4"></div>
+    </div>
+  </div>
+
+  <script src="/i18n.js?v=3ff6b871a5"></script>
+  <script>
+    // Bahasa terpilih (asj_lang) ikut serta; label statis diterjemahkan onload.
+    document.addEventListener('DOMContentLoaded', function () {
+      var lb = document.getElementById('lang-btn-mf');
+      if (lb) lb.textContent = CURRENT_LANG === 'jp' ? 'ID' : 'JP';
+      if (typeof renderLanguageLight === 'function') renderLanguageLight();
+    });
+  </script>
+  <script src="gas-client.js?v=c5abdf9b08"></script>
+  <script>
+    // FASE 3/4: WA/NAMA dulu diisi server (GAS scriptlet) dari e.parameter.
+    // Sekarang dibaca dari query string URL (?wa=&nama=), sumbernya sama
+    // persis (link dari generateLegacyMasterBridge()), cuma dibaca browser.
+    (function() {
+      function cleanPhoneJS(wa) {
+        if (!wa) return "";
+        var s = String(wa).replace(/\D/g, "");
+        if (s.startsWith("0")) s = "62" + s.substring(1);
+        else if (s.startsWith("8")) s = "62" + s;
+        return s;
+      }
+      var p = new URLSearchParams(window.location.search);
+      var wa = cleanPhoneJS(p.get('wa') || '');
+      var nama = (p.get('nama') || '').trim();
+      document.getElementById('wa-display').textContent = wa;
+      document.getElementById('wa').value = wa;
+      document.getElementById('nama').value = nama;
+    })();
+
+    let currentStep = 1; 
+    const totalSteps = 5;
+
+    const getEl = (id) => document.getElementById(id);
+    const setVal = (id, val) => { if(getEl(id) && val) getEl(id).value = val; };
+    const formatDate = (ds) => {
+        if (!ds) return "";
+        try { let d = new Date(ds); if (isNaN(d.getTime())) return ds; return d.toISOString().split('T')[0]; } catch(e) { return ds; }
+    };
+
+    function toggleImaMade(i) {
+        let outEl = getEl(`job_out_${i}`);
+        let chk = getEl(`job_now_${i}`).checked;
+        if(chk) { outEl.value = ""; outEl.disabled = true; }
+        else { outEl.disabled = false; }
+    }
+
+    // ===== GERBANG LOGIN KANDIDAT (session asli dari server) =====
+    function getCandidateSession() {
+        return localStorage.getItem('asj_kandidat_session') || '';
+    }
+    function showLoginGate(msg) {
+        let gwa = document.getElementById('gate-wa'); if(gwa) gwa.textContent = getEl('wa').value || '';
+        let gm = document.getElementById('gate-msg'); if(gm) gm.textContent = msg || '';
+        let gate = document.getElementById('login-gate'); if(gate) gate.classList.remove('hidden');
+        let pass = document.getElementById('gate-pass'); if(pass) { pass.value = ''; pass.focus(); }
+        renderLanguageLight();
+    }
+    function hideLoginGate() {
+        let gate = document.getElementById('login-gate'); if(gate) gate.classList.add('hidden');
+    }
+    async function gateLogin() {
+        let wa = getEl('wa').value;
+        let pass = document.getElementById('gate-pass') ? document.getElementById('gate-pass').value : '';
+        let btn = document.getElementById('gate-btn');
+        let msg = document.getElementById('gate-msg');
+        if(!pass) { if(msg) msg.textContent = tr('form.mf_gate_pw_wajib'); return; }
+        if(btn) { btn.disabled = true; btn.innerHTML = tr('form.mf_memeriksa'); }
+        try {
+            let res = await callGAS('loginKandidat', [wa, pass]);
+            if(res && res.success) {
+                localStorage.setItem('asj_kandidat_login', 'sukses');
+                localStorage.setItem('asj_kandidat_name', res.nama || '');
+                localStorage.setItem('asj_kandidat_wa', res.wa || wa);
+                localStorage.setItem('asj_kandidat_session', res.sessionToken || '');
+                hideLoginGate();
+                window.location.reload();
+            } else {
+                if(msg) msg.textContent = (res && res.error) || tr('form.mf_gagal_masuk');
+            }
+        } catch(e) {
+            if(msg) msg.textContent = tr('alert.network') + (e && e.message ? e.message : e);
+        } finally {
+            if(btn) { btn.disabled = false; btn.innerHTML = tr('form.mf_masuk'); }
+        }
+    }
+
+    // ===== DAFTAR DROPDOWN DWI BAHASA (ID/JP) =====
+    // 16 bidang SSW (Tokutei Ginou) resmi di Indonesia.
+    var SSW_LIST = [
+      ['KAIGO', 'KAIGO (介護)'],
+      ['BUILDING CLEANING', 'BUILDING CLEANING (ビルクリーニング)'],
+      ['FOUNDRY & PLASTIC', 'FOUNDRY & PLASTIC (素形材産業)'],
+      ['INDUSTRIAL MACHINERY', 'INDUSTRIAL MACHINERY (産業機械製造業)'],
+      ['ELECTRIC & ELECTRONIC', 'ELECTRIC & ELECTRONIC (電気・電子情報)'],
+      ['CONSTRUCTION', 'CONSTRUCTION (建設)'],
+      ['SHIPBUILDING', 'SHIPBUILDING (造船・舶用工業)'],
+      ['AUTOMOBILE REPAIR', 'AUTOMOBILE REPAIR (自動車整備)'],
+      ['AVIATION', 'AVIATION (航空)'],
+      ['ACCOMMODATION', 'ACCOMMODATION (宿泊)'],
+      ['AGRICULTURE', 'AGRICULTURE (農業)'],
+      ['FISHERY', 'FISHERY (漁業)'],
+      ['FOOD & BEVERAGE', 'FOOD & BEVERAGE (飲食料品製造業)'],
+      ['RESTAURANT', 'RESTAURANT (外食業)'],
+      ['FORESTRY', 'FORESTRY (林業)'],
+      ['WOOD INDUSTRY', 'WOOD INDUSTRY (木材産業)']
+    ];
+    // Pekerjaan umum di Indonesia (Jabatan / Posisi).
+    var PEKERJAAN_LIST = [
+      ['OPERATOR PRODUKSI', 'OPERATOR PRODUKSI (工場作業員)'],
+      ['ADMIN / STAFF ADMIN', 'ADMIN / STAFF ADMIN (事務員)'],
+      ['SALES / MARKETING', 'SALES / MARKETING (営業)'],
+      ['KASIR', 'KASIR (レジ係)'],
+      ['KOKI / CHEF', 'KOKI / CHEF (調理師)'],
+      ['PELAYAN / WAITER', 'PELAYAN / WAITER (ウェイター)'],
+      ['CLEANING SERVICE', 'CLEANING SERVICE (清掃員)'],
+      ['SATPAM / SECURITY', 'SATPAM / SECURITY (警備員)'],
+      ['SOPIR / DRIVER', 'SOPIR / DRIVER (運転手)'],
+      ['BURUH PABRIK', 'BURUH PABRIK (工場労働者)'],
+      ['KARYAWAN SWASTA', 'KARYAWAN SWASTA (会社員)'],
+      ['PEGAWAI TOKO', 'PEGAWAI TOKO (店員)'],
+      ['GURU / PENGAJAR', 'GURU / PENGAJAR (教師)'],
+      ['PERAWAT', 'PERAWAT (看護師)'],
+      ['MEKANIK', 'MEKANIK (整備士)'],
+      ['TEKNISI', 'TEKNISI (技術者)'],
+      ['WELDER / LAS', 'WELDER / LAS (溶接工)'],
+      ['TUKANG BANGUNAN', 'TUKANG BANGUNAN (建設作業員)'],
+      ['PETANI / PERKEBUNAN', 'PETANI / PERKEBUNAN (農業)'],
+      ['NELAYAN', 'NELAYAN (漁師)'],
+      ['RESEPSIONIS', 'RESEPSIONIS (受付)'],
+      ['BARISTA', 'BARISTA (バリスタ)'],
+      ['IBU RUMAH TANGGA', 'IBU RUMAH TANGGA (主婦)'],
+      ['PELAJAR / MAHASISWA', 'PELAJAR / MAHASISWA (学生)'],
+      ['BELUM BEKERJA', 'BELUM BEKERJA (無職)']
+    ];
+    function sswOptionsHtml() {
+      var h = '<option value="">Pilih / 選択</option>';
+      SSW_LIST.forEach(function(pair) { h += '<option value="' + pair[0] + '">' + pair[1] + '</option>'; });
+      h += '<option value="__LAINNYA__">✍️ Lainnya / その他 (ketik manual)</option>';
+      return h;
+    }
+    function pekerjaanOptionsHtml() {
+      var h = '<option value="">Pilih / 選択</option>';
+      PEKERJAAN_LIST.forEach(function(pair) { h += '<option value="' + pair[0] + '">' + pair[1] + '</option>'; });
+      h += '<option value="__LAINNYA__">✍️ Lainnya / その他 (ketik manual)</option>';
+      return h;
+    }
+    function buildSswSelect(id) { var el = getEl(id); if (el) el.innerHTML = sswOptionsHtml(); }
+    function onSswSelect(id) {
+      var sel = getEl(id), manual = getEl(id + '_manual');
+      if (!sel) return;
+      if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
+      else if (manual) { manual.classList.add('hidden'); manual.value = ''; }
+    }
+    function onPekerjaanSelect(i) {
+      var sel = getEl('job_pos_' + i), manual = getEl('job_pos_manual_' + i);
+      if (!sel) return;
+      if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
+      else if (manual) { manual.classList.add('hidden'); manual.value = ''; }
+    }
+    function onFamPekerjaanSelect(i) {
+      var sel = getEl('fam_job_' + i), manual = getEl('fam_job_manual_' + i);
+      if (!sel) return;
+      if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
+      else if (manual) { manual.classList.add('hidden'); manual.value = ''; }
+    }
+    // Isi dropdown dari data lama: kalau nilai tidak ada di daftar, tampilkan
+    // di kotak manual (nilai lama TIDAK hilang saat disimpan ulang).
+    function fillManualSelect(sel, manual, value) {
+      if (!sel) return;
+      var match = false;
+      for (var k = 0; k < sel.options.length; k++) { if (sel.options[k].value === value) match = true; }
+      if (value && !match) {
+        sel.value = '__LAINNYA__';
+        if (manual) { manual.value = value; manual.classList.remove('hidden'); }
+      } else {
+        sel.value = value || '';
+        if (manual) { manual.classList.add('hidden'); manual.value = ''; }
+      }
+    }
+    function readManualSelect(sel, manual) {
+      if (!sel) return '';
+      if (sel.value === '__LAINNYA__') return manual ? manual.value.trim() : '';
+      return sel.value;
+    }
+
+    window.onload = function() {
+        try {
+            // RENDER EDU (MONTH)
+            let eduHtml = '';
+            for(let i=1; i<=5; i++) {
+                let boxTitle = (i === 5) ? 'LPK Bahasa Jepang (日本語学校)' : (tr('form.mf_pendidikan_n') + ' ' + i);
+                let lpkSel = (i === 5) ? ' selected' : '';
+                eduHtml += `<div class="dynamic-box"><div class="box-title">${boxTitle}</div>
+                    <div class="row mb-3"><div><label class="label">${tr('form.mf_tingkat')}</label><select id="edu_tk_${i}" class="input py-2"><option value="">Pilih / 選択</option><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA/SMK">SMA/SMK</option><option value="D3/S1">D3/S1</option><option value="LPK BAHASA"${lpkSel}>LPK BAHASA (日本語学校)</option></select></div>
+                    <div><label class="label">${tr('form.mf_nama_sekolah')}</label><input id="edu_nm_${i}" class="input py-2"></div></div>
+                    <div class="form-group mb-3"><label class="label">${tr('form.mf_jurusan')}</label><input id="edu_jur_${i}" class="input py-2" placeholder="${tr('form.mf_ph_jurusan')}"></div>
+                    <div class="row"><div><label class="label">${tr('form.mf_masuk')}</label><input id="edu_in_${i}" type="month" class="input py-2"></div>
+                    <div><label class="label">${tr('form.mf_lulus')}</label><input id="edu_out_${i}" type="month" class="input py-2"></div></div></div>`;
+            }
+            if(getEl("edu-container")) getEl("edu-container").innerHTML = eduHtml;
+
+            // RENDER JOB (MONTH + IMA MADE)
+            let jobHtml = '';
+            for(let i=1; i<=3; i++) {
+                jobHtml += `<div class="dynamic-box"><div class="box-title">${tr('form.mf_pekerjaan_n')} ${i}</div>
+                    <div class="form-group mb-3"><label class="label">${tr('form.mf_perusahaan')}</label><input id="job_nm_${i}" class="input py-2"></div>
+                    <div class="row mb-3"><div><label class="label">${tr('form.mf_masuk')}</label><input id="job_in_${i}" type="month" class="input py-2"></div>
+                    <div><label class="label">${tr('form.mf_keluar')}</label><input id="job_out_${i}" type="month" class="input py-2">
+                    <div class="mt-2"><label class="text-[11px] text-sky-400 font-bold flex items-center gap-1 cursor-pointer"><input type="checkbox" id="job_now_${i}" onchange="toggleImaMade(${i})" class="w-4 h-4 accent-sky-500"> ${tr('form.mf_ima_made')}</label></div></div></div>
+                    <div class="row">
+                        <div class="form-group"><label class="label">${tr('form.mf_jabatan')}</label><select id="job_pos_${i}" class="input py-2" onchange="onPekerjaanSelect(${i})"></select><input id="job_pos_manual_${i}" class="input py-2 hidden mt-2" placeholder="${tr('form.mf_ph_jabatan_lain')}"></div>
+                        <div class="form-group"><label class="label">${tr('form.mf_gaji_terakhir')}</label><input id="job_sal_${i}" type="number" class="input py-2" placeholder="${tr('form.mf_ph_sal')}"></div>
+                    </div></div>`;
+            }
+            if(getEl("job-container")) getEl("job-container").innerHTML = jobHtml;
+            for(let i=1; i<=3; i++) { if(getEl(`job_pos_${i}`)) getEl(`job_pos_${i}`).innerHTML = pekerjaanOptionsHtml(); }
+
+            // RENDER FAM
+            let famHtml = '';
+            for(let i=1; i<=5; i++) {
+                famHtml += `<div class="dynamic-box"><div class="box-title">${tr('form.mf_keluarga_n')} ${i}</div>
+                    <div class="row mb-3"><div><label class="label">${tr('form.mf_hubungan')}</label><select id="fam_hub_${i}" class="input py-2"><option value="">Pilih</option><option value="AYAH">AYAH</option><option value="IBU">IBU</option><option value="SUAMI">SUAMI</option><option value="ISTRI">ISTRI</option><option value="ANAK">ANAK</option><option value="KAKAK">KAKAK</option><option value="ADIK">ADIK</option></select></div>
+                    <div><label class="label">${tr('form.mf_nama_keluarga')}</label><input id="fam_nm_${i}" class="input py-2" placeholder="Otomatis ke katakana saat disimpan"></div></div>
+                    <div class="row mb-3">
+                        <div><label class="label">${tr('form.mf_kenalan_usia')}</label><input id="fam_age_${i}" type="number" class="input py-2"></div>
+                        <div><label class="label">${tr('form.mf_pekerjaan')}</label><select id="fam_job_${i}" class="input py-2" onchange="onFamPekerjaanSelect(${i})"></select><input id="fam_job_manual_${i}" class="input py-2 hidden mt-2" placeholder="${tr('form.mf_ph_pekerjaan_lain')}"></div>
+                    </div>
+                    <div class="form-group"><label class="label">${tr('form.mf_gaji')}</label><input id="fam_sal_${i}" type="number" class="input py-2"></div></div>`;
+            }
+            if(getEl("fam-container")) getEl("fam-container").innerHTML = famHtml;
+            for(let i=1; i<=5; i++) { if(getEl(`fam_job_${i}`)) getEl(`fam_job_${i}`).innerHTML = pekerjaanOptionsHtml(); }
+            // Dropdown SSW (lisensi) diisi lewat JS supaya daftar dwi bahasa konsisten.
+            buildSswSelect("lisensi");
+            buildSswSelect("lisensi2");
+
+            // AUTO FILL
+            let waVal = getEl("wa").value;
+            if(!waVal) { 
+                console.warn("Mode Preview: Nomor WA tidak ditemukan di URL, auto-fill dilewati."); 
+                return; 
+            }
+            // Keamanan: wajib session kandidat asli (login dulu) - nomor WA dari
+            // URL/QR saja tidak cukup untuk membaca data pribadi kandidat.
+            if(!getCandidateSession()) { showLoginGate(tr('form.mf_gate_desc')); return; }
+            let loadingBox = getEl("loading");
+            if(loadingBox) loadingBox.classList.remove("hidden");
+            
+            callGAS('getMasterDataByWa', [waVal]).then(data => {
+                    if(loadingBox) loadingBox.classList.add("hidden");
+                    if(data && data.sessionInvalid) { showLoginGate(tr('form.mf_sesi_berakhir')); return; }
+                    if(data) {
+                        setVal("nama", data["NAMA_LENGKAP"]);
+                        setVal("furigana", data["FURIGANA"]);
+                        setVal("panggilan", data["NAMAPANGGILAN"]);
+                        setVal("panggilanKatakana", data["PANGGILAN_KATAKANA"]);
+                        setVal("tempatLahir", data["TEMPAT_LAHIR"]);
+                        if(data["TGL_LAHIR"]) setVal("tglLahir", formatDate(data["TGL_LAHIR"]));
+                        setVal("gender", data["GENDER"]);
+                        setVal("usia", data["USIA"]);
+                        setVal("agama", data["AGAMA"]);
+                        setVal("statusNikah", data["STATUS_PERNIKAHAN"]);
+                        setVal("anak", data["JUMLAH_ANAK"]);
+                        setVal("ktp", data["NIK"]);
+                        setVal("sim", data["DRIVER_LICENSE"]);
+                        setVal("alamat", data["ALAMAT_LENGKAP"]);
+                        setVal("email", data["EMAIL"]);
+                        setVal("tb", data["TT"]);
+                        setVal("bb", data["BB"]);
+                        setVal("goldar", data["GOLONGAN_DARAH"]);
+                        setVal("tangan", data["TANGANDOMINAN"]);
+                        setVal("baju", data["UKURANBAJU"]);
+                        setVal("sepatu", data["UKURANSEPATU"]);
+                        setVal("topi", data["UKURAN_TOPI"]);
+                        setVal("tahanAc", data["TAHAN_AC"]);
+                        
+                        setVal("mataKiri", data["MATA_KIRI"]);
+                        setVal("mataKanan", data["MATA_KANAN"]);
+                        setVal("kacamata", data["KACAMATA"]);
+                        setVal("butaWarna", data["BUTA_WARNA"]);
+                        setVal("tato", data["TATO"]);
+                        setVal("tindik", data["TINDIK"]);
+                        setVal("merokok", data["MEROKOK"]);
+                        setVal("alkohol", data["MINUM_ALKOHOL"]);
+                        
+                        setVal("penyakit", data["RIWAYAT_PENYAKIT"]);
+                        setVal("alergi", data["ALERGI"]);
+                        setVal("laka", data["RIWAYAT_KECELAKAAN"]);
+                        setVal("lamaJepang", data["LAMA_DI_JEPANG"]);
+                        setVal("gajiYen", data["HARAPAN_GAJI_YEN"]);
+                        setVal("tabungan", data["HARAPAN_TABUNGAN"]);
+                        setVal("bhsJepang", data["BAHASA"]);
+                        setVal("nilai", data["JFT"]);
+                        var lisensiVal = String(data["BIDANGSSW"] || data["SSW"] || "");
+                        var lisensiParts = lisensiVal.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+                        fillManualSelect(getEl("lisensi"), getEl("lisensi_manual"), lisensiParts[0] || "");
+                        fillManualSelect(getEl("lisensi2"), getEl("lisensi2_manual"), lisensiParts[1] || "");
+                        setVal("promosi", data["PROMOSI_DIRI"]);
+                        setVal("kelebihan", data["KELEBIHAN"]);
+                        setVal("kekurangan", data["KEKURANGAN"]);
+                        setVal("keahlianKhusus", data["KEAHLIAN_KHUSUS"]);
+                        setVal("hobi", data["HOBI_&_KETERAMPILAN"]);
+                        setVal("alasanBidang", data["ALASAN_MEMILIH_BIDANG"]);
+                        setVal("motivasiJepang", data["MOTIVASI_KE_JEPANG"]);
+                        setVal("keinginan", data["KEINGINAN_PRIBADI"]);
+                        setVal("rencanaPulang", data["RENCANA_SETELAH_PULANG"]);
+                        setVal("tujuanJepang", data["TUJUAN_KE_JEPANG"]);
+
+                        setVal("eksJepang", data["STATUS_EKS_JEPANG"] || "BELUM PERNAH");
+                        setVal("daruratNama", data["KONTAK_DARURAT_NAMA"]);
+                        setVal("daruratHubungan", data["KONTAK_DARURAT_HUBUNGAN"]);
+                        if(data["KONTAK_DARURAT_WA"]) setVal("daruratWa", String(data["KONTAK_DARURAT_WA"]).replace(/\D/g, ''));
+                        setVal("kenalanNama", data["KENALAN_DI_JEPANG_NAMA"]);
+                        setVal("kenalanHubungan", data["KENALAN_DI_JEPANG_HUBUNGAN"]);
+                        setVal("kenalanPekerjaan", data["KENALAN_DI_JEPANG_PEKERJAAN"]);
+                        setVal("kenalanUsia", data["KENALAN_DI_JEPANG_USIA"]);
+                        setVal("kenalanAlamat", data["KENALAN_DI_JEPANG_ALAMAT"]);
+
+                        for(let i=1; i<=5; i++) {
+                            setVal(`edu_tk_${i}`, data[`PENDIDIKAN_${i}_TINGKAT`]);
+                            setVal(`edu_nm_${i}`, data[`PENDIDIKAN_${i}_NAMA_SEKOLAH`]);
+                            setVal(`edu_jur_${i}`, data[`PENDIDIKAN_${i}_JURUSAN`] || data[`PENDIDIKAN_${i}_JURUSAN_ID`]);
+                            setVal(`edu_in_${i}`, data[`PENDIDIKAN_${i}_TAHUN_MASUK`]);
+                            setVal(`edu_out_${i}`, data[`PENDIDIKAN_${i}_TAHUN_LULUS`]);
+                        }
+                        for(let i=1; i<=3; i++) {
+                            setVal(`job_nm_${i}`, data[`PEKERJAAN_${i}_NAMA_PERUSAHAAN`]);
+                            setVal(`job_in_${i}`, data[`PEKERJAAN_${i}_TAHUN_MASUK`]);
+                            let tOut = data[`PEKERJAAN_${i}_TAHUN_KELUAR`];
+                            if(tOut === "SEKARANG") {
+                                if(getEl(`job_now_${i}`)) { getEl(`job_now_${i}`).checked = true; toggleImaMade(i); }
+                            } else { setVal(`job_out_${i}`, tOut); }
+                            fillManualSelect(getEl(`job_pos_${i}`), getEl(`job_pos_manual_${i}`), data[`PEKERJAAN_${i}_JABATAN`] || "");
+                            setVal(`job_sal_${i}`, data[`PEKERJAAN_${i}_GAJI`]);
+                        }
+                        for(let i=1; i<=5; i++) {
+                            setVal(`fam_hub_${i}`, data[`KELUARGA_${i}_HUBUNGAN`]);
+                            setVal(`fam_nm_${i}`, data[`KELUARGA_${i}_NAMA`]);
+                            setVal(`fam_age_${i}`, data[`KELUARGA_${i}_USIA`]);
+                            fillManualSelect(getEl(`fam_job_${i}`), getEl(`fam_job_manual_${i}`), data[`KELUARGA_${i}_PEKERJAAN`] || "");
+                            setVal(`fam_sal_${i}`, data[`KELUARGA_${i}_PENDAPATAN`]);
+                        }
+                        
+                        setVal("noPaspor", data["NO_PASPORT"]);
+                        setVal("kotaPaspor", data["KOTA_TERBIT_PASPORT"]);
+                        setVal("noCoe", data["NO_COE"]);
+                        if(data["TGL_TERBIT_PASPORT"]) setVal("tglTerbitPaspor", formatDate(data["TGL_TERBIT_PASPORT"]));
+                        if(data["EXP_PASPORT"]) setVal("expPaspor", formatDate(data["EXP_PASPORT"]));
+
+                        if(data["PAS_PHOTO"] && String(data["PAS_PHOTO"]).length > 10) {
+                            let pInfo = getEl("photoInfo");
+                            if(pInfo) pInfo.innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+                        }
+                        if(data["JFT_URL"] && String(data["JFT_URL"]).length > 10) {
+                            let jInfo = getEl("jftInfo");
+                            if(jInfo) jInfo.innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+                        }
+                        if(data["SSW_URL"] && String(data["SSW_URL"]).length > 10) {
+                            let sInfo = getEl("sswInfo");
+                            if(sInfo) sInfo.innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+                        }
+                    }
+                }).catch(err => {
+                    if(loadingBox) loadingBox.classList.add("hidden");
+                    console.error("AutoFill Error:", err);
+                });
+        } catch(e) { console.error("Onload Error:", e); }
+    };
+
+    // Format baku per jenis (2026-08-12): foto JPG/PNG, CV PDF/Word/Excel,
+    // dokumen lain PDF — diterjemahkan dari atribut accept input (sumber
+    // kebenaran di HTML), sinkron dengan aturan per-prefix di storage-helper.ts.
+    function ekstensiDariAccept(acceptAttr) {
+      const acc = String(acceptAttr || '').toLowerCase();
+      if (acc.indexOf('image/*') !== -1) return ['jpg','jpeg','png','gif','webp','bmp','svg'];
+      const out = [];
+      acc.split(',').forEach(a => { a = a.trim().replace(/^\./, ''); if (a) out.push(a); });
+      return out.length ? out : null;
+    }
+
+    function handleFile(input, infoId) {
+      const file = input.files[0];
+      let infoEl = getEl(infoId);
+      if (file && infoEl) {
+         if (file.size > 2 * 1024 * 1024) { alert(tr('form.mf_alert_max2mb')); input.value = ""; infoEl.innerHTML = tr('form.mf_alert_besar'); } 
+         else {
+           const allowed = ekstensiDariAccept(input.getAttribute('accept'));
+           const ext = String(file.name || '').split('.').pop().toLowerCase();
+           if (allowed && allowed.indexOf(ext) === -1) {
+             alert('Format .' + ext + ' tidak diizinkan untuk dokumen ini (foto JPG/PNG, CV PDF/Word/Excel, dokumen lain PDF).');
+             input.value = ""; infoEl.innerHTML = '';
+           } else { infoEl.innerHTML = `<span style='color:#38bdf8'>✅ ${file.name}</span>`; }
+         }
+      }
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve({ name: file.name, mime: file.type, data: e.target.result.split(",")[1] });
+        reader.onerror = reject; reader.readAsDataURL(file);
+      });
+    }
+
+    function changeStep(dir) {
+        try {
+            let curStepEl = getEl(`step-${currentStep}`);
+            if(curStepEl) curStepEl.classList.remove('active');
+            let curIndEl = getEl(`ind-${currentStep}`);
+            if(curIndEl) { curIndEl.classList.remove('active'); curIndEl.classList.add('completed'); }
+            
+            currentStep += dir;
+
+            for(let i=1; i<=totalSteps; i++) {
+                let ind = getEl(`ind-${i}`);
+                if(ind) {
+                    if(i < currentStep) { ind.classList.add('completed'); ind.classList.remove('active'); }
+                    else if(i === currentStep) { ind.classList.add('active'); ind.classList.remove('completed'); }
+                    else { ind.classList.remove('active', 'completed'); }
+                }
+            }
+
+            let nextStepEl = getEl(`step-${currentStep}`);
+            if(nextStepEl) nextStepEl.classList.add('active');
+            
+            let btnPrev = getEl("btnPrev");
+            let btnNext = getEl("btnNext");
+            let btnSubmit = getEl("btnSubmit");
+
+            if(btnPrev) btnPrev.style.display = currentStep === 1 ? "none" : "block";
+            if (currentStep === totalSteps) { 
+                if(btnNext) btnNext.classList.add("hidden"); 
+                if(btnSubmit) btnSubmit.classList.remove("hidden"); 
+            } else { 
+                if(btnNext) btnNext.classList.remove("hidden"); 
+                if(btnSubmit) btnSubmit.classList.add("hidden"); 
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) { alert("Navigasi Error: " + error.message); }
+    }
+
+    async function submitMaster(isDraft) {
+        try {
+            if(!getCandidateSession()) { showLoginGate(tr('form.mf_alert_login_dulu')); return; }
+            let namaVal = getEl("nama") ? getEl("nama").value : "";
+            if(!isDraft && !namaVal.trim()) { alert(tr('form.mf_alert_nama_wajib')); changeStep(1 - currentStep); return; }
+
+            let loadingBox = getEl("loading");
+            if(loadingBox) {
+                getEl("loadingText").innerText = isDraft ? tr('form.mf_save_draft') : tr('form.mf_save_final');
+                loadingBox.classList.remove("hidden");
+            }
+            
+            // POSISI BARIS DIJAGA: selalu kirim 5 elemen (baris kosong = {}), supaya
+            // LPK di baris 5 tidak bergeser ke baris 4/lebih awal saat disimpan ulang
+            // (dulu hanya baris terisi yang dikirim -> posisi ikut memampat).
+            let arrEdu = [];
+            for(let i=1; i<=5; i++) {
+                if(getEl(`edu_tk_${i}`) && getEl(`edu_tk_${i}`).value) {
+                    arrEdu.push({ tingkat: getEl(`edu_tk_${i}`).value, namaSekolah: getEl(`edu_nm_${i}`).value, jurusan: getEl(`edu_jur_${i}`) ? getEl(`edu_jur_${i}`).value : "", tahunMasuk: getEl(`edu_in_${i}`).value, tahunLulus: getEl(`edu_out_${i}`).value });
+                } else {
+                    arrEdu.push({});
+                }
+            }
+            let arrJob = [];
+            for(let i=1; i<=3; i++) {
+                if(getEl(`job_nm_${i}`) && getEl(`job_nm_${i}`).value) {
+                    let outVal = getEl(`job_now_${i}`).checked ? "SEKARANG" : getEl(`job_out_${i}`).value;
+                    arrJob.push({ namaPt: getEl(`job_nm_${i}`).value, tahunMasuk: getEl(`job_in_${i}`).value, tahunKeluar: outVal, jabatan: readManualSelect(getEl(`job_pos_${i}`), getEl(`job_pos_manual_${i}`)), gaji: getEl(`job_sal_${i}`) ? getEl(`job_sal_${i}`).value : "" });
+                }
+            }
+            let arrFam = [];
+            for(let i=1; i<=5; i++) {
+                if(getEl(`fam_hub_${i}`) && getEl(`fam_hub_${i}`).value && getEl(`fam_nm_${i}`).value) {
+                    arrFam.push({ hubungan: getEl(`fam_hub_${i}`).value, nama: getEl(`fam_nm_${i}`).value, usia: getEl(`fam_age_${i}`).value, pekerjaan: readManualSelect(getEl(`fam_job_${i}`), getEl(`fam_job_manual_${i}`)), pendapatan: getEl(`fam_sal_${i}`) ? getEl(`fam_sal_${i}`).value : "" });
+                }
+            }
+
+            const valSafe = (id) => getEl(id) ? getEl(id).value : "";
+
+            let filePhoto = getEl("photo") && getEl("photo").files.length > 0 ? await fileToBase64(getEl("photo").files[0]) : null;
+            let fileJft = getEl("jft") && getEl("jft").files.length > 0 ? await fileToBase64(getEl("jft").files[0]) : null;
+            let fileSsw = getEl("ssw") && getEl("ssw").files.length > 0 ? await fileToBase64(getEl("ssw").files[0]) : null;
+            let fileIjazahSd = getEl("ijazahSd") && getEl("ijazahSd").files.length > 0 ? await fileToBase64(getEl("ijazahSd").files[0]) : null;
+            let fileIjazahSmp = getEl("ijazahSmp") && getEl("ijazahSmp").files.length > 0 ? await fileToBase64(getEl("ijazahSmp").files[0]) : null;
+            let fileIjazahSma = getEl("ijazahSma") && getEl("ijazahSma").files.length > 0 ? await fileToBase64(getEl("ijazahSma").files[0]) : null;
+            let fileUniv = getEl("univ") && getEl("univ").files.length > 0 ? await fileToBase64(getEl("univ").files[0]) : null;
+            let fileKtp = getEl("ktp") && getEl("ktp").files.length > 0 ? await fileToBase64(getEl("ktp").files[0]) : null;
+            let fileKk = getEl("kk") && getEl("kk").files.length > 0 ? await fileToBase64(getEl("kk").files[0]) : null;
+
+            const payload = {
+                wa: valSafe("wa"), nama: valSafe("nama").toUpperCase(), furigana: valSafe("furigana"), panggilan: valSafe("panggilan").toUpperCase(),
+                panggilanKatakana: valSafe("panggilanKatakana"),
+                gender: valSafe("gender"), tempatLahir: valSafe("tempatLahir").toUpperCase(), tglLahir: valSafe("tglLahir"), usia: valSafe("usia"),
+                agama: valSafe("agama"), statusNikah: valSafe("statusNikah"), anak: valSafe("anak"), ktp: valSafe("ktp"), sim: valSafe("sim"), 
+                alamat: valSafe("alamat"), email: valSafe("email"),
+                tb: valSafe("tb"), bb: valSafe("bb"), goldar: valSafe("goldar"), tangan: valSafe("tangan"), baju: valSafe("baju").toUpperCase(), sepatu: valSafe("sepatu"),
+                topi: valSafe("topi"), tahanAc: valSafe("tahanAc"),
+                mataKiri: valSafe("mataKiri"), mataKanan: valSafe("mataKanan"), kacamata: valSafe("kacamata"), butaWarna: valSafe("butaWarna"), tato: valSafe("tato"), tindik: valSafe("tindik"),
+                merokok: valSafe("merokok"), alkohol: valSafe("alkohol"), 
+                penyakit: valSafe("penyakit"), alergi: valSafe("alergi"), laka: valSafe("laka"),
+                promosi: valSafe("promosi"), kelebihan: valSafe("kelebihan"), kekurangan: valSafe("kekurangan"), 
+                keahlianKhusus: valSafe("keahlianKhusus"), hobi: valSafe("hobi"), alasanBidang: valSafe("alasanBidang"),
+                motivasiJepang: valSafe("motivasiJepang"), keinginan: valSafe("keinginan"), rencanaPulang: valSafe("rencanaPulang"), tujuanJepang: valSafe("tujuanJepang"),
+                lamaJepang: valSafe("lamaJepang"), gajiYen: valSafe("gajiYen"), tabungan: valSafe("tabungan"),
+                bhsJepang: valSafe("bhsJepang"), nilai: valSafe("nilai"),
+                lisensi: [readManualSelect(getEl("lisensi"), getEl("lisensi_manual")), readManualSelect(getEl("lisensi2"), getEl("lisensi2_manual"))].filter(Boolean).join(", "),
+                eksJepang: valSafe("eksJepang"),
+                daruratNama: valSafe("daruratNama"), daruratHubungan: valSafe("daruratHubungan"), daruratWa: valSafe("daruratWa"),
+                kenalanNama: valSafe("kenalanNama"),
+                kenalanHubungan: valSafe("kenalanHubungan"),
+                kenalanPekerjaan: valSafe("kenalanPekerjaan"),
+                kenalanUsia: valSafe("kenalanUsia"), kenalanAlamat: valSafe("kenalanAlamat"),
+
+                pendidikan: arrEdu, pekerjaan: arrJob, keluarga: arrFam,
+                noPaspor: valSafe("noPaspor"), tglTerbitPaspor: valSafe("tglTerbitPaspor"), expPaspor: valSafe("expPaspor"),
+                kotaPaspor: valSafe("kotaPaspor").toUpperCase(), noCoe: valSafe("noCoe"),
+                photoFile: filePhoto, jftFile: fileJft, sswFile: fileSsw,
+                ijazahSdFile: fileIjazahSd, ijazahSmpFile: fileIjazahSmp, ijazahSmaFile: fileIjazahSma, univFile: fileUniv,
+                ktpFile: fileKtp, kkFile: fileKk
+            };
+
+            callGAS('submitMasterForm', [payload]).then(res => {
+                    if(loadingBox) loadingBox.classList.add("hidden");
+                    if(res && res.sessionInvalid) { showLoginGate(tr('form.mf_sesi_simpan')); return; }
+                    if(res.success) { 
+                        var msg = isDraft ? tr('form.mf_alert_draft') : tr('form.mf_alert_final');
+                        if(res.translationSkipped) msg += tr('form.mf_alert_translate');
+                        alert(msg); 
+                    } else { alert(tr('form.mf_alert_gagal') + res.message); }
+                }).catch(err => {
+                    if(loadingBox) loadingBox.classList.add("hidden"); 
+                    alert(tr('form.mf_alert_koneksi') + err.message);
+                });
+        } catch (e) {
+            let loadingBox = getEl("loading");
+            if(loadingBox) loadingBox.classList.add("hidden");
+            alert(tr('form.mf_alert_sistem') + e.message);
+        }
+    }
+  </script>
+  <script src="/pwa.js?v=3a746281c5"></script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<head>
+  <meta name="referrer" content="no-referrer">
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ASJ FORM</title>
+  <link rel="manifest" href="/manifest.webmanifest?v=8f163ba13c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#020617">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=b90abf8d0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ASJ Portal">
+  
+  
+
+  <link rel="stylesheet" href="/vendor/font-awesome/css/all.min.css?v=8230c4590e">
+  <link rel="stylesheet" href="/fonts/fonts.css?v=1dd324a9c7">
+  <!-- Preload font kritis (Montserrat, UI font) — href & url() di fonts.css memakai ?v yang sama. -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/montserrat-latin.woff2?v=9b1446d51c" crossorigin>
+
+  <style>
+    html, body { background-color: #020617 !important; color: #f8fafc !important; }
+    
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Plus Jakarta Sans',sans-serif; }
+    body { background:#020617; color:#fff; padding-bottom: 90px; }
+    
+    .hero { height:260px; position:relative; overflow:hidden; }
+    .bg-hero { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(.35); }
+    .overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.25), #020617); }
+    .header { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); text-align:center; width:100%; padding:0 20px; z-index:10; }
+    
+    .logo { width:100px; height:100px; border-radius:50%; margin:auto; box-shadow:0 15px 35px rgba(0,0,0,.5); object-fit:cover; object-position:center; position:relative; z-index:15; background:transparent; border:none; padding:0; }
+    
+    .jp { margin-top:15px; letter-spacing:7px; font-size:11px; font-weight:700; color:#ff6db2; }
+    .title { font-size:28px; font-weight:900; margin-top:5px; }
+    .sub { font-size:13px; margin-top:5px; color:#cbd5e1; }
+    
+    .container { max-width:480px; margin:auto; padding:15px; margin-top:-40px; position:relative; z-index:20; }
+    .glass { background:rgba(15,23,42,.88); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.08); border-radius:28px; padding:25px; box-shadow:0 25px 60px rgba(0,0,0,.45); }
+    
+    .stepper-wrapper { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; position:relative; }
+    .stepper-line { position:absolute; top:18px; left:15%; right:15%; height:3px; background:#334155; z-index:1; }
+    .stepper-line-active { position:absolute; top:18px; left:15%; height:3px; background:#ec4899; z-index:2; transition:width 0.4s ease; width:0%; }
+    
+    .step-item { position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; gap:8px; width:33%; }
+    .step-circle { width:38px; height:38px; border-radius:50%; background:#1e293b; border:2px solid #334155; display:flex; justify-content:center; align-items:center; font-weight:800; color:#cbd5e1; transition:0.3s; }
+    .step-text { font-size:11px; font-weight:700; color:#64748b; transition:0.3s; }
+    
+    .step-item.active .step-circle { background:#ec4899; border-color:#ec4899; color:white; box-shadow:0 0 15px rgba(236,72,153,.4); }
+    .step-item.active .step-text { color:#ec4899; }
+    .step-item.completed .step-circle { background:#db2777; border-color:#db2777; color:white; }
+    .step-item.completed .step-text { color:#cbd5e1; }
+
+    .step-content { display:none; animation:fadeIn 0.4s ease-in-out; }
+    .step-content.active { display:block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .form-group { margin-bottom:20px; }
+    .label { display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:#cbd5e1; }
+    .field { position:relative; }
+    .field i { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:#ec4899; font-size:18px; }
+    .input { width:100%; height:55px; padding:0 18px 0 54px; background:#0f172a; border:1px solid #334155; border-radius:16px; color:white; font-size:14px; transition:.25s; }
+    .input:focus { outline:none; border-color:#ec4899; box-shadow:0 0 0 4px rgba(236,72,153,.15); }
+    .input::placeholder { color:#64748b; }
+    select.input { appearance:none; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .tip { margin-top:6px; font-size:11px; color:#64748b; }
+
+    .upload-card { background:#0f172a; border:1px solid #334155; border-radius:20px; padding:20px; margin-bottom:18px; }
+    .upload-top { display:flex; align-items:center; justify-content:space-between; }
+    .upload-left { display:flex; align-items:center; gap:14px; }
+    .upload-icon { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:20px; color:white; }
+    
+    .photo-bg { background:linear-gradient(135deg,#ec4899,#db2777); }
+    .cv-bg { background:linear-gradient(135deg,#f59e0b,#d97706); }
+    .jft-bg { background:linear-gradient(135deg,#0ea5e9,#2563eb); }
+    .ssw-bg { background:linear-gradient(135deg,#10b981,#059669); }
+    
+    .upload-title { font-size:16px; font-weight:800; }
+    .upload-sub { margin-top:4px; font-size:11px; color:#94a3b8; }
+    .upload-btn { padding:10px 18px; border:none; border-radius:12px; font-size:12px; font-weight:800; color:white; cursor:pointer; transition:.2s; }
+    .upload-btn:hover { filter: brightness(1.1); }
+    
+    .photo-btn { background:#ec4899; } 
+    .cv-btn { background:#d97706; }
+    .jft-btn { background:#0284c7; } 
+    .ssw-btn { background:#059669; }
+    
+    .file-name { margin-top:15px; padding:12px; background:#020617; border-radius:12px; font-size:12px; color:#94a3b8; word-break:break-all; }
+    .preview-img { width:100%; height:160px; object-fit:contain; background:#020617; border-radius:12px; margin-top:15px; display:none; border:1px solid #334155; }
+    .size-warn { color:#f43f5e; font-size:11px; margin-top:8px; display:none; font-weight:700; }
+
+    .confirm { background:#0f172a; border:1px solid #334155; border-radius:20px; padding:20px; display:flex; gap:15px; align-items:flex-start; margin-bottom:20px;}
+    .confirm input { margin-top:4px; width:22px; height:22px; accent-color:#ec4899; }
+    .confirm p { font-size:13px; line-height:24px; color:#cbd5e1; }
+    
+    .footerInfo { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .footerCard { background:#0f172a; border:1px solid #334155; border-radius:16px; padding:15px 10px; text-align:center; }
+    .footerCard i { font-size:20px; color:#ec4899; margin-bottom:8px; }
+    .footerCard div { font-size:10px; color:#cbd5e1; font-weight:800; }
+
+    .sticky-nav { position:fixed; bottom:0; left:0; width:100%; background:rgba(2,6,23,.95); backdrop-filter:blur(10px); border-top:1px solid #1e293b; padding:15px 20px; z-index:50; display:flex; justify-content:space-between; gap:15px; }
+    .btn-nav { flex:1; height:55px; border-radius:16px; font-size:15px; font-weight:800; transition:0.3s; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; border:none; }
+    .btn-prev { background:#1e293b; color:#cbd5e1; }
+    .btn-prev:hover { background:#334155; }
+    .btn-next { background:linear-gradient(90deg,#ec4899,#db2777); color:white; box-shadow:0 10px 25px rgba(236,72,153,.25); }
+    .btn-next:hover { transform:translateY(-2px); }
+    .btn-next:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .loading, .success { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(2,6,23,.92); backdrop-filter:blur(5px); z-index:9999; }
+    .loadingBox { text-align:center; }
+    .loadingCircle { width:70px; height:70px; border-radius:50%; border:4px solid #334155; border-top-color:#ec4899; margin:auto; animation:spin 1s linear infinite; }
+    @keyframes spin { 100% { transform:rotate(360deg); } }
+    .successBox { width:90%; max-width:340px; background:#0f172a; border:1px solid #10b981; border-radius:24px; padding:30px; text-align:center; }
+    .successBox h2 { margin-top:15px; font-size:24px; font-weight:900; }
+    .successBox p { margin-top:10px; font-size:14px; color:#94a3b8; line-height:22px; }
+    .successBtn { margin-top:20px; width:100%; height:50px; border:none; border-radius:14px; background:#10b981; font-weight:800; color:white; cursor:pointer; }
+    
+    .hidden { display: none !important; }
+  </style>
+  <script type="module" crossorigin src="/assets/applyFull-DONYcaRI.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-DEfa6N4x.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BNVm_Ism.css">
+</head>
+<body>
+
+  <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
+  <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+  <!-- HERO SECTION -->
+  <div class="hero">
+    <img class="bg-hero" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1600&q=80" alt="">
+    <div class="overlay"></div>
+    <div class="header">
+      <img class="logo" src="https://drive.google.com/thumbnail?id=1yIzGKLZongVWLY92y5xxOu7S5avhWoHv&sz=w1000" alt="Logo ASJ">
+      <div class="jp">日本への挑戦</div>
+      <div class="title">PT AMANAH SAKURA JAPAN</div>
+    </div>
+  </div>
+
+  <div class="container" id="main-content" tabindex="-1">
+    <div class="glass">
+      
+      <!-- STEPPER WIZARD -->
+      <div class="stepper-wrapper">
+        <div class="stepper-line"></div>
+        <div class="stepper-line-active" id="progress-line"></div>
+        
+        <div class="step-item active" id="indicator-1">
+          <div class="step-circle"><i class="fa-solid fa-user"></i></div>
+          <div class="step-text">Data Diri</div>
+        </div>
+        <div class="step-item" id="indicator-2">
+          <div class="step-circle"><i class="fa-solid fa-file-arrow-up"></i></div>
+          <div class="step-text">Dokumen</div>
+        </div>
+        <div class="step-item" id="indicator-3">
+          <div class="step-circle"><i class="fa-solid fa-check-double"></i></div>
+          <div class="step-text">Kirim</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: DATA PELAMAR -->
+      <div id="step-1" class="step-content active">
+        <div class="form-group">
+          <label class="label">Nomer Job ASJ</label>
+          <div class="field"><i class="fa-solid fa-briefcase"></i>
+            <input id="job" name="job" autocomplete="off" readonly value="" class="input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Bidang Pekerjaan</label>
+          <div class="field"><i class="fa-solid fa-layer-group"></i>
+            <input id="bidang" name="bidang" autocomplete="off" readonly value="" class="input">
+          </div>
+        </div>
+        
+        <!-- KOLOM WHATSAPP DENGAN RADAR CEK RIWAYAT (AUTO-FILL PORTAL) -->
+        <div class="form-group">
+          <label class="label">Nomor WhatsApp</label>
+          <div class="field"><i class="fa-brands fa-whatsapp"></i>
+            <input id="wa" name="wa" type="tel" autocomplete="tel" value="" onblur="formatInputWA(this); cekRiwayat();" placeholder="Contoh: 08123456789" class="input">
+            <span id="wa-loading" class="absolute right-4 top-1/2 -translate-y-1/2 hidden"><i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i></span>
+          </div>
+          <div id="wa-msg" class="text-xs text-emerald-400 font-bold hidden mt-3 bg-emerald-900/30 p-2.5 rounded-lg border border-emerald-500/30"><i class="fas fa-check-circle mr-1"></i> Data riwayat ditemukan! Form & Dokumen otomatis disesuaikan.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Nama Lengkap</label>
+          <div class="field"><i class="fa-solid fa-user"></i>
+            <input id="nama" name="nama" autocomplete="name" value="" placeholder="Sesuai KTP / Paspor" class="input">
+          </div>
+          <div class="tip">Akan otomatis menjadi HURUF KAPITAL</div>
+        </div>
+        
+        <div class="row">
+          <div class="form-group">
+            <label class="label">Gender</label>
+            <div class="field"><i class="fa-solid fa-venus-mars"></i>
+              <select id="gender" class="input">
+                <option value="">Pilih</option><option>LAKI-LAKI</option><option>PEREMPUAN</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Usia</label>
+            <div class="field"><i class="fa-solid fa-cake-candles"></i>
+              <input id="usia" name="usia" type="number" inputmode="numeric" autocomplete="off" placeholder="Misal: 22" class="input">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label class="label">Tinggi Badan</label>
+            <div class="field"><i class="fa-solid fa-ruler-vertical"></i>
+              <input id="tb" name="tb" type="number" inputmode="numeric" autocomplete="off" placeholder="cm" class="input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Berat Badan</label>
+            <div class="field"><i class="fa-solid fa-weight-scale"></i>
+              <input id="bb" name="bb" type="number" inputmode="numeric" autocomplete="off" placeholder="kg" class="input">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: UPLOAD DOKUMEN -->
+      <div id="step-2" class="step-content">
+        <!-- PHOTO -->
+        <div class="upload-card">
+          <div class="upload-top">
+            <div class="upload-left">
+              <div class="upload-icon photo-bg"><i class="fa-solid fa-image"></i></div>
+              <div><div class="upload-title">PAS PHOTO</div><div class="upload-sub">Format: JPG / PNG • Maks 2 MB</div></div>
+            </div>
+            <button type="button" onclick="photo.click()" class="upload-btn photo-btn">PILIH</button>
+          </div>
+          <input id="photo" type="file" accept=".jpg,.jpeg,.png" hidden>
+          <img id="photoPreview" class="preview-img" alt="">
+          <div id="photoInfo" class="file-name">Belum ada file dipilih</div>
+          <div id="photoWarn" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
+        </div>
+
+        <!-- CV EXCEL / FORMAT TSK (DEFAULT DI-HIDE TAPI BISA DIMUNCULKAN OLEH RADAR) -->
+        <div class="upload-card hidden" id="card-cv">
+          <div class="upload-top">
+            <div class="upload-left">
+              <div class="upload-icon cv-bg"><i class="fa-solid fa-file-excel"></i></div>
+              <div><div class="upload-title">FORMAT CV ASJ</div><div class="upload-sub">Format: Excel/PDF • Maks 2 MB</div></div>
+            </div>
+            <button type="button" onclick="cv.click()" class="upload-btn cv-btn">UPLOAD</button>
+          </div>
+          <input id="cv" type="file" accept=".pdf,.xls,.xlsx,.doc,.docx" hidden>
+          <div id="cvInfo" class="file-name">Belum ada file dipilih</div>
+          <div id="cvWarn" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
+        </div>
+
+        <!-- JFT -->
+        <div class="upload-card hidden" id="card-jft">
+          <div class="upload-top">
+            <div class="upload-left">
+              <div class="upload-icon jft-bg"><i class="fa-solid fa-file-pdf"></i></div>
+              <div><div class="upload-title">JFT CERTIFICATE</div><div class="upload-sub">Format: PDF • Maks 2 MB</div></div>
+            </div>
+            <button type="button" onclick="jft.click()" class="upload-btn jft-btn">UPLOAD</button>
+          </div>
+          <input id="jft" type="file" accept=".pdf" hidden>
+          <div id="jftInfo" class="file-name">Belum ada file dipilih</div>
+          <div id="jftWarn" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
+        </div>
+
+        <!-- SSW -->
+        <div class="upload-card hidden" id="card-ssw">
+          <div class="upload-top">
+            <div class="upload-left">
+              <div class="upload-icon ssw-bg"><i class="fa-solid fa-file-pdf"></i></div>
+              <div><div class="upload-title">SSW CERTIFICATE</div><div class="upload-sub">Format: PDF • Maks 2 MB</div></div>
+            </div>
+            <button type="button" onclick="ssw.click()" class="upload-btn ssw-btn">UPLOAD</button>
+          </div>
+          <input id="ssw" type="file" accept=".pdf" hidden>
+          <div id="sswInfo" class="file-name">Belum ada file dipilih</div>
+          <div id="sswWarn" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
+        </div>
+
+        <!-- DYNAMIC EXTRA FILES CONTAINER -->
+        <div id="dynamic-cards"></div>
+      </div>
+
+      <!-- STEP 3: KONFIRMASI -->
+      <div id="step-3" class="step-content">
+        <div class="confirm">
+          <input id="agree" name="agree" type="checkbox">
+          <p>Saya menyatakan dengan sesungguhnya bahwa seluruh data dan dokumen yang saya unggah adalah <b>benar dan asli</b>. Apabila dikemudian hari ditemukan pemalsuan, saya bersedia menerima sanksi pembatalan dari ASJ.</p>
+        </div>
+        <div class="footerInfo">
+          <div class="footerCard"><i class="fa-solid fa-bolt"></i><div>PROSES CEPAT</div></div>
+          <div class="footerCard"><i class="fa-solid fa-shield-halved"></i><div>DATA AMAN</div></div>
+          <div class="footerCard"><i class="fa-solid fa-torii-gate"></i><div>ASJ JAPAN</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STICKY BOTTOM NAVIGATION -->
+  <div class="sticky-nav" id="nav-area">
+    <button id="btnPrev" class="btn-nav btn-prev" onclick="changeStep(-1)" style="display:none;"><i class="fa-solid fa-chevron-left"></i> Kembali</button>
+    <button id="btnNext" class="btn-nav btn-next" onclick="changeStep(1)">Lanjut <i class="fa-solid fa-chevron-right"></i></button>
+    <button id="btnSubmit" class="btn-nav btn-next" onclick="submitApply()" style="display:none;"><i class="fa-solid fa-paper-plane"></i> KIRIM LAMARAN</button>
+  </div>
+
+  <!-- MODALS -->
+  <div id="loading" class="loading">
+    <div class="loadingBox">
+      <div class="loadingCircle"></div>
+      <h2 style="margin-top:20px; color:white; font-size:20px; font-weight:800;">Mengirim Lamaran…</h2>
+      <p style="margin-top:8px; font-size:12px; color:#94a3b8">Mohon tunggu dan jangan tutup halaman ini.</p>
+    </div>
+  </div>
+  <div id="success" class="success">
+    <div class="successBox">
+      <div style="font-size:60px; margin-bottom:10px;">✅</div>
+      <h2>Berhasil!</h2>
+      <p>Data & Dokumen lamaran Anda telah masuk ke Sistem ASJ.</p>
+      <button class="successBtn" onclick="window.top.location.href='/index.html'">KEMBALI KE PORTAL</button>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script src="/gas-client.js?v=c5abdf9b08"></script>
+  <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
+  <script src="/js/apply-docs.js?v=0d887d9d43"></script>
+  <script>
+    // FASE 3/4: field JOB/BIDANG/WA/NAMA dulu diisi server (GAS scriptlet)
+    // dari e.parameter saat halaman dibuka. Sekarang dibaca dari query
+    // string URL (?job=&bidang=&wa=&nama=), sumbernya sama persis (link
+    // WA blast dari generateFormBridge()), cuma dibaca di browser.
+    (function() {
+      function cleanPhoneJS(wa) {
+        if (!wa) return "";
+        var s = String(wa).replace(/\D/g, "");
+        if (s.startsWith("0")) s = "62" + s.substring(1);
+        else if (s.startsWith("8")) s = "62" + s;
+        return s;
+      }
+      var p = new URLSearchParams(window.location.search);
+      document.getElementById('job').value = (p.get('job') || '').trim();
+      document.getElementById('bidang').value = (p.get('bidang') || '').trim();
+      document.getElementById('wa').value = cleanPhoneJS(p.get('wa') || '');
+      document.getElementById('nama').value = (p.get('nama') || '').trim();
+      window.dynamicReqStr = (p.get('req') || 'CV,JFT,SSW').trim();
+    })();
+
+    const $ = id => document.getElementById(id);
+    const MAX_SIZE = 2 * 1024 * 1024; // 2 MB Limit
+    let currentStep = 1;
+    const totalSteps = 3;
+    
+    // VARIABEL PENYIMPAN LINK LAMA JIKA DATA DITEMUKAN
+    let oldPhotoUrl = "-";
+    let oldJftUrl = "-";
+    let oldSswUrl = "-";
+
+    // --- FITUR AUTO-FILL & CEK RIWAYAT ---
+    function formatInputWA(el) { let val = el.value.replace(/\D/g, ''); if (val.startsWith('0')) { val = '62' + val.substring(1); } else if (val.startsWith('8')) { val = '62' + val; } el.value = val.length > 0 ? '+' + val : ''; }
+    
+    function cekRiwayat() {
+       let wa = $("wa").value.trim().replace(/\D/g, '');
+       if(wa.length < 8) return;
+       $("wa-loading").classList.remove("hidden");
+       $("wa-msg").classList.add("hidden");
+       
+       callGAS('cekDataPelamar', [wa]).then(res => {
+           $("wa-loading").classList.add("hidden");
+           if(res && res.found) {
+               $("wa-msg").classList.remove("hidden");
+               
+               // Isi data secara elegan jika belum terisi
+               if(res.nama && !$("nama").value) $("nama").value = res.nama;
+               if(res.gender) {
+                   // DB menyimpan 'perempuan'/'laki-laki' (huruf kecil) — cocokkan
+                   // case-insensitive dgn opsi select (LAKI-LAKI/PEREMPUAN).
+                   var gOpt = Array.prototype.find.call($("gender").options, function(o){ return o.value.toLowerCase() === String(res.gender).toLowerCase(); });
+                   if (gOpt) $("gender").value = gOpt.value;
+               }
+               if(res.usia) $("usia").value = res.usia;
+               if(res.tb) $("tb").value = res.tb;
+               if(res.bb) $("bb").value = res.bb;
+               
+               // Jika file sudah ada di database, lewati wajib upload dan munculkan Badge Hijau
+               var photoUrl = res.pasPhoto || res.photoUrl; // backend kirim pasPhoto
+               if(photoUrl && photoUrl !== "-") { 
+                   oldPhotoUrl = photoUrl; 
+                   $("photoInfo").innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"; 
+                   $("photoWarn").style.display = "none";
+               }
+               if(res.jftUrl && res.jftUrl !== "-") { 
+                   oldJftUrl = res.jftUrl; 
+                   $("jftInfo").innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"; 
+                   $("jftWarn").style.display = "none";
+               }
+               if(res.sswUrl && res.sswUrl !== "-") { 
+                   oldSswUrl = res.sswUrl; 
+                   $("sswInfo").innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"; 
+                   $("sswWarn").style.display = "none";
+               }
+           }
+       });
+    }
+
+    function handleExtraFile(el, idx) {
+      handleFile(el, 'extraInfo_' + idx, 'extraWarn_' + idx, null);
+    }
+
+    // --- STEPPER NAVIGATION WIZARD ---
+    function changeStep(direction) {
+      if (direction === 1) {
+        if (currentStep === 1 && !validateStep1()) return;
+        if (currentStep === 2 && !validateStep2()) return;
+      }
+
+      $(`step-${currentStep}`).classList.remove('active');
+      $(`indicator-${currentStep}`).classList.remove('active');
+      $(`indicator-${currentStep}`).classList.add('completed');
+      
+      currentStep += direction;
+
+      for(let i=1; i<=totalSteps; i++) {
+        const ind = $(`indicator-${i}`);
+        if(i < currentStep) { ind.classList.add('completed'); ind.classList.remove('active'); }
+        else if(i === currentStep) { ind.classList.add('active'); ind.classList.remove('completed'); }
+        else { ind.classList.remove('active', 'completed'); }
+      }
+
+      const progressWidth = currentStep === 1 ? "0%" : currentStep === 2 ? "35%" : "70%";
+      $("progress-line").style.width = progressWidth;
+
+      $(`step-${currentStep}`).classList.add('active');
+      updateButtons();
+    }
+
+    function updateButtons() {
+      $("btnPrev").style.display = currentStep === 1 ? "none" : "flex";
+      if (currentStep === totalSteps) { $("btnNext").style.display = "none"; $("btnSubmit").style.display = "flex"; } 
+      else { $("btnNext").style.display = "flex"; $("btnSubmit").style.display = "none"; }
+    }
+
+    // --- VALIDATION PER STEP ---
+    function validateStep1() {
+      if(!$("job").value) { alert("Nomor Job tidak terdeteksi!"); return false; }
+      if(!$("nama").value.trim()) { alert("Nama Lengkap wajib diisi."); $("nama").focus(); return false; }
+      if(!$("wa").value.trim()) { alert("Nomor WhatsApp wajib diisi."); $("wa").focus(); return false; }
+      if(!$("gender").value) { alert("Silakan pilih Gender Anda."); $("gender").focus(); return false; }
+      if(!$("usia").value) { alert("Usia wajib diisi."); $("usia").focus(); return false; }
+      if(!$("tb").value) { alert("Tinggi Badan wajib diisi."); $("tb").focus(); return false; }
+      if(!$("bb").value) { alert("Berat Badan wajib diisi."); $("bb").focus(); return false; }
+      return true;
+    }
+
+    function validateStep2() {
+      // Jika file kosong DAN belum ada riwayat lamanya, blokir!
+      if($("photo").files.length === 0 && oldPhotoUrl === "-") { alert("Silakan Upload Pas Photo Anda."); return false; }
+      if(!$("card-cv").classList.contains("hidden") && $("cv").files.length === 0) { alert("Silakan Upload Dokumen CV / Format TSK Anda."); return false; }
+      if(!$("card-jft").classList.contains("hidden") && $("jft").files.length === 0 && oldJftUrl === "-") { alert("Silakan Upload Sertifikat JFT Anda."); return false; }
+      if(!$("card-ssw").classList.contains("hidden") && $("ssw").files.length === 0 && oldSswUrl === "-") { alert("Silakan Upload Sertifikat SSW Anda."); return false; }
+      
+      if(window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0) {
+          for(let i=0; i<window.dynamicExtraFiles.length; i++) {
+              if($("extra_" + i).files.length === 0) {
+                  alert("Silakan Upload " + window.dynamicExtraFiles[i] + " Anda."); return false;
+              }
+              if($("extraWarn_" + i).style.display === "block") {
+                  alert("Gagal lanjut! Ukuran file " + window.dynamicExtraFiles[i] + " melebihi batas 2 MB."); return false;
+              }
+          }
+      }
+      
+      if($("photoWarn").style.display === "block" || 
+         (!$("card-cv").classList.contains("hidden") && $("cvWarn").style.display === "block") || 
+         (!$("card-jft").classList.contains("hidden") && $("jftWarn").style.display === "block") || 
+         (!$("card-ssw").classList.contains("hidden") && $("sswWarn").style.display === "block")) {
+          alert("Gagal lanjut! Ada file yang ukurannya melebihi batas 2 MB.");
+          return false;
+      }
+      return true;
+    }
+
+    // --- FILE HANDLING & PREVIEW ---
+    function handleFile(input, infoId, warnId, previewId) {
+      const file = input.files[0];
+      const info = $(infoId); const warn = $(warnId); const preview = previewId ? $(previewId) : null;
+
+      if (!file) {
+        info.innerHTML = "Belum ada file dipilih"; warn.style.display = "none"; if(preview) preview.style.display = "none";
+        return;
+      }
+
+      if (file.size > MAX_SIZE) {
+        warn.style.display = "block"; info.innerHTML = "Belum ada file dipilih"; if(preview) preview.style.display = "none";
+        input.value = ""; return;
+      }
+
+      warn.style.display = "none"; info.innerHTML = `✅ Sukses: ${file.name}`;
+      if (preview && file.type.startsWith('image/')) {
+        preview.src = URL.createObjectURL(file); preview.style.display = "block";
+      }
+    }
+
+    $("photo").onchange = () => handleFile($("photo"), "photoInfo", "photoWarn", "photoPreview");
+    $("cv").onchange = () => handleFile($("cv"), "cvInfo", "cvWarn", null);
+    $("jft").onchange = () => handleFile($("jft"), "jftInfo", "jftWarn", null);
+    $("ssw").onchange = () => handleFile($("ssw"), "sswInfo", "sswWarn", null);
+
+    // --- FORM SUBMISSION ---
+    // Downscale gambar (foto lamaran) saat upload via canvas — max 800px, jpeg
+    // quality 0.8. Tujuan: byte di Storage kecil SELAMANYA tanpa fitur berbayar
+    // Supabase Image Transformations (Free plan tidak menyediakan resize).
+    // Non-gambar (cv/jft/ssw pdf) & gambar gagal-decode (HEIC/korup) dikembalikan
+    // apa adanya supaya alur upload tidak berubah/macet.
+    async function downscaleImageFile(file, maxWidth, quality) {
+      if (!file || !file.type || !file.type.startsWith('image/')) return file;
+      if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
+      try {
+        const dataUrl = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => reject(new Error('read fail')); r.readAsDataURL(file); });
+        const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = () => reject(new Error('decode fail')); i.src = dataUrl; });
+        let w = img.width, h = img.height;
+        const MAX = maxWidth || 800;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality || 0.8));
+        if (!blob || blob.size >= file.size) return file; // hasil tak lebih kecil → kirim asli
+        const base = String(file.name || 'image').replace(/\.[^/.]+$/, '') || 'image';
+        return new File([blob], base + '.jpg', { type: 'image/jpeg' });
+      } catch (e) { return file; }
+    }
+
+    async function uploadFilesDirectly(filesObj, folder) {
+      // Downscale dulu (foto → max 800px jpeg) supaya byte di Storage kecil;
+      // non-gambar (cv/jft/ssw pdf) dibiarkan utuh oleh downscaleImageFile.
+      const files = {};
+      for (const k of Object.keys(filesObj)) files[k] = filesObj[k] ? await downscaleImageFile(filesObj[k], 800, 0.8) : null;
+      const toUpload = Object.keys(files).filter(k => files[k]);
+      if (toUpload.length === 0) return {};
+      
+      const payloadFiles = toUpload.map(k => {
+        const file = files[k];
+        return { key: k, prefix: k.toUpperCase(), ext: file.name.split('.').pop() || 'bin' };
+      });
+      
+      const res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
+      if (!res.success) throw new Error('Gagal mendapatkan link upload: ' + (res.message || res.error || ''));
+      
+      const uploadedUrls = {};
+      for (const key of toUpload) {
+        const file = files[key];
+        const { signedUrl, publicUrl } = res.urls[key];
+        
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
+          body: file
+        });
+        
+        if (!uploadRes.ok) throw new Error('Gagal mengunggah ' + key);
+        uploadedUrls[key] = publicUrl;
+      }
+      return uploadedUrls;
+    }
+
+    // Ekstensi yang diizinkan DARI atribut accept input — HTML jadi sumber
+    // kebenaran format baku per jenis (foto JPG/PNG, CV PDF/Word/Excel, dokumen
+    // lain PDF). Return null kalau accept kosong -> jatuh ke allowlist umum.
+    function ekstensiDariAccept(acceptAttr) {
+      const acc = String(acceptAttr || '').toLowerCase();
+      if (acc.indexOf('image/*') !== -1) return ['jpg','jpeg','png','gif','webp','bmp','svg'];
+      const out = [];
+      acc.split(',').forEach(a => {
+        a = a.trim().replace(/^\./, '');
+        if (a) out.push(a);
+      });
+      return out.length > 0 ? out : null;
+    }
+    // Ekstensi file yang diizinkan — fallback sinkron dengan allowlist backend.
+    const ALLOWED_FILE_EXT = ['pdf','jpg','jpeg','png','gif','webp','bmp','svg','xls','xlsx','xlsm','doc','docx','ppt','pptx','odt','ods','odp','txt','rtf','csv'];
+    function cekEkstensiFileLokal(inputEl) {
+      if(!inputEl || !inputEl.files || inputEl.files.length === 0) return '';
+      const f = inputEl.files[0];
+      const ext = String(f.name || '').split('.').pop().toLowerCase();
+      const allowed = ekstensiDariAccept(inputEl.getAttribute('accept')) || ALLOWED_FILE_EXT;
+      if(allowed.indexOf(ext) === -1) return 'Format ' + (f.name || 'file') + ' tidak diizinkan untuk dokumen ini.';
+      return '';
+    }
+
+    async function submitApply() {
+      if(!$("agree").checked) { alert("Anda harus menyetujui persyaratan sebelum mengirim lamaran!"); return; }
+
+      // Guard ekstensi: cek semua input file SEBELUM upload (toast cepat).
+      const extInputs = ['photo','cv','jft','ssw'];
+      for(let i = 0; i < extInputs.length; i++) {
+        const el = document.getElementById(extInputs[i]);
+        const err = cekEkstensiFileLokal(el);
+        if(err) { alert(err); return; }
+      }
+
+      $("loading").style.display = "flex"; $("btnSubmit").disabled = true; $("btnPrev").disabled = true;
+
+      try {
+        const filesToUpload = {};
+        if($("photo").files.length > 0) filesToUpload.photoFile = $("photo").files[0];
+        if(!$("card-cv").classList.contains("hidden") && $("cv").files.length > 0) filesToUpload.cvFile = $("cv").files[0];
+        if($("card-jft").classList.contains("hidden") === false && $("jft").files.length > 0) filesToUpload.jftFile = $("jft").files[0];
+        if($("card-ssw").classList.contains("hidden") === false && $("ssw").files.length > 0) filesToUpload.sswFile = $("ssw").files[0];
+        
+        if(window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0) {
+            for(let idx = 0; idx < window.dynamicExtraFiles.length; idx++) {
+                let el = $("extra_" + idx);
+                if(el && el.files.length > 0) {
+                    const err = cekEkstensiFileLokal(el);
+                    if(err) { $("loading").style.display = "none"; $("btnSubmit").disabled = false; $("btnPrev").disabled = false; alert(err); return; }
+                    let key = window.dynamicExtraFiles[idx].replace(/[^a-zA-Z0-9]/g, '_');
+                    filesToUpload[key] = el.files[0];
+                }
+            }
+        }
+
+        const folderName = 'master/' + $("nama").value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '_');
+        const uploadedUrls = await uploadFilesDirectly(filesToUpload, folderName);
+
+        // Dokumen ekstra (SIM A, KTP, dll) ikut dikirim sebagai bukti kelengkapan
+        // ({ name: nama dokumen, url: URL hasil upload }) — backend submitApply
+        // mencocokkannya dengan model loker (dokumen_share) & menolak yang kurang.
+        const extraFilesPayload = [];
+        if (window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0) {
+            for (let idx = 0; idx < window.dynamicExtraFiles.length; idx++) {
+                const docName = window.dynamicExtraFiles[idx];
+                const key = docName.replace(/[^a-zA-Z0-9]/g, '_');
+                if (uploadedUrls[key]) extraFilesPayload.push({ name: docName.toUpperCase(), url: uploadedUrls[key] });
+            }
+        }
+
+        const payload = {
+          job: $("job").value,
+          bidang: $("bidang").value,
+          nama: $("nama").value.trim().toUpperCase(),
+          wa: $("wa").value.trim(),
+          gender: $("gender").value,
+          usia: $("usia").value,
+          tb: $("tb").value,
+          bb: $("bb").value,
+          photoFile: uploadedUrls.photoFile || null,
+          oldPhoto: oldPhotoUrl,
+          cvFile: uploadedUrls.cvFile || null,
+          jftFile: uploadedUrls.jftFile || null,
+          oldJft: oldJftUrl,
+          sswFile: uploadedUrls.sswFile || null,
+          oldSsw: oldSswUrl,
+          extraFiles: extraFilesPayload
+        };
+
+        callGAS('submitApply', [payload]).then(function(res) {
+            $("loading").style.display = "none";
+            if(!res.success) { alert(res.message); $("btnSubmit").disabled = false; $("btnPrev").disabled = false; return; }
+            $("success").style.display = "flex";
+          }).catch(function(err) {
+            $("loading").style.display = "none"; $("btnSubmit").disabled = false; $("btnPrev").disabled = false;
+            alert("Terjadi kesalahan jaringan: " + err.message);
+          });
+          
+      } catch(error) {
+        $("loading").style.display = "none"; $("btnSubmit").disabled = false; $("btnPrev").disabled = false;
+        alert("Terjadi kesalahan: " + error.message);
+      }
+    }
+
+    // --- TUGAS PERTAMA SAAT WEB DIBUKA (AUTO-FILL & RADAR) ---
+    window.onload = function() {
+      // Logika murni model dokumen ada di /js/apply-docs.js (applyDocsPlan) —
+      // di-unit-test supaya bug JFT/SSW tidak muncul diam-diam lagi.
+      const plan = applyDocsPlan(window.dynamicReqStr);
+
+      // Kartu upload default hidden — tampilkan HANYA yang diminta model loker.
+      if (plan.showCv) $("card-cv").classList.remove("hidden");
+      if (plan.showJft) $("card-jft").classList.remove("hidden");
+      if (plan.showSsw) $("card-ssw").classList.remove("hidden");
+      
+      const extraFiles = plan.extras;
+      window.dynamicExtraFiles = extraFiles;
+      
+      if(extraFiles.length > 0) {
+          let html = '';
+          extraFiles.forEach((fileReq, idx) => {
+              html += `
+              <div class="upload-card">
+                <div class="upload-top">
+                  <div class="upload-left">
+                    <div class="upload-icon" style="background:linear-gradient(135deg, #1e293b, #334155); color:#94a3b8;"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div><div class="upload-title">${fileReq}</div><div class="upload-sub">Format: Gambar/PDF • Maks 2 MB</div></div>
+                  </div>
+                  <button type="button" onclick="document.getElementById('extra_${idx}').click()" class="upload-btn" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2);">UPLOAD</button>
+                </div>
+                <input id="extra_${idx}" type="file" accept=".pdf" hidden onchange="handleExtraFile(this, ${idx})">
+                <div id="extraInfo_${idx}" class="file-name">Belum ada file dipilih</div>
+                <div id="extraWarn_${idx}" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
+              </div>
+              `;
+          });
+          $("dynamic-cards").innerHTML = html;
+      }
+
+      // 2. Jika pelamar dikirim dari Portal ASJ (sudah login), auto-fill datanya & panggil file lamanya!
+      if($("wa").value) {
+          formatInputWA($("wa"));
+          $("wa").setAttribute("readonly", true); // Kunci WA biar tidak bisa dirubah
+          if($("nama").value) $("nama").setAttribute("readonly", true); // Kunci NAMA
+          cekRiwayat(); // Panggil radar pengecek ke Database!
+      }
+    };
+  </script>
+  <script src="/pwa.js?v=3a746281c5"></script>
+</body>
+</html>
