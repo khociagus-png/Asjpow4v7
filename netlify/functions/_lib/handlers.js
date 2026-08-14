@@ -740,14 +740,36 @@ async function handleTandaiGagalJob(payload, sessionToken) {
     if (!row) {
       return { success: false, error: "Kandidat tidak ditemukan." };
     }
-    if (String(row.id_loker_pilihan || "") !== String(jobCode)) {
+    // Kolom loker bisa id_loker_pilihan ATAU id_loker (skema adaptif).
+    const idLoker = supabase.toText(supabase.pick(row, ["id_loker_pilihan", "id_loker"]));
+    if (String(idLoker) !== String(jobCode)) {
       return { success: false, error: "Kandidat tidak terdaftar di job ini." };
     }
     await supabase.supabaseJson("PATCH", "database_candidate", {
       query: { id: "eq." + row.id },
-      body: { status_kandidat: "GAGAL", id_loker_pilihan: null },
+      body: {
+        status_kandidat: "GAGAL",
+        id_loker_pilihan: null,
+        updated_at: new Date().toISOString(),
+      },
       headers: { Prefer: "return=minimal" },
     });
+    // Sinkronkan mail: lamaran kandidat ikut berstatus GAGAL (tidak menunggu
+    // review lagi).
+    try {
+      const forms = await supabase.findForms();
+      const want = supabase.normalizeWa(wa);
+      const m = forms.find((r) => supabase.normalizeWa(String(r.no_wa || "")) === want);
+      if (m && m.id !== undefined) {
+        await supabase.supabaseJson("PATCH", "database_asj_form", {
+          query: { id: "eq." + m.id },
+          body: { status: "GAGAL" },
+          headers: { Prefer: "return=minimal" },
+        });
+      }
+    } catch (e) {
+      /* opsional */
+    }
     return { success: true };
   } catch (e) {
     return { success: false, error: "Gagal tandai gagal: " + e.message };
@@ -845,9 +867,87 @@ async function handleFormStatus(rowIndex, status, reason) {
       body,
       headers: { Prefer: "return=minimal" },
     });
+    // Kandidat masuk list DB JOB HANYA setelah approve (LULUS); Gagal
+    // mengeluarkannya. Sebelum approve, kandidat hanya ada di mail.
+    try {
+      await syncCandidateDariForm(f, status);
+    } catch (e) {
+      console.error("[form-status] sync candidate:", e && e.message ? e.message : e);
+    }
     return { success: true };
   } catch (e) {
     return { success: false, error: "Gagal proses form: " + e.message };
+  }
+}
+
+// nextCandidateId — ID kandidat baru ASJ<max+1> (salinan dari actions-extra).
+async function nextCandidateId() {
+  const found = await supabase.findCandidates();
+  let max = 0;
+  for (const r of found.rows) {
+    const m = String(supabase.pick(r, ["id_kandidat", "id"]) || "").match(/ASJ(\d+)/i);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
+  }
+  return "ASJ" + String(max + 1).padStart(5, "0");
+}
+
+// Approve (LULUS) → buat/perbarui database_candidate dengan id_loker_pilihan =
+// code_job supaya kandidat muncul di list DB JOB. Reject (GAGAL) → status GAGAL
+// + lepas dari job. Data diambil dari baris mail (form lamaran).
+async function syncCandidateDariForm(f, status) {
+  const wa = supabase.normalizeWa(String(f.no_wa || f.wa || ""));
+  const codeJob = String(f.code_job || "");
+  if (!wa) return;
+  const row = await findCandidateByWa(wa);
+  if (status === "LULUS") {
+    const now = new Date().toISOString();
+    const base = {
+      nama_lengkap: String(f.nama_lengkap || ""),
+      gender: String(f.gender || ""),
+      usia: String(f.usia || ""),
+      tb: String(f.tb || ""),
+      bb: String(f.bb || ""),
+      pas_photo: f.pas_photo || "",
+      jft: f.jft || "",
+      ssw: f.ssw || "",
+      file_cv: f.file_cv || "",
+      status_kandidat: "LULUS",
+      updated_at: now,
+    };
+    if (codeJob) base.id_loker_pilihan = codeJob;
+    if (row && row.id !== undefined) {
+      for (const k of Object.keys(base)) if (base[k] === undefined) delete base[k];
+      await supabase.supabaseJson("PATCH", "database_candidate", {
+        query: { id: "eq." + row.id },
+        body: base,
+        headers: { Prefer: "return=minimal" },
+      });
+    } else if (codeJob) {
+      // Belum ada baris kandidat → buat dari data mail (password default = 4
+      // digit terakhir WA, sama seperti alur daftar).
+      base.id_kandidat = await nextCandidateId();
+      base.no_wa = wa;
+      base.password_kandidat = bcrypt.hashSync(wa.slice(-4), 10);
+      base.password_diubah = false;
+      base.tahapan_seleksi = "LIST";
+      base.tanggal_daftar = now;
+      base.created_at = now;
+      base.updated_at = now;
+      await supabase.supabaseJson("POST", "database_candidate", {
+        body: base,
+        headers: { Prefer: "return=minimal" },
+      });
+    }
+  } else if (status === "GAGAL" && row && row.id !== undefined) {
+    const upd = { status_kandidat: "GAGAL", updated_at: new Date().toISOString() };
+    if (codeJob && String(supabase.pick(row, ["id_loker_pilihan", "id_loker"]) || "") === codeJob) {
+      upd.id_loker_pilihan = null;
+    }
+    await supabase.supabaseJson("PATCH", "database_candidate", {
+      query: { id: "eq." + row.id },
+      body: upd,
+      headers: { Prefer: "return=minimal" },
+    });
   }
 }
 
