@@ -993,413 +993,29 @@
     </div>
   </footer>
 
-  <div id="modal-cv-mini" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
-     <div class="glass-panel border-sky-500/50 p-6 md:p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <button onclick="document.getElementById('modal-cv-mini').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-        <h3 class="text-xl font-black text-sky-400 mb-2 border-b border-sky-900/50 pb-4"><i class="fas fa-user-edit mr-2"></i><span data-lang="ui.update_cv_mini"> Update CV Mini</span></h3>
-        <p class="text-sm text-slate-400 mb-6 leading-relaxed"><span data-lang="ui.master_update_hint">Perbarui data Anda di bawah ini agar perusahaan tertarik. Lebih cepat dan mudah!</span></p>
-        
-        <div class="space-y-4">
-           <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_gender">Gender</span></label><select id="um-gender" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"><option value="LAKI-LAKI">LAKI-LAKI</option><option value="PEREMPUAN">PEREMPUAN</option></select></div>
-              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_age">Usia</span></label><input type="number" inputmode="numeric" id="um-usia" placeholder="Misal: 22" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
-           </div>
-           <div class="grid grid-cols-2 gap-4">
-              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_height">Tinggi (CM)</span></label><input type="number" inputmode="numeric" id="um-tb" placeholder="165" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
-              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_weight">Berat (KG)</span></label><input type="number" inputmode="numeric" id="um-bb" placeholder="55" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
-           </div>
-           <div>
-               <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_education">Pendidikan Terakhir</span></label>
-               <select id="um-pendidikan" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500">
-                   <option value="-">Pilih Pendidikan…</option>
-                   <option value="SMA">SMA</option>
-                   <option value="SMK">SMK</option>
-                   <option value="MA">MA</option>
-                   <option value="D3">D3</option>
-                   <option value="S1">S1</option>
-               </select>
-           </div>
-           <div class="grid grid-cols-2 gap-4">
-               <div><label class="block text-xs font-bold text-sky-400 mb-1.5 uppercase"><span data-lang="ui.jft_score">Nilai JFT/JLPT</span></label><input type="text" id="um-jft-text" placeholder="Contoh: A2 / 120" class="w-full p-3 rounded-2xl bg-black/60 border border-sky-900/50 text-sm text-white outline-none focus:border-sky-500"></div>
-               <div><label class="block text-xs font-bold text-emerald-400 mb-1.5 uppercase"><span data-lang="candidate.form_ssw_text">Bidang SSW</span></label><input type="text" id="um-ssw-text" placeholder="Kaigo, Pertanian" class="w-full p-3 rounded-2xl bg-black/60 border border-emerald-900/50 text-sm text-white outline-none focus:border-emerald-500"></div>
-           </div>
-           <div class="p-4 bg-sky-900/20 border border-dashed border-sky-500/50 rounded-2xl">
-               <label class="block text-sm text-sky-400 mb-1.5 font-bold"><span data-lang="ui.latest_photo">PAS PHOTO TERBARU (JPG/PNG)</span></label>
-               <input type="file" id="um-photo" accept="image/*" class="w-full text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:bg-sky-600 file:text-white file:font-bold hover:file:bg-sky-500 cursor-pointer transition">
-           </div>
-           <button onclick="prosesSimpanCvMini()" id="btn-submit-cv-mini" class="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] hover:-translate-y-1 transition mt-4 text-sm"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_cv_mini"> Simpan CV Mini</span></button>
-        </div>
-     </div>
-  </div>
+  
 
-  <div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-    <div class="glass-panel p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
-      <button onclick="document.getElementById('modal-admin').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-      <div id="login-step-1">
-          <i class="fas fa-shield-alt text-5xl text-red-500 mb-5 drop-shadow-lg"></i>
-          <h3 class="text-xl font-bold text-white mb-6 tracking-wide" data-lang="admin.auth_title">Otorisasi Sistem</h3>
-          <label for="admin-pin-master" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_master">PIN Master</label>
-          <input type="password" id="admin-pin-master" name="pin_master" autocomplete="current-password" data-lang-placeholder="admin.pin_master" placeholder="PIN Master" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-red-500 transition">
-          <button onclick="prosesLoginMaster()" id="btn-login-master" class="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(220,38,38,0.5)] text-lg hover:-translate-y-1" data-lang="button.verify">Verifikasi</button>
-      </div>
-      <div id="login-step-2" class="hidden">
-          <i class="fas fa-users-cog text-5xl text-sky-500 mb-5 drop-shadow-lg"></i>
-          <h3 class="text-lg font-bold text-white mb-6 tracking-wide" data-lang="admin.select_account">Pilih Akun Admin</h3>
-          <div class="grid grid-cols-2 gap-4">
-             <button onclick="showLoginPersonal('SACHOU')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1"><span data-lang="ui.sachou">SACHOU</span></button>
-             <button onclick="showLoginPersonal('AYOK')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">AYOK</button>
-             <button onclick="showLoginPersonal('KHOLIS')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">KHOLIS</button>
-             <button onclick="showLoginPersonal('KHOCI')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">KHOCI</button>
-          </div>
-      </div>
-      <div id="login-step-3" class="hidden">
-          <i class="fas fa-lock text-5xl text-amber-500 mb-4 drop-shadow-lg"></i>
-          <h3 class="text-lg font-bold text-white mb-1" id="lbl-nama-admin" data-lang="header.login">Login</h3>
-          <p class="text-sm text-slate-400 mb-6" data-lang="admin.enter_pin">Masukkan PIN Pribadi Anda</p>
-          <input type="hidden" id="admin-name-temp">
-          <label for="admin-pin-personal" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_personal">PIN Pribadi</label>
-          <input type="password" id="admin-pin-personal" name="pin_personal" autocomplete="current-password" data-lang-placeholder="admin.pin_personal" placeholder="PIN Pribadi" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-amber-500 transition">
-          <button onclick="prosesLoginPersonal()" id="btn-login-personal" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(217,119,6,0.5)] text-lg hover:-translate-y-1" data-lang="button.enter_portal">Masuk Portal</button>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- MODAL GANTI PASSWORD KANDIDAT (2026-08-12): ganti password default
        (4 digit terakhir WA) dengan password pribadi. Backend: action
        gantiPasswordKandidat di auth.ts (wajib sesi kandidat). -->
   
 
-  <div id="modal-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-    <div class="glass-panel p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative">
-      <button onclick="document.getElementById('modal-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-      <div id="form-daftar-kandidat" class="hidden">
-         <h3 class="text-xl font-bold text-emerald-400 mb-6 border-b border-emerald-900/50 pb-4 text-center"><i class="fas fa-user-plus mr-2"></i> <span data-lang="candidate.reg_title">Daftar Pelamar Baru</span></h3>
-         <input type="text" id="reg-nama" name="nama" autocomplete="name" data-lang-placeholder="candidate.reg_name" placeholder="Nama Lengkap KTP" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-emerald-500 transition">
-         <input type="tel" id="reg-wa" name="wa" autocomplete="tel" onblur="formatInputWA(this)" data-lang-placeholder="candidate.reg_wa" placeholder="No WA (0812…)" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-emerald-500 transition">
-         <div class="px-4 py-3 rounded-2xl bg-emerald-900/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-6 text-center" data-lang="candidate.reg_pass_hint">Password Anda = 4 digit terakhir nomor WA</div>
-         <button onclick="prosesDaftarKandidat()" id="btn-reg-kandidat" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(90,141,0,0.4)] hover:-translate-y-1 transition" data-lang="button.register">Daftar Akun</button>
-         <p class="text-sm text-center mt-5 text-slate-400"><span data-lang="candidate.have_account">Sudah punya akun?</span> <button type="button" onclick="bukaModalKandidat('login')" class="text-emerald-400 hover:text-emerald-300 underline font-bold" data-lang="candidate.login_here">Login di sini</button></p>
-      </div>
-      <div id="form-login-kandidat" class="hidden">
-         <h3 class="text-xl font-bold text-sky-400 mb-6 border-b border-sky-900/50 pb-4 text-center"><i class="fas fa-sign-in-alt mr-2"></i> <span data-lang="candidate.log_title">Login Pelamar</span></h3>
-         <label for="log-wa" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_wa">No WhatsApp Terdaftar</label>
-         <input type="tel" id="log-wa" name="wa" autocomplete="tel" onblur="formatInputWA(this)" data-lang-placeholder="candidate.log_wa" placeholder="No WhatsApp Terdaftar" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-sky-500 transition">
-         <label for="log-pass" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_pass">Password</label>
-         <input type="password" id="log-pass" name="password" autocomplete="current-password" data-lang-placeholder="candidate.log_pass" placeholder="Password" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-6 outline-none focus:border-sky-500 transition">
-         <button onclick="prosesLoginKandidat()" id="btn-log-kandidat" class="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] hover:-translate-y-1 transition" data-lang="button.enter_dashboard">Masuk Dashboard</button>
-         <p class="text-sm text-center mt-5 text-slate-400"><span data-lang="candidate.no_account">Belum punya akun?</span> <button type="button" onclick="bukaModalKandidat('daftar')" class="text-sky-400 hover:text-sky-300 underline font-bold" data-lang="candidate.register_here">Daftar di sini</button></p>
-      </div>
-    </div>
-  </div>
+  
 
-  <div id="modal-cv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 p-6 md:p-8 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_40px_rgba(0,0,0,0.8)] relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-          <button onclick="document.getElementById('modal-cv').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-10" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-          
-          <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-6">
-              <div class="flex items-center gap-4">
-                  <img id="cv-logo-asj" src="" class="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-lg" alt="ASJ" onerror="this.onerror=null;this.style.display='none';">
-                  <div>
-                      <h3 class="text-lg md:text-xl font-black text-white tracking-wider"><span data-lang="ui.asj_dossier">ASJ DOSSIER</span></h3>
-                      <p class="text-[9px] md:text-xs text-pink-400 font-bold tracking-[0.2em] uppercase"><span data-lang="ui.verified_candidate">Verified Candidate</span></p>
-                  </div>
-              </div>
-              <i class="fas fa-check-circle text-sky-400 text-2xl md:text-3xl drop-shadow-[0_0_15px_rgba(118,185,0,0.4)] pr-8 md:pr-0"></i>
-          </div>
-
-          <div class="flex flex-col md:flex-row gap-6 mb-6">
-              <div class="w-full md:w-1/3 flex flex-col items-center">
-                  <div class="w-32 h-40 bg-slate-800 rounded-2xl border-2 border-slate-600 flex items-center justify-center overflow-hidden shadow-inner mb-3 relative group">
-                      <i id="cv-no-foto" class="fas fa-user text-5xl text-slate-500"></i>
-                      <!-- FIX 2026-08-12: loading=lazy + class=hidden = deadlock —
-                           img display:none tidak punya viewport -> lazy load tak
-                           pernah trigger -> onload tak jalan -> foto tak pernah
-                           tampil. Modal dibuka on-demand, jadi eager benar. -->
-                      <img id="cv-foto" src="" width="320" height="400" loading="eager" decoding="async" alt="Foto kandidat" class="hidden w-full h-full object-cover transition duration-300 group-hover:scale-110">
-                  </div>
-                  <div class="text-center w-full flex flex-col gap-2">
-                      <span id="cv-id" class="px-4 py-1.5 bg-slate-800 text-sky-300 text-xs font-mono font-bold rounded-full border border-slate-600 shadow-inner">-</span>
-                      <div class="px-2 py-1.5 bg-emerald-900/40 border border-emerald-500/50 rounded-lg">
-                          <p class="text-[8px] text-emerald-300 uppercase font-bold mb-0.5"><span data-lang="ui.status_stage">Status & Tahapan</span></p>
-                          <p id="cv-status" class="text-xs text-white font-bold leading-tight">-</p>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="w-full md:w-2/3 space-y-4">
-                  <div>
-                      <h2 id="cv-nama" class="text-xl md:text-2xl font-black text-white uppercase tracking-wide leading-tight">-</h2>
-                      <a id="cv-wa-link" href="#" target="_blank" class="text-emerald-400 text-sm font-bold hover:text-emerald-300 transition flex items-center gap-1 mt-1 inline-flex">
-                          <i class="fab fa-whatsapp text-lg"></i> <span id="cv-wa">-</span>
-                      </a>
-                      <div id="cv-pass-row" class="hidden mt-2 px-3 py-2 bg-amber-900/20 border border-amber-500/30 rounded-lg">
-                          <p class="text-[9px] text-amber-400 font-bold uppercase mb-0.5"><i class="fas fa-key mr-1"></i><span data-lang="ui.cand_pass_label"> Password Kandidat</span></p>
-                          <p id="cv-pass" class="text-sm text-white font-bold tracking-widest">-</p>
-                      </div>
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-y-4 gap-x-4 border-t border-b border-slate-700 py-4">
-                      <div>
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-venus-mars mr-1"></i><span data-lang="candidate.form_gender"> Gender</span></p>
-                          <p id="cv-gender" class="text-sm text-white font-bold">-</p>
-                      </div>
-                      <div>
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-user-clock mr-1"></i><span data-lang="candidate.form_age"> Usia</span></p>
-                          <p id="cv-usia" class="text-sm text-white font-bold">-</p>
-                      </div>
-                      <div>
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-weight mr-1"></i><span data-lang="ui.physical_tbbb"> Fisik (TB/BB)</span></p>
-                          <p id="cv-tbbb" class="text-sm text-amber-300 font-bold">-</p>
-                      </div>
-                      <div>
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-graduation-cap mr-1"></i><span data-lang="ui.education"> Pendidikan</span></p>
-                          <p id="cv-pendidikan" class="text-sm text-white font-bold">-</p>
-                      </div>
-                      <div class="col-span-2">
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-calendar-alt mr-1"></i><span data-lang="ui.pob_dob"> Tempat, Tgl Lahir</span></p>
-                          <p id="cv-ttl-lengkap" class="text-sm text-white font-bold">-</p>
-                      </div>
-                      <div class="col-span-2">
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-envelope mr-1"></i><span data-lang="ui.email"> Email</span></p>
-                          <p id="cv-email" class="text-sm text-white font-bold break-all">-</p>
-                      </div>
-                      <div class="col-span-2">
-                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-map-marker-alt mr-1"></i><span data-lang="ui.address_ktp"> Alamat (Sesuai KTP)</span></p>
-                          <p id="cv-alamat" class="text-sm text-white font-bold leading-relaxed">-</p>
-                      </div>
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-3">
-                      <div class="bg-sky-900/20 border border-sky-700/50 p-2.5 rounded-xl shadow-inner text-center">
-                          <p class="text-[9px] text-sky-500 font-bold uppercase mb-1"><span data-lang="ui.jft_jlpt">JFT / JLPT</span></p>
-                          <p id="cv-jft-nilai" class="text-sm font-bold text-white">-</p>
-                      </div>
-                      <div class="bg-emerald-900/20 border border-emerald-700/50 p-2.5 rounded-xl shadow-inner text-center">
-                          <p class="text-[9px] text-emerald-500 font-bold uppercase mb-1"><span data-lang="ui.ssw_field">SSW / Bidang</span></p>
-                          <p id="cv-ssw" class="text-sm font-bold text-white">-</p>
-                      </div>
-                  </div>
-
-                  <!-- EDIT DATA CEPAT (admin) — gender/usia/TTL/TB/JFT/SSW tanpa buka CV AI -->
-                  <button type="button" id="btn-cv-edit-cepat" onclick="toggleEditCepatCv()" class="hidden w-full py-3 bg-pink-600/20 hover:bg-pink-600 border border-pink-500/50 text-pink-300 hover:text-white rounded-xl text-xs font-bold transition shadow mb-3">
-                      <i class="fas fa-pen mr-1"></i><span data-lang="ui.edit_quick_cv"> EDIT DATA CEPAT</span>
-                  </button>
-                  <div id="cv-edit-cepat-form" class="hidden mb-4 bg-black/40 border border-pink-500/30 rounded-xl p-4 space-y-3">
-                      <div class="grid grid-cols-2 gap-3">
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_gender">Gender</span></label>
-                              <select id="cv-edit-gender" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                                  <option value="">-</option><option value="LAKI-LAKI">Laki-laki</option><option value="PEREMPUAN">Perempuan</option>
-                              </select>
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_age">Usia</span></label>
-                              <input type="number" inputmode="numeric" id="cv-edit-usia" placeholder="22" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_pob">Tempat Lahir</span></label>
-                              <input type="text" id="cv-edit-tempat-lahir" placeholder="Ponorogo" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_dob">Tanggal Lahir</span></label>
-                              <input type="date" id="cv-edit-tgl-lahir" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_height">Tinggi (CM)</span></label>
-                              <input type="number" inputmode="numeric" id="cv-edit-tb" placeholder="159" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_weight">Berat (KG)</span></label>
-                              <input type="number" inputmode="numeric" id="cv-edit-bb" placeholder="47" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="ui.jft_score">Nilai JFT/JLPT</span></label>
-                              <input type="text" id="cv-edit-jft" placeholder="A2 / 120" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                          <div>
-                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_ssw_text">Bidang SSW</span></label>
-                              <input type="text" id="cv-edit-ssw" placeholder="Kaigo, Pertanian…" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
-                          </div>
-                      </div>
-                      <button type="button" onclick="simpanEditCepatCv()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg transition"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_quick_cv"> SIMPAN DATA</span></button>
-                  </div>
-              </div>
-          </div>
-
-          <div class="mb-5 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-              <h4 class="text-xs text-slate-400 font-bold uppercase mb-2"><span data-lang="ui.job_field_applied">Job / Bidang yang dilamar:</span></h4>
-              <div id="cv-job-tags" class="flex flex-wrap gap-2">
-                  <span class="text-sm text-slate-500 italic">-</span>
-              </div>
-          </div>
-
-          <div class="flex gap-3 mb-2">
-              <button type="button" id="btn-cv-dokumen" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-file-alt mr-1 text-amber-400"></i><span data-lang="ui.cv_format"> FORMAT CV</span></button>
-              <button type="button" id="btn-cv-jft" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-certificate mr-1 text-sky-400"></i><span data-lang="ui.cert_jft"> SERTIF JFT</span></button>
-              <button type="button" id="btn-cv-ssw" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-award mr-1 text-emerald-400"></i><span data-lang="ui.cert_ssw"> SERTIF SSW</span></button>
-          </div>
-
-          <div id="cv-inline-preview" class="hidden mt-4 w-full h-[400px] border border-slate-700 rounded-xl overflow-hidden relative bg-black">
-              <button type="button" onclick="document.getElementById('cv-inline-preview').classList.add('hidden')" class="absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center z-10 shadow-lg" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
-              <div class="absolute top-2 right-12 z-10">
-                  <a id="cv-inline-external" href="#" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white rounded-full px-3 py-1.5 flex items-center justify-center text-xs font-bold shadow-lg"><i class="fas fa-external-link-alt mr-1"></i><span data-lang="ui.open_tab"> BUKA TAB</span></a>
-              </div>
-              <iframe id="cv-inline-iframe" class="w-full h-full border-0 bg-white"></iframe>
-          </div>
-
-          <!-- TOMBOL FOLDER PEMBERKASAN (HANYA MUNCUL JIKA LOLOS) -->
-                    <div id="cv-pemberkasan-area" class="border-t border-slate-700 pt-4 mt-4 hidden">
-              <h4 class="text-sm font-bold text-emerald-400 uppercase mb-3"><i class="fas fa-folder-open mr-2"></i><span data-lang="ui.cand_docs_supabase"> Dokumen Pelamar (Supabase)</span></h4>
-              <div class="grid grid-cols-2 gap-2 mb-2">
-                  <button type="button" id="btn-cv-file-cv" class="hidden w-full flex items-center justify-center py-2 bg-blue-900/40 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-file-pdf mr-1"></i><span data-lang="ui.open_cv"> BUKA CV</span></button>
-                  <button type="button" id="btn-cv-file-jft" class="hidden w-full flex items-center justify-center py-2 bg-purple-900/40 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-certificate mr-1"></i><span data-lang="ui.open_jft"> BUKA JFT</span></button>
-                  <button type="button" id="btn-cv-file-ssw" class="hidden w-full flex items-center justify-center py-2 bg-pink-900/40 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-award mr-1"></i><span data-lang="ui.open_ssw"> BUKA SSW</span></button>
-                  <button type="button" id="btn-cv-file-photo" class="hidden w-full flex items-center justify-center py-2 bg-emerald-900/40 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-image mr-1"></i><span data-lang="ui.open_photo"> BUKA FOTO</span></button>
-              </div>
-              <a id="btn-cv-folder" href="#" target="_blank" class="w-full flex items-center justify-center py-3 bg-slate-900/40 hover:bg-slate-600 text-slate-400 hover:text-white border border-slate-500/50 rounded-xl text-xs font-bold transition shadow-lg mt-2 hidden">
-                  <i class="fas fa-folder mr-2"></i><span data-lang="ui.legacy_folder"> FOLDER LEGACY (Google Drive)
-              </span></a>
-              <button onclick="bukaModalPemberkasan(document.getElementById('cv-wa').innerText)" class="w-full flex items-center justify-center py-3 bg-amber-900/40 hover:bg-amber-600 text-amber-400 hover:text-white border border-amber-500/50 rounded-xl text-xs font-bold transition shadow-lg mt-2">
-                  <i class="fas fa-tasks mr-2"></i><span data-lang="ui.manage_checklist"> KELOLA CHECKLIST & UPLOAD BERKAS
-              </span></button>
-          </div>
-
-          <div id="cv-admin-notes-area" class="border-t border-slate-700 pt-5 mt-5 hidden">
-              <h4 class="text-sm font-bold text-white uppercase mb-3"><i class="fas fa-edit mr-2 text-pink-400"></i><span data-lang="ui.cand_eval"> Evaluasi Kandidat (Admin)</span></h4>
-              <div class="space-y-3">
-                  <div>
-                      <label class="text-xs text-red-400 font-bold uppercase block mb-1"><span data-lang="ui.note_internal">Catatan Internal (Private)</span></label>
-                      <textarea id="cv-catatan-int" class="w-full bg-black/40 border border-red-900/50 focus:border-red-500 rounded-lg p-2.5 text-sm text-slate-300 outline-none transition" rows="2" placeholder="Kelemahan/Catatan khusus admin…"></textarea>
-                  </div>
-                  <div>
-                      <label class="text-xs text-sky-400 font-bold uppercase block mb-1"><span data-lang="ui.note_external">Catatan External (Kandidat)</span></label>
-                      <textarea id="cv-catatan-ext" class="w-full bg-black/40 border border-sky-900/50 focus:border-sky-500 rounded-lg p-2.5 text-sm text-slate-300 outline-none transition" rows="2" placeholder="Feedback untuk kandidat…"></textarea>
-                  </div>
-                  <button onclick="simpanCatatanCv()" class="w-full py-4 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg transition"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_eval_note"> SIMPAN EVALUASI CATATAN</span></button>
-              </div>
-          </div>
-      </div>
-  </div>
+  
 
   
 
   
 
-  <div id="modal-edit-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
-     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar border-sky-500/50">
-        <button onclick="document.getElementById('modal-edit-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-        
-        <div class="flex items-center gap-3 mb-4 border-b border-sky-900/50 pb-3">
-            <i class="fas fa-user-shield text-3xl text-sky-400"></i>
-            <div>
-                <h3 class="text-xl font-black text-white uppercase tracking-wide"><span data-lang="ui.super_edit_cand">Super Edit Kandidat</span></h3>
-                <p class="text-xs text-sky-400 font-bold uppercase" id="super-nama-kandidat"><span data-lang="ui.cand_name">Nama Kandidat</span></p>
-            </div>
-        </div>
-
-        <input type="hidden" id="edit-k-row">
-        <input type="hidden" id="edit-k-wa">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4">
-                <h4 class="text-sm font-bold text-sky-400 uppercase tracking-widest border-b border-slate-700 pb-1"><i class="fas fa-briefcase mr-1"></i><span data-lang="ui.operational"> Operasional</span></h4>
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="admin.form_current_stage">TAHAPAN SAAT INI</span></label><select id="edit-k-tahapan" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"></select></div>
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="admin.form_stage_status">STATUS TAHAPAN</span></label><select id="edit-k-status" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"><option value="Aktif">Aktif</option><option value="Lulus">Lulus</option><option value="Gagal">Gagal</option><option value="Revisi">Revisi (Minta Berkas)</option></select></div>
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.note_candidate">CATATAN (KANDIDAT)</span></label><textarea id="edit-k-catatan" rows="2" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"></textarea></div>
-                
-                <div class="p-3 bg-amber-900/20 border border-amber-500/30 rounded-xl flex items-center justify-between mt-2">
-                    <div>
-                        <p class="text-xs font-bold text-amber-400 uppercase"><i class="fas fa-crown mr-1"></i><span data-lang="ui.privilege_tag"> Privilege Tag</span></p>
-                        <p class="text-[9px] text-slate-400"><span data-lang="ui.mark_priority">Tandai sebagai siswa prioritas/emas</span></p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" id="edit-k-privilege" class="sr-only peer">
-                      <div class="w-9 h-5 bg-slate-700 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-[translate,border-color] peer-checked:bg-amber-500"></div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-700 pb-1"><i class="fas fa-id-card mr-1"></i><span data-lang="ui.master_profile"> Master Profil</span></h4>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_gender">GENDER</span></label><select id="edit-k-gender" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><option value="">-</option><option value="LAKI-LAKI">Laki-laki</option><option value="PEREMPUAN">Perempuan</option></select></div>
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_age">USIA</span></label><input type="number" inputmode="numeric" id="edit-k-usia" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_pob">TEMPAT LAHIR</span></label><input type="text" id="edit-k-tempat-lahir" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_dob">TANGGAL LAHIR</span></label><input type="date" id="edit-k-tgl-lahir" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_height">TINGGI (CM)</span></label><input type="number" inputmode="numeric" id="edit-k-tb" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_weight">BERAT (KG)</span></label><input type="number" inputmode="numeric" id="edit-k-bb" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                </div>
-                
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.education">PENDIDIKAN</span></label><select id="edit-k-pendidikan" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><option value="-">-</option><option value="SMA">SMA</option><option value="SMK">SMK</option><option value="MA">MA</option><option value="D3">D3</option><option value="S1">S1</option></select></div>
-
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.jft_score">NILAI JFT/JLPT</span></label><input type="text" id="edit-k-jft" placeholder="A2 / 120…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_ssw_text">BIDANG SSW</span></label><input type="text" id="edit-k-ssw" placeholder="Kaigo, Pertanian…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
-            </div>
-        </div>
-        
-        <!-- UPLOAD ULANG DOKUMEN UTAMA (Opsional) — PAS PHOTO/CV/JFT/SSW + IJAZAH
-             SD/SMP/SMA/UNIVERSITAS. Blok ini SEMPAT HILANG dari index.html
-             (drift vs admin.html) — ID-nya wajib ada di dua halaman (cek
-             scripts/check-admin-index-drift.cjs) supaya tidak hilang lagi. -->
-        <div class="p-4 bg-sky-900/20 border border-sky-500/30 rounded-xl space-y-3 mt-6">
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_photo">PAS PHOTO (JPG/PNG)</label><input type="file" id="edit-k-photo" accept="image/*" onchange="tandaiFileDipilih('edit-k-photo','edit-k-st-photo','PAS PHOTO')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-photo" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_cv">CV / RIREKISHO (PDF/Excel/Word)</label><input type="file" id="edit-k-cv" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" onchange="tandaiFileDipilih('edit-k-cv','edit-k-st-cv','CV')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-cv" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_jft">JFT (PDF)</label><input type="file" id="edit-k-file-jft" accept=".pdf" onchange="tandaiFileDipilih('edit-k-file-jft','edit-k-st-jft','JFT')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-jft" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ssw">SSW (PDF)</label><input type="file" id="edit-k-file-ssw" accept=".pdf" onchange="tandaiFileDipilih('edit-k-file-ssw','edit-k-st-ssw','SSW')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ssw" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_sd">IJAZAH SD (PDF)</label><input type="file" id="edit-k-ijazah-sd" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-sd','edit-k-st-ijazah-sd','IJAZAH SD')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-sd" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_smp">IJAZAH SMP (PDF)</label><input type="file" id="edit-k-ijazah-smp" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-smp','edit-k-st-ijazah-smp','IJAZAH SMP')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-smp" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_sma">IJAZAH SMA (PDF)</label><input type="file" id="edit-k-ijazah-sma" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-sma','edit-k-st-ijazah-sma','IJAZAH SMA')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-sma" class="block mt-1 text-xs font-bold h-4"></span></div>
-            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_univ">IJAZAH UNIVERSITAS (PDF)</label><input type="file" id="edit-k-univ" accept=".pdf" onchange="tandaiFileDipilih('edit-k-univ','edit-k-st-univ','UNIVERSITAS')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-univ" class="block mt-1 text-xs font-bold h-4"></span></div>
-        </div>
-        
-        <!-- UPLOAD DOKUMEN LAINNYA (Opsional) — sama seperti modal Input Kandidat:
-             admin bisa melampirkan berkas pemberkasan tambahan saat mengedit
-             kandidat yang sudah ada (disimpan ke pemberkasan_checklist).
-             Baris dinamis: tombol + menambah baris, tombol − menghapus (min. 1). -->
-        <div class="mt-6 p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-xl space-y-3">
-            <label class="block text-xs font-bold text-emerald-400 mb-1"><i class="fas fa-folder-plus mr-1"></i><span data-lang="admin.form_other_docs"> UPLOAD DOKUMEN LAINNYA (Opsional)</span></label>
-            <!-- Berkas pemberkasan yang SUDAH tersimpan (dari pemberkasan_checklist):
-                 ditampilkan read-only supaya admin lihat "dokumen lengkap" kandidat
-                 sebelum menambah/menimpa. Diisi JS (renderBerkasTersimpan). -->
-            <div id="edit-k-berkas-ada" class="hidden"></div>
-            <div id="edit-k-lain-rows" class="space-y-3"></div>
-        </div>
-        
-        <div class="mt-6 pt-4 border-t border-slate-700">
-            <button onclick="simpanSuperEditKandidat()" id="btn-save-super" class="w-full py-4 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-xl font-bold shadow-lg transition text-base tracking-wider"><i class="fas fa-sync-alt mr-2"></i><span data-lang="ui.save_sync_3way"> SIMPAN & UPDATE PROFIL</span></button>
-        </div>
-     </div>
-  </div>
+  
 
   
 
   <!-- MODAL LIST KANDIDAT & UNDANG GRUP FONNTE -->
-  <div id="modal-list-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
-     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative max-h-[90vh] flex flex-col">
-        <button onclick="document.getElementById('modal-list-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-        <h3 class="text-xl font-bold text-sky-400 mb-2 border-b border-sky-900/50 pb-3"><i class="fas fa-list-ol mr-2"></i><span data-lang="admin.modal_list_candidate_title"> List Kandidat</span></h3>
-        <p class="text-xs text-slate-400 mb-4"><span data-lang="admin.job_code_label">Loker Code: </span><span id="list-job-code" class="font-bold text-white text-sm"></span></p>
-        
-        <div class="flex gap-2 mb-3">
-            <button onclick="salinTeksDecode(encodeURIComponent(currentCopyListTxt))" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs transition"><i class="fas fa-copy mr-1"></i><span data-lang="ui.copy_wa"> Copy WA</span></button>
-            <button onclick="document.getElementById('panel-undang-grup').classList.toggle('hidden')" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition"><i class="fab fa-whatsapp mr-1"></i><span data-lang="ui.invite_group"> Undang Grup</span></button>
-        </div>
-
-        <!-- PANEL FONNTE UNDANG GRUP ANTI-BAN -->
-        <div id="panel-undang-grup" class="hidden bg-black/40 border border-emerald-500/30 p-3 rounded-xl mb-3">
-            <input type="text" id="input-link-grup" placeholder="Link Grup WA (https://chat…)" class="w-full p-2 mb-2 rounded bg-slate-800 border border-slate-600 text-sm text-white outline-none focus:border-emerald-500">
-            <input type="number" inputmode="numeric" id="input-interval" placeholder="Jeda antar pesan (detik)" value="5" class="w-full p-2 mb-2 rounded bg-slate-800 border border-slate-600 text-sm text-white outline-none focus:border-emerald-500">
-            <button id="btn-undang-grup" onclick="mulaiKirimUndanganGrup()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition"><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
-        </div>
-
-        <div id="list-kandidat-content" class="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-4 space-y-2"></div>
-     </div>
-  </div>
+  
 
   
   
@@ -1408,25 +1024,7 @@
   <datalist id="list-syarat"></datalist>
 
   <!-- MODAL REJECT LAMARAN (dipakai tombol Gagal di Mail Inbox admin) -->
-  <div id="modal-reject-mail" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-      <div class="glass-panel w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-700 animate-slide-up relative flex flex-col">
-          <div class="p-5 border-b border-slate-700 bg-slate-900 flex justify-between items-center">
-              <h3 class="text-white font-bold text-lg"><i class="fas fa-ban text-red-500 mr-2"></i><span data-lang="ui.reject_app"> Reject Lamaran</span></h3>
-              <button onclick="document.getElementById('modal-reject-mail').classList.add('hidden')" class="text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
-          </div>
-          <div class="p-6 bg-slate-800/50 flex flex-col gap-4">
-              <input type="hidden" id="reject-row-index">
-              <div class="bg-red-900/20 border border-red-500/30 p-3 rounded-lg">
-                  <p class="text-sm text-slate-300"><span data-lang="ui.reject_reason_hint">Tulis alasan penolakan. Pesan ini akan muncul di Dashboard Kandidat.</span></p>
-              </div>
-              <textarea id="reject-reason-text" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-sky-500 outline-none h-32" placeholder="Contoh: CV kurang lengkap, atau Sertifikat JFT buram…"></textarea>
-          </div>
-          <div class="p-4 border-t border-slate-700 bg-slate-900 flex justify-end gap-3">
-              <button onclick="document.getElementById('modal-reject-mail').classList.add('hidden')" class="px-5 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white hover:bg-slate-600 transition"><span data-lang="ui.cancel">Batal</span></button>
-              <button onclick="submitRejectForm()" class="px-5 py-2 rounded-lg text-sm font-bold bg-red-600 text-white hover:bg-red-500 transition shadow-lg shadow-red-900/50"><i class="fas fa-ban mr-1"></i><span data-lang="ui.confirm_reject"> Konfirmasi Reject</span></button>
-          </div>
-      </div>
-  </div>
+  
 
   <!-- MODAL PDF VIEWER BARU -->
   
@@ -1511,65 +1109,7 @@
 
   <!-- MODAL TUTORIAL INSTALL APLIKASI (PWA) -->
   <!-- MODAL RINCIAN BIAYA BUILDER (Admin: klik-klik include/exclude/tahapan) -->
-  <div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-3 md:p-5">
-    <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-6 md:p-8">
-      <button onclick="rbBatal()" class="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
-      <h3 class="text-xl font-black text-emerald-400 mb-1"><i class="fas fa-list-check mr-2"></i><span data-lang="ui.rincian_biaya"> Rincian Biaya & Tahapan</span></h3>
-      <p class="text-xs text-slate-400 mb-5 leading-relaxed" data-lang="ui.rincian_builder_hint">Klik pilihan yang mau dipakai, isi tahapan & catatan. Hasilnya otomatis tampil lengkap di popup <b class="text-amber-300">Detail</b> loker publik.</p>
-      <p class="text-[9px] text-slate-500 -mt-3 mb-5 leading-relaxed" data-lang="ui.star_hint"><i class="fas fa-star text-amber-400 mr-1"></i> Bintang <i class="far fa-star"></i> = simpan item ke <b class="text-amber-300">koleksi favorit</b> (tersimpan di database, tinggal pakai di loker berikutnya). Bintang <i class="fas fa-star"></i> = sudah tersimpan, klik untuk hapus dari koleksi.</p>
-
-      <div class="mb-5">
-        <label class="block text-xs font-bold text-emerald-400 mb-1 uppercase"><i class="fas fa-wallet mr-1"></i><span data-lang="ui.total_cost"> TOTAL BIAYA JOB</span></label>
-        <input type="text" id="rb-total" oninput="rbRenderPreview()" placeholder="Contoh: 25 JT" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition">
-      </div>
-
-      <div class="mb-5">
-        <div class="flex items-center justify-between mb-2">
-          <label class="text-xs font-bold text-amber-400 uppercase tracking-widest"><i class="fas fa-stairs mr-1"></i><span data-lang="ui.payment_stage"> TAHAPAN PEMBAYARAN</span></label>
-          <button type="button" onclick="rbAddTahapan('','')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition"><i class="fas fa-plus mr-1"></i><span data-lang="ui.add_stage"> Tambah Tahapan</span></button>
-        </div>
-        <div id="rb-tahapan-list"></div>
-        <p class="text-[9px] text-slate-500 mt-1" data-lang="ui.stage_example">Contoh: <i>TTD KONTRAK : 6 JT</i> — otomatis jadi langkah 1, 2, 3…</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
-        <div>
-          <label class="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2"><i class="fas fa-check-circle mr-1"></i><span data-lang="ui.include"> INCLUDE</span></label>
-          <div id="rb-include" class="flex flex-wrap gap-1.5 mb-2"></div>
-          <div class="flex gap-2"><input id="rb-custom-include" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('include','rb-custom-include');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><button type="button" onclick="rbAddChip('include','rb-custom-include')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-rose-400 uppercase tracking-widest mb-2"><i class="fas fa-times-circle mr-1"></i><span data-lang="ui.exclude"> EXCLUDE</span></label>
-          <div id="rb-exclude" class="flex flex-wrap gap-1.5 mb-2"></div>
-          <div class="flex gap-2"><input id="rb-custom-exclude" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('exclude','rb-custom-exclude');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-rose-500 transition"><button type="button" onclick="rbAddChip('exclude','rb-custom-exclude')" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-        <div>
-          <label class="block text-xs font-bold text-amber-400 uppercase tracking-widest mb-2"><i class="fas fa-star mr-1"></i><span data-lang="ui.benefit"> BENEFIT</span></label>
-          <div id="rb-benefit" class="flex flex-wrap gap-1.5 mb-2"></div>
-          <div class="flex gap-2"><input id="rb-custom-benefit" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('benefit','rb-custom-benefit');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"><button type="button" onclick="rbAddChip('benefit','rb-custom-benefit')" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-clipboard-check mr-1"></i><span data-lang="ui.requirements"> PERSYARATAN</span></label>
-          <div id="rb-persyaratan" class="flex flex-wrap gap-1.5 mb-2"></div>
-          <div class="flex gap-2"><input id="rb-custom-persyaratan" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('persyaratan','rb-custom-persyaratan');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"><button type="button" onclick="rbAddChip('persyaratan','rb-custom-persyaratan')" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
-        </div>
-      </div>
-
-      <div class="mb-5">
-        <label class="block text-xs font-bold text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-1"></i><span data-lang="ui.note"> CATATAN</span></label>
-        <textarea id="rb-catatan" rows="4" oninput="rbRenderPreview()" placeholder="Catatan bebas: dicicil, refund bila kaisha batal, training wajib, dll" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition leading-relaxed custom-scrollbar"></textarea>
-      </div>
-
-      <div class="mb-6">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fas fa-eye mr-1"></i><span data-lang="ui.preview_detail"> PRATINJAU (yang akan tampil di popup Detail)</span></label>
-        <pre id="rb-preview" class="bg-black/60 border border-slate-700 rounded-xl p-3 text-xs text-emerald-300 whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar"></pre>
-      </div>
-
-      <button onclick="rbSimpan()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black shadow-lg transition text-base"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_rincian"> SIMPAN RINCIAN</span></button>
-    </div>
-  </div>
+  
 
   <!-- MODAL DETAIL LOKER (POPUP PUBLIK): pamflet + rincian biaya + syarat -->
   
@@ -1585,40 +1125,7 @@
   
 
   <!-- MODAL SIMULATOR WAWANCARA (VIP) -->
-  <div id="modal-interview" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex flex-col justify-end md:justify-center items-center md:p-4">
-      <div class="glass-panel w-full md:max-w-2xl h-[90vh] md:h-[80vh] md:rounded-[2rem] rounded-t-[2rem] shadow-2xl relative border-t border-violet-500/50 flex flex-col overflow-hidden bg-slate-950">
-          
-          <!-- Header -->
-          <div class="px-6 py-4 bg-gradient-to-r from-violet-900/80 to-slate-900 border-b border-violet-500/30 flex justify-between items-center z-10">
-              <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-violet-500 p-0.5 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)] flex-shrink-0 relative overflow-hidden">
-                      <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/qween_jeklin.webp" alt="Jeklin Sensei" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                      <span style="display:none;" class="text-xl">🇯🇵</span>
-                  </div>
-                  <div>
-                      <h3 class="text-base font-black text-white tracking-wide">Jeklin Sensei</h3>
-                      <p class="text-xs text-violet-300 font-bold uppercase tracking-widest animate-pulse"><span data-lang="ui.interview_sim">Simulator 面接 (Mentsetsu)</span></p>
-                  </div>
-              </div>
-              <button onclick="document.getElementById('modal-interview').classList.add('hidden')" class="text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
-          </div>
-
-          <!-- Chat Area -->
-          <div id="interview-chat-box" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-900/50">
-              <!-- Chat akan muncul di sini -->
-          </div>
-
-          <!-- Input Area -->
-          <div class="p-4 bg-slate-900 border-t border-slate-800">
-              <div id="interview-typing" class="hidden text-xs text-violet-400 font-bold mb-2"><i class="fas fa-pen fa-spin mr-1"></i> Sensei sedang mengetik evaluasi…</div>
-              <div class="flex items-center gap-2">
-                  <textarea id="interview-input" rows="2" placeholder="Ketik jawabanmu dalam bahasa Jepang (Romaji/Kana)…" aria-label="Ketik jawabanmu dalam bahasa Jepang (Romaji/Kana)…" data-lang-aria="admin.interview_ph" class="w-full p-3 bg-black/60 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-violet-500 transition resize-none custom-scrollbar"></textarea>
-                  <button onclick="sendInterviewMessage()" id="btn-send-interview" class="w-14 h-14 bg-violet-600 hover:bg-violet-500 text-white rounded-xl flex items-center justify-center shadow-lg transition active:scale-95 flex-shrink-0" aria-label="Kirim" data-lang-aria="ui.send"><i class="fas fa-paper-plane text-xl"></i></button>
-              </div>
-          </div>
-
-      </div>
-  </div>
+  
 
   <!-- MODAL PREVIEW RIREKISHO LENGKAP -->
   
@@ -1779,6 +1286,520 @@ body.theme-light .inline-flex.bg-slate-900\/80 .bg-sky-600.text-white {
 </style>
 
 <!--SHARED_MODALS_START-->
+<div id="modal-cv-mini" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+     <div class="glass-panel border-sky-500/50 p-6 md:p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <button onclick="document.getElementById('modal-cv-mini').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <h3 class="text-xl font-black text-sky-400 mb-2 border-b border-sky-900/50 pb-4"><i class="fas fa-user-edit mr-2"></i><span data-lang="ui.update_cv_mini"> Update CV Mini</span></h3>
+        <p class="text-sm text-slate-400 mb-6 leading-relaxed"><span data-lang="ui.master_update_hint">Perbarui data Anda di bawah ini agar perusahaan tertarik. Lebih cepat dan mudah!</span></p>
+        
+        <div class="space-y-4">
+           <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_gender">Gender</span></label><select id="um-gender" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"><option value="LAKI-LAKI">LAKI-LAKI</option><option value="PEREMPUAN">PEREMPUAN</option></select></div>
+              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_age">Usia</span></label><input type="number" inputmode="numeric" id="um-usia" placeholder="Misal: 22" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
+           </div>
+           <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_height">Tinggi (CM)</span></label><input type="number" inputmode="numeric" id="um-tb" placeholder="165" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
+              <div><label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_weight">Berat (KG)</span></label><input type="number" inputmode="numeric" id="um-bb" placeholder="55" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500"></div>
+           </div>
+           <div>
+               <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase"><span data-lang="candidate.form_education">Pendidikan Terakhir</span></label>
+               <select id="um-pendidikan" class="w-full p-3 rounded-2xl bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-sky-500">
+                   <option value="-">Pilih Pendidikan…</option>
+                   <option value="SMA">SMA</option>
+                   <option value="SMK">SMK</option>
+                   <option value="MA">MA</option>
+                   <option value="D3">D3</option>
+                   <option value="S1">S1</option>
+               </select>
+           </div>
+           <div class="grid grid-cols-2 gap-4">
+               <div><label class="block text-xs font-bold text-sky-400 mb-1.5 uppercase"><span data-lang="ui.jft_score">Nilai JFT/JLPT</span></label><input type="text" id="um-jft-text" placeholder="Contoh: A2 / 120" class="w-full p-3 rounded-2xl bg-black/60 border border-sky-900/50 text-sm text-white outline-none focus:border-sky-500"></div>
+               <div><label class="block text-xs font-bold text-emerald-400 mb-1.5 uppercase"><span data-lang="candidate.form_ssw_text">Bidang SSW</span></label><input type="text" id="um-ssw-text" placeholder="Kaigo, Pertanian" class="w-full p-3 rounded-2xl bg-black/60 border border-emerald-900/50 text-sm text-white outline-none focus:border-emerald-500"></div>
+           </div>
+           <div class="p-4 bg-sky-900/20 border border-dashed border-sky-500/50 rounded-2xl">
+               <label class="block text-sm text-sky-400 mb-1.5 font-bold"><span data-lang="ui.latest_photo">PAS PHOTO TERBARU (JPG/PNG)</span></label>
+               <input type="file" id="um-photo" accept="image/*" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white">
+           </div>
+           <button onclick="prosesSimpanCvMini()" id="btn-submit-cv-mini" class="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] hover:-translate-y-1 transition mt-4 text-sm"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_cv_mini"> Simpan CV Mini</span></button>
+        </div>
+     </div>
+  </div>
+
+<div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+    <div class="glass-panel p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
+      <button onclick="document.getElementById('modal-admin').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+      <div id="login-step-1">
+          <i class="fas fa-shield-alt text-5xl text-red-500 mb-5 drop-shadow-lg"></i>
+          <h3 class="text-xl font-bold text-white mb-6 tracking-wide" data-lang="admin.auth_title">Otorisasi Sistem</h3>
+          <label for="admin-pin-master" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_master">PIN Master</label>
+          <input type="password" id="admin-pin-master" name="pin_master" autocomplete="current-password" data-lang-placeholder="admin.pin_master" placeholder="PIN Master" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-red-500 transition">
+          <button onclick="prosesLoginMaster()" id="btn-login-master" class="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(220,38,38,0.5)] text-lg hover:-translate-y-1" data-lang="button.verify">Verifikasi</button>
+      </div>
+      <div id="login-step-2" class="hidden">
+          <i class="fas fa-users-cog text-5xl text-sky-500 mb-5 drop-shadow-lg"></i>
+          <h3 class="text-lg font-bold text-white mb-6 tracking-wide" data-lang="admin.select_account">Pilih Akun Admin</h3>
+          <div class="grid grid-cols-2 gap-4">
+             <button onclick="showLoginPersonal('SACHOU')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1"><span data-lang="ui.sachou">SACHOU</span></button>
+             <button onclick="showLoginPersonal('AYOK')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">AYOK</button>
+             <button onclick="showLoginPersonal('KHOLIS')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">KHOLIS</button>
+             <button onclick="showLoginPersonal('KHOCI')" class="py-4 bg-white/10 hover:bg-sky-600 border border-white/20 rounded-2xl font-bold text-white transition shadow-md hover:-translate-y-1">KHOCI</button>
+          </div>
+      </div>
+      <div id="login-step-3" class="hidden">
+          <i class="fas fa-lock text-5xl text-amber-500 mb-4 drop-shadow-lg"></i>
+          <h3 class="text-lg font-bold text-white mb-1" id="lbl-nama-admin" data-lang="header.login">Login</h3>
+          <p class="text-sm text-slate-400 mb-6" data-lang="admin.enter_pin">Masukkan PIN Pribadi Anda</p>
+          <input type="hidden" id="admin-name-temp">
+          <label for="admin-pin-personal" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_personal">PIN Pribadi</label>
+          <input type="password" id="admin-pin-personal" name="pin_personal" autocomplete="current-password" data-lang-placeholder="admin.pin_personal" placeholder="PIN Pribadi" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-amber-500 transition">
+          <button onclick="prosesLoginPersonal()" id="btn-login-personal" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(217,119,6,0.5)] text-lg hover:-translate-y-1" data-lang="button.enter_portal">Masuk Portal</button>
+      </div>
+    </div>
+  </div>
+
+<div id="modal-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+    <div class="glass-panel p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative">
+      <button onclick="document.getElementById('modal-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+      <div id="form-daftar-kandidat" class="hidden">
+         <h3 class="text-xl font-bold text-emerald-400 mb-6 border-b border-emerald-900/50 pb-4 text-center"><i class="fas fa-user-plus mr-2"></i> <span data-lang="candidate.reg_title">Daftar Pelamar Baru</span></h3>
+         <input type="text" id="reg-nama" name="nama" autocomplete="name" data-lang-placeholder="candidate.reg_name" placeholder="Nama Lengkap KTP" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-emerald-500 transition">
+         <input type="tel" id="reg-wa" name="wa" autocomplete="tel" onblur="formatInputWA(this)" data-lang-placeholder="candidate.reg_wa" placeholder="No WA (0812…)" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-emerald-500 transition">
+         <div class="px-4 py-3 rounded-2xl bg-emerald-900/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-6 text-center" data-lang="candidate.reg_pass_hint">Password Anda = 4 digit terakhir nomor WA</div>
+         <button onclick="prosesDaftarKandidat()" id="btn-reg-kandidat" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(90,141,0,0.4)] hover:-translate-y-1 transition" data-lang="button.register">Daftar Akun</button>
+         <p class="text-sm text-center mt-5 text-slate-400"><span data-lang="candidate.have_account">Sudah punya akun?</span> <button type="button" onclick="bukaModalKandidat('login')" class="text-emerald-400 hover:text-emerald-300 underline font-bold" data-lang="candidate.login_here">Login di sini</button></p>
+      </div>
+      <div id="form-login-kandidat" class="hidden">
+         <h3 class="text-xl font-bold text-sky-400 mb-6 border-b border-sky-900/50 pb-4 text-center"><i class="fas fa-sign-in-alt mr-2"></i> <span data-lang="candidate.log_title">Login Pelamar</span></h3>
+         <label for="log-wa" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_wa">No WhatsApp Terdaftar</label>
+         <input type="tel" id="log-wa" name="wa" autocomplete="tel" onblur="formatInputWA(this)" data-lang-placeholder="candidate.log_wa" placeholder="No WhatsApp Terdaftar" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-sky-500 transition">
+         <label for="log-pass" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_pass">Password</label>
+         <input type="password" id="log-pass" name="password" autocomplete="current-password" data-lang-placeholder="candidate.log_pass" placeholder="Password" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-6 outline-none focus:border-sky-500 transition">
+         <button onclick="prosesLoginKandidat()" id="btn-log-kandidat" class="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] hover:-translate-y-1 transition" data-lang="button.enter_dashboard">Masuk Dashboard</button>
+         <p class="text-sm text-center mt-5 text-slate-400"><span data-lang="candidate.no_account">Belum punya akun?</span> <button type="button" onclick="bukaModalKandidat('daftar')" class="text-sky-400 hover:text-sky-300 underline font-bold" data-lang="candidate.register_here">Daftar di sini</button></p>
+      </div>
+    </div>
+  </div>
+
+<div id="modal-cv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 p-6 md:p-8 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_40px_rgba(0,0,0,0.8)] relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <button onclick="document.getElementById('modal-cv').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-10" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          
+          <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-6">
+              <div class="flex items-center gap-4">
+                  <img id="cv-logo-asj" src="" class="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-lg" alt="ASJ" onerror="this.onerror=null;this.style.display='none';">
+                  <div>
+                      <h3 class="text-lg md:text-xl font-black text-white tracking-wider"><span data-lang="ui.asj_dossier">ASJ DOSSIER</span></h3>
+                      <p class="text-[9px] md:text-xs text-pink-400 font-bold tracking-[0.2em] uppercase"><span data-lang="ui.verified_candidate">Verified Candidate</span></p>
+                  </div>
+              </div>
+              <i class="fas fa-check-circle text-sky-400 text-2xl md:text-3xl drop-shadow-[0_0_15px_rgba(118,185,0,0.4)] pr-8 md:pr-0"></i>
+          </div>
+
+          <div class="flex flex-col md:flex-row gap-6 mb-6">
+              <div class="w-full md:w-1/3 flex flex-col items-center">
+                  <div class="w-32 h-40 bg-slate-800 rounded-2xl border-2 border-slate-600 flex items-center justify-center overflow-hidden shadow-inner mb-3 relative group">
+                      <i id="cv-no-foto" class="fas fa-user text-5xl text-slate-500"></i>
+                      <!-- FIX 2026-08-12: loading=lazy + class=hidden = deadlock —
+                           img display:none tidak punya viewport -> lazy load tak
+                           pernah trigger -> onload tak jalan -> foto tak pernah
+                           tampil. Modal dibuka on-demand, jadi eager benar. -->
+                      <img id="cv-foto" src="" width="320" height="400" loading="eager" decoding="async" alt="Foto kandidat" class="hidden w-full h-full object-cover transition duration-300 group-hover:scale-110">
+                  </div>
+                  <div class="text-center w-full flex flex-col gap-2">
+                      <span id="cv-id" class="px-4 py-1.5 bg-slate-800 text-sky-300 text-xs font-mono font-bold rounded-full border border-slate-600 shadow-inner">-</span>
+                      <div class="px-2 py-1.5 bg-emerald-900/40 border border-emerald-500/50 rounded-lg">
+                          <p class="text-[8px] text-emerald-300 uppercase font-bold mb-0.5"><span data-lang="ui.status_stage">Status & Tahapan</span></p>
+                          <p id="cv-status" class="text-xs text-white font-bold leading-tight">-</p>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="w-full md:w-2/3 space-y-4">
+                  <div>
+                      <h2 id="cv-nama" class="text-xl md:text-2xl font-black text-white uppercase tracking-wide leading-tight">-</h2>
+                      <a id="cv-wa-link" href="#" target="_blank" class="text-emerald-400 text-sm font-bold hover:text-emerald-300 transition flex items-center gap-1 mt-1 inline-flex">
+                          <i class="fab fa-whatsapp text-lg"></i> <span id="cv-wa">-</span>
+                      </a>
+                      <div id="cv-pass-row" class="hidden mt-2 px-3 py-2 bg-amber-900/20 border border-amber-500/30 rounded-lg">
+                          <p class="text-[9px] text-amber-400 font-bold uppercase mb-0.5"><i class="fas fa-key mr-1"></i><span data-lang="ui.cand_pass_label"> Password Kandidat</span></p>
+                          <p id="cv-pass" class="text-sm text-white font-bold tracking-widest">-</p>
+                      </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-y-4 gap-x-4 border-t border-b border-slate-700 py-4">
+                      <div>
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-venus-mars mr-1"></i><span data-lang="candidate.form_gender"> Gender</span></p>
+                          <p id="cv-gender" class="text-sm text-white font-bold">-</p>
+                      </div>
+                      <div>
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-user-clock mr-1"></i><span data-lang="candidate.form_age"> Usia</span></p>
+                          <p id="cv-usia" class="text-sm text-white font-bold">-</p>
+                      </div>
+                      <div>
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-weight mr-1"></i><span data-lang="ui.physical_tbbb"> Fisik (TB/BB)</span></p>
+                          <p id="cv-tbbb" class="text-sm text-amber-300 font-bold">-</p>
+                      </div>
+                      <div>
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-graduation-cap mr-1"></i><span data-lang="ui.education"> Pendidikan</span></p>
+                          <p id="cv-pendidikan" class="text-sm text-white font-bold">-</p>
+                      </div>
+                      <div class="col-span-2">
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-calendar-alt mr-1"></i><span data-lang="ui.pob_dob"> Tempat, Tgl Lahir</span></p>
+                          <p id="cv-ttl-lengkap" class="text-sm text-white font-bold">-</p>
+                      </div>
+                      <div class="col-span-2">
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-envelope mr-1"></i><span data-lang="ui.email"> Email</span></p>
+                          <p id="cv-email" class="text-sm text-white font-bold break-all">-</p>
+                      </div>
+                      <div class="col-span-2">
+                          <p class="text-[9px] text-slate-500 font-bold uppercase mb-0.5"><i class="fas fa-map-marker-alt mr-1"></i><span data-lang="ui.address_ktp"> Alamat (Sesuai KTP)</span></p>
+                          <p id="cv-alamat" class="text-sm text-white font-bold leading-relaxed">-</p>
+                      </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                      <div class="bg-sky-900/20 border border-sky-700/50 p-2.5 rounded-xl shadow-inner text-center">
+                          <p class="text-[9px] text-sky-500 font-bold uppercase mb-1"><span data-lang="ui.jft_jlpt">JFT / JLPT</span></p>
+                          <p id="cv-jft-nilai" class="text-sm font-bold text-white">-</p>
+                      </div>
+                      <div class="bg-emerald-900/20 border border-emerald-700/50 p-2.5 rounded-xl shadow-inner text-center">
+                          <p class="text-[9px] text-emerald-500 font-bold uppercase mb-1"><span data-lang="ui.ssw_field">SSW / Bidang</span></p>
+                          <p id="cv-ssw" class="text-sm font-bold text-white">-</p>
+                      </div>
+                  </div>
+
+                  <!-- EDIT DATA CEPAT (admin) — gender/usia/TTL/TB/JFT/SSW tanpa buka CV AI -->
+                  <button type="button" id="btn-cv-edit-cepat" onclick="toggleEditCepatCv()" class="hidden w-full py-3 bg-pink-600/20 hover:bg-pink-600 border border-pink-500/50 text-pink-300 hover:text-white rounded-xl text-xs font-bold transition shadow mb-3">
+                      <i class="fas fa-pen mr-1"></i><span data-lang="ui.edit_quick_cv"> EDIT DATA CEPAT</span>
+                  </button>
+                  <div id="cv-edit-cepat-form" class="hidden mb-4 bg-black/40 border border-pink-500/30 rounded-xl p-4 space-y-3">
+                      <div class="grid grid-cols-2 gap-3">
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_gender">Gender</span></label>
+                              <select id="cv-edit-gender" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                                  <option value="">-</option><option value="LAKI-LAKI">Laki-laki</option><option value="PEREMPUAN">Perempuan</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_age">Usia</span></label>
+                              <input type="number" inputmode="numeric" id="cv-edit-usia" placeholder="22" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_pob">Tempat Lahir</span></label>
+                              <input type="text" id="cv-edit-tempat-lahir" placeholder="Ponorogo" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_dob">Tanggal Lahir</span></label>
+                              <input type="date" id="cv-edit-tgl-lahir" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_height">Tinggi (CM)</span></label>
+                              <input type="number" inputmode="numeric" id="cv-edit-tb" placeholder="159" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_weight">Berat (KG)</span></label>
+                              <input type="number" inputmode="numeric" id="cv-edit-bb" placeholder="47" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="ui.jft_score">Nilai JFT/JLPT</span></label>
+                              <input type="text" id="cv-edit-jft" placeholder="A2 / 120" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_ssw_text">Bidang SSW</span></label>
+                              <input type="text" id="cv-edit-ssw" placeholder="Kaigo, Pertanian…" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                          </div>
+                      </div>
+                      <button type="button" onclick="simpanEditCepatCv()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg transition"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_quick_cv"> SIMPAN DATA</span></button>
+                  </div>
+              </div>
+          </div>
+
+          <div class="mb-5 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+              <h4 class="text-xs text-slate-400 font-bold uppercase mb-2"><span data-lang="ui.job_field_applied">Job / Bidang yang dilamar:</span></h4>
+              <div id="cv-job-tags" class="flex flex-wrap gap-2">
+                  <span class="text-sm text-slate-500 italic">-</span>
+              </div>
+          </div>
+
+                    <div class="flex gap-3 mb-2">
+              <button type="button" id="btn-cv-dokumen" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-file-alt mr-1 text-amber-400"></i><span data-lang="ui.cv_format"> FORMAT CV</span></button>
+              <button type="button" id="btn-cv-jft" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-certificate mr-1 text-sky-400"></i><span data-lang="ui.cert_jft"> SERTIF JFT</span></button>
+              <button type="button" id="btn-cv-ssw" class="hidden flex-1 py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center transition shadow-lg"><i class="fas fa-award mr-1 text-emerald-400"></i><span data-lang="ui.cert_ssw"> SERTIF SSW</span></button>
+          </div>
+          
+          <div id="cv-inline-preview" class="hidden mt-4 w-full h-[400px] border border-slate-700 rounded-xl overflow-hidden relative bg-black">
+              <button type="button" onclick="document.getElementById('cv-inline-preview').classList.add('hidden')" class="absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center z-10 shadow-lg" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
+              <div class="absolute top-2 right-12 z-10">
+                  <a id="cv-inline-external" href="#" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white rounded-full px-3 py-1.5 flex items-center justify-center text-xs font-bold shadow-lg"><i class="fas fa-external-link-alt mr-1"></i><span data-lang="ui.open_tab"> BUKA TAB</span></a>
+              </div>
+              <iframe id="cv-inline-iframe" class="w-full h-full border-0 bg-white"></iframe>
+          </div>
+
+          <!-- TOMBOL FOLDER PEMBERKASAN (HANYA MUNCUL JIKA LOLOS) -->
+                    <div id="cv-pemberkasan-area" class="border-t border-slate-700 pt-4 mt-4 hidden">
+              <h4 class="text-sm font-bold text-emerald-400 uppercase mb-3"><i class="fas fa-folder-open mr-2"></i><span data-lang="ui.cand_docs_supabase"> Dokumen Pelamar (Supabase)</span></h4>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                  <button type="button" id="btn-cv-file-cv" class="hidden w-full flex items-center justify-center py-2 bg-blue-900/40 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-file-pdf mr-1"></i><span data-lang="ui.open_cv"> BUKA CV</span></button>
+                  <button type="button" id="btn-cv-file-jft" class="hidden w-full flex items-center justify-center py-2 bg-purple-900/40 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-certificate mr-1"></i><span data-lang="ui.open_jft"> BUKA JFT</span></button>
+                  <button type="button" id="btn-cv-file-ssw" class="hidden w-full flex items-center justify-center py-2 bg-pink-900/40 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-award mr-1"></i><span data-lang="ui.open_ssw"> BUKA SSW</span></button>
+                  <button type="button" id="btn-cv-file-photo" class="hidden w-full flex items-center justify-center py-2 bg-emerald-900/40 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/50 rounded-lg text-xs font-bold transition shadow"><i class="fas fa-image mr-1"></i><span data-lang="ui.open_photo"> BUKA FOTO</span></button>
+              </div>
+              <a id="btn-cv-folder" href="#" target="_blank" class="w-full flex items-center justify-center py-3 bg-slate-900/40 hover:bg-slate-600 text-slate-400 hover:text-white border border-slate-500/50 rounded-xl text-xs font-bold transition shadow-lg mt-2 hidden">
+                  <i class="fas fa-folder mr-2"></i><span data-lang="ui.legacy_folder"> FOLDER LEGACY (Google Drive)
+              </span></a>
+              <button onclick="bukaModalPemberkasan(document.getElementById('cv-wa').innerText)" class="w-full flex items-center justify-center py-3 bg-amber-900/40 hover:bg-amber-600 text-amber-400 hover:text-white border border-amber-500/50 rounded-xl text-xs font-bold transition shadow-lg mt-2">
+                  <i class="fas fa-tasks mr-2"></i><span data-lang="ui.manage_checklist"> KELOLA CHECKLIST & UPLOAD BERKAS
+              </span></button>
+          </div>
+
+          <div id="cv-admin-notes-area" class="border-t border-slate-700 pt-5 mt-5 hidden">
+              <h4 class="text-sm font-bold text-white uppercase mb-3"><i class="fas fa-edit mr-2 text-pink-400"></i><span data-lang="ui.cand_eval"> Evaluasi Kandidat (Admin)</span></h4>
+              <div class="space-y-3">
+                  <div>
+                      <label class="text-xs text-red-400 font-bold uppercase block mb-1"><span data-lang="ui.note_internal">Catatan Internal (Private)</span></label>
+                      <textarea id="cv-catatan-int" class="w-full bg-black/40 border border-red-900/50 focus:border-red-500 rounded-lg p-2.5 text-sm text-slate-300 outline-none transition" rows="2" placeholder="Kelemahan/Catatan khusus admin…"></textarea>
+                  </div>
+                  <div>
+                      <label class="text-xs text-sky-400 font-bold uppercase block mb-1"><span data-lang="ui.note_external">Catatan External (Kandidat)</span></label>
+                      <textarea id="cv-catatan-ext" class="w-full bg-black/40 border border-sky-900/50 focus:border-sky-500 rounded-lg p-2.5 text-sm text-slate-300 outline-none transition" rows="2" placeholder="Feedback untuk kandidat…"></textarea>
+                  </div>
+                  <button onclick="simpanCatatanCv()" class="w-full py-4 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg transition"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_eval_note"> SIMPAN EVALUASI CATATAN</span></button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+<div id="modal-edit-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar border-sky-500/50">
+        <button onclick="document.getElementById('modal-edit-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        
+        <div class="flex items-center gap-3 mb-4 border-b border-sky-900/50 pb-3">
+            <i class="fas fa-user-shield text-3xl text-sky-400"></i>
+            <div>
+                <h3 class="text-xl font-black text-white uppercase tracking-wide"><span data-lang="ui.super_edit_cand">Super Edit Kandidat</span></h3>
+                <p class="text-xs text-sky-400 font-bold uppercase" id="super-nama-kandidat"><span data-lang="ui.cand_name">Nama Kandidat</span></p>
+            </div>
+        </div>
+
+        <input type="hidden" id="edit-k-row">
+        <input type="hidden" id="edit-k-wa">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <h4 class="text-sm font-bold text-sky-400 uppercase tracking-widest border-b border-slate-700 pb-1"><i class="fas fa-briefcase mr-1"></i><span data-lang="ui.operational"> Operasional</span></h4>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="admin.form_current_stage">TAHAPAN SAAT INI</span></label><select id="edit-k-tahapan" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"></select></div>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="admin.form_stage_status">STATUS TAHAPAN</span></label><select id="edit-k-status" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"><option value="Aktif">Aktif</option><option value="Lulus">Lulus</option><option value="Gagal">Gagal</option><option value="Revisi">Revisi (Minta Berkas)</option></select></div>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.note_candidate">CATATAN (KANDIDAT)</span></label><textarea id="edit-k-catatan" rows="2" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"></textarea></div>
+                
+                <div class="p-3 bg-amber-900/20 border border-amber-500/30 rounded-xl flex items-center justify-between mt-2">
+                    <div>
+                        <p class="text-xs font-bold text-amber-400 uppercase"><i class="fas fa-crown mr-1"></i><span data-lang="ui.privilege_tag"> Privilege Tag</span></p>
+                        <p class="text-[9px] text-slate-400"><span data-lang="ui.mark_priority">Tandai sebagai siswa prioritas/emas</span></p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="edit-k-privilege" class="sr-only peer">
+                      <div class="w-9 h-5 bg-slate-700 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-[translate,border-color] peer-checked:bg-amber-500"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-700 pb-1"><i class="fas fa-id-card mr-1"></i><span data-lang="ui.master_profile"> Master Profil</span></h4>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_gender">GENDER</span></label><select id="edit-k-gender" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><option value="">-</option><option value="LAKI-LAKI">Laki-laki</option><option value="PEREMPUAN">Perempuan</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_age">USIA</span></label><input type="number" inputmode="numeric" id="edit-k-usia" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_pob">TEMPAT LAHIR</span></label><input type="text" id="edit-k-tempat-lahir" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_dob">TANGGAL LAHIR</span></label><input type="date" id="edit-k-tgl-lahir" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_height">TINGGI (CM)</span></label><input type="number" inputmode="numeric" id="edit-k-tb" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                    <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_weight">BERAT (KG)</span></label><input type="number" inputmode="numeric" id="edit-k-bb" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                </div>
+                
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.education">PENDIDIKAN</span></label><select id="edit-k-pendidikan" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><option value="-">-</option><option value="SMA">SMA</option><option value="SMK">SMK</option><option value="MA">MA</option><option value="D3">D3</option><option value="S1">S1</option></select></div>
+
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.jft_score">NILAI JFT/JLPT</span></label><input type="text" id="edit-k-jft" placeholder="A2 / 120…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+                <div><label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="candidate.form_ssw_text">BIDANG SSW</span></label><input type="text" id="edit-k-ssw" placeholder="Kaigo, Pertanian…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"></div>
+            </div>
+        </div>
+        
+        <!-- UPLOAD ULANG DOKUMEN UTAMA (Opsional) — PAS PHOTO/CV/JFT/SSW + IJAZAH
+             SD/SMP/SMA/UNIVERSITAS. Blok ini SEMPAT HILANG dari index.html
+             (drift vs admin.html) — ID-nya wajib ada di dua halaman (cek
+             scripts/check-admin-index-drift.cjs) supaya tidak hilang lagi. -->
+        <div class="p-4 bg-sky-900/20 border border-sky-500/30 rounded-xl space-y-3 mt-6">
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_photo">PAS PHOTO (JPG/PNG)</label><input type="file" id="edit-k-photo" accept="image/*" onchange="tandaiFileDipilih('edit-k-photo','edit-k-st-photo','PAS PHOTO')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-photo" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_cv">CV / RIREKISHO (PDF/Excel/Word)</label><input type="file" id="edit-k-cv" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" onchange="tandaiFileDipilih('edit-k-cv','edit-k-st-cv','CV')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-cv" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_jft">JFT (PDF)</label><input type="file" id="edit-k-file-jft" accept=".pdf" onchange="tandaiFileDipilih('edit-k-file-jft','edit-k-st-jft','JFT')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-jft" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ssw">SSW (PDF)</label><input type="file" id="edit-k-file-ssw" accept=".pdf" onchange="tandaiFileDipilih('edit-k-file-ssw','edit-k-st-ssw','SSW')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ssw" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_sd">IJAZAH SD (PDF)</label><input type="file" id="edit-k-ijazah-sd" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-sd','edit-k-st-ijazah-sd','IJAZAH SD')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-sd" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_smp">IJAZAH SMP (PDF)</label><input type="file" id="edit-k-ijazah-smp" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-smp','edit-k-st-ijazah-smp','IJAZAH SMP')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-smp" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_ijazah_sma">IJAZAH SMA (PDF)</label><input type="file" id="edit-k-ijazah-sma" accept=".pdf" onchange="tandaiFileDipilih('edit-k-ijazah-sma','edit-k-st-ijazah-sma','IJAZAH SMA')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-ijazah-sma" class="block mt-1 text-xs font-bold h-4"></span></div>
+            <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_univ">IJAZAH UNIVERSITAS (PDF)</label><input type="file" id="edit-k-univ" accept=".pdf" onchange="tandaiFileDipilih('edit-k-univ','edit-k-st-univ','UNIVERSITAS')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-univ" class="block mt-1 text-xs font-bold h-4"></span></div>
+        </div>
+        
+        <!-- UPLOAD DOKUMEN LAINNYA (Opsional) — sama seperti modal Input Kandidat:
+             admin bisa melampirkan berkas pemberkasan tambahan saat mengedit
+             kandidat yang sudah ada (disimpan ke pemberkasan_checklist).
+             Baris dinamis: tombol + menambah baris, tombol − menghapus (min. 1). -->
+        <div class="mt-6 p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-xl space-y-3">
+            <label class="block text-xs font-bold text-emerald-400 mb-1"><i class="fas fa-folder-plus mr-1"></i><span data-lang="admin.form_other_docs"> UPLOAD DOKUMEN LAINNYA (Opsional)</span></label>
+            <!-- Berkas pemberkasan yang SUDAH tersimpan (dari pemberkasan_checklist):
+                 ditampilkan read-only supaya admin lihat "dokumen lengkap" kandidat
+                 sebelum menambah/menimpa. Diisi JS (renderBerkasTersimpan). -->
+            <div id="edit-k-berkas-ada" class="hidden"></div>
+            <div id="edit-k-lain-rows" class="space-y-3"></div>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t border-slate-700">
+            <button onclick="simpanSuperEditKandidat()" id="btn-save-super" class="w-full py-4 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-xl font-bold shadow-lg transition text-base tracking-wider"><i class="fas fa-sync-alt mr-2"></i><span data-lang="ui.save_sync_3way"> SIMPAN & UPDATE PROFIL</span></button>
+        </div>
+     </div>
+  </div>
+
+<div id="modal-list-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative max-h-[90vh] flex flex-col">
+        <button onclick="document.getElementById('modal-list-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <h3 class="text-xl font-bold text-sky-400 mb-2 border-b border-sky-900/50 pb-3"><i class="fas fa-list-ol mr-2"></i><span data-lang="admin.modal_list_candidate_title"> List Kandidat</span></h3>
+        <p class="text-xs text-slate-400 mb-4"><span data-lang="admin.job_code_label">Loker Code: </span><span id="list-job-code" class="font-bold text-white text-sm"></span></p>
+        
+        <div class="flex gap-2 mb-3">
+            <button onclick="salinTeksDecode(encodeURIComponent(currentCopyListTxt))" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-bold text-xs transition"><i class="fas fa-copy mr-1"></i><span data-lang="ui.copy_wa"> Copy WA</span></button>
+            <button onclick="document.getElementById('panel-undang-grup').classList.toggle('hidden')" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition"><i class="fab fa-whatsapp mr-1"></i><span data-lang="ui.invite_group"> Undang Grup</span></button>
+        </div>
+
+        <!-- PANEL FONNTE UNDANG GRUP ANTI-BAN -->
+        <div id="panel-undang-grup" class="hidden bg-black/40 border border-emerald-500/30 p-3 rounded-xl mb-3">
+            <input type="text" id="input-link-grup" placeholder="Link Grup WA (https://chat…)" class="w-full p-2.5 mb-2 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500">
+            <input type="number" inputmode="numeric" id="input-interval" placeholder="Jeda antar pesan (detik)" value="5" class="w-full p-2.5 mb-2 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500">
+            <button id="btn-undang-grup" onclick="mulaiKirimUndanganGrup()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition"><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
+        </div>
+
+        <div id="list-kandidat-content" class="flex-1 overflow-y-auto custom-scrollbar pr-2 mb-4 space-y-2"></div>
+     </div>
+  </div>
+
+<div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-3 md:p-5">
+    <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-6 md:p-8">
+      <button onclick="rbBatal()" class="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
+      <h3 class="text-xl font-black text-emerald-400 mb-1"><i class="fas fa-list-check mr-2"></i><span data-lang="ui.rincian_biaya"> Rincian Biaya & Tahapan</span></h3>
+      <p class="text-xs text-slate-400 mb-5 leading-relaxed" data-lang="ui.rincian_builder_hint">Klik pilihan yang mau dipakai, isi tahapan & catatan. Hasilnya otomatis tampil lengkap di popup <b class="text-amber-300">Detail</b> loker publik.</p>
+      <p class="text-[9px] text-slate-500 -mt-3 mb-5 leading-relaxed" data-lang="ui.star_hint"><i class="fas fa-star text-amber-400 mr-1"></i> Bintang <i class="far fa-star"></i> = simpan item ke <b class="text-amber-300">koleksi favorit</b> (tersimpan di database, tinggal pakai di loker berikutnya). Bintang <i class="fas fa-star"></i> = sudah tersimpan, klik untuk hapus dari koleksi.</p>
+
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-emerald-400 mb-1 uppercase"><i class="fas fa-wallet mr-1"></i><span data-lang="ui.total_cost"> TOTAL BIAYA JOB</span></label>
+        <input type="text" id="rb-total" oninput="rbRenderPreview()" placeholder="Contoh: 25 JT" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition">
+      </div>
+
+      <div class="mb-5">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold text-amber-400 uppercase tracking-widest"><i class="fas fa-stairs mr-1"></i><span data-lang="ui.payment_stage"> TAHAPAN PEMBAYARAN</span></label>
+          <button type="button" onclick="rbAddTahapan('','')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition"><i class="fas fa-plus mr-1"></i><span data-lang="ui.add_stage"> Tambah Tahapan</span></button>
+        </div>
+        <div id="rb-tahapan-list"></div>
+        <p class="text-[9px] text-slate-500 mt-1" data-lang="ui.stage_example">Contoh: <i>TTD KONTRAK : 6 JT</i> — otomatis jadi langkah 1, 2, 3…</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
+        <div>
+          <label class="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2"><i class="fas fa-check-circle mr-1"></i><span data-lang="ui.include"> INCLUDE</span></label>
+          <div id="rb-include" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <div class="flex gap-2"><input id="rb-custom-include" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('include','rb-custom-include');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition"><button type="button" onclick="rbAddChip('include','rb-custom-include')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-rose-400 uppercase tracking-widest mb-2"><i class="fas fa-times-circle mr-1"></i><span data-lang="ui.exclude"> EXCLUDE</span></label>
+          <div id="rb-exclude" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <div class="flex gap-2"><input id="rb-custom-exclude" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('exclude','rb-custom-exclude');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-rose-500 transition"><button type="button" onclick="rbAddChip('exclude','rb-custom-exclude')" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div>
+          <label class="block text-xs font-bold text-amber-400 uppercase tracking-widest mb-2"><i class="fas fa-star mr-1"></i><span data-lang="ui.benefit"> BENEFIT</span></label>
+          <div id="rb-benefit" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <div class="flex gap-2"><input id="rb-custom-benefit" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('benefit','rb-custom-benefit');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"><button type="button" onclick="rbAddChip('benefit','rb-custom-benefit')" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-clipboard-check mr-1"></i><span data-lang="ui.requirements"> PERSYARATAN</span></label>
+          <div id="rb-persyaratan" class="flex flex-wrap gap-1.5 mb-2"></div>
+          <div class="flex gap-2"><input id="rb-custom-persyaratan" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('persyaratan','rb-custom-persyaratan');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition"><button type="button" onclick="rbAddChip('persyaratan','rb-custom-persyaratan')" class="px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-1"></i><span data-lang="ui.note"> CATATAN</span></label>
+        <textarea id="rb-catatan" rows="4" oninput="rbRenderPreview()" placeholder="Catatan bebas: dicicil, refund bila kaisha batal, training wajib, dll" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition leading-relaxed custom-scrollbar"></textarea>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fas fa-eye mr-1"></i><span data-lang="ui.preview_detail"> PRATINJAU (yang akan tampil di popup Detail)</span></label>
+        <pre id="rb-preview" class="bg-black/60 border border-slate-700 rounded-xl p-3 text-xs text-emerald-300 whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar"></pre>
+      </div>
+
+      <button onclick="rbSimpan()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black shadow-lg transition text-base"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_rincian"> SIMPAN RINCIAN</span></button>
+    </div>
+  </div>
+
+<div id="modal-interview" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex flex-col justify-end md:justify-center items-center md:p-4">
+      <div class="glass-panel w-full md:max-w-2xl h-[90vh] md:h-[80vh] md:rounded-[2rem] rounded-t-[2rem] shadow-2xl relative border-t border-violet-500/50 flex flex-col overflow-hidden bg-slate-950">
+          
+          <!-- Header -->
+          <div class="px-6 py-4 bg-gradient-to-r from-violet-900/80 to-slate-900 border-b border-violet-500/30 flex justify-between items-center z-10">
+              <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-violet-500 p-0.5 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)] flex-shrink-0 relative overflow-hidden">
+                      <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/qween_jeklin.webp" alt="Jeklin Sensei" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                      <span style="display:none;" class="text-xl">🇯🇵</span>
+                  </div>
+                  <div>
+                      <h3 class="text-base font-black text-white tracking-wide">Jeklin Sensei</h3>
+                      <p class="text-xs text-violet-300 font-bold uppercase tracking-widest animate-pulse"><span data-lang="ui.interview_sim">Simulator 面接 (Mentsetsu)</span></p>
+                  </div>
+              </div>
+              <button onclick="document.getElementById('modal-interview').classList.add('hidden')" class="text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          </div>
+
+          <!-- Chat Area -->
+          <div id="interview-chat-box" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-900/50">
+              <!-- Chat akan muncul di sini -->
+          </div>
+
+          <!-- Input Area -->
+          <div class="p-4 bg-slate-900 border-t border-slate-800">
+              <div id="interview-typing" class="hidden text-xs text-violet-400 font-bold mb-2"><i class="fas fa-pen fa-spin mr-1"></i> Sensei sedang mengetik evaluasi…</div>
+              <div class="flex items-center gap-2">
+                  <textarea id="interview-input" rows="2" placeholder="Ketik jawabanmu dalam bahasa Jepang (Romaji/Kana)…" aria-label="Ketik jawabanmu dalam bahasa Jepang (Romaji/Kana)…" data-lang-aria="admin.interview_ph" class="w-full p-3 bg-black/60 border border-slate-700 rounded-xl text-white text-sm outline-none focus:border-violet-500 transition resize-none custom-scrollbar"></textarea>
+                  <button onclick="sendInterviewMessage()" id="btn-send-interview" class="w-14 h-14 bg-violet-600 hover:bg-violet-500 text-white rounded-xl flex items-center justify-center shadow-lg transition active:scale-95 flex-shrink-0" aria-label="Kirim" data-lang-aria="ui.send"><i class="fas fa-paper-plane text-xl"></i></button>
+              </div>
+          </div>
+
+      </div>
+  </div>
+
+<div id="modal-reject-mail" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+      <div class="glass-panel w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-700 animate-slide-up relative flex flex-col">
+          <div class="p-5 border-b border-slate-700 bg-slate-900 flex justify-between items-center">
+              <h3 class="text-white font-bold text-lg"><i class="fas fa-ban text-red-500 mr-2"></i><span data-lang="ui.reject_app"> Reject Lamaran</span></h3>
+              <button onclick="document.getElementById('modal-reject-mail').classList.add('hidden')" class="text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
+          </div>
+          <div class="p-6 bg-slate-800/50 flex flex-col gap-4">
+              <input type="hidden" id="reject-row-index">
+              <div class="bg-red-900/20 border border-red-500/30 p-3 rounded-lg">
+                  <p class="text-sm text-slate-300"><span data-lang="ui.reject_reason_hint">Tulis alasan penolakan. Pesan ini akan muncul di Dashboard Kandidat.</span></p>
+              </div>
+              <textarea id="reject-reason-text" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm focus:border-sky-500 outline-none h-32" placeholder="Contoh: CV kurang lengkap, atau Sertifikat JFT buram…"></textarea>
+              <button onclick="document.getElementById('reject-reason-text').value = '📱 Anti-Gagal! Cara Download PDF Sertifikat JFT & SSW di HP (Tanpa SS)\n\nHasil cetak jernih, tajam, dan langsung diakui perusahaan/imigrasi Jepang! Cukup 4 Langkah Praktis:\n\n✅ Aktifkan Situs Desktop\nBuka Google Chrome di HP → Klik titik tiga (⋮) di pojok kanan atas → Centang Situs Desktop. (Wajib, agar tombol download muncul sempurna!)\n\n✅ Login Prometric\nMasuk ke situs resmi Prometric → Masukkan ID & Password kamu.\n\n✅ Buka Score Report\nMasuk ke menu Laporan Hasil Ujian → Pilih ujianmu → Klik Tampilkan (Display).\n\n✅ Simpan ke PDF\nKlik tombol Cetak / Print → Ubah tujuan printer jadi Simpan sebagai PDF (Save as PDF) → Klik tombol Download / PDF.\n\n🎉 Selesai! File Resmi, Anti Ditolak!'" class="bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/50 text-amber-400 py-2 px-3 rounded-lg text-sm font-bold transition text-left">
+                  <i class="fas fa-paste mr-1"></i><span data-lang="ui.use_jft_ssw_pdf"> Gunakan Teks Instruksi PDF JFT/SSW
+              </span></button>
+          </div>
+          <div class="p-4 border-t border-slate-700 bg-slate-900 flex justify-end gap-3">
+              <button onclick="document.getElementById('modal-reject-mail').classList.add('hidden')" class="px-5 py-2 rounded-lg text-sm font-bold bg-slate-700 text-white hover:bg-slate-600 transition"><span data-lang="ui.cancel">Batal</span></button>
+              <button onclick="submitRejectForm()" class="px-5 py-2 rounded-lg text-sm font-bold bg-red-600 text-white hover:bg-red-500 transition shadow-lg shadow-red-900/50"><i class="fas fa-ban mr-1"></i><span data-lang="ui.confirm_reject"> Konfirmasi Reject</span></button>
+          </div>
+      </div>
+  </div>
+
 <div id="modal-cek-siswa" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4">
     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col border border-emerald-500/50">
        <button onclick="document.getElementById('modal-cek-siswa').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>

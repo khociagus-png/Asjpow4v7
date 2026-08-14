@@ -992,7 +992,171 @@
     </div>
   </footer>
 
-  <div id="modal-cv-mini" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+  
+
+  
+
+  <!-- MODAL GANTI PASSWORD KANDIDAT (2026-08-12): ganti password default
+       (4 digit terakhir WA) dengan password pribadi. Backend: action
+       gantiPasswordKandidat di auth.ts (wajib sesi kandidat). -->
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  <!-- MODAL LIST KANDIDAT & UNDANG GRUP FONNTE -->
+  
+
+  
+  
+  <datalist id="list-kode-job"></datalist>
+  <datalist id="list-lokasi"></datalist>
+  <datalist id="list-syarat"></datalist>
+
+  <!-- MODAL PDF VIEWER BARU -->
+  
+
+  <!-- Dictionary.html & Script.html dipindah ke app.js (FASE 3/4) -->
+
+  <!-- MODAL SHARE LOKER (upgrade: link share view + konfigurasi dokumen + template copas WA gaya lama) -->
+  
+
+  <div id="toast-container" aria-live="polite" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+  
+  <!-- MODAL PAMFLET FULL -->
+  <div id="pamfletModal" class="hidden fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
+    <div class="relative w-full max-w-3xl mx-auto flex flex-col items-center">
+      <button onclick="tutupPamflet()" class="absolute -top-12 right-0 text-slate-300 hover:text-red-500 text-4xl font-black drop-shadow-md transition transform hover:scale-110" aria-label="Tutup" data-lang-aria="public.close">&times;</button>
+      <img id="gambarPamfletFull" src="" alt="Pamflet" class="modal-content-pamflet bg-slate-900 border border-slate-700">
+    </div>
+  </div>
+
+  <!-- MODAL PREVIEW DOKUMEN (gambar/PDF inline, bukan buka tab baru) -->
+  
+
+  
+
+    <!-- MODAL PEMBERKASAN LENGKAP (CANDIDATE & ADMIN) -->
+    
+
+    <!-- ========================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION (HANYA MUNCUL DI HP) -->
+  <!-- ========================================== -->
+  
+  <!-- BOTTOM NAV ADMIN -->
+  <div id="bottom-nav-admin" class="md:hidden hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 z-[90] pb-safe">
+    <div class="flex justify-between items-center px-6 py-3">
+        <button onclick="adminSwitchTab('kelola')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
+            <i class="fas fa-briefcase text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="ui.loker">Loker</span>
+        </button>
+        <button onclick="adminSwitchTab('pelamar')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
+            <i class="fas fa-users text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="ui.applicant">Pelamar</span>
+        </button>
+        <!-- Tombol Mail dengan Notifikasi Merah -->
+        <button onclick="adminSwitchTab('mail')" class="relative flex flex-col items-center text-slate-400 hover:text-white transition group">
+            <div class="relative">
+                <i class="fas fa-envelope text-lg mb-1 group-active:scale-90 transition"></i>
+                <span id="nav-bot-notif" class="hidden absolute -top-1 -right-2 w-3 h-3 bg-red-500 rounded-full border border-slate-900"></span>
+            </div>
+            <span class="text-[9px] font-bold" data-lang="ui.mail">Mail</span>
+        </button>
+        <button onclick="adminSwitchTab('wa')" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition group">
+            <i class="fab fa-whatsapp text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="ui.wa">WA</span>
+        </button>
+        <button onclick="adminSwitchTab('config')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
+            <i class="fas fa-cogs text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="ui.settings2">Seting</span>
+        </button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV KANDIDAT -->
+  <div id="bottom-nav-kandidat" class="md:hidden hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 z-[90] pb-safe">
+    <div class="flex justify-around items-center px-6 py-3">
+        <button onclick="changePage('public')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
+            <i class="fas fa-globe text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="ui.search_job">Cari Job</span>
+        </button>
+        <button onclick="changePage('kandidat'); window.scrollTo(0,0);" class="relative -top-5 flex flex-col items-center group">
+            <div class="w-14 h-14 bg-emerald-600 rounded-full flex items-center justify-center text-white border-4 border-slate-950 shadow-lg group-active:scale-95 transition">
+                <i class="fas fa-id-card text-2xl"></i>
+            </div>
+            <span class="text-xs text-emerald-400 font-bold mt-1" data-lang="header.dashboard">Dashboard</span>
+        </button>
+        <button onclick="logoutApp()" class="flex flex-col items-center text-slate-400 hover:text-red-400 transition group">
+            <i class="fas fa-power-off text-lg mb-1 group-active:scale-90 transition"></i>
+            <span class="text-[9px] font-bold" data-lang="header.logout">Keluar</span>
+        </button>
+    </div>
+  </div>
+
+  <!-- MODAL TUTORIAL INSTALL APLIKASI (PWA) -->
+  <!-- MODAL RINCIAN BIAYA BUILDER (Admin: klik-klik include/exclude/tahapan) -->
+  
+
+  <!-- MODAL MIGRASI DRIVE: daftar kandidat yg masih pakai link Google Drive + upload ulang -->
+  
+
+  <!-- MODAL DETAIL LOKER (POPUP PUBLIK): pamflet + rincian biaya + syarat -->
+  
+
+  
+
+  <!-- MODAL UTAMA E-SIGNATURE -->
+  
+
+  <!-- MODAL FULL SCREEN CANVAS (LAYAR MENGGAMBAR) -->
+  
+
+  <!-- MODAL SIMULATOR WAWANCARA (VIP) -->
+  
+
+  <!-- MODAL PREVIEW RIREKISHO LENGKAP -->
+  
+  
+  <style>
+      @media print {
+          @page { size: A4 portrait; margin: 10mm; }
+          body * { visibility: hidden; }
+          #modal-preview-cv, #modal-preview-cv * { visibility: visible; }
+          #modal-preview-cv { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 0 !important; }
+          .print\:hidden { display: none !important; }
+          .cv-table { page-break-inside: auto; }
+          .cv-tr { page-break-inside: avoid; page-break-after: auto; }
+      }
+      .cv-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; margin-bottom: 16px; }
+      .cv-table th, .cv-table td { border: 1px solid black; padding: 6px; }
+      .cv-table th { background-color: #f9fafb; font-weight: bold; text-align: center; }
+  </style>
+
+  <!-- MODAL AI MATCHMAKING (DENGAN FILTER CERDAS) -->
+  
+  <!-- MODAL REJECT MAIL -->
+  
+  <script src="/assets/app-66e3b518fe.js"></script>
+<!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
+       adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
+       tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah
+       termuat / preview error; muat eager. HANYA xlsx yang dibutuhkan (render
+       CSV via renderExcelKeFrame): docx/pptx dirute ke MS Office viewer dan
+       renderDocxKeFrame/renderPptxKeDiv sudah dihapus (dead code) — mammoth &
+       pptx-preview (2MB) tidak dimuat lagi. index.html (sisi kandidat) tetap
+       lazy via muatVendorLib 02_init.js. -->
+  <script src="/vendor/xlsx.full.min.js?v=7f749f81a4"></script>
+<!--SHARED_MODALS_START-->
+<div id="modal-cv-mini" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel border-sky-500/50 p-6 md:p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button onclick="document.getElementById('modal-cv-mini').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-black text-sky-400 mb-2 border-b border-sky-900/50 pb-4"><i class="fas fa-user-edit mr-2"></i><span data-lang="ui.update_cv_mini"> Update CV Mini</span></h3>
@@ -1031,13 +1195,13 @@
      </div>
   </div>
 
-  <div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+<div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
     <div class="glass-panel p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
       <button onclick="document.getElementById('modal-admin').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
       <div id="login-step-1">
           <i class="fas fa-shield-alt text-5xl text-red-500 mb-5 drop-shadow-lg"></i>
           <h3 class="text-xl font-bold text-white mb-6 tracking-wide" data-lang="admin.auth_title">Otorisasi Sistem</h3>
-          <label for="admin-pin-master" class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.pin_master">PIN Master</label>
+          <label for="admin-pin-master" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_master">PIN Master</label>
           <input type="password" id="admin-pin-master" name="pin_master" autocomplete="current-password" data-lang-placeholder="admin.pin_master" placeholder="PIN Master" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-red-500 transition">
           <button onclick="prosesLoginMaster()" id="btn-login-master" class="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(220,38,38,0.5)] text-lg hover:-translate-y-1" data-lang="button.verify">Verifikasi</button>
       </div>
@@ -1056,19 +1220,14 @@
           <h3 class="text-lg font-bold text-white mb-1" id="lbl-nama-admin" data-lang="header.login">Login</h3>
           <p class="text-sm text-slate-400 mb-6" data-lang="admin.enter_pin">Masukkan PIN Pribadi Anda</p>
           <input type="hidden" id="admin-name-temp">
-          <label for="admin-pin-personal" class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.pin_personal">PIN Pribadi</label>
+          <label for="admin-pin-personal" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.pin_personal">PIN Pribadi</label>
           <input type="password" id="admin-pin-personal" name="pin_personal" autocomplete="current-password" data-lang-placeholder="admin.pin_personal" placeholder="PIN Pribadi" class="w-full p-4 rounded-2xl bg-black/60 border border-slate-600 text-center text-2xl tracking-widest text-white mb-6 outline-none focus:border-amber-500 transition">
           <button onclick="prosesLoginPersonal()" id="btn-login-personal" class="w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-full font-bold transition shadow-[0_0_15px_rgba(217,119,6,0.5)] text-lg hover:-translate-y-1" data-lang="button.enter_portal">Masuk Portal</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL GANTI PASSWORD KANDIDAT (2026-08-12): ganti password default
-       (4 digit terakhir WA) dengan password pribadi. Backend: action
-       gantiPasswordKandidat di auth.ts (wajib sesi kandidat). -->
-  
-
-  <div id="modal-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+<div id="modal-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
     <div class="glass-panel p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative">
       <button onclick="document.getElementById('modal-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
       <div id="form-daftar-kandidat" class="hidden">
@@ -1081,9 +1240,9 @@
       </div>
       <div id="form-login-kandidat" class="hidden">
          <h3 class="text-xl font-bold text-sky-400 mb-6 border-b border-sky-900/50 pb-4 text-center"><i class="fas fa-sign-in-alt mr-2"></i> <span data-lang="candidate.log_title">Login Pelamar</span></h3>
-         <label for="log-wa" class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="candidate.log_wa">No WhatsApp Terdaftar</label>
+         <label for="log-wa" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_wa">No WhatsApp Terdaftar</label>
          <input type="tel" id="log-wa" name="wa" autocomplete="tel" onblur="formatInputWA(this)" data-lang-placeholder="candidate.log_wa" placeholder="No WhatsApp Terdaftar" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-sky-500 transition">
-         <label for="log-pass" class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="candidate.log_pass">Password</label>
+         <label for="log-pass" class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="candidate.log_pass">Password</label>
          <input type="password" id="log-pass" name="password" autocomplete="current-password" data-lang-placeholder="candidate.log_pass" placeholder="Password" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-6 outline-none focus:border-sky-500 transition">
          <button onclick="prosesLoginKandidat()" id="btn-log-kandidat" class="w-full py-4 bg-sky-600 hover:bg-sky-500 text-white rounded-full font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] hover:-translate-y-1 transition" data-lang="button.enter_dashboard">Masuk Dashboard</button>
          <p class="text-sm text-center mt-5 text-slate-400"><span data-lang="candidate.no_account">Belum punya akun?</span> <button type="button" onclick="bukaModalKandidat('daftar')" class="text-sky-400 hover:text-sky-300 underline font-bold" data-lang="candidate.register_here">Daftar di sini</button></p>
@@ -1091,7 +1250,7 @@
     </div>
   </div>
 
-  <div id="modal-cv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
+<div id="modal-cv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 p-6 md:p-8 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_40px_rgba(0,0,0,0.8)] relative max-h-[90vh] overflow-y-auto custom-scrollbar">
           <button onclick="document.getElementById('modal-cv').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-10" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
           
@@ -1280,11 +1439,7 @@
       </div>
   </div>
 
-  
-
-  
-
-  <div id="modal-edit-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+<div id="modal-edit-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar border-sky-500/50">
         <button onclick="document.getElementById('modal-edit-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         
@@ -1341,6 +1496,10 @@
             </div>
         </div>
         
+        <!-- UPLOAD ULANG DOKUMEN UTAMA (Opsional) — PAS PHOTO/CV/JFT/SSW + IJAZAH
+             SD/SMP/SMA/UNIVERSITAS. Blok ini SEMPAT HILANG dari index.html
+             (drift vs admin.html) — ID-nya wajib ada di dua halaman (cek
+             scripts/check-admin-index-drift.cjs) supaya tidak hilang lagi. -->
         <div class="p-4 bg-sky-900/20 border border-sky-500/30 rounded-xl space-y-3 mt-6">
             <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_photo">PAS PHOTO (JPG/PNG)</label><input type="file" id="edit-k-photo" accept="image/*" onchange="tandaiFileDipilih('edit-k-photo','edit-k-st-photo','PAS PHOTO')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-photo" class="block mt-1 text-xs font-bold h-4"></span></div>
             <div><label class="block text-xs font-bold text-sky-400 mb-1" data-lang="admin.form_upload_cv">CV / RIREKISHO (PDF/Excel/Word)</label><input type="file" id="edit-k-cv" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" onchange="tandaiFileDipilih('edit-k-cv','edit-k-st-cv','CV')" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-700 file:text-white"><span id="edit-k-st-cv" class="block mt-1 text-xs font-bold h-4"></span></div>
@@ -1366,15 +1525,12 @@
         </div>
         
         <div class="mt-6 pt-4 border-t border-slate-700">
-            <button onclick="simpanSuperEditKandidat()" id="btn-save-super" class="w-full py-4 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-xl font-bold shadow-lg transition"><i class="fas fa-sync-alt mr-2"></i><span data-lang="ui.save_sync_3way"> SIMPAN & UPDATE PROFIL</span></button>
+            <button onclick="simpanSuperEditKandidat()" id="btn-save-super" class="w-full py-4 bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white rounded-xl font-bold shadow-lg transition text-base tracking-wider"><i class="fas fa-sync-alt mr-2"></i><span data-lang="ui.save_sync_3way"> SIMPAN & UPDATE PROFIL</span></button>
         </div>
      </div>
   </div>
 
-  
-
-  <!-- MODAL LIST KANDIDAT & UNDANG GRUP FONNTE -->
-  <div id="modal-list-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+<div id="modal-list-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative max-h-[90vh] flex flex-col">
         <button onclick="document.getElementById('modal-list-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-sky-400 mb-2 border-b border-sky-900/50 pb-3"><i class="fas fa-list-ol mr-2"></i><span data-lang="admin.modal_list_candidate_title"> List Kandidat</span></h3>
@@ -1396,119 +1552,28 @@
      </div>
   </div>
 
-  
-  
-  <datalist id="list-kode-job"></datalist>
-  <datalist id="list-lokasi"></datalist>
-  <datalist id="list-syarat"></datalist>
+<div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-3 md:p-5">
+    <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-6 md:p-8">
+      <button onclick="rbBatal()" class="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
+      <h3 class="text-xl font-black text-emerald-400 mb-1"><i class="fas fa-list-check mr-2"></i><span data-lang="ui.rincian_biaya"> Rincian Biaya & Tahapan</span></h3>
+      <p class="text-xs text-slate-400 mb-5 leading-relaxed" data-lang="ui.rincian_builder_hint">Klik pilihan yang mau dipakai, isi tahapan & catatan. Hasilnya otomatis tampil lengkap di popup <b class="text-amber-300">Detail</b> loker publik.</p>
+      <p class="text-[9px] text-slate-500 -mt-3 mb-5 leading-relaxed" data-lang="ui.star_hint"><i class="fas fa-star text-amber-400 mr-1"></i> Bintang <i class="far fa-star"></i> = simpan item ke <b class="text-amber-300">koleksi favorit</b> (tersimpan di database, tinggal pakai di loker berikutnya). Bintang <i class="fas fa-star"></i> = sudah tersimpan, klik untuk hapus dari koleksi.</p>
 
-  <!-- MODAL PDF VIEWER BARU -->
-  
-
-  <!-- Dictionary.html & Script.html dipindah ke app.js (FASE 3/4) -->
-
-  <!-- MODAL SHARE LOKER (upgrade: link share view + konfigurasi dokumen + template copas WA gaya lama) -->
-  
-
-  <div id="toast-container" aria-live="polite" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
-  
-  <!-- MODAL PAMFLET FULL -->
-  <div id="pamfletModal" class="hidden fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
-    <div class="relative w-full max-w-3xl mx-auto flex flex-col items-center">
-      <button onclick="tutupPamflet()" class="absolute -top-12 right-0 text-slate-300 hover:text-red-500 text-4xl font-black drop-shadow-md transition transform hover:scale-110" aria-label="Tutup" data-lang-aria="public.close">&times;</button>
-      <img id="gambarPamfletFull" src="" alt="Pamflet" class="modal-content-pamflet bg-slate-900 border border-slate-700">
-    </div>
-  </div>
-
-  <!-- MODAL PREVIEW DOKUMEN (gambar/PDF inline, bukan buka tab baru) -->
-  
-
-  
-
-    <!-- MODAL PEMBERKASAN LENGKAP (CANDIDATE & ADMIN) -->
-    
-
-    <!-- ========================================== -->
-  <!-- MOBILE BOTTOM NAVIGATION (HANYA MUNCUL DI HP) -->
-  <!-- ========================================== -->
-  
-  <!-- BOTTOM NAV ADMIN -->
-  <div id="bottom-nav-admin" class="md:hidden hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 z-[90] pb-safe">
-    <div class="flex justify-between items-center px-6 py-3">
-        <button onclick="adminSwitchTab('kelola')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
-            <i class="fas fa-briefcase text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="ui.loker">Loker</span>
-        </button>
-        <button onclick="adminSwitchTab('pelamar')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
-            <i class="fas fa-users text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="ui.applicant">Pelamar</span>
-        </button>
-        <!-- Tombol Mail dengan Notifikasi Merah -->
-        <button onclick="adminSwitchTab('mail')" class="relative flex flex-col items-center text-slate-400 hover:text-white transition group">
-            <div class="relative">
-                <i class="fas fa-envelope text-lg mb-1 group-active:scale-90 transition"></i>
-                <span id="nav-bot-notif" class="hidden absolute -top-1 -right-2 w-3 h-3 bg-red-500 rounded-full border border-slate-900"></span>
-            </div>
-            <span class="text-[9px] font-bold" data-lang="ui.mail">Mail</span>
-        </button>
-        <button onclick="adminSwitchTab('wa')" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition group">
-            <i class="fab fa-whatsapp text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="ui.wa">WA</span>
-        </button>
-        <button onclick="adminSwitchTab('config')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
-            <i class="fas fa-cogs text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="ui.settings2">Seting</span>
-        </button>
-    </div>
-  </div>
-
-  <!-- BOTTOM NAV KANDIDAT -->
-  <div id="bottom-nav-kandidat" class="md:hidden hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 z-[90] pb-safe">
-    <div class="flex justify-around items-center px-6 py-3">
-        <button onclick="changePage('public')" class="flex flex-col items-center text-slate-400 hover:text-white transition group">
-            <i class="fas fa-globe text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="ui.search_job">Cari Job</span>
-        </button>
-        <button onclick="changePage('kandidat'); window.scrollTo(0,0);" class="relative -top-5 flex flex-col items-center group">
-            <div class="w-14 h-14 bg-emerald-600 rounded-full flex items-center justify-center text-white border-4 border-slate-950 shadow-lg group-active:scale-95 transition">
-                <i class="fas fa-id-card text-2xl"></i>
-            </div>
-            <span class="text-xs text-emerald-400 font-bold mt-1" data-lang="header.dashboard">Dashboard</span>
-        </button>
-        <button onclick="logoutApp()" class="flex flex-col items-center text-slate-400 hover:text-red-400 transition group">
-            <i class="fas fa-power-off text-lg mb-1 group-active:scale-90 transition"></i>
-            <span class="text-[9px] font-bold" data-lang="header.logout">Keluar</span>
-        </button>
-    </div>
-  </div>
-
-  <!-- MODAL TUTORIAL INSTALL APLIKASI (PWA) -->
-  <!-- MODAL RINCIAN BIAYA BUILDER (Admin: klik-klik include/exclude/tahapan) -->
-  <div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-2 md:p-4">
-    <div class="glass-panel rounded-[1.5rem] w-full max-w-2xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-4 md:p-5">
-      <button onclick="rbBatal()" class="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
-      <h3 class="text-lg font-black text-emerald-400 mb-1"><i class="fas fa-list-check mr-2"></i><span data-lang="ui.rincian_biaya"> Rincian Biaya & Tahapan</span></h3>
-      <p class="text-xs text-slate-400 mb-3 leading-relaxed" data-lang="ui.autofill_stage_hint">Tahapan & catatan <b class="text-emerald-300">default sudah terisi otomatis</b> — cukup isi harganya saja. Klik pilihan yang mau dipakai, hasilnya otomatis tampil di popup <b class="text-amber-300">Detail</b> loker publik.</p>
-      <p class="text-[9px] text-slate-500 mb-4 leading-relaxed" data-lang="ui.star_hint"><i class="fas fa-star text-amber-400 mr-1"></i> Bintang <i class="far fa-star"></i> = simpan item ke <b class="text-amber-300">koleksi favorit</b> (tersimpan di database, tinggal pakai di loker berikutnya). Bintang <i class="fas fa-star"></i> = sudah tersimpan, klik untuk hapus dari koleksi.</p>
-
-      <div class="mb-4">
-        <label class="block text-[9px] font-bold text-emerald-400 mb-1 uppercase"><i class="fas fa-wallet mr-1"></i><span data-lang="ui.total_cost"> TOTAL BIAYA JOB</span></label>
-        <input type="text" id="rb-total" oninput="rbRenderPreview()" placeholder="Contoh: 25 JT" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition">
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-emerald-400 mb-1 uppercase"><i class="fas fa-wallet mr-1"></i><span data-lang="ui.total_cost"> TOTAL BIAYA JOB</span></label>
+        <input type="text" id="rb-total" oninput="rbRenderPreview()" placeholder="Contoh: 25 JT" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition">
       </div>
 
-      <div class="mb-4">
+      <div class="mb-5">
         <div class="flex items-center justify-between mb-2">
-          <label class="text-[9px] font-bold text-amber-400 uppercase tracking-widest"><i class="fas fa-stairs mr-1"></i><span data-lang="ui.payment_stage"> TAHAPAN PEMBAYARAN</span></label>
-          <div class="flex gap-1.5">
-            <button type="button" onclick="rbResetTahapan()" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-[9px] font-bold transition" title="Kembalikan ke tahapan default (TTD KONTRAK + COE)"><i class="fas fa-rotate-left mr-1"></i><span data-lang="ui.default"> Default</span></button>
-            <button type="button" onclick="rbAddTahapan('','')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[9px] font-bold transition"><i class="fas fa-plus mr-1"></i><span data-lang="button.add"> Tambah</span></button>
-          </div>
+          <label class="text-xs font-bold text-amber-400 uppercase tracking-widest"><i class="fas fa-stairs mr-1"></i><span data-lang="ui.payment_stage"> TAHAPAN PEMBAYARAN</span></label>
+          <button type="button" onclick="rbAddTahapan('','')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition"><i class="fas fa-plus mr-1"></i><span data-lang="ui.add_stage"> Tambah Tahapan</span></button>
         </div>
         <div id="rb-tahapan-list"></div>
-        <p class="text-[9px] text-slate-500 mt-1" data-lang="ui.default_stage_hint">Default: <i>TTD KONTRAK</i> + <i>COE TERBIT</i> — tinggal isi harga. Hapus lewat <i class="fas fa-times text-red-400"></i> untuk kasus khusus.</p>
+        <p class="text-[9px] text-slate-500 mt-1" data-lang="ui.stage_example">Contoh: <i>TTD KONTRAK : 6 JT</i> — otomatis jadi langkah 1, 2, 3…</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
         <div>
           <label class="block text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2"><i class="fas fa-check-circle mr-1"></i><span data-lang="ui.include"> INCLUDE</span></label>
           <div id="rb-include" class="flex flex-wrap gap-1.5 mb-2"></div>
@@ -1520,7 +1585,7 @@
           <div class="flex gap-2"><input id="rb-custom-exclude" onkeydown="if(event.key==='Enter'){event.preventDefault();rbAddChip('exclude','rb-custom-exclude');}" placeholder="Item custom…" class="flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-rose-500 transition"><button type="button" onclick="rbAddChip('exclude','rb-custom-exclude')" class="px-3 py-1.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg text-sm font-bold transition">+</button></div>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <div>
           <label class="block text-xs font-bold text-amber-400 uppercase tracking-widest mb-2"><i class="fas fa-star mr-1"></i><span data-lang="ui.benefit"> BENEFIT</span></label>
           <div id="rb-benefit" class="flex flex-wrap gap-1.5 mb-2"></div>
@@ -1533,43 +1598,28 @@
         </div>
       </div>
 
-      <div class="mb-4">
-        <label class="block text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-2" data-lang="ui.note_auto"><i class="fas fa-info-circle mr-1"></i> CATATAN <span class="text-slate-500 font-normal normal-case">(default otomatis, bisa diedit)</span></label>
-        <textarea id="rb-catatan" rows="3" oninput="rbRenderPreview()" placeholder="Catatan bebas: dicicil, refund bila kaisha batal, training wajib, dll" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition leading-relaxed custom-scrollbar"></textarea>
+      <div class="mb-5">
+        <label class="block text-xs font-bold text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-1"></i><span data-lang="ui.note"> CATATAN</span></label>
+        <textarea id="rb-catatan" rows="4" oninput="rbRenderPreview()" placeholder="Catatan bebas: dicicil, refund bila kaisha batal, training wajib, dll" class="w-full p-3 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-sky-500 transition leading-relaxed custom-scrollbar"></textarea>
       </div>
 
-      <div class="mb-4">
-        <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fas fa-eye mr-1"></i><span data-lang="ui.preview"> PRATINJAU</span></label>
-        <pre id="rb-preview" class="bg-black/60 border border-slate-700 rounded-xl p-3 text-xs text-emerald-300 whitespace-pre-wrap max-h-32 overflow-y-auto custom-scrollbar"></pre>
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="fas fa-eye mr-1"></i><span data-lang="ui.preview_detail"> PRATINJAU (yang akan tampil di popup Detail)</span></label>
+        <pre id="rb-preview" class="bg-black/60 border border-slate-700 rounded-xl p-3 text-xs text-emerald-300 whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar"></pre>
       </div>
 
-      <button onclick="rbSimpan()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black shadow-lg transition text-sm"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_rincian"> SIMPAN RINCIAN</span></button>
+      <button onclick="rbSimpan()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black shadow-lg transition text-base"><i class="fas fa-save mr-2"></i><span data-lang="ui.save_rincian"> SIMPAN RINCIAN</span></button>
     </div>
   </div>
 
-  <!-- MODAL MIGRASI DRIVE: daftar kandidat yg masih pakai link Google Drive + upload ulang -->
-  
-
-  <!-- MODAL DETAIL LOKER (POPUP PUBLIK): pamflet + rincian biaya + syarat -->
-  
-
-  
-
-  <!-- MODAL UTAMA E-SIGNATURE -->
-  
-
-  <!-- MODAL FULL SCREEN CANVAS (LAYAR MENGGAMBAR) -->
-  
-
-  <!-- MODAL SIMULATOR WAWANCARA (VIP) -->
-  <div id="modal-interview" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex flex-col justify-end md:justify-center items-center md:p-4">
+<div id="modal-interview" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex flex-col justify-end md:justify-center items-center md:p-4">
       <div class="glass-panel w-full md:max-w-2xl h-[90vh] md:h-[80vh] md:rounded-[2rem] rounded-t-[2rem] shadow-2xl relative border-t border-violet-500/50 flex flex-col overflow-hidden bg-slate-950">
           
           <!-- Header -->
           <div class="px-6 py-4 bg-gradient-to-r from-violet-900/80 to-slate-900 border-b border-violet-500/30 flex justify-between items-center z-10">
               <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-violet-500 p-0.5 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)] flex-shrink-0 relative overflow-hidden">
-                      <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png" alt="Jeklin Sensei" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                      <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/qween_jeklin.webp" alt="Jeklin Sensei" class="absolute inset-0 w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                       <span style="display:none;" class="text-xl">🇯🇵</span>
                   </div>
                   <div>
@@ -1597,28 +1647,7 @@
       </div>
   </div>
 
-  <!-- MODAL PREVIEW RIREKISHO LENGKAP -->
-  
-  
-  <style>
-      @media print {
-          @page { size: A4 portrait; margin: 10mm; }
-          body * { visibility: hidden; }
-          #modal-preview-cv, #modal-preview-cv * { visibility: visible; }
-          #modal-preview-cv { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 0 !important; }
-          .print\:hidden { display: none !important; }
-          .cv-table { page-break-inside: auto; }
-          .cv-tr { page-break-inside: avoid; page-break-after: auto; }
-      }
-      .cv-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; margin-bottom: 16px; }
-      .cv-table th, .cv-table td { border: 1px solid black; padding: 6px; }
-      .cv-table th { background-color: #f9fafb; font-weight: bold; text-align: center; }
-  </style>
-
-  <!-- MODAL AI MATCHMAKING (DENGAN FILTER CERDAS) -->
-  
-  <!-- MODAL REJECT MAIL -->
-  <div id="modal-reject-mail" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+<div id="modal-reject-mail" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
       <div class="glass-panel w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-700 animate-slide-up relative flex flex-col">
           <div class="p-5 border-b border-slate-700 bg-slate-900 flex justify-between items-center">
               <h3 class="text-white font-bold text-lg"><i class="fas fa-ban text-red-500 mr-2"></i><span data-lang="ui.reject_app"> Reject Lamaran</span></h3>
@@ -1640,17 +1669,7 @@
           </div>
       </div>
   </div>
-  <script src="/assets/app-66e3b518fe.js"></script>
-<!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
-       adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
-       tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah
-       termuat / preview error; muat eager. HANYA xlsx yang dibutuhkan (render
-       CSV via renderExcelKeFrame): docx/pptx dirute ke MS Office viewer dan
-       renderDocxKeFrame/renderPptxKeDiv sudah dihapus (dead code) — mammoth &
-       pptx-preview (2MB) tidak dimuat lagi. index.html (sisi kandidat) tetap
-       lazy via muatVendorLib 02_init.js. -->
-  <script src="/vendor/xlsx.full.min.js?v=7f749f81a4"></script>
-<!--SHARED_MODALS_START-->
+
 <div id="modal-cek-siswa" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4">
     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col border border-emerald-500/50">
        <button onclick="document.getElementById('modal-cek-siswa').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>

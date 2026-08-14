@@ -55,33 +55,33 @@ itu sengaja.
 - `scripts/build-js.mjs` (idempotent) → `assets/app-<hash>.js` (minify esbuild).
 - `admin.html` & `index.html` cuma 1 tag bundel; sw.js SHELL + VERSION ikut.
 - Artefak Vite mati dihapus dari semua 7 halaman: stub `assets/*-DONYcaRI.js`,
-  `main-DEfa6N4x.js`, dan `<link rel="modulepreload">` yang 404.
-
-### 6. Pecah HTML (bagian 1): 18 modal bersama diekstrak
-
-- 18 modal identik antara `admin.html` & `index.html` (85 KB) dipindah ke
-  `partials/modals-shared.html` (SATU sumber) → di-inject via `bun run build:html`.
-- Hasil build byte-identik dengan sebelumnya; sumber modal tidak bisa lagi
-  beda versi antar halaman (sumber bug "ubah satu halaman, lupa yang lain").
+  `main-DEfa6N4x.js`, dan `<link rel="modulepreload">` yang 404.### 6. Pecah HTML: 27 modal bersama diekstrak (semua modal)
+- 18 modal identik (85 KB) + 9 modal yang tadinya beda versi (146 KB total)
+  dipindah ke `partials/modals-shared.html` (SATU sumber) → di-inject via
+  `bun run build:html`. Hasil build byte-identik.
+- **Rekonsiliasi 9 modal divergen**: diputuskan berdasarkan bukti, bukan tebakan
+  - `rincian-builder` → versi INDEX (admin kehilangan `rb-catatan` yang DIBUTUHKAN
+    JS `13_rincian_builder.js` → admin sebelumnya crash saat buka builder ini; kini diperbaiki)
+  - `reject-mail` → versi ADMIN (superset: tombol instruksi PDF JFT/SSW)
+  - `interview` → versi INDEX (`qween_jeklin.webp` branding baru)
+  - `cv-mini`, `list-kandidat` → versi ADMIN (styling konsisten dengan app)
+  - `admin`, `kandidat`, `cv`, `edit-kandidat` → versi INDEX (label/kosmetik)
+- Sumber bug "ubah satu halaman, lupa yang lain" hilang untuk SEMUA modal.
 
 ---
 
 ## ⏳ BELUM SELESAI
 
-1. **Rekonsiliasi 9 modal yang masih beda versi** antar `admin.html` & `index.html`:
-   `cv-mini`, `admin`, `kandidat`, `cv`, `edit-kandidat`, `list-kandidat`,
-   `rincian-builder`, `interview`, `reject-mail`. Setelah direkonsiliasi, modal
-   itu bisa ikut dipindah ke `partials/modals-shared.html`.
-2. **Runtime on-demand load modal** (penghematan parse HP: 165KB/halaman) —
+1. **Runtime on-demand load modal** (penghematan parse HP: ±165 KB/halaman) —
    modal dimuat dari partial saat dibutuhkan, bukan di HTML awal. Perlu
    verifikasi preview dulu (berisiko kalau dikerjakan buta).
-3. **Preview visual belum diverifikasi** untuk bundel JS (tool preview tidak
+2. **Preview visual belum diverifikasi** untuk bundel JS (tool preview tidak
    tersedia di sesi pengerjaan). Saat pertama buka: **hard refresh sekali**
    (SW version baru otomatis buang cache lama).
-4. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
+3. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
    beres dulu (token free tier tipis).
-5. **Demo assets cek manual** (lihat #3 di atas).
-6. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
+4. **Demo assets cek manual** (lihat #3 di atas).
+5. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
    `simpanKandidatDanUpload`, sync 3-way, upload revisi) — bisa di-patch
    berikutnya kalau dirasa masih lambat.
 
