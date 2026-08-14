@@ -78,18 +78,22 @@
         }
     }
 
-    // Helper: buka form bridge di tab baru — async/await + try/catch/finally.
-    // Optimistic UI: loader tampil segera, dipadamkan di finally walau gagal.
+    // Helper: buka form bridge — async/await + try/catch/finally.
+    // FIX: navigasi di TAB YANG SAMA (window.location) supaya pengguna PWA
+    // tetap di dalam aplikasi — sebelumnya window.open('', '_blank') melompat
+    // ke tab browser biasa (ASJ DOSSIER / Form Master / AI master keluar dari
+    // PWA). Halaman form (master-full/ai_form/apply-full) semuanya di dalam
+    // scope PWA, jadi tetap tampil sebagai halaman aplikasi.
     async function bukaFormBridge(endpoint, params, toastUrlMissing) {
-        var w = window.open('', '_blank');
         var loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
         try {
             const res = await callGAS(endpoint, params);
-            if(res && res.formUrl) { if (w) w.location.href = res.formUrl; else window.open(res.formUrl, '_blank'); }
-            else { if (w) w.close(); showToast(toastUrlMissing, 'error'); }
+            if(res && res.formUrl) {
+                window.location.href = res.formUrl;
+            }
+            else { showToast(toastUrlMissing, 'error'); }
         } catch (err) {
-            if (w) w.close();
             showToast(tr('ui.toast_open_master_failed') + (err && err.message ? err.message : err), 'error');
         } finally {
             if(loader) loader.style.display = 'none';
@@ -118,7 +122,8 @@
         try {
             const url = await callGAS('getLinkSiswaBaru', []);
             if(url) {
-                window.open(url.url || url.formUrl || url, '_blank');
+                // FIX: tetap di dalam PWA (tab sama), bukan tab browser.
+                window.location.href = (url.url || url.formUrl || url);
             } else {
                 showToast(tr('ui.toast_siswa_form_url_missing'), 'error');
             }

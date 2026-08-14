@@ -1,6 +1,9 @@
     // 7. FUNGSI RENDER TAMPILAN ADMIN & PUBLIK
     // ==========================================
 
+    // Seleksi baris Mail Inbox untuk hapus massal (key = rowIndex di ALL_FORM).
+    var MAIL_SELECTED = {};
+
     // Chip dokumen share di modal Share Loker. SUMBER KEBENARAN frontend:
     // backend normalizeDokumenShare (netlify/functions/jobs.ts) HARUS menerima
     // semua chip ini — dijaga test scripts/__tests__/share-docs-sync.test.js.
@@ -85,7 +88,10 @@
             let translatedStatus = tr('status.' + statusKey);
             if(translatedStatus === 'status.' + statusKey) translatedStatus = j.status;
             
-            var btnLamar = j.status.includes('CLOSE') 
+            // FIX: tombol Lamar ikut tertutup kalau tahapan job sudah berjalan
+            // (CHECK KAIWA dst) — bukan hanya dari kolom status CLOSE.
+            var tutupLamar = jobTutupUntukLamar(j);
+            var btnLamar = tutupLamar 
                 ? '<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-600 rounded-lg text-white text-[10px] font-bold opacity-50 cursor-not-allowed shadow-inner border border-slate-500">' + tr('button.closed') + '</button>' 
                 : '<button onclick="lamarJob(\'' + j.code + '\', \'' + j.kategori + '\', \'' + (j.dokumenShare || '') + '\')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-[0_4px_15px_rgba(5,150,105,0.4)] transition text-[11px] font-bold border border-emerald-500/50"><i class="fas fa-paper-plane mr-1"></i> ' + tr('button.apply') + '</button>';
             
@@ -610,7 +616,11 @@
                     '</div>';
             }
 
+            // Checkbox pilih (fitur hapus massal): simpan posisi asli di ALL_FORM
+            // (rowIndex) supaya deleteForm tetap benar walau daftar ter-filter.
+            var ck = (MAIL_SELECTED[f.rowIndex]) ? ' checked' : '';
             html += '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+                '<td class="p-4 text-center"><input type="checkbox" class="mail-check" data-idx="' + f.rowIndex + '" onclick="toggleMailSelect(this)" ' + ck + ' aria-label="Pilih" class="w-4 h-4 accent-rose-500 cursor-pointer"></td>' +
                 '<td data-label="' + tr('table.timestamp') + '" class="p-4 text-[10px] text-slate-400 whitespace-nowrap">' + (f.timestamp ? String(f.timestamp).substring(0, 10) : '-') + '</td>' +
                 '<td data-label="' + tr('table.job_code') + '" class="p-4 font-mono text-sky-300 font-bold text-xs">' + f.code + '</td>' +
                 '<td data-label="' + tr('table.category') + '" class="p-4 text-[10px] font-bold text-amber-300 uppercase">' + trOption(f.kategori || '-') + '</td>' +
@@ -628,7 +638,7 @@
         }
         if (arr.length === 0) {
             var emptyMsg = (mailFilterStatus === 'ALL') ? 'TIDAK ADA DATA MAIL' : 'TIDAK ADA DATA MAIL DENGAN STATUS ' + (MAIL_STATUS_LABEL[mailFilterStatus] || mailFilterStatus);
-            html = '<tr><td colspan="8" class="p-4 text-center text-slate-500 font-bold">' + emptyMsg + '</td></tr>';
+            html = '<tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold">' + emptyMsg + '</td></tr>';
         }
         tb.innerHTML = html;
     }

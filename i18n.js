@@ -391,7 +391,9 @@ const LANG = {
             send_wa_call: "Kirim WA Panggilan",
             sending: "Mengirim…",
             confirm_delete_mail: "Hapus data lamaran ini secara permanen?",
-            delete_mail: "Hapus lamaran",
+                        delete_mail: "Hapus lamaran",
+            delete_selected_mail: "Hapus Terpilih",
+            select_mail_first: "Pilih dulu baris yang mau dihapus.",
             set_fail: "Set status GAGAL",
             set_pass: "Set status LULUS",
             set_review: "Set status REVIEW ADMIN",
@@ -425,6 +427,7 @@ const LANG = {
             toast_ai_form_url_missing: "URL AI Form tidak tersedia.",
             toast_applicant_not_found: "Data pelamar tidak ditemukan.",
             toast_apply_form_url_missing: "URL Form Pelamar tidak tersedia.",
+            toast_job_closed_process: "Lowongan sudah ditutup — proses seleksi/pendokumenan sedang berjalan.",
             toast_area_empty: "Area gambar masih kosong!",
             toast_biodata_saved: "Biodata Tersimpan",
             toast_cand_label: "Kandidat: ",
@@ -944,7 +947,9 @@ candidate: {
             send_wa_call: "WA呼び出しを送信",
             sending: "送信中…",
             confirm_delete_mail: "この応募データを完全に削除しますか？",
-            delete_mail: "応募を削除",
+                        delete_mail: "応募を削除",
+            delete_selected_mail: "選択削除",
+            select_mail_first: "削除する行を先に選択してください。",
             set_fail: "不合格に設定",
             set_pass: "合格に設定",
             set_review: "レビュー待ちに設定",
@@ -978,6 +983,7 @@ candidate: {
             toast_ai_form_url_missing: "AIフォームのURLがありません。",
             toast_applicant_not_found: "応募者データが見つかりません。",
             toast_apply_form_url_missing: "応募フォームのURLがありません。",
+            toast_job_closed_process: "募集は締切ました — 選考・書類手続きが進行中です。",
             toast_area_empty: "描画エリアが空です！",
             toast_biodata_saved: "履歴書を保存しました",
             toast_cand_label: "候補者：",
@@ -1151,9 +1157,14 @@ const OPTION_TRANSLATIONS = {
   '🚢 PEMBUATAN KAPAL': { id: '🚢 PEMBUATAN KAPAL', jp: '🚢 造船' },
   '✈️ PENERBANGAN': { id: '✈️ PENERBANGAN', jp: '✈️ 航空' },
   '🍽️ RESTORAN': { id: '🍽️ RESTORAN', jp: '🍽️ 外食' },
-  // Gender (list_gender)
+  // Gender (list_gender) — plus varian umum yang sering dipakai di config
   'LAKI-LAKI': { id: 'LAKI-LAKI', jp: '男性' },
   'PEREMPUAN': { id: 'PEREMPUAN', jp: '女性' },
+  'PRIA': { id: 'PRIA', jp: '男性' },
+  'WANITA': { id: 'WANITA', jp: '女性' },
+  'LAKI LAKI': { id: 'LAKI LAKI', jp: '男性' },
+  'MALE': { id: 'MALE', jp: '男性' },
+  'FEMALE': { id: 'FEMALE', jp: '女性' },
   // Syarat (list_syarat)
   'JFT A2': { id: 'JFT A2', jp: 'JFT A2' },
   'SSW': { id: 'SSW', jp: '特定技能' },
@@ -1243,6 +1254,18 @@ function trOption(value) {
         return CURRENT_LANG === 'jp' && jp ? jp : (id || s);
     }
     var t = OPTION_TRANSLATIONS[s.trim()];
+    if (!t) {
+        // Toleran: nilai config sering beda format (huruf besar/kecil, emoji
+        // prefix seperti "👨 Pria", spasi ganda) — coba beberapa varian supaya
+        // dropdown kota/gender tetap dapat versi JP.
+        var upper = s.trim().toUpperCase();
+        t = OPTION_TRANSLATIONS[upper];
+        if (!t) {
+            // Buang karakter non-huruf/angka di awal (emoji, spasi, dsb).
+            var stripped = s.replace(/^[^\p{L}\p{N}]+/u, '').trim().toUpperCase();
+            if (stripped && stripped !== upper) t = OPTION_TRANSLATIONS[stripped];
+        }
+    }
     if (t) return CURRENT_LANG === 'jp' ? t.jp : t.id;
     return s;
 }

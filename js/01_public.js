@@ -255,6 +255,20 @@
         return '<span class="px-2.5 py-1 bg-purple-900/50 text-purple-300 border border-purple-500/50 rounded font-bold"><i class="fas fa-venus-mars mr-1"></i> ' + (gLabel || '-') + '</span>';
     }
 
+    // Job dianggap DITUTUP untuk lamaran bila status CLOSE ATAU tahapan seleksi
+    // sudah berjalan (CHECK KAIWA → MENDAN → … → FLIGHT). Aturan lapangan:
+    // begitu proses jalan, pendaftaran baru ditutup — tombol Lamar harus CLOSED
+    // walau kolom status belum diubah admin.
+    function jobTutupUntukLamar(j) {
+        if (!j) return true;
+        if (String(j.status || '').includes('CLOSE')) return true;
+        var t = String(j.tahapan || '').toUpperCase().trim();
+        if (!t || t === '-' || t === 'LIST' || t === 'LIST-CHECK' || t === 'PENCARIAN' ||
+            t === 'PENDAFTARAN' || t === 'OPEN' || t === 'DAFTAR' || t === 'MENUNGGU' || t === 'REVIEW') return false;
+        // Tahapan yang berarti seleksi/pendokumenan sudah berjalan → tutup lamar.
+        return /KAIWA|MENDAN|MENSETSU|LOLOS|USER|MCU|PARPOR|PASPOR|PASPORT|KONTRAK|COE|SISKOP|E-?ID|VISA|FLIGHT|BERANGKAT|TERBANG|TIKET|NAITEI|PEMBERKASAN|MEDICAL|MEDIKAL/i.test(t);
+    }
+
     function bukaDetailLoker(code) {
         var j = (window.ALL_JOBS || []).find(function(x) { return x.code === code; });
         if (!j) return;
@@ -327,9 +341,13 @@
         var directUrl = getDirectDownloadUrl(j.templateCv);
         var katEsc = String(j.kategori || '').replace(/'/g, "\\'");
         var reqEsc = String(j.dokumenShare || '').replace(/'/g, "\\'");
+        var tutupLamar = jobTutupUntukLamar(j);
+        var btnLamar = tutupLamar
+            ? '<button disabled class="flex-1 px-5 py-3.5 bg-slate-600 text-white text-sm font-black text-center rounded-xl shadow-inner opacity-60 cursor-not-allowed"><i class="fas fa-door-closed mr-1.5"></i> ' + tr('button.closed') + '</button>'
+            : '<button onclick="lamarJob(\'' + j.code + '\', \'' + katEsc + '\', \'' + reqEsc + '\'); tutupDetailLoker();" class="flex-1 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black text-center rounded-xl shadow-[0_4px_15px_rgba(5,150,105,0.45)] transition"><i class="fas fa-paper-plane mr-1.5"></i> ' + tr('button.apply_now') + '</button>';
         html += '<div class="flex flex-col sm:flex-row gap-3">' +
             (directUrl ? '<a href="' + directUrl + '" target="_blank" download class="flex-1 px-5 py-3.5 bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold text-center rounded-xl shadow-[0_4px_15px_rgba(2,132,199,0.4)] transition"><i class="fas fa-download mr-1.5"></i> ' + tr('button.format') + '</a>' : '') +
-            '<button onclick="lamarJob(\'' + j.code + '\', \'' + katEsc + '\', \'' + reqEsc + '\'); tutupDetailLoker();" class="flex-1 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black text-center rounded-xl shadow-[0_4px_15px_rgba(5,150,105,0.45)] transition"><i class="fas fa-paper-plane mr-1.5"></i> ' + tr('button.apply_now') + '</button>' +
+            btnLamar +
             (waNum ? '<a href="https://wa.me/' + waNum + '?text=' + encodeURIComponent(waMsg) + '" target="_blank" class="flex-1 px-5 py-3.5 bg-[#25D366] hover:bg-[#1fbd5b] text-white text-sm font-bold text-center rounded-xl shadow-[0_4px_15px_rgba(37,211,102,0.4)] transition"><i class="fab fa-whatsapp mr-1.5"></i> ' + tr('button.chat_wa') + '</a>' : '') +
         '</div>';
 

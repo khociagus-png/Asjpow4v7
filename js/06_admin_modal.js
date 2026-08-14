@@ -388,6 +388,13 @@
     }
 
     function lamarJob(jc, b, req) {
+        // Guard: kalau tahapan job sudah berjalan (seleksi/pendokumenan), tolak
+        // lamaran baru walau tombol sempat terklik (mis. halaman lama di-cache).
+        var job = (window.ALL_JOBS || []).find(function (x) { return x.code === jc; });
+        if (job && jobTutupUntukLamar(job)) {
+            showToast(tr('ui.toast_job_closed_process'), 'error');
+            return;
+        }
         bukaFormBridge('generateFormBridge', [jc, b, currentKandidatWa, currentKandidatName, req], tr('ui.toast_apply_form_url_missing'));
     }
     

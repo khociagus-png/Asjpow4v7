@@ -921,6 +921,7 @@ module.exports = {
   handleHapusJadwal,
   handleTambahTugasBaru,
   handleSetTugasStatus,
+  handleHapusTugas,
   handleSimpanWaTemplate,
   handleHapusWaTemplate,
   handleKirimSatuPesanFonnte,
@@ -976,8 +977,21 @@ async function handleHapusJadwal(payload, sessionToken) {
   const id = String((payload && payload[0]) || "");
   if (!id) return { success: false, error: "ID jadwal tidak ditemukan." };
   try {
+    // FIX: jadwal legacy (sebelum rebuild) hanya punya kolom `id`, tanpa
+    // `id_jadwal` — DELETE dengan filter id_jadwal yang tidak cocok diam-diam
+    // menghapus 0 baris (kenapa dulu "gak bisa hapus jadwal"). Cari barisnya
+    // dulu (id_jadwal ATAU id), lalu hapus berdasarkan primary key `id`.
+    const rows = await supabase.supabaseJson("GET", "database_schedule", {
+      query: { select: "*", limit: 500 },
+    });
+    const row = (Array.isArray(rows) ? rows : []).find(
+      (r) => String(r.id_jadwal || "") === id || String(r.id || "") === id
+    );
+    if (!row || row.id === undefined || row.id === null) {
+      return { success: false, error: "Jadwal tidak ditemukan." };
+    }
     await supabase.supabaseJson("DELETE", "database_schedule", {
-      query: { id_jadwal: "eq." + id },
+      query: { id: "eq." + row.id },
       headers: { Prefer: "return=minimal" },
     });
     return { success: true };
@@ -1018,16 +1032,52 @@ async function handleSetTugasStatus(payload, sessionToken) {
   const st = String((payload && payload[1]) || "");
   if (!id || !st) return { success: false, error: "Data tidak lengkap." };
   try {
+    // FIX sama seperti hapus jadwal: tugas legacy hanya punya `id`, bukan
+    // `id_tugas` — cari barisnya dulu, update berdasarkan primary key `id`.
+    const rows = await supabase.supabaseJson("GET", "database_tugas", {
+      query: { select: "*", limit: 500 },
+    });
+    const row = (Array.isArray(rows) ? rows : []).find(
+      (r) => String(r.id_tugas || "") === id || String(r.id || "") === id
+    );
+    if (!row || row.id === undefined || row.id === null) {
+      return { success: false, error: "Tugas tidak ditemukan." };
+    }
     const body = { status: st, updated_at: new Date().toISOString() };
     if (st === "SELESAI") body.waktu_selesai = new Date().toISOString();
     await supabase.supabaseJson("PATCH", "database_tugas", {
-      query: { id_tugas: "eq." + id },
+      query: { id: "eq." + row.id },
       body,
       headers: { Prefer: "return=minimal" },
     });
     return { success: true };
   } catch (e) {
     return { success: false, error: "Gagal update status tugas: " + e.message };
+  }
+}
+
+async function handleHapusTugas(payload, sessionToken) {
+  const guard = requireRole(sessionToken, "admin");
+  if (guard.error) return guard.error;
+  const id = String((payload && payload[0]) || "");
+  if (!id) return { success: false, error: "ID tugas tidak ditemukan." };
+  try {
+    const rows = await supabase.supabaseJson("GET", "database_tugas", {
+      query: { select: "*", limit: 500 },
+    });
+    const row = (Array.isArray(rows) ? rows : []).find(
+      (r) => String(r.id_tugas || "") === id || String(r.id || "") === id
+    );
+    if (!row || row.id === undefined || row.id === null) {
+      return { success: false, error: "Tugas tidak ditemukan." };
+    }
+    await supabase.supabaseJson("DELETE", "database_tugas", {
+      query: { id: "eq." + row.id },
+      headers: { Prefer: "return=minimal" },
+    });
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: "Gagal hapus tugas: " + e.message };
   }
 }
 

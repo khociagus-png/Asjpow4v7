@@ -980,6 +980,8 @@ async function handleAction(action, payload, sessionToken) {
       return extra.handleTambahTugasBaru(payload, sessionToken);
     case "setTugasStatus":
       return extra.handleSetTugasStatus(payload, sessionToken);
+    case "hapusTugas":
+      return extra.handleHapusTugas(payload, sessionToken);
     case "checkAndSendAgendaReminders":
       return { success: true, sent: 0 };
     // Template & kirim WA (Fonnte)

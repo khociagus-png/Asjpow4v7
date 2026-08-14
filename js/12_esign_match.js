@@ -226,15 +226,16 @@
 
             document.getElementById('sc-qr').src = "https://i.gifer.com/ZKZg.gif"; 
 
-            // Merubah Link QR yang awalnya Form Master -> Menjadi Link Pop-Up Digital CV (ASJ Dossier)
+            // Link QR = Digital CV (ASJ Dossier) yang terbuka otomatis saat scan.
+            // FIX: arahkan ke index (/?cv=ID) — SATU-SATUNYA halaman yang punya
+            // handler `?cv=` → bukaDigitalCV() (03_engine.js). Sebelumnya QR
+            // mengarah ke siswa-baru.html?cv=... yang TIDAK punya handler itu,
+            // jadi scan tidak membuka apa-apa ("QR masih error").
             try {
-                const urlSiswa = await callGAS('getLinkSiswaBaru', []);
-                if (urlSiswa) {
-                    let urlStr = urlSiswa.url || urlSiswa.formUrl || urlSiswa; let urlAsli = typeof urlStr === 'string' ? urlStr.split('?')[0] : ''; 
-                    let verifyUrl = urlAsli + "?cv=" + myData.idKandidat; // Link Super Pendek & Langsung tembus pop-up
-                    
-                    document.getElementById('sc-qr').src = "https://quickchart.io/qr?size=300&text=" + encodeURIComponent(verifyUrl);
-                }
+                let base = (typeof location !== 'undefined' && location.origin) ? location.origin : '';
+                let verifyUrl = base + "/?cv=" + encodeURIComponent(myData.idKandidat);
+                document.getElementById('sc-qr').src =
+                    "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(verifyUrl);
             } catch (err) { /* QR tetap pada animasi loading — non-fatal */ }
         }
     }

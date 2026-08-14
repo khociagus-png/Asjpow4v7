@@ -53,6 +53,49 @@
             if (loader) loader.style.display = 'none';
         }
     }
+    function toggleMailSelect(cb) {
+        if (!cb) return;
+        var idx = cb.dataset && cb.dataset.idx;
+        if (idx === undefined || idx === null) return;
+        if (cb.checked) MAIL_SELECTED[idx] = true;
+        else delete MAIL_SELECTED[idx];
+        // Sinkronkan tombol "centang semua" dengan kondisi baris yang tampil.
+        var all = document.getElementById('mail-check-all');
+        if (all) {
+            var boxes = document.querySelectorAll('#admin-mail-body .mail-check');
+            var vis = Array.prototype.filter.call(boxes, function (b) { return !b.closest('tr').classList.contains('hidden'); });
+            all.checked = vis.length > 0 && vis.every(function (b) { return b.checked; });
+        }
+    }
+    function mailSelectAll(cb) {
+        var boxes = document.querySelectorAll('#admin-mail-body .mail-check');
+        for (var i = 0; i < boxes.length; i++) {
+            boxes[i].checked = cb.checked;
+            if (cb.checked) MAIL_SELECTED[boxes[i].dataset.idx] = true;
+            else delete MAIL_SELECTED[boxes[i].dataset.idx];
+        }
+    }
+    async function hapusFormMailTerpilih() {
+        var ids = Object.keys(MAIL_SELECTED);
+        if (ids.length === 0) { showToast(tr('ui.select_mail_first'), 'error'); return; }
+        if (!confirm('Hapus ' + ids.length + ' lamaran terpilih? Data kandidat & master TIDAK ikut terhapus.')) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        var ok = 0; var fail = 0;
+        try {
+            for (var i = 0; i < ids.length; i++) {
+                try {
+                    const res = await callGAS('deleteForm', [Number(ids[i])]);
+                    if (res && res.success) ok++; else fail++;
+                } catch (e) { fail++; }
+            }
+            MAIL_SELECTED = {};
+            showToast('Hapus: ' + ok + ' berhasil' + (fail ? ', ' + fail + ' gagal' : ''), fail ? 'error' : 'success');
+            refreshDataDinamis('mail');
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
+    }
     async function hapusFormMail(id) {
         if (!confirm(tr('ui.confirm_delete_mail'))) return;
         const loader = document.getElementById('global-loader');
@@ -72,7 +115,9 @@
         ALL_TUGAS.forEach(t => {
             var bg = t.status == 'BARU' ? 'bg-slate-800' : (t.status == 'PROSES' ? 'bg-amber-900/40 border-amber-500/30' : 'bg-emerald-900/30 border-emerald-500/30 opacity-60');
             var btn = t.status == 'BARU' ? '<button onclick="updateStatusTugas(\'' + t.id + '\', \'PROSES\')" class="px-3 py-1 bg-amber-600 text-[10px] rounded text-white font-bold">' + tr('form.txt_kerjakan') + '</button>' : (t.status == 'PROSES' ? '<button onclick="updateStatusTugas(\'' + t.id + '\', \'SELESAI\')" class="px-3 py-1 bg-emerald-600 text-[10px] rounded text-white font-bold">' + tr('form.txt_selesai') + '</button>' : '<span class="text-[10px] font-bold text-emerald-400">' + tr('form.txt_done') + '</span>');
-            html += '<div class="flex justify-between items-center p-3 rounded-lg mb-2 border border-slate-700 ' + bg + '"><div><div class="text-xs font-bold text-white">' + t.task + '</div></div><div>' + btn + '</div></div>';
+            // Tombol hapus tugas (baru ada — dulu papan tugas tidak punya aksi hapus).
+            var delBtn = '<button onclick="hapusTugasAdmin(\'' + t.id + '\')" class="px-2.5 py-1.5 bg-slate-700 hover:bg-red-600 text-slate-400 hover:text-white rounded text-[10px] font-bold shadow transition" title="' + tr('table.delete') + '"><i class="fas fa-trash-alt"></i></button>';
+            html += '<div class="flex justify-between items-center p-3 rounded-lg mb-2 border border-slate-700 ' + bg + '"><div><div class="text-xs font-bold text-white">' + t.task + '</div></div><div class="flex gap-1.5">' + btn + delBtn + '</div></div>';
         });
         if(ALL_TUGAS.length === 0) html = '<div class="text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Tidak ada tugas baru.</div>';
         list.innerHTML = html;
@@ -99,6 +144,18 @@
             const res = await callGAS('setTugasStatus', [id, st, currentAdminName]);
             if (res.success) refreshDataDinamis();
             else showToast(res.error || 'Gagal update status', 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { if (loader) loader.style.display = 'none'; }
+    }
+    async function hapusTugasAdmin(id) {
+        if (!confirm('Hapus tugas ini?')) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('hapusTugas', [id, currentAdminName]);
+            if (res.success) refreshDataDinamis();
+            else showToast(res.error || 'Gagal hapus tugas', 'error');
         } catch (err) {
             showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
         } finally { if (loader) loader.style.display = 'none'; }
