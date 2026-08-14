@@ -259,7 +259,26 @@ function mapForm(row, i) {
     ssw: row.ssw || "",
     cv: row.file_cv || "",
     keterangan: toText(row.keterangan),
+    // Dokumen tambahan dari keterangan "NAMA:URL;NAMA2:URL2;..." — dipakai
+    // mail inbox untuk menampilkan SEMUA yang di-upload kandidat + preview.
+    docs: parseDocs(toText(row.keterangan)),
   };
+}
+
+// Parse keterangan mail menjadi daftar dokumen {nama, url} (format NAMA:URL;...).
+function parseDocs(keterangan) {
+  const out = [];
+  String(keterangan || "")
+    .split(";")
+    .forEach((chunk) => {
+      const i = chunk.indexOf(":");
+      if (i <= 0) return;
+      const nama = chunk.slice(0, i).trim();
+      const url = chunk.slice(i + 1).trim();
+      if (!nama || !url || !/^https?:\/\//i.test(url)) return;
+      out.push({ nama, url });
+    });
+  return out;
 }
 
 // Urutan form konsisten (dipakai getAppData DAN handler review/approve/reject/

@@ -588,6 +588,16 @@
             var btnSsw   = (f.ssw && f.ssw !== '-' && f.ssw.toLowerCase().startsWith('http')) ? '<button onclick="bukaPdfPreview(\'' + f.ssw + '\')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold shadow transition">SSW</button>' : '';
             var btnCv    = (f.cv && f.cv !== '-' && f.cv.toLowerCase().startsWith('http')) ? '<button onclick="bukaPdfPreview(\'' + f.cv + '\')" class="px-2 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-[9px] font-bold shadow transition">CV</button>' : '';
 
+            // Dokumen tambahan dari keterangan ("NAMA:URL;...") — tampilkan semua
+            // yang di-upload kandidat beserta preview (gambar → foto, lainnya → pdf).
+            var extraDocBtns = '';
+            (Array.isArray(f.docs) ? f.docs : []).forEach(function (dc) {
+                var isImg = /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(dc.url) || /^data:image\//i.test(dc.url);
+                var escNama = String(dc.nama || 'DOKUMEN').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                var escUrl = String(dc.url || '').replace(/'/g, "\\'");
+                extraDocBtns += '<button onclick="' + (isImg ? 'bukaFotoPreview' : 'bukaPdfPreview') + '(\'' + escUrl + '\')" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition" title="' + escNama + '"><i class="' + (isImg ? 'fas fa-image' : 'fas fa-file-alt') + ' text-amber-400 mr-1"></i>' + escNama + '</button> ';
+            });
+
             var st = MAIL_STATE_OF(f);
             var isProcessed = (MAIL_BUCKET(st) === 'LULUS' || MAIL_BUCKET(st) === 'GAGAL');
             var badgeClass = (MAIL_BUCKET(st) === 'LULUS') ? 'bg-emerald-900/50 border-emerald-500/40 text-emerald-300'
@@ -630,7 +640,7 @@
                 '<td data-label="' + tr('table.doc_folder') + '" class="rt-full p-4 text-center">' +
                     '<div class="flex flex-wrap gap-1 justify-center">' +
                         '<a href="' + f.folderUrl + '" target="_blank" aria-label="' + tr('table.doc_folder') + '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' +
-                        btnPhoto + btnJft + btnSsw + btnCv +
+                        btnPhoto + btnJft + btnSsw + btnCv + extraDocBtns +
                     '</div>' +
                 '</td>' +
                 '<td data-label="' + tr('table.action_review') + '" class="rt-full p-4 text-center">' + actionCell + '</td>' +

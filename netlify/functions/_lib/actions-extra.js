@@ -71,11 +71,63 @@ function mimeFromName(name, fallback) {
   return map[ext] || fallback || "application/octet-stream";
 }
 
+// Alias nama file per jenis — semua jalur upload (apply-full, dashboard,
+// master form, admin) dijamin memakai stem yang sama, sehingga file lama
+// ikut terhapus & tidak ada dokumen dobel (mis. KTP 2 / KK 2 di share view).
+function stemAliases(stem) {
+  const u = String(stem || "").toUpperCase();
+  const m = {
+    PAS_PHOTO: ["PHOTOFILE", "PASPHOTO", "FOTO"],
+    PHOTOFILE: ["PAS_PHOTO", "PASPHOTO", "FOTO"],
+    PASPHOTO: ["PAS_PHOTO", "PHOTOFILE", "FOTO"],
+    CV: ["CVFILE", "FILE_CV", "CV_REVISI"],
+    CVFILE: ["CV", "FILE_CV", "CV_REVISI"],
+    CV_REVISI: ["CV", "CVFILE", "FILE_CV"],
+    JFT: ["JFTFILE"],
+    JFTFILE: ["JFT"],
+    SSW: ["SSWFILE"],
+    SSWFILE: ["SSW"],
+    KK: ["KARTU_KELUARGA"],
+    KARTU_KELUARGA: ["KK"],
+  };
+  return m[u] || [];
+}
+
+// Hapus semua varian lama satu jenis file di folder (mis. KTP.jpg, KTP.png,
+// plus alias-nya). Dipanggil SEBELUM upload supaya selalu menimpa file lama.
+// Catatan API: object/list mengembalikan nama RELATIF terhadap prefix, jadi
+// filter + delete harus pakai path lengkap (folder + "/" + nama).
+async function hapusJenisVarian(folder, stem) {
+  const f = String(folder).replace(/^\/+|\/+$/g, "");
+  const stems = [String(stem || "")].concat(stemAliases(stem));
+  try {
+    const list = await storageRequest("POST", "object/list/" + bucket(), {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prefix: f + "/", limit: 300, offset: 0 }),
+    });
+    const items = Array.isArray(list) ? list : [];
+    const victims = items
+      .map((o) => (o && o.name ? String(o.name) : ""))
+      .filter((n) => n && stems.some((s) => n.startsWith(s + ".")));
+    if (victims.length) {
+      await storageRequest("DELETE", "object/" + bucket(), {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prefixes: victims.map((n) => f + "/" + n) }),
+      });
+    }
+  } catch (e) {
+    // List/hapus gagal tidak memblokir upload — x-upsert tetap menimpa nama sama.
+  }
+}
+
 // Upload file base64 ke Storage, kembalikan public URL.
 async function uploadBase64(data, folder, fileName) {
   if (!data) return null;
   const buf = b64ToBuffer(data);
   const cleanName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, "_");
+  const stem = cleanName.split(".")[0];
+  // FIX anti-duplikat: hapus varian lama (KTP.jpg / KTP.png / alias) dulu.
+  await hapusJenisVarian(folder, stem);
   const path = String(folder).replace(/^\/+|\/+$/g, "") + "/" + cleanName;
   await storageRequest("POST", "object/" + bucket() + "/" + path, {
     headers: {
@@ -105,6 +157,8 @@ async function handleGetUploadUrls(payload, sessionToken) {
       const prefix = String(f.prefix || key).trim().replace(/[^a-zA-Z0-9_-]/g, "_") || "FILE";
       const ext = String(f.ext || "bin").replace(/[^a-z0-9]/gi, "").toLowerCase() || "bin";
       const path = (folder ? folder + "/" : "") + prefix + "." + ext;
+      // FIX anti-duplikat: hapus varian lama jenis ini sebelum upload baru.
+      await hapusJenisVarian(folder, prefix);
       const res = await storageRequest("POST", "object/upload/sign/" + bucket() + "/" + path, {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ expiresIn: 120 }),
@@ -797,6 +851,63 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
 // simpanBerkasTahapan([{wa, nama, jenisBerkas, file}]) — upload dokumen
 // pemberkasan / file utama kandidat. Dipakai admin (modal edit/pemberkasan)
 // DAN kandidat (upload berkas sendiri dari dashboard).
+// ---------------------------------------------------------------------------
+// MAIL = UPLOAD-DRIVEN (kebijakan). Hanya perubahan dokumen/upload yang masuk
+// mail inbox (database_asj_form). Update data lain (status kandidat, CV mini,
+// CV AI, auto approve) TIDAK menyentuh mail.
+// ---------------------------------------------------------------------------
+// Sinkronkan/muat baris mail kandidat dengan satu upload dokumen terbaru.
+// Keterangan menyimpan daftar dokumen "NAMA:URL;..." — mail menampilkan
+// SEMUA dokumen yang sudah di-upload kandidat beserta preview-nya.
+async function syncFormMailDariUpload(wa, nama, docLabel, url) {
+  const want = supabase.normalizeWa(wa);
+  const rows = await supabase.supabaseJson("GET", "database_asj_form", {
+    query: { select: "*", limit: 500 },
+  });
+  const existing = (Array.isArray(rows) ? rows : []).find(
+    (r) => supabase.normalizeWa(String(r.no_wa || r.wa || "")) === want
+  );
+  // Baca dokumen lama dari keterangan, lalu gabung dengan yang baru.
+  const docs = {};
+  const raw = String((existing && existing.keterangan) || "");
+  raw.split(";").forEach((chunk) => {
+    const i = chunk.indexOf(":");
+    if (i > 0) docs[chunk.slice(0, i).trim().toUpperCase()] = chunk.slice(i + 1).trim();
+  });
+  const label = String(docLabel || "DOKUMEN").trim().toUpperCase();
+  docs[label] = String(url || "");
+  const keterangan = Object.entries(docs)
+    .filter(([, v]) => v)
+    .map(([k, v]) => k + ":" + v)
+    .join(";");
+  const body = {
+    timestamp: new Date().toISOString(),
+    code_job: existing && existing.code_job ? String(existing.code_job) : "",
+    nama_lengkap: String(nama || (existing && existing.nama_lengkap) || "KANDIDAT").toUpperCase(),
+    no_wa: want,
+    keterangan,
+    status: "MENUNGGU",
+    updated_at: new Date().toISOString(),
+  };
+  // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
+  if (label === "PAS_PHOTO" || label === "PHOTO") body.pas_photo = String(url || "");
+  if (label === "CV" || label === "CV_REVISI") body.file_cv = String(url || "");
+  if (label === "JFT") body.jft = String(url || "");
+  if (label === "SSW") body.ssw = String(url || "");
+  if (existing && existing.id !== undefined) {
+    await supabase.supabaseJson("PATCH", "database_asj_form", {
+      query: { id: "eq." + existing.id },
+      body,
+      headers: { Prefer: "return=minimal" },
+    });
+  } else {
+    await supabase.supabaseJson("POST", "database_asj_form", {
+      body,
+      headers: { Prefer: "return=minimal" },
+    });
+  }
+}
+
 async function handleSimpanBerkasTahapan(payload, sessionToken) {
   const d = (payload && payload[0]) || {};
   const t = session.verifyToken(sessionToken);
@@ -819,6 +930,14 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     const ext = String(f.name || "file").split(".").pop() || "jpg";
     const url = await uploadBase64(f.data, folder, (jenis || "DOKUMEN") + "." + ext);
     if (!url) return { success: false, error: "Upload gagal." };
+
+    // MAIL = upload-driven: upload berkas → masuk mail inbox (untuk review),
+    // menampilkan dokumen yang di-upload beserta preview-nya.
+    try {
+      await syncFormMailDariUpload(wa, nama, jenis, url);
+    } catch (e) {
+      /* sinkronisasi mail opsional — jangan gagalkan upload */
+    }
 
     const labelKey = fileLabelKey(jenis);
     const map = labelKey ? FILE_LABEL_COLUMNS[labelKey] : null;
@@ -880,6 +999,12 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
     const folder = "master/" + nama.replace(/[^A-Z0-9_-]/g, "_");
     const ext = String(f.name || "file").split(".").pop() || "jpg";
     const url = await uploadBase64(f.data, folder, "CV_REVISI." + ext);
+    // Upload CV revisi juga masuk mail (dokumen pendukung).
+    try {
+      await syncFormMailDariUpload(wa, nama, "CV", url);
+    } catch (e) {
+      /* opsional */
+    }
     const candFound = await supabase.findCandidates();
     const want = supabase.normalizeWa(wa);
     const c = candFound.rows.find((r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || "")) === want);
