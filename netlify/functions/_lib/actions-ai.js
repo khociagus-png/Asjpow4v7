@@ -162,7 +162,11 @@ async function geminiGenerate(systemPrompt, history) {
     const role = h && h.role === "assistant" ? "model" : "user";
     if (h && h.content) contents.push({ role, parts: [{ text: String(h.content) }] });
   }
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
+  // Model saat ini (Agt 2026): gemini-1.5-flash & 2.0-flash sudah dihapus Google (404),
+  // gemini-2.5-flash sudah tidak tersedia untuk key baru. Urutan = prioritas;
+  // fallback otomatis ke model berikutnya. gemini-flash-latest selalu menunjuk ke
+  // model flash stabil terbaru, sehingga tidak perlu update manual tiap migrasi.
+  const models = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-2.5-flash"];
   let lastErr = null;
   for (const model of models) {
     try {
@@ -205,7 +209,9 @@ async function handleProcessAIChat(payload) {
   try {
     return await geminiGenerate(system, history);
   } catch (e) {
-    return { reply: "Maaf, jaringan AI sedang sibuk. Silakan coba lagi ya! (" + e.message + ")" };
+    // Jangan bocorkan detail error mentah ke user — log detailnya di server saja.
+    console.error("[AI] processAIChat error:", e && e.message ? e.message : e);
+    return { reply: "Maaf, asisten AI sedang sibuk. Coba lagi beberapa saat ya!" };
   }
 }
 
@@ -222,7 +228,9 @@ async function handleProcessAdminAIChat(payload, sessionToken) {
     const r = await geminiGenerate(system, history);
     return { success: true, reply: r.reply, suggestedActions: [], analysis: null };
   } catch (e) {
-    return { success: false, error: e.message };
+    // Jangan bocorkan detail error mentah ke admin — log detailnya di server saja.
+    console.error("[AI] processAdminAIChat error:", e && e.message ? e.message : e);
+    return { success: false, error: "Asisten AI sedang sibuk. Coba lagi beberapa saat ya!" };
   }
 }
 

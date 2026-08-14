@@ -59,7 +59,8 @@
             let typingEl = document.getElementById(typingId);
             if(typingEl) typingEl.remove();
             if (res && res.success === false && res.error) {
-                tambahPesanAdminAi('Waduh sistem Jeklin error kak: ' + res.error, 'ai');
+                console.error('[AI] processAdminAIChat:', res.error);
+                tambahPesanAdminAi('Waduh sistem Jeklin lagi sibuk kak, coba beberapa saat lagi ya!', 'ai');
                 return;
             }
             let replyText = res.reply || (res.data ? JSON.stringify(res.data) : 'Jeklin bingung nih kak, coba tanya lagi ya!');
@@ -75,9 +76,10 @@
 
             adminAiHistory.push({role: 'user', content: msg}, {role: 'assistant', content: replyText});
         } catch (err) {
+            console.error('[AI] admin chat error:', err);
             let typingEl = document.getElementById(typingId);
             if(typingEl) typingEl.remove();
-            tambahPesanAdminAi('Waduh Jeklin error nih: ' + err, 'ai');
+            tambahPesanAdminAi('Waduh Jeklin lagi sibuk nih, coba beberapa saat lagi ya!', 'ai');
         }
     }
 
