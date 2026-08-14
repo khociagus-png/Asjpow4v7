@@ -546,9 +546,18 @@
       const toUpload = Object.keys(files).filter(k => files[k]);
       if (toUpload.length === 0) return {};
       
+      // CV per code job: beda loker = beda file CV (JOB<code>_CV). Upload baru
+      // untuk code job yang SAMA yang menimpa; CV loker lain tetap utuh.
+      var cvJobPrefix = '';
+      try {
+        var jobEl = document.getElementById('job');
+        if (jobEl && jobEl.value) cvJobPrefix = 'JOB' + String(jobEl.value).trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '_') + '_';
+      } catch (e) { /* job tidak tersedia — pakai nama default */ }
       const payloadFiles = toUpload.map(k => {
         const file = files[k];
-        return { key: k, prefix: k.toUpperCase(), ext: file.name.split('.').pop() || 'bin' };
+        let prefix = k.toUpperCase();
+        if (k === 'cvFile' && cvJobPrefix) prefix = cvJobPrefix + 'CV';
+        return { key: k, prefix: prefix, ext: file.name.split('.').pop() || 'bin' };
       });
       
       const res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
