@@ -104,13 +104,15 @@
             
             let gText = (j.gender || '').toUpperCase();
             let gLabel = trOption(j.gender);
+            // Badge gender ikut theme: di SAKURA (light) pakai latar terang + teks gelap.
+            let light = (CURRENT_THEME === 'SAKURA');
             let genderBadge = '';
             if (gText.includes('PRIA') || gText.includes('LAKI')) {
-                genderBadge = '<span class="px-2 py-0.5 bg-blue-900/50 text-blue-300 border border-blue-500/50 rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-mars mr-1"></i> ' + gLabel + '</span>';
+                genderBadge = '<span class="px-2 py-0.5 ' + (light ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-blue-900/50 text-blue-300 border-blue-500/50') + ' rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-mars mr-1"></i> ' + gLabel + '</span>';
             } else if (gText.includes('WANITA') || gText.includes('PEREMPUAN')) {
-                genderBadge = '<span class="px-2 py-0.5 bg-pink-900/50 text-pink-300 border border-pink-500/50 rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-venus mr-1"></i> ' + gLabel + '</span>';
+                genderBadge = '<span class="px-2 py-0.5 ' + (light ? 'bg-pink-100 text-pink-700 border-pink-300' : 'bg-pink-900/50 text-pink-300 border-pink-500/50') + ' rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-venus mr-1"></i> ' + gLabel + '</span>';
             } else {
-                genderBadge = '<span class="px-2 py-0.5 bg-purple-900/50 text-purple-300 border border-purple-500/50 rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-venus-mars mr-1"></i> ' + (gLabel || '-') + '</span>';
+                genderBadge = '<span class="px-2 py-0.5 ' + (light ? 'bg-purple-100 text-purple-700 border-purple-300' : 'bg-purple-900/50 text-purple-300 border-purple-500/50') + ' rounded text-[10px] font-bold shadow-sm whitespace-nowrap"><i class="fas fa-venus-mars mr-1"></i> ' + (gLabel || '-') + '</span>';
             }
 
             let pamfletHtml = '';
@@ -125,17 +127,17 @@
                 // Thumbnail storage (w-20 = ~80px): minta versi kecil + lazy —
                 // gambar penuh hanya diunduh saat diklik zoom (bukaPamflet).
                 thumbUrl = thumbnailUrl(thumbUrl, 200);
-                pamfletHtml = '<img src="' + thumbUrl + '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' + fullUrl + '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border border-slate-600 shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' + tr('ui.click_zoom') + '" alt="Pamflet">';
+                pamfletHtml = '<img src="' + thumbUrl + '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' + fullUrl + '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border ' + (light ? 'border-rose-200' : 'border-slate-600') + ' shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' + tr('ui.click_zoom') + '" alt="Pamflet">';
             }
                 
-            // Kartu tabel SELALU gelap (lihat applyTheme wrap) di kedua theme,
-            // jadi teks baris selalu terang. (Dulu SAKURA pakai teks gelap
-            // karena wrap-nya transparan di atas background pink — tak terbaca.)
-            let textTitle = 'text-white';
-            let textSub = 'text-slate-300';
+            // Baris tabel ikut theme: SAKURA = wrap terang + teks gelap (bukan
+            // putih), TOKYO = wrap gelap + teks terang seperti sebelumnya.
+            let textTitle = light ? 'text-stone-800' : 'text-white';
+            let textSub = light ? 'text-stone-600' : 'text-slate-300';
             let ketText = 'text-amber-300/90';
+            let rowHover = light ? 'hover:bg-rose-900/5' : 'hover:bg-black/10';
 
-            html += '<tr class="rt-row border-b ' + (THEMES[CURRENT_THEME] ? THEMES[CURRENT_THEME].border : 'border-slate-800') + ' hover:bg-black/10 transition">' +
+            html += '<tr class="rt-row border-b ' + (THEMES[CURRENT_THEME] ? THEMES[CURRENT_THEME].border : 'border-slate-800') + ' ' + rowHover + ' transition">' +
                 '<td data-label="' + tr('table.code') + '" class="p-4 text-sky-400 font-mono text-sm text-center font-bold align-top">' + j.code + '</td>' +
                 '<td data-label="' + tr('table.job') + '" class="rt-full p-4 align-top whitespace-normal min-w-[250px]">' + 
                     '<div class="flex items-start gap-4">' + 

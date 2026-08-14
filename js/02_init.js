@@ -460,11 +460,13 @@
         var light = (theme === 'SAKURA');
         var bodyEl = document.getElementById('asj-body'); if(bodyEl) bodyEl.className = 'min-h-screen flow-root transition-colors duration-300 ' + cfg.bg + (light ? ' theme-light' : ' theme-dark'); 
         var wrap = document.getElementById('public-table-wrap');
-        // Di theme Light (SAKURA) kartu tabel tetap gelap supaya baris tabel
-        // (warna dark-theme: teks putih/abu, badge status) terbaca — konsisten
-        // dengan kartu section lain yang memang bg-slate-900/90 di kedua theme.
-        if (wrap) wrap.className = 'overflow-x-auto rounded-xl border shadow-xl transition-colors ' + (light ? 'bg-slate-900/95 border-rose-400/40 shadow-rose-900/20' : cfg.border);
+        // Theme Light (SAKURA): kartu tabel jadi TERANG (putih) — baris tabel
+        // ikut dirender terang oleh renderPublicFiltered (teks gelap, badge terang).
+        if (wrap) wrap.className = 'overflow-x-auto rounded-xl border shadow-xl transition-colors ' + (light ? 'bg-white/95 border-rose-300/60 shadow-rose-200/30' : cfg.border);
         var head = document.getElementById('public-table-head'); if(head) head.className = 'text-xs uppercase tracking-wider font-bold border-b transition-colors ' + cfg.head + ' ' + cfg.border; 
+        // Pemisah baris tabel ikut terang di SAKURA (bukan divide-white).
+        var tbody = document.getElementById('public-table-body');
+        if (tbody) tbody.className = 'divide-y transition-colors duration-300 ' + (light ? 'divide-rose-100' : 'divide-white/5');
         // Bar kontrol Tema & Filter menyesuaikan terang/gelap (Sakura = light).
         var bar = document.getElementById('public-ctrl-bar');
         if (bar) {
