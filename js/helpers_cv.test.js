@@ -47,12 +47,12 @@ describe('makeV (v) — prioritas d -> ai -> flat uppercase', () => {
   const d = {
     identitas: { nama_lengkap: 'AGUS KHOCI', tempat_lahir_jp: 'ポノロゴ' },
     wawancara: { hobi_id: 'Membaca', hobi_jp: '読書と水泳' },
-    NAMALENGKAP: 'LEGACY NAME',   // key flat uppercase legacy
-    GENDER: 'PRIA'
+    NAMALENGKAP: 'LEGACY NAME', // key flat uppercase legacy
+    GENDER: 'PRIA',
   };
   const ai = {
     wawancara: { hobi_id: 'AI HOBI' },
-    identitas: { nama_lengkap: 'AI NAMA' }
+    identitas: { nama_lengkap: 'AI NAMA' },
   };
   const v = makeV(d, ai);
 
@@ -65,11 +65,11 @@ describe('makeV (v) — prioritas d -> ai -> flat uppercase', () => {
     const d2 = { identitas: {}, wawancara: {} };
     const v2 = makeV(d2, ai);
     expect(v2('identitas.nama_lengkap')).toBe('AI NAMA'); // dari ai
-    expect(v2('wawancara.hobi_id')).toBe('AI HOBI');      // dari ai
+    expect(v2('wawancara.hobi_id')).toBe('AI HOBI'); // dari ai
   });
 
   it('key flat uppercase dibaca langsung dari d', () => {
-    expect(v('NAMALENGKAP')).toBe('LEGACY NAME');  // d['NAMALENGKAP'] ada -> langsung
+    expect(v('NAMALENGKAP')).toBe('LEGACY NAME'); // d['NAMALENGKAP'] ada -> langsung
   });
 
   it('key flat tanpa pasangan di d -> cek uppercase clean', () => {
@@ -102,7 +102,7 @@ describe('getPath & isGood', () => {
 
   it('isGood menolak kosong, null, undefined, dan "-"', () => {
     expect(isGood('x')).toBe(true);
-    expect(isGood(0)).toBe(true);           // 0 valid
+    expect(isGood(0)).toBe(true); // 0 valid
     expect(isGood('')).toBe(false);
     expect(isGood(null)).toBe(false);
     expect(isGood(undefined)).toBe(false);

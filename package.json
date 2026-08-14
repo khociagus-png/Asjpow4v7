@@ -6,14 +6,23 @@
   "scripts": {
     "e2e": "node e2e/login-check.mjs",
     "test": "vitest run",
-    "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify",
+    "build:js": "node scripts/build-js.mjs",
+    "build": "bun run build:css && bun run build:js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
     "playwright": "^1.62.1",
+    "prettier": "^3.9.6",
     "tailwindcss": "4.3.3",
     "vitest": "^4.1.10"
   }

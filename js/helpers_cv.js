@@ -13,7 +13,9 @@
   }
 
   function isGood(val) {
-    return val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-';
+    return (
+      val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-'
+    );
   }
 
   // Pencari data dengan prioritas: (a) objek utama d (nested + flat), (b) ai
@@ -22,7 +24,7 @@
     ai = ai || {};
     const getAi = (path) => {
       let val = getPath(ai, path);
-      return (val && String(val).trim() !== '') ? String(val).trim() : null;
+      return val && String(val).trim() !== '' ? String(val).trim() : null;
     };
     return function v(...keys) {
       for (let k of keys) {
@@ -34,7 +36,9 @@
         } else {
           // coba langsung (lowercase di d), lalu uppercase, lalu ai
           if (d[k] !== undefined && isGood(d[k])) return String(d[k]).trim();
-          let cleanKey = String(k).toUpperCase().replace(/[^A-Z0-9]/g, '');
+          let cleanKey = String(k)
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '');
           if (d[cleanKey] !== undefined && isGood(d[cleanKey])) return String(d[cleanKey]).trim();
           let aiVal = getAi(k);
           if (aiVal) return aiVal;

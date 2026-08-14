@@ -1,78 +1,110 @@
-    // 10b. PEMBANGUN SECTION CV RIREKISHO (BAGIAN MURNI HTML)
-    // Dipisah dari renderCVAjaib (10_cv_rirekisho.js) saat god-object refactor.
-    // Tiap fungsi murni: terima data + helper v(), kembalikan HTML string.
-    // ==========================================
+// 10b. PEMBANGUN SECTION CV RIREKISHO (BAGIAN MURNI HTML)
+// Dipisah dari renderCVAjaib (10_cv_rirekisho.js) saat god-object refactor.
+// Tiap fungsi murni: terima data + helper v(), kembalikan HTML string.
+// ==========================================
 
-    // --- BLOK PENDIDIKAN (maks 5 baris: 1-4 SD s/d universitas, baris 5 = LPK
-    // Bahasa). Baris 4-5 hanya dirender kalau ada isinya, jadi CV kandidat yang
-    // hanya punya 1-3 pendidikan tetap tampil sama seperti sebelumnya. ---
-    function buildEduRows(eduList, v) {
-        let eduHtml = '';
-        for(let i=1; i<=5; i++) {
-            let pE = Object.assign({}, eduList[i-1] || {});
-            // Toleransi dua bentuk kunci backend: {masuk,lulus,sekolah,jurusan_id}
-            // (bentuk baru) vs {tahun_masuk,tahun_lulus,nama_sekolah,jurusan} (lama).
-            if (!isGood(pE.masuk) && isGood(pE.tahun_masuk)) pE.masuk = pE.tahun_masuk;
-            if (!isGood(pE.lulus) && isGood(pE.tahun_lulus)) pE.lulus = pE.tahun_lulus;
-            if (!isGood(pE.sekolah) && isGood(pE.nama_sekolah)) pE.sekolah = pE.nama_sekolah;
-            if (!isGood(pE.jurusan_id) && isGood(pE.jurusan)) pE.jurusan_id = pE.jurusan;
-            let msk = isGood(pE.masuk) ? pE.masuk : v('PENDIDIKAN'+i+'TAHUNMASUK');
-            let lls = isGood(pE.lulus) ? pE.lulus : v('PENDIDIKAN'+i+'TAHUNLULUS');
-            let sek_id = isGood(pE.sekolah) ? pE.sekolah : v('PENDIDIKAN'+i+'NAMASEKOLAH', 'PENDIDIKAN'+i+'SEKOLAHID');
-            let sek_jp = isGood(pE.sekolah_jp) ? pE.sekolah_jp : v('PENDIDIKAN'+i+'SEKOLAHJP');
-            let jur_id = isGood(pE.jurusan_id) ? pE.jurusan_id : v('PENDIDIKAN'+i+'JURUSAN', 'PENDIDIKAN'+i+'JURUSANID');
-            let jur_jp = isGood(pE.jurusan_jp) ? pE.jurusan_jp : v('PENDIDIKAN'+i+'JURUSANJP');
-            
-            if(msk === '-') msk = ''; if(lls === '-') lls = ''; if(sek_id === '-') sek_id = ''; if(jur_id === '-') jur_id = '';
-            if(sek_jp === '-') sek_jp = ''; if(jur_jp === '-') jur_jp = '';
-            // Baris tambahan (4-5) tanpa isi di-skip supaya tabel tidak melebar kosong
-            // (cek SETELAH normalisasi '-' -> '' karena '-' masih truthy).
-            if (i > 3 && !(sek_id || msk || lls)) continue;
-            
-            let finalSek = sek_jp ? sek_id + '<br><span style="font-size:8px; font-weight:normal;">' + sek_jp + '</span>' : sek_id;
-            let finalJur = jur_jp ? jur_id + '<br><span style="font-size:8px; font-weight:normal;">' + jur_jp + '</span>' : jur_id;
+// --- BLOK PENDIDIKAN (maks 5 baris: 1-4 SD s/d universitas, baris 5 = LPK
+// Bahasa). Baris 4-5 hanya dirender kalau ada isinya, jadi CV kandidat yang
+// hanya punya 1-3 pendidikan tetap tampil sama seperti sebelumnya. ---
+function buildEduRows(eduList, v) {
+  let eduHtml = '';
+  for (let i = 1; i <= 5; i++) {
+    let pE = Object.assign({}, eduList[i - 1] || {});
+    // Toleransi dua bentuk kunci backend: {masuk,lulus,sekolah,jurusan_id}
+    // (bentuk baru) vs {tahun_masuk,tahun_lulus,nama_sekolah,jurusan} (lama).
+    if (!isGood(pE.masuk) && isGood(pE.tahun_masuk)) pE.masuk = pE.tahun_masuk;
+    if (!isGood(pE.lulus) && isGood(pE.tahun_lulus)) pE.lulus = pE.tahun_lulus;
+    if (!isGood(pE.sekolah) && isGood(pE.nama_sekolah)) pE.sekolah = pE.nama_sekolah;
+    if (!isGood(pE.jurusan_id) && isGood(pE.jurusan)) pE.jurusan_id = pE.jurusan;
+    let msk = isGood(pE.masuk) ? pE.masuk : v('PENDIDIKAN' + i + 'TAHUNMASUK');
+    let lls = isGood(pE.lulus) ? pE.lulus : v('PENDIDIKAN' + i + 'TAHUNLULUS');
+    let sek_id = isGood(pE.sekolah)
+      ? pE.sekolah
+      : v('PENDIDIKAN' + i + 'NAMASEKOLAH', 'PENDIDIKAN' + i + 'SEKOLAHID');
+    let sek_jp = isGood(pE.sekolah_jp) ? pE.sekolah_jp : v('PENDIDIKAN' + i + 'SEKOLAHJP');
+    let jur_id = isGood(pE.jurusan_id)
+      ? pE.jurusan_id
+      : v('PENDIDIKAN' + i + 'JURUSAN', 'PENDIDIKAN' + i + 'JURUSANID');
+    let jur_jp = isGood(pE.jurusan_jp) ? pE.jurusan_jp : v('PENDIDIKAN' + i + 'JURUSANJP');
 
-            eduHtml += `<tr>
+    if (msk === '-') msk = '';
+    if (lls === '-') lls = '';
+    if (sek_id === '-') sek_id = '';
+    if (jur_id === '-') jur_id = '';
+    if (sek_jp === '-') sek_jp = '';
+    if (jur_jp === '-') jur_jp = '';
+    // Baris tambahan (4-5) tanpa isi di-skip supaya tabel tidak melebar kosong
+    // (cek SETELAH normalisasi '-' -> '' karena '-' masih truthy).
+    if (i > 3 && !(sek_id || msk || lls)) continue;
+
+    let finalSek = sek_jp
+      ? sek_id + '<br><span style="font-size:8px; font-weight:normal;">' + sek_jp + '</span>'
+      : sek_id;
+    let finalJur = jur_jp
+      ? jur_id + '<br><span style="font-size:8px; font-weight:normal;">' + jur_jp + '</span>'
+      : jur_id;
+
+    eduHtml += `<tr>
               <td class="val-center border-r-none">${fmtMonthYearJp(msk)}</td>
               <td class="val-center border-lr-none">${msk || lls ? '-' : ''}</td>
               <td class="val-center border-l-none">${fmtMonthYearJp(lls)}</td>
               <td colspan="2" class="val-center">${finalSek}</td>
               <td colspan="2" class="val-center">${finalJur}</td>
             </tr>`;
-        }
-        return eduHtml;
-    }
+  }
+  return eduHtml;
+}
 
-    // --- BLOK PEKERJAAN (maks 3 baris: form master punya 3 kolom pekerjaan).
-    // Baris ke-3 hanya dirender kalau ada isinya, jadi CV kandidat dengan 1-2
-    // pekerjaan tetap tampil sama seperti sebelumnya. ---
-    function buildJobRows(jobList, v) {
-        let jobHtml = '';
-        for(let i=1; i<=3; i++) { 
-            let pJ = Object.assign({}, jobList[i-1] || {});
-            // Toleransi dua bentuk kunci backend: {masuk,keluar,perusahaan} vs {tahun_masuk,tahun_keluar,nama_perusahaan}.
-            if (!isGood(pJ.masuk) && isGood(pJ.tahun_masuk)) pJ.masuk = pJ.tahun_masuk;
-            if (!isGood(pJ.keluar) && isGood(pJ.tahun_keluar)) pJ.keluar = pJ.tahun_keluar;
-            if (!isGood(pJ.perusahaan) && isGood(pJ.nama_perusahaan)) pJ.perusahaan = pJ.nama_perusahaan;
-            let msk = isGood(pJ.masuk) ? pJ.masuk : v('PEKERJAAN'+i+'TAHUNMASUK');
-            let klr = isGood(pJ.keluar) ? pJ.keluar : v('PEKERJAAN'+i+'TAHUNKELUAR');
-            let pt_id = isGood(pJ.perusahaan) ? pJ.perusahaan : v('PEKERJAAN'+i+'NAMAPERUSAHAAN', 'PEKERJAAN'+i+'PERUSAHAANID');
-            let pt_jp = isGood(pJ.perusahaan_jp) ? pJ.perusahaan_jp : v('PEKERJAAN'+i+'PERUSAHAANJP');
-            let ker_id = isGood(pJ.jabatan) ? pJ.jabatan : v('PEKERJAAN'+i+'JENISKERJA', 'PEKERJAAN'+i+'POSISI', 'PEKERJAAN'+i+'JABATANID');
-            let ker_jp = isGood(pJ.jabatan_jp) ? pJ.jabatan_jp : v('PEKERJAAN'+i+'JABATANJP');
-            let gaji = isGood(pJ.gaji) ? pJ.gaji : v('PEKERJAAN'+i+'GAJI');
-            
-            if(msk === '-') msk = ''; if(klr === '-') klr = ''; if(pt_id === '-') pt_id = ''; if(ker_id === '-') ker_id = ''; if(gaji === '-') gaji = '';
-            if(pt_jp === '-') pt_jp = ''; if(ker_jp === '-') ker_jp = '';
-            // Baris tambahan (ke-3) tanpa isi di-skip supaya tabel tidak melebar kosong
-            // (cek SETELAH normalisasi '-' -> '' karena '-' masih truthy).
-            if (i > 2 && !(pt_id || msk || klr)) continue;
-            
-            let klrFmt = klr.toUpperCase().includes('SEKARANG') || klr.toUpperCase().includes('IMA') ? '現在に至る' : fmtMonthYearJp(klr);
-            let finalPt = pt_jp ? pt_id + '<br><span style="font-size:8px; font-weight:normal;">' + pt_jp + '</span>' : pt_id;
-            let finalKer = ker_jp ? ker_id + '<br><span style="font-size:8px; font-weight:normal;">' + ker_jp + '</span>' : ker_id;
+// --- BLOK PEKERJAAN (maks 3 baris: form master punya 3 kolom pekerjaan).
+// Baris ke-3 hanya dirender kalau ada isinya, jadi CV kandidat dengan 1-2
+// pekerjaan tetap tampil sama seperti sebelumnya. ---
+function buildJobRows(jobList, v) {
+  let jobHtml = '';
+  for (let i = 1; i <= 3; i++) {
+    let pJ = Object.assign({}, jobList[i - 1] || {});
+    // Toleransi dua bentuk kunci backend: {masuk,keluar,perusahaan} vs {tahun_masuk,tahun_keluar,nama_perusahaan}.
+    if (!isGood(pJ.masuk) && isGood(pJ.tahun_masuk)) pJ.masuk = pJ.tahun_masuk;
+    if (!isGood(pJ.keluar) && isGood(pJ.tahun_keluar)) pJ.keluar = pJ.tahun_keluar;
+    if (!isGood(pJ.perusahaan) && isGood(pJ.nama_perusahaan)) pJ.perusahaan = pJ.nama_perusahaan;
+    let msk = isGood(pJ.masuk) ? pJ.masuk : v('PEKERJAAN' + i + 'TAHUNMASUK');
+    let klr = isGood(pJ.keluar) ? pJ.keluar : v('PEKERJAAN' + i + 'TAHUNKELUAR');
+    let pt_id = isGood(pJ.perusahaan)
+      ? pJ.perusahaan
+      : v('PEKERJAAN' + i + 'NAMAPERUSAHAAN', 'PEKERJAAN' + i + 'PERUSAHAANID');
+    let pt_jp = isGood(pJ.perusahaan_jp) ? pJ.perusahaan_jp : v('PEKERJAAN' + i + 'PERUSAHAANJP');
+    let ker_id = isGood(pJ.jabatan)
+      ? pJ.jabatan
+      : v(
+          'PEKERJAAN' + i + 'JENISKERJA',
+          'PEKERJAAN' + i + 'POSISI',
+          'PEKERJAAN' + i + 'JABATANID',
+        );
+    let ker_jp = isGood(pJ.jabatan_jp) ? pJ.jabatan_jp : v('PEKERJAAN' + i + 'JABATANJP');
+    let gaji = isGood(pJ.gaji) ? pJ.gaji : v('PEKERJAAN' + i + 'GAJI');
 
-            jobHtml += `<tr>
+    if (msk === '-') msk = '';
+    if (klr === '-') klr = '';
+    if (pt_id === '-') pt_id = '';
+    if (ker_id === '-') ker_id = '';
+    if (gaji === '-') gaji = '';
+    if (pt_jp === '-') pt_jp = '';
+    if (ker_jp === '-') ker_jp = '';
+    // Baris tambahan (ke-3) tanpa isi di-skip supaya tabel tidak melebar kosong
+    // (cek SETELAH normalisasi '-' -> '' karena '-' masih truthy).
+    if (i > 2 && !(pt_id || msk || klr)) continue;
+
+    let klrFmt =
+      klr.toUpperCase().includes('SEKARANG') || klr.toUpperCase().includes('IMA')
+        ? '現在に至る'
+        : fmtMonthYearJp(klr);
+    let finalPt = pt_jp
+      ? pt_id + '<br><span style="font-size:8px; font-weight:normal;">' + pt_jp + '</span>'
+      : pt_id;
+    let finalKer = ker_jp
+      ? ker_id + '<br><span style="font-size:8px; font-weight:normal;">' + ker_jp + '</span>'
+      : ker_id;
+
+    jobHtml += `<tr>
               <td class="val-center border-r-none">${fmtMonthYearJp(msk)}</td>
               <td class="val-center border-lr-none">${msk || klr ? '-' : ''}</td>
               <td class="val-center border-l-none">${klrFmt}</td>
@@ -80,79 +112,138 @@
               <td class="val-center">${finalKer}</td>
               <td class="val-right pr-1">${gaji ? '¥&nbsp;&nbsp;&nbsp;' + gaji : '¥&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-'}</td>
             </tr>`;
-        }
-        return jobHtml;
-    }
+  }
+  return jobHtml;
+}
 
-    // --- BLOK KELUARGA (maks 6 baris) ---
-    function buildFamRows(famList, v) {
-        let famHtml = '';
-        for(let i=1; i<=6; i++) {
-            let kF = Object.assign({}, famList[i-1] || {});
-            // Toleransi dua bentuk kunci backend: {umur} vs {usia}.
-            if (!isGood(kF.umur) && isGood(kF.usia)) kF.umur = kF.usia;
-            let hub = isGood(kF.hubungan) ? kF.hubungan : v('KELUARGA'+i+'HUBUNGANID', 'KELUARGA'+i+'HUBUNGAN');
-            let hub_jp = isGood(kF.hubungan_jp) ? kF.hubungan_jp : v('KELUARGA'+i+'HUBUNGANJP');
-            let nm = isGood(kF.nama) ? kF.nama : v('KELUARGA'+i+'NAMA');
-            let u = isGood(kF.umur) ? kF.umur : v('KELUARGA'+i+'USIA', 'KELUARGA'+i+'UMUR');
-            let p = isGood(kF.pekerjaan) ? kF.pekerjaan : v('KELUARGA'+i+'PEKERJAANID', 'KELUARGA'+i+'PEKERJAAN');
-            let p_jp = isGood(kF.pekerjaan_jp) ? kF.pekerjaan_jp : v('KELUARGA'+i+'PEKERJAANJP');
-            let g = isGood(kF.gaji) ? kF.gaji : v('KELUARGA'+i+'GAJI');
-            
-            if(hub === '-') hub = ''; if(nm === '-') nm = ''; if(u === '-') u = ''; if(p === '-') p = ''; if(g === '-') g = '';
-            if(hub_jp === '-') hub_jp = ''; if(p_jp === '-') p_jp = '';
-            
-            let finalHub = hub_jp ? hub.toUpperCase() + '  ' + hub_jp : hub.toUpperCase();
-            let finalPek = p_jp ? p + '<br><span style="font-size:8px; font-weight:normal;">' + p_jp + '</span>' : p;
+// --- BLOK KELUARGA (maks 6 baris) ---
+function buildFamRows(famList, v) {
+  let famHtml = '';
+  for (let i = 1; i <= 6; i++) {
+    let kF = Object.assign({}, famList[i - 1] || {});
+    // Toleransi dua bentuk kunci backend: {umur} vs {usia}.
+    if (!isGood(kF.umur) && isGood(kF.usia)) kF.umur = kF.usia;
+    let hub = isGood(kF.hubungan)
+      ? kF.hubungan
+      : v('KELUARGA' + i + 'HUBUNGANID', 'KELUARGA' + i + 'HUBUNGAN');
+    let hub_jp = isGood(kF.hubungan_jp) ? kF.hubungan_jp : v('KELUARGA' + i + 'HUBUNGANJP');
+    let nm = isGood(kF.nama) ? kF.nama : v('KELUARGA' + i + 'NAMA');
+    let u = isGood(kF.umur) ? kF.umur : v('KELUARGA' + i + 'USIA', 'KELUARGA' + i + 'UMUR');
+    let p = isGood(kF.pekerjaan)
+      ? kF.pekerjaan
+      : v('KELUARGA' + i + 'PEKERJAANID', 'KELUARGA' + i + 'PEKERJAAN');
+    let p_jp = isGood(kF.pekerjaan_jp) ? kF.pekerjaan_jp : v('KELUARGA' + i + 'PEKERJAANJP');
+    let g = isGood(kF.gaji) ? kF.gaji : v('KELUARGA' + i + 'GAJI');
 
-            famHtml += `<tr>
+    if (hub === '-') hub = '';
+    if (nm === '-') nm = '';
+    if (u === '-') u = '';
+    if (p === '-') p = '';
+    if (g === '-') g = '';
+    if (hub_jp === '-') hub_jp = '';
+    if (p_jp === '-') p_jp = '';
+
+    let finalHub = hub_jp ? hub.toUpperCase() + '  ' + hub_jp : hub.toUpperCase();
+    let finalPek = p_jp
+      ? p + '<br><span style="font-size:8px; font-weight:normal;">' + p_jp + '</span>'
+      : p;
+
+    famHtml += `<tr>
               <td colspan="2" class="val-center">${finalHub}</td>
               <td colspan="2" class="val-center">${nm.toUpperCase()}</td>
               <td class="val-center">${u ? u + '歳' : ''}</td>
               <td class="val-center">${finalPek}</td>
               <td class="val-right pr-1">${g ? '¥&nbsp;&nbsp;&nbsp;' + g : '¥&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-'}</td>
             </tr>`;
-        }
-        return famHtml;
-    }
+  }
+  return famHtml;
+}
 
-    // --- NILAI IDENTITAS (gender/nikah/jpn/paspor/tangan/goldar/no) ---
-    function buildCvIdentitas(v) {
-        let gen = String(v('GENDER', 'JENISKELAMIN', 'identitas.gender')).toUpperCase();
-        // Perempuan: PEREMPUAN/WANITA/CEWEK/W/女; jangan tangkap 'PRIA' (punya huruf P)
-        let genderStr = gen.includes('PEREMPUAN') || gen.includes('WANITA') || gen.includes('CEWEK') || gen.includes('女') || gen === 'W' ? 'PEREMPUAN (女)' : (gen === '-' ? '' : 'LAKI LAKI (男)');
-        
-        let nikah = String(v('STATUSPERNIKAHAN', 'STATUSNIKAH', 'PASANGAN', 'identitas.status_nikah', 'identitas.status_nikah_id')).toUpperCase();
-        let nikahStr = nikah.includes('MENIKAH') && !nikah.includes('BELUM') ? 'MENIKAH （既婚）' : (nikah === '-' ? '' : 'BELUM MENIKAH （未婚）');
-        
-        // "BELUM PERNAH" / "TIDAK" / kosong -> TIDAK (無); yang lain (EKS MAGANG,
-        // EKS TOKUTEI GINO, YA, ADA) -> ADA (有). Cek BELUM/TIDAK dulu karena
-        // 'BELUM PERNAH' mengandung 'PERNAH' (cek naif lama salah tampil ADA).
-        let jpn = String(v('PERNAHKEJEPANG', 'PENGALAMANJEPANG', 'STATUSEKSJEPANG', 'wawancara.riwayat_jepang')).toUpperCase();
-        let jpnStr = (!jpn || jpn === '-' || jpn.includes('BELUM') || jpn.includes('TIDAK') || jpn === 'NO') ? (jpn === '-' ? '' : 'TIDAK （無）') : 'ADA （有）';
-        
-        let pspr = String(v('PASPOR', 'PASPORT', 'identitas.paspor')).toUpperCase();
-        let psprStr = pspr.includes('YA') || pspr.includes('ADA') || pspr.length > 5 ? 'ADA （有）' : 'TIDAK （無）';
+// --- NILAI IDENTITAS (gender/nikah/jpn/paspor/tangan/goldar/no) ---
+function buildCvIdentitas(v) {
+  let gen = String(v('GENDER', 'JENISKELAMIN', 'identitas.gender')).toUpperCase();
+  // Perempuan: PEREMPUAN/WANITA/CEWEK/W/女; jangan tangkap 'PRIA' (punya huruf P)
+  let genderStr =
+    gen.includes('PEREMPUAN') ||
+    gen.includes('WANITA') ||
+    gen.includes('CEWEK') ||
+    gen.includes('女') ||
+    gen === 'W'
+      ? 'PEREMPUAN (女)'
+      : gen === '-'
+        ? ''
+        : 'LAKI LAKI (男)';
 
-        let tgn = String(v('TANGANDOMINAN', 'TANGAN', 'fisik.tangan_dominan')).toUpperCase();
-        let tgnStr = tgn.includes('KIRI') ? 'KIRI (左)' : (tgn === '-' ? '' : 'KANAN  (右)');
+  let nikah = String(
+    v(
+      'STATUSPERNIKAHAN',
+      'STATUSNIKAH',
+      'PASANGAN',
+      'identitas.status_nikah',
+      'identitas.status_nikah_id',
+    ),
+  ).toUpperCase();
+  let nikahStr =
+    nikah.includes('MENIKAH') && !nikah.includes('BELUM')
+      ? 'MENIKAH （既婚）'
+      : nikah === '-'
+        ? ''
+        : 'BELUM MENIKAH （未婚）';
 
-        let goldar = v('GOLONGANDARAH', 'GOLDAR', 'identitas.golongan_darah');
-        if (goldar === '-') goldar = '';
+  // "BELUM PERNAH" / "TIDAK" / kosong -> TIDAK (無); yang lain (EKS MAGANG,
+  // EKS TOKUTEI GINO, YA, ADA) -> ADA (有). Cek BELUM/TIDAK dulu karena
+  // 'BELUM PERNAH' mengandung 'PERNAH' (cek naif lama salah tampil ADA).
+  let jpn = String(
+    v('PERNAHKEJEPANG', 'PENGALAMANJEPANG', 'STATUSEKSJEPANG', 'wawancara.riwayat_jepang'),
+  ).toUpperCase();
+  let jpnStr =
+    !jpn || jpn === '-' || jpn.includes('BELUM') || jpn.includes('TIDAK') || jpn === 'NO'
+      ? jpn === '-'
+        ? ''
+        : 'TIDAK （無）'
+      : 'ADA （有）';
 
-        // Nomor 実習生 dari id_kandidat (mis. ASJ-20260801-6160 -> P-6160)
-        let noRirekisho = v('id_kandidat', 'IDKANDIDAT', 'NOMOR', 'ID');
-        if (noRirekisho !== '-') {
-            let m = String(noRirekisho).match(/(\d{3,})$/);
-            noRirekisho = m ? 'P - ' + m[1] : noRirekisho;
-        } else { noRirekisho = ''; }
-        return { genderStr, nikahStr, jpnStr, psprStr, tgnStr, goldar, noRirekisho };
-    }
+  let pspr = String(v('PASPOR', 'PASPORT', 'identitas.paspor')).toUpperCase();
+  let psprStr =
+    pspr.includes('YA') || pspr.includes('ADA') || pspr.length > 5 ? 'ADA （有）' : 'TIDAK （無）';
 
-    // --- TEMPLATE KERTAS A4 (100% IDENTIK GAMBAR) ---
-    function buildCvKertasA4(p) {
-        const { v, fotoHtml, btnPrintHtml, tglFormat, waTarget, genderStr, nikahStr, jpnStr, psprStr, tgnStr, goldar, noRirekisho, eduHtml, jobHtml, famHtml } = p;
-        let html = `
+  let tgn = String(v('TANGANDOMINAN', 'TANGAN', 'fisik.tangan_dominan')).toUpperCase();
+  let tgnStr = tgn.includes('KIRI') ? 'KIRI (左)' : tgn === '-' ? '' : 'KANAN  (右)';
+
+  let goldar = v('GOLONGANDARAH', 'GOLDAR', 'identitas.golongan_darah');
+  if (goldar === '-') goldar = '';
+
+  // Nomor 実習生 dari id_kandidat (mis. ASJ-20260801-6160 -> P-6160)
+  let noRirekisho = v('id_kandidat', 'IDKANDIDAT', 'NOMOR', 'ID');
+  if (noRirekisho !== '-') {
+    let m = String(noRirekisho).match(/(\d{3,})$/);
+    noRirekisho = m ? 'P - ' + m[1] : noRirekisho;
+  } else {
+    noRirekisho = '';
+  }
+  return { genderStr, nikahStr, jpnStr, psprStr, tgnStr, goldar, noRirekisho };
+}
+
+// --- TEMPLATE KERTAS A4 (100% IDENTIK GAMBAR) ---
+function buildCvKertasA4(p) {
+  const {
+    v,
+    fotoHtml,
+    btnPrintHtml,
+    tglFormat,
+    waTarget,
+    genderStr,
+    nikahStr,
+    jpnStr,
+    psprStr,
+    tgnStr,
+    goldar,
+    noRirekisho,
+    eduHtml,
+    jobHtml,
+    famHtml,
+  } = p;
+  let html = `
             ${btnPrintHtml}
             <style>
                 @media print {
@@ -223,7 +314,7 @@
                 <tr>
                     <td colspan="2" class="bg-amber val-center">名前&nbsp;&nbsp;&nbsp;NAMA</td>
                     <td class="bg-amber val-center">年齢&nbsp;&nbsp;&nbsp;USIA</td>
-                    <td class="val-center">${v('USIA', 'UMUR', 'identitas.umur').replace(/\D/g,'')} 歳</td>
+                    <td class="val-center">${v('USIA', 'UMUR', 'identitas.umur').replace(/\D/g, '')} 歳</td>
                 </tr>
                 <tr>
                     <td colspan="2" class="val-center uppercase" style="font-size:12px;"><i>${v('NAMALENGKAP', 'NAMA', 'identitas.nama_lengkap')}</i></td>
@@ -383,5 +474,5 @@
                 </tr>
             </table>
         `;
-        return html;
-    }
+  return html;
+}

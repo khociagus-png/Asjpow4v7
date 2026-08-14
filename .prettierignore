@@ -1,0 +1,10 @@
+# Artefak build / pihak ketiga — jangan diformat
+assets/
+vendor/
+node_modules/
+dist/
+
+# Halaman HTML raksasa (250KB+) — belum diformat karena masih menunggu
+# pemecahan partial (langkah refactor berikutnya). JS di dalamnya ditangani
+# lewat bundel build:js.
+*.html

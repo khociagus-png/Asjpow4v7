@@ -22,9 +22,11 @@ ke branch `main` di GitHub**, supaya anggota tim selalu bisa download versi terb
 - Kalau lupa: cek dengan `git status` — kalau ada file belum di-commit, langsung commit + push.
 
 ### Cara tim mengambil versi terbaru
+
 ```bash
 git pull origin main
 ```
+
 > Jika ada versi lama nyangkut di browser/HP: muat ulang halaman / hapus cache (PWA).
 > Data di Supabase tetap sama — yang di-pull hanya kode.
 
@@ -32,15 +34,15 @@ git pull origin main
 
 ## 2. Struktur project (singkat)
 
-| Bagian | Lokasi | Keterangan |
-|---|---|---|
-| Frontend (statis, vanilla JS) | root: `index.html`, `admin.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html`, `ai_form.html` | SPA statis, di-host Netlify |
-| Styling | `src/main.css` (input Tailwind v4) → build → `assets/main.css` | **WAJIB jalankan `bun run build:css` setelah menambah/ubah kelas Tailwind di HTML/JS**, supaya CSS hasil build ikut kelas terbaru (lihat #3) |
-| Logika frontend | `js/*.js` (dimuat berurutan sesuai urutan di tiap HTML) | Sudah di-refactor ke `async/await` — **jangan tulis ulang ke pola callback `.then()`** |
-| Backend API | `netlify/functions/**` (`_lib/handlers.js` = dispatcher action, `_lib/supabase.js` = DB) | Semua `callGAS(...)` di frontend hanyalah **nama bridge** → Netlify Functions + Supabase. **TIDAK ada** Google Apps Script lagi. Jangan menambahkan endpoint GAS baru |
-| Konfigurasi Netlify | `netlify.toml` | `publish = "."`, `functions = "netlify/functions"`, redirect `/api/*` → `/.netlify/functions/:splat` |
-| E2E test | `e2e/login-check.mjs` | Playwright (login admin/kandidat + render dashboard) |
-| Unit test | `js/helpers_cv.test.js` | Vitest |
+| Bagian                        | Lokasi                                                                                                                    | Keterangan                                                                                                                                                                                                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend (statis, vanilla JS) | root: `index.html`, `admin.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html`, `ai_form.html`  | SPA statis, di-host Netlify                                                                                                                                                                                                                                   |
+| Styling                       | `src/main.css` (input Tailwind v4) → build → `assets/main.css`                                                            | **WAJIB jalankan `bun run build:css` setelah menambah/ubah kelas Tailwind di HTML/JS**, supaya CSS hasil build ikut kelas terbaru (lihat #3)                                                                                                                  |
+| Logika frontend               | `js/*.js` + `api-client.js` + `i18n.js` + `pwa.js` (sumber) → `bun run build:js` → `assets/app-<hash>.js` (bundel 1 file) | admin.html & index.html memuat **1 bundel** (`assets/app-<hash>.js`) — bukan 20 script tag lagi. **WAJIB jalankan `bun run build:js` setelah mengubah file JS apa pun** (lihat #3). Halaman lain (master/apply/share/dll) memuat api-client/i18n/pwa langsung |
+| Backend API                   | `netlify/functions/**` (`_lib/handlers.js` = dispatcher action, `_lib/supabase.js` = DB)                                  | Semua `callGAS(...)` di frontend hanyalah **nama bridge** → Netlify Functions + Supabase. **TIDAK ada** Google Apps Script lagi. Jangan menambahkan endpoint GAS baru                                                                                         |
+| Konfigurasi Netlify           | `netlify.toml`                                                                                                            | `publish = "."`, `functions = "netlify/functions"`, redirect `/api/*` → `/.netlify/functions/:splat`                                                                                                                                                          |
+| E2E test                      | `e2e/login-check.mjs`                                                                                                     | Playwright (login admin/kandidat + render dashboard)                                                                                                                                                                                                          |
+| Unit test                     | `js/helpers_cv.test.js`                                                                                                   | Vitest                                                                                                                                                                                                                                                        |
 
 ---
 
@@ -52,6 +54,19 @@ bun install
 
 # Rebuild CSS Tailwind (WAJIB setelah ubah kelas di HTML/JS)
 bun run build:css
+
+# Rebuild bundel JS (WAJIB setelah ubah file di js/, api-client.js, i18n.js, atau pwa.js)
+bun run build:js
+
+# Build keduanya sekaligus
+bun run build
+
+# Format semua JS (Prettier) — jalankan sekali, lalu hanya saat ada PR besar
+bun run format
+bun run format:check   # cek saja
+
+# Lint (ESLint) — error = bug nyata (mis. key duplikat di i18n), warning = gaya
+bun run lint
 
 # Unit test
 bun run test

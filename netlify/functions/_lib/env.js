@@ -3,43 +3,43 @@
 // Prioritas: process.env (Netlify production / Freebuff Keys UI) lalu fallback
 // ke .env.local di repo (hanya untuk preview sandbox). Hanya kunci whitelist
 // yang dibaca dari file — secret lain tidak pernah disentuh.
-"use strict";
+'use strict';
 
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 const WHITELIST = new Set([
-  "SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "SUPABASE_ANON_KEY",
-  "SUPABASE_KEY",
-  "GEMINI_API_KEY",
-  "FONNTE_TOKEN",
-  "FONNTE_API_KEY",
-  "ADMIN_PASSWORD",
-  "ADMIN_MASTER_PASSWORD",
-  "MASTER_PASSWORD",
-  "ASJ_ADMIN_PASSWORD",
-  "ADMIN_PIN",
-  "PIN_ADMIN",
-  "ADMIN_MASTER_PIN",
-  "ADMIN_NUMBERS",
-  "PIN_KHOCI",
-  "GROQ_API_KEY",
-  "SUPABASE_STORAGE_BUCKET",
-  "LOG_DRAIN_TOKEN",
-  "NETLIFY_SITE_URL",
-  "SESSION_SECRET",
-  "ASJ_ADMINS",
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'SUPABASE_ANON_KEY',
+  'SUPABASE_KEY',
+  'GEMINI_API_KEY',
+  'FONNTE_TOKEN',
+  'FONNTE_API_KEY',
+  'ADMIN_PASSWORD',
+  'ADMIN_MASTER_PASSWORD',
+  'MASTER_PASSWORD',
+  'ASJ_ADMIN_PASSWORD',
+  'ADMIN_PIN',
+  'PIN_ADMIN',
+  'ADMIN_MASTER_PIN',
+  'ADMIN_NUMBERS',
+  'PIN_KHOCI',
+  'GROQ_API_KEY',
+  'SUPABASE_STORAGE_BUCKET',
+  'LOG_DRAIN_TOKEN',
+  'NETLIFY_SITE_URL',
+  'SESSION_SECRET',
+  'ASJ_ADMINS',
 ]);
 
 // Nama scope pada tabel env Netlify yang ditempel. Nilai pada baris scope ini
 // milik variabel yang namanya ada di baris komentar (#) tepat di atas bloknya.
 const SCOPE_ROWS = new Set([
-  "PRODUCTION",
-  "DEPLOY_PREVIEW",
-  "BRANCH_DEPLOY",
-  "LOCAL_DEVELOPMENT_NETLIFY_CLI",
+  'PRODUCTION',
+  'DEPLOY_PREVIEW',
+  'BRANCH_DEPLOY',
+  'LOCAL_DEVELOPMENT_NETLIFY_CLI',
 ]);
 
 // Normalisasi nama key dari tabel yang ditempel:
@@ -48,26 +48,26 @@ function normalizeKey(raw) {
   return raw
     .trim()
     .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
 
 // Alias umum bila nama asli di dashboard Netlify beda dari nama baku.
 const ALIASES = {
-  SERVICE_ROLE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
-  SERVICE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
-  SUPABASE_KEY: "SUPABASE_SERVICE_ROLE_KEY",
-  ANON_KEY: "SUPABASE_ANON_KEY",
-  SUPABASE_ANON: "SUPABASE_ANON_KEY",
-  GEMINI_KEY: "GEMINI_API_KEY",
-  GEMINI: "GEMINI_API_KEY",
-  GOOGLE_GEMINI_KEY: "GEMINI_API_KEY",
-  FONNTE: "FONNTE_TOKEN",
-  FONNTE_API: "FONNTE_TOKEN",
-  MASTER_PIN: "ADMIN_MASTER_PIN",
-  ADMIN_PIN: "ADMIN_MASTER_PIN",
-  SESSION_KEY: "SESSION_SECRET",
-  ASJ_ADMIN: "ASJ_ADMINS",
+  SERVICE_ROLE_KEY: 'SUPABASE_SERVICE_ROLE_KEY',
+  SERVICE_KEY: 'SUPABASE_SERVICE_ROLE_KEY',
+  SUPABASE_KEY: 'SUPABASE_SERVICE_ROLE_KEY',
+  ANON_KEY: 'SUPABASE_ANON_KEY',
+  SUPABASE_ANON: 'SUPABASE_ANON_KEY',
+  GEMINI_KEY: 'GEMINI_API_KEY',
+  GEMINI: 'GEMINI_API_KEY',
+  GOOGLE_GEMINI_KEY: 'GEMINI_API_KEY',
+  FONNTE: 'FONNTE_TOKEN',
+  FONNTE_API: 'FONNTE_TOKEN',
+  MASTER_PIN: 'ADMIN_MASTER_PIN',
+  ADMIN_PIN: 'ADMIN_MASTER_PIN',
+  SESSION_KEY: 'SESSION_SECRET',
+  ASJ_ADMIN: 'ASJ_ADMINS',
 };
 
 // Parse satu baris env: dukung format "KEY=value" DAN format tabel
@@ -93,14 +93,14 @@ function loadFileEnv() {
   if (fileEnv) return fileEnv;
   fileEnv = {};
   try {
-    const p = path.join(process.cwd(), ".env.local");
+    const p = path.join(process.cwd(), '.env.local');
     if (!fs.existsSync(p)) return fileEnv;
-    const lines = fs.readFileSync(p, "utf8").split(/\r?\n/);
+    const lines = fs.readFileSync(p, 'utf8').split(/\r?\n/);
     // Format yang didukung:
     //   KEY=value
     //   # NAMA_VARIABEL  (nama variabel untuk blok tabel scope di bawahnya)
     //   | Production | <nilai> |  (dst.) — nilai milik variabel di komentar atas
-    let currentVar = "";
+    let currentVar = '';
     for (const line of lines) {
       const cm = line.match(/^\s*#+\s*(.+?)\s*$/);
       if (cm) {
@@ -119,7 +119,7 @@ function loadFileEnv() {
       if (!WHITELIST.has(target)) continue;
       if (isScope) {
         // Nilai scope: utamakan baris PRODUCTION; jangan menimpa nilai KEY=value.
-        if (parsed.key === "PRODUCTION" || !(target in fileEnv)) {
+        if (parsed.key === 'PRODUCTION' || !(target in fileEnv)) {
           fileEnv[target] = val;
         }
       } else {
@@ -134,12 +134,12 @@ function loadFileEnv() {
 
 function env(key) {
   const v =
-    process.env[key] !== undefined && process.env[key] !== ""
+    process.env[key] !== undefined && process.env[key] !== ''
       ? process.env[key]
-      : loadFileEnv()[key] || "";
+      : loadFileEnv()[key] || '';
   // NETLIFY_SITE_URL kadang tercemar baris paste tabel env Netlify (multi-
   // baris berisi variabel lain) — ambil hanya URL valid pertama.
-  if (key === "NETLIFY_SITE_URL") {
+  if (key === 'NETLIFY_SITE_URL') {
     // Nilai bisa tercemar paste tabel env Netlify — ambil host saja
     // (https://<subdomain>.<domain>), tanpa path.
     const m = String(v).match(/https?:\/\/[a-z0-9.-]+/i);
@@ -172,11 +172,11 @@ function debugFileStructure() {
     otherShapes: [], // klasifikasi bentuk baris lain (tanpa isi)
   };
   try {
-    const p = path.join(process.cwd(), ".env.local");
+    const p = path.join(process.cwd(), '.env.local');
     const st = fs.statSync(p);
     info.exists = true;
     info.size = st.size;
-    const content = fs.readFileSync(p, "utf8");
+    const content = fs.readFileSync(p, 'utf8');
     const rawLines = content.split(/\r?\n/);
     info.lines = rawLines.length;
     for (const line of rawLines) {
@@ -184,18 +184,19 @@ function debugFileStructure() {
       if (parseLine(line)) {
         info.keyValue++;
         info.keys.push(parseLine(line).key);
-      } else if (trimmed.startsWith("#") || trimmed.startsWith(";")) {
+      } else if (trimmed.startsWith('#') || trimmed.startsWith(';')) {
         info.comment++;
-      } else if (trimmed === "") {
+      } else if (trimmed === '') {
         info.blank++;
       } else {
         info.other++;
-        const shape = trimmed.startsWith("{")
-          ? "{obj"
-          : trimmed.startsWith("[")
-            ? "[arr"
-            : trimmed.startsWith("\"")
-              ? '\"str' : "len" + trimmed.length + ":" + trimmed.charAt(0);
+        const shape = trimmed.startsWith('{')
+          ? '{obj'
+          : trimmed.startsWith('[')
+            ? '[arr'
+            : trimmed.startsWith('"')
+              ? '\"str'
+              : 'len' + trimmed.length + ':' + trimmed.charAt(0);
         if (info.otherShapes.length < 5 && !info.otherShapes.includes(shape)) {
           info.otherShapes.push(shape);
         }
@@ -212,7 +213,7 @@ function debugFileStructure() {
       const s = keyStats[parsed.key] || { count: 0, valueLen: 0, valueHasPipe: false };
       s.count++;
       s.valueLen = parsed.value.length;
-      if (parsed.value.includes("|")) s.valueHasPipe = true;
+      if (parsed.value.includes('|')) s.valueHasPipe = true;
       keyStats[parsed.key] = s;
     }
     info.keyStats = Object.entries(keyStats).map(([k, s]) => ({ key: k, ...s }));
@@ -220,17 +221,17 @@ function debugFileStructure() {
     const prefixCount = {};
     for (const line of rawLines) {
       const trimmed = line.trim();
-      if (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith(";")) continue;
+      if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
       if (parseLine(line)) continue;
-      const cls = trimmed.startsWith("|-")
-        ? "|- (separator tabel)"
-        : trimmed.startsWith("|")
-          ? "| (pipe lain)"
-          : trimmed.startsWith("-")
-            ? "- (dash)"
-            : trimmed.startsWith("{")
-              ? "{ (obj)"
-              : "lainnya";
+      const cls = trimmed.startsWith('|-')
+        ? '|- (separator tabel)'
+        : trimmed.startsWith('|')
+          ? '| (pipe lain)'
+          : trimmed.startsWith('-')
+            ? '- (dash)'
+            : trimmed.startsWith('{')
+              ? '{ (obj)'
+              : 'lainnya';
       prefixCount[cls] = (prefixCount[cls] || 0) + 1;
     }
     info.otherPrefix = prefixCount;
@@ -238,42 +239,42 @@ function debugFileStructure() {
     // Dipakai untuk mengenali layout tabel yang ditempel (mis. value-first).
     function fieldShape(f) {
       const t = f.trim();
-      if (/^https?:\/\//.test(t)) return "url";
-      if (/^ey[A-Za-z0-9_-]+$/.test(t) && t.length > 20) return "jwt";
-      if (/^\d+$/.test(t)) return "num";
-      if (/^[A-Za-z][A-Za-z0-9_. -]{0,40}$/.test(t)) return "word";
-      if (t === "✅" || t === "✔" || t === "✓") return "check";
-      if (t === "") return "empty";
-      return "mixed(" + t.length + ")";
+      if (/^https?:\/\//.test(t)) return 'url';
+      if (/^ey[A-Za-z0-9_-]+$/.test(t) && t.length > 20) return 'jwt';
+      if (/^\d+$/.test(t)) return 'num';
+      if (/^[A-Za-z][A-Za-z0-9_. -]{0,40}$/.test(t)) return 'word';
+      if (t === '✅' || t === '✔' || t === '✓') return 'check';
+      if (t === '') return 'empty';
+      return 'mixed(' + t.length + ')';
     }
     const shapeCount = {};
     for (const line of rawLines) {
       const trimmed = line.trim();
-      if (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith(";")) continue;
+      if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
       if (parseLine(line)) continue;
-      const fields = trimmed.split("|").map(fieldShape);
-      const pat = fields.join(" | ");
+      const fields = trimmed.split('|').map(fieldShape);
+      const pat = fields.join(' | ');
       shapeCount[pat] = (shapeCount[pat] || 0) + 1;
     }
     info.otherFieldShapes = Object.entries(shapeCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
-      .map(([pat, cnt]) => pat + " x" + cnt);
+      .map(([pat, cnt]) => pat + ' x' + cnt);
     // Nama field pertama (key) dari baris "other" yang TIDAK ter-parse,
     // ditampilkan ter-mask (nama variabel bukan rahasia):
     // "SUP…_KEY (26)". Nilai tidak pernah ditampilkan.
     const masked = [];
     for (const line of rawLines) {
       const trimmed = line.trim();
-      if (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith(";")) continue;
+      if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
       if (parseLine(line)) continue;
       const m = trimmed.match(/^\s*\|\s*([^|]*)/);
       if (m) {
         const f = m[1].trim();
         const mask =
           f.length <= 8
-            ? f.charAt(0) + "…"
-            : f.slice(0, 5) + "…" + f.slice(-5) + " (" + f.length + ")";
+            ? f.charAt(0) + '…'
+            : f.slice(0, 5) + '…' + f.slice(-5) + ' (' + f.length + ')';
         if (!masked.includes(mask)) masked.push(mask);
       }
     }
@@ -281,26 +282,27 @@ function debugFileStructure() {
     // Dump 30 baris pertama: NAMA KEY (atau bentuk baris) + nilai ter-mask
     // (3 karakter awal + 3 akhir + panjang). Nilai penuh TIDAK pernah tampil.
     function maskVal(v) {
-      if (v === "") return "(kosong)";
-      const s = v.length <= 12 ? v.charAt(0) + "…(" + v.length + ")" : v.slice(0, 3) + "…" + v.slice(-3) + " (" + v.length + ")";
+      if (v === '') return '(kosong)';
+      const s =
+        v.length <= 12
+          ? v.charAt(0) + '…(' + v.length + ')'
+          : v.slice(0, 3) + '…' + v.slice(-3) + ' (' + v.length + ')';
       return s;
     }
     const linesDump = [];
     for (let i = 0; i < Math.min(rawLines.length, 30); i++) {
       const line = rawLines[i];
       const trimmed = line.trim();
-      if (trimmed === "") continue;
+      if (trimmed === '') continue;
       const parsed = parseLine(line);
       if (parsed) {
-        linesDump.push(i + 1 + ": " + parsed.key + " = " + maskVal(parsed.value));
-      } else if (trimmed.startsWith("#")) {
-        const text = trimmed.replace(/^#+\s*/, "").trim();
-        linesDump.push(i + 1 + ": # " + (text.length > 60 ? text.slice(0, 60) + "…" : text));
+        linesDump.push(i + 1 + ': ' + parsed.key + ' = ' + maskVal(parsed.value));
+      } else if (trimmed.startsWith('#')) {
+        const text = trimmed.replace(/^#+\s*/, '').trim();
+        linesDump.push(i + 1 + ': # ' + (text.length > 60 ? text.slice(0, 60) + '…' : text));
       } else {
-        const fields = trimmed.split("|");
-        linesDump.push(
-          i + 1 + ": [" + fields.map((f) => maskVal(f.trim())).join(" | ") + "]"
-        );
+        const fields = trimmed.split('|');
+        linesDump.push(i + 1 + ': [' + fields.map((f) => maskVal(f.trim())).join(' | ') + ']');
       }
     }
     info.linesDump = linesDump;

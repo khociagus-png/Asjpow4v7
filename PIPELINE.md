@@ -45,13 +45,13 @@ di-handling sesuai SOP lapangan (bukan otomatis sistem).
 Urutan tahapan (umum; perusahaan tertentu bisa minta alur khusus — sistem harus
 mendukung penyimpangan, bukan memaksa linear):
 
-| # | Tahapan | Arti lapangan |
-|---|---|---|
-| 1 | **list-check** | Daftar kandidat dari hasil share dipilah & diverifikasi (umur, gender, dokumen awal) |
-| 2 | **kaiwa** | Tes percakapan / kemampuan dasar bahasa Jepang |
-| 3 | **mendan** | Wawancara pendahuluan (ASJ ↔ kandidat) |
-| 4 | **mensetsu** | Wawancara formal (dengan pihak Jepang / user / TSK) |
-| 5 | **lolos user** | Kandidat dinyatakan lulus seleksi oleh user |
+| #   | Tahapan        | Arti lapangan                                                                        |
+| --- | -------------- | ------------------------------------------------------------------------------------ |
+| 1   | **list-check** | Daftar kandidat dari hasil share dipilah & diverifikasi (umur, gender, dokumen awal) |
+| 2   | **kaiwa**      | Tes percakapan / kemampuan dasar bahasa Jepang                                       |
+| 3   | **mendan**     | Wawancara pendahuluan (ASJ ↔ kandidat)                                               |
+| 4   | **mensetsu**   | Wawancara formal (dengan pihak Jepang / user / TSK)                                  |
+| 5   | **lolos user** | Kandidat dinyatakan lulus seleksi oleh user                                          |
 
 **Sifat filter berjenjang (corong):** jumlah kandidat menyusut di tiap tahapan.
 Contoh nyata: list 30 → lolos kaiwa hanya **7** → lolos mendan **5** → lolos user **3**.
@@ -63,16 +63,16 @@ Sistem harus mencatat **jumlah awal & jumlah yang lolos di tiap tahap** (bukan c
 
 Urutan tetap, hanya kandidat yang sudah **lolos user** yang masuk fase ini:
 
-| # | Tahapan | Arti lapangan |
-|---|---|---|
-| 1 | **MCU** | Medical check-up (kesehatan) |
-| 2 | **paspor** | Pengurusan / perpanjangan paspor |
-| 3 | **TTD kontrak** | Penandatanganan kontrak kerja |
-| 4 | **proses COE** | Pengajuan Certificate of Eligibility |
-| 5 | **siskop** | Siskop / pengurusan izin & data ketenagakerjaan |
-| 6 | **e-ID** | Kartu identitas elektronik / data identitas resmi |
-| 7 | **visa** | Pengurusan visa kerja |
-| 8 | **flight** | Tiket & keberangkatan |
+| #   | Tahapan         | Arti lapangan                                     |
+| --- | --------------- | ------------------------------------------------- |
+| 1   | **MCU**         | Medical check-up (kesehatan)                      |
+| 2   | **paspor**      | Pengurusan / perpanjangan paspor                  |
+| 3   | **TTD kontrak** | Penandatanganan kontrak kerja                     |
+| 4   | **proses COE**  | Pengajuan Certificate of Eligibility              |
+| 5   | **siskop**      | Siskop / pengurusan izin & data ketenagakerjaan   |
+| 6   | **e-ID**        | Kartu identitas elektronik / data identitas resmi |
+| 7   | **visa**        | Pengurusan visa kerja                             |
+| 8   | **flight**      | Tiket & keberangkatan                             |
 
 > Pengecualian: jika perusahaan **cancel** di tengah fase ini, pipeline berhenti —
 > sistem menandai kandidat **gagal/batal + alasan cancel**, bukan melanjutkan otomatis.
@@ -99,16 +99,16 @@ Urutan tetap, hanya kandidat yang sudah **lolos user** yang masuk fase ini:
 
 ## 5. Pemetaan ke sistem saat ini (buat developer)
 
-| Konsep pipeline | Di sistem |
-|---|---|
-| JO dari TSK | Tabel `db_job` (loker: kode job, judul, syarat, kuota, tahapan) |
-| Daftar tahapan (Fase A+B) | Config `list_tahapan` (sys_config) — urutannya harus = pipeline di atas |
-| Posisi kandidat di pipeline | Kolom `tahapan` / `status` di `database_candidate` |
-| Progres dashboard kandidat | `evaluasiTahapanKandidat()` — menghitung posisi vs `list_tahapan` |
-| Filter berjenjang (corong) | Hitung dari data kandidat per tahap (perlu laporan agregat) |
-| Dokumen pendukung (CV, berkas) | Pemberkasan kandidat + link ke Drive (tidak menggantikan Drive) |
-| Pamflet / share WA | Share link loker (`share.html`) + blast WA (Fonnte) |
-| Cancel perusahaan | Status kandidat **batal/gagal** + alasan — bukan lanjut otomatis |
+| Konsep pipeline                | Di sistem                                                               |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| JO dari TSK                    | Tabel `db_job` (loker: kode job, judul, syarat, kuota, tahapan)         |
+| Daftar tahapan (Fase A+B)      | Config `list_tahapan` (sys_config) — urutannya harus = pipeline di atas |
+| Posisi kandidat di pipeline    | Kolom `tahapan` / `status` di `database_candidate`                      |
+| Progres dashboard kandidat     | `evaluasiTahapanKandidat()` — menghitung posisi vs `list_tahapan`       |
+| Filter berjenjang (corong)     | Hitung dari data kandidat per tahap (perlu laporan agregat)             |
+| Dokumen pendukung (CV, berkas) | Pemberkasan kandidat + link ke Drive (tidak menggantikan Drive)         |
+| Pamflet / share WA             | Share link loker (`share.html`) + blast WA (Fonnte)                     |
+| Cancel perusahaan              | Status kandidat **batal/gagal** + alasan — bukan lanjut otomatis        |
 
 ---
 

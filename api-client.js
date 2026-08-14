@@ -11,10 +11,15 @@ const NETLIFY_API_BASE = '/.netlify/functions';
 // asli dari server, bukan hanya nomor WA). callAPI menempelkan asj_kandidat_session
 // ke body request untuk action ini, dan backend memvalidasinya (WA harus cocok).
 const CANDIDATE_ACTIONS = new Set([
-  'getMasterDataByWa', 'submitMasterForm', 'getDrafCvMaster',
-  'simpanUpdateMaster', 'simpanBiodataLengkap',
-  'simpanRevisiKandidat', 'simpanBerkasTahapan',
-  'simpanDataTtdNaitei', 'gantiPasswordKandidat',
+  'getMasterDataByWa',
+  'submitMasterForm',
+  'getDrafCvMaster',
+  'simpanUpdateMaster',
+  'simpanBiodataLengkap',
+  'simpanRevisiKandidat',
+  'simpanBerkasTahapan',
+  'simpanDataTtdNaitei',
+  'gantiPasswordKandidat',
   // AI CV (ai_form, flow=master) dipakai KANDIDAT (VIP) DAN ADMIN (tombol AI CV
   // di tabel admin → bridge window berbagi localStorage). Kirim token yang
   // sedang aktif: utamakan admin supaya server bisa izinkan admin membuka AI CV
@@ -24,117 +29,138 @@ const CANDIDATE_ACTIONS = new Set([
   // sesi harus cocok dengan WA yang dikirim) DAN ADMIN (bridge, WA apa pun).
   // Backend ai-form-submit.ts memvalidasi: admin valid ATAU kandidat pemilik WA
   // itu — selainnya 401 (anti spoof WA: tanpa sesi, data tidak bisa ditimpa).
-  'submitDataAsj'
+  'submitDataAsj',
 ]);
 
 const ADMIN_ACTIONS = new Set([
-  'approveForm', 'editLokerFull', 'hapusJadwal', 'hapusJobData', 'hapusWaTemplate',
-  'kirimSatuPesanFonnte', 'rejectForm', 'reviewForm', 'setTugasStatus', 'simpanJadwalBaru',
-  'simpanJobBaru', 'simpanWaTemplate', 'superSyncCleanup',
-  'tambahTugasBaru', 'ubahStatusJob', 'updateCatatanKandidat', 'updateKandidatSuper', 'getCandidatesPage',
+  'approveForm',
+  'editLokerFull',
+  'hapusJadwal',
+  'hapusJobData',
+  'hapusWaTemplate',
+  'kirimSatuPesanFonnte',
+  'rejectForm',
+  'reviewForm',
+  'setTugasStatus',
+  'simpanJadwalBaru',
+  'simpanJobBaru',
+  'simpanWaTemplate',
+  'superSyncCleanup',
+  'tambahTugasBaru',
+  'ubahStatusJob',
+  'updateCatatanKandidat',
+  'updateKandidatSuper',
+  'getCandidatesPage',
   'deleteForm',
-  'updateTahapanDbJob', 'simpanKandidatDanUpload',
+  'updateTahapanDbJob',
+  'simpanKandidatDanUpload',
   'tandaiGagalJob',
   'updateDokumenShare',
-  'getRincianPresets', 'saveRincianPreset', 'deleteRincianPreset',
+  'getRincianPresets',
+  'saveRincianPreset',
+  'deleteRincianPreset',
   'runMigration',
-  'getDriveLinkCandidates', 'uploadDriveReplacement',
+  'getDriveLinkCandidates',
+  'uploadDriveReplacement',
   // Aksi admin yang dulu tanpa gerbang server (audit keamanan 2026-08-09) -
   // sekarang wajib sesi admin di backend, jadi frontend harus kirim sessionToken.
-  'updateSysConfig', 'getAppConfig',
+  'updateSysConfig',
+  'getAppConfig',
   'getDaftarSiswaBaru',
   'kirimTawaranMassal',
-  'processAdminAIChat', 'getAdminAiContext', 'buildAdminAiCandidateSummary',
+  'processAdminAIChat',
+  'getAdminAiContext',
+  'buildAdminAiCandidateSummary',
   // Signed upload URL ke Storage (files.ts) - sekarang wajib sesi admin.
-  'getUploadUrls'
+  'getUploadUrls',
 ]);
 
 const NETLIFY_FUNCTIONS = {
   // AI (Gemini)
-  'processAIChat': 'ai-chat',
-  'processAdminAIChat': 'ai-chat',
-  'processSiswaAIChat': 'ai-chat',
-  'processAiInterview': 'ai-chat',
+  processAIChat: 'ai-chat',
+  processAdminAIChat: 'ai-chat',
+  processSiswaAIChat: 'ai-chat',
+  processAiInterview: 'ai-chat',
   // Form AI + upload berkas
-  'submitDataAsj': 'ai-form-submit',
-  'submitDaftarSiswa': 'ai-form-submit',
-  'simpanDataTtdNaitei': 'ai-form-submit',
+  submitDataAsj: 'ai-form-submit',
+  submitDaftarSiswa: 'ai-form-submit',
+  simpanDataTtdNaitei: 'ai-form-submit',
   // Context AI admin
-  'getAdminAiContext': 'admin-ai-context',
-  'buildAdminAiCandidateSummary': 'admin-ai-context',
+  getAdminAiContext: 'admin-ai-context',
+  buildAdminAiCandidateSummary: 'admin-ai-context',
   // Jadwal & tugas
-  'checkAndSendAgendaReminders': 'schedule-reminders',
-  'simpanJadwalBaru': 'schedule-reminders',
-  'hapusJadwal': 'schedule-reminders',
-  'tambahTugasBaru': 'schedule-reminders',
-  'setTugasStatus': 'schedule-reminders',
+  checkAndSendAgendaReminders: 'schedule-reminders',
+  simpanJadwalBaru: 'schedule-reminders',
+  hapusJadwal: 'schedule-reminders',
+  tambahTugasBaru: 'schedule-reminders',
+  setTugasStatus: 'schedule-reminders',
   // WhatsApp (Fonnte)
-  'kirimTawaranMassal': 'whatsapp',
-  'kirimSatuPesanFonnte': 'whatsapp',
-  'simpanWaTemplate': 'whatsapp',
-  'hapusWaTemplate': 'whatsapp',
+  kirimTawaranMassal: 'whatsapp',
+  kirimSatuPesanFonnte: 'whatsapp',
+  simpanWaTemplate: 'whatsapp',
+  hapusWaTemplate: 'whatsapp',
   // Konfigurasi sistem
-  'getAppConfig': 'config',
-  'updateSysConfig': 'config',
+  getAppConfig: 'config',
+  updateSysConfig: 'config',
   // File generik (Supabase Storage) - hanya getUploadUrls (upload/list/delete
   // generik dihapus dari files.ts karena tidak dipakai & tanpa gerbang admin)
-  'getUploadUrls': 'files',
+  getUploadUrls: 'files',
   // Data utama aplikasi
-  'getAppData': 'get-app-data',
+  getAppData: 'get-app-data',
   // Auth & akun
-  'daftarKandidat': 'auth',
-  'loginKandidat': 'auth',
-  'checkAdminMaster': 'auth',
-  'checkAdminPersonal': 'auth',
-  'gantiPasswordKandidat': 'auth',
-  'logout': 'auth',
+  daftarKandidat: 'auth',
+  loginKandidat: 'auth',
+  checkAdminMaster: 'auth',
+  checkAdminPersonal: 'auth',
+  gantiPasswordKandidat: 'auth',
+  logout: 'auth',
   // Lamaran publik (apply-full.html)
-  'cekDataPelamar': 'apply',
-  'isJobRequiresCv': 'apply',
-  'submitApply': 'apply',
-  'getExistingCandidateJsonByWa': 'apply',
+  cekDataPelamar: 'apply',
+  isJobRequiresCv: 'apply',
+  submitApply: 'apply',
+  getExistingCandidateJsonByWa: 'apply',
   // Data master kandidat (master-full.html + admin)
-  'getMasterDataByWa': 'master-data',
-  'submitMasterForm': 'master-data',
-  'getDrafCvMaster': 'master-data',
-  'simpanUpdateMaster': 'master-data',
-  'simpanKandidatDanUpload': 'master-data',
-  'simpanBiodataLengkap': 'master-data',
-  'simpanRevisiKandidat': 'master-data',
-  'simpanBerkasTahapan': 'master-data',
+  getMasterDataByWa: 'master-data',
+  submitMasterForm: 'master-data',
+  getDrafCvMaster: 'master-data',
+  simpanUpdateMaster: 'master-data',
+  simpanKandidatDanUpload: 'master-data',
+  simpanBiodataLengkap: 'master-data',
+  simpanRevisiKandidat: 'master-data',
+  simpanBerkasTahapan: 'master-data',
   // Manajemen loker (admin)
-  'simpanJobBaru': 'jobs',
-  'editLokerFull': 'jobs',
-  'ubahStatusJob': 'jobs',
-  'hapusJobData': 'jobs',
-  'updateTahapanDbJob': 'jobs',
-  'tandaiGagalJob': 'jobs',
-  'updateDokumenShare': 'jobs',
+  simpanJobBaru: 'jobs',
+  editLokerFull: 'jobs',
+  ubahStatusJob: 'jobs',
+  hapusJobData: 'jobs',
+  updateTahapanDbJob: 'jobs',
+  tandaiGagalJob: 'jobs',
+  updateDokumenShare: 'jobs',
   // Manajemen kandidat (admin)
-  'updateKandidatSuper': 'candidates',
-  'getCandidatesPage': 'candidates',
-  'updateCatatanKandidat': 'candidates',
-  'approveForm': 'candidates',
-  'rejectForm': 'candidates',
-  'reviewForm': 'candidates',
-  'deleteForm': 'candidates',
+  updateKandidatSuper: 'candidates',
+  getCandidatesPage: 'candidates',
+  updateCatatanKandidat: 'candidates',
+  approveForm: 'candidates',
+  rejectForm: 'candidates',
+  reviewForm: 'candidates',
+  deleteForm: 'candidates',
   // Link bridge & siswa baru
-  'getDaftarSiswaBaru': 'bridge-links',
-  'getLinkSiswaBaru': 'bridge-links',
-  'generateFormBridge': 'bridge-links',
-  'generateLegacyMasterBridge': 'bridge-links',
-  'generateAiFormBridge': 'bridge-links',
+  getDaftarSiswaBaru: 'bridge-links',
+  getLinkSiswaBaru: 'bridge-links',
+  generateFormBridge: 'bridge-links',
+  generateLegacyMasterBridge: 'bridge-links',
+  generateAiFormBridge: 'bridge-links',
   // Sinkronisasi & pembersihan data
-  'superSyncCleanup': 'admin-sync',
+  superSyncCleanup: 'admin-sync',
   // Preset Rincian Biaya (koleksi admin)
-  'getRincianPresets': 'rincian-presets',
-  'saveRincianPreset': 'rincian-presets',
-  'deleteRincianPreset': 'rincian-presets',
+  getRincianPresets: 'rincian-presets',
+  saveRincianPreset: 'rincian-presets',
+  deleteRincianPreset: 'rincian-presets',
   // Migrasi database (tombol di tab Pengaturan)
-  'runMigration': 'run-migration',
+  runMigration: 'run-migration',
   // Migrasi kandidat dari link Google Drive ke Storage
-  'getDriveLinkCandidates': 'drive-links',
-  'uploadDriveReplacement': 'drive-links'
+  getDriveLinkCandidates: 'drive-links',
+  uploadDriveReplacement: 'drive-links',
 };
 
 function getApiUrl(action) {
@@ -155,18 +181,26 @@ async function callAPI(action, payload) {
   if (action === 'logout') {
     // Logout dipakai admin DAN kandidat - kirim token yang sedang aktif
     // (utamakan admin kalau keduanya login di perangkat yang sama).
-    body.sessionToken = (localStorage.getItem('asj_admin_login') === 'sukses'
-      ? localStorage.getItem('asj_admin_session')
-      : localStorage.getItem('asj_kandidat_session')) || '';
-  } else if (ADMIN_ACTIONS.has(action) || (action === 'getAppData' && payload && payload[0] === 'admin')) {
+    body.sessionToken =
+      (localStorage.getItem('asj_admin_login') === 'sukses'
+        ? localStorage.getItem('asj_admin_session')
+        : localStorage.getItem('asj_kandidat_session')) || '';
+  } else if (
+    ADMIN_ACTIONS.has(action) ||
+    (action === 'getAppData' && payload && payload[0] === 'admin')
+  ) {
     body.sessionToken = localStorage.getItem('asj_admin_session') || '';
-  } else if (CANDIDATE_ACTIONS.has(action) || (action === 'getAppData' && payload && payload[0] === 'kandidat')) {
+  } else if (
+    CANDIDATE_ACTIONS.has(action) ||
+    (action === 'getAppData' && payload && payload[0] === 'kandidat')
+  ) {
     // Beberapa action dipakai ADMIN dan KANDIDAT (mis. getDrafCvMaster untuk
     // preview CV dari tabel admin, getMasterDataByWa). Kalau admin sedang
     // login, kirim token admin; kalau tidak, token kandidat.
-    body.sessionToken = (localStorage.getItem('asj_admin_login') === 'sukses'
-      ? localStorage.getItem('asj_admin_session')
-      : localStorage.getItem('asj_kandidat_session')) || '';
+    body.sessionToken =
+      (localStorage.getItem('asj_admin_login') === 'sukses'
+        ? localStorage.getItem('asj_admin_session')
+        : localStorage.getItem('asj_kandidat_session')) || '';
   }
 
   try {
@@ -174,11 +208,15 @@ async function callAPI(action, payload) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      redirect: 'follow'
+      redirect: 'follow',
     });
     const text = await res.text();
     let parsed;
-    try { parsed = JSON.parse(text); } catch (e) { parsed = { success: false, message: text }; }
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      parsed = { success: false, message: text };
+    }
     if (parsed && parsed.sessionInvalid) {
       localStorage.removeItem('asj_admin_login');
       localStorage.removeItem('asj_admin_session');
