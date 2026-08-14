@@ -3,6 +3,10 @@
 Dokumen ini adalah **kesepakatan kerja tim** + pengingat untuk siapa pun (termasuk AI assistant)
 yang mengerjakan repo ini. Baca sebelum mulai bekerja.
 
+> ⚠️ **Sebelum mengerjakan fitur apa pun, baca dulu [`PIPELINE.md`](PIPELINE.md)** —
+> itu pedoman alur kerja lapangan ASJ (JO → seleksi → lolos user → pendokumenan).
+> Portal hanya mendigitalkan/mengotomasi alur itu, **TIDAK BOLEH mengubah pipeline lapangan**.
+
 ---
 
 ## 1. Aturan utama: SELALU commit + push ke `main` 🚀
@@ -95,3 +99,6 @@ Kalau kamu (assistant) sedang mengerjakan repo ini, patuhi:
 5. Jangan menyentuh `vite.config.ts`/HMR — project ini bukan Vite; preview memakai `serve-static.mjs`.
 6. Setelah commit, ingatkan user untuk **deploy ulang lewat Freebuff** supaya situs live ikut terbaru.
 7. **JANGAN PERNAH deploy ke Netlify** — apa pun alasannya.
+8. **Patuhi `PIPELINE.md`** — sebelum menambah/mengubah fitur yang menyentuh tahapan
+   kandidat, seleksi, atau pendokumenan, cek dulu pipeline-nya. Jangan mengubah urutan
+   tahapan lapangan; fitur baru harus lewat checklist di `PIPELINE.md` bagian 6.
