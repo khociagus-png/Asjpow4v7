@@ -347,13 +347,11 @@
         }
 
         // Tipe yang bisa ditampilkan INLINE: gambar/PDF native + format Office
-        // (xls/xlsx/doc/docx/ppt/pptx) lewat Google Docs Viewer — viewer ini
-        // menampilkan file Office di iframe tanpa memicu auto-download.
+        // (xls/xlsx/doc/docx/ppt/pptx) — dirender client-side (SheetJS/mammoth).
         function isPreviewableFile(url) {
             var u = String(url || '').toLowerCase();
             if (/[.](jpe?g|png|gif|webp|bmp|svg|pdf)([?#].*)?$/i.test(u)) return true;
             if (/[.](xls|xlsx|xlsm|doc|docx|ppt|pptx|odt|ods|odp|txt|rtf|csv)([?#].*)?$/i.test(u)) return true;
-            if (u.includes('drive.google.com')) return true;
             return false;
         }
 
@@ -361,9 +359,6 @@
         function previewFinalUrl(url) {
             var u = String(url || '');
             var lower = u.toLowerCase();
-            if (lower.includes('drive.google.com')) {
-                return lower.includes('/view') ? u.replace(/\/view.*$/, '/preview') : u;
-            }
             var isImage = /[.](jpe?g|png|gif|webp|bmp|svg)([?#].*)?$/i.test(lower) || lower.includes('pas_photo');
             var isPdf = /[.]pdf([?#].*)?$/i.test(lower);
             if (isImage || isPdf) return u;
@@ -371,13 +366,11 @@
             if (isOffice) {
                 return 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(u);
             }
-            return 'https://docs.google.com/viewer?url=' + encodeURIComponent(u) + '&embedded=true';
+            return u;
         }
 
         // Render file Excel (xls/xlsx/xlsm/csv) CLIENT-SIDE via SheetJS -> HTML
-        // table di iframe. Google Docs Viewer sering GAGAL fetch URL storage
-        // Supabase ("unable to retrieve") — render lokal tidak bergantung
-        // layanan eksternal. Fallback ke Google viewer kalau gagal.
+        // table di iframe — render lokal tidak bergantung layanan eksternal.
         function renderExcelKeFrame(frame, url) {
             if (typeof XLSX === 'undefined' || !frame) return Promise.resolve(false);
             return fetch(url).then(function (res) {
@@ -501,8 +494,7 @@
                         }
                     });
                 } else if (render) {
-                    // Render LOKAL (anti gagal viewer eksternal) — fallback
-                    // Google Docs Viewer kalau lib/parse gagal.
+                    // Render LOKAL (anti gagal viewer eksternal).
                     if (pptxHost) pptxHost.classList.add('hidden');
                     frame2.classList.remove('hidden');
                     render(frame2, url).then(function (ok) {
@@ -727,7 +719,7 @@
   <script src="/pwa.js?v=3a746281c5"></script>
   <!-- Renderer dokumen lokal (dibutuhkan saat preview dibuka): Excel -> SheetJS,
        Word -> mammoth, PPT -> pptx-preview. Dimuat terakhir supaya tidak
-       memblokir logika aplikasi; didahulukan dibanding Google Docs Viewer yang tidak andal. -->
+       memblokir logika aplikasi. -->
   <script src="/vendor/xlsx.full.min.js?v=7f749f81a4"></script>
   <script src="/vendor/mammoth.browser.min.js?v=ba27bf4add"></script>
   <script src="/vendor/pptx-preview.umd.js?v=8d69597cd3"></script>

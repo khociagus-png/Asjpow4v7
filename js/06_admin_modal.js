@@ -58,7 +58,7 @@
             
             let catatanIntStr = c.catatanInt || '';
             if(catatanIntStr.includes('[VIP]')) {
-                let logoSrc = ASSETS.LOGO || 'https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG';
+                let logoSrc = ASSETS.LOGO || 'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
                 cvBadges += '<img src="' + logoSrc + '" class="w-6 h-6 object-contain drop-shadow-[0_0_10px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' + tr('ui.badge_official') + '">';
             }
             
@@ -305,7 +305,7 @@
         };
         document.getElementById('global-loader').style.display = 'flex';
         try {
-            const res = await callGAS('updateKandidatSuper', [payload]);
+            const res = await callAPI('updateKandidatSuper', [payload]);
             if (res && res.success) {
                 showToast(tr('ui.toast_sync3_success'), 'success');
                 // reset flag touched biar form terisi ulang data baru
@@ -331,7 +331,7 @@
         
         if (previewContainer && frame) {
             // Satu pintu preview: gambar/PDF native, CSV -> render lokal,
-            // Office (docx/pptx) -> MS Office Viewer, lain -> Google Docs Viewer.
+            // Office (docx/pptx) -> MS Office Viewer, lain -> URL asli.
             previewFileInFrame(frame, url);
             if (btnExt) btnExt.href = url;
             previewContainer.classList.remove('hidden');
@@ -372,7 +372,7 @@
 
         document.getElementById('global-loader').style.display = 'flex';
         try {
-            const res = await callGAS('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
+            const res = await callAPI('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
             if (res.success) {
                 showToast(tr('ui.toast_eval_note_saved'), "success");
                 document.getElementById('modal-cv').classList.add('hidden');

@@ -172,7 +172,7 @@
         };
         
         try {
-            const res = await callGAS('simpanDataTtdNaitei', { wa: currentKandidatWa, ...payload });
+            const res = await callAPI('simpanDataTtdNaitei', { wa: currentKandidatWa, ...payload });
             if(res.success) {
                 showToast(tr('ui.toast_saved_server'), "success");
                 document.getElementById('modal-ttd').classList.add('hidden');
@@ -420,7 +420,7 @@
         let msg = `Halo Kak {nama} 👋\n\nBerdasarkan kecocokan data Anda di sistem ASJ, kami ingin menawarkan *Lowongan Kerja Baru* yang sangat sesuai untuk Anda!\n\nKode Job: *{job_code}*\n\nJika Kakak tertarik, silakan segera login ke Dashboard dan lamar pekerjaan ini di:\n🔗 {link_grup}\n\nSemangat! 🇯🇵`;
 
         try {
-            const res = await callGAS('kirimTawaranMassal', [{ candidates: matchedCandidates, jobCode: currentMatchJobCode, linkGrup: linkPortal, customMessage: msg }]);
+            const res = await callAPI('kirimTawaranMassal', [{ candidates: matchedCandidates, jobCode: currentMatchJobCode, linkGrup: linkPortal, customMessage: msg }]);
             const results = (res && res.results) || [];
             const successCount = results.filter(r => r.success).length;
             showToast(tr('ui.toast_offer_sent_n').replace('{n}', successCount), "success");

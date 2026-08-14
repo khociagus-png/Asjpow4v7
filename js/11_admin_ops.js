@@ -86,7 +86,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('tandaiGagalJob', [wa, jobCode]);
+            const res = await callAPI('tandaiGagalJob', [wa, jobCode]);
             if(res.success) {
                 showToast(tr('ui.toast_cand_removed_job'), "success");
                 document.getElementById('modal-list-kandidat').classList.add('hidden');
@@ -118,7 +118,7 @@
         // dikirim sebagai parameter `interval` supaya pacing user dihormati.
         // Pesan default server = "gabung ke Grup Resmi" (sama seperti dulu).
         try {
-            const res = await callGAS('kirimTawaranMassal', [{ candidates: cands, jobCode: jobCode, linkGrup: linkGrup, interval: interval }]);
+            const res = await callAPI('kirimTawaranMassal', [{ candidates: cands, jobCode: jobCode, linkGrup: linkGrup, interval: interval }]);
             const results = (res && res.results) || [];
             const successCount = results.filter(r => r.success).length;
             showToast(tr('ui.toast_invites_done_n').replace('{n}', successCount), 'success');
@@ -135,7 +135,7 @@
         if(loader) loader.style.display = 'flex';
         
         try {
-            const res = await callGAS('getDaftarSiswaBaru', []);
+            const res = await callAPI('getDaftarSiswaBaru', []);
             if(res.success) {
                 let tb = document.getElementById('tbody-cek-siswa');
                 let html = '';
@@ -271,7 +271,7 @@
         if(loader) loader.style.display = 'flex';
         
         try {
-            const res = await callGAS('updateSysConfig', [key, arrayData, currentAdminName]);
+            const res = await callAPI('updateSysConfig', [key, arrayData, currentAdminName]);
             if(!res.success) showToast(tr('ui.toast_save_server_failed') + res.error, "error");
         } catch (err) {
             showToast(tr('ui.toast_network_error'), 'error');
@@ -334,7 +334,7 @@
         if (pendingEl) pendingEl.classList.add('hidden');
 
         try {
-            const res = await callGAS('runMigration', {});
+            const res = await callAPI('runMigration', {});
             if (!res || !res.success) {
                 if (statusEl) statusEl.textContent = '';
                 showToast(tr('ui.toast_migrate_failed') + (res && res.error ? res.error : 'respon tidak valid'), 'error');
@@ -398,9 +398,9 @@
     var DRIVE_CANDIDATES = [];
 
     async function muatMigrasiDrive() {
-        if (typeof callGAS !== 'function') return;
+        if (typeof callAPI !== 'function') return;
         try {
-            const res = await callGAS('getDriveLinkCandidates', []);
+            const res = await callAPI('getDriveLinkCandidates', []);
             if (!res || !res.success) return;
             DRIVE_CANDIDATES = res.list || [];
             var banner = document.getElementById('drive-migrate-banner');
@@ -511,7 +511,7 @@
         driveSetStatus(safeId, field, 'uploading');
         var labelNama = { PAS_PHOTO: 'PAS PHOTO', CV: 'CV', JFT: 'JFT', SSW: 'SSW' }[field] || field;
         try {
-            const res = await callGAS('uploadDriveReplacement', [{ idKandidat: idKandidat, nama: nama, label: field, fileData: fileData }]);
+            const res = await callAPI('uploadDriveReplacement', [{ idKandidat: idKandidat, nama: nama, label: field, fileData: fileData }]);
             if (res && res.success) {
                 driveSetStatus(safeId, labelNama, 'ok');
                 showToast(res.field + ' ' + idKandidat + ' terupload ke Storage ✓', 'success');
@@ -540,7 +540,7 @@
         btn.disabled = true;
 
         try {
-            const res = await callGAS('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
+            const res = await callAPI('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
             if(res.success) {
                 showToast(tr('ui.toast_marquee_updated'), "success");
                 // Update langsung di layar Admin

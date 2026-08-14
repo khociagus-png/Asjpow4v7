@@ -212,7 +212,7 @@ async function handleCekDataPelamar(payload) {
   }
 }
 
-// isJobRequiresCv([code]) — dipakai apply-full.html via gas-client.
+// isJobRequiresCv([code]) — dipakai apply-full.html via api-client.
 async function handleIsJobRequiresCv(payload) {
   const code = String((payload && payload[0]) || "");
   try {
@@ -486,7 +486,7 @@ function buildMasterNested(row) {
   };
 }
 
-// getMasterDataByWa([wa]) → bentuk flat UPPERCASE (kontrak lama GAS).
+// getMasterDataByWa([wa]) → bentuk flat UPPERCASE (format kontrak lama/legacy).
 async function handleGetMasterDataByWa(payload, sessionToken) {
   const wa = String((payload && payload[0]) || "");
   const guard = requireRole(sessionToken, "kandidat");

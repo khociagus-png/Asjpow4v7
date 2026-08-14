@@ -44,7 +44,7 @@
     
         document.getElementById('global-loader').style.display='flex'; 
         try { 
-            const res = await callGAS('simpanUpdateMaster', [payload]); 
+            const res = await callAPI('simpanUpdateMaster', [payload]); 
             if(res.success) { 
               showToast(tr('ui.toast_cvmini_updated'), 'success'); 
               document.getElementById('modal-cv-mini').classList.add('hidden'); 
@@ -88,7 +88,7 @@
         var loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS(endpoint, params);
+            const res = await callAPI(endpoint, params);
             if(res && res.formUrl) {
                 window.location.href = res.formUrl;
             }
@@ -120,7 +120,7 @@
         if(loader) loader.style.display = 'flex';
         
         try {
-            const url = await callGAS('getLinkSiswaBaru', []);
+            const url = await callAPI('getLinkSiswaBaru', []);
             if(url) {
                 // FIX: tetap di dalam PWA (tab sama), bukan tab browser.
                 window.location.href = (url.url || url.formUrl || url);
@@ -421,7 +421,7 @@
         // gagal tidak menggagalkan batch, dan hasil dihitung dari yang sukses.
         const results = await Promise.allSettled(filesToUpload.map(async (f) => {
             const payload = { wa: ACTIVE_PEMBERKASAN_WA, nama: ACTIVE_PEMBERKASAN_NAMA, file: f.file, jenisBerkas: f.jenisBerkas };
-            const res = await callGAS('simpanBerkasTahapan', [payload]);
+            const res = await callAPI('simpanBerkasTahapan', [payload]);
             return !!(res && res.success);
         }));
         const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
@@ -453,7 +453,7 @@
         };
         
         try {
-            const res = await callGAS('simpanBiodataLengkap', [payload]);
+            const res = await callAPI('simpanBiodataLengkap', [payload]);
             if(res.success) { 
                 showToast(tr('ui.toast_biodata_saved'), 'success'); 
                 document.getElementById('modal-pemberkasan').classList.add('hidden');

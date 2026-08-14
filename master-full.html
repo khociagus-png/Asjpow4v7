@@ -354,7 +354,7 @@
       if (typeof renderLanguageLight === 'function') renderLanguageLight();
     });
   </script>
-  <script src="gas-client.js?v=c5abdf9b08"></script>
+  <script src="/api-client.js?v=4fbd0619d2"></script>
   <script>
     // FASE 3/4: WA/NAMA dulu diisi server (GAS scriptlet) dari e.parameter.
     // Sekarang dibaca dari query string URL (?wa=&nama=), sumbernya sama
@@ -414,7 +414,7 @@
         if(!pass) { if(msg) msg.textContent = tr('form.mf_gate_pw_wajib'); return; }
         if(btn) { btn.disabled = true; btn.innerHTML = tr('form.mf_memeriksa'); }
         try {
-            let res = await callGAS('loginKandidat', [wa, pass]);
+            let res = await callAPI('loginKandidat', [wa, pass]);
             if(res && res.success) {
                 localStorage.setItem('asj_kandidat_login', 'sukses');
                 localStorage.setItem('asj_kandidat_name', res.nama || '');
@@ -593,7 +593,7 @@
             let loadingBox = getEl("loading");
             if(loadingBox) loadingBox.classList.remove("hidden");
             
-            callGAS('getMasterDataByWa', [waVal]).then(data => {
+            callAPI('getMasterDataByWa', [waVal]).then(data => {
                     if(loadingBox) loadingBox.classList.add("hidden");
                     if(data && data.sessionInvalid) { showLoginGate(tr('form.mf_sesi_berakhir')); return; }
                     if(data) {
@@ -868,7 +868,7 @@
                 ktpFile: fileKtp, kkFile: fileKk
             };
 
-            callGAS('submitMasterForm', [payload]).then(res => {
+            callAPI('submitMasterForm', [payload]).then(res => {
                     if(loadingBox) loadingBox.classList.add("hidden");
                     if(res && res.sessionInvalid) { showLoginGate(tr('form.mf_sesi_simpan')); return; }
                     if(res.success) { 

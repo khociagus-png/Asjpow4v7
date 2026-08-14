@@ -31,7 +31,7 @@
         var isi = document.getElementById('wa-isi').value;
         
         try {
-            const res = await callGAS('simpanWaTemplate', [id, nama, isi, currentAdminName]);
+            const res = await callAPI('simpanWaTemplate', [id, nama, isi, currentAdminName]);
             if(res.success) {
                 showToast(tr('ui.toast_wa_template_saved'), "success");
                 batalEditWa();
@@ -66,7 +66,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('hapusWaTemplate', [id, currentAdminName]);
+            const res = await callAPI('hapusWaTemplate', [id, currentAdminName]);
             if(res.success) refreshDataDinamis('wa');
             else { showToast(tr('ui.toast_error_prefix') + res.error, "error"); }
         } catch (err) {
@@ -275,18 +275,8 @@
             document.body.appendChild(modal);
         }
         
+        // Foto disimpan di Supabase Storage — langsung tampilkan URL-nya.
         var imgUrl = url;
-        var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        var matchId = url.match(/id=([a-zA-Z0-9_-]+)/);
-        
-        var fileId = "";
-        if (match) fileId = match[1];
-        else if (matchId) fileId = matchId[1];
-
-        if (fileId) {
-            imgUrl = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1000';
-        }
-
         document.getElementById('foto-preview-img').src = imgUrl;
         modal.classList.remove('hidden');
         setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);

@@ -6,18 +6,23 @@
 const DEMO_PREVIEW_NOTE =
   "⚠ MODE PREVIEW — Data loker di bawah adalah CONTOH DEMO. Backend asli (Supabase) belum dikonfigurasi: isi SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY di Keys/API keys.";
 
-// ASSETS ASLI (diambil dari situs live asjportal.netlify.app — campuran Google
-// Drive + Supabase Storage). Dipakai sebagai default saat sys_config tidak
+// ASSETS ASLI — seluruhnya di-host di Supabase Storage (bucket asj-files,
+// folder assets). Dipakai sebagai default saat sys_config tidak
 // menyediakan konfigurasi assets.
+// Semua aset brand kini di Supabase Storage (bucket asj-files, folder assets)
+// — tidak ada lagi aset yang di-host di Google (lh3/drive).
+const STORAGE_BASE =
+  "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files";
+
 const DEMO_ASSETS = {
-  LOGO: "https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG",
+  LOGO: STORAGE_BASE + "/assets/logo_asj.png",
   BANNER: {
-    TOKYO: "https://lh3.googleusercontent.com/d/15lHFJSZCKl24gorevn_CGdc82H-TgtHQ",
-    SAKURA: "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/sakra_banner.webp",
+    TOKYO: STORAGE_BASE + "/assets/tokyo_banner.jpg",
+    SAKURA: STORAGE_BASE + "/assets/sakra_banner.webp",
   },
   FOOTER: {
-    TOKYO: "https://lh3.googleusercontent.com/d/11qMjEs4x39vfntI2LrSNigEcQG6AeUKd",
-    SAKURA: "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/sakura_footer.webp",
+    TOKYO: STORAGE_BASE + "/assets/tokyo_footer.jpg",
+    SAKURA: STORAGE_BASE + "/assets/sakura_footer.webp",
   },
   SOCIAL: {
     whatsapp: "6287889502004",

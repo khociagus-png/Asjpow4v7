@@ -147,7 +147,7 @@
         if (progMini === 100) { badges += '<i class="fas fa-award text-slate-300 text-2xl md:text-3xl drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]" title="' + tr('ui.badge_silver') + '"></i>'; }
         if (progMaster === 100) { badges += '<i class="fas fa-crown text-yellow-400 text-3xl md:text-4xl drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" title="' + tr('ui.badge_gold') + '"></i>'; }
         if (isVip) {
-            let logoSrc = ASSETS.LOGO || 'https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG';
+            let logoSrc = ASSETS.LOGO || 'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
             badges += '<img src="' + logoSrc + '" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' + tr('ui.badge_official') + '">';
         }
         
@@ -235,7 +235,7 @@
         // (Retry TIDAK diterapkan ke action tulis lain yang berisiko double-submit.)
         async function muatData(percobaan) {
         try {
-            const res = await callGAS('getAppData', [modeLoad, payload, publicCvId]);
+            const res = await callAPI('getAppData', [modeLoad, payload, publicCvId]);
             if(!res || !res.success) { 
                 if (percobaan < 1) { setTimeout(function () { muatData(percobaan + 1); }, 1200); return; }
                 if(!isSilent) showToast(tr('alert.failed'), 'error'); 

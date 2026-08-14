@@ -133,7 +133,7 @@
     <img class="bg-hero" src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1600&q=80" alt="">
     <div class="overlay"></div>
     <div class="header">
-      <img class="logo" src="https://drive.google.com/thumbnail?id=1yIzGKLZongVWLY92y5xxOu7S5avhWoHv&sz=w1000" alt="Logo ASJ">
+      <img class="logo" src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_apply.png" alt="Logo ASJ">
       <div class="jp">日本への挑戦</div>
       <div class="title">PT AMANAH SAKURA JAPAN</div>
     </div>
@@ -330,7 +330,7 @@
   </div>
 
   <!-- SCRIPT ENGINE -->
-  <script src="/gas-client.js?v=c5abdf9b08"></script>
+  <script src="/api-client.js?v=4fbd0619d2"></script>
   <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
   <script src="/js/apply-docs.js?v=0d887d9d43"></script>
   <script>
@@ -373,7 +373,7 @@
        $("wa-loading").classList.remove("hidden");
        $("wa-msg").classList.add("hidden");
        
-       callGAS('cekDataPelamar', [wa]).then(res => {
+       callAPI('cekDataPelamar', [wa]).then(res => {
            $("wa-loading").classList.add("hidden");
            if(res && res.found) {
                $("wa-msg").classList.remove("hidden");
@@ -560,7 +560,7 @@
         return { key: k, prefix: prefix, ext: file.name.split('.').pop() || 'bin' };
       });
       
-      const res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
+      const res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload: ' + (res.message || res.error || ''));
       
       const uploadedUrls = {};
@@ -670,7 +670,7 @@
           extraFiles: extraFilesPayload
         };
 
-        callGAS('submitApply', [payload]).then(function(res) {
+        callAPI('submitApply', [payload]).then(function(res) {
             $("loading").style.display = "none";
             if(!res.success) { alert(res.message); $("btnSubmit").disabled = false; $("btnPrev").disabled = false; return; }
             $("success").style.display = "flex";

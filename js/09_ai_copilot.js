@@ -2,7 +2,7 @@
     // ==========================================
     let adminAiHistory = [];
     let currentAiCandidateId = null;
-    const urlFotoJeklin = "https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt";
+    const urlFotoJeklin = "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png";
 
     function bukaAdminAiCopilot(candidateId) {
         if (!isAdmin) { showToast(tr('ui.toast_admin_login_first'), 'error'); return; }
@@ -12,7 +12,7 @@
         
         chatBox.innerHTML = `
         <div class="flex items-start gap-3 mt-4">
-            <img src="https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt" class="w-8 h-8 rounded-full object-cover shadow-sm border border-amber-400 flex-shrink-0" alt="Jeklin">
+            <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png" class="w-8 h-8 rounded-full object-cover shadow-sm border border-amber-400 flex-shrink-0" alt="Jeklin">
             <div class="bg-slate-800 text-slate-200 text-sm p-3.5 rounded-2xl rounded-tl-none shadow-md border border-amber-500/20" style="max-width: 85%; width: fit-content;">
                 <p class="whitespace-pre-wrap m-0 leading-relaxed">${tr('ui.ai_welcome')}</p>
             </div>
@@ -50,7 +50,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
-            const res = await callGAS('processAdminAIChat', [{
+            const res = await callAPI('processAdminAIChat', [{
                 adminName: currentAdminName,
                 message: msg,
                 history: adminAiHistory,
@@ -255,7 +255,7 @@
         };
 
         try {
-            const res = await callGAS('processAiInterview', payload);
+            const res = await callAPI('processAiInterview', payload);
             if(res.reply) {
                 appendInterviewChat('ai', res.reply);
                 interviewHistory.push({ role: 'ai', content: res.reply });

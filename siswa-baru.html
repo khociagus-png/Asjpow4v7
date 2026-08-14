@@ -54,7 +54,7 @@
     <div class="p-3 bg-slate-950 border-b border-slate-800 flex items-center gap-3 shadow-lg relative overflow-hidden">
       <div class="absolute -top-4 -right-4 w-16 h-16 bg-amber-500 rounded-full blur-2xl opacity-20"></div>
       <div class="w-10 h-10 rounded-full bg-amber-500 p-0.5 shadow-[0_0_15px_rgba(245,158,11,0.4)] flex-shrink-0">
-        <img src="https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt" alt="Qween Jeklin" class="w-full h-full rounded-full object-cover">
+        <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png" alt="Qween Jeklin" class="w-full h-full rounded-full object-cover">
       </div>
       <div>
         <h2 class="text-sm font-bold text-amber-400">Qween Jeklin 👑</h2>
@@ -76,7 +76,7 @@
       
       <div class="flex justify-between items-center mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-800 shadow-lg">
         <div class="flex items-center gap-3">
-          <img src="https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG" alt="ASJ Logo" class="h-10 object-contain drop-shadow-md">
+          <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png" alt="ASJ Logo" class="h-10 object-contain drop-shadow-md">
           <div>
             <h1 class="text-sm md:text-lg font-black text-white leading-tight">FORM SISWA BARU ASJ</h1>
             <p class="text-[10px] text-slate-400">Jawab pertanyaan Jeklin untuk mengisi form otomatis.</p>
@@ -135,13 +135,13 @@
     </div>
   </div>
 
-  <script src="/gas-client.js?v=c5abdf9b08"></script>
+  <script src="/api-client.js?v=4fbd0619d2"></script>
   <script>
     function $(id) { return document.getElementById(id); }
     var chatHistory = []; 
     var candidateData = {}; 
     var uploadedFiles = { ktp: null, kk: null, ijazah: null };
-    var urlJeklin = "https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt";
+    var urlJeklin = "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png";
     const DRAFT_KEY = "asj_siswa_draft_v1"; // Kunci untuk LocalStorage
 
     var fieldPaths = {
@@ -286,7 +286,7 @@
       
       var payloadToAI = { history: chatHistory, currentData: candidateData };
       
-      callGAS('processSiswaAIChat', payloadToAI).then(function(res) {
+      callAPI('processSiswaAIChat', payloadToAI).then(function(res) {
           inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); 
           $("aiTypingStatus").classList.add("hidden");
           
@@ -405,7 +405,7 @@
         return { key: k, prefix: k.toUpperCase(), ext: (file.name || '').split('.').pop() || 'bin' };
       });
       
-      var res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
+      var res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload');
       
       var uploadedUrls = {};
@@ -465,7 +465,7 @@
           ijazah: uploadedUrls.ijazah || null
         });
         
-        callGAS('submitDaftarSiswa', payload).then(function(res) {
+        callAPI('submitDaftarSiswa', payload).then(function(res) {
           btn.disabled = false;
           if(res.success) {
             btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!'; btn.classList.replace("bg-emerald-600", "bg-sky-600");

@@ -8,7 +8,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('reviewForm', [r, currentAdminName]);
+            const res = await callAPI('reviewForm', [r, currentAdminName]);
             if (res.success) refreshDataDinamis('mail');
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -22,7 +22,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('approveForm', [r, currentAdminName]);
+            const res = await callAPI('approveForm', [r, currentAdminName]);
             if (res.success) refreshDataDinamis('mail');
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -44,7 +44,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('rejectForm', [r, currentAdminName, reason]);
+            const res = await callAPI('rejectForm', [r, currentAdminName, reason]);
             if (res.success) refreshDataDinamis('mail');
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -85,7 +85,7 @@
         try {
             for (var i = 0; i < ids.length; i++) {
                 try {
-                    const res = await callGAS('deleteForm', [Number(ids[i])]);
+                    const res = await callAPI('deleteForm', [Number(ids[i])]);
                     if (res && res.success) ok++; else fail++;
                 } catch (e) { fail++; }
             }
@@ -101,7 +101,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('deleteForm', [id]);
+            const res = await callAPI('deleteForm', [id]);
             if (res.success) refreshDataDinamis('mail');
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -129,7 +129,7 @@
         const text = input.value.trim();
         input.value = ''; input.disabled = true;
         try {
-            const res = await callGAS('tambahTugasBaru', [text, currentAdminName]);
+            const res = await callAPI('tambahTugasBaru', [text, currentAdminName]);
             if (!res.success) { input.value = text; showToast(res.error || tr('alert.failed'), 'error'); }
             else refreshDataDinamis();
         } catch (err) {
@@ -141,7 +141,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('setTugasStatus', [id, st, currentAdminName]);
+            const res = await callAPI('setTugasStatus', [id, st, currentAdminName]);
             if (res.success) refreshDataDinamis();
             else showToast(res.error || 'Gagal update status', 'error');
         } catch (err) {
@@ -153,7 +153,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('hapusTugas', [id, currentAdminName]);
+            const res = await callAPI('hapusTugas', [id, currentAdminName]);
             if (res.success) refreshDataDinamis();
             else showToast(res.error || 'Gagal hapus tugas', 'error');
         } catch (err) {
@@ -165,7 +165,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('ubahStatusJob', [r, st, currentAdminName]);
+            const res = await callAPI('ubahStatusJob', [r, st, currentAdminName]);
             if (res.success) refreshDataDinamis('kelola');
             else showToast(res.error || 'Gagal ubah status', 'error');
         } catch (err) {
@@ -177,7 +177,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('hapusJobData', [r, currentAdminName]);
+            const res = await callAPI('hapusJobData', [r, currentAdminName]);
             if (res.success) refreshDataDinamis('kelola');
             else showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error');
         } catch (err) {
@@ -189,7 +189,7 @@
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
         try {
-            const res = await callGAS('hapusJadwal', [r, currentAdminName]);
+            const res = await callAPI('hapusJadwal', [r, currentAdminName]);
             if (res.success) refreshDataDinamis('jadwal');
             else showToast(res.error || 'Gagal hapus jadwal', 'error');
         } catch (err) {
@@ -231,7 +231,7 @@
         const file = files[k];
         return { key: k, prefix: k.toUpperCase(), ext: file.name.split('.').pop() || 'bin' };
       });
-      const res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
+      const res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload');
       const uploadedUrls = {};
       for (const key of toUpload) {
@@ -277,7 +277,7 @@
                 rincianBiaya: document.getElementById('input-rincian-biaya').value || '',
                 dokumenShare: arrReq.join(',')
             };
-            const res = await callGAS('simpanJobBaru', [data]);
+            const res = await callAPI('simpanJobBaru', [data]);
             if (res.success) { document.getElementById('form-tambah-job').reset(); refreshDataDinamis('kelola'); }
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -293,7 +293,7 @@
         btn.innerHTML = tr('ui.saving'); btn.disabled = true; document.getElementById('global-loader').style.display = 'flex';
         const data = { admin: currentAdminName, nama: document.getElementById('j-nama').value, loker: document.getElementById('j-loker').value || '-', waktu: document.getElementById('j-waktu').value.replace('T', ' '), lokasi: document.getElementById('j-lokasi').value || '-', link: document.getElementById('j-link').value || '-', tsk: document.getElementById('j-tsk').value, kandidat: '-' };
         try {
-            const res = await callGAS('simpanJadwalBaru', [data]);
+            const res = await callAPI('simpanJadwalBaru', [data]);
             if (res.success) {
                 document.getElementById('form-tambah-jadwal').reset();
                 document.getElementById('form-jadwal-container').classList.add('hidden');
@@ -388,7 +388,7 @@
                 // memutuskan: kosong = pertahankan nilai lama, isi = timpa.
                 dokumenShare: arrReq.join(',')
             };
-            const res = await callGAS('editLokerFull', [data]);
+            const res = await callAPI('editLokerFull', [data]);
             if (res.success) { document.getElementById('modal-edit-full-loker').classList.add('hidden'); refreshDataDinamis('kelola'); }
             else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
         } catch (err) {
@@ -726,7 +726,7 @@
             files: fd
         };
         try {
-        const res = await callGAS('simpanKandidatDanUpload', [data]);
+        const res = await callAPI('simpanKandidatDanUpload', [data]);
         if (res.success) {
             const okList = res.uploaded || [];
             markUploadResults(labels, okList);
@@ -745,7 +745,7 @@
                 const lainFile = await bacaFileBase64(r.input, 'DOKUMEN');
                 if (lainFile) {
                     try {
-                        const lr = await callGAS('simpanBerkasTahapan', [{ wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile }]);
+                        const lr = await callAPI('simpanBerkasTahapan', [{ wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile }]);
                         setUploadStatus(r.stId, jenisLabel, (lr && lr.success) ? 'ok' : 'fail');
                     } catch (e) { setUploadStatus(r.stId, jenisLabel, 'fail'); }
                 }
@@ -859,7 +859,7 @@
         };
         
         try {
-        const res = await callGAS('updateKandidatSuper', [payload]);
+        const res = await callAPI('updateKandidatSuper', [payload]);
         if (res.success) {
             // Upload dokumen lain (opsional, seperti modal Input Kandidat):
             // admin boleh lampirkan berkas pemberkasan tambahan saat edit.
@@ -898,7 +898,7 @@
                         // master kandidat supaya berkas bisa dipreview.
                         const eCand = (ALL_CANDIDATES || []).find(function (x) { return normalizePhone(String(x.wa || '')) === payload.wa; });
                         const eNama = (eCand && eCand.nama) ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
-                        const lr2 = await callGAS('simpanBerkasTahapan', [{ wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile }]);
+                        const lr2 = await callAPI('simpanBerkasTahapan', [{ wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile }]);
                         setUploadStatus(er.stId, eJenisLabel, (lr2 && lr2.success) ? 'ok' : 'fail');
                     } catch (e2) { setUploadStatus(er.stId, eJenisLabel, 'fail'); }
                 }
@@ -930,7 +930,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + ''; btn.disabled = true;
         document.getElementById('global-loader').style.display = 'flex';
         try {
-            const res = await callGAS('updateTahapanDbJob', [
+            const res = await callAPI('updateTahapanDbJob', [
                 document.getElementById('edit-db-row').value,
                 document.getElementById('edit-db-tahapan').value,
                 document.getElementById('edit-db-status').value, // probe2
@@ -952,7 +952,7 @@
         let fileData = await bacaFileBase64(input, 'CV_REVISI'); 
         document.getElementById('global-loader').style.display='flex'; 
         try {
-            const res = await callGAS('simpanRevisiKandidat', [currentKandidatWa, fileData]);
+            const res = await callAPI('simpanRevisiKandidat', [currentKandidatWa, fileData]);
             if(res.success) { showToast(tr('ui.toast_revisi_uploaded'), 'success'); refreshDataDinamis(); }
             else { showToast(tr('ui.toast_failed_prefix') + res.error, 'error'); }
         } catch (err) {
@@ -971,7 +971,7 @@
         var templateCv = job ? job.templateCv : "";
 
         try {
-            const b = await callGAS('generateFormBridge', [c, k]);
+            const b = await callAPI('generateFormBridge', [c, k]);
             if(b && b.qrUrl) {
                 safeSet('qr-job-title', jobTitle);
                 setImg('qr-image', b.qrUrl);
@@ -1022,7 +1022,7 @@
     // (blast WA, esign match, modal, dll). No-op bila total <= yang sudah dimuat
     // (mode kandidat: candidatesTotal tidak ada -> langsung kembali).
     async function fetchCandidatesPage(page, pageSize, q) {
-        const res = await callGAS('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
+        const res = await callAPI('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
         if (!res || res.success !== true) throw new Error((res && res.error) || 'Gagal memuat kandidat');
         return res;
     }

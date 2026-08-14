@@ -10,7 +10,7 @@
         const fl = document.getElementById('form-login-kandidat'); if (fl) fl.classList.toggle('hidden', mode !== 'login');
     }
 
-    // Helper: jalankan callGAS dengan state tombol loading + error terpusat.
+    // Helper: jalankan callAPI dengan state tombol loading + error terpusat.
     // Optimistic UI: tombol langsung menampilkan spinner, lalu dikembalikan
     // di finally — UI tidak pernah macet walau request gagal/timeout.
     async function runAuthAction(btn, loadingHtml, idleText, fn) {
@@ -37,7 +37,7 @@
             btn,
             '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.registering'),
             tr('button.register'),
-            () => callGAS('daftarKandidat', [n, w])
+            () => callAPI('daftarKandidat', [n, w])
         );
         if (res && res.success) { showToast(tr('alert.success'), 'success'); bukaModalKandidat('login'); }
         else if (res) showToast(res.error, 'error');
@@ -62,7 +62,7 @@
             btn,
             '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.change_password') + '…',
             '<i class="fas fa-check mr-1.5"></i> ' + tr('ui.change_password'),
-            () => callGAS('gantiPasswordKandidat', [currentKandidatWa, lama, baru])
+            () => callAPI('gantiPasswordKandidat', [currentKandidatWa, lama, baru])
         );
         if (res && res.success) {
             showToast(tr('ui.pass_changed_ok'), 'success');
@@ -86,7 +86,7 @@
             btn,
             '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.searching_data'),
             tr('button.enter_dashboard'),
-            () => callGAS('loginKandidat', [w, p])
+            () => callAPI('loginKandidat', [w, p])
         );
 
         if (res && res.success) {
@@ -134,7 +134,7 @@
             btn,
             '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
             tr('button.verify'),
-            () => callGAS('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || ''])
+            () => callAPI('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || ''])
         );
         if (res && res.success) {
             document.getElementById('login-step-1').classList.add('hidden');
@@ -158,7 +158,7 @@
             btn,
             '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
             tr('button.enter_portal'),
-            () => callGAS('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || ''])
+            () => callAPI('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || ''])
         );
 
         if (res && res.success) {

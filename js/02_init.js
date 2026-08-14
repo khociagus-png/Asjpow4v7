@@ -165,19 +165,15 @@
     function setImg(id, url) { var el = document.getElementById(id); if(el && url) el.src = url; }
     function setBg(id, url) { var el = document.getElementById(id); if(el && url) el.style.backgroundImage = 'url(\'' + url + '\')'; }
     
-    function getHighResImage(url) { 
-        if(!url || url === "-") return ""; 
-        let match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/); 
-        if(match) return "https://lh3.googleusercontent.com/d/" + match[1]; 
-        return url; 
+    // Berkas kini selalu di Supabase Storage — URL langsung dipakai apa adanya.
+    // (Dulu di sini ada konversi link Google Drive; sudah dihapus.)
+    function getHighResImage(url) {
+        if (!url || url === "-") return "";
+        return url;
     }
 
     function getDirectDownloadUrl(url) {
         if (!url || url === '-' || url.trim() === '') return '';
-        let match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
-        if (match) {
-            return 'https://drive.google.com/uc?export=download&id=' + match[1];
-        }
         return url;
     }
 
@@ -202,29 +198,24 @@
     }
 
     // Tipe yang bisa ditampilkan INLINE: gambar/PDF native + format Office
-    // (xls/xlsx/doc/docx/ppt/pptx) lewat Google Docs Viewer — viewer ini
-    // menampilkan file Office di iframe tanpa memicu auto-download.
-    // Yang TIDAK bisa (zip, rar, 7z, dll) → pesan + tombol Unduh.
+    // (xls/xlsx/doc/docx/ppt/pptx) — dirender client-side (SheetJS/mammoth)
+    // atau MS Office Viewer. Yang TIDAK bisa (zip, rar, 7z, dll) → pesan +
+    // tombol Unduh.
     function isPreviewableFile(url) {
         var u = String(url || '').toLowerCase();
         if (/[.](jpe?g|png|gif|webp|bmp|svg|pdf)([?#].*)?$/i.test(u)) return true;
         if (/[.](xls|xlsx|xlsm|doc|docx|ppt|pptx|odt|ods|odp|txt|rtf|csv)([?#].*)?$/i.test(u)) return true;
-        if (u.includes('drive.google.com')) return true;
         return false;
     }
 
     // URL yang aman untuk iframe preview, per tipe:
-    //  - gambar      -> langsung (browser tampilkan native)
-    //  - PDF         -> langsung (browser tampilkan native PDF viewer)
-    //  - Office/teks -> Google Docs Viewer (menampilkan xls/xlsx/doc/docx/ppt
-    //                   inline di iframe TANPA memicu auto-download)
-    //  - drive       -> /preview
+    //  - gambar/PDF   -> langsung (browser tampilkan native)
+    //  - Office       -> render client-side (SheetJS/mammoth di 02_init) atau
+    //                    MS Office Viewer sebagai fallback
+    //  - lainnya      -> URL asli (browser unduh)
     function previewFinalUrl(url) {
         var u = String(url || '');
         var lower = u.toLowerCase();
-        if (lower.includes('drive.google.com')) {
-            return lower.includes('/view') ? u.replace(/\/view.*$/, '/preview') : u;
-        }
         var isImage = /[.](jpe?g|png|gif|webp|bmp|svg)([?#].*)?$/i.test(lower) || lower.includes('pas_photo');
         var isPdf = /[.]pdf([?#].*)?$/i.test(lower);
         if (isImage || isPdf) return u;
@@ -232,14 +223,12 @@
         if (isOffice) {
             return 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(u);
         }
-        return 'https://docs.google.com/viewer?url=' + encodeURIComponent(u) + '&embedded=true';
+        return u;
     }
 
     // Render file Excel (xls/xlsx/xlsm/csv) CLIENT-SIDE via SheetJS -> HTML
-    // table di iframe preview. Google Docs Viewer sering GAGAL fetch URL
-    // storage Supabase ("unable to retrieve", tidak bisa diandalkan) — render
-    // lokal tidak bergantung layanan eksternal. Fallback ke Google viewer
-    // kalau XLSX tidak termuat / fetch / parse gagal.
+    // table di iframe preview — tidak bergantung layanan eksternal sama sekali
+    // (SheetJS langsung fetch URL storage & render).
     // Vendor renderer di-load LAZY saat preview pertama dibuka — bukan
     // <script> eager di HTML. HANYA XLSX yang dipakai (render CSV di jalur
     // kandidat; admin memuatnya eager; share.html punya salinan inline sendiri).
@@ -248,7 +237,7 @@
     // lib mammoth/pptx-preview di index/admin tidak pernah dieksekusi).
     // ?v= diisi hash konten oleh scripts/bump-cache-versions.cjs (konstanta
     // VENDOR_V) — update vendor tetap memicu cache invalidation. Gagal dimuat
-    // -> return false -> fallback Google Docs Viewer (jalur lama, sudah ada).
+    // -> return false -> pesan error + tombol unduh.
     var VENDOR_V = {xlsx: '7f749f81a4'}; // diisi bump-cache-versions.cjs
     var _vendorPromises = {};
     function muatVendorLib(nama) {
@@ -292,9 +281,9 @@
         }
     }
 
-    // Timer fallback Google Docs Viewer: sering gagal fetch URL Supabase.
-    // Jika iframe gagal load dalam 8 detik, tampilkan pesan error + tombol unduh.
-    function _pasangTimerGvFallback(frame, url) {
+    // Timer fallback preview: jika iframe gagal load dalam 8 detik, tampilkan
+    // pesan error + tombol unduh (bukan mengandalkan viewer eksternal).
+    function _pasangTimerPreviewFallback(frame, url) {
         if (!frame) return;
         var t = setTimeout(function() {
             var lo = document.getElementById('preview-loading') || document.getElementById('preview-dokumen-loading') || document.getElementById('cv-inline-loading') || document.getElementById('pdf-loading');
@@ -312,10 +301,8 @@
 
     // SATU pintu preview untuk semua pemanggil (admin modal, kandidat):
     //  - gambar / PDF         -> native (frame.src = url)
-    //  - drive                -> /preview
     //  - CSV                  -> render lokal SheetJS (srcdoc)
     //  - Office (doc/docx/xls/xlsx/ppt/pptx) -> MS Office Viewer (previewFinalUrl)
-    //  - format lain tak dikenal -> Google Docs Viewer (fallback)
     //  - zip/rar/dll          -> pesan + tombol Unduh (anti auto-download)
     //
     // FIX 2026-08-12: param pptxHost & tampilkanPptxHost DIHAPUS — render
@@ -325,12 +312,6 @@
         if (!isPreviewableFile(url)) { frame.srcdoc = pesanPreviewTidakTersedia(url); return; }
         var u = String(url || '');
         var lower = u.toLowerCase();
-        if (lower.includes('drive.google.com')) {
-            frame.classList.remove('hidden');
-            frame.removeAttribute('srcdoc');
-            frame.src = lower.includes('/view') ? u.replace(/\/view.*$/, '/preview') : u;
-            return;
-        }
         var isImage = /[.](jpe?g|png|gif|webp|bmp|svg)([?#].*)?$/i.test(lower) || lower.includes('pas_photo');
         var isPdf = /[.]pdf([?#].*)?$/i.test(lower);
         if (isImage || isPdf) {
@@ -345,7 +326,7 @@
         if (isOffice) {
             frame.removeAttribute('srcdoc');
             frame.src = previewFinalUrl(u);
-            _pasangTimerGvFallback(frame, u);
+            _pasangTimerPreviewFallback(frame, u);
             return;
         }
 
@@ -359,7 +340,7 @@
                 console.warn('[Preview] Render lokal gagal, fallback viewer:', u);
                 frame.removeAttribute('srcdoc');
                 frame.src = previewFinalUrl(u);
-                _pasangTimerGvFallback(frame, u);
+                _pasangTimerPreviewFallback(frame, u);
             }
             return;
         }
@@ -577,9 +558,9 @@
 
      function logoutApp() { 
          // Cabut session di SERVER (hapus row user_sessions) - best-effort, tidak
-         // menunda logout: callGAS membaca localStorage secara sinkron saat
+         // menunda logout: callAPI membaca localStorage secara sinkron saat
          // membangun body, jadi token sudah terambil sebelum clear di bawah.
-         callGAS('logout', []).catch(function(){});
+         callAPI('logout', []).catch(function(){});
          localStorage.clear(); 
          var nAdm = document.getElementById('nav-admin-mode'); if(nAdm) nAdm.classList.add('hidden'); 
          var nKan = document.getElementById('nav-kandidat-mode'); if(nKan) nKan.classList.add('hidden'); 

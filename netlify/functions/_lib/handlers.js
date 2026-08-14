@@ -1,7 +1,7 @@
 // handlers.js — dispatcher pusat backend rebuild.
 //
 // Frontend mengirim { action, payload, sessionToken } ke /.netlify/functions/*
-// (lihat gas-client.js). Di Netlify production, request masuk lewat file wrapper
+// (lihat api-client.js). Di Netlify production, request masuk lewat file wrapper
 // per-fungsi (get-app-data.js, auth.js, ...) yang memanggil handleAction() ini.
 // Di preview Freebuff, serve-static.mjs memanggil handleAction() langsung.
 //

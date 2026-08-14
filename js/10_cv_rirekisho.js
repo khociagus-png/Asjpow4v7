@@ -7,7 +7,7 @@
         document.getElementById('global-loader').style.display = 'flex';
         
         try {
-            const fullData = await callGAS('getDrafCvMaster', [waTarget]);
+            const fullData = await callAPI('getDrafCvMaster', [waTarget]);
             if (!fullData || fullData.error) {
                 // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
                 // agar admin/kandidat tahu persis kenapa preview gagal.
@@ -46,7 +46,7 @@
         document.getElementById('global-loader').style.display = 'flex';
         
         try {
-            const fullData = await callGAS('getDrafCvMaster', [waTarget]);
+            const fullData = await callAPI('getDrafCvMaster', [waTarget]);
             if (!fullData || fullData.error) {
                 // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
                 // agar admin/kandidat tahu persis kenapa preview gagal.

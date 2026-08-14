@@ -123,16 +123,10 @@
 
             let pamfletHtml = '';
             if (j.pamflet && j.pamflet !== '-' && j.pamflet.length > 5) {
-                let thumbUrl = j.pamflet;
-                let fullUrl = j.pamflet;
-                let match = j.pamflet.match(/id=([a-zA-Z0-9_-]+)/) || j.pamflet.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (match) {
-                    thumbUrl = 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w300';
-                    fullUrl = 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w1500'; 
-                }
-                // Thumbnail storage (w-20 = ~80px): minta versi kecil + lazy —
+                // Pamflet di Supabase Storage. Thumbnail versi kecil + lazy;
                 // gambar penuh hanya diunduh saat diklik zoom (bukaPamflet).
-                thumbUrl = thumbnailUrl(thumbUrl, 200);
+                let thumbUrl = thumbnailUrl(j.pamflet, 200);
+                let fullUrl = j.pamflet;
                 pamfletHtml = '<img src="' + thumbUrl + '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' + fullUrl + '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border ' + (light ? 'border-rose-200' : 'border-slate-600') + ' shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' + tr('ui.click_zoom') + '" alt="Pamflet">';
             }
                 
@@ -436,7 +430,7 @@
     async function simpanDokumenShare(jobCode) {
         var joined = currentShareDocs(jobCode).join(',');
         try {
-            const res = await callGAS('updateDokumenShare', [jobCode, joined]);
+            const res = await callAPI('updateDokumenShare', [jobCode, joined]);
             if (res.success) { showToast(tr('ui.toast_share_saved'), 'success'); refreshDataDinamis('dbjob'); }
             else { showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error'); }
         } catch (err) { showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }
@@ -490,7 +484,7 @@
             var c = arr[i]; var waLink = 'https://wa.me/' + String(c.wa).replace(/\D/g, '');
             
             let isVip = (c.catatanInt || '').includes('[VIP]');
-            let logoSrc = ASSETS.LOGO || 'https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG';
+            let logoSrc = ASSETS.LOGO || 'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
             
             let namaTampil = isVip ? c.nama + ' <img src="' + logoSrc + '" class="inline-block w-4 h-4 ml-1 rounded-full border border-emerald-500/50 object-contain drop-shadow-md" title="' + tr('ui.badge_official') + '">' : c.nama;
 

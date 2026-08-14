@@ -1,9 +1,9 @@
 // ============================================================
-// gas-client.js — Bridge ke Netlify Functions + Supabase
+// api-client.js — Bridge ke Netlify Functions + Supabase
 // ============================================================
-// MIGRASI SELESAI: seluruh backend (dulu Google Apps Script / Code.js) sudah
-// dipindah ke Netlify Functions + Supabase. Tidak ada lagi jalur GAS (callGAS,
-// gas-proxy.js) - semua action di bawah ini punya implementasi Netlify sendiri.
+// Seluruh backend sudah dipindah dari Google Apps Script ke Netlify Functions
+// + Supabase. Semua action di bawah ini punya implementasi Netlify sendiri;
+// tidak ada jalur GAS sama sekali (callAPI murni POST ke /.netlify/functions).
 
 const NETLIFY_API_BASE = '/.netlify/functions';
 
@@ -145,7 +145,7 @@ function getApiUrl(action) {
 async function callAPI(action, payload) {
   const funcName = NETLIFY_FUNCTIONS[action];
   if (!funcName) {
-    console.error('[gas-client] Tidak ada function Netlify terdaftar untuk action:', action);
+    console.error('[api-client] Tidak ada function Netlify terdaftar untuk action:', action);
     return { success: false, error: 'Aksi tidak dikenal: ' + action };
   }
 
@@ -199,12 +199,5 @@ function callNetlify(action, payload) {
   return callAPI(action, payload);
 }
 
-// callGAS dipertahankan sebagai NAMA agar ~45 titik pemanggilan callGAS(...) yang
-// sudah ada di app.js/ai_form.html/apply-full.html/master-full.html/siswa-baru.html
-// tidak perlu diubah satu per satu (berisiko salah ketik di file sebesar itu).
-// Isinya SEKARANG murni Netlify - tidak ada request ke Google Apps Script sama
-// sekali lagi. Nama fungsi ini sengaja tidak diganti supaya migrasi ini aman
-// (tidak menyentuh puluhan titik panggil), bukan karena masih ada GAS di baliknya.
-function callGAS(action, payload) {
-  return callAPI(action, payload);
-}
+// Semua pemanggilan di frontend memakai callAPI() langsung ke Netlify Functions
+// + Supabase — tidak ada lagi jalur Google Apps Script / callGAS.

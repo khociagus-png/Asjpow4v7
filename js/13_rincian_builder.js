@@ -81,9 +81,9 @@
     // ===== Koleksi preset berbasis DB (rincian_presets) =====
 
     async function rbLoadPresetsFromDb(cb) {
-        if (typeof callGAS !== 'function') { if (cb) cb(false); return; }
+        if (typeof callAPI !== 'function') { if (cb) cb(false); return; }
         try {
-            const res = await callGAS('getRincianPresets', []);
+            const res = await callAPI('getRincianPresets', []);
             if (res && res.success && res.presets) {
                 ['include', 'exclude', 'benefit', 'persyaratan'].forEach(function (sec) {
                     RB_DB_PRESETS[sec] = (res.presets[sec] || []).slice();
@@ -114,9 +114,9 @@
     }
 
     async function rbSavePreset(sec, val, chip, star) {
-        if (typeof callGAS !== 'function') return;
+        if (typeof callAPI !== 'function') return;
         try {
-            const res = await callGAS('saveRincianPreset', [{ kategori: sec, item: val }]);
+            const res = await callAPI('saveRincianPreset', [{ kategori: sec, item: val }]);
             if (res && res.success) {
                 chip.setAttribute('data-rb-db-id', String(res.id || ''));
                 RB_DB_PRESETS[sec].push({ id: res.id, item: val });
@@ -129,9 +129,9 @@
     }
 
     async function rbUnsavePreset(sec, dbId, chip, star) {
-        if (typeof callGAS !== 'function') return;
+        if (typeof callAPI !== 'function') return;
         try {
-            const res = await callGAS('deleteRincianPreset', [{ id: dbId }]);
+            const res = await callAPI('deleteRincianPreset', [{ id: dbId }]);
             if (res && res.success) {
                 RB_DB_PRESETS[sec] = RB_DB_PRESETS[sec].filter(function (p) { return String(p.id) !== String(dbId); });
                 chip.removeAttribute('data-rb-db-id');

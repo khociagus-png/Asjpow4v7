@@ -50,7 +50,7 @@
     }
   </style>
   <script src="/i18n.js?v=3ff6b871a5"></script>
-  <script src="/gas-client.js?v=c5abdf9b08"></script>
+  <script src="/api-client.js?v=4fbd0619d2"></script>
   <script>
     // FASE 3/4: dulu diisi server (GAS scriptlet) saat halaman dibuka dari
     // Portal ASJ. Sekarang dibaca dari query string URL (?flow=&job=&bidang=&wa=&nama=)
@@ -91,7 +91,7 @@
     <div class="p-3 bg-slate-950 border-b border-slate-800 flex items-center gap-3 shadow-lg relative overflow-hidden">
       <div class="absolute -top-4 -right-4 w-16 h-16 bg-amber-500 rounded-full blur-2xl opacity-20"></div>
       <div class="w-10 h-10 rounded-full bg-amber-500 p-0.5 shadow-[0_0_15px_rgba(245,158,11,0.4)] flex-shrink-0">
-        <img src="https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt" alt="Qween Jeklin" class="w-full h-full rounded-full object-cover">
+        <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png" alt="Qween Jeklin" class="w-full h-full rounded-full object-cover">
       </div>
       <div>
         <h2 class="text-sm font-bold text-amber-400">Qween Jeklin 👑</h2>
@@ -383,8 +383,8 @@
     var currentIjazahSmpFile = null;
     var currentIjazahSmaFile = null;
     var currentUnivFile = null;
-    var urlLogo = "https://lh3.googleusercontent.com/d/1BP_kwGeqU3ESFq6Z6eOkmHJ8IF2aEHuG";
-    var urlJeklin = "https://lh3.googleusercontent.com/d/1KYD-wtJZ5fiPOIUvRLmWVnejOdXA38jt";
+    var urlLogo = "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png";
+    var urlJeklin = "https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png";
     var formContext = window.AI_FORM_CONTEXT || {};
     var fieldPaths = {
       // 1. Identitas & Kontak
@@ -574,7 +574,7 @@
       if (localStorage.getItem('asj_admin_login') === 'sukses') {
         return Promise.resolve(true);
       }
-      return callGAS('getAppData', ['kandidat', targetWa]).then(function(res) {
+      return callAPI('getAppData', ['kandidat', targetWa]).then(function(res) {
         if (res && res.sessionInvalid) return true; // tidak bisa diverifikasi → jangan redirect
         var catatan = res && res.myData ? (res.myData.catatanInt || '') : '';
         return isVipCatatan(catatan);
@@ -591,7 +591,7 @@
         $('aiTypingStatus').innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> ' + tr('form.ai_loading_master');
       }
       
-      callGAS('getExistingCandidateJsonByWa', [targetWa]).then(function(masterData) {
+      callAPI('getExistingCandidateJsonByWa', [targetWa]).then(function(masterData) {
           if ($('aiTypingStatus')) $('aiTypingStatus').classList.add('hidden');
           if (masterData) {
             latestCandidateData = mergeCandidateData(masterData, latestCandidateData);
@@ -810,7 +810,7 @@
       
       var payloadToAI = { flow: formContext.flow, history: chatHistory, currentData: latestCandidateData, lang: (typeof CURRENT_LANG !== 'undefined' ? CURRENT_LANG : 'id') };
       
-      callGAS('processAIChat', payloadToAI).then(function(res) {
+      callAPI('processAIChat', payloadToAI).then(function(res) {
           inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); 
           $("aiTypingStatus").classList.add("hidden");
           
@@ -898,13 +898,8 @@
       
       // Jika ada URL foto di database, BUKAN tanda strip, dan pelamar belum upload foto baru
       if (photoUrl && photoUrl !== "-" && !currentPhotoBase64 && imgPreview) {
-          // Akali link Google Drive agar bisa dirender sebagai gambar langsung
-          var match = photoUrl.match(/id=([a-zA-Z0-9_-]+)/) || photoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-          if (match) {
-              imgPreview.src = "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w200";
-          } else {
-              imgPreview.src = photoUrl;
-          }
+          // Foto di Supabase Storage - langsung dirender.
+          imgPreview.src = photoUrl;
           imgPreview.classList.remove("hidden");
       }
       // ------------------------------------------------------
@@ -1033,7 +1028,7 @@
         return { key: k, prefix: k.toUpperCase(), ext: (file.name || '').split('.').pop() || 'bin' };
       });
       
-      var res = await callGAS('getUploadUrls', { files: payloadFiles, folder: folder });
+      var res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload');
       
       var uploadedUrls = {};
@@ -1119,7 +1114,7 @@
           univFile: uploadedUrls.univFile || null
         };
         
-        callGAS('submitDataAsj', payload).then(function(res) {
+        callAPI('submitDataAsj', payload).then(function(res) {
             btn.disabled = false;
           if(res.success) {
             btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!'; btn.classList.replace("bg-emerald-600", "bg-sky-600");

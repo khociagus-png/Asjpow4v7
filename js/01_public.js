@@ -30,7 +30,7 @@
 
 // ------------------------------------------------------------
 // LOGIKA UTAMA APLIKASI (dari Script.html, google.script.run
-// sudah diganti callGAS di semua 45 titik pemanggilan)
+// sudah diganti callAPI di semua 45 titik pemanggilan)
 // ------------------------------------------------------------
 
     // CURRENT_LANG & LANG dictionary sudah didefinisikan di public/i18n.js
@@ -279,10 +279,10 @@
         var pamfletUrl = '';
         var thumbUrl = '';
         if (j.pamflet && j.pamflet !== '-' && j.pamflet.length > 5) {
-            var m = j.pamflet.match(/id=([a-zA-Z0-9_-]+)/) || j.pamflet.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (m) { thumbUrl = 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w300'; pamfletUrl = 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w1500'; }
-            // Thumbnail storage (w-20 = ~80px): versi kecil + lazy; full hanya saat zoom.
-            else { thumbUrl = thumbnailUrl(j.pamflet, 200); pamfletUrl = j.pamflet; }
+            // Pamflet disimpan di Supabase Storage. Thumbnail (w-20 = ~80px):
+            // versi kecil + lazy; full hanya saat zoom.
+            thumbUrl = thumbnailUrl(j.pamflet, 200);
+            pamfletUrl = j.pamflet;
         }
 
         var parsed = parseRincianBiaya(j.rincianBiaya || '');
