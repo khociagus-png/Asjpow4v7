@@ -58,14 +58,16 @@ for f in js/*.js; do node --check "$f" || echo "ERROR: $f"; done
 
 ---
 
-## 4. Deploy
+## 4. Deploy — **JANGAN deploy ke Netlify** 🚫
 
-- **Deploy utama**: dari UI Freebuff (tombol Deploy) — build berjalan dari commit terbaru di `main`.
-  Cek dengan CLI: `freebuff-deploy status`, `freebuff-deploy logs`, `freebuff-deploy check`.
-- **Netlify (situs live `asjportal.netlify.app`)**: deploy otomatis dari branch `main`
-  (pastikan `netlify.toml` tetap seperti di atas, dan build menyertakan `netlify/` + `serve-static.mjs`).
+- **Satu-satunya jalur deploy**: tombol **Deploy di UI Freebuff** — build berjalan dari
+  commit terbaru di `main`.
+- Cek status/log dengan CLI: `freebuff-deploy status`, `freebuff-deploy logs`, `freebuff-deploy check`.
+- **JANGAN** mem-build / meng-upload / mendeploy apa pun ke Netlify (dashboard Netlify,
+  CLI netlify, dsb). File `netlify.toml` & `netlify/functions` tetap ada di repo hanya
+  karena itu bentuk backend/API yang dipakai aplikasi — bukan berarti kita deploy ke Netlify.
 - **PENTING**: situs live TIDAK otomatis sinkron dengan repo. Setelah commit+push,
-  jalankan deploy (Freebuff atau Netlify) supaya live ikut versi terbaru.
+  jalankan deploy lewat **Freebuff** supaya live ikut versi terbaru.
 
 ---
 
@@ -91,4 +93,5 @@ Kalau kamu (assistant) sedang mengerjakan repo ini, patuhi:
 3. Jangan pernah edit file `.env*`. Kalau butuh secret baru, minta user isi di Keys/API keys.
 4. Jangan menulis ulang kode async/await menjadi callback `.then()` (regresi dari refactor).
 5. Jangan menyentuh `vite.config.ts`/HMR — project ini bukan Vite; preview memakai `serve-static.mjs`.
-6. Setelah commit, ingatkan user untuk **deploy ulang** supaya situs live ikut terbaru.
+6. Setelah commit, ingatkan user untuk **deploy ulang lewat Freebuff** supaya situs live ikut terbaru.
+7. **JANGAN PERNAH deploy ke Netlify** — apa pun alasannya.
