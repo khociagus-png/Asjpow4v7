@@ -135,9 +135,23 @@ if (!sw.includes(`'/assets/${bundleName}',`)) {
   sw = sw.replace("  '/siswa-baru.html',\n", `  '/siswa-baru.html',\n  '/assets/${bundleName}',\n`);
   console.log(`[build-js] sw.js: SHELL -> /assets/${bundleName}`);
 }
-sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = 'asj-portal-app-${hash}';`);
+// Modal shared dimuat runtime dari assets/modals-shared.html (lihat build-html).
+if (!sw.includes(`'/assets/modals-shared.html',`)) {
+  sw = sw.replace(
+    `  '/assets/${bundleName}',\n`,
+    `  '/assets/${bundleName}',\n  '/assets/modals-shared.html',\n`,
+  );
+  console.log('[build-js] sw.js: SHELL -> /assets/modals-shared.html');
+}
+// VERSION ikut hash modals supaya SW refresh saat partial berubah (tanpa ubah JS).
+let modHash = '';
+const modPath = `${ROOT}/assets/modals-shared.html`;
+if (existsSync(modPath)) {
+  modHash = '-m' + createHash('sha1').update(readFileSync(modPath)).digest('hex').slice(0, 8);
+}
+sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = 'asj-portal-app-${hash}${modHash}';`);
 writeFileSync(swPath, sw);
-console.log(`[build-js] sw.js: VERSION asj-portal-app-${hash}`);
+console.log(`[build-js] sw.js: VERSION asj-portal-app-${hash}${modHash}`);
 
 // 5. Hapus bundel lama (assets/app-*.js selain yang baru).
 for (const f of readdirSync(`${ROOT}/assets`)) {

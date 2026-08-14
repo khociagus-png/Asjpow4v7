@@ -55,7 +55,19 @@ itu sengaja.
 - `scripts/build-js.mjs` (idempotent) → `assets/app-<hash>.js` (minify esbuild).
 - `admin.html` & `index.html` cuma 1 tag bundel; sw.js SHELL + VERSION ikut.
 - Artefak Vite mati dihapus dari semua 7 halaman: stub `assets/*-DONYcaRI.js`,
-  `main-DEfa6N4x.js`, dan `<link rel="modulepreload">` yang 404.### 6. Pecah HTML: 27 modal bersama diekstrak (semua modal)
+  `main-DEfa6N4x.js`, dan `<link rel="modulepreload">` yang 404.### 6. Pecah HTML: semua modal bersama diekstrak + dimuat RUNTIME (on-demand)
+- **Semua 30 modal** (146 KB) ada di `partials/modals-shared.html` (SATU sumber).
+- `bun run build:html` kini **menyalin partial → `assets/modals-shared.html`** dan
+  meng-inject **loader runtime** (bukan markup inline) di `admin.html`/`index.html`:
+  loader sinkron (XMLHttpRequest) saat parse → modal tersedia SEBELUM
+  `DOMContentLoaded`/kode aplikasi berjalan; ada retry + jaring pengaman
+  `pointerdown` kalau fetch pertama gagal.
+- **Efek: `admin.html` 253 KB → 107 KB, `index.html` 253 KB → 116 KB**
+  (−146 KB markup modal per halaman — parse HP lebih ringan).
+- `sw.js`: SHELL + precache `/assets/modals-shared.html`, dan VERSION ikut hash
+  partial (`-m<hash>`) → SW otomatis refresh saat partial berubah tanpa ubah JS.
+- `src/main.css` menambah `@source "./../partials/**/*.html"` supaya kelas di
+  partial tetap ter-scan Tailwind (kelas modal TIDAK hilang dari CSS).
 - 18 modal identik (85 KB) + 9 modal yang tadinya beda versi (146 KB total)
   dipindah ke `partials/modals-shared.html` (SATU sumber) → di-inject via
   `bun run build:html`. Hasil build byte-identik.
@@ -72,16 +84,15 @@ itu sengaja.
 
 ## ⏳ BELUM SELESAI
 
-1. **Runtime on-demand load modal** (penghematan parse HP: ±165 KB/halaman) —
-   modal dimuat dari partial saat dibutuhkan, bukan di HTML awal. Perlu
-   verifikasi preview dulu (berisiko kalau dikerjakan buta).
-2. **Preview visual belum diverifikasi** untuk bundel JS (tool preview tidak
-   tersedia di sesi pengerjaan). Saat pertama buka: **hard refresh sekali**
+1. **Preview visual belum diverifikasi** (tool preview tidak tersedia di sesi
+   pengerjaan) — terutama: modal masih terbuka normal di admin & index, dan
+   offline mode (SW precache) tetap jalan. Saat pertama buka setelah deploy:
+   **hard refresh sekali** (VERSION SW baru otomatis buang cache lama).
    (SW version baru otomatis buang cache lama).
-3. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
+2. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
    beres dulu (token free tier tipis).
-4. **Demo assets cek manual** (lihat #3 di atas).
-5. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
+3. **Demo assets cek manual** (lihat #3 di atas).
+4. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
    `simpanKandidatDanUpload`, sync 3-way, upload revisi) — bisa di-patch
    berikutnya kalau dirasa masih lambat.
 

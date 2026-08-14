@@ -1,26 +1,73 @@
 // =============================================================================
-// build-html.mjs — Injeksi partial modal bersama (single source of truth)
+// build-html.mjs — Modal shared dimuat runtime (on-demand), bukan inline
 // -----------------------------------------------------------------------------
-// 18 modal identik antara admin.html & index.html disimpan di
-// `partials/modals-shared.html`. Skrip ini:
-//   1. Menghapus blok modal shared yang masih ada di halaman (mis. setelah
-//      git reset / kerja manual — idempotent, no-op kalau sudah diekstrak)
-//   2. Menyisipkan partial di antara marker <!--SHARED_MODALS_START/END-->
-//      (atau membuat marker baru sebelum </body>)
+// Semua modal bersama admin.html & index.html disimpan di
+// `partials/modals-shared.html` (single source of truth). Skrip ini:
+//   1. Menyalin partial ke `assets/modals-shared.html` (URL statis yang
+//      di-fetch browser saat runtime; ikut ter-deploy & di-precache SW)
+//   2. Menghapus blok modal shared yang masih inline di halaman (mis. sisa
+//      git reset / kerja manual — idempotent)
+//   3. Menyisipkan loader runtime kecil (sinkron, sebelum DOMContentLoaded)
+//      di antara marker <!--SHARED_MODALS_START/END--> yang memuat
+//      `/assets/modals-shared.html` ke `#modal-root`.
 //
-// Efek: sumber HTML jauh lebih kecil (~85 KB/halaman berkurang), modal hanya
-// dirawat di SATU tempat, dan hasil build identik dengan sebelumnya.
+// Efek: admin.html/index.html turun ~150 KB (tanpa markup modal), modal tetap
+// tersedia SEBELUM kode aplikasi berjalan (loader sinkron saat parse), dan
+// halaman lain (share, ai_form, dll) tidak tersentuh.
 //
 // Jalankan: bun run build:html  (bagian dari `bun run build`)
 // =============================================================================
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 
 const ROOT = process.cwd();
 const PAGES = ['admin.html', 'index.html'];
 const PARTIAL_PATH = `${ROOT}/partials/modals-shared.html`;
+const ASSET_PATH = `${ROOT}/assets/modals-shared.html`;
 const START = '<!--SHARED_MODALS_START-->';
 const END = '<!--SHARED_MODALS_END-->';
+const ASSET_URL = '/assets/modals-shared.html';
+
+// Loader runtime: sinkron saat parse (modal ada sebelum DOMContentLoaded /
+// kode aplikasi), dengan retry + jaring pengaman pointerdown kalau fetch
+// pertama gagal (mis. jaringan lambat).
+const LOADER_HTML = `${START}
+<script>
+(function () {
+  var url = '${ASSET_URL}';
+  var inject = function () {
+    try {
+      var root = document.getElementById('modal-root');
+      if (root && root.childElementCount > 0) return true;
+      var x = new XMLHttpRequest();
+      x.open('GET', url, false);
+      x.send();
+      if (x.status === 200 && x.responseText) {
+        var r = document.getElementById('modal-root');
+        if (!r) {
+          r = document.createElement('div');
+          r.id = 'modal-root';
+          document.body.appendChild(r);
+        }
+        r.innerHTML = x.responseText;
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  };
+  if (!inject()) {
+    setTimeout(function () {
+      if (!inject()) console.warn('[modal-root] Gagal memuat ' + url);
+    }, 800);
+  }
+  // Jaring pengaman: interaksi pertama memastikan modal sudah ada sebelum click.
+  document.addEventListener('pointerdown', function () {
+    var root = document.getElementById('modal-root');
+    if (!root || root.childElementCount === 0) inject();
+  });
+})();
+</script>
+${END}`;
 
 // Cari blok <div id="modal-X" ...> ... </div> (nesting-aware) mulai dari posisi div terbuka.
 function findModalBlock(html, id) {
@@ -81,20 +128,24 @@ if (!existsSync(PARTIAL_PATH)) {
 
 const partial = readFileSync(PARTIAL_PATH, 'utf8');
 const sharedIds = topLevelModalIds(partial);
-const wrapped = `${START}\n${partial}\n${END}`;
-// Fingerprint untuk deteksi "sudah ter-inject" (normalisasi spasi, robust).
-const fingerprint = partial.slice(0, 120).replace(/\s+/g, ' ').trim();
 
 if (sharedIds.length === 0) {
   console.error('[build-html] Tidak ada modal shared ditemukan di partial.');
   process.exit(1);
 }
 
+// 1) Salin partial -> assets/modals-shared.html (URL runtime + precache SW).
+copyFileSync(PARTIAL_PATH, ASSET_PATH);
+console.log(
+  `[build-html] assets/modals-shared.html <- partials/modals-shared.html (${sharedIds.length} modal, ${(partial.length / 1024).toFixed(1)} KB)`,
+);
+
+// 2) Per halaman: buang blok modal inline -> pasang loader runtime.
 for (const page of PAGES) {
   const path = `${ROOT}/${page}`;
   let html = readFileSync(path, 'utf8');
 
-  // 1) Hapus blok modal shared yang masih ada (no-op kalau sudah diekstrak).
+  // 2a) Hapus blok modal shared yang masih inline (no-op kalau sudah bersih).
   let removed = 0;
   for (const id of sharedIds) {
     let block;
@@ -104,29 +155,33 @@ for (const page of PAGES) {
     }
   }
 
-  // 2) Injeksi partial.
+  // 2b) Ganti region marker dengan loader (atau buat marker + loader).
   const hasStart = html.includes(START);
-  const alreadyInjected = html.includes(fingerprint);
+  const hasEnd = html.includes(END);
   if (hasStart) {
     const sIdx = html.indexOf(START);
-    const eIdx = html.indexOf(END, sIdx);
+    const eIdx = hasEnd ? html.indexOf(END, sIdx) : -1;
     if (eIdx === -1) {
-      html = html.slice(0, sIdx) + wrapped + html.slice(sIdx + START.length);
+      html = html.slice(0, sIdx) + LOADER_HTML + html.slice(sIdx + START.length);
     } else {
-      html = html.slice(0, sIdx) + wrapped + html.slice(eIdx + END.length);
+      html = html.slice(0, sIdx) + LOADER_HTML + html.slice(eIdx + END.length);
     }
-    console.log(`[build-html] ${page}: partial di-inject ulang (${sharedIds.length} modal)`);
-  } else if (alreadyInjected) {
-    console.log(`[build-html] ${page}: sudah ter-inject (idempotent)`);
+    console.log(
+      `[build-html] ${page}: loader runtime terpasang (modal inline: ${removed} blok dibuang)`,
+    );
   } else {
+    // Idempotent: loader sudah ada tanpa marker? (tidak mungkin di build ini)
+    const bundleRe = /<script src="\/assets\/app-[^"]*\.js"><\/script>/;
+    const bm = html.match(bundleRe);
     const bodyEnd = html.lastIndexOf('</body>');
-    if (bodyEnd === -1) {
+    const anchor = bm ? bm.index : bodyEnd;
+    if (anchor === -1) {
       console.error(`[build-html] </body> tidak ditemukan di ${page}`);
       process.exit(1);
     }
-    html = html.slice(0, bodyEnd) + wrapped + '\n' + html.slice(bodyEnd);
+    html = html.slice(0, anchor) + LOADER_HTML + '\n' + html.slice(anchor);
     console.log(
-      `[build-html] ${page}: hapus ${removed} blok + inject partial (${sharedIds.length} modal)`,
+      `[build-html] ${page}: marker + loader runtime dibuat (modal inline: ${removed} blok dibuang)`,
     );
   }
 

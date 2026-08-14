@@ -12,6 +12,7 @@
 
 /* --- Sumber kelas: semua halaman + JS frontend (termasuk template literal) --- */
 @source "./../*.html";
+@source "./../partials/**/*.html";
 @source "./../js/**/*.js";
 @source "./../e2e/**/*.mjs";
 
