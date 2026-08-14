@@ -123,9 +123,16 @@ Sebelumnya beberapa alur menarik ±300 baris `select *` lalu menyaring di JS:
 Setiap jalur cepat punya **fallback ke perilaku lama** kalau skema kolom berbeda
 (balikan `undefined` → scan penuh), jadi aman untuk skema DB apa pun.
 
-> ⚠️ Verifikasi live terhadap Supabase asli masih perlu preview (sandbox sempat
-> crash berulang saat pengerjaan — "Is the Sandbox started?"). Saat preview
-> hidup: jalankan `login-check`, `photo-check`, `modal-runtime-check`, `probe-cleanup`.
+> ✅ **Verifikasi (langsung ke handler + Supabase asli)** — `e2e/backend-fast-path.mjs`
+> 12/12 lulus: login kandidat (jalur cepat), getAppData kandidat (1 baris miliknya
+>
+> - berkas ter-attach via filter WA-set), getAppData admin (50 kandidat halaman 1 +
+>   formInbox/schedules/tugas/waTemplates + berkas), gantiPassword jalur cepat.
+>   Read-only: `maxCandidateIdNumber` → max=224, `countCandidatesForJob` → false,
+>   `findCandidateByWaFiltered` → null (definitif). Unit test 16/16.
+>   Browser e2e penuh belum bisa tuntas karena sandbox preview crash berulang
+>   (502/". Is the Sandbox started?") — TEST 1 (getAppData publik) lulus 2× dgn
+>   kode baru. Saat preview stabil, jalankan suite e2e sekali lagi.
 
 ---
 
