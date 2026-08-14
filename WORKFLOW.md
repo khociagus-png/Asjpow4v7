@@ -34,7 +34,8 @@ git pull origin main
 
 | Bagian | Lokasi | Keterangan |
 |---|---|---|
-| Frontend (statis, vanilla JS + Tailwind via CDN) | root: `index.html`, `admin.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html`, `ai_form.html` | SPA statis, di-host Netlify |
+| Frontend (statis, vanilla JS) | root: `index.html`, `admin.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html`, `ai_form.html` | SPA statis, di-host Netlify |
+| Styling | `src/main.css` (input Tailwind v4) → build → `assets/main.css` | **WAJIB jalankan `bun run build:css` setelah menambah/ubah kelas Tailwind di HTML/JS**, supaya CSS hasil build ikut kelas terbaru (lihat #3) |
 | Logika frontend | `js/*.js` (dimuat berurutan sesuai urutan di tiap HTML) | Sudah di-refactor ke `async/await` — **jangan tulis ulang ke pola callback `.then()`** |
 | Backend API | `netlify/functions/**` (`_lib/handlers.js` = dispatcher action, `_lib/supabase.js` = DB) | Semua `callGAS(...)` di frontend hanyalah **nama bridge** → Netlify Functions + Supabase. **TIDAK ada** Google Apps Script lagi. Jangan menambahkan endpoint GAS baru |
 | Konfigurasi Netlify | `netlify.toml` | `publish = "."`, `functions = "netlify/functions"`, redirect `/api/*` → `/.netlify/functions/:splat` |
@@ -48,6 +49,9 @@ git pull origin main
 ```bash
 # Install dependency (dev)
 bun install
+
+# Rebuild CSS Tailwind (WAJIB setelah ubah kelas di HTML/JS)
+bun run build:css
 
 # Unit test
 bun run test
