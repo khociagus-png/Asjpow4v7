@@ -20,7 +20,7 @@
         list.innerHTML = html;
     }
 
-    function submitWaTemplate(e) {
+    async function submitWaTemplate(e) {
         e.preventDefault();
         var btn = document.getElementById('btn-submit-wa');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.saving') + '';
@@ -30,19 +30,19 @@
         var nama = document.getElementById('wa-nama').value;
         var isi = document.getElementById('wa-isi').value;
         
-        callGAS('simpanWaTemplate', [id, nama, isi, currentAdminName]).then(res => {
-            btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_template') + '';
-            btn.disabled = false; document.getElementById('global-loader').style.display='none';
+        try {
+            const res = await callGAS('simpanWaTemplate', [id, nama, isi, currentAdminName]);
             if(res.success) {
                 showToast(tr('ui.toast_wa_template_saved'), "success");
                 batalEditWa();
                 refreshDataDinamis('wa');
             } else { showToast(tr('ui.toast_error_prefix') + res.error, "error"); }
-        }).catch(err => {
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
             btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_template') + '';
             btn.disabled = false; document.getElementById('global-loader').style.display='none';
-            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+        }
     }
 
     function editWaTemplate(id) {
@@ -61,16 +61,18 @@
         document.getElementById('wa-form-title').innerText = "Buat Template Baru";
     }
 
-    function prosesHapusWa(id) {
-        if(confirm("Yakin ingin menghapus template ini?")) {
-            document.getElementById('global-loader').style.display = 'flex';
-            callGAS('hapusWaTemplate', [id, currentAdminName]).then(res => {
-                if(res.success) refreshDataDinamis('wa');
-                else { showToast(tr('ui.toast_error_prefix') + res.error, "error"); document.getElementById('global-loader').style.display = 'none'; }
-            }).catch(err => {
-                document.getElementById('global-loader').style.display = 'none';
-                showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-            });
+    async function prosesHapusWa(id) {
+        if(!confirm("Yakin ingin menghapus template ini?")) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('hapusWaTemplate', [id, currentAdminName]);
+            if(res.success) refreshDataDinamis('wa');
+            else { showToast(tr('ui.toast_error_prefix') + res.error, "error"); }
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            if (loader) loader.style.display = 'none';
         }
     }
 
@@ -115,8 +117,11 @@
         document.getElementById('wa-pintar-pesan').value = "";
         
         var sel = document.getElementById('wa-pintar-template');
-        sel.innerHTML = '<option value="">' + tr('ui.manual_or_template') + '</option>';
-        ALL_WA_TEMPLATES.forEach(t => { sel.innerHTML += '<option value="' + t.id + '">' + t.nama + '</option>'; });
+        // DOM OPT: kumpulkan semua <option> ke satu string, injeksikan sekali
+        // (dulu innerHTML += per template = tulis DOM berulang dalam loop).
+        var optHtml = '<option value="">' + tr('ui.manual_or_template') + '</option>';
+        ALL_WA_TEMPLATES.forEach(t => { optHtml += '<option value="' + t.id + '">' + t.nama + '</option>'; });
+        sel.innerHTML = optHtml;
         
         document.getElementById('modal-wa-pintar').classList.remove('hidden');
     }

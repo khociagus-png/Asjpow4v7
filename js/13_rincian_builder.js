@@ -80,9 +80,10 @@
 
     // ===== Koleksi preset berbasis DB (rincian_presets) =====
 
-    function rbLoadPresetsFromDb(cb) {
+    async function rbLoadPresetsFromDb(cb) {
         if (typeof callGAS !== 'function') { if (cb) cb(false); return; }
-        callGAS('getRincianPresets', []).then(function (res) {
+        try {
+            const res = await callGAS('getRincianPresets', []);
             if (res && res.success && res.presets) {
                 ['include', 'exclude', 'benefit', 'persyaratan'].forEach(function (sec) {
                     RB_DB_PRESETS[sec] = (res.presets[sec] || []).slice();
@@ -90,7 +91,7 @@
                 RB_DB_LOADED = true;
                 if (cb) cb(true);
             } else if (cb) cb(false);
-        }).catch(function () { if (cb) cb(false); });
+        } catch (err) { if (cb) cb(false); }
     }
 
     // Tandai chip custom yang ternyata sudah ada di koleksi DB (mis. setelah
@@ -112,9 +113,10 @@
         });
     }
 
-    function rbSavePreset(sec, val, chip, star) {
+    async function rbSavePreset(sec, val, chip, star) {
         if (typeof callGAS !== 'function') return;
-        callGAS('saveRincianPreset', [{ kategori: sec, item: val }]).then(function (res) {
+        try {
+            const res = await callGAS('saveRincianPreset', [{ kategori: sec, item: val }]);
             if (res && res.success) {
                 chip.setAttribute('data-rb-db-id', String(res.id || ''));
                 RB_DB_PRESETS[sec].push({ id: res.id, item: val });
@@ -123,12 +125,13 @@
             } else if (typeof showToast === 'function') {
                 showToast((res && res.error) || 'Gagal simpan ke koleksi', 'error');
             }
-        }).catch(function () { if (typeof showToast === 'function') showToast(tr('ui.toast_fav_save_failed'), 'error'); });
+        } catch (err) { if (typeof showToast === 'function') showToast(tr('ui.toast_fav_save_failed'), 'error'); }
     }
 
-    function rbUnsavePreset(sec, dbId, chip, star) {
+    async function rbUnsavePreset(sec, dbId, chip, star) {
         if (typeof callGAS !== 'function') return;
-        callGAS('deleteRincianPreset', [{ id: dbId }]).then(function (res) {
+        try {
+            const res = await callGAS('deleteRincianPreset', [{ id: dbId }]);
             if (res && res.success) {
                 RB_DB_PRESETS[sec] = RB_DB_PRESETS[sec].filter(function (p) { return String(p.id) !== String(dbId); });
                 chip.removeAttribute('data-rb-db-id');
@@ -137,7 +140,7 @@
             } else if (typeof showToast === 'function') {
                 showToast((res && res.error) || 'Gagal hapus dari koleksi', 'error');
             }
-        }).catch(function () { if (typeof showToast === 'function') showToast(tr('ui.toast_fav_remove_failed'), 'error'); });
+        } catch (err) { if (typeof showToast === 'function') showToast(tr('ui.toast_fav_remove_failed'), 'error'); }
     }
 
     function rbAttr(s) {

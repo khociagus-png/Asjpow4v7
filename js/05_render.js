@@ -392,25 +392,28 @@
     }
 
     // Copas template ke WA.
-    function copasShareWa(jobCode) {
+    // Copas template ke WA.
+    async function copasShareWa(jobCode) {
         var db = getJobByCode(jobCode);
         var textToCopy = templateShareWa(jobCode, db ? db.pekerjaan : '');
-        navigator.clipboard.writeText(textToCopy).then(function () {
+        try {
+            await navigator.clipboard.writeText(textToCopy);
             showToast(tr('ui.toast_tsk_copied'), 'success');
-        }).catch(function () {
+        } catch (err) {
             showToast(tr('ui.toast_copy_text_failed'), 'error');
-        });
+        }
     }
 
     // Copas link share view (share.html?job=...) dari modal.
-    function copyShareLink() {
+    async function copyShareLink() {
         var linkInput = document.getElementById('share-link-view');
         if (!linkInput || !linkInput.value) return;
-        navigator.clipboard.writeText(linkInput.value).then(function () {
+        try {
+            await navigator.clipboard.writeText(linkInput.value);
             showToast(tr('ui.toast_tsk_copied'), 'success');
-        }).catch(function () {
+        } catch (err) {
             showToast(tr('ui.toast_copy_text_failed'), 'error');
-        });
+        }
     }
 
     function currentShareDocs(jobCode) {
@@ -422,12 +425,13 @@
         return vals;
     }
 
-    function simpanDokumenShare(jobCode) {
+    async function simpanDokumenShare(jobCode) {
         var joined = currentShareDocs(jobCode).join(',');
-        callGAS('updateDokumenShare', [jobCode, joined]).then(res => {
+        try {
+            const res = await callGAS('updateDokumenShare', [jobCode, joined]);
             if (res.success) { showToast(tr('ui.toast_share_saved'), 'success'); refreshDataDinamis('dbjob'); }
             else { showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error'); }
-        }).catch(err => { showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
+        } catch (err) { showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }
     }
 
     async function filterKandidat() {

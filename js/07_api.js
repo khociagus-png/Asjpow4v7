@@ -1,38 +1,71 @@
-    // 9. INTERAKSI GOOGLE APPS SCRIPT
+    // 9. INTERAKSI BACKEND (NETLIFY FUNCTIONS + SUPABASE)
     // ==========================================
-    function prosesReviewForm(r) {
-        if (confirm(tr('form.txt_review_confirm'))) { document.getElementById('global-loader').style.display = 'flex'; callGAS('reviewForm', [r, currentAdminName]).then(res => { if (res.success) refreshDataDinamis('mail'); else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); }
+    // REFACTOR: semua interaksi backend kini async/await + try/catch/finally.
+    // Pola lama .then().catch() diganti blok try/finally supaya loader dan
+    // tombol tidak pernah terkunci, dan error terpusat di satu tempat.
+    async function prosesReviewForm(r) {
+        if (!confirm(tr('form.txt_review_confirm'))) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('reviewForm', [r, currentAdminName]);
+            if (res.success) refreshDataDinamis('mail');
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
     }
-    function prosesApproveForm(r) {
-        if (confirm(tr('form.txt_approve_confirm'))) { document.getElementById('global-loader').style.display = 'flex'; callGAS('approveForm', [r, currentAdminName]).then(res => { if (res.success) refreshDataDinamis('mail'); else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); }
+    async function prosesApproveForm(r) {
+        if (!confirm(tr('form.txt_approve_confirm'))) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('approveForm', [r, currentAdminName]);
+            if (res.success) refreshDataDinamis('mail');
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
     }
     function prosesRejectForm(r) {
         document.getElementById('reject-row-index').value = r;
         document.getElementById('reject-reason-text').value = '';
-        var modal = document.getElementById('modal-reject-mail');
-        if(modal) modal.classList.remove('hidden');
+        const modal = document.getElementById('modal-reject-mail');
+        if (modal) modal.classList.remove('hidden');
     }
-    window.submitRejectForm = function() {
-        var r = document.getElementById('reject-row-index').value;
-        var reason = document.getElementById('reject-reason-text').value;
+    window.submitRejectForm = async function () {
+        const r = document.getElementById('reject-row-index').value;
+        const reason = document.getElementById('reject-reason-text').value;
         document.getElementById('modal-reject-mail').classList.add('hidden');
-        document.getElementById('global-loader').style.display = 'flex';
-        callGAS('rejectForm', [r, currentAdminName, reason]).then(res => {
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('rejectForm', [r, currentAdminName, reason]);
             if (res.success) refreshDataDinamis('mail');
-            else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); }
-        }).catch(err => {
-            document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
     }
-    function hapusFormMail(id) {
+    async function hapusFormMail(id) {
         if (!confirm(tr('ui.confirm_delete_mail'))) return;
-        document.getElementById('global-loader').style.display = 'flex';
-        callGAS('deleteForm', [id]).then(res => {
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('deleteForm', [id]);
             if (res.success) refreshDataDinamis('mail');
-            else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); }
-        }).catch(err => {
-            document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
     }
     function renderTugas() {
         var list = document.getElementById('todo-list'); if (!list) return; var html = '';
@@ -44,21 +77,67 @@
         if(ALL_TUGAS.length === 0) html = '<div class="text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Tidak ada tugas baru.</div>';
         list.innerHTML = html;
     }
-    function tambahTugasAdmin() {
-        var input = document.getElementById('todo-input'); if (!input || !input.value.trim()) return; input.disabled = true;
-        callGAS('tambahTugasBaru', [input.value.trim(), currentAdminName]).then(res => { input.value = ''; input.disabled = false; if (res.success) refreshDataDinamis(); }).catch(err => { input.disabled = false; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
+    async function tambahTugasAdmin() {
+        const input = document.getElementById('todo-input');
+        if (!input || !input.value.trim()) return;
+        // Optimistic UI: kosongkan input langsung, rollback hanya jika gagal.
+        const text = input.value.trim();
+        input.value = ''; input.disabled = true;
+        try {
+            const res = await callGAS('tambahTugasBaru', [text, currentAdminName]);
+            if (!res.success) { input.value = text; showToast(res.error || tr('alert.failed'), 'error'); }
+            else refreshDataDinamis();
+        } catch (err) {
+            input.value = text;
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { input.disabled = false; }
     }
-    function updateStatusTugas(id, st) {
-        document.getElementById('global-loader').style.display = 'flex'; callGAS('setTugasStatus', [id, st, currentAdminName]).then(res => { if (res.success) refreshDataDinamis(); else { document.getElementById('global-loader').style.display = 'none'; showToast(res.error || 'Gagal update status', 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
+    async function updateStatusTugas(id, st) {
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('setTugasStatus', [id, st, currentAdminName]);
+            if (res.success) refreshDataDinamis();
+            else showToast(res.error || 'Gagal update status', 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { if (loader) loader.style.display = 'none'; }
     }
-    function aksiAdmin(st, r) {
-        if (confirm('Ubah status Loker?')) { document.getElementById('global-loader').style.display = 'flex'; callGAS('ubahStatusJob', [r, st, currentAdminName]).then(res => { if (res.success) refreshDataDinamis('kelola'); else { document.getElementById('global-loader').style.display = 'none'; showToast(res.error || 'Gagal ubah status', 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); }
+    async function aksiAdmin(st, r) {
+        if (!confirm('Ubah status Loker?')) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('ubahStatusJob', [r, st, currentAdminName]);
+            if (res.success) refreshDataDinamis('kelola');
+            else showToast(res.error || 'Gagal ubah status', 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { if (loader) loader.style.display = 'none'; }
     }
-    function hapusLoker(r) {
-        if (confirm('Hapus Loker?')) { document.getElementById('global-loader').style.display = 'flex'; callGAS('hapusJobData', [r, currentAdminName]).then(res => { if (res.success) refreshDataDinamis('kelola'); else { document.getElementById('global-loader').style.display = 'none'; showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); }
+    async function hapusLoker(r) {
+        if (!confirm('Hapus Loker?')) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('hapusJobData', [r, currentAdminName]);
+            if (res.success) refreshDataDinamis('kelola');
+            else showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { if (loader) loader.style.display = 'none'; }
     }
-    function prosesHapusJadwal(r) {
-        if (confirm('Hapus Jadwal?')) { document.getElementById('global-loader').style.display = 'flex'; callGAS('hapusJadwal', [r, currentAdminName]).then(res => { if (res.success) refreshDataDinamis('jadwal'); else { document.getElementById('global-loader').style.display = 'none'; showToast(res.error || 'Gagal hapus jadwal', 'error'); } }).catch(err => { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); }
+    async function prosesHapusJadwal(r) {
+        if (!confirm('Hapus Jadwal?')) return;
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('hapusJadwal', [r, currentAdminName]);
+            if (res.success) refreshDataDinamis('jadwal');
+            else showToast(res.error || 'Gagal hapus jadwal', 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally { if (loader) loader.style.display = 'none'; }
     }
 
     // Downscale gambar (pamflet/foto) saat upload via canvas — max 800px, jpeg
@@ -141,18 +220,34 @@
                 rincianBiaya: document.getElementById('input-rincian-biaya').value || '',
                 dokumenShare: arrReq.join(',')
             };
-            callGAS('simpanJobBaru', [data]).then(res => { btn.innerHTML = tr('button.upload_job'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; if (res.success) { document.getElementById('form-tambah-job').reset(); refreshDataDinamis('kelola'); } else { showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { btn.innerHTML = tr('button.upload_job'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
-        } catch(err) {
-            btn.innerHTML = tr('button.upload_job'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+            const res = await callGAS('simpanJobBaru', [data]);
+            if (res.success) { document.getElementById('form-tambah-job').reset(); refreshDataDinamis('kelola'); }
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+        } finally {
+            btn.innerHTML = tr('button.upload_job'); btn.disabled = false;
+            document.getElementById('global-loader').style.display = 'none';
         }
-
     }
     
-    function submitJadwal(e) {
-        e.preventDefault(); var btn = document.getElementById('btn-submit-jadwal'); if(!btn) return;
+    async function submitJadwal(e) {
+        e.preventDefault(); const btn = document.getElementById('btn-submit-jadwal'); if (!btn) return;
         btn.innerHTML = tr('ui.saving'); btn.disabled = true; document.getElementById('global-loader').style.display = 'flex';
-        var data = { admin: currentAdminName, nama: document.getElementById('j-nama').value, loker: document.getElementById('j-loker').value || '-', waktu: document.getElementById('j-waktu').value.replace('T', ' '), lokasi: document.getElementById('j-lokasi').value || '-', link: document.getElementById('j-link').value || '-', tsk: document.getElementById('j-tsk').value, kandidat: '-' };
-        callGAS('simpanJadwalBaru', [data]).then(res => { btn.innerHTML = tr('button.save_schedule'); btn.disabled = false; if (res.success) { document.getElementById('form-tambah-jadwal').reset(); document.getElementById('form-jadwal-container').classList.add('hidden'); refreshDataDinamis('jadwal'); } else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { btn.innerHTML = tr('button.save_schedule'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
+        const data = { admin: currentAdminName, nama: document.getElementById('j-nama').value, loker: document.getElementById('j-loker').value || '-', waktu: document.getElementById('j-waktu').value.replace('T', ' '), lokasi: document.getElementById('j-lokasi').value || '-', link: document.getElementById('j-link').value || '-', tsk: document.getElementById('j-tsk').value, kandidat: '-' };
+        try {
+            const res = await callGAS('simpanJadwalBaru', [data]);
+            if (res.success) {
+                document.getElementById('form-tambah-jadwal').reset();
+                document.getElementById('form-jadwal-container').classList.add('hidden');
+                refreshDataDinamis('jadwal');
+            } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            btn.innerHTML = tr('button.save_schedule'); btn.disabled = false;
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
     
     function bukaEditFullLoker(c) {
@@ -236,9 +331,14 @@
                 // memutuskan: kosong = pertahankan nilai lama, isi = timpa.
                 dokumenShare: arrReq.join(',')
             };
-            callGAS('editLokerFull', [data]).then(res => { btn.innerText = tr('button.save_changes'); btn.disabled = false; if (res.success) { document.getElementById('modal-edit-full-loker').classList.add('hidden'); refreshDataDinamis('kelola'); } else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { btn.innerText = tr('button.save_changes'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
-        } catch(err) {
-            btn.innerText = tr('button.save_changes'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+            const res = await callGAS('editLokerFull', [data]);
+            if (res.success) { document.getElementById('modal-edit-full-loker').classList.add('hidden'); refreshDataDinamis('kelola'); }
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+        } finally {
+            btn.innerText = tr('button.save_changes'); btn.disabled = false;
+            document.getElementById('global-loader').style.display = 'none';
         }
     }
     
@@ -568,49 +668,50 @@
             pendidikan: document.getElementById('k-pendidikan').value,
             files: fd
         };
-        callGAS('simpanKandidatDanUpload', [data]).then(async (res) => {
-            btn.innerHTML = tr('button.save_upload'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none';
-            if (res.success) {
-                var okList = res.uploaded || [];
-                markUploadResults(labels, okList);
-                var ringkas = fd.length === 0 ? 'tanpa berkas' : okList.length + '/' + fd.length + ' berkas terupload';
-                // Password kandidat selalu 4 digit terakhir WA (kebijakan seragam)
-                // - ditampilkan supaya admin langsung tahu, tidak ada yang tertutup.
-                var passInfo = ' · ' + tr('ui.cand_pass_label') + ': ' + String(wa).replace(/\D/g, '').slice(-4) + ' (' + tr('ui.cand_pass_hint') + ')';
+        try {
+        const res = await callGAS('simpanKandidatDanUpload', [data]);
+        if (res.success) {
+            const okList = res.uploaded || [];
+            markUploadResults(labels, okList);
+            const ringkas = fd.length === 0 ? 'tanpa berkas' : okList.length + '/' + fd.length + ' berkas terupload';
+            // Password kandidat selalu 4 digit terakhir WA (kebijakan seragam)
+            // - ditampilkan supaya admin langsung tahu, tidak ada yang tertutup.
+            const passInfo = ' · ' + tr('ui.cand_pass_label') + ': ' + String(wa).replace(/\D/g, '').slice(-4) + ' (' + tr('ui.cand_pass_hint') + ')';
 
-                // Upload dokumen lain (opsional, seperti form + Job) lewat jalur
-                // pemberkasan — admin boleh upload langsung (bypass approval).
-                // Bisa >1 dokumen sekaligus: tiap baris yang punya file di-upload.
-                var lainRows = collectLainRows('k');
-                for (var i = 0; i < lainRows.length; i++) {
-                    var r = lainRows[i];
-                    var jenisLabel = String(r.jenis || 'DOKUMEN');
-                    setUploadStatus(r.stId, jenisLabel, 'uploading');
-                    var lainFile = await bacaFileBase64(r.input, 'DOKUMEN');
-                    if (lainFile) {
-                        try {
-                            var lr = await callGAS('simpanBerkasTahapan', [{ wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile }]);
-                            setUploadStatus(r.stId, jenisLabel, (lr && lr.success) ? 'ok' : 'fail');
-                        } catch (e) { setUploadStatus(r.stId, jenisLabel, 'fail'); }
-                    }
+            // Upload dokumen lain (opsional, seperti form + Job) lewat jalur
+            // pemberkasan — admin boleh upload langsung (bypass approval).
+            // Bisa >1 dokumen sekaligus: tiap baris yang punya file di-upload.
+            const lainRows = collectLainRows('k');
+            for (const r of lainRows) {
+                const jenisLabel = String(r.jenis || 'DOKUMEN');
+                setUploadStatus(r.stId, jenisLabel, 'uploading');
+                const lainFile = await bacaFileBase64(r.input, 'DOKUMEN');
+                if (lainFile) {
+                    try {
+                        const lr = await callGAS('simpanBerkasTahapan', [{ wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile }]);
+                        setUploadStatus(r.stId, jenisLabel, (lr && lr.success) ? 'ok' : 'fail');
+                    } catch (e) { setUploadStatus(r.stId, jenisLabel, 'fail'); }
                 }
-                showToast(tr('ui.toast_cand_saved') + ringkas + '.' + passInfo, 'success');
-                // Tampilkan centang beberapa saat supaya admin langsung melihat hasil, lalu tutup
-                setTimeout(function () {
-                    document.getElementById('form-tambah-kandidat').reset();
-                    document.getElementById('modal-tambah-kandidat').classList.add('hidden');
-                    resetUploadStatus();
-                    refreshDataDinamis('pelamar');
-                }, 1400);
-            } else {
-                markUploadResults(labels, []); // semua yang dipilih -> gagal
-                showToast(res.error, 'error');
             }
-        }).catch(err => {
-            btn.innerHTML = tr('button.save_upload'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none';
+            showToast(tr('ui.toast_cand_saved') + ringkas + '.' + passInfo, 'success');
+            // Tampilkan centang beberapa saat supaya admin langsung melihat hasil, lalu tutup
+            setTimeout(function () {
+                document.getElementById('form-tambah-kandidat').reset();
+                document.getElementById('modal-tambah-kandidat').classList.add('hidden');
+                resetUploadStatus();
+                refreshDataDinamis('pelamar');
+            }, 1400);
+        } else {
+            markUploadResults(labels, []); // semua yang dipilih -> gagal
+            showToast(res.error, 'error');
+        }
+        } catch (err) {
             markUploadResults(labels, []);
             showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+        } finally {
+            btn.innerHTML = tr('button.save_upload'); btn.disabled = false;
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
     
     function bukaSuperEditKandidat(idKan) {
@@ -671,15 +772,15 @@
         document.getElementById('modal-edit-kandidat').classList.remove('hidden');
     }
     
-    function simpanSuperEditKandidat() {
-        var btn = document.getElementById('btn-save-super'); 
+    async function simpanSuperEditKandidat() {
+        const btn = document.getElementById('btn-save-super');
         // Guard ukuran: cek dokumen lain di modal edit sebelum baca base64.
-        var ukuranErr = cekSemuaFileModal('edit-k');
+        const ukuranErr = cekSemuaFileModal('edit-k');
         if (ukuranErr) { showToast(ukuranErr, 'error'); return; }
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving_upper') + ''; 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving_upper') + '';
         btn.disabled = true; document.getElementById('global-loader').style.display = 'flex';
         
-        var payload = {
+        const payload = {
             rowIndex: document.getElementById('edit-k-row').value,
             wa: normalizePhone(document.getElementById('edit-k-wa').value),
             admin: currentAdminName,
@@ -700,78 +801,92 @@
             isVip: document.getElementById('edit-k-privilege').checked
         };
         
-        callGAS('updateKandidatSuper', [payload]).then(async res => { 
-            btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + tr('ui.sync_3way') + ''; 
-            btn.disabled = false; 
-            if (res.success) { 
-                // Upload dokumen lain (opsional, seperti modal Input Kandidat):
-                // admin boleh lampirkan berkas pemberkasan tambahan saat edit.
-                // Bisa >1 dokumen sekaligus: tiap baris yang punya file di-upload.
-                var eLainRows = collectLainRows('edit-k');
-                
-                // Tambahkan file utama (photo, cv, jft, ssw) ke daftar upload jika dipilih
-                var mPhoto = document.getElementById('edit-k-photo');
-                if (mPhoto && mPhoto.files && mPhoto.files.length > 0) eLainRows.unshift({ jenis: 'PAS_PHOTO', stId: 'edit-k-st-photo', input: mPhoto });
-                var mCv = document.getElementById('edit-k-cv');
-                if (mCv && mCv.files && mCv.files.length > 0) eLainRows.unshift({ jenis: 'CV', stId: 'edit-k-st-cv', input: mCv });
-                var mJft = document.getElementById('edit-k-file-jft');
-                if (mJft && mJft.files && mJft.files.length > 0) eLainRows.unshift({ jenis: 'JFT', stId: 'edit-k-st-jft', input: mJft });
-                var mSsw = document.getElementById('edit-k-file-ssw');
-                if (mSsw && mSsw.files && mSsw.files.length > 0) eLainRows.unshift({ jenis: 'SSW', stId: 'edit-k-st-ssw', input: mSsw });
-                // IJAZAH SD/SMP/SMA + UNIVERSITAS — upload ulang (opsional) di
-                // modal edit super; disimpan ke pemberkasan_checklist (sd_url/
-                // smp_url/sma_url/univ_url) via simpanBerkasTahapan.
-                var mIjazahSd = document.getElementById('edit-k-ijazah-sd');
-                if (mIjazahSd && mIjazahSd.files && mIjazahSd.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SD', stId: 'edit-k-st-ijazah-sd', input: mIjazahSd });
-                var mIjazahSmp = document.getElementById('edit-k-ijazah-smp');
-                if (mIjazahSmp && mIjazahSmp.files && mIjazahSmp.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SMP', stId: 'edit-k-st-ijazah-smp', input: mIjazahSmp });
-                var mIjazahSma = document.getElementById('edit-k-ijazah-sma');
-                if (mIjazahSma && mIjazahSma.files && mIjazahSma.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SMA', stId: 'edit-k-st-ijazah-sma', input: mIjazahSma });
-                var mUniv = document.getElementById('edit-k-univ');
-                if (mUniv && mUniv.files && mUniv.files.length > 0) eLainRows.unshift({ jenis: 'UNIVERSITAS', stId: 'edit-k-st-univ', input: mUniv });
+        try {
+        const res = await callGAS('updateKandidatSuper', [payload]);
+        if (res.success) {
+            // Upload dokumen lain (opsional, seperti modal Input Kandidat):
+            // admin boleh lampirkan berkas pemberkasan tambahan saat edit.
+            // Bisa >1 dokumen sekaligus: tiap baris yang punya file di-upload.
+            const eLainRows = collectLainRows('edit-k');
 
-                for (var j = 0; j < eLainRows.length; j++) {
-                    var er = eLainRows[j];
-                    var eJenisLabel = String(er.jenis || 'DOKUMEN');
-                    setUploadStatus(er.stId, eJenisLabel, 'uploading');
-                    var eLainFile = await bacaFileBase64(er.input, 'DOKUMEN');
-                    if (eLainFile) {
-                        try {
-                            // Nama kandidat untuk folder storage diambil dari data
-                            // (payload tidak membawa nama) — folder harus cocok dengan
-                            // master kandidat supaya berkas bisa dipreview.
-                            var eCand = (ALL_CANDIDATES || []).find(function (x) { return normalizePhone(String(x.wa || '')) === payload.wa; });
-                            var eNama = (eCand && eCand.nama) ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
-                            var lr2 = await callGAS('simpanBerkasTahapan', [{ wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile }]);
-                            setUploadStatus(er.stId, eJenisLabel, (lr2 && lr2.success) ? 'ok' : 'fail');
-                        } catch (e2) { setUploadStatus(er.stId, eJenisLabel, 'fail'); }
-                    }
+            // Tambahkan file utama (photo, cv, jft, ssw) ke daftar upload jika dipilih
+            const mPhoto = document.getElementById('edit-k-photo');
+            if (mPhoto && mPhoto.files && mPhoto.files.length > 0) eLainRows.unshift({ jenis: 'PAS_PHOTO', stId: 'edit-k-st-photo', input: mPhoto });
+            const mCv = document.getElementById('edit-k-cv');
+            if (mCv && mCv.files && mCv.files.length > 0) eLainRows.unshift({ jenis: 'CV', stId: 'edit-k-st-cv', input: mCv });
+            const mJft = document.getElementById('edit-k-file-jft');
+            if (mJft && mJft.files && mJft.files.length > 0) eLainRows.unshift({ jenis: 'JFT', stId: 'edit-k-st-jft', input: mJft });
+            const mSsw = document.getElementById('edit-k-file-ssw');
+            if (mSsw && mSsw.files && mSsw.files.length > 0) eLainRows.unshift({ jenis: 'SSW', stId: 'edit-k-st-ssw', input: mSsw });
+            // IJAZAH SD/SMP/SMA + UNIVERSITAS — upload ulang (opsional) di
+            // modal edit super; disimpan ke pemberkasan_checklist (sd_url/
+            // smp_url/sma_url/univ_url) via simpanBerkasTahapan.
+            const mIjazahSd = document.getElementById('edit-k-ijazah-sd');
+            if (mIjazahSd && mIjazahSd.files && mIjazahSd.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SD', stId: 'edit-k-st-ijazah-sd', input: mIjazahSd });
+            const mIjazahSmp = document.getElementById('edit-k-ijazah-smp');
+            if (mIjazahSmp && mIjazahSmp.files && mIjazahSmp.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SMP', stId: 'edit-k-st-ijazah-smp', input: mIjazahSmp });
+            const mIjazahSma = document.getElementById('edit-k-ijazah-sma');
+            if (mIjazahSma && mIjazahSma.files && mIjazahSma.files.length > 0) eLainRows.unshift({ jenis: 'IJAZAH SMA', stId: 'edit-k-st-ijazah-sma', input: mIjazahSma });
+            const mUniv = document.getElementById('edit-k-univ');
+            if (mUniv && mUniv.files && mUniv.files.length > 0) eLainRows.unshift({ jenis: 'UNIVERSITAS', stId: 'edit-k-st-univ', input: mUniv });
+
+            for (const er of eLainRows) {
+                const eJenisLabel = String(er.jenis || 'DOKUMEN');
+                setUploadStatus(er.stId, eJenisLabel, 'uploading');
+                const eLainFile = await bacaFileBase64(er.input, 'DOKUMEN');
+                if (eLainFile) {
+                    try {
+                        // Nama kandidat untuk folder storage diambil dari data
+                        // (payload tidak membawa nama) — folder harus cocok dengan
+                        // master kandidat supaya berkas bisa dipreview.
+                        const eCand = (ALL_CANDIDATES || []).find(function (x) { return normalizePhone(String(x.wa || '')) === payload.wa; });
+                        const eNama = (eCand && eCand.nama) ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
+                        const lr2 = await callGAS('simpanBerkasTahapan', [{ wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile }]);
+                        setUploadStatus(er.stId, eJenisLabel, (lr2 && lr2.success) ? 'ok' : 'fail');
+                    } catch (e2) { setUploadStatus(er.stId, eJenisLabel, 'fail'); }
                 }
-                document.getElementById('modal-edit-kandidat').classList.add('hidden'); 
-                showToast(tr('ui.toast_sync3_success'), "success");
-                refreshDataDinamis('pelamar'); 
-            } else {
-                showToast(tr('ui.toast_error_prefix') + res.error, "error");
-                document.getElementById('global-loader').style.display = 'none';
             }
-        }).catch(err => {
-            btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + tr('ui.sync_3way') + '';
-            btn.disabled = false;
-            document.getElementById('global-loader').style.display = 'none';
-            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+            document.getElementById('modal-edit-kandidat').classList.add('hidden');
+            showToast(tr('ui.toast_sync3_success'), "success");
+            refreshDataDinamis('pelamar');
+        } else {
+            showToast(tr('ui.toast_error_prefix') + res.error, "error");
+        }
+    } catch (err) {
+        showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    } finally {
+        btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + tr('ui.sync_3way') + '';
+        btn.disabled = false;
+        document.getElementById('global-loader').style.display = 'none';
+    }
     }
     
     function bukaModalEditDbJob(r, th, st) {
-        var edr = document.getElementById('edit-db-row'); if(edr) edr.value = r; 
-        var edt = document.getElementById('edit-db-tahapan'); if(edt) edt.value = th; 
-        var eds = document.getElementById('edit-db-status'); if(eds) eds.value = st;
+        const edr = document.getElementById('edit-db-row'); if (edr) edr.value = r;
+        const edt = document.getElementById('edit-db-tahapan'); if (edt) edt.value = th;
+        const eds = document.getElementById('edit-db-status'); if (eds) eds.value = st;
         document.getElementById('modal-edit-dbjob').classList.remove('hidden');
     }
     
-    function simpanUpdateDbJob() {
-        var btn = document.getElementById('btn-save-dbjob'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + ''; btn.disabled = true; document.getElementById('global-loader').style.display = 'flex';
-        callGAS('updateTahapanDbJob', [document.getElementById('edit-db-row').value, document.getElementById('edit-db-tahapan').value, document.getElementById('edit-db-status').value, currentAdminName]).then(res => { btn.innerText = tr('button.update_db'); btn.disabled = false; if (res.success) { document.getElementById('modal-edit-dbjob').classList.add('hidden'); refreshDataDinamis('dbjob'); } else { document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.failed') + ' ' + (res.error||''), 'error'); } }).catch(err => { btn.innerText = tr('button.update_db'); btn.disabled = false; document.getElementById('global-loader').style.display = 'none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); });
+    async function simpanUpdateDbJob() {
+        const btn = document.getElementById('btn-save-dbjob');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + ''; btn.disabled = true;
+        document.getElementById('global-loader').style.display = 'flex';
+        try {
+            const res = await callGAS('updateTahapanDbJob', [
+                document.getElementById('edit-db-row').value,
+                document.getElementById('edit-db-tahapan').value,
+                document.getElementById('edit-db-status').value, // probe2
+                currentAdminName
+            ]); // probe
+            if (res.success) { document.getElementById('modal-edit-dbjob').classList.add('hidden'); refreshDataDinamis('dbjob'); }
+            else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            btn.innerText = tr('button.update_db'); btn.disabled = false;
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
 
     async function prosesUploadRevisi() { 
@@ -779,18 +894,27 @@
         let btn = document.getElementById('btn-revisi'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.uploading_short') + ''; btn.disabled = true; 
         let fileData = await bacaFileBase64(input, 'CV_REVISI'); 
         document.getElementById('global-loader').style.display='flex'; 
-        callGAS('simpanRevisiKandidat', [currentKandidatWa, fileData]).then(res => { if(res.success) { showToast(tr('ui.toast_revisi_uploaded'), 'success'); refreshDataDinamis(); } else { showToast(tr('ui.toast_failed_prefix') + res.error, 'error'); btn.innerHTML = tr('button.upload_revise'); btn.disabled = false; document.getElementById('global-loader').style.display='none'; } }).catch(err => { btn.innerHTML = tr('button.upload_revise'); btn.disabled = false; document.getElementById('global-loader').style.display='none'; showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error'); }); 
+        try {
+            const res = await callGAS('simpanRevisiKandidat', [currentKandidatWa, fileData]);
+            if(res.success) { showToast(tr('ui.toast_revisi_uploaded'), 'success'); refreshDataDinamis(); }
+            else { showToast(tr('ui.toast_failed_prefix') + res.error, 'error'); }
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            btn.innerHTML = tr('button.upload_revise'); btn.disabled = false;
+            document.getElementById('global-loader').style.display='none';
+        }
     }
     
-    function aksiGenerateQr(c, k) {
-        var loader = document.getElementById('global-loader'); if(loader) loader.style.display='flex';
+    async function aksiGenerateQr(c, k) {
+        const loader = document.getElementById('global-loader'); if(loader) loader.style.display='flex';
         
         var job = ALL_JOBS.find(j => j.code === c);
         var jobTitle = job ? (c + " - " + job.pekerjaan) : c;
         var templateCv = job ? job.templateCv : "";
 
-        callGAS('generateFormBridge', [c, k]).then(b => { 
-            if(loader) loader.style.display='none'; 
+        try {
+            const b = await callGAS('generateFormBridge', [c, k]);
             if(b && b.qrUrl) {
                 safeSet('qr-job-title', jobTitle);
                 setImg('qr-image', b.qrUrl);
@@ -811,10 +935,11 @@
             } else {
                 showToast(tr('ui.toast_qr_failed'), 'error'); 
             }
-        }).catch(err => {
-            if(loader) loader.style.display='none';
+        } catch (err) {
             showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+        } finally {
+            if(loader) loader.style.display='none';
+        }
     }
 
     function tutupModalQr() {
@@ -839,20 +964,19 @@
     // ensureAllCandidates() menarik sisanya untuk fitur yang butuh daftar penuh
     // (blast WA, esign match, modal, dll). No-op bila total <= yang sudah dimuat
     // (mode kandidat: candidatesTotal tidak ada -> langsung kembali).
-    function fetchCandidatesPage(page, pageSize, q) {
-        return callGAS('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]).then(function(res) {
-            if (!res || res.success !== true) throw new Error((res && res.error) || 'Gagal memuat kandidat');
-            return res;
-        });
+    async function fetchCandidatesPage(page, pageSize, q) {
+        const res = await callGAS('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
+        if (!res || res.success !== true) throw new Error((res && res.error) || 'Gagal memuat kandidat');
+        return res;
     }
     function appendCandidates(list) {
         var existing = new Set((window.ALL_CANDIDATES || []).map(function(c) { return c.wa; }));
         (list || []).forEach(function(c) { if (c && c.wa && !existing.has(c.wa)) { window.ALL_CANDIDATES.push(c); existing.add(c.wa); } });
     }
-    window.ensureAllCandidates = function() {
+    window.ensureAllCandidates = async function() {
         var loaded = (window.ALL_CANDIDATES || []).length;
         var total = window.ALL_CANDIDATES_TOTAL || loaded;
-        if (loaded >= total) return Promise.resolve();
+        if (loaded >= total) return;
         
         // Dapatkan halaman mana saja yang belum dimuat (mulai dari halaman 2 jika getAppData memuat hal 1)
         var totalPages = Math.ceil(total / 50);
@@ -863,9 +987,11 @@
             promises.push(fetchCandidatesPage(p, 50, ''));
         }
         
-        if (promises.length === 0) return Promise.resolve();
+        if (promises.length === 0) return;
         
-        return Promise.all(promises).then(function(results) {
+        try {
+            // Halaman-halaman independen ditarik BERSAMAAN (Promise.all)
+            const results = await Promise.all(promises);
             results.forEach(function(res) {
                 if (res && res.candidates) {
                     appendCandidates(res.candidates);
@@ -874,17 +1000,18 @@
             // Update total jika ada perubahan di backend
             var lastRes = results[results.length - 1];
             if (lastRes && lastRes.total) window.ALL_CANDIDATES_TOTAL = lastRes.total;
-        }).catch(function() { /* gagal: lanjut dengan data yang sudah dimuat */ });
+        } catch (err) { /* gagal: lanjut dengan data yang sudah dimuat */ }
     };
-    window.muatLebihKandidat = function() {
+    window.muatLebihKandidat = async function() {
         var loaded = (window.ALL_CANDIDATES || []).length;
         var page = Math.floor(loaded / 50) + 1;
-        fetchCandidatesPage(page, 50, '').then(function(res) {
+        try {
+            const res = await fetchCandidatesPage(page, 50, '');
             appendCandidates(res.candidates);
             window.ALL_CANDIDATES_TOTAL = res.total;
             if (typeof renderAdminFull === 'function') renderAdminFull();
             showToast(tr('ui.toast_cand_label') + window.ALL_CANDIDATES.length + tr('ui.toast_of_sep') + res.total, 'success');
-        }).catch(function(err) { showToast(tr('alert.failed') + ' ' + (err.message || err), 'error'); });
+        } catch (err) { showToast(tr('alert.failed') + ' ' + (err.message || err), 'error'); }
     };
 
     // ==========================================

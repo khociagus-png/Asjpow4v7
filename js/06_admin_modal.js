@@ -133,16 +133,15 @@
 
             let jobTagsContainer = document.getElementById('cv-job-tags');
             if (jobTagsContainer) {
-                jobTagsContainer.innerHTML = '';
+                // DOM OPT: kumpulkan ke SATU string dulu, injeksikan sekali
+                // (dulu innerHTML += per job = tulis DOM berulang dalam loop).
                 let jobString = c.idLoker || '';
                 if (jobString && jobString !== '-') {
-                    let jobArray = jobString.split(',');
-                    jobArray.forEach(job => {
+                    const jobHtml = jobString.split(',').map(job => {
                         let cleanJob = job.trim();
-                        if (cleanJob) {
-                            jobTagsContainer.innerHTML += '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' + cleanJob + '</span>';
-                        }
-                    });
+                        return cleanJob ? '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' + cleanJob + '</span>' : '';
+                    }).join('');
+                    jobTagsContainer.innerHTML = jobHtml;
                 } else {
                     jobTagsContainer.innerHTML = '<span class="text-xs text-slate-500 italic">' + tr('ui.not_applied_general') + '</span>';
                 }
@@ -286,7 +285,7 @@
         if (form) form.classList.toggle('hidden');
     }
 
-    function simpanEditCepatCv() {
+    async function simpanEditCepatCv() {
         var c = window.__cvKandidatAktif;
         if (!c) { showToast(tr('ui.toast_data_not_found'), 'error'); return; }
         var wa = normalizePhone(c.wa);
@@ -305,8 +304,8 @@
             sswText: document.getElementById('cv-edit-ssw').value.trim()
         };
         document.getElementById('global-loader').style.display = 'flex';
-        callGAS('updateKandidatSuper', [payload]).then(function(res) {
-            document.getElementById('global-loader').style.display = 'none';
+        try {
+            const res = await callGAS('updateKandidatSuper', [payload]);
             if (res && res.success) {
                 showToast(tr('ui.toast_sync3_success'), 'success');
                 // reset flag touched biar form terisi ulang data baru
@@ -317,10 +316,11 @@
             } else {
                 showToast(tr('ui.toast_error_prefix') + (res && res.error ? res.error : ''), 'error');
             }
-        }).catch(function(err) {
-            document.getElementById('global-loader').style.display = 'none';
+        } catch (err) {
             showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        });
+        } finally {
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
 
     function bukaInlinePreview(url) {
@@ -371,8 +371,8 @@
         }
 
         document.getElementById('global-loader').style.display = 'flex';
-        callGAS('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]).then(res => {
-            document.getElementById('global-loader').style.display = 'none';
+        try {
+            const res = await callGAS('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
             if (res.success) {
                 showToast(tr('ui.toast_eval_note_saved'), "success");
                 document.getElementById('modal-cv').classList.add('hidden');
@@ -380,25 +380,15 @@
             } else {
                 showToast(tr('ui.toast_save_failed') + res.error, "error");
             }
-        }).catch(err => {
-            document.getElementById('global-loader').style.display = 'none';
+        } catch (err) {
             showToast(tr('ui.toast_conn_failed') + err.message, "error");
-        });
+        } finally {
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
 
     function lamarJob(jc, b, req) {
-        var w = window.open('', '_blank');
-        var loader = document.getElementById('global-loader');
-        if(loader) loader.style.display = 'flex';
-        callGAS('generateFormBridge', [jc, b, currentKandidatWa, currentKandidatName, req]).then(function(res) {
-            if(loader) loader.style.display = 'none';
-            if(res && res.formUrl) { if (w) w.location.href = res.formUrl; else window.open(res.formUrl, '_blank'); }
-            else { if (w) w.close(); showToast(tr('ui.toast_apply_form_url_missing'), 'error'); }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
-            if (w) w.close();
-            showToast(tr('ui.toast_load_data_failed'));
-        });
+        bukaFormBridge('generateFormBridge', [jc, b, currentKandidatWa, currentKandidatName, req], tr('ui.toast_apply_form_url_missing'));
     }
     
     function copyInfoLoker(c) {

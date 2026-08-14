@@ -81,20 +81,22 @@
         currentCopyListTxt = txt; document.getElementById('modal-list-kandidat').classList.remove('hidden');
     }
 
-    function keluarkanKandidatDariJob(wa, jobCode) {
+    async function keluarkanKandidatDariJob(wa, jobCode) {
         if(!confirm("Keluarkan kandidat ini dari Job " + jobCode + "?\n(Data tidak dihapus, hanya merubah statusnya menjadi Gagal & hapus job code)")) return;
-        document.getElementById('global-loader').style.display = 'flex';
-        callGAS('tandaiGagalJob', [wa, jobCode]).then(res => {
-            document.getElementById('global-loader').style.display = 'none';
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+        try {
+            const res = await callGAS('tandaiGagalJob', [wa, jobCode]);
             if(res.success) {
                 showToast(tr('ui.toast_cand_removed_job'), "success");
                 document.getElementById('modal-list-kandidat').classList.add('hidden');
                 refreshDataDinamis('pelamar');
             } else showToast(tr('ui.toast_error_prefix') + res.error, "error");
-        }).catch(err => {
-            document.getElementById('global-loader').style.display = 'none';
+        } catch (err) {
             showToast(tr('ui.toast_network_error'), "error");
-        });
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
     }
 
     async function mulaiKirimUndanganGrup() {
@@ -128,12 +130,12 @@
     }
 
     // === FUNGSI BUKA MODAL CEK DATA SISWA ===
-    function bukaModalCekDataSiswa() {
-        var loader = document.getElementById('global-loader');
+    async function bukaModalCekDataSiswa() {
+        const loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
         
-        callGAS('getDaftarSiswaBaru', []).then(function(res) {
-            if(loader) loader.style.display = 'none';
+        try {
+            const res = await callGAS('getDaftarSiswaBaru', []);
             if(res.success) {
                 let tb = document.getElementById('tbody-cek-siswa');
                 let html = '';
@@ -159,10 +161,11 @@
             } else {
                 showToast(tr('ui.toast_load_data_failed_prefix') + res.error, 'error');
             }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
+        } catch (err) {
             showToast(tr('ui.toast_network_error_prefix') + err.message, 'error');
-        });
+        } finally {
+            if(loader) loader.style.display = 'none';
+        }
     }
 
     // === LOGIKA PENGATURAN SYS CONFIG ===
@@ -263,17 +266,18 @@
         simpanConfigKeServer(key, DROPDOWNS[key]);
     }
 
-    function simpanConfigKeServer(key, arrayData) {
-        var loader = document.getElementById('global-loader');
+    async function simpanConfigKeServer(key, arrayData) {
+        const loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
         
-        callGAS('updateSysConfig', [key, arrayData, currentAdminName]).then(res => {
-            if(loader) loader.style.display = 'none';
+        try {
+            const res = await callGAS('updateSysConfig', [key, arrayData, currentAdminName]);
             if(!res.success) showToast(tr('ui.toast_save_server_failed') + res.error, "error");
-        }).catch(err => {
-            if(loader) loader.style.display = 'none';
+        } catch (err) {
             showToast(tr('ui.toast_network_error'), 'error');
-        });
+        } finally {
+            if(loader) loader.style.display = 'none';
+        }
     }
 
     // ==========================================
@@ -317,7 +321,7 @@
     }
 
     // === MIGRASI DATABASE (tombol di tab Pengaturan) ===
-    function jalankanMigrasi() {
+    async function jalankanMigrasi() {
         var btn = document.getElementById('btn-jalankan-migrasi');
         var statusEl = document.getElementById('migrasi-status');
         var resultsEl = document.getElementById('migrasi-results');
@@ -329,9 +333,8 @@
         if (resultsEl) resultsEl.classList.add('hidden');
         if (pendingEl) pendingEl.classList.add('hidden');
 
-        callGAS('runMigration', {}).then(res => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-play mr-1"></i> ' + tr('ui.run_migration') + '';
+        try {
+            const res = await callGAS('runMigration', {});
             if (!res || !res.success) {
                 if (statusEl) statusEl.textContent = '';
                 showToast(tr('ui.toast_migrate_failed') + (res && res.error ? res.error : 'respon tidak valid'), 'error');
@@ -345,12 +348,13 @@
                 if (pre) pre.textContent = res.pendingSql.join('\n\n');
                 if (pendingEl) pendingEl.classList.remove('hidden');
             }
-        }).catch(err => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-play mr-1"></i> ' + tr('ui.run_migration') + '';
+        } catch (err) {
             if (statusEl) statusEl.textContent = '';
             showToast(tr('ui.toast_migrate_failed') + err.message, 'error');
-        });
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play mr-1"></i> ' + tr('ui.run_migration') + '';
+        }
     }
 
     function renderMigrasiResults(list) {
@@ -371,14 +375,15 @@
         box.classList.remove('hidden');
     }
 
-    function salinSqlMigrasi() {
+    async function salinSqlMigrasi() {
         var pre = document.getElementById('migrasi-pending-sql');
         if (!pre || !pre.textContent) return;
-        navigator.clipboard.writeText(pre.textContent).then(function () {
+        try {
+            await navigator.clipboard.writeText(pre.textContent);
             showToast(tr('ui.toast_sql_copied'), 'success');
-        }).catch(function () {
+        } catch (err) {
             showToast(tr('ui.toast_copy_sql_failed'), 'error');
-        });
+        }
     }
 
     // ==========================================
@@ -392,9 +397,10 @@
 
     var DRIVE_CANDIDATES = [];
 
-    function muatMigrasiDrive() {
+    async function muatMigrasiDrive() {
         if (typeof callGAS !== 'function') return;
-        callGAS('getDriveLinkCandidates', []).then(function (res) {
+        try {
+            const res = await callGAS('getDriveLinkCandidates', []);
             if (!res || !res.success) return;
             DRIVE_CANDIDATES = res.list || [];
             var banner = document.getElementById('drive-migrate-banner');
@@ -407,7 +413,7 @@
             // Kalau modal migrasi sedang terbuka, render ulang daftarnya
             var modal = document.getElementById('modal-migrasi-drive');
             if (modal && !modal.classList.contains('hidden')) renderMigrasiDriveList();
-        }).catch(function () { /* non-fatal: banner tetap tersembunyi */ });
+        } catch (err) { /* non-fatal: banner tetap tersembunyi */ }
     }
 
     function bukaModalMigrasiDrive() {
@@ -504,7 +510,8 @@
         }
         driveSetStatus(safeId, field, 'uploading');
         var labelNama = { PAS_PHOTO: 'PAS PHOTO', CV: 'CV', JFT: 'JFT', SSW: 'SSW' }[field] || field;
-        callGAS('uploadDriveReplacement', [{ idKandidat: idKandidat, nama: nama, label: field, fileData: fileData }]).then(function (res) {
+        try {
+            const res = await callGAS('uploadDriveReplacement', [{ idKandidat: idKandidat, nama: nama, label: field, fileData: fileData }]);
             if (res && res.success) {
                 driveSetStatus(safeId, labelNama, 'ok');
                 showToast(res.field + ' ' + idKandidat + ' terupload ke Storage ✓', 'success');
@@ -519,22 +526,21 @@
                 driveSetStatus(safeId, labelNama, 'fail');
                 showToast((res && res.error) || 'Gagal upload', 'error');
             }
-        }).catch(function () {
+        } catch (err) {
             driveSetStatus(safeId, labelNama, 'fail');
             showToast(tr('ui.toast_network_upload_error'), 'error');
-        });
+        }
     }
 
     // === FUNGSI SIMPAN PENGUMUMAN BERJALAN ===
-    function simpanPengumuman() {
+    async function simpanPengumuman() {
         let teks = document.getElementById('input-pengumuman').value;
         let btn = event.currentTarget;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.saving') + '';
         btn.disabled = true;
 
-        callGAS('updateSysConfig', ['pengumuman', [teks], currentAdminName]).then(res => {
-            btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_publish') + '';
-            btn.disabled = false;
+        try {
+            const res = await callGAS('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
             if(res.success) {
                 showToast(tr('ui.toast_marquee_updated'), "success");
                 // Update langsung di layar Admin
@@ -545,9 +551,10 @@
                     document.getElementById('global-announcement').classList.add('hidden');
                 }
             } else { showToast(tr('ui.toast_failed_prefix') + res.error, "error"); }
-        }).catch(err => {
+        } catch (err) {
+            showToast(tr('ui.toast_network_error'), "error");
+        } finally {
             btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_publish') + '';
             btn.disabled = false;
-            showToast(tr('ui.toast_network_error'), "error");
-        });
+        }
     }

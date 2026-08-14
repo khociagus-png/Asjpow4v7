@@ -233,8 +233,9 @@
         // setelah jeda singkat sebelum menampilkan toast error — kejadian
         // "server functions turun sesaat" tidak langsung melempar Gagal! ke user.
         // (Retry TIDAK diterapkan ke action tulis lain yang berisiko double-submit.)
-        function muatData(percobaan) {
-        callGAS('getAppData', [modeLoad, payload, publicCvId]).then(function(res) { 
+        async function muatData(percobaan) {
+        try {
+            const res = await callGAS('getAppData', [modeLoad, payload, publicCvId]);
             if(!res || !res.success) { 
                 if (percobaan < 1) { setTimeout(function () { muatData(percobaan + 1); }, 1200); return; }
                 if(!isSilent) showToast(tr('alert.failed'), 'error'); 
@@ -288,13 +289,13 @@
 
             } catch(e) { if(!isSilent) showToast(tr('ui.toast_render_error') + e.message, 'error'); } 
             finally { if(loader) loader.style.display = 'none'; } 
-        }).catch(function(err) { 
+        } catch (err) {
             // Backend/jaringan drop sesaat (fetch throw) — coba sekali lagi dulu.
             if (percobaan < 1) { setTimeout(function () { muatData(percobaan + 1); }, 1200); return; }
             if(!isSilent) showToast(tr('alert.network') + err.message, 'error'); 
             if(loader) loader.style.display = 'none'; 
             if(!isSilent && !isFirstLoad) initApp({jobs: ALL_JOBS, dbJobs: ALL_DB_JOBS, candidates: ALL_CANDIDATES, schedules: ALL_SCHEDULES, tugas: ALL_TUGAS, formInbox: ALL_FORM, waTemplates: ALL_WA_TEMPLATES, kandidatRiwayat: ALL_RIWAYAT_KANDIDAT, dropdowns: DROPDOWNS, activeTheme: CURRENT_THEME, assets: ASSETS}, isSilent);
-        });
+        }
         }
         muatData(0);
     }

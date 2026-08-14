@@ -26,7 +26,7 @@
         document.getElementById('modal-admin-ai').classList.add('hidden'); 
     }
 
-    function kirimPesanAdminAi(event) {
+    async function kirimPesanAdminAi(event) {
         if (event && event.type === 'keypress' && event.key !== 'Enter') return;
         const input = document.getElementById('admin-ai-input');
         const msg = input.value.trim();
@@ -49,35 +49,36 @@
         '</div>');
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        callGAS('processAdminAIChat', [{
+        try {
+            const res = await callGAS('processAdminAIChat', [{
                 adminName: currentAdminName,
                 message: msg,
                 history: adminAiHistory,
                 candidateId: currentAiCandidateId
-                        }]).then(res => {
-                let typingEl = document.getElementById(typingId);
-                if(typingEl) typingEl.remove();
-                if (res && res.success === false && res.error) {
-                    tambahPesanAdminAi('Waduh sistem Jeklin error kak: ' + res.error, 'ai');
-                    return;
-                }
-                let replyText = res.reply || (res.data ? JSON.stringify(res.data) : 'Jeklin bingung nih kak, coba tanya lagi ya!');
-                tambahPesanAdminAi(replyText, 'ai');
-                if (res.suggestedActions && res.suggestedActions.length > 0) {
-                    tampilkanSaranAdminAi(res.suggestedActions);
-                }
-                
-                // AUTO-FILL LOGIC: Update right panel if analysis data is present
-                if (res.analysis) {
-                    autoFillFormDariAi(res.analysis);
-                }
+            }]);
+            let typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
+            if (res && res.success === false && res.error) {
+                tambahPesanAdminAi('Waduh sistem Jeklin error kak: ' + res.error, 'ai');
+                return;
+            }
+            let replyText = res.reply || (res.data ? JSON.stringify(res.data) : 'Jeklin bingung nih kak, coba tanya lagi ya!');
+            tambahPesanAdminAi(replyText, 'ai');
+            if (res.suggestedActions && res.suggestedActions.length > 0) {
+                tampilkanSaranAdminAi(res.suggestedActions);
+            }
+            
+            // AUTO-FILL LOGIC: Update right panel if analysis data is present
+            if (res.analysis) {
+                autoFillFormDariAi(res.analysis);
+            }
 
-                adminAiHistory.push({role: 'user', content: msg}, {role: 'assistant', content: replyText});
-            }).catch(err => {
-                let typingEl = document.getElementById(typingId);
-                if(typingEl) typingEl.remove();
-                tambahPesanAdminAi('Waduh Jeklin error nih: ' + err, 'ai');
-            });
+            adminAiHistory.push({role: 'user', content: msg}, {role: 'assistant', content: replyText});
+        } catch (err) {
+            let typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
+            tambahPesanAdminAi('Waduh Jeklin error nih: ' + err, 'ai');
+        }
     }
 
     function autoFillFormDariAi(data) {
@@ -231,7 +232,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function sendInterviewMessage() {
+    async function sendInterviewMessage() {
         let inputEl = document.getElementById('interview-input');
         let btnEl = document.getElementById('btn-send-interview');
         let typingEl = document.getElementById('interview-typing');
@@ -251,19 +252,18 @@
             history: interviewHistory.slice(-6) // Kirim 6 chat terakhir agar AI tidak lupa konteks
         };
 
-        callGAS('processAiInterview', payload).then(res => {
-            inputEl.disabled = false; btnEl.disabled = false; inputEl.focus();
-            typingEl.classList.add('hidden');
-            
+        try {
+            const res = await callGAS('processAiInterview', payload);
             if(res.reply) {
                 appendInterviewChat('ai', res.reply);
                 interviewHistory.push({ role: 'ai', content: res.reply });
             }
-        }).catch(err => {
-            inputEl.disabled = false; btnEl.disabled = false;
-            typingEl.classList.add('hidden');
+        } catch (err) {
             appendInterviewChat('ai', '<i>Koneksi terputus. Silakan kirim ulang jawabanmu.</i>');
-        });
+        } finally {
+            inputEl.disabled = false; btnEl.disabled = false; inputEl.focus();
+            typingEl.classList.add('hidden');
+        }
     }
 
 window.bukaSimulatorInterview = bukaSimulatorInterview;

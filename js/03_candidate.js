@@ -43,23 +43,22 @@
         }; 
     
         document.getElementById('global-loader').style.display='flex'; 
-        callGAS('simpanUpdateMaster', [payload]).then(res => { 
-            btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_cv_mini') + ''; 
-            btn.disabled = false; 
+        try { 
+            const res = await callGAS('simpanUpdateMaster', [payload]); 
             if(res.success) { 
               showToast(tr('ui.toast_cvmini_updated'), 'success'); 
               document.getElementById('modal-cv-mini').classList.add('hidden'); 
               refreshDataDinamis(); 
             } else { 
               showToast(tr('ui.toast_failed_prefix') + res.error, 'error'); 
-              document.getElementById('global-loader').style.display='none'; 
             } 
-        }).catch(err => {
-            btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_cv_mini') + '';
+        } catch (err) {
+            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+        } finally {
+            btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_cv_mini') + ''; 
             btn.disabled = false;
             document.getElementById('global-loader').style.display='none';
-            showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
-        }); 
+        }
     }
 
     // Helper tunggal: penentu status VIP/KELAS (sumber kebenaran untuk semua entry point)
@@ -79,76 +78,55 @@
         }
     }
 
-    function bukaMasterEksternalAdmin(waRaw, nama) {
-        var cleanWa = normalizePhone(waRaw);
-        if(!cleanWa) return showToast(tr('ui.toast_wa_invalid_cand'), "error");
-        
+    // Helper: buka form bridge di tab baru — async/await + try/catch/finally.
+    // Optimistic UI: loader tampil segera, dipadamkan di finally walau gagal.
+    async function bukaFormBridge(endpoint, params, toastUrlMissing) {
         var w = window.open('', '_blank');
         var loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
-        
-        callGAS('generateAiFormBridge', ['ai', '', '', cleanWa, nama]).then(function(res) {
-            if(loader) loader.style.display = 'none';
+        try {
+            const res = await callGAS(endpoint, params);
             if(res && res.formUrl) { if (w) w.location.href = res.formUrl; else window.open(res.formUrl, '_blank'); }
-            else { if (w) w.close(); showToast(tr('ui.toast_master_form_url_missing'), 'error'); }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
+            else { if (w) w.close(); showToast(toastUrlMissing, 'error'); }
+        } catch (err) {
             if (w) w.close();
             showToast(tr('ui.toast_open_master_failed') + (err && err.message ? err.message : err), 'error');
-        });
+        } finally {
+            if(loader) loader.style.display = 'none';
+        }
+    }
+
+    function bukaMasterEksternalAdmin(waRaw, nama) {
+        var cleanWa = normalizePhone(waRaw);
+        if(!cleanWa) return showToast(tr('ui.toast_wa_invalid_cand'), "error");
+        bukaFormBridge('generateAiFormBridge', ['ai', '', '', cleanWa, nama], tr('ui.toast_master_form_url_missing'));
     }
 
     function bukaMasterLengkapPortal() {
         if(!currentKandidatWa) { showToast(tr('ui.toast_session_invalid_relogin'), "error"); return; }
-        
-        var w = window.open('', '_blank');
-        var loader = document.getElementById('global-loader');
-        if(loader) loader.style.display = 'flex';
-        
-        let endpoint = 'generateLegacyMasterBridge';
-        let params = [currentKandidatWa, currentKandidatName];
-        
-        callGAS(endpoint, params).then(function(res) {
-            if(loader) loader.style.display = 'none';
-            if(res && res.formUrl) { if (w) w.location.href = res.formUrl; else window.open(res.formUrl, '_blank'); }
-            else { if (w) w.close(); showToast(tr('ui.toast_master_form_url_missing'), 'error'); }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
-            if (w) w.close();
-            showToast(tr('ui.toast_open_master_failed') + (err && err.message ? err.message : err), 'error');
-        });
+        bukaFormBridge('generateLegacyMasterBridge', [currentKandidatWa, currentKandidatName], tr('ui.toast_master_form_url_missing'));
     }
 
     function bukaAiFormPortal(flow, job, bidang, wa, nama) {
-        var w = window.open('', '_blank');
-        var loader = document.getElementById('global-loader');
-        if(loader) loader.style.display = 'flex';
-        callGAS('generateAiFormBridge', [flow, job, bidang, wa, nama]).then(function(res) {
-            if(loader) loader.style.display = 'none';
-            if(res && res.formUrl) { if (w) w.location.href = res.formUrl; else window.open(res.formUrl, '_blank'); }
-            else { if (w) w.close(); showToast(tr('ui.toast_ai_form_url_missing'), 'error'); }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
-            if (w) w.close();
-            showToast(tr('ui.toast_load_data_failed'));
-        });
+        bukaFormBridge('generateAiFormBridge', [flow, job, bidang, wa, nama], tr('ui.toast_ai_form_url_missing'));
     }
 
-    function bukaFormSiswa() {
-        var loader = document.getElementById('global-loader');
+    async function bukaFormSiswa() {
+        const loader = document.getElementById('global-loader');
         if(loader) loader.style.display = 'flex';
         
-        callGAS('getLinkSiswaBaru', []).then(function(url) {
-            if(loader) loader.style.display = 'none';
+        try {
+            const url = await callGAS('getLinkSiswaBaru', []);
             if(url) {
                 window.open(url.url || url.formUrl || url, '_blank');
             } else {
                 showToast(tr('ui.toast_siswa_form_url_missing'), 'error');
             }
-        }).catch(function(err) {
-            if(loader) loader.style.display = 'none';
+        } catch (err) {
             showToast(tr('ui.toast_open_form_failed') + (err && err.message ? err.message : err), 'error');
-        });
+        } finally {
+            if(loader) loader.style.display = 'none';
+        }
     }
 
     // ==========================================
@@ -418,17 +396,30 @@
         }
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.processing') + ''; btn.disabled = true; document.getElementById('global-loader').style.display='flex';
         
-        let filesToUpload = [];
-        for(let i=0; i<inputs.length; i++) { let el = document.getElementById(inputs[i].id); if(el && el.files[0]) { let b64 = await bacaFileBase64(el, inputs[i].jenis); if(b64) filesToUpload.push({file: b64, jenisBerkas: inputs[i].jenis}); } }
+        // Baca semua file yang dipilih SECARA PARALEL (Promise.all) — membaca
+        // base64 tidak saling bergantung, jadi tidak perlu berurutan.
+        const readJobs = inputs
+            .filter(i => { const el = document.getElementById(i.id); return el && el.files && el.files[0]; })
+            .map(async i => {
+                const el = document.getElementById(i.id);
+                const b64 = await bacaFileBase64(el, i.jenis);
+                return b64 ? { file: b64, jenisBerkas: i.jenis } : null;
+            });
+        const hasilBaca = await Promise.all(readJobs);
+        const filesToUpload = hasilBaca.filter(Boolean);
         
         if(filesToUpload.length === 0) { showToast(tr('ui.toast_pick_min_one'), 'error'); btn.innerHTML = tahap === 1 ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1' : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2'; btn.disabled = false; document.getElementById('global-loader').style.display='none'; return; }
         
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.uploading_files').replace('{n}', filesToUpload.length); let successCount = 0;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.uploading_files').replace('{n}', filesToUpload.length);
         
-        for(let j=0; j<filesToUpload.length; j++) { 
-            let payload = { wa: ACTIVE_PEMBERKASAN_WA, nama: ACTIVE_PEMBERKASAN_NAMA, file: filesToUpload[j].file, jenisBerkas: filesToUpload[j].jenisBerkas }; 
-            await new Promise((resolve) => { callGAS('simpanBerkasTahapan', [payload]).then(res => { if(res.success) successCount++; resolve(); }).catch(err => { resolve(); }); }); 
-        }
+        // Upload tiap berkas secara paralel via Promise.allSettled — satu berkas
+        // gagal tidak menggagalkan batch, dan hasil dihitung dari yang sukses.
+        const results = await Promise.allSettled(filesToUpload.map(async (f) => {
+            const payload = { wa: ACTIVE_PEMBERKASAN_WA, nama: ACTIVE_PEMBERKASAN_NAMA, file: f.file, jenisBerkas: f.jenisBerkas };
+            const res = await callGAS('simpanBerkasTahapan', [payload]);
+            return !!(res && res.success);
+        }));
+        const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
         
         document.getElementById('global-loader').style.display='none'; 
         btn.innerHTML = tahap === 1 ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1' : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2'; 
@@ -439,7 +430,7 @@
         refreshDataDinamis(); 
     }
 
-    function prosesSimpanBiodataLengkap() {
+    async function prosesSimpanBiodataLengkap() {
         if(!ACTIVE_PEMBERKASAN_WA) return showToast(tr('ui.toast_target_invalid'), 'error');
         let btn = document.getElementById('btn-submit-bio'); if(!btn) return;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + ''; btn.disabled = true; document.getElementById('global-loader').style.display='flex';
@@ -456,16 +447,18 @@
             web_perusahaan: document.getElementById('bio-webpt').value, alamat_perusahaan: document.getElementById('bio-alamatpt').value 
         };
         
-        callGAS('simpanBiodataLengkap', [payload]).then(res => { 
-            btn.innerHTML = '<i class="fas fa-save mr-2"></i> ' + tr('button.save_biodata') + ''; btn.disabled = false; document.getElementById('global-loader').style.display='none'; 
+        try {
+            const res = await callGAS('simpanBiodataLengkap', [payload]);
             if(res.success) { 
                 showToast(tr('ui.toast_biodata_saved'), 'success'); 
                 document.getElementById('modal-pemberkasan').classList.add('hidden');
                 refreshDataDinamis(); 
             } else { showToast(tr('ui.toast_failed_prefix') + res.error, 'error'); } 
-        }).catch(err => { 
+        } catch (err) { 
             showToast(tr('ui.toast_network_error_prefix') + err.message, 'error'); 
-            document.getElementById('global-loader').style.display='none'; btn.disabled = false; 
-        });
+        } finally {
+            document.getElementById('global-loader').style.display='none'; btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save mr-2"></i> ' + tr('button.save_biodata') + '';
+        }
     }
 

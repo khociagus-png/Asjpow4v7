@@ -1,0 +1,17 @@
+{
+  "name": "asj-portal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "PT Amanah Sakura Japan - Portal Lowongan (static frontend + rebuilt Netlify Functions backend)",
+  "scripts": {
+    "e2e": "node e2e/login-check.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vitest": "^4.1.10"
+  }
+}

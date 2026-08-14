@@ -6,30 +6,30 @@
         
         document.getElementById('global-loader').style.display = 'flex';
         
-        callGAS('getDrafCvMaster', [waTarget]).then(function(fullData) {
-                document.getElementById('global-loader').style.display = 'none';
-                
-                if (!fullData || fullData.error) {
-                    showToast(tr('ui.toast_master_incomplete'), "error");
-                    return;
-                }
-                
-                let c = ALL_CANDIDATES.find(k => normalizePhone(k.wa) === normalizePhone(waTarget));
-                let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
-                // Fallback foto dari getDrafCvMaster (uploads.photo)
-                if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
-                    photoUrl = getHighResImage(fullData.uploads.photo);
-                }
-                
-                try {
-                    renderCVAjaib(fullData, photoUrl, waTarget);
-                } catch(e) {
-                    showToast(tr('ui.toast_cv_build_failed') + e.message, "error");
-                }
-            }).catch(function(err) {
-                document.getElementById('global-loader').style.display = 'none';
-                showToast(tr('ui.toast_server_conn_failed'), "error");
-            }); 
+        try {
+            const fullData = await callGAS('getDrafCvMaster', [waTarget]);
+            if (!fullData || fullData.error) {
+                showToast(tr('ui.toast_master_incomplete'), "error");
+                return;
+            }
+            
+            let c = ALL_CANDIDATES.find(k => normalizePhone(k.wa) === normalizePhone(waTarget));
+            let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
+            // Fallback foto dari getDrafCvMaster (uploads.photo)
+            if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
+                photoUrl = getHighResImage(fullData.uploads.photo);
+            }
+            
+            try {
+                renderCVAjaib(fullData, photoUrl, waTarget);
+            } catch(e) {
+                showToast(tr('ui.toast_cv_build_failed') + e.message, "error");
+            }
+        } catch (err) {
+            showToast(tr('ui.toast_server_conn_failed'), "error");
+        } finally {
+            document.getElementById('global-loader').style.display = 'none';
+        }
     }
 
     // FUNGSI 2: Dipanggil saat Kandidat mengklik "Preview Desain CV" di dashboardnya
@@ -40,34 +40,34 @@
     }
 
     // MESIN UTAMA PENARIK DATA KE SERVER
-    function prosesBukaRirekisho(waTarget) {
+    async function prosesBukaRirekisho(waTarget) {
         document.getElementById('global-loader').style.display = 'flex';
         
-        callGAS('getDrafCvMaster', [waTarget]).then(function(fullData) {
-                document.getElementById('global-loader').style.display = 'none';
-                
-                if (!fullData || fullData.error) {
-                    showToast(tr('ui.toast_master_incomplete'), "error");
-                    return;
-                }
-                
-                let c = ALL_CANDIDATES.find(k => normalizePhone(k.wa) === normalizePhone(waTarget));
-                let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
-                // Fallback foto dari getDrafCvMaster (uploads.photo)
-                if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
-                    photoUrl = getHighResImage(fullData.uploads.photo);
-                }
-                
-                try {
-                    // Panggil fungsi renderCVAjaib yang sudah Kakak pasang sebelumnya
-                    renderCVAjaib(fullData, photoUrl, waTarget);
-                } catch(e) {
-                    showToast(tr('ui.toast_cv_build_failed') + e.message, "error");
-                }
-            }).catch(function(err) {
-                document.getElementById('global-loader').style.display = 'none';
-                showToast(tr('ui.toast_server_conn_failed'), "error");
-            }); // Panggil fungsi server getDrafCvMaster()
+        try {
+            const fullData = await callGAS('getDrafCvMaster', [waTarget]);
+            if (!fullData || fullData.error) {
+                showToast(tr('ui.toast_master_incomplete'), "error");
+                return;
+            }
+            
+            let c = ALL_CANDIDATES.find(k => normalizePhone(k.wa) === normalizePhone(waTarget));
+            let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
+            // Fallback foto dari getDrafCvMaster (uploads.photo)
+            if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
+                photoUrl = getHighResImage(fullData.uploads.photo);
+            }
+            
+            try {
+                // Panggil fungsi renderCVAjaib yang sudah Kakak pasang sebelumnya
+                renderCVAjaib(fullData, photoUrl, waTarget);
+            } catch(e) {
+                showToast(tr('ui.toast_cv_build_failed') + e.message, "error");
+            }
+        } catch (err) {
+            showToast(tr('ui.toast_server_conn_failed'), "error");
+        } finally {
+            document.getElementById('global-loader').style.display = 'none';
+        } // Panggil fungsi server getDrafCvMaster()
     }
 
     function renderCVAjaib(d, fotoUrl, waTarget) {

@@ -158,7 +158,7 @@
         document.getElementById('modal-fs-canvas').classList.add('hidden');
     }
 
-    function submitDataEsignFull() {
+    async function submitDataEsignFull() {
         if (!signData.ttd1 && !signData.nama1 && !signData.ttd2 && !signData.nama2) {
             showToast(tr('ui.toast_sign_area_required'), "error"); return;
         }
@@ -171,19 +171,19 @@
             ttd1: signData.ttd1, nama1: signData.nama1, ttd2: signData.ttd2, nama2: signData.nama2
         };
         
-        callGAS('simpanDataTtdNaitei', { wa: currentKandidatWa, ...payload }).then(res => {
-            btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + tr('ui.save_all_docs') + ''; 
-            btn.disabled = false; document.getElementById('global-loader').style.display='none';
+        try {
+            const res = await callGAS('simpanDataTtdNaitei', { wa: currentKandidatWa, ...payload });
             if(res.success) {
                 showToast(tr('ui.toast_saved_server'), "success");
                 document.getElementById('modal-ttd').classList.add('hidden');
                 refreshDataDinamis();
             } else { showToast(tr('ui.toast_failed_prefix') + res.error, "error"); }
-        }).catch(err => {
+        } catch (err) {
+            showToast(tr('ui.toast_network_error'), "error");
+        } finally {
             btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + tr('ui.save_all_docs') + ''; 
             btn.disabled = false; document.getElementById('global-loader').style.display='none';
-            showToast(tr('ui.toast_network_error'), "error");
-        });
+        }
     }
 
     // ==========================================
@@ -191,7 +191,7 @@
     // ==========================================
 
     // Panggil fungsi ini saat data selesai di-load (disisipkan di fungsi initApp)
-    function renderStudentCard() {
+    async function renderStudentCard() {
         if (!isKandidat) return;
         let myData = ALL_CANDIDATES.find(c => normalizePhone(c.wa) === normalizePhone(currentKandidatWa));
         if (!myData) return;
@@ -227,14 +227,15 @@
             document.getElementById('sc-qr').src = "https://i.gifer.com/ZKZg.gif"; 
 
             // Merubah Link QR yang awalnya Form Master -> Menjadi Link Pop-Up Digital CV (ASJ Dossier)
-            callGAS('getLinkSiswaBaru', []).then(function(urlSiswa) {
+            try {
+                const urlSiswa = await callGAS('getLinkSiswaBaru', []);
                 if (urlSiswa) {
                     let urlStr = urlSiswa.url || urlSiswa.formUrl || urlSiswa; let urlAsli = typeof urlStr === 'string' ? urlStr.split('?')[0] : ''; 
                     let verifyUrl = urlAsli + "?cv=" + myData.idKandidat; // Link Super Pendek & Langsung tembus pop-up
                     
                     document.getElementById('sc-qr').src = "https://quickchart.io/qr?size=300&text=" + encodeURIComponent(verifyUrl);
                 }
-            }); 
+            } catch (err) { /* QR tetap pada animasi loading — non-fatal */ }
         }
     }
 

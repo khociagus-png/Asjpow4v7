@@ -1,48 +1,13 @@
-functionsDirectory = "C:\\Users\\k89\\Downloads\\portaltskasj\\netlify\\functions"
-functionsDirectoryOrigin = "config-v1"
-redirectsOrigin = "config"
-plugins = []
-headers = []
-
 [build]
-publish = "C:\\Users\\k89\\Downloads\\portaltskasj\\dist"
-publishOrigin = "config"
-commandOrigin = "config"
-command = "npm run check:gate && npm run typecheck && npm run build"
-functions = "C:\\Users\\k89\\Downloads\\portaltskasj\\netlify\\functions"
-
-  [build.environment]
-
-  [build.processing]
-
-    [build.processing.css]
-
-    [build.processing.html]
-
-    [build.processing.images]
-
-    [build.processing.js]
-
-  [build.services]
+publish = "."
+functions = "netlify/functions"
+command = "echo 'Static site - no build step'"
 
 [dev]
 functions = "netlify/functions"
-
-[functions]
-
-  [functions.session-cleanup]
-  schedule = "0 3 * * *"
-
-  [functions."*"]
 
 [[redirects]]
 from = "/api/*"
 to = "/.netlify/functions/:splat"
 status = 200
 force = false
-
-  [redirects.query]
-
-  [redirects.conditions]
-
-  [redirects.headers]
