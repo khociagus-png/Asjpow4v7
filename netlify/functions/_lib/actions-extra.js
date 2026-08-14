@@ -1771,12 +1771,6 @@ function siteBase() {
   return (env('NETLIFY_SITE_URL') || 'https://asjportal.netlify.app').replace(/\/$/, '');
 }
 
-function qrUrl(data) {
-  return (
-    'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(data)
-  );
-}
-
 async function handleGetLinkSiswaBaru() {
   return { url: siteBase() + '/siswa-baru.html', formUrl: siteBase() + '/siswa-baru.html' };
 }
@@ -1791,7 +1785,7 @@ async function handleGenerateFormBridge(payload) {
     '&bidang=' +
     encodeURIComponent(bidang) +
     '&wa=&nama=';
-  return { qrUrl: qrUrl(formUrl), formUrl };
+  return { formUrl };
 }
 
 async function handleGenerateLegacyMasterBridge(payload) {
@@ -1803,7 +1797,7 @@ async function handleGenerateLegacyMasterBridge(payload) {
     encodeURIComponent(wa) +
     '&nama=' +
     encodeURIComponent(nama);
-  return { qrUrl: qrUrl(formUrl), formUrl };
+  return { formUrl };
 }
 
 async function handleGenerateAiFormBridge(payload) {
@@ -1811,7 +1805,7 @@ async function handleGenerateAiFormBridge(payload) {
   const wa = String((payload && payload[1]) || '');
   const formUrl =
     siteBase() + '/ai_form.html?job=' + encodeURIComponent(code) + '&wa=' + encodeURIComponent(wa);
-  return { qrUrl: qrUrl(formUrl), formUrl };
+  return { formUrl };
 }
 
 // ---------------------------------------------------------------------------

@@ -277,21 +277,24 @@ async function renderStudentCard() {
       document.getElementById('sc-kelas').innerText = 'VIP MEMBER';
     }
 
-    document.getElementById('sc-qr').src = 'https://i.gifer.com/ZKZg.gif';
-
     // Link QR = Digital CV (ASJ Dossier) yang terbuka otomatis saat scan.
     // FIX: arahkan ke index (/?cv=ID) — SATU-SATUNYA halaman yang punya
     // handler `?cv=` → bukaDigitalCV() (03_engine.js). Sebelumnya QR
     // mengarah ke siswa-baru.html?cv=... yang TIDAK punya handler itu,
     // jadi scan tidak membuka apa-apa ("QR masih error").
+    // QR di-generate LOKAL (buatQrDataUrl) — tanpa api.qrserver.com eksternal.
     try {
       let base = typeof location !== 'undefined' && location.origin ? location.origin : '';
       let verifyUrl = base + '/?cv=' + encodeURIComponent(myData.idKandidat);
+      var qrData = typeof buatQrDataUrl === 'function' ? buatQrDataUrl(verifyUrl) : '';
       document.getElementById('sc-qr').src =
-        'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' +
-        encodeURIComponent(verifyUrl);
+        qrData ||
+        'data:image/svg+xml;utf8,' +
+          encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250"><rect width="250" height="250" fill="%23111"/><text x="125" y="128" fill="%2376b900" font-size="20" font-family="sans-serif" text-anchor="middle" font-weight="bold">QR GAGAL</text></svg>',
+          );
     } catch (err) {
-      /* QR tetap pada animasi loading — non-fatal */
+      /* QR tetap placeholder — non-fatal */
     }
   }
 }

@@ -57,8 +57,11 @@ async function prosesReviewForm(r) {
   if (!confirm(tr('form.txt_review_confirm'))) return;
   try {
     const res = await callAPI('reviewForm', [r, currentAdminName]);
-    if (res.success) patchFormMail(r, res.form);
-    else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+    if (res.success) {
+      // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
+      MAIL_SELECTED[r] = true;
+      patchFormMail(r, res.form);
+    } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
     showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
@@ -68,6 +71,8 @@ async function prosesApproveForm(r) {
   try {
     const res = await callAPI('approveForm', [r, currentAdminName]);
     if (res.success) {
+      // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
+      MAIL_SELECTED[r] = true;
       patchFormMail(r, res.form);
       upsertCandidateMemory(res.candidate);
     } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
@@ -88,6 +93,8 @@ window.submitRejectForm = async function () {
   try {
     const res = await callAPI('rejectForm', [r, currentAdminName, reason]);
     if (res.success) {
+      // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
+      MAIL_SELECTED[r] = true;
       patchFormMail(r, res.form);
       upsertCandidateMemory(res.candidate);
     } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
@@ -1526,6 +1533,23 @@ async function prosesUploadRevisi() {
   }
 }
 
+// QR di-generate LOKAL (vendor/qrcode-generator.min.js) — tanpa layanan eksternal
+// (api.qrserver.com) supaya offline/PWA tetap jalan dan 100% mandiri.
+// Kembalikan data URL gambar QR dari teks; '' bila lib tidak termuat.
+function buatQrDataUrl(text, targetPx) {
+  if (typeof qrcode !== 'function' || !text) return '';
+  try {
+    var qr = qrcode(0, 'M');
+    qr.addData(String(text));
+    qr.make();
+    var count = qr.getModuleCount();
+    var cell = Math.max(2, Math.floor((targetPx || 250) / (count + 2)));
+    return qr.createDataURL(cell, 1);
+  } catch (e) {
+    return '';
+  }
+}
+
 async function aksiGenerateQr(c, k) {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
@@ -1536,12 +1560,14 @@ async function aksiGenerateQr(c, k) {
 
   try {
     const b = await callAPI('generateFormBridge', [c, k]);
-    if (b && b.qrUrl) {
+    if (b && b.formUrl) {
+      var qrData = buatQrDataUrl(b.formUrl);
+      if (!qrData) throw new Error('QR lib tidak termuat');
       safeSet('qr-job-title', jobTitle);
-      setImg('qr-image', b.qrUrl);
+      setImg('qr-image', qrData);
 
       var btnDownload = document.getElementById('btn-download-qr');
-      btnDownload.href = b.qrUrl;
+      btnDownload.href = qrData;
       btnDownload.download = 'QR_LOKER_' + c + '.png';
 
       document.getElementById('qr-link-form').value = b.formUrl;
