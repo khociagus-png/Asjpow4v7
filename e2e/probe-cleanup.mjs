@@ -43,6 +43,9 @@ const LOGO_APPLY =
       .goto(BASE + p, { waitUntil: 'domcontentloaded' })
       .catch((e) => problems.push(`${p} goto: ${e.message}`));
     await page.waitForTimeout(1500);
+    // share.html adalah viewer mandiri yang memakai fetch('/api/share-data')
+    // langsung — tidak pernah memuat /api-client.js, jadi callAPI tidak wajib.
+    const needsApiClient = p !== '/share.html';
     const hasApiClient = await page.evaluate(
       () => !!window.callAPI && typeof window.callAPI === 'function',
     );
@@ -50,7 +53,7 @@ const LOGO_APPLY =
     console.log(
       `${p}: callAPI=${hasApiClient} callGAS=${hasCallGAS} googleReqs=${googleReqs.length} ${googleReqs.length ? googleReqs[0] : ''}`,
     );
-    if (!hasApiClient) problems.push(`${p}: callAPI tidak terdefinisi`);
+    if (needsApiClient && !hasApiClient) problems.push(`${p}: callAPI tidak terdefinisi`);
     if (hasCallGAS) problems.push(`${p}: callGAS masih ada!`);
   }
 
@@ -60,11 +63,16 @@ const LOGO_APPLY =
     ['/', LOGO],
     ['/apply-full.html', LOGO_APPLY],
   ]) {
-    const ok = await page.goto(BASE + p).then(() =>
-      page.evaluate((n) => {
-        const imgs = [...document.images].map((i) => i.src);
-        return imgs.some((s) => s.includes(n));
-      }, needle),
+    await page.goto(BASE + p, { waitUntil: 'domcontentloaded' });
+    // Tunggu logo dirender (JS menyisipkan img setelah data dimuat).
+    await page
+      .waitForFunction((n) => [...document.images].some((i) => i.src.includes(n)), needle, {
+        timeout: 8000,
+      })
+      .catch(() => {});
+    const ok = await page.evaluate(
+      (n) => [...document.images].some((i) => i.src.includes(n)),
+      needle,
     );
     console.log(`${p} memuat ${needle.split('/').pop()}: ${ok}`);
     if (!ok) problems.push(`${p}: ${needle.split('/').pop()} tidak dimuat`);

@@ -1,11 +1,12 @@
 // =============================================================
 // E2E MODAL RUNTIME CHECK — ASJ Portal
 // Memvalidasi loader modal runtime (assets/modals-shared.html):
-// buka modal SHARED dari sisi admin (modal-cv, modal-edit-kandidat)
-// lalu periksa foto yang BENAR-BENAR gagal (img visible + src
-// non-kosong + naturalWidth=0). Test photo-check lama memilih
-// fungsi yang salah (bukaModalKandidat = modal login) dan menghitung
-// img hidden/src-kosong sebagai "gagal".
+// - modal SHARED ter-inject di #modal-root saat halaman dibuka
+// - modal login admin bisa dibuka & dioperasikan (login penuh)
+// - openRincianBuilder('input') jalan tanpa error (regresi fix
+//   rb-catatan yang hilang di versi admin lama)
+// - modal share loker terbuka (modal shared, tanpa API berat)
+// - foto yang BENAR-BENAR gagal (visible + src non-kosong) = 0
 // =============================================================
 import { chromium } from 'playwright';
 
@@ -31,8 +32,7 @@ async function waitFor(condition, timeoutMs = 20000, intervalMs = 300) {
   return false;
 }
 
-// Foto yang benar-benar gagal: img yang VISIBLE, src non-kosong, dan
-// naturalWidth=0 setelah complete (atau timeout kecil).
+// Foto yang benar-benar gagal: img VISIBLE + src non-kosong + naturalWidth=0.
 async function realFailedImages(page) {
   return page.evaluate(async () => {
     const out = [];
@@ -64,7 +64,7 @@ const browser = await chromium.launch();
 console.log(`\nTarget: ${BASE}\n`);
 
 // -------------------------------------------------------------
-// Login admin
+// 1. Login admin (modal login = modal shared via runtime)
 // -------------------------------------------------------------
 const page = await browser.newPage();
 const jsErrors = [];
@@ -88,51 +88,56 @@ const adminMode = await waitFor(async () => await page.locator('#page-admin').is
 check('Login admin sukses', adminMode);
 
 // -------------------------------------------------------------
-// Buka modal CV (bukaPreviewCV_Admin) — modal SHARED
+// 2. Rincian Builder (regresi rb-catatan) — modal SHARED
 // -------------------------------------------------------------
-await waitFor(async () => (await page.locator('#admin-kandidat-body tr').count()) > 0);
-const cvBtn = await page.locator('[onclick*="bukaPreviewCV_Admin"]').first();
-const hasCvBtn = (await cvBtn.count()) > 0;
-if (hasCvBtn) {
-  await cvBtn.click();
-  const cvOpen = await waitFor(async () => await page.locator('#modal-cv').isVisible());
-  check('Modal CV (shared) terbuka via runtime', cvOpen);
-  if (cvOpen) {
-    await new Promise((r) => setTimeout(r, 1500));
-    const failed = await realFailedImages(page);
-    check(
-      'Foto di modal CV semua termuat',
-      failed.length === 0,
-      JSON.stringify(failed.slice(0, 3)),
-    );
-    // Tutup modal CV
-    await page.locator('#modal-cv').evaluate((el) => el.classList.add('hidden'));
-  }
-} else {
-  console.log('  (tidak ada tombol bukaPreviewCV_Admin di baris kandidat pertama)');
-}
-
-// -------------------------------------------------------------
-// Buka modal edit kandidat (bukaSuperEditKandidat) — modal SHARED
-// -------------------------------------------------------------
-const editBtn = await page.locator('[onclick*="bukaSuperEditKandidat"]').first();
-if ((await editBtn.count()) > 0) {
-  await editBtn.click();
-  const editOpen = await waitFor(
-    async () => await page.locator('#modal-edit-kandidat').isVisible(),
+const rbFn = await page.evaluate(() => typeof window.openRincianBuilder === 'function');
+if (rbFn) {
+  const errBefore = jsErrors.length;
+  await page.evaluate(() => window.openRincianBuilder('input'));
+  const rbOpen = await waitFor(
+    async () => await page.locator('#modal-rincian-builder').isVisible(),
+    15000,
   );
-  check('Modal Edit Kandidat (shared) terbuka via runtime', editOpen);
-  if (editOpen) {
+  check('Modal Rincian Builder terbuka (fix rb-catatan, shared)', rbOpen);
+  check(
+    'Tidak ada error JS saat buka Rincian Builder',
+    jsErrors.length === errBefore,
+    jsErrors.slice(errBefore)[0] || '',
+  );
+  if (rbOpen) {
     await new Promise((r) => setTimeout(r, 1200));
     const failed = await realFailedImages(page);
     check(
-      'Foto di modal Edit Kandidat semua termuat',
+      'Foto di modal Rincian Builder termuat',
       failed.length === 0,
       JSON.stringify(failed.slice(0, 3)),
     );
+    await page.locator('#modal-rincian-builder').evaluate((el) => el.classList.add('hidden'));
   }
 } else {
-  console.log('  (tidak ada tombol bukaSuperEditKandidat)');
+  console.log('  (openRincianBuilder tidak tersedia)');
+}
+
+// -------------------------------------------------------------
+// 3. Modal Share Loker (bukaModalShare) — modal SHARED
+// -------------------------------------------------------------
+const jobCode = await page.evaluate(() => {
+  const btn = document.querySelector('[onclick*="bukaModalShare"]');
+  if (!btn) return null;
+  const m = btn.getAttribute('onclick').match(/bukaModalShare\('([^']+)'\)/);
+  return m ? m[1] : null;
+});
+if (jobCode) {
+  await page.evaluate((code) => window.bukaModalShare(code), jobCode);
+  const shareOpen = await waitFor(async () => await page.locator('#modal-share-loker').isVisible());
+  check('Modal Share Loker (shared) terbuka via runtime', shareOpen);
+  if (shareOpen) {
+    await new Promise((r) => setTimeout(r, 1000));
+    const failed = await realFailedImages(page);
+    check('Foto di modal Share termuat', failed.length === 0, JSON.stringify(failed.slice(0, 3)));
+  }
+} else {
+  console.log('  (tidak ada tombol bukaModalShare di halaman)');
 }
 
 check('Tidak ada error JS selama tes modal', jsErrors.length === 0, jsErrors[0] || '');

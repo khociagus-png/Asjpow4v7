@@ -48,7 +48,9 @@ async function failedImages(page, waitMs = 6000) {
   return page.evaluate(() => {
     const out = [];
     document.querySelectorAll('img').forEach((img) => {
-      if (!img.src || img.src.startsWith('data:')) return;
+      // Abaikan img placeholder yang src-nya kosong (resolve ke URL halaman)
+      // atau data-URI — bukan foto yang benar-benar gagal dimuat.
+      if (!img.src || img.src.startsWith('data:') || img.src === location.href) return;
       const rect = img.getBoundingClientRect();
       const visible = rect.width > 0 && rect.height > 0;
       const style = getComputedStyle(img);
