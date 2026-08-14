@@ -9,7 +9,13 @@
     function buildEduRows(eduList, v) {
         let eduHtml = '';
         for(let i=1; i<=5; i++) {
-            let pE = eduList[i-1] || {};
+            let pE = Object.assign({}, eduList[i-1] || {});
+            // Toleransi dua bentuk kunci backend: {masuk,lulus,sekolah,jurusan_id}
+            // (bentuk baru) vs {tahun_masuk,tahun_lulus,nama_sekolah,jurusan} (lama).
+            if (!isGood(pE.masuk) && isGood(pE.tahun_masuk)) pE.masuk = pE.tahun_masuk;
+            if (!isGood(pE.lulus) && isGood(pE.tahun_lulus)) pE.lulus = pE.tahun_lulus;
+            if (!isGood(pE.sekolah) && isGood(pE.nama_sekolah)) pE.sekolah = pE.nama_sekolah;
+            if (!isGood(pE.jurusan_id) && isGood(pE.jurusan)) pE.jurusan_id = pE.jurusan;
             let msk = isGood(pE.masuk) ? pE.masuk : v('PENDIDIKAN'+i+'TAHUNMASUK');
             let lls = isGood(pE.lulus) ? pE.lulus : v('PENDIDIKAN'+i+'TAHUNLULUS');
             let sek_id = isGood(pE.sekolah) ? pE.sekolah : v('PENDIDIKAN'+i+'NAMASEKOLAH', 'PENDIDIKAN'+i+'SEKOLAHID');
@@ -43,7 +49,11 @@
     function buildJobRows(jobList, v) {
         let jobHtml = '';
         for(let i=1; i<=3; i++) { 
-            let pJ = jobList[i-1] || {};
+            let pJ = Object.assign({}, jobList[i-1] || {});
+            // Toleransi dua bentuk kunci backend: {masuk,keluar,perusahaan} vs {tahun_masuk,tahun_keluar,nama_perusahaan}.
+            if (!isGood(pJ.masuk) && isGood(pJ.tahun_masuk)) pJ.masuk = pJ.tahun_masuk;
+            if (!isGood(pJ.keluar) && isGood(pJ.tahun_keluar)) pJ.keluar = pJ.tahun_keluar;
+            if (!isGood(pJ.perusahaan) && isGood(pJ.nama_perusahaan)) pJ.perusahaan = pJ.nama_perusahaan;
             let msk = isGood(pJ.masuk) ? pJ.masuk : v('PEKERJAAN'+i+'TAHUNMASUK');
             let klr = isGood(pJ.keluar) ? pJ.keluar : v('PEKERJAAN'+i+'TAHUNKELUAR');
             let pt_id = isGood(pJ.perusahaan) ? pJ.perusahaan : v('PEKERJAAN'+i+'NAMAPERUSAHAAN', 'PEKERJAAN'+i+'PERUSAHAANID');
@@ -78,7 +88,9 @@
     function buildFamRows(famList, v) {
         let famHtml = '';
         for(let i=1; i<=6; i++) {
-            let kF = famList[i-1] || {};
+            let kF = Object.assign({}, famList[i-1] || {});
+            // Toleransi dua bentuk kunci backend: {umur} vs {usia}.
+            if (!isGood(kF.umur) && isGood(kF.usia)) kF.umur = kF.usia;
             let hub = isGood(kF.hubungan) ? kF.hubungan : v('KELUARGA'+i+'HUBUNGANID', 'KELUARGA'+i+'HUBUNGAN');
             let hub_jp = isGood(kF.hubungan_jp) ? kF.hubungan_jp : v('KELUARGA'+i+'HUBUNGANJP');
             let nm = isGood(kF.nama) ? kF.nama : v('KELUARGA'+i+'NAMA');

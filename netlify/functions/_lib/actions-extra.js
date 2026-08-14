@@ -349,23 +349,33 @@ function buildMasterNested(row) {
       motivasi_ke_jepang: v("motivasi_ke_jepang"), motivasi_ke_jepang_jp: v("motivasi_ke_jepang_jp"),
       alasan_memilih_bidang: v("alasan_memilih_bidang"), alasan_memilih_bidang_jp: v("alasan_memilih_bidang_jp"),
       rencana_setelah_pulang: v("rencana_setelah_pulang"), rencana_setelah_pulang_jp: v("rencana_setelah_pulang_jp"),
+      // Alias yang dibaca builder CV (10b_cv_builders.js).
+      rencana_pulang_id: v("rencana_setelah_pulang"), rencana_pulang_jp: v("rencana_setelah_pulang_jp"),
       gaji_yen: v("harapan_gaji_yen"), tabungan: v("harapan_tabungan"),
     },
     sertifikasi: {
       bahasa: v("bahasa"), jft: v("jft"), ssw: v("ssw"), bidang: v("bidangssw") || v("bidang"),
+      // Alias yang dibaca builder CV (10b_cv_builders.js): JLPT row & Lain-lain row.
+      bahasa_jepang: v("jft"), nilai: v("jft"), lisensi: v("ssw"),
     },
     pendidikan: (function () {
       const arr = [];
       for (let i = 1; i <= 5; i++) {
         const tingkat = row["pendidikan_" + i + "_tingkat"];
         if (tingkat === undefined || tingkat === null) continue;
+        // Kunci yang dibaca builder CV: sekolah/masuk/lulus/jurusan_id (nama_sekolah/
+        // tahun_masuk/dll dipertahankan sebagai alias untuk kompatibilitas).
         arr.push({
           tingkat: supabase.toText(tingkat),
+          sekolah: v("pendidikan_" + i + "_nama_sekolah"),
           nama_sekolah: v("pendidikan_" + i + "_nama_sekolah"),
           sekolah_jp: v("pendidikan_" + i + "_sekolah_jp"),
+          jurusan_id: v("pendidikan_" + i + "_jurusan_id"),
           jurusan: v("pendidikan_" + i + "_jurusan_id"),
           jurusan_jp: v("pendidikan_" + i + "_jurusan_jp"),
+          masuk: v("pendidikan_" + i + "_tahun_masuk"),
           tahun_masuk: v("pendidikan_" + i + "_tahun_masuk"),
+          lulus: v("pendidikan_" + i + "_tahun_lulus"),
           tahun_lulus: v("pendidikan_" + i + "_tahun_lulus"),
         });
       }
@@ -377,11 +387,14 @@ function buildMasterNested(row) {
         const nm = row["pekerjaan_" + i + "_nama_perusahaan"];
         if (nm === undefined || nm === null) continue;
         arr.push({
+          perusahaan: supabase.toText(nm),
           nama_perusahaan: supabase.toText(nm),
           perusahaan_jp: v("pekerjaan_" + i + "_perusahaan_jp"),
           jabatan: v("pekerjaan_" + i + "_jabatan"),
           jabatan_jp: v("pekerjaan_" + i + "_jabatan_jp"),
+          masuk: v("pekerjaan_" + i + "_tahun_masuk"),
           tahun_masuk: v("pekerjaan_" + i + "_tahun_masuk"),
+          keluar: v("pekerjaan_" + i + "_tahun_keluar"),
           tahun_keluar: v("pekerjaan_" + i + "_tahun_keluar"),
           gaji: v("pekerjaan_" + i + "_gaji"),
         });
@@ -395,6 +408,7 @@ function buildMasterNested(row) {
         if (nm === undefined || nm === null) continue;
         arr.push({
           nama: supabase.toText(nm),
+          umur: v("keluarga_" + i + "_usia"),
           usia: v("keluarga_" + i + "_usia"),
           hubungan: v("keluarga_" + i + "_hubungan"),
           hubungan_jp: v("keluarga_" + i + "_hubungan_jp"),
@@ -404,6 +418,13 @@ function buildMasterNested(row) {
       }
       return arr;
     })(),
+    kenalan_jepang: {
+      nama_id: v("kenalan_di_jepang_nama"), nama_jp: v("kenalan_di_jepang_nama_jp"),
+      hubungan_id: v("kenalan_di_jepang_hubungan"), hubungan_jp: v("kenalan_di_jepang_hubungan_jp"),
+      pekerjaan_id: v("kenalan_di_jepang_pekerjaan"), pekerjaan_jp: v("kenalan_di_jepang_pekerjaan_jp"),
+      usia: v("kenalan_di_jepang_usia"),
+      alamat_id: v("kenalan_di_jepang_alamat"), alamat_jp: v("kenalan_di_jepang_alamat_jp"),
+    },
     uploads: {
       photo: row.pas_photo || "", cv: row.file_cv || "",
       jft: row.jft_url || "", ssw: row.ssw_url || "",
@@ -506,6 +527,8 @@ async function handleGetDrafCvMaster(payload) {
     const nested = buildMasterNested(row);
     return Object.assign(nested, {
       AIDATAJSON: row.ai_data_json || "",
+      // Dipakai builder CV untuk nomor rirekisho (buildCvIdentitas → v('id_kandidat')).
+      id_kandidat: row.id_kandidat || row.id || "",
     });
   } catch (e) {
     return { error: e.message };
