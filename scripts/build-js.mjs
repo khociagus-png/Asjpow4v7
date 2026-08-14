@@ -35,6 +35,7 @@ const PAGES = [
 const STACK = [
   '/api-client.js',
   '/i18n.js',
+  '/js/upload-guard.js',
   '/js/00_dictionary.js',
   '/js/01_public.js',
   '/js/02_init.js',

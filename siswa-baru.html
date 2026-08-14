@@ -134,6 +134,7 @@
   </div>
 
   <script src="/api-client.js?v=4fbd0619d2"></script>
+  <script src="/js/upload-guard.js?v=1"></script>
   <script>
     function $(id) { return document.getElementById(id); }
     var chatHistory = []; 
@@ -350,26 +351,8 @@
 
     function handleDocUpload(event, type) {
       var file = event.target.files[0]; if (!file) return;
-      var maxMB = 3;
-      if (file.size > maxMB * 1024 * 1024) {
-          alert('File ' + file.name + ' terlalu besar. Maksimal ' + maxMB + 'MB.');
-          event.target.value = '';
-          return;
-      }
-      // Format baku (2026-08-12, rev): KTP/KK boleh foto HP (jpg/png, otomatis
-      // di-downscale di bawah) ATAU pdf; ijazah wajib PDF. Enforce dari atribut
-      // accept input (gabungan image/* + ekstensi eksplisit) supaya file yang
-      // dipilih manual tetap ditolak.
-      var acc = String(event.target.getAttribute('accept') || '').toLowerCase();
-      var ext = String(file.name || '').split('.').pop().toLowerCase();
-      var okExts = [];
-      if (acc.indexOf('image/*') !== -1) okExts = okExts.concat(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']);
-      acc.split(',').forEach(function (a) { a = a.trim().replace(/^\./, ''); if (a) okExts.push(a); });
-      if (okExts.length > 0 && okExts.indexOf(ext) === -1) {
-          alert('Format .' + ext + ' tidak diizinkan untuk dokumen ini.');
-          event.target.value = '';
-          return;
-      }
+      // Guard seragam: format sesuai accept + ukuran maks 3 MB — alert jelas + reset.
+      if (!cekUploadFile(event.target, { maxMb: 3 })) return;
       var statusEl = $("status_" + type);
       statusEl.classList.remove("hidden");
       statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400"></i> Membaca…';

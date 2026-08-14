@@ -147,6 +147,33 @@ Setiap jalur cepat punya **fallback ke perilaku lama** kalau skema kolom berbeda
 | Link buka tab browser bukan PWA (Dossier/Master/AI)       | ✅ SUDAH             | `bukaFormBridge` pakai `window.location.href` (tab sama, tetap di PWA).                                                                                                                                                     |
 | Tombol Gagal di list kandidat tidak menggugurkan          | ✅ SUDAH             | `tandaiGagalJob` mengembalikan candidate+form → patch-in-place sinkron.                                                                                                                                                     |
 
+### 9. Helper validasi upload SERAGAM (format + ukuran) di semua form
+
+(commit setelah QR/auto-centang/i18n; file: `js/upload-guard.js`)
+
+Sebelumnya tiap form punya cek sendiri-sendiri & ada yang TIDAK punya sama sekali
+(admin: template/pamflet/revisi tidak divalidasi; apply-full tidak cek format):
+
+| Form upload                                            | Sebelum                               | Sesudah                                                            |
+| ------------------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------ |
+| Admin: template CV, pamflet, file revisi               | ❌ tanpa validasi                     | ✅ `onchange="cekUploadFile(...)"` (format dari `accept` + ukuran) |
+| `ai_form.html` (pas foto + JFT/SSW/KTP/KK/ijazah/UNIV) | cek ukuran saja, format baru di akhir | ✅ guard di `compressImage` (10 MB) & `handleDocUpload` (3 MB)     |
+| `apply-full.html` (photo/CV/JFT/SSW/ekstra)            | cek ukuran 2 MB, tanpa cek format     | ✅ guard di `handleFile` (mencakup semua + dokumen ekstra dinamis) |
+| `master-full.html` (9 dokumen)                         | cek 2 MB + ekstensi (manual)          | ✅ guard seragam di `handleFile`                                   |
+| `siswa-baru.html` (KTP/KK/ijazah)                      | cek 3 MB + ekstensi (manual)          | ✅ guard seragam di `handleDocUpload`                              |
+
+**Cara kerja `cekUploadFile(input, { maxMb })`:**
+
+- Format dicek dari atribut `accept` (`image/*` diperluas ke jpg/jpeg/png/gif/webp/bmp).
+- Ukuran dicek dari argumen `maxMb` / `data-max-mb` / default 5 MB (base64 +30% tetap muat).
+- Gagal → `alert` pesan jelas (format yang diizinkan + batas MB, i18n ID/JP, fallback ID),
+  input di-reset, return false. Sukses → return true (alur lama jalan normal).
+- Dipakai admin/index via bundel (build-js STACK) + 4 halaman standalone via
+  `<script src="/js/upload-guard.js?v=1">`.
+
+Verifikasi: bundel 21 file memuat guard; 32/32 input `type="file"` ter-guard; test 16/16;
+format:check bersih; lint 0 error.
+
 ---
 
 ## ⏳ BELUM SELESAI

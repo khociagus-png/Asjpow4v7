@@ -353,6 +353,7 @@
     });
   </script>
   <script src="/api-client.js?v=4fbd0619d2"></script>
+  <script src="/js/upload-guard.js?v=1"></script>
   <script>
     // FASE 3/4: WA/NAMA dulu diisi server (GAS scriptlet) dari e.parameter.
     // Sekarang dibaca dari query string URL (?wa=&nama=), sumbernya sama
@@ -727,15 +728,9 @@
       const file = input.files[0];
       let infoEl = getEl(infoId);
       if (file && infoEl) {
-         if (file.size > 2 * 1024 * 1024) { alert(tr('form.mf_alert_max2mb')); input.value = ""; infoEl.innerHTML = tr('form.mf_alert_besar'); } 
-         else {
-           const allowed = ekstensiDariAccept(input.getAttribute('accept'));
-           const ext = String(file.name || '').split('.').pop().toLowerCase();
-           if (allowed && allowed.indexOf(ext) === -1) {
-             alert('Format .' + ext + ' tidak diizinkan untuk dokumen ini (foto JPG/PNG, CV PDF/Word/Excel, dokumen lain PDF).');
-             input.value = ""; infoEl.innerHTML = '';
-           } else { infoEl.innerHTML = `<span style='color:#38bdf8'>✅ ${file.name}</span>`; }
-         }
+        // Guard seragam: format (accept) + ukuran maks 2 MB — alert jelas + reset input.
+        if (!cekUploadFile(input, { maxMb: 2 })) { infoEl.innerHTML = ""; return; }
+        infoEl.innerHTML = `<span style='color:#38bdf8'>✅ ${file.name}</span>`;
       }
     }
 

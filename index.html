@@ -546,8 +546,8 @@
           <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_category">KATEGORI BIDANG</label><select id="input-kategori" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
           <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_job_name">NAMA PEKERJAAN (Judul Loker)</label><input type="text" id="input-pekerjaan" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></div>
           <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_gender">GENDER</label><select id="input-gender" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
-          <div><label class="block text-xs font-bold text-sky-400 mb-1.5 uppercase"><i class="fas fa-file-excel mr-1"></i><span data-lang="ui.upload_cv_excel"> UPLOAD FORMAT CV/EXCEL (Opsional)</span></label><input type="file" id="input-template" accept=".pdf,.xls,.xlsx,.doc,.docx" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-sky-900/50 file:text-sky-400 hover:file:bg-sky-900/80 cursor-pointer"></div>
-          <div><label class="block text-xs font-bold text-pink-400 mb-1.5 uppercase"><i class="fas fa-image mr-1"></i><span data-lang="ui.upload_pamflet"> UPLOAD PAMFLET (Opsional)</span></label><input type="file" id="input-pamflet" accept="image/*" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-pink-900/50 file:text-pink-400 hover:file:bg-pink-900/80 cursor-pointer"></div>
+          <div><label class="block text-xs font-bold text-sky-400 mb-1.5 uppercase"><i class="fas fa-file-excel mr-1"></i><span data-lang="ui.upload_cv_excel"> UPLOAD FORMAT CV/EXCEL (Opsional)</span></label><input type="file" id="input-template" accept=".pdf,.xls,.xlsx,.doc,.docx" onchange="cekUploadFile(this, { maxMb: 5 })" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-sky-900/50 file:text-sky-400 hover:file:bg-sky-900/80 cursor-pointer"></div>
+          <div><label class="block text-xs font-bold text-pink-400 mb-1.5 uppercase"><i class="fas fa-image mr-1"></i><span data-lang="ui.upload_pamflet"> UPLOAD PAMFLET (Opsional)</span></label><input type="file" id="input-pamflet" accept="image/*" onchange="cekUploadFile(this, { maxMb: 5 })" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-pink-900/50 file:text-pink-400 hover:file:bg-pink-900/80 cursor-pointer"></div>
         </div>
         <div class="space-y-5">
           <div>
@@ -941,7 +941,7 @@
           <div id="area-revisi" class="hidden bg-red-900/30 border border-red-500/40 rounded-[2rem] p-5 md:p-6 mb-6 md:mb-8 text-left backdrop-blur-md">
              <h3 class="text-red-400 font-bold mb-2 text-lg"><i class="fas fa-exclamation-triangle mr-2"></i> <span data-lang="candidate.doc_revise_title">Dokumen Perlu Direvisi</span></h3>
              <p class="text-sm text-slate-300 mb-5" id="k-dash-catatan" data-lang="candidate.doc_revise_desc">Silakan perbaiki dan upload ulang.</p>
-             <input type="file" id="file-revisi" accept=".pdf,.xls,.xlsx,.jpg,.png" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:font-bold file:bg-red-600/20 file:text-red-300 hover:file:bg-red-600/40 cursor-pointer mb-4 transition-colors">
+             <input type="file" id="file-revisi" accept=".pdf,.xls,.xlsx,.jpg,.png" onchange="cekUploadFile(this, { maxMb: 3 })" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:font-bold file:bg-red-600/20 file:text-red-300 hover:file:bg-red-600/40 cursor-pointer mb-4 transition-colors">
              <button onclick="prosesUploadRevisi()" id="btn-revisi" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white rounded-full text-sm font-bold shadow-lg transition-colors" data-lang="button.upload_revise">Upload File Revisi</button>
           </div>
 
@@ -1148,7 +1148,7 @@
   <!-- MODAL AI MATCHMAKING (DENGAN FILTER CERDAS) -->
   
   <script src="/vendor/qrcode-generator.min.js"></script>
-<script src="/assets/app-01478a4be9.js"></script>
+<script src="/assets/app-28a9b7ac72.js"></script>
 <!-- Renderer dokumen lokal (xlsx/mammoth/pptx-preview) kini di-load LAZY saat
        preview pertama dibuka (lihat muatVendorLib di 02_init.js) — hemat 2.8MB
        download+parse di tiap load halaman. -->
