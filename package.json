@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify",
     "build:js": "node scripts/build-js.mjs",
-    "build": "bun run build:css && bun run build:js"
+    "build:html": "node scripts/build-html.mjs",
+    "build": "bun run build:css && bun run build:html && bun run build:js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3"

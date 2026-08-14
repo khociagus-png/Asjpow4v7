@@ -51,29 +51,37 @@ itu sengaja.
 - ESLint menemukan & sudah diperbaiki: **4 key duplikat di `i18n.js`**
   (`mf_masuk` tombol "Masuk" vs label bulan masuk; `ai_pekerjaan` header seksi)
   → dipisah jadi `mf_masuk_bulan` & `ai_pekerjaan_5`, pemakaian di
-  `master-full.html` & `ai_form.html` di-update.
-
-### 5. Bundel JS: 20 script tag → 1 file
-
+  `master-full.html` & `ai_form.html` di-update.### 5. Bundel JS: 20 script tag → 1 file
 - `scripts/build-js.mjs` (idempotent) → `assets/app-<hash>.js` (minify esbuild).
 - `admin.html` & `index.html` cuma 1 tag bundel; sw.js SHELL + VERSION ikut.
 - Artefak Vite mati dihapus dari semua 7 halaman: stub `assets/*-DONYcaRI.js`,
   `main-DEfa6N4x.js`, dan `<link rel="modulepreload">` yang 404.
 
+### 6. Pecah HTML (bagian 1): 18 modal bersama diekstrak
+
+- 18 modal identik antara `admin.html` & `index.html` (85 KB) dipindah ke
+  `partials/modals-shared.html` (SATU sumber) → di-inject via `bun run build:html`.
+- Hasil build byte-identik dengan sebelumnya; sumber modal tidak bisa lagi
+  beda versi antar halaman (sumber bug "ubah satu halaman, lupa yang lain").
+
 ---
 
 ## ⏳ BELUM SELESAI
 
-1. **Pecah HTML raksasa jadi partial** (`admin.html` 253KB, `index.html` 260KB).
-   Modal duplikat di 2 halaman itu kemungkinan sudah beda versi — perlu diff dulu
-   sebelum diekstrak. Ini langkah refactor terbesar & paling berisiko.
-2. **Preview visual belum diverifikasi** untuk bundel JS (tool preview tidak
+1. **Rekonsiliasi 9 modal yang masih beda versi** antar `admin.html` & `index.html`:
+   `cv-mini`, `admin`, `kandidat`, `cv`, `edit-kandidat`, `list-kandidat`,
+   `rincian-builder`, `interview`, `reject-mail`. Setelah direkonsiliasi, modal
+   itu bisa ikut dipindah ke `partials/modals-shared.html`.
+2. **Runtime on-demand load modal** (penghematan parse HP: 165KB/halaman) —
+   modal dimuat dari partial saat dibutuhkan, bukan di HTML awal. Perlu
+   verifikasi preview dulu (berisiko kalau dikerjakan buta).
+3. **Preview visual belum diverifikasi** untuk bundel JS (tool preview tidak
    tersedia di sesi pengerjaan). Saat pertama buka: **hard refresh sekali**
    (SW version baru otomatis buang cache lama).
-3. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
+4. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
    beres dulu (token free tier tipis).
-4. **Demo assets cek manual** (lihat #3 di atas).
-5. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
+5. **Demo assets cek manual** (lihat #3 di atas).
+6. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
    `simpanKandidatDanUpload`, sync 3-way, upload revisi) — bisa di-patch
    berikutnya kalau dirasa masih lambat.
 
