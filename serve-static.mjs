@@ -12,14 +12,21 @@
 // production Netlify functions would. Until Supabase keys are configured, the
 // getAppData handler returns demo data so the UI is still visible.
 import { createServer } from "node:http";
+import { existsSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { extname, join, normalize, sep } from "node:path";
+import { dirname, extname, join, normalize, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 
 const PORT = Number(process.env.PORT) || 3000;
-const ROOT = normalize(process.cwd());
+
+// Root dokumen: kalau file ini dijalankan dari dalam dist/ (hasil build
+// deploy — index.html + netlify/ ikut disalin), pakai direktori file-nya.
+// Kalau dijalankan dari repo root (preview), pakai cwd.
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = existsSync(join(HERE, "index.html")) ? HERE : normalize(process.cwd());
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -50,7 +57,7 @@ function sendJson(res, status, obj) {
 // { action, payload, sessionToken }.
 let handlers = null;
 function loadHandlers() {
-  if (!handlers) handlers = require("./netlify/functions/_lib/handlers.js");
+  if (!handlers) handlers = require(join(HERE, "netlify/functions/_lib/handlers.js"));
   return handlers;
 }
 
