@@ -478,18 +478,135 @@ const BIO_COLUMNS = [
   ['alamatpt', ['alamat_perusahaan', 'alamatpt']],
 ];
 
+// Kolom WA yang umum di tabel kandidat (database_candidate / master) — dipakai
+// query targeted (findCandidateByWaFiltered) & filter WA-set di attachBerkasBio.
+const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
+
+// Cari kandidat via query SERVER-SIDE (filter kolom WA) — bukan tarik 300 baris
+// lalu filter di JS. Return: row (ketemu) | null (tidak ketemu, query jalan) |
+// undefined (kolom tidak cocok — caller pakai fallback scan).
+async function findCandidateByWaFiltered(wa) {
+  const want = normalizeWa(wa);
+  let anySucceed = false;
+  for (const col of CAND_WA_COLS.slice(0, 3)) {
+    try {
+      const rows = await supabaseJson('GET', 'database_candidate', {
+        query: { select: '*', limit: '5', [col]: 'eq.' + want },
+      });
+      anySucceed = true;
+      if (!Array.isArray(rows) || rows.length === 0) continue;
+      const hit = rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want);
+      if (hit) return hit;
+    } catch {
+      /* kolom ini tidak ada di skema — coba kolom berikutnya */
+    }
+  }
+  return anySucceed ? null : undefined;
+}
+
+// Ada kandidat yang masih terikat ke job code? (cek hapus loker) — server-side.
+async function countCandidatesForJob(code) {
+  try {
+    const rows = await supabaseJson('GET', 'database_candidate', {
+      query: { select: 'id', id_loker_pilihan: 'eq.' + String(code), limit: '1' },
+    });
+    return Array.isArray(rows) ? rows.length > 0 : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Max nomor id kandidat (ASJ#####) dari kolom id_kandidat — server-side.
+async function maxCandidateIdNumber() {
+  try {
+    const rows = await supabaseJson('GET', 'database_candidate', {
+      query: { select: 'id_kandidat', order: 'id_kandidat.desc', limit: '5' },
+    });
+    if (!Array.isArray(rows) || rows.length === 0) return undefined;
+    let max = 0;
+    let found = false;
+    for (const r of rows) {
+      const m = String(r.id_kandidat || '').match(/ASJ(\d+)/i);
+      if (m) {
+        max = Math.max(max, parseInt(m[1], 10));
+        found = true;
+      }
+    }
+    return found ? max : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Tarik pemberkasan_checklist hanya untuk WA di daftar (fallback: null → scan).
+async function fetchBerkasByWa(waList) {
+  try {
+    const rows = await supabaseJson('GET', 'pemberkasan_checklist', {
+      query: { select: '*', limit: '500', wa: 'in.(' + waList.join(',') + ')' },
+    });
+    return Array.isArray(rows) ? rows : null;
+  } catch {
+    return null;
+  }
+}
+
+// Tarik master_database_candidate hanya untuk WA di daftar. Coba kolom WA
+// umum (or), lalu no_wa saja — fallback null → scan penuh.
+async function fetchMasterByWa(waList) {
+  const inList = waList.join(',');
+  try {
+    const rows = await supabaseJson('GET', 'master_database_candidate', {
+      query: {
+        select: '*',
+        limit: '500',
+        or: `(no_wa.in.(${inList}),wa.in.(${inList}),whatsapp.in.(${inList}))`,
+      },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* coba kolom berikutnya */
+  }
+  try {
+    const rows = await supabaseJson('GET', 'master_database_candidate', {
+      query: { select: '*', limit: '500', no_wa: 'in.(' + inList + ')' },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* fallback scan penuh */
+  }
+  return null;
+}
+
 async function attachBerkasBio(candidates) {
   if (!Array.isArray(candidates) || candidates.length === 0) return candidates;
   try {
-    // Tarik BERSAMAAN (Promise.all) — dua tabel independen.
-    const [pRows, mRows] = await Promise.all([
-      supabaseJson('GET', 'pemberkasan_checklist', {
-        query: { select: '*', limit: 500 },
-      }),
-      supabaseJson('GET', 'master_database_candidate', {
-        query: { select: '*', limit: 500 },
-      }),
-    ]);
+    // Filter server-side: tarik hanya baris yang WA-nya ada di daftar kandidat
+    // (max 150 per panggilan), bukan scan 500 baris penuh tiap kali.
+    const waList = [
+      ...new Set(candidates.map((c) => normalizeWa(String(c.wa || ''))).filter(Boolean)),
+    ];
+    const useFilter = waList.length > 0 && waList.length <= 150;
+    let pRows = useFilter ? await fetchBerkasByWa(waList) : null;
+    let mRows = useFilter ? await fetchMasterByWa(waList) : null;
+    // Fallback per-tabel: scan penuh (perilaku lama) kalau filter gagal.
+    if (!Array.isArray(pRows)) {
+      try {
+        pRows = await supabaseJson('GET', 'pemberkasan_checklist', {
+          query: { select: '*', limit: 500 },
+        });
+      } catch {
+        pRows = [];
+      }
+    }
+    if (!Array.isArray(mRows)) {
+      try {
+        mRows = await supabaseJson('GET', 'master_database_candidate', {
+          query: { select: '*', limit: 500 },
+        });
+      } catch {
+        mRows = [];
+      }
+    }
     const pByWa = new Map();
     for (const r of Array.isArray(pRows) ? pRows : []) {
       pByWa.set(normalizeWa(String(r.wa || '')), r);
@@ -558,6 +675,9 @@ module.exports = {
   findTable,
   findJobs,
   findCandidates,
+  findCandidateByWaFiltered,
+  countCandidatesForJob,
+  maxCandidateIdNumber,
   findAdmins,
   findSettings,
   findAnnouncements,

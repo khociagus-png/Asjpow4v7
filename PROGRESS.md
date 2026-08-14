@@ -105,6 +105,28 @@ Kesimpulan: keluhan di situs lama ("login sukses tapi data kosong / progress 0 /
 terbukti dari data: Netlify lama masih pakai GAS + gambar dari Google/drive, dan login-nya macet.
 Preview kode terbaru bersih total. **Jangan deploy ke akun lama** — lanjut rencana akun Netlify baru.
 
+### 7. Optimasi kecepatan ambil data — filter query Supabase SERVER-SIDE
+
+(commit `15d2b56`+, file: `netlify/functions/_lib/supabase.js` + `handlers.js`)
+
+Sebelumnya beberapa alur menarik ±300 baris `select *` lalu menyaring di JS:
+
+| Alur                                                      | Sebelum                                 | Sesudah                                                                             |
+| --------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------- |
+| Login kandidat / cek WA / approve-reject / ganti password | `findCandidates()` 300 baris penuh      | `findCandidateByWaFiltered()`: query `no_wa=eq.X` (atau `wa`/`whatsapp`), 1-5 baris |
+| getAppData **mode kandidat** (dashboard kandidat)         | 300 baris untuk cari 1 baris sendiri    | query targeted by WA                                                                |
+| `attachBerkasBio` (admin load + tiap halaman kandidat)    | scan 500 baris pemberkasan + 500 master | filter `wa.in.(...)` per daftar WA kandidat (max 150)                               |
+| Hapus loker (cek kandidat terkait)                        | scan 300 baris                          | `select=id&id_loker_pilihan=eq.X&limit=1`                                           |
+| `nextCandidateId` (approve → kandidat baru)               | scan 300 baris cari max                 | `select=id_kandidat&order=desc&limit=5`                                             |
+| getAppData admin (jadwal/tugas/mail/template)             | 5 fetch berurutan                       | `Promise.all` paralel                                                               |
+
+Setiap jalur cepat punya **fallback ke perilaku lama** kalau skema kolom berbeda
+(balikan `undefined` → scan penuh), jadi aman untuk skema DB apa pun.
+
+> ⚠️ Verifikasi live terhadap Supabase asli masih perlu preview (sandbox sempat
+> crash berulang saat pengerjaan — "Is the Sandbox started?"). Saat preview
+> hidup: jalankan `login-check`, `photo-check`, `modal-runtime-check`, `probe-cleanup`.
+
 ---
 
 ## ⏳ BELUM SELESAI

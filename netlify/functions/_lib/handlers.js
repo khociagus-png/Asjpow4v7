@@ -211,25 +211,39 @@ async function handleGetAppData(payload, sessionToken) {
       result.candidates = stripRaw(paged.rows.map(supabase.mapCandidate));
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
       // kandidat — dipakai modal admin (berkas tersimpan, auto-fill biodata).
-      await supabase.attachBerkasBio(result.candidates);
+      // Fetch sisa data dashboard diparalelkan (semuanya independen).
+      const [berkas, schedules, tugas, formInbox, waTemplates] = await Promise.all([
+        supabase.attachBerkasBio(result.candidates),
+        loadSchedules(),
+        loadTugas(),
+        supabase.findForms().then((f) => f.map(supabase.mapForm)),
+        loadWaTemplates(),
+      ]);
+      result.candidates = berkas;
       result.candidatesTotal = paged.total;
-      result.schedules = await loadSchedules();
-      result.tugas = await loadTugas();
-      result.formInbox = (await supabase.findForms()).map(supabase.mapForm);
-      result.waTemplates = await loadWaTemplates();
+      result.schedules = schedules;
+      result.tugas = tugas;
+      result.formInbox = formInbox;
+      result.waTemplates = waTemplates;
       result.kandidatRiwayat = [];
     }
 
     if (mode === 'kandidat') {
-      // Data kandidat miliknya sendiri (mapping lanjutan menyusul).
-      const foundCand = await supabase.findCandidates();
+      // Data kandidat miliknya sendiri — query server-side (filter WA),
+      // bukan tarik 300 baris lalu cari di JS.
       const w = supabase.normalizeWa(t.wa || '');
-      const row = foundCand.rows.find(
-        (r) =>
-          supabase.normalizeWa(
-            supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
-          ) === w,
-      );
+      let row = await supabase.findCandidateByWaFiltered(w);
+      if (row === undefined) {
+        // Fallback: scan penuh (skema kolom WA tidak dikenal).
+        const foundCand = await supabase.findCandidates();
+        row =
+          foundCand.rows.find(
+            (r) =>
+              supabase.normalizeWa(
+                supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
+              ) === w,
+          ) || null;
+      }
       result.dbJobs = stripRaw(jobs);
       // Kandidat juga mengisi ALL_CANDIDATES dengan datanya sendiri (sama
       // seperti backend asli) supaya dashboard (progres pemberkasan x/17,
@@ -514,16 +528,23 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
     return { success: false, error: 'Backend belum dikonfigurasi.' };
   }
   try {
-    const found = await supabase.findCandidates();
-    const colWa = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'].find(
-      (c) => found.rows[0] && c in found.rows[0],
-    );
-    const colPass = ['password_kandidat', 'password', 'pass', 'pin'].find(
-      (c) => found.rows[0] && c in found.rows[0],
-    );
-    if (!colWa || !colPass) return { success: false, error: 'Kolom password tidak ditemukan.' };
-    const row = found.rows.find((r) => supabase.normalizeWa(String(r[colWa] || '')) === wa);
-    if (!row) return { success: false, error: 'Kandidat tidak ditemukan.' };
+    // Jalur cepat: cari baris kandidat via query server-side (filter WA).
+    let row = await supabase.findCandidateByWaFiltered(wa);
+    let table = 'database_candidate';
+    let colWa = null;
+    if (row) {
+      colWa = CAND_WA_COLS.find((c) => c in row);
+    } else if (row === undefined) {
+      // Fallback: scan penuh (skema kolom WA tidak dikenal) — sekaligus
+      // deteksi nama tabel & kolom.
+      const found = await supabase.findCandidates();
+      table = found.table;
+      colWa = CAND_WA_COLS.find((c) => found.rows[0] && c in found.rows[0]);
+      if (!colWa) return { success: false, error: 'Kolom password tidak ditemukan.' };
+      row = found.rows.find((r) => supabase.normalizeWa(String(r[colWa] || '')) === wa);
+    }
+    const colPass = ['password_kandidat', 'password', 'pass', 'pin'].find((c) => row && c in row);
+    if (!row || !colPass) return { success: false, error: 'Kandidat tidak ditemukan.' };
     const stored = row[colPass];
     let okLama =
       stored && String(stored).startsWith('$2')
@@ -531,8 +552,8 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
         : String(stored || '') === lama;
     if (!okLama) return { success: false, error: 'Password lama salah.' };
     const body = { [colPass]: bcrypt.hashSync(baru, 10) };
-    if ('password_diubah' in (found.rows[0] || {})) body.password_diubah = true;
-    await supabase.supabaseJson('PATCH', found.table, {
+    if ('password_diubah' in row) body.password_diubah = true;
+    await supabase.supabaseJson('PATCH', table, {
       query: { [colWa]: 'eq.' + row[colWa] },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -586,8 +607,12 @@ const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
 
 // Cari baris kandidat berdasarkan WA (format fleksibel 0xx / 62xx).
 async function findCandidateByWa(wa) {
-  const found = await supabase.findCandidates();
   const want = supabase.normalizeWa(wa);
+  // Jalur cepat: query server-side (filter kolom WA) — tanpa tarik 300 baris.
+  const hit = await supabase.findCandidateByWaFiltered(want);
+  if (hit !== undefined) return hit;
+  // Fallback: scan penuh (skema kolom WA tidak dikenal).
+  const found = await supabase.findCandidates();
   return (
     found.rows.find((r) => supabase.normalizeWa(supabase.pick(r, CAND_WA_COLS) || '') === want) ||
     null
@@ -682,10 +707,18 @@ async function handleHapusJobData(payload, sessionToken) {
   if (!code) return { success: false, error: 'Kode loker tidak ditemukan.' };
   try {
     // Tolak hapus bila masih ada kandidat terkait (pesan sama seperti asli).
-    const cands = await supabase.findCandidates();
-    const terkait = cands.rows.some((r) => String(r.id_loker_pilihan || '') === String(code));
-    if (terkait) {
+    // Jalur cepat: query server-side (ada kandidat dengan id_loker_pilihan=code?).
+    const adaTerkait = await supabase.countCandidatesForJob(code);
+    if (adaTerkait === true) {
       return { success: false, error: 'Gagal hapus loker. Mungkin masih ada kandidat terkait.' };
+    }
+    if (adaTerkait === undefined) {
+      // Fallback: scan penuh.
+      const cands = await supabase.findCandidates();
+      const terkait = cands.rows.some((r) => String(r.id_loker_pilihan || '') === String(code));
+      if (terkait) {
+        return { success: false, error: 'Gagal hapus loker. Mungkin masih ada kandidat terkait.' };
+      }
     }
     await supabase.supabaseJson('DELETE', 'job_database', {
       query: { code_job: 'eq.' + code },
@@ -933,6 +966,10 @@ async function handleFormStatus(rowIndex, status, reason) {
 
 // nextCandidateId — ID kandidat baru ASJ<max+1> (salinan dari actions-extra).
 async function nextCandidateId() {
+  // Jalur cepat: ambil id_kandidat tertinggi via query server-side.
+  const fastMax = await supabase.maxCandidateIdNumber();
+  if (fastMax !== undefined) return 'ASJ' + String(fastMax + 1).padStart(5, '0');
+  // Fallback: scan penuh.
   const found = await supabase.findCandidates();
   let max = 0;
   for (const r of found.rows) {
