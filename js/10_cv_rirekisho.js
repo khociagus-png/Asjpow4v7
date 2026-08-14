@@ -9,7 +9,9 @@
         try {
             const fullData = await callGAS('getDrafCvMaster', [waTarget]);
             if (!fullData || fullData.error) {
-                showToast(tr('ui.toast_master_incomplete'), "error");
+                // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
+                // agar admin/kandidat tahu persis kenapa preview gagal.
+                showToast((fullData && fullData.error) || tr('ui.toast_master_incomplete'), "error");
                 return;
             }
             
@@ -46,7 +48,9 @@
         try {
             const fullData = await callGAS('getDrafCvMaster', [waTarget]);
             if (!fullData || fullData.error) {
-                showToast(tr('ui.toast_master_incomplete'), "error");
+                // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
+                // agar admin/kandidat tahu persis kenapa preview gagal.
+                showToast((fullData && fullData.error) || tr('ui.toast_master_incomplete'), "error");
                 return;
             }
             

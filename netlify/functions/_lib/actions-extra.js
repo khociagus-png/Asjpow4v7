@@ -486,7 +486,23 @@ async function handleGetDrafCvMaster(payload) {
   const wa = String((payload && payload[0]) || "");
   try {
     const row = await findMasterByWa(wa);
-    if (!row) return { error: "Data Master belum ada." };
+    if (!row) {
+      // Kandidat terdaftar di database_candidate tapi belum punya baris di
+      // master_database_candidate (profil master belum diisi/di-sync) → beri
+      // pesan yang jelas dengan nama + WA, jangan error cryptic.
+      let nama = "";
+      try {
+        const found = await supabase.findCandidates();
+        const want = supabase.normalizeWa(wa);
+        const c = ((found && found.rows) || []).find((r) =>
+          supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || "")) === want);
+        if (c) nama = String(supabase.pick(c, ["nama_lengkap", "nama"]) || "");
+      } catch (e) { /* lookup nama gagal — lanjut tanpa nama */ }
+      return {
+        error: "Data Master belum ada" + (nama ? " untuk " + nama : "") +
+          " (" + wa + "). Isi Form Master dulu.",
+      };
+    }
     const nested = buildMasterNested(row);
     return Object.assign(nested, {
       AIDATAJSON: row.ai_data_json || "",
