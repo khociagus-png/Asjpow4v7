@@ -200,10 +200,25 @@ async function bukaModalCekDataSiswa() {
           '</td></tr>';
       } else {
         res.data.forEach((s, i) => {
-          let gBadge =
-            (s.jenis_kelamin || s.gender) === 'L'
-              ? '<span class="w-6 h-6 rounded-full bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-blue-500/30">L</span>'
-              : '<span class="w-6 h-6 rounded-full bg-pink-900/50 text-pink-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-pink-500/30">P</span>';
+          const gRaw = String(s.jenis_kelamin || s.gender || '')
+            .trim()
+            .toUpperCase();
+          let gBadge;
+          if (gRaw === 'L' || gRaw.includes('LAKI') || gRaw === 'PRIA' || gRaw === 'MALE') {
+            gBadge =
+              '<span class="w-6 h-6 rounded-full bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-blue-500/30">L</span>';
+          } else if (
+            gRaw === 'P' ||
+            gRaw.includes('PEREMPUAN') ||
+            gRaw === 'WANITA' ||
+            gRaw === 'FEMALE'
+          ) {
+            gBadge =
+              '<span class="w-6 h-6 rounded-full bg-pink-900/50 text-pink-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-pink-500/30">P</span>';
+          } else {
+            gBadge =
+              '<span class="w-6 h-6 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-[10px] mx-auto border border-slate-600/50" title="Gender belum diisi">&mdash;</span>';
+          }
 
           html += `<tr class="hover:bg-white/5 transition duration-200">
                             <td class="p-3 text-center text-slate-400 text-xs">${i + 1}</td>

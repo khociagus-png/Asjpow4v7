@@ -1912,13 +1912,29 @@ async function handleDeleteRincianPreset(payload, sessionToken) {
 // Siswa baru (respon_siswa_baru)
 // ---------------------------------------------------------------------------
 async function handleGetDaftarSiswaBaru(payload, sessionToken) {
-  const guard = requireRole(sessionToken, 'admin');
-  if (guard.error) return guard.error;
+  // Endpoint PUBLIK: tombol "Cek Data" ada di landing publik (index.html),
+  // bukan hanya admin. Dulu butuh role admin → pengunjung publik dapat
+  // sessionInvalid → halaman reload dan tombol terasa "mati".
+  // HANYA kolom yang ditampilkan modal yang dikirim (id, nama, gender, alamat)
+  // — WA/email/URL berkas (PII) TIDAK ikut, demi keamanan.
   try {
     const rows = await supabase.supabaseJson('GET', 'respon_siswa_baru', {
-      query: { select: '*', limit: 500, order: 'timestamp.desc' },
+      query: {
+        select: 'id,nama_lengkap,jenis_kelamin,alamat_lengkap',
+        limit: 500,
+        order: 'created_at.desc',
+      },
     });
-    return { success: true, data: Array.isArray(rows) ? rows : [] };
+    const data = (Array.isArray(rows) ? rows : []).map((r) => {
+      const g = supabase.normalizeGender(r.jenis_kelamin || r.gender);
+      return {
+        id: r.id,
+        nama_lengkap: r.nama_lengkap || '',
+        alamat_lengkap: r.alamat_lengkap || '',
+        jenis_kelamin: g === 'PRIA' ? 'L' : g === 'WANITA' ? 'P' : '',
+      };
+    });
+    return { success: true, data };
   } catch (e) {
     return { success: false, error: e.message };
   }
