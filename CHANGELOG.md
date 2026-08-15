@@ -1,10 +1,20 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `6e4f550`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `17e6973`.
 
 ---
 
 ## 2026-08-15 — Sesi terbaru: dedupe data & dokumen, share view, keamanan, CI
+
+### `17e6973` — Perbaiki CV rirekisho: foto, alamat JP, tombol X
+- **Foto:** pas_photo di `database_candidate` bisa menunjuk file yang sudah tidak ada (404); CV kini memakai `uploads.photo` dari **master dulu** (file terbaru yang benar), fallback ke pas_photo kandidat.
+- **Alamat JP:** key mismatch — backend membangun `identitas.alamatjp` (tanpa garis bawah) tapi builder CV mencari `identitas.alamat_jp` → alamat Jepang master tidak pernah tampil; `v()` kini mencoba `alamatjp` juga (CV AGUS KHOCI kembali menampilkan "グジュンロル …ジャワティムール").
+- **Tombol X modal CV:** badge "MODE PREVIEW"/baris tombol cetak (z-50, full-width) menutupi X (z-50) → klik nyata kena badge; z-index X dinaikkan ke `z-[100]`.
+
+### `1710865` — Perbaiki tombol "Cek Data" di landing publik
+- `getDaftarSiswaBaru` jadi **endpoint publik** (tombol ada di landing index.html; sebelumnya butuh sesi admin → pengunjung dapat `sessionInvalid` → halaman reload dan tombol terasa mati).
+- Endpoint kini hanya mengirim kolom yang ditampilkan modal (nama, gender, alamat) — **WA/email/URL berkas PII tidak bocor** ke publik.
+- Gender dinormalisasi ke L/P/'' (Laki-laki/Perempuan/MALE dsb. dipetakan); badge "—" netral untuk yang belum diisi (bukan asumsi P).
 
 ### `6e4f550` — Dokumentasi sesi terbaru
 - `PROGRESS.md` diperbarui: rangkum seluruh kerja `e36fb64` → `c6744b4` (dedupe data/dokumen, share view, storage cleanup, CI).

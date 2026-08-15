@@ -4,11 +4,63 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `c6744b4` (lihat `git log`).
+**Update terakhir:** commit `17e6973` (lihat `git log`).
 
 ---
 
-## 🆕 SESI TERBARU — dedupe data & dokumen, share view, storage cleanup, CI
+## 🆕 SESI TERBARU — Cek Data publik, CV rirekisho, z-index close, audit pas_photo
+
+Rangkaian kerja terbaru (`1710865` → seterusnya), fokus: tombol publik yang
+mati, CV rirekisho yang tidak lengkap (foto / alamat JP / tombol X), dan
+konsistensi close modal + data foto kandidat.
+
+### 1. Tombol "Cek Data" di landing publik — kini berfungsi (`1710865`)
+
+- **Penyebab:** `getDaftarSiswaBaru` (fungsi `bridge-links`) butuh sesi admin,
+  padahal tombolnya ada di landing publik. Pengunjung tanpa login dapat
+  `sessionInvalid` → `callAPI` reload halaman → tombol terasa mati.
+- **Fix:** endpoint jadi publik; **hanya kolom yang ditampilkan modal** yang
+  dikirim (id, nama, gender, alamat) — WA/email/URL KTP-KK-ijazah tidak lagi
+  bocor ke publik; urut `created_at` (baris legacy `timestamp` null).
+- **Gender:** dinormalisasi ke `L`/`P`/`''`; badge "—" netral untuk yang belum
+  diisi (sebelumnya apa pun yang bukan 'L' tampil P — YOGA/BAKTI jadi P).
+
+### 2. CV rirekisho: foto tidak render, alamat JP hilang, tombol X mati (`17e6973`)
+
+- **Foto:** `database_candidate.pas_photo` AGUS KHOCI menunjuk `PAS_PHOTO.jpg`
+  yang sudah **tidak ada di Storage** (404); file benar `FOTOFILE_1786….jpg`
+  ada di master. CV kini memakai `uploads.photo` (master) dulu, fallback ke
+  pas_photo kandidat — berlaku untuk semua kandidat dengan pas_photo basi.
+- **Alamat JP:** key mismatch — `buildMasterNested` membangun
+  `identitas.alamatjp` (tanpa garis bawah) tapi builder CV mencari
+  `identitas.alamat_jp` → nilai `alamatjp` master (terisi!) tidak pernah
+  tampil. `v()` kini mencoba `ALAMATJP` → `identitas.alamatjp` →
+  `identitas.alamat_jp`.
+- **Tombol X modal CV:** ter-reproduksi — badge "MODE PREVIEW" / baris tombol
+  cetak (`z-50 relative`, block full-width, DOM belakangan) **menutupi** X
+  (`elementFromPoint` di titik X mengembalikan badge); z-index X dinaikkan ke
+  `z-[100]`.
+
+### 3. Seragamkan z-index tombol close semua modal (commit sesi ini)
+
+- Semua **22 tombol close absolut** di `partials/modals-shared.html` kini
+  `z-[100]` (sebelumnya tanpa z / `z-10` / `z-20`) supaya tidak ada konten
+  modal yang bisa menutupinya. Tombol close inline di header (5) tidak perlu
+  z-index (normal flow). Rebuild `assets/modals-shared.html`.
+
+### 4. Audit & perbaiki pas_photo kandidat (commit sesi ini)
+
+- Skrip baru **`scripts/audit-pasphoto.mjs`** (dry-run default, `--apply` +
+  backup JSON ke `.freebuff/`): cek setiap `database_candidate.pas_photo`
+  terhadap file yang benar-benar ada di Storage `master/` (paginasi penuh).
+- **Eksekusi produksi:** 2 dari 223 kandidat rusak — AGUS KHOCI (id 40) &
+  FIRMA ELGA PRATAMA (id 41), keduanya diperbaiki ke pas_photo master yang
+  ada. Verifikasi ulang: **127 valid, 0 rusak**. Backup:
+  `.freebuff/pasphoto-fix-backup-*.json`.
+
+---
+
+## SESI SEBELUMNYA — dedupe data & dokumen, share view, storage cleanup, CI
 
 Rangkaian kerja terbaru (`e36fb64` → `c6744b4`), fokus: hilangkan data/file ganda
 agar "1 loker = 1 kandidat = 1 CV/JFT/SSW/foto", perbaiki share view, dan pasang
