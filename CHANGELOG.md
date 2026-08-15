@@ -1,6 +1,31 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `67bd3e0`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `c1433d2`.
+
+---
+
+## 2026-08-15 — Optimasi S2 lanjutan: proyeksi kolom ringan (bottleneck tersisa)
+
+### `c1433d2` — Proyeksi kolom ringan master & inbox admin
+- `attachBerkasBio` (getAppData admin/kandidat + getCandidatesPage) tidak lagi
+  menarik master `select *` (154 kolom, ±6,5 KB/baris): `fetchMasterLightByWa`
+  dengan `MASTER_LIGHT_COLS` — **251 KB → 17,3 KB (hemat 93%)** untuk 50
+  kandidat. `fetchMasterByWa` select * tetap untuk `findMasterByWa`/CV
+  builder/ai_data_json.
+- Inbox admin `getAppData` & `findFormsByWaList` pakai proyeksi
+  `FORM_LIGHT_COLS` (`findFormsLight`): **22 KB → 3,9 KB (hemat 82%)**;
+  urutan `timestamp.desc` tetap konsisten dengan `findFormByIndexFiltered`
+  (rowIndex mail). Fallback `select *`/scan penuh kalau skema kolom berbeda.
+
+### `56382b1` — Daftar admin kandidat: baris ringan + paginasi penuh
+- `loadCandidatesUnik` memakai `findAllCandidatesLight` (proyeksi kolom
+  dedupe/filter/sort, paginasi Range tanpa batas 300) lalu `findCandidatesByIds`
+  hanya untuk halaman yang diminta — total = jumlah UNIK. Probe
+  `scripts/probe-cols.mjs` & `scripts/probe-sizes.mjs` (read-only).
+
+### `dd939ad` — Aturan jejak kerja: siapa & kapan wajib jelas
+- WORKFLOW.md §7: format commit `<Kategori>: <ringkasan>`, cek `git config`,
+  header sesi PROGRESS.md (tanggal + pengerja + hash).
 
 ---
 

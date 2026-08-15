@@ -8,6 +8,33 @@
 
 ---
 
+## 🆕 Sesi 2026-08-15 (lanjutan) — dikerjakan oleh: khoci89 (via Freebuff)
+
+### Commit `c1433d2` — Proyeksi kolom ringan master & inbox admin
+
+Bottleneck berikutnya dipilih dari ukuran payload NYATA di Supabase produksi
+(probe read-only):
+
+- **Master ±6,5 KB/baris (154 kolom), 224 baris = ±1 MB** — `attachBerkasBio`
+  menariknya `select *` untuk 50 kandidat halaman 1 = **±251 KB**. Sekarang
+  `fetchMasterLightByWa()` dengan `MASTER_LIGHT_COLS` (hanya kolom
+  BERKAS_COLUMNS/BIO_COLUMNS yang dibaca): **17,3 KB (hemat 93%)**.
+  `fetchMasterByWa` select * TETAP untuk `findMasterByWa`/CV builder/
+  ai_data_json (butuh baris penuh).
+- **Inbox admin** `getAppData` memakai `findFormsLight()` (`FORM_LIGHT_COLS`):
+  **22 KB → 3,9 KB (hemat 82%)**; urutan `timestamp.desc` tetap konsisten
+  dengan `findFormByIndexFiltered` (rowIndex review/approve/reject/hapus).
+  `findFormsByWaList` (getCandidatesPage & share-data) ikut light.
+- **Pola aman**: proyeksi gagal (skema kolom beda) → fallback `select *` /
+  scan penuh — perilaku lama tidak berubah.
+- **Verifikasi**: `node --check` OK · unit 49/49 · probe live produksi:
+  master 93% lebih kecil, form 82% lebih kecil, `mapForm` & `attachApplications`
+  output identik light vs full, jumlah baris sama (50 master, 10 form).
+
+Dokumen: REVIEW.md S2 di-update (checklist 56382b1 + c1433d2).
+
+---
+
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
 ### 1. Commit `56382b1` — Optimasi S2 lanjutan: daftar admin kandidat baris ringan + paginasi penuh

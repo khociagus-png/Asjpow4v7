@@ -251,14 +251,32 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
         (job by code + kandidat by job + lamaran per WA-set).
 
       Sisa scan penuh yang **sengaja dipertahankan** (butuh keputusan produk / memang
-      harus penuh): daftar admin `loadCandidatesUnik` (dedupe-by-WA global + urutan
-      `updated_at` — ganti ke queryPaged akan mengubah urutan list admin),
-      inbox admin `getAppData` (formInbox penuh), loker publik `getAppData`
-      (semua job), diagnostik `getAppConfig`, `handleGetDriveLinkCandidates`
-      (butuh semua baris), `daftarKandidat` (deteksi nama tabel).
+      harus penuh): loker publik `getAppData` (semua job), diagnostik
+      `getAppConfig`, `handleGetDriveLinkCandidates` (butuh semua baris),
+      `daftarKandidat` (deteksi nama tabel).
 
       Verifikasi: unit 49/49 · lint 0 error · `backend-fast-path` 12/12 · live preview
       `share-data`/`isJobRequiresCv`/`getAppData` sukses (data Supabase asli).
+
+      **Lanjutan berikutnya (commit `56382b1`, `c1433d2`):**
+
+      - [x] `56382b1` — daftar admin `loadCandidatesUnik` TIDAK lagi scan penuh
+            `select *` + terpotong 300 baris: `findAllCandidatesLight()` (proyeksi
+            kolom ringan, paginasi Range penuh tanpa batas) + `findCandidatesByIds()`
+            (baris penuh hanya untuk halaman yang diminta). Total = jumlah UNIK.
+            Terukur: 222 kandidat — `select *` 215 KB vs light 54 KB.
+      - [x] `c1433d2` — `attachBerkasBio` TIDAK lagi menarik master `select *`
+            (154 kolom, ±6,5 KB/baris): `fetchMasterLightByWa()` dengan
+            `MASTER_LIGHT_COLS` (hanya kolom BERKAS_COLUMNS/BIO_COLUMNS).
+            Terukur 50 WA: **251 KB → 17,3 KB (hemat 93%)**. `fetchMasterByWa`
+            select * tetap dipakai `findMasterByWa`/CV builder/ai_data_json.
+      - [x] `c1433d2` — inbox admin `getAppData` & `findFormsByWaList` pakai
+            proyeksi `FORM_LIGHT_COLS` (`findFormsLight`): **22 KB → 3,9 KB
+            (hemat 82%)**, urutan `timestamp.desc` tetap konsisten dengan
+            `findFormByIndexFiltered` (rowIndex). Kolom berat `ai_data_json` dll.
+            tidak ikut.
+      - Pola aman semua jalur: proyeksi gagal (skema kolom berbeda) → fallback
+        `select *` / scan penuh — perilaku lama tidak berubah.
 
 ### 🟡 S4 — Artefak stale
 
