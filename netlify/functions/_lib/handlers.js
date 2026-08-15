@@ -1380,8 +1380,12 @@ async function handleShareData(jobCode) {
         .includes(code),
     );
     const mapped = rows.map(supabase.mapCandidate);
-    // extraDocs: dokumen tambahan dari keterangan form lamaran kandidat
-    // (format NAMA:URL;...) — dipakai tombol dokumen ekstra di kartu share.
+    // extraDocs: SEMUA file folder master kandidat (KK/KTP/ijazah/dll) KECUALI
+    // yang sudah jadi tombol utama (pas_photo, file_cv, jft, ssw) — persis
+    // perilaku backend lama (produksi). Folder = master/<NAMA_HURUF_KAPITAL>/
+    // (spasi → underscore), didaftarkan via Supabase Storage list API.
+    const storageBase = supabase.supabaseUrl().replace(/\/$/, '');
+    const pubBase = storageBase + '/storage/v1/object/public/asj-files/';
     const forms = await supabase.findForms();
     const byWa = new Map();
     for (const f of forms) {
@@ -1390,17 +1394,54 @@ async function handleShareData(jobCode) {
       if (!byWa.has(w)) byWa.set(w, []);
       for (const d of supabase.parseDocs(supabase.toText(f.keterangan))) byWa.get(w).push(d);
     }
-    const candidates = mapped.map((c) => {
-      const docs = byWa.get(supabase.normalizeWa(String(c.wa || ''))) || [];
-      const seen = new Set();
-      const extraDocs = docs.filter((d) => {
-        const k = String(d.nama) + '|' + String(d.url);
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
-      return {
+    const candidates = [];
+    for (const c of mapped) {
+      const folder =
+        'master/' + String(c.nama || '').toUpperCase().replace(/\s+/g, '_') + '/';
+      let names = [];
+      try {
+        names = await supabase.listStorageFolder(folder);
+      } catch {
+        /* non-fatal: tanpa folder → tanpa tombol ekstra */
+      }
+      // Tombol utama (pas_photo/file_cv/jft/ssw) sudah tampil — file folder
+      // yang TIPENYA sama tidak boleh dobel (mis. CVFILE lama vs baru).
+      const mainBasenames = [c.pasPhoto, c.fileCv, c.jft, c.ssw]
+        .map((u) => {
+          try {
+            return decodeURIComponent(String(u || '').split('/').pop());
+          } catch {
+            return String(u || '').split('/').pop();
+          }
+        })
+        .filter(Boolean);
+      const mainTypes = new Set(mainBasenames.map(docTypeOf).filter(Boolean));
+      // Dedupe per tipe dokumen: upload lama tidak boleh menimbulkan tombol
+      // dobel — cukup file TERBARU per tipe (KK/KTP/CV dst).
+      const byType = new Map();
+      for (const n of names) {
+        if (mainBasenames.indexOf(n) !== -1) continue;
+        const t = docTypeOf(n);
+        if (mainTypes.has(t)) continue;
+        const prev = byType.get(t);
+        if (!prev || docAge(n) > docAge(prev.name)) {
+          byType.set(t, { name: n, url: pubBase + folder + encodeURIComponent(n) });
+        }
+      }
+      const extraDocs = [...byType.values()];
+      // Gabungkan juga dokumen dari keterangan form (NAMA:URL;...) — dedupe
+      // per URL biar tidak dobel dengan folder master.
+      const formDocs = byWa.get(supabase.normalizeWa(String(c.wa || ''))) || [];
+      const seenUrl = new Set(extraDocs.map((d) => d.url));
+      for (const d of formDocs) {
+        if (!seenUrl.has(String(d.url))) {
+          seenUrl.add(String(d.url));
+          extraDocs.push(d);
+        }
+      }
+      candidates.push({
         id_kandidat: c.idKandidat,
+        no_wa: c.wa,
         nama_lengkap: c.nama,
         gender: c.gender,
         usia: c.usia,
@@ -1413,12 +1454,27 @@ async function handleShareData(jobCode) {
         nilai_jft_text: c.jftText,
         bidang_ssw_text: c.sswText,
         extraDocs,
-      };
-    });
-    return { job: { code, name }, candidates };
+      });
+    }
+    const tsk = supabase.toText(supabase.pick(jobRow, ['tsk', 'pengurus']));
+    return { job: { code, name, tsk }, candidates };
   } catch (e) {
     return { error: 'Gagal memuat data share: ' + e.message };
   }
+}
+
+// Tipe dokumen dari nama file: huruf kapital di depan (KK_1786…pdf → KK,
+// CVFILE_1786…xlsx → CVFILE, nama_jft.pdf → NAMA). Dipakai dedupe extraDocs.
+function docTypeOf(name) {
+  const base = String(name || '').replace(/\.[a-z0-9]+$/i, '');
+  const m = base.match(/^[A-Z]+/);
+  return m ? m[0] : base.toUpperCase();
+}
+
+// Usia file dari suffix numerik nama (ms epoch) — makin besar makin baru.
+function docAge(name) {
+  const m = String(name || '').match(/_(\d{10,})/);
+  return m ? Number(m[1]) : 0;
 }
 
 module.exports = { handleAction, NOT_IMPLEMENTED, handleShareData };

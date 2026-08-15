@@ -686,6 +686,39 @@ function attachApplications(candidates, forms) {
   return candidates;
 }
 
+// Daftar file dalam folder Supabase Storage (bucket asj-files). Dipakai
+// share-data untuk menampilkan dokumen folder master (KK/KTP/ijazah/dll),
+// persis perilaku backend lama (produksi). Non-fatal: error → daftar kosong.
+async function listStorageFolder(prefix) {
+  const base = supabaseUrl();
+  const key = supabaseKey();
+  if (!base || !key || !prefix) return [];
+  try {
+    const res = await fetch(base.replace(/\/$/, '') + '/storage/v1/object/list/asj-files', {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: 'Bearer ' + key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prefix,
+        limit: 200,
+        sortBy: { column: 'name', order: 'asc' },
+      }),
+    });
+    if (!res.ok) return [];
+    const j = await res.json();
+    return Array.isArray(j)
+      ? j
+          .filter((f) => f && f.name && !String(f.name).endsWith('/'))
+          .map((f) => String(f.name))
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 function columnsFromSchema(spec, table) {
   if (!spec || !spec.components || !spec.components.schemas) return [];
   const s = spec.components.schemas[table];
@@ -724,4 +757,5 @@ module.exports = {
   normalizeGender,
   attachBerkasBio,
   attachApplications,
+  listStorageFolder,
 };

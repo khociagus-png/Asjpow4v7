@@ -48,7 +48,6 @@ const ADMIN_ACTIONS = new Set([
   'simpanJadwalBaru',
   'simpanJobBaru',
   'simpanWaTemplate',
-  'superSyncCleanup',
   'tambahTugasBaru',
   'ubahStatusJob',
   'updateCatatanKandidat',
@@ -154,7 +153,6 @@ const NETLIFY_FUNCTIONS = {
   generateLegacyMasterBridge: 'bridge-links',
   generateAiFormBridge: 'bridge-links',
   // Sinkronisasi & pembersihan data
-  superSyncCleanup: 'admin-sync',
   // Preset Rincian Biaya (koleksi admin)
   getRincianPresets: 'rincian-presets',
   saveRincianPreset: 'rincian-presets',
