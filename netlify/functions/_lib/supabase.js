@@ -317,18 +317,85 @@ async function findJobs() {
   ]);
 }
 
+// Nama tabel kandidat yang umum (urutan prioritas) — dipakai findCandidates &
+// findAllCandidatesLight supaya jalur cepat & fallback mencari tabel yang sama.
+const CAND_TABLES = [
+  'database_candidate',
+  'master_database_candidate',
+  'candidates',
+  'kandidat',
+  'calon',
+  'data_kandidat',
+  'siswa',
+  'candidate_data',
+  'master_kandidat',
+];
+
 async function findCandidates() {
-  return findTable([
-    'database_candidate',
-    'master_database_candidate',
-    'candidates',
-    'kandidat',
-    'calon',
-    'data_kandidat',
-    'siswa',
-    'candidate_data',
-    'master_kandidat',
-  ]);
+  return findTable(CAND_TABLES);
+}
+
+// Fetch SEMUA baris satu tabel via header Range (loop 1000/halaman) — tanpa
+// batas `limit` query (PostgREST default maks 1000). Lempar error bila != 200.
+async function fetchPagedAll(table, select) {
+  const qs = new URLSearchParams({ select }).toString();
+  const all = [];
+  const pageSize = 1000;
+  for (let start = 0; ; start += pageSize) {
+    const res = await fetch(supabaseUrl().replace(/\/$/, '') + '/rest/v1/' + table + '?' + qs, {
+      method: 'GET',
+      headers: {
+        apikey: supabaseKey(),
+        Authorization: 'Bearer ' + supabaseKey(),
+        Range: start + '-' + (start + pageSize - 1),
+        Prefer: 'count=exact',
+      },
+    });
+    if (!res.ok) {
+      throw new Error(table + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
+    }
+    const rows = await res.json();
+    all.push(...rows);
+    const cr = res.headers.get('content-range') || '';
+    const total = parseInt(String(cr).split('/')[1] || '0', 10);
+    if (rows.length === 0 || start + rows.length >= total) break;
+  }
+  return all;
+}
+
+// Kolom RINGAN untuk daftar admin — cukup untuk dedupe by WA + filter kata
+// kunci + urut updated_at (TIDAK membawa kolom berat seperti catatan/nik/email).
+const CAND_LIGHT_COLS =
+  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar';
+
+// Semua baris kandidat bentuk RINGAN (proyeksi) — paginasi penuh TANPA batas
+// 300 baris (admin list sebelumnya diam-diam terpotong saat >300 kandidat).
+// Return: array (tabel ditemukan, boleh kosong) | undefined (tidak dikenal —
+// caller fallback scan penuh). Urutan TIDAK dijamin — caller tetap dedupe+sort.
+async function findAllCandidatesLight() {
+  for (const t of CAND_TABLES) {
+    try {
+      return await fetchPagedAll(t, CAND_LIGHT_COLS);
+    } catch {
+      /* kolom/tabel tidak cocok — coba tabel berikutnya */
+    }
+  }
+  return undefined;
+}
+
+// Baris PENUH untuk daftar id (halaman daftar admin) — pengganti scan 300
+// baris `select *`: hanya id di halaman yang ditarik. undefined → gagal.
+async function findCandidatesByIds(ids) {
+  const list = [...new Set((Array.isArray(ids) ? ids : []).map((x) => String(x).trim()).filter(Boolean))];
+  if (!list.length) return [];
+  try {
+    const rows = await supabaseJson('GET', 'database_candidate', {
+      query: { select: '*', id: 'in.(' + list.join(',') + ')' },
+    });
+    return Array.isArray(rows) ? rows : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 async function findAdmins() {
@@ -898,6 +965,8 @@ module.exports = {
   findTable,
   findJobs,
   findCandidates,
+  findAllCandidatesLight,
+  findCandidatesByIds,
   findCandidateByWaFiltered,
   findCandidateByIdFiltered,
   findJobByCodeFiltered,

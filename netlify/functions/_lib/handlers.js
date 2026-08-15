@@ -144,33 +144,67 @@ function dedupeKandidatRaw(rows) {
   return out;
 }
 
-// Seluruh kandidat (maks 300 — batas findTable) → dedupe by WA → urut yang
-// paling baru di atas. Dipakai getAppData & getCandidatesPage supaya "satu
-// kandidat = satu baris" konsisten DAN ukuran halaman & total selalu
-// dihitung dari baris UNIK (pagination frontend: page = floor(loaded/50)+1).
-async function loadCandidatesUnik(q) {
-  const found = await supabase.findCandidates();
-  const rows = Array.isArray(found.rows) ? found.rows : [];
-  let uniq = dedupeKandidatRaw(rows);
+// Saring daftar kandidat unik dengan kata kunci (nama / WA) — dipakai jalur
+// cepat & fallback supaya perilaku sama persis.
+function saringKandidatUnik(uniq, q) {
   const needle = String(q || '')
     .trim()
     .toLowerCase();
-  if (needle) {
-    const digit = needle.replace(/\D/g, '');
-    uniq = uniq.filter((r) => {
-      const nama = String(supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
-      const wa = supabase.normalizeWa(
-        String(
-          supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
-        ),
-      );
-      return nama.includes(needle) || (digit && wa.includes(digit));
-    });
-  }
+  if (!needle) return uniq;
+  const digit = needle.replace(/\D/g, '');
+  return uniq.filter((r) => {
+    const nama = String(supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
+    const wa = supabase.normalizeWa(
+      String(
+        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+      ),
+    );
+    return nama.includes(needle) || (digit && wa.includes(digit));
+  });
+}
+
+// Daftar kandidat UNIK (satu baris per WA) urut paling baru di atas + total.
+// Dipakai getAppData & getCandidatesPage supaya "satu kandidat = satu baris"
+// konsisten DAN ukuran halaman & total selalu dihitung dari baris UNIK.
+//
+// Jalur cepat: baris RINGAN (proyeksi kolom dedupe/filter/sort) paginasi penuh
+// TANPA batas 300 baris → dedupe+filter+sort di JS → baris PENUH hanya untuk
+// halaman yang diminta (findCandidatesByIds). Semantik urutan TIDAK berubah.
+// Fallback: scan penuh lama (skema kolom/tabel tidak dikenal).
+async function loadCandidatesUnik(q, opts = {}) {
+  const page = Number(opts.page) || 1;
+  const pageSize = Number(opts.pageSize) || 50;
+  const start = (page - 1) * pageSize;
   const tsOf = (r) =>
     String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
-  uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
-  return uniq;
+  const urutkan = (uniq) =>
+    uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
+
+  const light = await supabase.findAllCandidatesLight();
+  if (light !== undefined) {
+    let uniq = dedupeKandidatRaw(light);
+    uniq = saringKandidatUnik(uniq, q);
+    urutkan(uniq);
+    const total = uniq.length;
+    const slice = uniq.slice(start, start + pageSize);
+    const full = await supabase.findCandidatesByIds(slice.map((r) => r.id));
+    if (full !== undefined) {
+      const byId = new Map(full.map((r) => [String(r.id), r]));
+      // Semua id halaman harus ter-resolve ke baris penuh; kalau ada yang
+      // tidak (data legacy tanpa id) → fallback scan penuh biar aman.
+      if (slice.every((r) => byId.has(String(r.id)))) {
+        return { rows: slice.map((r) => byId.get(String(r.id))), total };
+      }
+    }
+  }
+
+  // Fallback lama: scan penuh (perilaku persis sebelum optimasi).
+  const found = await supabase.findCandidates();
+  const rows = Array.isArray(found.rows) ? found.rows : [];
+  let uniq = dedupeKandidatRaw(rows);
+  uniq = saringKandidatUnik(uniq, q);
+  urutkan(uniq);
+  return { rows: uniq.slice(start, start + pageSize), total: uniq.length };
 }
 
 // ---------------------------------------------------------------------------
@@ -265,9 +299,12 @@ async function handleGetAppData(payload, sessionToken) {
     if (mode === 'admin') {
       // Satu kandidat = satu baris: WA ganda (duplikat warisan) di-dedupe
       // GLOBAL dulu, baru ambil halaman 1 (50). Total = jumlah UNIK supaya
-      // pagination frontend (Muat Lebih) tetap konsisten.
-      const allUniq = await loadCandidatesUnik('');
-      const candRows = allUniq.slice(0, 50);
+      // pagination frontend (Muat Lebih) tetap konsisten. Jalur cepat: baris
+      // ringan untuk dedupe+sort, baris penuh hanya untuk halaman ini.
+      const { rows: candRows, total: candidatesTotal } = await loadCandidatesUnik('', {
+        page: 1,
+        pageSize: 50,
+      });
       result.dbJobs = stripRaw(jobs);
       result.candidates = stripRaw(candRows.map(supabase.mapCandidate));
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
@@ -284,7 +321,7 @@ async function handleGetAppData(payload, sessionToken) {
       // Lampirkan SEMUA lamaran (per WA) ke tiap kandidat — mail inbox bisa
       // berisi banyak job per kandidat (multi-apply).
       supabase.attachApplications(result.candidates, allForms);
-      result.candidatesTotal = allUniq.length;
+      result.candidatesTotal = candidatesTotal;
       result.schedules = schedules;
       result.tugas = tugas;
       result.formInbox = allForms.map(supabase.mapForm);
@@ -1005,10 +1042,12 @@ async function handleGetCandidatesPage(payload, sessionToken) {
   const pageSize = Number(opts.pageSize) || 50;
   try {
     // Konsisten dengan getAppData: dedupe GLOBAL by WA lalu slice halaman —
-    // ukuran halaman & total selalu dihitung dari baris UNIK.
-    const allUniq = await loadCandidatesUnik(opts.q || '');
-    const start = (page - 1) * pageSize;
-    const candRows = allUniq.slice(start, start + pageSize);
+    // ukuran halaman & total selalu dihitung dari baris UNIK. Jalur cepat:
+    // baris ringan untuk dedupe+sort, baris penuh hanya untuk halaman ini.
+    const { rows: candRows, total } = await loadCandidatesUnik(opts.q || '', {
+      page,
+      pageSize,
+    });
     const cands = stripRaw(candRows.map(supabase.mapCandidate));
     await supabase.attachBerkasBio(cands);
     // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
@@ -1018,7 +1057,7 @@ async function handleGetCandidatesPage(payload, sessionToken) {
     let allForms = await supabase.findFormsByWaList(waList);
     if (allForms === undefined) allForms = await supabase.findForms();
     supabase.attachApplications(cands, allForms);
-    return { success: true, candidates: cands, total: allUniq.length };
+    return { success: true, candidates: cands, total };
   } catch (e) {
     return { success: false, error: 'Gagal memuat kandidat: ' + e.message };
   }
