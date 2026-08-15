@@ -4,7 +4,79 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `prettier+eslint+bundel+fix-i18n` (lihat `git log`).
+**Update terakhir:** commit `c6744b4` (lihat `git log`).
+
+---
+
+## 🆕 SESI TERBARU — dedupe data & dokumen, share view, storage cleanup, CI
+
+Rangkaian kerja terbaru (`e36fb64` → `c6744b4`), fokus: hilangkan data/file ganda
+agar "1 loker = 1 kandidat = 1 CV/JFT/SSW/foto", perbaiki share view, dan pasang
+CI.
+
+### 1. Kandidat duplikat di database — dihapus & dicegah (`e36fb64`)
+
+- **Penyebab:** WA korup (`62135812198` vs `628135812198` kehilangan digit) +
+  `simpanKandidatDanUpload` selalu membuat baris baru tanpa cek duplikat.
+- **Fix:** upsert per WA (baris lama di-update, bukan bikin baru), validasi format
+  WA (62 + 10/11 digit) di `simpanKandidatDanUpload` & `daftarKandidat`, fix
+  search admin (`queryPaged` or=(…) tanpa kurung → HTTP 400).
+- **Eksekusi (produksi):** 30 baris kandidat + 1 master duplikat dihapus
+  (253 → 222 kandidat, master 1:1). Merge RIZKY/DEILA: kandidat kosong ASJ00156
+  dihapus, master lengkap DEILA dipindah ke WA kanonik `628581541420`.
+
+### 2. Multi-apply — kandidat boleh melamar banyak loker (`ee459c9`, `9035526`, `e534de5`)
+
+- `submitApply` dedup per **(WA + job)**: job sama → update baris, job beda →
+  baris baru (lamaran lama tidak lagi tertimpa).
+- `attachApplications` melampirkan SEMUA lamaran per WA di `getAppData`
+  (admin & kandidat) + `getCandidatesPage`.
+- UI: badge job semua lamaran di dashboard kandidat & modal CV admin (chip `+N`
+  di tabel), dropdown Job Dilamar di Edit Cepat (LULUS-first), peringatan
+  multi-apply di `apply-full.html`.
+- `scripts/sync-idloker.mjs` (dry-run default, `--apply`): 15 kandidat
+  `id_loker_pilihan` disinkronkan ke lamaran LULUS terbaru.
+
+### 3. share.html & endpoint `/api/share-data` (`f1a1f21`, `1f6eb68`, `2d7a46c`, `c6744b4`)
+
+- Fungsi netlify `share-data.js` + `handleShareData` + route GET di preview
+  (sebelumnya 404 → "Akses Ditolak").
+- **extraDocs** kini dari folder master Supabase Storage (KK/KTP sync — 21/21
+  kandidat TG633), bukan dari keterangan form yang kosong.
+- **Dedupe per tipe dokumen + klasifikasi nama lawas** (`docTypeOf`):
+  `1. X_CV.xlsx`/`nama_jft.pdf`/`X_PAS_PHOTO.jpg` dikenali, alias dinormalisasi
+  (CVFILE→CV, PHOTOFILE→PHOTO, KARTU_KELUARGA→KK), CV/JFT/SSW/foto selalu tipe
+  utama → **tiap kartu tepat 5 tombol (CV, JFT, SSW, KK, KTP)**, sama seperti
+  produksi.
+- `share.html` pakai klasifikasi kanonik yang SAMA + dedupe defensif di
+  frontend (tampilan bersih walau backend lama belum di-deploy).
+- Hapus aksi mati `superSyncCleanup` dari `api-client.js`; audit endpoint
+  menyeluruh (tidak ada endpoint hilang lain).
+
+### 4. Storage cleanup & upload yang menimpa (`bf140e0`, `b6ae9dd`, `abb5352`)
+
+- `hapusJenisVarian` kini menghapus varian **bertimestamp** (`KTP_1786….pdf`),
+  bukan hanya `KTP.ext` — upload baru selalu menimpa file lama per tipe
+  (isVarianOf + unit test).
+- `scripts/scan-orphan-files.mjs` (paginasi penuh + `--apply` + backup JSON ke
+  `.freebuff/`): **195 file yatim dihapus dari `master/`** (25 varian-lama,
+  153 `.keep`, 17 file folder test) — verifikasi 0 tersisa, share view utuh.
+- `scripts/cleanup-job-misc.mjs`: audit `jobs/` & `misc/` — **77 file yatim di
+  `jobs/`** (template CV 2026, pamflet/templateCv_TGxxxASJ lama, folder test).
+  Dry-run siap; eksekusi menunggu konfirmasi.
+
+### 5. CI / e2e (`.github/workflows/e2e-share.yml`)
+
+- `e2e/share-view.mjs` (script npm `e2e:share`): cek API share-data + browser
+  check best-effort; dijalankan vs produksi tiap push ke `main`.
+- Fix `cache: npm` (repo tidak punya `package-lock.json`) → `npm install`;
+  run CI hijau (contoh run 31865030810).
+
+### Catatan deploy
+
+- Data & storage sudah bersih di Supabase (berlaku untuk produksi).
+- **Belum di-deploy ke Netlify** — backend baru (dedupe share-data, klasifikasi
+  docTypeOf, upload menimpa) aktif di produksi setelah deploy ulang.
 
 ---
 
@@ -226,7 +298,7 @@ bun run build:js     # hanya bundel JS (setelah ubah js/, api-client.js, i18n.js
 bun run format       # prettier semua (kecuali assets/vendor/*.html)
 bun run format:check
 bun run lint         # ESLint — error = bug nyata, warning = gaya
-bun run test         # Vitest (16 tes)
+bun run test         # Vitest (41 tes)
 ```
 
 ## Catatan untuk AI assistant (biar tidak muter-muter baca code)
