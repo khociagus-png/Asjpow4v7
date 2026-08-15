@@ -202,6 +202,12 @@ function mapCandidate(row) {
     jft: pick(row, ['jft', 'file_jft']) || '',
     ssw: pick(row, ['ssw', 'file_ssw']) || '',
     fileCv: pick(row, ['file_cv', 'fileCv', 'cv']) || '',
+    // Alias jftUrl/sswUrl/cvUrl — dibaca modal CV admin (dossier) & dashboard.
+    // Backend lama (Netlify GAS) mengembalikan nama ini; tanpa alias, tombol
+    // FORMAT CV / SERTIF JFT / SERTIF SSW di dossier tidak pernah muncul.
+    jftUrl: pick(row, ['jft', 'file_jft']) || '',
+    sswUrl: pick(row, ['ssw', 'file_ssw']) || '',
+    cvUrl: pick(row, ['file_cv', 'fileCv', 'cv']) || '',
     nik: toText(pick(row, ['nik'])),
     noPasport: toText(pick(row, ['no_pasport', 'no_paspor'])),
     tanggalDaftar: pick(row, ['tanggal_daftar', 'tanggalDaftar']) || '',
