@@ -116,6 +116,71 @@ function mergeFill(keeper, dups, cols) {
   }
   return { body, changed };
 }
+// ai_data_json (jsonb) — SNAPSHOT bertingkat: setiap submit membawa state form
+// yang makin lengkap. JANGAN pakai fill-if-empty (baris penjaga dipilih by
+// STATUS, bisa jadi snapshot PALING TUA → data hilang). Deep-merge semua
+// snapshot, newest-wins per leaf; array: snapshot terbaru yang non-kosong.
+const isEmptyVal = (v) =>
+  v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
+function mergeJsonDeep(target, source) {
+  for (const [k, v] of Object.entries(source)) {
+    if (isEmptyVal(v)) continue;
+    const tv = target[k];
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      if (tv && typeof tv === 'object' && !Array.isArray(tv)) {
+        mergeJsonDeep(tv, v);
+      } else {
+        target[k] = JSON.parse(JSON.stringify(v));
+      }
+    } else if (Array.isArray(v)) {
+      if (v.length > 0) target[k] = JSON.parse(JSON.stringify(v));
+      else if (tv === undefined) target[k] = [];
+    } else if (isEmptyVal(tv)) {
+      target[k] = v;
+    } else {
+      target[k] = v; // keduanya terisi → yang terbaru menang
+    }
+  }
+  return target;
+}
+function mergeAiJson(rows) {
+  const withAi = rows.filter((r) => r && r.ai_data_json);
+  if (withAi.length === 0) return null;
+  withAi.sort((a, b) => (tsOf(a) > tsOf(b) ? 1 : -1));
+  let merged = {};
+  for (const r of withAi) {
+    let j = r.ai_data_json;
+    if (typeof j === 'string') {
+      try {
+        j = JSON.parse(j);
+      } catch (e) {
+        continue;
+      }
+    }
+    if (!j || typeof j !== 'object') continue;
+    merged = mergeJsonDeep(merged, j);
+  }
+  return Object.keys(merged).length ? merged : null;
+}
+// Kolom biodata: ambil nilai TERBARU yang terisi di semua baris grup (bukan
+// "penjaga dulu baru isi sisanya") — penjaga dipilih by status, belum tentu
+// snapshot biodata terbaru.
+function mergeFillLatest(rows, cols) {
+  const body = {};
+  let changed = false;
+  const sorted = [...rows].sort((a, b) => (tsOf(a) > tsOf(b) ? 1 : -1));
+  for (const col of cols) {
+    const latest = [...sorted]
+      .reverse()
+      .find((r) => nonEmpty(r[col]));
+    if (latest && String(latest[col]) !== String(rows[0][col])) {
+      body[col] = latest[col];
+      changed = true;
+    }
+  }
+  return { body, changed };
+}
+
 // keterangan "NAMA:URL;NAMA2:URL2;..." — gabungkan kamus dokumen semua baris.
 function mergeDocs(keeper, dups) {
   const docs = {};
@@ -185,16 +250,27 @@ const TABLES = [
     key: (r) => normalizeWa(String(r.no_wa || r.wa || '')) + '#' + String(r.code_job || '').trim(),
     pick: (rows) => pickKeeper(rows, { prio: formPrio }),
     merge: (keeper, dups) => {
-      const { body, changed } = mergeFill(keeper, dups, [
+      const all = [keeper, ...dups];
+      // ai_data_json DEEP-MERGE semua snapshot (newest-wins) — bukan fill-if-empty.
+      const ai = mergeAiJson(all);
+      // Kolom biodata lain: nilai terbaru yang terisi menang (penjaga by status
+      // bisa saja snapshot paling tua → jangan biarkan data baru hilang).
+      const { body, changed } = mergeFillLatest(all, [
         'pas_photo', 'jft', 'ssw', 'file_cv', 'gender', 'usia', 'tb', 'bb',
         'email', 'tempat_lahir', 'tgl_lahir', 'alamat_lengkap', 'folder_url',
-        'folder_id', 'folder_name', 'ai_data_json', 'kategory', 'nama_lengkap', 'no_wa',
+        'folder_id', 'folder_name', 'kategory', 'nama_lengkap', 'no_wa',
       ]);
       const docs = mergeDocs(keeper, dups);
       const fb = mergeFeedback(keeper, dups);
+      if (ai) {
+        const cur = typeof keeper.ai_data_json === 'string' ? keeper.ai_data_json : JSON.stringify(keeper.ai_data_json || {});
+        if (JSON.stringify(ai) !== cur) {
+          body.ai_data_json = JSON.stringify(ai);
+        }
+      }
       if (docs) body.keterangan = docs;
       if (fb) body.feedback_berkas = fb;
-      return { body, changed: changed || !!docs || !!fb };
+      return { body, changed: changed || !!docs || !!fb || !!body.ai_data_json };
     },
   },
   {
