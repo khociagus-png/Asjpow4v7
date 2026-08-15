@@ -1,6 +1,26 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `beb294a`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `ecc1828`.
+
+---
+
+## 2026-08-15 — Tes menyeluruh live + fix kritis export fetchMasterByWa
+
+### `ecc1828` — Fix: export fetchMasterByWa di supabase.js (upload & biodata kandidat rusak)
+- **Bug kritis** dari commit `c1433d2`: `fetchMasterByWa`/`fetchMasterLightByWa`
+  tidak di-export di `module.exports` supabase.js → semua action yang lewat
+  `findMasterByWa` gagal (`supabase.fetchMasterByWa is not a function`):
+  `simpanBerkasTahapan` (upload pemberkasan), `submitMasterForm` /
+  `simpanBiodataLengkap`, `getDrafCvMaster`, `simpanRevisiKandidat`, dll.
+- Fix 1 baris: keduanya ditambahkan ke export. Verifikasi in-process:
+  upload KTP → `pemberkasan_checklist.ktp_url` tersimpan + `getDrafCvMaster` OK;
+  unit test **49/49**.
+- **Tes menyeluruh di live** (asjportal-379): login-check **20/20**, modal-runtime
+  **8/8**, share-view ✅ (22 kandidat), backend-fast-path **13/13**. Kegagalan
+  awal di tes = artefak rate limit (5 login/menit per IP) & asersi jadwal basi.
+- Test e2e dirapikan: `login-check` (tabel jadwal boleh kosong — fitur sudah
+  dihapus `d86b854`), `share-view` (tunggu render ±30 dtk — cold start Storage).
+- ⚠️ **Fix belum live** — menunggu izin user untuk redeploy Netlify.
 
 ---
 

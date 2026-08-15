@@ -10,6 +10,30 @@
 
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `ecc1828` — Tes menyeluruh live + fix kritis export fetchMasterByWa
+
+- User minta tes **semua modal & fungsi** di situs live (`asjportal-379`).
+- **E2E live:** login-check **20/20**, modal-runtime-check **8/8**, share-view ✅
+  (22 kandidat + dokumen ekstra), backend-fast-path **13/13**. Kegagalan awal
+  bukan bug aplikasi: rate limit login 5/menit per IP (kena tes curl saya sendiri)
+  dan asersi jadwal basi (fitur jadwal sudah dihapus → tabel boleh kosong).
+- 🐛 **Bug kritis ditemukan:** `supabase.fetchMasterByWa is not a function` —
+  fungsi `fetchMasterByWa` (baru di `c1433d2`) **tidak di-export** di
+  `module.exports` supabase.js. Semua action lewat `findMasterByWa` rusak:
+  `simpanBerkasTahapan` (upload pemberkasan → modal menutup tapi 0 tersimpan),
+  `submitMasterForm`/`simpanBiodataLengkap`, `getDrafCvMaster`, `simpanRevisiKandidat`.
+- **Fix 1 baris:** export `fetchMasterByWa` + `fetchMasterLightByWa`.
+- **Verifikasi fix:** in-process `simpanBerkasTahapan` → `pemberkasan_checklist.ktp_url`
+  tersimpan ✅, `getDrafCvMaster` (AGUS KHOCI) OK ✅, unit 49/49 ✅.
+- Test e2e dirapikan: `login-check` (jadwal boleh kosong), `share-view` (tunggu
+  render ±30 dtk — share-data lambat di cold start karena fetch Storage per
+  kandidat).
+- ⚠️ **Fix belum live** — redeploy Netlify menunggu izin user (aturan DEPLOY.md).
+
+---
+
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `beb294a` — Kebijakan GitHub main base & deploy Netlify wajib izin (DEPLOY.md)
 
 - **Latar:** user punya akun Netlify baru (`nerazzurri190889@gmail.com`) dan minta
