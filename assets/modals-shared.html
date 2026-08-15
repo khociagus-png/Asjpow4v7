@@ -1,6 +1,6 @@
 <div id="modal-cv-mini" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel border-sky-500/50 p-6 md:p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <button onclick="document.getElementById('modal-cv-mini').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-cv-mini').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-black text-sky-400 mb-2 border-b border-sky-900/50 pb-4"><i class="fas fa-user-edit mr-2"></i><span data-lang="ui.update_cv_mini"> Update CV Mini</span></h3>
         <p class="text-sm text-slate-400 mb-6 leading-relaxed"><span data-lang="ui.master_update_hint">Perbarui data Anda di bawah ini agar perusahaan tertarik. Lebih cepat dan mudah!</span></p>
         
@@ -39,7 +39,7 @@
 
 <div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
     <div class="glass-panel p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
-      <button onclick="document.getElementById('modal-admin').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+      <button onclick="document.getElementById('modal-admin').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
       <div id="login-step-1">
           <i class="fas fa-shield-alt text-5xl text-red-500 mb-5 drop-shadow-lg"></i>
           <h3 class="text-xl font-bold text-white mb-6 tracking-wide" data-lang="admin.auth_title">Otorisasi Sistem</h3>
@@ -71,7 +71,7 @@
 
 <div id="modal-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-center justify-center p-4">
     <div class="glass-panel p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative">
-      <button onclick="document.getElementById('modal-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+      <button onclick="document.getElementById('modal-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
       <div id="form-daftar-kandidat" class="hidden">
          <h3 class="text-xl font-bold text-emerald-400 mb-6 border-b border-emerald-900/50 pb-4 text-center"><i class="fas fa-user-plus mr-2"></i> <span data-lang="candidate.reg_title">Daftar Pelamar Baru</span></h3>
          <input type="text" id="reg-nama" name="nama" autocomplete="name" data-lang-placeholder="candidate.reg_name" placeholder="Nama Lengkap KTP" class="w-full p-3.5 rounded-2xl bg-black/60 border border-slate-600 text-sm text-white mb-4 outline-none focus:border-emerald-500 transition">
@@ -94,7 +94,7 @@
 
 <div id="modal-cv" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 p-6 md:p-8 rounded-[2.5rem] w-full max-w-lg shadow-[0_0_40px_rgba(0,0,0,0.8)] relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-          <button onclick="document.getElementById('modal-cv').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-10" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          <button onclick="document.getElementById('modal-cv').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
           
           <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-6">
               <div class="flex items-center gap-4">
@@ -247,7 +247,7 @@
           </div>
           
           <div id="cv-inline-preview" class="hidden mt-4 w-full h-[400px] border border-slate-700 rounded-xl overflow-hidden relative bg-black">
-              <button type="button" onclick="document.getElementById('cv-inline-preview').classList.add('hidden')" class="absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center z-10 shadow-lg" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
+              <button type="button" onclick="document.getElementById('cv-inline-preview').classList.add('hidden')" class="absolute top-2 right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center z-[100] shadow-lg" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
               <div class="absolute top-2 right-12 z-10">
                   <a id="cv-inline-external" href="#" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white rounded-full px-3 py-1.5 flex items-center justify-center text-xs font-bold shadow-lg"><i class="fas fa-external-link-alt mr-1"></i><span data-lang="ui.open_tab"> BUKA TAB</span></a>
               </div>
@@ -290,7 +290,7 @@
 
 <div id="modal-edit-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar border-sky-500/50">
-        <button onclick="document.getElementById('modal-edit-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-edit-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         
         <div class="flex items-center gap-3 mb-4 border-b border-sky-900/50 pb-3">
             <i class="fas fa-user-shield text-3xl text-sky-400"></i>
@@ -381,7 +381,7 @@
 
 <div id="modal-list-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative max-h-[90vh] flex flex-col">
-        <button onclick="document.getElementById('modal-list-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-list-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-sky-400 mb-2 border-b border-sky-900/50 pb-3"><i class="fas fa-list-ol mr-2"></i><span data-lang="admin.modal_list_candidate_title"> List Kandidat</span></h3>
         <p class="text-xs text-slate-400 mb-4"><span data-lang="admin.job_code_label">Loker Code: </span><span id="list-job-code" class="font-bold text-white text-sm"></span></p>
         
@@ -403,7 +403,7 @@
 
 <div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-3 md:p-5">
     <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-6 md:p-8">
-      <button onclick="rbBatal()" class="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
+      <button onclick="rbBatal()" class="absolute top-5 right-5 z-[100] w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
       <h3 class="text-xl font-black text-emerald-400 mb-1"><i class="fas fa-list-check mr-2"></i><span data-lang="ui.rincian_biaya"> Rincian Biaya & Tahapan</span></h3>
       <p class="text-xs text-slate-400 mb-5 leading-relaxed" data-lang="ui.rincian_builder_hint">Klik pilihan yang mau dipakai, isi tahapan & catatan. Hasilnya otomatis tampil lengkap di popup <b class="text-amber-300">Detail</b> loker publik.</p>
       <p class="text-[9px] text-slate-500 -mt-3 mb-5 leading-relaxed" data-lang="ui.star_hint"><i class="fas fa-star text-amber-400 mr-1"></i> Bintang <i class="far fa-star"></i> = simpan item ke <b class="text-amber-300">koleksi favorit</b> (tersimpan di database, tinggal pakai di loker berikutnya). Bintang <i class="fas fa-star"></i> = sudah tersimpan, klik untuk hapus dari koleksi.</p>
@@ -521,7 +521,7 @@
 
 <div id="modal-cek-siswa" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4">
     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col border border-emerald-500/50">
-       <button onclick="document.getElementById('modal-cek-siswa').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+       <button onclick="document.getElementById('modal-cek-siswa').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
        
        <h3 class="text-xl font-black text-white mb-2 border-b border-emerald-900/50 pb-3">
            <i class="fas fa-users text-emerald-400 mr-2"></i><span data-lang="siswa.title"> Pendaftar Siswa Baru
@@ -548,7 +548,7 @@
 
 <div id="modal-ganti-pass" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[210] flex items-center justify-center p-4">
     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-sm shadow-2xl relative">
-      <button onclick="tutupModalGantiPass()" class="absolute top-4 right-5 text-slate-400 hover:text-white transition text-2xl font-black" aria-label="Tutup" data-lang-aria="public.close">&times;</button>
+      <button onclick="tutupModalGantiPass()" class="absolute top-4 right-5 text-slate-400 hover:text-white transition text-2xl font-black z-[100]" aria-label="Tutup" data-lang-aria="public.close">&times;</button>
       <h3 class="text-lg font-black text-white mb-1"><i class="fas fa-key mr-2 text-teal-400"></i><span data-lang="ui.change_password"> Ganti Password</span></h3>
       <p class="text-xs text-slate-400 mb-5 leading-relaxed" data-lang="ui.pass_new_hint">Password baru 6-20 karakter, tanpa spasi, tidak boleh sama dengan 4 digit terakhir No. WA.</p>
       <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-lang="ui.pass_old">Password Lama</label>
@@ -563,7 +563,7 @@
 
 <div id="modal-edit-full-loker" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <button onclick="document.getElementById('modal-edit-full-loker').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-edit-full-loker').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-amber-400 mb-4 border-b border-amber-900/50 pb-3"><i class="fas fa-edit mr-2"></i> <span data-lang="admin.modal_edit_job_title">Edit Loker Full</span></h3>
         <form onsubmit="submitEditFullLoker(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-400 mb-1" data-lang="admin.form_job_code_ro">KODE JOB (READONLY)</label><input type="text" id="ef-code" readonly class="w-full p-2.5 rounded-lg bg-black/40 border border-slate-700 text-slate-500 text-sm outline-none"></div>
@@ -612,7 +612,7 @@
 
 <div id="modal-tambah-kandidat" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-        <button onclick="document.getElementById('modal-tambah-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-tambah-kandidat').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-sky-400 mb-4 border-b border-sky-900/50 pb-3"><i class="fas fa-user-plus mr-2"></i> <span data-lang="admin.modal_input_manual_title">Input Kandidat Manual</span></h3>
         <form id="form-tambah-kandidat" class="space-y-4">
             <div class="bg-sky-900/20 p-3 rounded-xl border border-sky-500/30 mb-2">
@@ -659,7 +659,7 @@
 
 <div id="modal-edit-dbjob" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-sm shadow-2xl relative">
-        <button onclick="document.getElementById('modal-edit-dbjob').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="document.getElementById('modal-edit-dbjob').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-purple-400 mb-4 border-b border-purple-900/50 pb-3"><i class="fas fa-server mr-2"></i> <span data-lang="admin.modal_update_db_title">Update Tahapan DB</span></h3>
         <input type="hidden" id="edit-db-row">
         <div class="space-y-4">
@@ -672,7 +672,7 @@
 
 <div id="modal-qr" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[250] flex items-center justify-center p-4">
      <div class="glass-panel p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative">
-        <button onclick="tutupModalQr()" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+        <button onclick="tutupModalQr()" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
         <h3 class="text-xl font-bold text-pink-400 mb-2 border-b border-pink-900/50 pb-3"><i class="fas fa-qrcode mr-2"></i><span data-lang="ui.job_pamflet_asset"> Aset Pamflet Loker</span></h3>
         <p class="text-sm text-slate-400 mb-4 font-bold" id="qr-job-title">-</p>
         
@@ -725,7 +725,7 @@
 
 <div id="modal-share-loker" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
     <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-      <button onclick="tutupModalShare()" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+      <button onclick="tutupModalShare()" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
       <h3 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/50 pb-3"><i class="fas fa-share-alt mr-2"></i> <span data-lang="ui.share_modal_title">Share Loker</span></h3>
       <p id="share-modal-sub" class="text-[11px] font-bold text-slate-400 mt-1 mb-4"></p>
 
@@ -915,7 +915,7 @@
 
 <div id="modal-pemberkasan" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[260] flex items-center justify-center p-4">
        <div class="glass-panel p-6 md:p-8 rounded-[2.5rem] w-full max-w-4xl shadow-[0_0_40px_rgba(0,0,0,0.8)] relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-           <button onclick="document.getElementById('modal-pemberkasan').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-10" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+           <button onclick="document.getElementById('modal-pemberkasan').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
            
            <h3 class="text-xl md:text-2xl font-black text-white mb-2 uppercase tracking-wide border-b border-slate-700/50 pb-4">
                <i class="fas fa-folder-open text-emerald-400 mr-2"></i><span data-lang="ui.berkas_center"> Pusat Pemberkasan
@@ -1013,7 +1013,7 @@
 
 <div id="modal-migrasi-drive" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[360] flex items-center justify-center p-3 md:p-5">
     <div class="glass-panel rounded-[1.5rem] w-full max-w-2xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-4 md:p-5">
-      <button onclick="tutupModalMigrasiDrive()" class="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
+      <button onclick="tutupModalMigrasiDrive()" class="absolute top-3 right-3 z-[100] w-9 h-9 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times"></i></button>
       <h3 class="text-lg font-black text-amber-400 mb-1"><i class="fab fa-google-drive mr-2"></i><span data-lang="ui.drive_migrate"> Migrasi Berkas dari Google Drive</span></h3>
       <p class="text-xs text-slate-400 mb-3 leading-relaxed" data-lang="ui.drive_migrate_desc">Kandidat di bawah ini masih pakai <b class="text-amber-300">link folder Google Drive</b> — berkasnya belum ada di Storage, jadi foto/CV/JFT/SSW bisa tidak tampil. Pilih file dari perangkat lalu upload: otomatis masuk ke folder Storage kandidat dan semua kolom DB ikut ter-update.</p>
       <div id="migrasi-drive-list" class="space-y-3 mb-4"><p class="text-center text-slate-500 py-8 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-1"></i><span data-lang="ui.loading_candidates"> Memuat daftar kandidat…</span></p></div>
@@ -1023,14 +1023,14 @@
 
 <div id="modal-detail-loker" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-3 md:p-6">
     <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative">
-      <button onclick="tutupDetailLoker()" class="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
+      <button onclick="tutupDetailLoker()" class="absolute top-5 right-5 z-[100] w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>
       <div id="detail-loker-content" class="p-6 md:p-8"></div>
     </div>
   </div>
 
 <div id="modal-install" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4">
       <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-md shadow-2xl relative border border-emerald-500/50">
-          <button onclick="document.getElementById('modal-install').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          <button onclick="document.getElementById('modal-install').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
           
           <h3 class="text-xl font-black text-emerald-400 mb-2 border-b border-emerald-900/50 pb-3">
               <i class="fas fa-mobile-alt mr-2"></i><span data-lang="ui.install_howto"> Cara Install Aplikasi
@@ -1067,7 +1067,7 @@
 
 <div id="modal-ttd" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
       <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-lg shadow-2xl relative border border-rose-500/50 max-h-[90vh] overflow-y-auto custom-scrollbar">
-          <button onclick="document.getElementById('modal-ttd').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          <button onclick="document.getElementById('modal-ttd').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
           
           <h3 class="text-xl font-black text-rose-400 mb-2 border-b border-rose-900/50 pb-3">
               <i class="fas fa-file-signature mr-2"></i><span data-lang="ui.esign_docs"> Dokumen E-Sign
@@ -1147,7 +1147,7 @@
 
 <div id="modal-matchmaking" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
       <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-3xl shadow-2xl relative border border-violet-500/50 max-h-[90vh] flex flex-col">
-          <button onclick="document.getElementById('modal-matchmaking').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+          <button onclick="document.getElementById('modal-matchmaking').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
           
           <h3 class="text-xl font-black text-violet-400 mb-1 border-b border-violet-900/50 pb-3 flex items-center">
               <i class="fas fa-search-dollar mr-2"></i><span data-lang="ui.ai_headhunter"> AI Headhunter (Match)
