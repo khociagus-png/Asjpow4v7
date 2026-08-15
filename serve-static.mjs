@@ -73,7 +73,11 @@ async function handleApi(req, res) {
     }
     let out;
     try {
-      out = await loadHandlers().handleAction(body.action, body.payload, body.sessionToken);
+      const fwd = req.headers['x-forwarded-for'];
+      const ip = (fwd ? String(fwd).split(',')[0].trim() : null) || req.socket.remoteAddress || null;
+      out = await loadHandlers().handleAction(body.action, body.payload, body.sessionToken, {
+        ip,
+      });
     } catch (e) {
       out = { success: false, message: 'Error internal: ' + e.message };
     }

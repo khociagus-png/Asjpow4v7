@@ -13,6 +13,9 @@ const NETLIFY_API_BASE = '/.netlify/functions';
 const CANDIDATE_ACTIONS = new Set([
   'getMasterDataByWa',
   'submitMasterForm',
+  // M2 (REVIEW.md): getExistingCandidateJsonByWa memakai gerbang sesi —
+  // kirim token supaya kandidat/admin tetap dapat data penuh (prefill).
+  'getExistingCandidateJsonByWa',
   'getDrafCvMaster',
   'simpanUpdateMaster',
   'simpanBiodataLengkap',

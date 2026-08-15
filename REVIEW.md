@@ -169,24 +169,34 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
 
 - [x] `getAppConfig` wajib sesi admin (tidak lagi publik).
 
-### 🟠 M2 — Proteksi data kandidat di jalur publik (perlu keputusan produk)
+### 🟠 M2 — Proteksi data kandidat di jalur publik — ✅ DIPERBAIKI
 
-- [ ] Batasi field yang dikembalikan `getExistingCandidateJsonByWa` / `getDrafCvMaster`
+- [x] Batasi field yang dikembalikan `getExistingCandidateJsonByWa` / `getDrafCvMaster`
       untuk pemanggil tanpa sesi (hanya data yang dibutuhkan prefill, bukan seluruh profil).
+      Implementasi: `isOwnerOrAdmin()` + `pickPrefill()` di `actions-extra.js`; tanpa sesi
+      valid → `limited:true` (NIK/paspor/catatan internal/riwayat TIDAK ikut); sesi kandidat
+      pemilik WA atau admin → data penuh. `getExistingCandidateJsonByWa` ditambahkan ke
+      `CANDIDATE_ACTIONS` (api-client) supaya alur prefill kandidat/admin tetap dapat data
+      penuh. Terverifikasi live preview: anonim → field terbatas, sesi → penuh.
 - [ ] (Opsional, lebih kuat) Sisipkan token sekali pakai di link `generateFormBridge` dan
       validasi server sebelum mengembalikan data.
 
-### 🟠 M3 — Rate limit (definisi & nilai usulan di bawah)
+### 🟠 M3 — Rate limit — ✅ DIPERBAIKI
 
-- [ ] Rate limit `checkAdminMaster` / `checkAdminPersonal` (login admin): 5 percobaan/menit
+- [x] Rate limit `checkAdminMaster` / `checkAdminPersonal` (login admin): 5 percobaan/menit
       per IP + lockout 5 menit setelah 10 gagal.
-- [ ] Rate limit `processAIChat` / `processSiswaAIChat` / `processAdminAIChat` (biaya Gemini):
+- [x] Rate limit `processAIChat` / `processSiswaAIChat` / `processAdminAIChat` (biaya Gemini):
       10 req/menit per WA/admin; global 60 req/menit per IP.
-- [ ] Rate limit `kirimSatuPesanFonnte` / `kirimTawaranMassal` (biaya WA): maks 2×/menit
+- [x] Rate limit `kirimSatuPesanFonnte` / `kirimTawaranMassal` (biaya WA): maks 2×/menit
       per admin (massal sudah punya delay antar pesan — endpoint-nya yang dijaga).
-- [ ] Aksi admin CRUD biasa (simpan/edit/hapus loker, kandidat, jadwal, mail): jangan
+- [x] Aksi admin CRUD biasa (simpan/edit/hapus loker, kandidat, jadwal, mail): jangan
       di-throttle agresif — cukup 120 req/menit per admin sebagai jaring pengaman.
-- [ ] (Opsional) `loginKandidat` / `daftarKandidat`: 10 req/menit per IP.
+- [x] (Opsional) `loginKandidat` / `daftarKandidat`: 10 req/menit per IP.
+      Implementasi: `netlify/functions/_lib/rate-limit.js` (in-memory Map, window bergulir,
+      lockout) dipasang terpusat di `handleAction` (handlers.js) — berlaku untuk Netlify
+      wrapper (IP dari `x-forwarded-for`) & preview (`serve-static.mjs`). Respons
+      `{ success:false, rateLimited:true, retryAfter }`. Terverifikasi: percobaan ke-6
+      ditolak (retryAfter 60s), IP lain bebas, lockout 300s setelah 10 gagal.
 
 ### 🟡 S1 — XSS stored (escape menyeluruh)
 

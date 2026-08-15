@@ -7,6 +7,14 @@
 
 const { handleAction } = require('./handlers');
 
+// Ambil IP klien dari header standar proxy/Netlify untuk rate limit (M3).
+function clientIp(event) {
+  const h = (event && event.headers) || {};
+  const fwd = h['x-forwarded-for'];
+  if (fwd) return String(fwd).split(',')[0].trim();
+  return h['client-ip'] || h['x-real-ip'] || null;
+}
+
 function makeHandler() {
   return async (event) => {
     let body = {};
@@ -17,7 +25,9 @@ function makeHandler() {
     }
     let out;
     try {
-      out = await handleAction(body.action, body.payload, body.sessionToken);
+      out = await handleAction(body.action, body.payload, body.sessionToken, {
+        ip: clientIp(event),
+      });
     } catch (e) {
       out = { success: false, message: 'Error internal: ' + e.message };
     }

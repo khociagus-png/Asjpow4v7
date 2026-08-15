@@ -1,4 +1,6 @@
 .env.local
+# Sandbox env (isian UI API Keys) — jangan pernah ter-commit
+.env
 node_modules/
 .convex/
 dist/

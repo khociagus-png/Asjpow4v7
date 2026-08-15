@@ -16,6 +16,7 @@ const session = require('./session');
 const demo = require('./demo');
 const extra = require('./actions-extra');
 const ai = require('./actions-ai');
+const rateLimit = require('./rate-limit');
 
 const NOT_IMPLEMENTED =
   'Fungsi ini belum diimplementasi di backend rebuild (repo GitHub hanya berisi frontend).';
@@ -1085,9 +1086,97 @@ async function handleDeleteForm(payload, sessionToken) {
 }
 
 // ---------------------------------------------------------------------------
+// Rate limit (REVIEW.md M3) — lapisan proteksi di dispatcher supaya semua
+// endpoint (Netlify wrapper & preview server) kebagian, tanpa mengubah tiap
+// handler. Nilai mengikuti definisi di REVIEW.md: login admin 5/menit/IP +
+// lockout 5 menit setelah 10 gagal, AI 10/menit per identitas + 60/menit/IP,
+// Fonnte 2×/menit per admin, aksi CRUD admin 120/menit sebagai jaring pengaman.
+// ---------------------------------------------------------------------------
+const LOGIN_ACTIONS = new Set([
+  'checkAdminMaster',
+  'checkAdminPersonal',
+  'loginKandidat',
+  'daftarKandidat',
+]);
+const AI_ACTIONS = new Set([
+  'processAIChat',
+  'processSiswaAIChat',
+  'processAdminAIChat',
+  'processAiInterview',
+]);
+const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
+
+function sessionIdentity(sessionToken) {
+  const t = session.verifyToken(sessionToken);
+  if (!t) return null;
+  return t.role === 'admin' ? 'admin:' + String(t.name || '') : 'kandidat:' + String(t.wa || '');
+}
+
+function rateLimitChecks(action, meta, sessionToken) {
+  const ip = (meta && meta.ip && String(meta.ip).trim()) || 'anon';
+  const ident = sessionIdentity(sessionToken);
+  const adminKey = ident && ident.indexOf('admin:') === 0 ? ident : null;
+
+  if (action === 'checkAdminMaster' || action === 'checkAdminPersonal') {
+    return [
+      {
+        key: 'adminLogin:' + ip,
+        opts: { limit: 5, windowMs: 60000, lockoutAfter: 10, lockoutMs: 300000 },
+      },
+    ];
+  }
+  if (action === 'loginKandidat' || action === 'daftarKandidat') {
+    return [
+      {
+        key: 'kandidatLogin:' + ip,
+        opts: { limit: 10, windowMs: 60000, lockoutAfter: 15, lockoutMs: 300000 },
+      },
+    ];
+  }
+  if (AI_ACTIONS.has(action)) {
+    // Per identitas (WA/admin; anonim → IP): 10 req/menit. Global per IP: 60.
+    return [
+      { key: 'ai:' + (ident || ip), opts: { limit: 10, windowMs: 60000 } },
+      { key: 'aiGlobal:' + ip, opts: { limit: 60, windowMs: 60000 } },
+    ];
+  }
+  if (FONNTE_ACTIONS.has(action)) {
+    return [{ key: 'fonnte:' + (adminKey || ip), opts: { limit: 2, windowMs: 60000 } }];
+  }
+  if (adminKey) {
+    // Jaring pengaman aksi CRUD admin — kerja normal tidak boleh terhambat.
+    return [{ key: 'adminCrud:' + adminKey, opts: { limit: 120, windowMs: 60000 } }];
+  }
+  return [];
+}
+
+// ---------------------------------------------------------------------------
 // Dispatcher utama
 // ---------------------------------------------------------------------------
-async function handleAction(action, payload, sessionToken) {
+async function handleAction(action, payload, sessionToken, meta) {
+  const checks = rateLimitChecks(action, meta, sessionToken);
+  for (const c of checks) {
+    const r = rateLimit.check(c.key, c.opts);
+    if (!r.ok) {
+      return {
+        success: false,
+        error: 'Terlalu banyak permintaan. Coba lagi dalam ' + r.retryAfter + ' detik.',
+        rateLimited: true,
+        retryAfter: r.retryAfter,
+      };
+    }
+  }
+  const out = await dispatchAction(action, payload, sessionToken);
+  // Lockout login: catat kegagalan (PIN/WA/password salah) sesuai REVIEW M3.
+  if (out && out.success === false && !out.rateLimited && LOGIN_ACTIONS.has(action)) {
+    for (const c of checks) {
+      if (c.opts.lockoutAfter) rateLimit.fail(c.key, c.opts);
+    }
+  }
+  return out;
+}
+
+async function dispatchAction(action, payload, sessionToken) {
   switch (action) {
     case 'getAppData':
       return handleGetAppData(payload, sessionToken);
@@ -1147,12 +1236,12 @@ async function handleAction(action, payload, sessionToken) {
     case 'submitApply':
       return extra.handleSubmitApply(payload);
     case 'getExistingCandidateJsonByWa':
-      return extra.handleGetExistingCandidateJsonByWa(payload);
+      return extra.handleGetExistingCandidateJsonByWa(payload, sessionToken);
     // Master data (master-full.html, CV)
     case 'getMasterDataByWa':
       return extra.handleGetMasterDataByWa(payload, sessionToken);
     case 'getDrafCvMaster':
-      return extra.handleGetDrafCvMaster(payload);
+      return extra.handleGetDrafCvMaster(payload, sessionToken);
     case 'submitMasterForm':
     case 'simpanBiodataLengkap':
       return extra.handleSubmitMasterForm(payload, sessionToken);

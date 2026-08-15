@@ -22,6 +22,57 @@ function requireRole(sessionToken, role) {
   return { token: t };
 }
 
+// ---------------------------------------------------------------------------
+// REVIEW.md M2 — proteksi PII: data penuh hanya untuk pemilik WA (kandidat)
+// atau admin; pemanggil tanpa sesi valid hanya mendapat field prefill.
+// ---------------------------------------------------------------------------
+const PUBLIC_PREFILL_FIELDS = new Set([
+  'idKandidat',
+  'id',
+  'nama',
+  'wa',
+  'gender',
+  'usia',
+  'tb',
+  'bb',
+  'tbBb',
+  'ttl',
+  'pendidikan',
+  'pasPhoto',
+  'email',
+  'tempatLahir',
+  'tglLahir',
+  'alamat',
+  'jftText',
+  'sswText',
+  'jft',
+  'ssw',
+  'fileCv',
+  'idLoker',
+  'tahapan',
+  'status',
+]);
+
+// true jika session valid: admin (bebas) ATAU kandidat pemilik `wa` tsb.
+function isOwnerOrAdmin(sessionToken, wa) {
+  const t = session.verifyToken(sessionToken);
+  if (!t) return false;
+  if (t.role === 'admin') return true;
+  if (t.role === 'kandidat' && supabase.normalizeWa(t.wa || '') === supabase.normalizeWa(wa)) {
+    return true;
+  }
+  return false;
+}
+
+// Potong objek kandidat (hasil mapCandidate) hanya ke field prefill aman.
+function pickPrefill(data) {
+  const safe = {};
+  for (const k of Object.keys(data || {})) {
+    if (PUBLIC_PREFILL_FIELDS.has(k)) safe[k] = data[k];
+  }
+  return safe;
+}
+
 function bucket() {
   return env('SUPABASE_STORAGE_BUCKET') || 'asj-files';
 }
@@ -329,7 +380,9 @@ async function handleSubmitApply(payload) {
 }
 
 // getExistingCandidateJsonByWa([wa]) — data lengkap pelamar (untuk edit ulang).
-async function handleGetExistingCandidateJsonByWa(payload) {
+// REVIEW M2: tanpa sesi valid → hanya field prefill (NIK, paspor, catatan
+// internal, folder, dsb. TIDAK ikut); dengan sesi admin/pemilik WA → penuh.
+async function handleGetExistingCandidateJsonByWa(payload, sessionToken) {
   const wa = String((payload && payload[0]) || '');
   try {
     const found = await supabase.findCandidates();
@@ -338,7 +391,9 @@ async function handleGetExistingCandidateJsonByWa(payload) {
       (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
     );
     if (!row) return { success: false, error: 'Kandidat tidak ditemukan.' };
-    return { success: true, data: supabase.mapCandidate(row) };
+    const data = supabase.mapCandidate(row);
+    if (isOwnerOrAdmin(sessionToken, wa)) return { success: true, data };
+    return { success: true, data: pickPrefill(data), limited: true };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -733,7 +788,8 @@ async function handleGetMasterDataByWa(payload, sessionToken) {
 }
 
 // getDrafCvMaster([wa]) → nested + AIDATAJSON + uploads (untuk render CV).
-async function handleGetDrafCvMaster(payload) {
+// REVIEW M2: tanpa sesi valid → subset identitas dasar + uploads saja.
+async function handleGetDrafCvMaster(payload, sessionToken) {
   const wa = String((payload && payload[0]) || '');
   try {
     const row = await findMasterByWa(wa);
@@ -762,11 +818,26 @@ async function handleGetDrafCvMaster(payload) {
       };
     }
     const nested = buildMasterNested(row);
-    return Object.assign(nested, {
+    const full = Object.assign(nested, {
       AIDATAJSON: row.ai_data_json || '',
       // Dipakai builder CV untuk nomor rirekisho (buildCvIdentitas → v('id_kandidat')).
       id_kandidat: row.id_kandidat || row.id || '',
     });
+    if (isOwnerOrAdmin(sessionToken, wa)) return full;
+    // Tanpa sesi valid → jangan bocorkan NIK/alamat/riwayat/medis/dokumen.
+    const i = nested.identitas || {};
+    return {
+      identitas: {
+        nama_lengkap: i.nama_lengkap || '',
+        katakana: i.katakana || '',
+        gender: i.gender || '',
+        tempat_lahir: i.tempat_lahir || '',
+        tgl_lahir: i.tgl_lahir || '',
+        umur: i.umur || '',
+      },
+      uploads: nested.uploads || {},
+      limited: true,
+    };
   } catch (e) {
     return { error: e.message };
   }
