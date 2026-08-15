@@ -148,16 +148,15 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 4. ✅ E2E regresi (upload + biodata) kalau menyentuh alur kandidat/upload
 5. ✅ Update `PROGRESS.md` (header sesi: **tanggal + pengerja + hash commit** — lihat WORKFLOW.md §7.3)
 6. ✅ Cek `git config user.name/email` benar sesuai pengerja (WORKFLOW.md §7.2)
-7. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`
-8. ✅ Ingatkan user: deploy ulang lewat **Freebuff** supaya live ikut versi terbaru
-   (**JANGAN PERNAH deploy manual ke Netlify**)
+7. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`8. ✅ Ingatkan user soal kebijakan deploy (lihat **DEPLOY.md**): Netlify **hanya**
+   boleh di-deploy bila diizinkan eksplisit oleh pemilik — tanpa izin, jangan deploy
 
 ---
 
 ## 7. Larangan mutlak
 
 - ❌ Edit `.env*` — minta user isi di Keys/API keys.
-- ❌ Deploy ke Netlify manual (dashboard/CLI) — satu-satunya jalur = tombol Deploy Freebuff.
+- ❌ Deploy ke Netlify **tanpa izin eksplisit pemilik** (aturan & riwayat izin di `DEPLOY.md`).
 - ❌ Mengubah urutan/alur pipeline lapangan (lihat `PIPELINE.md`).
 - ❌ Menghapus/menimpa data user yang sudah ada tanpa diminta.
 - ❌ Edit hasil build (`assets/*`, `sw.js`, region `SHARED_MODALS`) dengan tangan.

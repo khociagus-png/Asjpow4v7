@@ -6,3 +6,6 @@ node_modules/
 dist/
 # Metadata internal Freebuff (preview harness) — bukan bagian proyek
 .freebuff/
+
+# Local Netlify folder
+.netlify

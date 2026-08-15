@@ -89,16 +89,19 @@ for f in js/*.js; do node --check "$f" || echo "ERROR: $f"; done
 
 ---
 
-## 4. Deploy — **JANGAN deploy ke Netlify** 🚫
+## 4. Deploy — GitHub main base, Netlify HANYA dengan izin 🔒
 
-- **Satu-satunya jalur deploy**: tombol **Deploy di UI Freebuff** — build berjalan dari
-  commit terbaru di `main`.
-- Cek status/log dengan CLI: `freebuff-deploy status`, `freebuff-deploy logs`, `freebuff-deploy check`.
-- **JANGAN** mem-build / meng-upload / mendeploy apa pun ke Netlify (dashboard Netlify,
-  CLI netlify, dsb). File `netlify.toml` & `netlify/functions` tetap ada di repo hanya
-  karena itu bentuk backend/API yang dipakai aplikasi — bukan berarti kita deploy ke Netlify.
+- **Sumber kode = GitHub (`main`)** — semua perubahan kode (update, patch, revisi)
+  lewat repo. Kebijakan lengkap: **`DEPLOY.md`**.
+- **Netlify: DILARANG deploy KECUALI diizinkan eksplisit oleh pemilik** (khoci89/Agus)
+  pada sesi itu (token `NETLIFY_AUTH_TOKEN` diberikan / perintah tertulis). Setiap
+  deploy Netlify dicatat di `DEPLOY.md` §4.
+- Jalur deploy lain (mis. tombol **Deploy Freebuff**) boleh dipakai sesuai kebijakan
+  masing-masing — cek status/log dengan `freebuff-deploy status/logs/check`.
+- `netlify.toml` & `netlify/functions` tetap ada di repo karena itu bentuk backend/API
+  aplikasi — **bukan** izin otomatis untuk deploy ke Netlify.
 - **PENTING**: situs live TIDAK otomatis sinkron dengan repo. Setelah commit+push,
-  jalankan deploy lewat **Freebuff** supaya live ikut versi terbaru.
+  live hanya berubah setelah deploy yang diizinkan.
 
 ---
 
@@ -124,8 +127,9 @@ Kalau kamu (assistant) sedang mengerjakan repo ini, patuhi:
 3. Jangan pernah edit file `.env*`. Kalau butuh secret baru, minta user isi di Keys/API keys.
 4. Jangan menulis ulang kode async/await menjadi callback `.then()` (regresi dari refactor).
 5. Jangan menyentuh `vite.config.ts`/HMR — project ini bukan Vite; preview memakai `serve-static.mjs`.
-6. Setelah commit, ingatkan user untuk **deploy ulang lewat Freebuff** supaya situs live ikut terbaru.
-7. **JANGAN PERNAH deploy ke Netlify** — apa pun alasannya.
+6. Setelah commit, ingatkan user tentang **kebijakan deploy** (lihat `DEPLOY.md`):
+   Netlify hanya boleh di-deploy bila diizinkan eksplisit — jangan pernah deploy sendiri tanpa izin.
+7. **JANGAN PERNAH deploy ke Netlify tanpa izin eksplisit pemilik** — aturan penuh di `DEPLOY.md`.
 8. **Patuhi `PIPELINE.md`** — sebelum menambah/mengubah fitur yang menyentuh tahapan
    kandidat, seleksi, atau pendokumenan, cek dulu pipeline-nya. Jangan mengubah urutan
    tahapan lapangan; fitur baru harus lewat checklist di `PIPELINE.md` bagian 6.
