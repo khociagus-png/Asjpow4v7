@@ -65,7 +65,22 @@ if (browser) {
   await page.goto(`${BASE}/share.html?job=${encodeURIComponent(JOB)}`, {
     waitUntil: 'domcontentloaded',
   });
-  await page.waitForTimeout(2500);
+  // Endpoint share-data menarik dokumen Storage per kandidat — pada cold start
+  // bisa butuh ±15 dtk. Tunggu sampai render selesai (kartu muncul) ATAU error
+  // tampil, bukan pakai jeda tetap yang terlalu pendek.
+  const startWait = Date.now();
+  while (Date.now() - startWait < 30000) {
+    const done = await page.evaluate(() => {
+      const errEl = document.getElementById('error-message');
+      const errVisible = errEl
+        ? !errEl.classList.contains('hidden') && errEl.offsetParent !== null
+        : false;
+      const cards = document.querySelectorAll('#candidates-grid .glass-card').length;
+      return errVisible || cards > 0;
+    });
+    if (done) break;
+    await page.waitForTimeout(1500);
+  }
 
   const errorVisible = await page.evaluate(() => {
     const el = document.getElementById('error-message');

@@ -1042,6 +1042,8 @@ module.exports = {
   findCandidateByIdFiltered,
   findJobByCodeFiltered,
   findFormsByWa,
+  fetchMasterByWa,
+  fetchMasterLightByWa,
   findFormByIndexFiltered,
   findFormsByWaList,
   findCandidatesByJobFiltered,

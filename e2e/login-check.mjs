@@ -145,14 +145,20 @@ console.log(`\nTarget: ${BASE}\n`);
   );
 
   // Dashboard render (fungsi render yang baru di-refactor: jadwal, kandidat, dbjob)
-  const jadwal = await waitFor(
-    async () => (await page.locator('#admin-jadwal-body tr').count()) > 0,
+  // Catatan: fitur jadwal/tugas sudah dihapus dari produk (changelog d86b854),
+  // jadi tabel jadwal boleh kosong — yang wajib adalah tbody-nya ter-render.
+  const jadwalRendered = await waitFor(
+    async () => (await page.locator('#admin-jadwal-body').count()) > 0,
   );
   const kandidat = await waitFor(
     async () => (await page.locator('#admin-kandidat-body tr').count()) > 0,
   );
   const dbjob = await waitFor(async () => (await page.locator('#admin-dbjob-body tr').count()) > 0);
-  check('Tabel Jadwal render', jadwal);
+  const jadwalRows = await page.locator('#admin-jadwal-body tr').count();
+  check(
+    'Tabel Jadwal ter-render' + (jadwalRows === 0 ? ' (kosong — fitur sudah dihapus)' : ''),
+    jadwalRendered,
+  );
   check('Tabel Kandidat render', kandidat);
   check('Tabel DB Job render', dbjob);
   check('Tidak ada error JS di dashboard admin', jsErrors.length === 0, jsErrors[0] || '');
