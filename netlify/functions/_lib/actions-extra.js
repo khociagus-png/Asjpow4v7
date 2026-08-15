@@ -164,12 +164,23 @@ function stemAliases(stem) {
 }
 
 // Hapus semua varian lama satu jenis file di folder (mis. KTP.jpg, KTP.png,
-// plus alias-nya). Dipanggil SEBELUM upload supaya selalu menimpa file lama.
+// KK_1786….pdf — termasuk varian bertimestamp dari backend lama — plus
+// alias-nya). Dipanggil SEBELUM upload supaya selalu menimpa file lama.
 // Catatan API: object/list mengembalikan nama RELATIF terhadap prefix, jadi
 // filter + delete harus pakai path lengkap (folder + "/" + nama).
+function isVarianOf(name, stem) {
+  const n = String(name || '');
+  if (!n || !stem) return false;
+  // KTP.ext / KTP.png — varian tanpa timestamp.
+  if (n.startsWith(stem + '.')) return true;
+  // KTP_1786683311216.pdf — varian bertimestamp (backend lama menamai
+  // file dengan timestamp sehingga upload kedua tidak menimpa).
+  return n.startsWith(stem + '_');
+}
+
 async function hapusJenisVarian(folder, stem) {
   const f = String(folder).replace(/^\/+|\/+$/g, '');
-  const stems = [String(stem || '')].concat(stemAliases(stem));
+  const stems = [String(stem || '')].concat(stemAliases(stem)).filter(Boolean);
   try {
     const list = await storageRequest('POST', 'object/list/' + bucket(), {
       headers: { 'Content-Type': 'application/json' },
@@ -178,7 +189,7 @@ async function hapusJenisVarian(folder, stem) {
     const items = Array.isArray(list) ? list : [];
     const victims = items
       .map((o) => (o && o.name ? String(o.name) : ''))
-      .filter((n) => n && stems.some((s) => n.startsWith(s + '.')));
+      .filter((n) => n && stems.some((s) => isVarianOf(n, s)));
     if (victims.length) {
       await storageRequest('DELETE', 'object/' + bucket(), {
         headers: { 'Content-Type': 'application/json' },
@@ -1428,6 +1439,9 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
 
 // Ekspor semua handler (fungsi deklarasi hoisted — letaknya boleh di tengah).
 module.exports = {
+  // Helper murni diekspor untuk unit test (pencocokan varian upload).
+  isVarianOf,
+  stemAliases,
   handleGetUploadUrls,
   handleCekDataPelamar,
   handleIsJobRequiresCv,
