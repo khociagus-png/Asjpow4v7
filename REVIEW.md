@@ -154,10 +154,69 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
 
 ---
 
-## Rekomendasi prioritas tindak lanjut
+## 📋 TODO / ACTION ITEMS (checklist — update centang saat selesai)
 
-1. **Sekarang (di luar repo):** set `SESSION_SECRET` di Netlify (K1). Ini satu-satunya
-   yang bisa menimbulkan kebocoran nyata.
-2. **Berikutnya:** rate limit (M3) + pembatasan data bridge publik (M2) —
-   dua-duanya murni server-side, tanpa ubah UX.
-3. **Bertahap:** escape XSS menyeluruh (S1) + target-kan sisa scan penuh (S2).
+> Diperbarui: 15 Agustus 2026 · Sumber: review menyeluruh di dokumen ini.
+
+### 🔴 K1 — WAJIB (di luar repo, butuh admin Netlify)
+
+- [ ] Set `SESSION_SECRET` (nilai acak panjang, **berbeda** dari `ADMIN_PASSWORD`) di
+      Environment Variables Netlify produksi.
+- [ ] Verifikasi setelah deploy: login admin normal, token `asj_admin_session` tidak bisa
+      dipalsukan (coba ubah satu karakter token → harus di-logout).
+
+### 🟠 M1 — SUDAH DIPERBAIKI (commit `3504781`)
+
+- [x] `getAppConfig` wajib sesi admin (tidak lagi publik).
+
+### 🟠 M2 — Proteksi data kandidat di jalur publik (perlu keputusan produk)
+
+- [ ] Batasi field yang dikembalikan `getExistingCandidateJsonByWa` / `getDrafCvMaster`
+      untuk pemanggil tanpa sesi (hanya data yang dibutuhkan prefill, bukan seluruh profil).
+- [ ] (Opsional, lebih kuat) Sisipkan token sekali pakai di link `generateFormBridge` dan
+      validasi server sebelum mengembalikan data.
+
+### 🟠 M3 — Rate limit (definisi & nilai usulan di bawah)
+
+- [ ] Rate limit `checkAdminMaster` / `checkAdminPersonal` (login admin): 5 percobaan/menit
+      per IP + lockout 5 menit setelah 10 gagal.
+- [ ] Rate limit `processAIChat` / `processSiswaAIChat` / `processAdminAIChat` (biaya Gemini):
+      10 req/menit per WA/admin; global 60 req/menit per IP.
+- [ ] Rate limit `kirimSatuPesanFonnte` / `kirimTawaranMassal` (biaya WA): maks 2×/menit
+      per admin (massal sudah punya delay antar pesan — endpoint-nya yang dijaga).
+- [ ] Aksi admin CRUD biasa (simpan/edit/hapus loker, kandidat, jadwal, mail): jangan
+      di-throttle agresif — cukup 120 req/menit per admin sebagai jaring pengaman.
+- [ ] (Opsional) `loginKandidat` / `daftarKandidat`: 10 req/menit per IP.
+
+### 🟡 S1 — XSS stored (escape menyeluruh)
+
+- [ ] Audit render admin (`05_render.js`, `11_admin_ops.js`, `03_candidate.js`) +
+      terapkan escape terpusat (helper global `esc()`) di semua data user-supplied.
+
+### 🟡 S2 — Sisa scan penuh
+
+- [ ] Target-kan 27 panggilan `findCandidates()`/`findJobs()`/`findForms()` tersisa
+      (path non-hot: hapus loker, daftar admin, diag) ke query ter-filter — bertahap.
+
+### 🟡 S4 — Artefak stale
+
+- [x] `.convex/` dihapus (commit `3504781`).
+
+---
+
+## Jawaban cepat: "rate limit apa buat admin?"
+
+Rate limit **tidak membatasi kerja admin normal** — justru melindungi aksi admin
+agar tidak bisa disalahgunakan (PIN dibrute-force, WA blast/doa AI di-spam).
+Usulan lapisan:
+
+| Endpoint                                          | Limit                                                           | Alasan                                        |
+| ------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------- |
+| Login admin (PIN master/personal)                 | **5 percobaan/menit per IP** + lockout 5 menit setelah 10 gagal | Anti brute-force PIN                          |
+| AI chat admin (Gemini)                            | **10 req/menit per admin**                                      | Biaya API Gemini                              |
+| Kirim WA (satu/massal)                            | **2×/menit per admin**                                          | Biaya WA (massal sudah ada delay antar pesan) |
+| Aksi CRUD admin (simpan/edit/hapus, mail, jadwal) | **120 req/menit per admin** (jaring pengaman saja)              | Kerja normal tidak boleh terhambat            |
+
+Implementasi paling sederhana tanpa infra baru: map in-memory di dalam function
+(`Map<key, {count, resetAt}>`) — cukup untuk satu instance; kalau mau akurat
+lintas instance, pindah ke Supabase/Redis. Murni server-side, tanpa ubah UX.
