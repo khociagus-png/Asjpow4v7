@@ -40,8 +40,12 @@
     .input-micro { width: 100%; background-color: #1e293b; border-radius: 0.25rem; padding: 0.25rem 0.4rem; font-size: 0.65rem; outline: none; border: 1px solid #334155; }
     .input-micro:focus { border-color: #5a8d00; }
     @media (max-width: 767px) {
-      #chatPanel { height: calc(100vh - 42px); }
-      #formPanel { height: calc(100vh - 42px); }
+      /* 100dvh = tinggi viewport DINAMIS iPhone Safari (URL bar naik/turun saat
+         scroll). Baris 100vh tetap sebagai fallback browser lama. */
+      #chatPanel { height: calc(100vh - 42px); height: calc(100dvh - 42px); }
+      #formPanel { height: calc(100vh - 42px); height: calc(100dvh - 42px); }
+      /* Bar input chat tidak tertutup home-indicator iPhone (safe-area). */
+      #chatPanel > div:last-child { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
       #sendBtn { min-height: 44px; min-width: 44px; }
       #userInput { min-height: 44px; }
       .input-micro { font-size: 0.7rem; padding: 0.35rem 0.5rem; }
@@ -77,7 +81,7 @@
   </script>
   <link rel="stylesheet" crossorigin href="/assets/main.css?v=a9642c4fe7">
 </head>
-<body class="flex flex-col md:flex-row h-screen w-full relative" onload="initApp()">
+<body class="flex flex-col md:flex-row h-screen w-full relative" style="height:100vh;height:100dvh" onload="initApp()">
   <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
   <a href="#formPanel" class="skip-link" data-lang="a11y.skip_to_content">Lewati ke konten utama</a>
 
@@ -740,7 +744,14 @@
       }
     }
 
+    // Tab terakhir yang aktif di layar < 768px + status desktop/mobile.
+    // Dipakai handleResize supaya rotasi layar kembali ke tab yang dipilih,
+    // TANPA memaksa pindah tab saat iPhone memicu "resize" tiap scroll
+    // (URL bar Safari naik/turun) — penyebab kolom chat "puter-puter".
+    var lastMobileTab = "chat";
+    var wasDesktop = window.innerWidth >= 768;
     function switchTab(target) {
+      lastMobileTab = target;
       if(window.innerWidth >= 768) return; 
       var cPanel = $('chatPanel'), fPanel = $('formPanel'), tChat = $('btnTabChat'), tForm = $('btnTabForm');
       if(target === 'chat') {
@@ -754,7 +765,15 @@
       }
     }
 
-    function handleResize() { if (window.innerWidth < 768) switchTab('chat'); }
+    function handleResize() {
+      // iPhone Safari memicu "resize" tiap scroll (URL bar naik/turun) —
+      // hanya bereaksi saat MENYEBRANG breakpoint md (mis. rotasi layar),
+      // dan kembali ke tab terakhir yang aktif, bukan paksa "chat".
+      var isDesktop = window.innerWidth >= 768;
+      if (isDesktop === wasDesktop) return;
+      wasDesktop = isDesktop;
+      if (!isDesktop) switchTab(lastMobileTab);
+    }
     function handleEnter(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }
 
     function appendHTML(sender, text) {

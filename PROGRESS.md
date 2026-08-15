@@ -174,6 +174,30 @@ Sebelumnya tiap form punya cek sendiri-sendiri & ada yang TIDAK punya sama sekal
 Verifikasi: bundel 21 file memuat guard; 32/32 input `type="file"` ter-guard; test 16/16;
 format:check bersih; lint 0 error.
 
+### 10. AI Master (ai_form.html) — perbaikan iPhone: kolom chat hilang/"puter-puter"
+
+Keluhan: di iPhone kolom chat susah terlihat & tampak berputar/berpindah sendiri.
+Penyebab & fix di `ai_form.html`:
+
+1. **`100vh` vs URL bar Safari** — `100vh` di iPhone termasuk area di belakang URL
+   bar → kolom chat (terutama bar input) terpotong di bawah layar. Sekarang pakai
+   **`100dvh`** (dengan fallback `100vh` untuk browser lama) di `#chatPanel`,
+   `#formPanel`, dan `<body>` (inline `height:100vh;height:100dvh`).
+2. **`resize` memaksa pindah tab tiap scroll** — Safari iPhone memicu `resize`
+   setiap kali URL bar naik/turun saat scroll, dan `handleResize()` lama memanggil
+   `switchTab('chat')` → layar "puter-puter" (lompat balik ke tab chat) dan
+   pengguna di tab Preview CV dilempar ke Chat. Sekarang `handleResize` hanya
+   bereaksi saat **menyebrang breakpoint md** (mis. rotasi layar) dan kembali ke
+   **tab terakhir yang aktif** (`lastMobileTab`), bukan paksa 'chat'.
+3. **Safe-area iPhone** — bar input chat diberi `padding-bottom:
+max(0.75rem, env(safe-area-inset-bottom))` supaya tidak tertutup home-indicator
+   (`viewport-fit=cover` sudah ada).
+
+Verifikasi: 2 blok inline script lolos `node --check`, test 16/16, format:check
+bersih, build idempotent (hanya `ai_form.html` berubah). Belum dicek visual di
+browser (sandbox preview tidak stabil) — perilaku sama untuk desktop (`md:flex`
+side-by-side) & Android; fix khusus jalur mobile.
+
 ---
 
 ## ⏳ BELUM SELESAI
