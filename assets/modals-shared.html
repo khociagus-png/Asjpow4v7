@@ -220,7 +220,14 @@
                               <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.form_ssw_text">Bidang SSW</span></label>
                               <input type="text" id="cv-edit-ssw" placeholder="Kaigo, Pertanian…" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
                           </div>
+                          <div>
+                              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1 block"><span data-lang="candidate.job_applied">Job Dilamar</span></label>
+                              <select id="cv-edit-loker" class="w-full p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-pink-500">
+                                  <option value="">-</option>
+                              </select>
+                          </div>
                       </div>
+                      <div class="flex flex-wrap gap-1.5 text-[10px]" id="cv-edit-apps"></div>
                       <button type="button" onclick="simpanEditCepatCv()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 text-white rounded-xl text-sm font-bold shadow-lg transition"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_quick_cv"> SIMPAN DATA</span></button>
                   </div>
               </div>

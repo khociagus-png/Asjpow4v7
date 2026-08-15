@@ -218,24 +218,52 @@ async function bukaDigitalCV(id) {
     if (jobTagsContainer) {
       // DOM OPT: kumpulkan ke SATU string dulu, injeksikan sekali
       // (dulu innerHTML += per job = tulis DOM berulang dalam loop).
-      let jobString = c.idLoker || '';
-      if (jobString && jobString !== '-') {
-        const jobHtml = jobString
-          .split(',')
-          .map((job) => {
-            let cleanJob = job.trim();
-            return cleanJob
-              ? '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' +
-                  esc(cleanJob) +
-                  '</span>'
-              : '';
-          })
-          .join('');
-        jobTagsContainer.innerHTML = jobHtml;
+      // Multi-apply: tampilkan SEMUA lamaran dari mail (code + status),
+      // bukan cuma id_loker_pilihan.
+      let apps = (c.applications || []).filter((a) => a && a.code);
+      let jobHtml = '';
+      if (apps.length > 0) {
+        apps.forEach((a) => {
+          let st = String(a.status || 'MENUNGGU').toUpperCase();
+          let stColor =
+            st === 'LULUS' || st === 'AKTIF'
+              ? 'bg-emerald-900/50 text-emerald-300 border-emerald-700/60'
+              : st === 'GAGAL' || st === 'REJECT' || st === 'DITOLAK'
+                ? 'bg-red-900/50 text-red-300 border-red-700/60'
+                : 'bg-sky-900/50 text-sky-300 border-sky-700/60';
+          jobHtml +=
+            '<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm" title="' +
+            esc(st) +
+            '"><i class="fas fa-briefcase mr-1"></i>' +
+            esc(a.code) +
+            '<span class="px-1.5 py-0.5 rounded-md text-[9px] border ' +
+            stColor +
+            '">' +
+            esc(st) +
+            '</span></span>';
+        });
       } else {
-        jobTagsContainer.innerHTML =
-          '<span class="text-xs text-slate-500 italic">' + tr('ui.not_applied_general') + '</span>';
+        let jobString = c.idLoker || '';
+        if (jobString && jobString !== '-') {
+          jobHtml = jobString
+            .split(',')
+            .map((job) => {
+              let cleanJob = job.trim();
+              return cleanJob
+                ? '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' +
+                    esc(cleanJob) +
+                    '</span>'
+                : '';
+            })
+            .join('');
+        } else {
+          jobHtml =
+            '<span class="text-xs text-slate-500 italic">' +
+            tr('ui.not_applied_general') +
+            '</span>';
+        }
       }
+      jobTagsContainer.innerHTML = jobHtml;
     }
 
     var img = document.getElementById('cv-foto');
@@ -428,6 +456,54 @@ function isiEditCepatCv(c) {
   if (jft && !jft.dataset.touched) jft.value = c.jftText && c.jftText !== '-' ? c.jftText : '';
   var ssw = document.getElementById('cv-edit-ssw');
   if (ssw && !ssw.dataset.touched) ssw.value = c.sswText && c.sswText !== '-' ? c.sswText : '';
+  // Job utama (id_loker_pilihan) — pilihan dari daftar loker aktif.
+  var loker = document.getElementById('cv-edit-loker');
+  if (loker && !loker.dataset.touched) {
+    var curCodes = String(c.idLoker || '')
+      .split(',')
+      .map(function (s) {
+        return s.trim();
+      })
+      .filter(Boolean);
+    var opts = '<option value="">-</option>';
+    (window.ALL_JOBS || []).forEach(function (j) {
+      var code = j && j.code ? String(j.code) : '';
+      if (!code) return;
+      var sel = curCodes.indexOf(code) !== -1 ? ' selected' : '';
+      opts +=
+        '<option value="' +
+        esc(code) +
+        '"' +
+        sel +
+        '>' +
+        esc(code + (j.pekerjaan ? ' — ' + j.pekerjaan : '')) +
+        '</option>';
+    });
+    loker.innerHTML = opts;
+  }
+  // Daftar lamaran aktif kandidat (semua job di mail) — info, bukan input.
+  var appsEl = document.getElementById('cv-edit-apps');
+  if (appsEl) {
+    var apps = (c.applications || []).filter(function (a) {
+      return a && a.code;
+    });
+    if (apps.length > 0) {
+      appsEl.innerHTML = apps
+        .map(function (a) {
+          return (
+            '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-900/40 text-sky-300 border border-sky-700/60 text-[9px] font-bold">' +
+            esc(a.code) +
+            ' · ' +
+            esc(String(a.status || 'MENUNGGU').toUpperCase()) +
+            '</span>'
+          );
+        })
+        .join(' ');
+    } else {
+      appsEl.innerHTML =
+        '<span class="text-slate-500 italic">' + tr('ui.not_applied_general') + '</span>';
+    }
+  }
   // tutup form setiap buka modal (biar bersih)
   form.classList.add('hidden');
 }
@@ -469,6 +545,7 @@ async function simpanEditCepatCv() {
     bb: document.getElementById('cv-edit-bb').value,
     jftText: document.getElementById('cv-edit-jft').value.trim(),
     sswText: document.getElementById('cv-edit-ssw').value.trim(),
+    idLoker: document.getElementById('cv-edit-loker').value,
   };
   document.getElementById('global-loader').style.display = 'flex';
   try {
@@ -485,6 +562,7 @@ async function simpanEditCepatCv() {
         'cv-edit-bb',
         'cv-edit-jft',
         'cv-edit-ssw',
+        'cv-edit-loker',
       ].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) delete el.dataset.touched;

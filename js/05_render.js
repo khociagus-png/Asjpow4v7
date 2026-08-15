@@ -25,6 +25,31 @@ var SHARE_DOC_CHIPS = [
   'ALL',
 ];
 
+// Kolom "Job Dilamar" di tabel kandidat: job utama (id_loker_pilihan) +
+// chip +N kalau kandidat punya lamaran lain di mail (multi-apply).
+function jobDilamarCell(c) {
+  var primaryRaw = String((c && c.idLoker) || '').trim();
+  var primaryCodes = primaryRaw
+    .split(',')
+    .map(function (s) {
+      return s.trim();
+    })
+    .filter(Boolean);
+  var extra = 0;
+  (c.applications || []).forEach(function (a) {
+    var code = a && a.code ? String(a.code).trim() : '';
+    if (code && primaryCodes.indexOf(code) === -1) extra++;
+  });
+  var label = primaryRaw && primaryRaw !== '-' ? esc(primaryRaw) : esc('Umum');
+  if (extra > 0) {
+    label +=
+      '<span class="px-1.5 py-0.5 ml-1 rounded-md bg-sky-900/70 text-sky-300 border border-sky-600/50 text-[9px] font-bold">+' +
+      extra +
+      '</span>';
+  }
+  return label;
+}
+
 function adminSwitchTab(t) {
   var tabs = ['kelola', 'dbjob', 'mail', 'tambah', 'pelamar', 'jadwal', 'wa', 'config'];
   tabs.forEach((x) => {
@@ -925,7 +950,7 @@ function renderKandidatTable(arr) {
       '<td data-label="' +
       tr('table.applied_job') +
       '" class="p-4 text-amber-300 font-mono text-xs max-w-[120px] truncate">' +
-      esc(c.idLoker || 'Umum') +
+      jobDilamarCell(c) +
       '</td>' +
       '<td data-label="' +
       tr('table.stage_status') +

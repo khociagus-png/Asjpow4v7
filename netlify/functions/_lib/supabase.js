@@ -659,6 +659,33 @@ async function attachBerkasBio(candidates) {
   return candidates;
 }
 
+// Lampirkan daftar lamaran (database_asj_form) ke tiap kandidat — dipakai
+// dashboard kandidat & modal CV admin untuk menampilkan SEMUA job yang
+// dilamar (satu kandidat boleh punya banyak lamaran di mail inbox).
+function attachApplications(candidates, forms) {
+  if (!Array.isArray(candidates) || !Array.isArray(forms)) return candidates;
+  const byWa = new Map();
+  for (const f of forms) {
+    const w = normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
+    if (!w) continue;
+    if (!byWa.has(w)) byWa.set(w, []);
+    byWa.get(w).push({
+      code: toText(f.code_job || f.code || ''),
+      kategori: toText(f.kategory || f.kategori || ''),
+      status: toText(f.status || 'MENUNGGU'),
+      timestamp: toText(f.timestamp || f.created_at || ''),
+      nama: toText(f.nama_lengkap || f.nama || ''),
+    });
+  }
+  for (const c of candidates) {
+    const w = normalizeWa(String(c.wa || ''));
+    const apps = byWa.get(w) || [];
+    apps.sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+    c.applications = apps;
+  }
+  return candidates;
+}
+
 function columnsFromSchema(spec, table) {
   if (!spec || !spec.components || !spec.components.schemas) return [];
   const s = spec.components.schemas[table];
@@ -695,4 +722,5 @@ module.exports = {
   normalizeStatus,
   normalizeGender,
   attachBerkasBio,
+  attachApplications,
 };

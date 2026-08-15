@@ -265,6 +265,20 @@ async function findFormByWa(wa) {
   return rows.find((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
 }
 
+// Cari lamaran per (WA + kode job) — kandidat boleh punya BANYAK lamaran
+// untuk job berbeda; tiap kombinasi WA+job punya SATU baris di mail.
+async function findFormByWaJob(wa, code) {
+  const want = supabase.normalizeWa(wa);
+  const rows = await supabase.findForms();
+  return (
+    rows.find(
+      (r) =>
+        supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want &&
+        String(r.code_job || '').trim() === String(code || '').trim(),
+    ) || null
+  );
+}
+
 // cekDataPelamar([wa]) → { found, nama, gender, usia, tb, bb, pasPhoto, jftUrl, sswUrl }
 async function handleCekDataPelamar(payload) {
   const wa = String((payload && payload[0]) || '');
@@ -360,7 +374,9 @@ async function handleSubmitApply(payload) {
         .join(';'),
     };
 
-    const existing = await findFormByWa(wa);
+    // Dedup per (WA + job): job SAMA -> update baris lamaran itu; job BEDA
+    // -> buat baris BARU (kandidat boleh melamar banyak loker).
+    const existing = await findFormByWaJob(wa, code);
     if (existing && existing.id !== undefined) {
       await supabase.supabaseJson('PATCH', 'database_asj_form', {
         query: { id: 'eq.' + existing.id },

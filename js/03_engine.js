@@ -22,6 +22,36 @@ function evaluasiTahapanKandidat(thpRaw) {
   }
 }
 
+// Badge job di dashboard kandidat: tampilkan SEMUA lamaran (mail) sebagai
+// chip kode job + warna status; fallback ke id_loker_pilihan kalau kosong.
+function renderJobDilamar(myData) {
+  var apps = (myData && myData.applications) || [];
+  var loker = (myData && myData.idLoker) || '';
+  if (!apps.length) return esc(loker || '-');
+  var chips = '';
+  apps.forEach(function (a) {
+    if (!a || !a.code) return;
+    var st = String(a.status || 'MENUNGGU').toUpperCase();
+    var color =
+      st === 'LULUS' || st === 'AKTIF'
+        ? 'bg-emerald-900/70 text-emerald-300 border-emerald-600/70'
+        : st === 'GAGAL' || st === 'REJECT' || st === 'DITOLAK'
+          ? 'bg-red-900/70 text-red-300 border-red-600/70'
+          : 'bg-sky-900/70 text-sky-300 border-sky-600/70';
+    chips +=
+      '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ' +
+      color +
+      '" title="' +
+      esc(a.code) +
+      ' — ' +
+      esc(st) +
+      '">' +
+      esc(a.code) +
+      '</span> ';
+  });
+  return chips;
+}
+
 // Ringkasan progres pemberkasan di dashboard kandidat: x/17 dokumen + status
 // biodata KTKLN/VISA. Data berkas & bio di-populate backend (get-app-data).
 var BERKAS_17 = [
@@ -698,7 +728,7 @@ function initApp(res, isSilent = false) {
     );
     if (myData) {
       currentKandidatId = myData.idKandidat;
-      safeSet('k-dash-job', esc(myData.idLoker || '-'));
+      safeSet('k-dash-job', renderJobDilamar(myData));
       // Tampilan tahapan/status sesuai bahasa; logika (evaluasiTahapanKandidat
       // & regex) tetap memakai nilai ASLI myData.tahapan/status.
       safeSet('k-dash-tahapan', esc(trOption(myData.tahapan)));

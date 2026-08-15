@@ -213,18 +213,21 @@ async function handleGetAppData(payload, sessionToken) {
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
       // kandidat — dipakai modal admin (berkas tersimpan, auto-fill biodata).
       // Fetch sisa data dashboard diparalelkan (semuanya independen).
-      const [berkas, schedules, tugas, formInbox, waTemplates] = await Promise.all([
+      const [berkas, schedules, tugas, allForms, waTemplates] = await Promise.all([
         supabase.attachBerkasBio(result.candidates),
         loadSchedules(),
         loadTugas(),
-        supabase.findForms().then((f) => f.map(supabase.mapForm)),
+        supabase.findForms(),
         loadWaTemplates(),
       ]);
       result.candidates = berkas;
+      // Lampirkan SEMUA lamaran (per WA) ke tiap kandidat — mail inbox bisa
+      // berisi banyak job per kandidat (multi-apply).
+      supabase.attachApplications(result.candidates, allForms);
       result.candidatesTotal = paged.total;
       result.schedules = schedules;
       result.tugas = tugas;
-      result.formInbox = formInbox;
+      result.formInbox = allForms.map(supabase.mapForm);
       result.waTemplates = waTemplates;
       result.kandidatRiwayat = [];
     }
@@ -252,6 +255,9 @@ async function handleGetAppData(payload, sessionToken) {
       // pemberkasan_checklist.
       const myCands = row ? stripRaw([supabase.mapCandidate(row)]) : [];
       await supabase.attachBerkasBio(myCands);
+      // Dashboard kandidat menampilkan semua job yang dilamar dari mail.
+      const myForms = await supabase.findForms();
+      supabase.attachApplications(myCands, myForms);
       result.candidates = myCands;
       result.kandidatRiwayat = myCands;
     }
@@ -887,6 +893,11 @@ async function handleUpdateKandidatSuper(payload, sessionToken) {
     bb: data.bb !== undefined ? data.bb : undefined,
     nilai_jft_text: data.jftText !== undefined ? data.jftText : undefined,
     bidang_ssw_text: data.sswText !== undefined ? data.sswText : undefined,
+    // Multi-apply: admin bisa set job utama kandidat (id_loker_pilihan).
+    id_loker_pilihan:
+      data.idLoker !== undefined && data.idLoker !== null
+        ? String(data.idLoker).trim()
+        : undefined,
   };
   for (const k of Object.keys(body)) if (body[k] === undefined) delete body[k];
   try {
@@ -917,6 +928,9 @@ async function handleGetCandidatesPage(payload, sessionToken) {
     });
     const cands = stripRaw(rows.map(supabase.mapCandidate));
     await supabase.attachBerkasBio(cands);
+    // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
+    const allForms = await supabase.findForms();
+    supabase.attachApplications(cands, allForms);
     return { success: true, candidates: cands, total };
   } catch (e) {
     return { success: false, error: 'Gagal memuat kandidat: ' + e.message };
