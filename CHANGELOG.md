@@ -20,7 +20,13 @@
   awal di tes = artefak rate limit (5 login/menit per IP) & asersi jadwal basi.
 - Test e2e dirapikan: `login-check` (tabel jadwal boleh kosong — fitur sudah
   dihapus `d86b854`), `share-view` (tunggu render ±30 dtk — cold start Storage).
-- ⚠️ **Fix belum live** — menunggu izin user untuk redeploy Netlify.
+- **Redeploy Netlify** (izin user) `--skip-functions-cache` → live ikut `ecc1828`;
+  verifikasi ulang live: upload-check & biodata-check **full lulus**, `getDrafCvMaster`
+  AGUS KHOCI lengkap → **auto-fill CV AI terisi** (keluhan user: data kosong —
+  akar masalahnya bug export yang sama).
+- **Tes lokal** (preview localhost:3000): login-check 20/20, modal-runtime, share-view
+  (22 kandidat), upload-check, biodata-check — semua hijau. Fix **sudah live**
+  (riwayat izin di DEPLOY.md §4).
 
 ---
 

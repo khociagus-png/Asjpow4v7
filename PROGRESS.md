@@ -12,6 +12,8 @@
 
 ### Commit `ecc1828` — Tes menyeluruh live + fix kritis export fetchMasterByWa
 
+### Lanjutan: redeploy live + verifikasi ulang + tes lokal (semua hijau)
+
 - User minta tes **semua modal & fungsi** di situs live (`asjportal-379`).
 - **E2E live:** login-check **20/20**, modal-runtime-check **8/8**, share-view ✅
   (22 kandidat + dokumen ekstra), backend-fast-path **13/13**. Kegagalan awal
@@ -28,7 +30,15 @@
 - Test e2e dirapikan: `login-check` (jadwal boleh kosong), `share-view` (tunggu
   render ±30 dtk — share-data lambat di cold start karena fetch Storage per
   kandidat).
-- ⚠️ **Fix belum live** — redeploy Netlify menunggu izin user (aturan DEPLOY.md).
+- **Redeploy Netlify DIIZINKAN user** ("Redeploy") → `--skip-functions-cache` → live ikut
+  `ecc1828`. Verifikasi ulang **live**: upload-check ✅ full (Storage + DB + master + UI),
+  biodata-check ✅ full, `getDrafCvMaster` AGUS KHOCI lengkap (nama/katakana/alamat/foto/
+  AIDATAJSON) → **auto-fill CV AI yang dilaporkan kosong sudah terisi** (akar masalahnya
+  sama: `fetchMasterByWa` tidak di-export).
+- **Tes lokal** (preview localhost:3000, env .env.local di-set dari nilai user): login-check
+  20/20, modal-runtime ✅, share-view ✅ (22 kandidat), upload-check ✅ full, biodata-check
+  ✅ full. Semua suite hijau di lokal & live.
+- ⚠️ Fix **sudah live** — redeploy dicatat di DEPLOY.md §4.
 
 ---
 
