@@ -8,6 +8,7 @@
     "e2e:share": "node e2e/share-view.mjs",
     "test": "vitest run",
     "lint": "eslint .",
+    "ship": "bash scripts/ship.sh",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify",
