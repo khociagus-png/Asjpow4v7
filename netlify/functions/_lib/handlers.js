@@ -1405,7 +1405,10 @@ async function handleShareData(jobCode) {
         /* non-fatal: tanpa folder → tanpa tombol ekstra */
       }
       // Tombol utama (pas_photo/file_cv/jft/ssw) sudah tampil — file folder
-      // yang TIPENYA sama tidak boleh dobel (mis. CVFILE lama vs baru).
+      // yang TIPENYA sama tidak boleh dobel (mis. CVFILE lama vs baru, atau
+      // "1. X_CV.xlsx" lawas vs CVFILE_… baru). CV/JFT/SSW/foto SELALU
+      // dianggap tipe utama (punya tombol sendiri), sisanya (KK/KTP/ijazah/
+      // passport/dll) jadi tombol ekstra.
       const mainBasenames = [c.pasPhoto, c.fileCv, c.jft, c.ssw]
         .map((u) => {
           try {
@@ -1415,7 +1418,11 @@ async function handleShareData(jobCode) {
           }
         })
         .filter(Boolean);
-      const mainTypes = new Set(mainBasenames.map(docTypeOf).filter(Boolean));
+      const mainTypes = new Set(['CV', 'JFT', 'SSW', 'PHOTO']);
+      for (const b of mainBasenames) {
+        const t = docTypeOf(b);
+        if (t) mainTypes.add(t);
+      }
       // Dedupe per tipe dokumen: upload lama tidak boleh menimbulkan tombol
       // dobel — cukup file TERBARU per tipe (KK/KTP/CV dst).
       const byType = new Map();
@@ -1463,12 +1470,57 @@ async function handleShareData(jobCode) {
   }
 }
 
-// Tipe dokumen dari nama file: huruf kapital di depan (KK_1786…pdf → KK,
-// CVFILE_1786…xlsx → CVFILE, nama_jft.pdf → NAMA). Dipakai dedupe extraDocs.
+// Tipe dokumen dari nama file. Kenali pola baru (KK_1786…pdf → KK,
+// CVFILE_1786…xlsx → CVFILE) DAN pola lawas (1. X_CV.xlsx → CV,
+// 1._X_JFT.pdf → JFT, nama_jft.pdf → JFT, X_PAS_PHOTO.jpg → PHOTO)
+// lalu normalisasi alias ke tipe kanonik (CVFILE→CV, PHOTOFILE→PHOTO, …).
+// Dipakai dedupe extraDocs supaya 1 loker = 1 CV/JFT/SSW/foto (tidak dobel).
+const TYPE_ALIAS = {
+  CVFILE: 'CV',
+  FILE_CV: 'CV',
+  CV_REVISI: 'CV',
+  PHOTOFILE: 'PHOTO',
+  PAS_PHOTO: 'PHOTO',
+  PASSPHOTO: 'PHOTO',
+  FOTO: 'PHOTO',
+  PHOTO: 'PHOTO',
+  JFTFILE: 'JFT',
+  SSWFILE: 'SSW',
+  KARTU_KELUARGA: 'KK',
+};
+// Token tipe yang dicari di nama lawas (lebih panjang dulu agar tidak
+// salah tangkap: PAS_PHOTO sebelum PHOTO/FOTO, KARTU_KELUARGA sebelum KK).
+const TYPE_TOKENS = [
+  'PAS_PHOTO',
+  'PHOTOFILE',
+  'KARTU_KELUARGA',
+  'CVFILE',
+  'FILE_CV',
+  'CV_REVISI',
+  'JFTFILE',
+  'SSWFILE',
+  'PASSPHOTO',
+  'PASSPORT',
+  'IJAZAH',
+  'KTP',
+  'KK',
+  'CV',
+  'JFT',
+  'SSW',
+  'FOTO',
+  'PHOTO',
+];
 function docTypeOf(name) {
   const base = String(name || '').replace(/\.[a-z0-9]+$/i, '');
   const m = base.match(/^[A-Z]+/);
-  return m ? m[0] : base.toUpperCase();
+  const raw = m ? m[0] : null;
+  let t = raw;
+  if (!t) {
+    const up = base.toUpperCase();
+    const hit = TYPE_TOKENS.find((tk) => up.includes(tk));
+    t = hit || up;
+  }
+  return TYPE_ALIAS[t] || t;
 }
 
 // Usia file dari suffix numerik nama (ms epoch) — makin besar makin baru.
@@ -1477,4 +1529,4 @@ function docAge(name) {
   return m ? Number(m[1]) : 0;
 }
 
-module.exports = { handleAction, NOT_IMPLEMENTED, handleShareData };
+module.exports = { handleAction, NOT_IMPLEMENTED, handleShareData, docTypeOf };
