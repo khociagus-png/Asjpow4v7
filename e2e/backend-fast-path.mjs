@@ -32,7 +32,10 @@ check(
 const token = login.sessionToken || '';
 
 // 2. getAppData mode kandidat — query targeted + attachBerkasBio filter.
-const gk = await handleAction('getAppData', ['kandidat', WA], token);
+// Payload WA pakai bentuk ternormalisasi dari respons login (persis yang
+// disimpan frontend di localStorage 'asj_kandidat_wa') supaya validasi sesi
+// `t.wa === waPayload` cocok.
+const gk = await handleAction('getAppData', ['kandidat', login.wa || WA], token);
 check('getAppData kandidat sukses', gk.success === true, (gk.message || '').slice(0, 100));
 check(
   'candidates = 1 baris miliknya',

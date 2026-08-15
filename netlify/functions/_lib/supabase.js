@@ -547,6 +547,160 @@ async function maxCandidateIdNumber() {
   }
 }
 
+// ===== Server-side targeted queries (lanjutan REVIEW.md S2) =====
+// Semua helper di bawah punya kontrak sama dengan findCandidateByWaFiltered:
+//  - baris/array ketemu → data
+//  - query jalan tapi tidak ada yang cocok → null / []
+//  - kolom/tabel tidak dikenal → undefined (caller fallback ke scan penuh)
+
+// Cari baris job per kode (code_job / code) — 1 baris, bukan scan semua loker.
+async function findJobByCodeFiltered(code) {
+  const want = String(code || '').trim();
+  if (!want) return undefined;
+  let anyOk = false;
+  for (const col of ['code_job', 'code']) {
+    try {
+      const rows = await supabaseJson('GET', 'job_database', {
+        query: { select: '*', limit: '1', [col]: 'eq.' + want },
+      });
+      anyOk = true;
+      if (Array.isArray(rows) && rows.length) return rows[0];
+    } catch {
+      /* kolom tidak ada — coba kolom berikutnya */
+    }
+  }
+  return anyOk ? null : undefined;
+}
+
+// Cari baris kandidat per id_kandidat / id — dipakai lookup by ID (admin).
+async function findCandidateByIdFiltered(id) {
+  const want = String(id || '').trim();
+  if (!want) return undefined;
+  let anyOk = false;
+  for (const col of ['id_kandidat', 'id']) {
+    try {
+      const rows = await supabaseJson('GET', 'database_candidate', {
+        query: { select: '*', limit: '1', [col]: 'eq.' + want },
+      });
+      anyOk = true;
+      if (Array.isArray(rows) && rows.length) return rows[0];
+    } catch {
+      /* kolom tidak ada / tipe tidak cocok — coba berikutnya */
+    }
+  }
+  return anyOk ? null : undefined;
+}
+
+// Semua baris mail (database_asj_form) untuk satu WA — urutan timestamp.desc
+// sama dengan findForms() supaya "baris pertama" konsisten.
+async function findFormsByWa(wa) {
+  const want = normalizeWa(wa);
+  if (!want) return [];
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: {
+        select: '*',
+        limit: '100',
+        order: 'timestamp.desc',
+        or: `(no_wa.eq.${want},wa.eq.${want})`,
+      },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* or gagal (kolom wa tidak ada) — coba no_wa saja */
+  }
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: { select: '*', limit: '100', order: 'timestamp.desc', no_wa: 'eq.' + want },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* fallback scan penuh */
+  }
+  return undefined;
+}
+
+// Baris mail pada posisi index urutan timestamp.desc — pengganti scan 500
+// baris untuk aksi admin yang menerima rowIndex dari frontend (review/approve/
+// reject/hapus/tandai dibaca).
+async function findFormByIndexFiltered(idx) {
+  const i = Number(idx);
+  if (!Number.isInteger(i) || i < 0) return undefined;
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: { select: '*', order: 'timestamp.desc', limit: '1', offset: String(i) },
+    });
+    return Array.isArray(rows) ? rows[0] || null : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Baris mail untuk daftar WA (in-filter) — share-data extra docs. Fallback:
+// undefined → scan penuh.
+async function findFormsByWaList(waList) {
+  const list = [
+    ...new Set((Array.isArray(waList) ? waList : []).map((w) => normalizeWa(w)).filter(Boolean)),
+  ];
+  if (!list.length) return [];
+  const inList = list.join(',');
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: { select: '*', limit: '500', or: `(no_wa.in.(${inList}),wa.in.(${inList}))` },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* or gagal — coba no_wa saja */
+  }
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: { select: '*', limit: '500', no_wa: 'in.(' + inList + ')' },
+    });
+    if (Array.isArray(rows)) return rows;
+  } catch {
+    /* fallback scan penuh */
+  }
+  return undefined;
+}
+
+// Kandidat yang terkait ke satu kode job (id_loker_pilihan bisa berisi banyak
+// kode dipisah koma) — filter server-side; caller TETAP memverifikasi token
+// eksak di JS supaya ilike tidak salah tangkap (mis. TG9ASJ vs TG90ASJ).
+async function findCandidatesByJobFiltered(code) {
+  const want = String(code || '').trim();
+  if (!want) return undefined;
+  try {
+    const rows = await supabaseJson('GET', 'database_candidate', {
+      query: { select: '*', limit: '500', id_loker_pilihan: 'ilike.*' + want + '*' },
+    });
+    return Array.isArray(rows) ? rows : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// Max nomor kode job TG###ASJ — server-side (desc, ambil 20 teratas).
+async function maxJobCodeNumber() {
+  try {
+    const rows = await supabaseJson('GET', 'job_database', {
+      query: { select: 'code_job', order: 'code_job.desc', limit: '20' },
+    });
+    if (!Array.isArray(rows) || rows.length === 0) return undefined;
+    let max = 0;
+    let found = false;
+    for (const r of rows) {
+      const m = String(r.code_job || r.code || '').match(/TG(\d+)ASJ/);
+      if (m) {
+        max = Math.max(max, parseInt(m[1], 10));
+        found = true;
+      }
+    }
+    return found ? max : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Tarik pemberkasan_checklist hanya untuk WA di daftar (fallback: null → scan).
 async function fetchBerkasByWa(waList) {
   try {
@@ -720,9 +874,7 @@ async function listStorageFolder(prefix) {
     if (!res.ok) return [];
     const j = await res.json();
     return Array.isArray(j)
-      ? j
-          .filter((f) => f && f.name && !String(f.name).endsWith('/'))
-          .map((f) => String(f.name))
+      ? j.filter((f) => f && f.name && !String(f.name).endsWith('/')).map((f) => String(f.name))
       : [];
   } catch {
     return [];
@@ -747,6 +899,13 @@ module.exports = {
   findJobs,
   findCandidates,
   findCandidateByWaFiltered,
+  findCandidateByIdFiltered,
+  findJobByCodeFiltered,
+  findFormsByWa,
+  findFormByIndexFiltered,
+  findFormsByWaList,
+  findCandidatesByJobFiltered,
+  maxJobCodeNumber,
   countCandidatesForJob,
   maxCandidateIdNumber,
   findAdmins,

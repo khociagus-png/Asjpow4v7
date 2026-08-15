@@ -4,7 +4,44 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `67bd3e0` (lihat `git log`).
+**Update terakhir:** sesi lanjutan REVIEW.md S2 (scan penuh → query ter-filter).
+
+---
+
+## 🆕 SESI TERBARU — Lanjutan bottleneck: sisa scan penuh → query server-side (REVIEW S2)
+
+Lanjutan optimasi "filter query Supabase SERVER-SIDE" (bagian 7 di bawah):
+39 call `findCandidates()`/`findJobs()`/`findForms()` dipangkas ke ±15, sisanya
+fallback (hanya jalan saat kolom/tabel tidak dikenal) atau memang harus penuh.
+
+- **Helper baru `netlify/functions/_lib/supabase.js`** (kontrak `undefined` =
+  fallback scan): `findJobByCodeFiltered`, `findCandidateByIdFiltered`,
+  `findFormsByWa`, `findFormByIndexFiltered` (rowIndex inbox via `order`+`offset`),
+  `findFormsByWaList` (in-filter WA-set), `findCandidatesByJobFiltered` (ilike +
+  verifikasi token eksak di JS), `maxJobCodeNumber`.
+- **Konversi ±24 call site** di `handlers.js`, `actions-extra.js`, `actions-ai.js`:
+  aksi mail (review/approve/reject/hapus/tandai-dibaca → 1 baris by index;
+  tandai-gagal & semua alur kandidat → hanya lamaran WA-nya), master & biodata
+  (`findMasterByWa` via in-filter), simpan/upload berkas & revisi (lookup kandidat
+  by WA/id via query), job (kode baru via `maxJobCodeNumber`, `getJobMapped`,
+  validasi lamaran), share-data (job by code + kandidat by job + lamaran per
+  WA-set).
+- **Sengaja dipertahankan scan penuh**: daftar admin `loadCandidatesUnik`
+  (dedupe-by-WA + urutan updated_at — butuh keputusan produk), inbox admin
+  (formInbox penuh), loker publik, diagnostik `getAppConfig`,
+  `handleGetDriveLinkCandidates`, `daftarKandidat` (deteksi tabel).
+- **Bonus**: `e2e/backend-fast-path.mjs` memakai WA mentah (`0821…`) sebagai
+  payload getAppData kandidat padahal token & frontend memakai bentuk
+  ternormalisasi (`62821…`) → sesi dianggap tidak valid & 2 asersi gagal.
+  Diperbaiki: pakai `login.wa` (normalisasi sama seperti `localStorage
+  'asj_kandidat_wa'` di `04_auth.js`).
+- **Verifikasi**: `node --check` 4 file · unit 49/49 · lint 0 error ·
+  `format:check` bersih (4 file) · `e2e/backend-fast-path.mjs` 12/12 · live
+  preview: `share-data?job=TG591ASJ`, `isJobRequiresCv`, `getAppData` sukses
+  dengan data Supabase asli.
+
+> ⚠️ Belum di-commit/deploy. Perlu `git add -A && git commit && git push` +
+> deploy ulang lewat Freebuff supaya live ikut versi ini.
 
 ---
 

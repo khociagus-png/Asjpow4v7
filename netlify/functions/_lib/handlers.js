@@ -124,7 +124,9 @@ function dedupeKandidatRaw(rows) {
     String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
   for (const r of rows) {
     const wa = supabase.normalizeWa(
-      String(supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
+      String(
+        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+      ),
     );
     if (!wa) {
       out.push(r);
@@ -150,15 +152,17 @@ async function loadCandidatesUnik(q) {
   const found = await supabase.findCandidates();
   const rows = Array.isArray(found.rows) ? found.rows : [];
   let uniq = dedupeKandidatRaw(rows);
-  const needle = String(q || '').trim().toLowerCase();
+  const needle = String(q || '')
+    .trim()
+    .toLowerCase();
   if (needle) {
     const digit = needle.replace(/\D/g, '');
     uniq = uniq.filter((r) => {
-      const nama = String(
-        supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '',
-      ).toLowerCase();
+      const nama = String(supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
       const wa = supabase.normalizeWa(
-        String(supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
+        String(
+          supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+        ),
       );
       return nama.includes(needle) || (digit && wa.includes(digit));
     });
@@ -312,7 +316,9 @@ async function handleGetAppData(payload, sessionToken) {
       const myCands = row ? stripRaw([supabase.mapCandidate(row)]) : [];
       await supabase.attachBerkasBio(myCands);
       // Dashboard kandidat menampilkan semua job yang dilamar dari mail.
-      const myForms = await supabase.findForms();
+      // Jalur cepat: tarik hanya lamaran WA-nya sendiri, bukan scan 500 baris.
+      let myForms = await supabase.findFormsByWa(w);
+      if (myForms === undefined) myForms = await supabase.findForms();
       supabase.attachApplications(myCands, myForms);
       result.candidates = myCands;
       result.kandidatRiwayat = myCands;
@@ -508,7 +514,10 @@ async function handleLoginKandidat(payload) {
   const password = String((payload && payload[1]) || '');
   if (!wa || !password) return { success: false, error: 'Nomor WA dan password wajib diisi.' };
   if (!isValidWaFormat(wa)) {
-    return { success: false, error: 'Nomor WA tidak valid. Gunakan format 08xx atau 628xx (12-13 digit).' };
+    return {
+      success: false,
+      error: 'Nomor WA tidak valid. Gunakan format 08xx atau 628xx (12-13 digit).',
+    };
   }
   if (!supabase.hasBackend()) {
     return { success: false, error: 'Backend belum dikonfigurasi (Supabase keys belum ada).' };
@@ -710,6 +719,10 @@ async function findCandidateByWa(wa) {
 
 // Kode loker baru: TG<max+1>ASJ (pola asli, mis. TG591ASJ).
 async function nextJobCode() {
+  // Jalur cepat: ambil kode job tertinggi via query server-side.
+  const fastMax = await supabase.maxJobCodeNumber();
+  if (fastMax !== undefined) return 'TG' + (fastMax + 1) + 'ASJ';
+  // Fallback: scan penuh (perilaku lama).
   const found = await supabase.findJobs();
   let max = 0;
   for (const row of found.rows) {
@@ -766,8 +779,14 @@ async function handleEditLokerFull(payload, sessionToken) {
 // handler kelola loker supaya respons aksi membawa barisnya sendiri (patch-in-
 // place) tanpa frontend harus tarik ulang getAppData.
 async function getJobMapped(code) {
-  const found = await supabase.findJobs();
-  const row = (found.rows || []).find((r) => String(r.code_job || r.code || '') === String(code));
+  // Jalur cepat: cari baris job via query server-side (filter code_job).
+  let row = await supabase.findJobByCodeFiltered(code);
+  if (row === undefined) {
+    // Fallback: scan penuh (skema kolom tidak dikenal).
+    const found = await supabase.findJobs();
+    row =
+      (found.rows || []).find((r) => String(r.code_job || r.code || '') === String(code)) || null;
+  }
   if (!row) return null;
   return stripRaw([supabase.mapJob(row)])[0] || null;
 }
@@ -881,13 +900,13 @@ async function handleTandaiGagalJob(payload, sessionToken) {
       headers: { Prefer: 'return=minimal' },
     });
     // Sinkronkan mail: lamaran kandidat ikut berstatus GAGAL (tidak menunggu
-    // review lagi).
+    // review lagi). Jalur cepat: tarik hanya lamaran WA-nya sendiri.
     let formUpdated = null;
     try {
-      const forms = await supabase.findForms();
+      let forms = await supabase.findFormsByWa(wa);
+      if (forms === undefined) forms = await supabase.findForms();
       const want = supabase.normalizeWa(wa);
-      const mIdx = forms.findIndex((r) => supabase.normalizeWa(String(r.no_wa || '')) === want);
-      const m = mIdx >= 0 ? forms[mIdx] : null;
+      const m = forms.find((r) => supabase.normalizeWa(String(r.no_wa || '')) === want) || null;
       if (m && m.id !== undefined) {
         await supabase.supabaseJson('PATCH', 'database_asj_form', {
           query: { id: 'eq.' + m.id },
@@ -895,7 +914,8 @@ async function handleTandaiGagalJob(payload, sessionToken) {
           headers: { Prefer: 'return=minimal' },
         });
         m.status = 'GAGAL';
-        formUpdated = supabase.mapForm(m, mIdx);
+        // rowIndex -1 → frontend patchFormMail fallback cari by id.
+        formUpdated = supabase.mapForm(m, -1);
       }
     } catch (e) {
       /* opsional */
@@ -960,9 +980,7 @@ async function handleUpdateKandidatSuper(payload, sessionToken) {
     bidang_ssw_text: data.sswText !== undefined ? data.sswText : undefined,
     // Multi-apply: admin bisa set job utama kandidat (id_loker_pilihan).
     id_loker_pilihan:
-      data.idLoker !== undefined && data.idLoker !== null
-        ? String(data.idLoker).trim()
-        : undefined,
+      data.idLoker !== undefined && data.idLoker !== null ? String(data.idLoker).trim() : undefined,
   };
   for (const k of Object.keys(body)) if (body[k] === undefined) delete body[k];
   try {
@@ -994,7 +1012,11 @@ async function handleGetCandidatesPage(payload, sessionToken) {
     const cands = stripRaw(candRows.map(supabase.mapCandidate));
     await supabase.attachBerkasBio(cands);
     // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
-    const allForms = await supabase.findForms();
+    // Jalur cepat: tarik lamaran hanya untuk WA kandidat di halaman ini
+    // (in-filter), bukan scan 500 baris inbox.
+    const waList = cands.map((c) => supabase.normalizeWa(String(c.wa || ''))).filter(Boolean);
+    let allForms = await supabase.findFormsByWaList(waList);
+    if (allForms === undefined) allForms = await supabase.findForms();
     supabase.attachApplications(cands, allForms);
     return { success: true, candidates: cands, total: allUniq.length };
   } catch (e) {
@@ -1013,8 +1035,13 @@ async function handleFormStatus(rowIndex, status, reason) {
     return { success: false, error: 'Index form tidak valid.' };
   }
   try {
-    const forms = await supabase.findForms();
-    const f = forms[idx];
+    // Jalur cepat: ambil baris mail di posisi index (urutan timestamp.desc)
+    // via query server-side, bukan scan 500 baris inbox.
+    let f = await supabase.findFormByIndexFiltered(idx);
+    if (f === undefined) {
+      const forms = await supabase.findForms();
+      f = forms[idx] || null;
+    }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
     const body = { status };
     if (reason !== null && reason !== undefined) body.keterangan = reason;
@@ -1163,8 +1190,12 @@ async function handleDeleteForm(payload, sessionToken) {
     return { success: false, error: 'Index form tidak valid.' };
   }
   try {
-    const forms = await supabase.findForms();
-    const f = forms[idx];
+    // Jalur cepat: ambil baris mail di posisi index via query server-side.
+    let f = await supabase.findFormByIndexFiltered(idx);
+    if (f === undefined) {
+      const forms = await supabase.findForms();
+      f = forms[idx] || null;
+    }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
     await supabase.supabaseJson('DELETE', 'database_asj_form', {
       query: { id: 'eq.' + f.id },
@@ -1188,8 +1219,12 @@ async function handleTandaiDibacaForm(payload, sessionToken) {
     return { success: false, error: 'Index form tidak valid.' };
   }
   try {
-    const forms = await supabase.findForms();
-    const f = forms[idx];
+    // Jalur cepat: ambil baris mail di posisi index via query server-side.
+    let f = await supabase.findFormByIndexFiltered(idx);
+    if (f === undefined) {
+      const forms = await supabase.findForms();
+      f = forms[idx] || null;
+    }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
     const fb = String(f.feedback_berkas || '');
     const m = fb.match(/\[\[PREV:([^\]]+)\]\]/);
@@ -1462,17 +1497,27 @@ async function handleShareData(jobCode) {
   const code = String(jobCode || '').trim();
   if (!code) return { error: 'Kode job tidak ditemukan.' };
   try {
-    const found = await supabase.findJobs();
-    const jobRow = found.rows.find(
-      (r) => String(supabase.pick(r, ['code_job', 'code']) || '') === code,
-    );
+    // Jalur cepat: cari baris job via query server-side (filter code_job).
+    let jobRow = await supabase.findJobByCodeFiltered(code);
+    if (jobRow === undefined) {
+      const found = await supabase.findJobs();
+      jobRow =
+        found.rows.find((r) => String(supabase.pick(r, ['code_job', 'code']) || '') === code) ||
+        null;
+    }
     if (!jobRow) return { error: 'Kode job tidak ditemukan: ' + code };
     const name = supabase.toText(
       supabase.pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']),
     );
     // Kandidat yang ter-approve untuk job ini (id_loker_pilihan berisi kode).
-    const cands = await supabase.findCandidates();
-    const rows = cands.rows.filter((r) =>
+    // Jalur cepat: filter server-side via ilike, lalu verifikasi token eksak di
+    // JS (kode bisa banyak dipisah koma) supaya tidak salah tangkap.
+    let candRows = await supabase.findCandidatesByJobFiltered(code);
+    if (candRows === undefined) {
+      const cands = await supabase.findCandidates();
+      candRows = cands.rows;
+    }
+    const rows = (Array.isArray(candRows) ? candRows : []).filter((r) =>
       String(supabase.pick(r, ['id_loker_pilihan', 'id_loker']) || '')
         .split(',')
         .map((s) => s.trim())
@@ -1485,7 +1530,11 @@ async function handleShareData(jobCode) {
     // (spasi → underscore), didaftarkan via Supabase Storage list API.
     const storageBase = supabase.supabaseUrl().replace(/\/$/, '');
     const pubBase = storageBase + '/storage/v1/object/public/asj-files/';
-    const forms = await supabase.findForms();
+    // Jalur cepat: tarik lamaran hanya untuk WA kandidat job ini (in-filter),
+    // bukan scan 500 baris inbox — cukup untuk membangun byWa extra docs.
+    const waList = mapped.map((c) => supabase.normalizeWa(String(c.wa || ''))).filter(Boolean);
+    let forms = await supabase.findFormsByWaList(waList);
+    if (forms === undefined) forms = await supabase.findForms();
     const byWa = new Map();
     for (const f of forms) {
       const w = supabase.normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
@@ -1496,7 +1545,11 @@ async function handleShareData(jobCode) {
     const candidates = [];
     for (const c of mapped) {
       const folder =
-        'master/' + String(c.nama || '').toUpperCase().replace(/\s+/g, '_') + '/';
+        'master/' +
+        String(c.nama || '')
+          .toUpperCase()
+          .replace(/\s+/g, '_') +
+        '/';
       let names = [];
       try {
         names = await supabase.listStorageFolder(folder);
@@ -1511,9 +1564,15 @@ async function handleShareData(jobCode) {
       const mainBasenames = [c.pasPhoto, c.fileCv, c.jft, c.ssw]
         .map((u) => {
           try {
-            return decodeURIComponent(String(u || '').split('/').pop());
+            return decodeURIComponent(
+              String(u || '')
+                .split('/')
+                .pop(),
+            );
           } catch {
-            return String(u || '').split('/').pop();
+            return String(u || '')
+              .split('/')
+              .pop();
           }
         })
         .filter(Boolean);

@@ -343,15 +343,22 @@ async function handleGetAdminAiContext(payload, sessionToken) {
   try {
     let row = null;
     if (wa) row = await findMasterByWa(wa);
-    if (!row) {
-      const found = await supabase.findCandidates();
+    if (!row && (d.candidateId || d.idKandidat || d.wa)) {
       const id = String(d.candidateId || d.idKandidat || '');
-      const cand = found.rows.find((r) =>
-        id
-          ? String(supabase.pick(r, ['id_kandidat', 'id']) || '') === id
-          : supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) ===
-            supabase.normalizeWa(d.wa),
-      );
+      // Jalur cepat: cari baris kandidat via query server-side (by id / WA).
+      let cand = id
+        ? await supabase.findCandidateByIdFiltered(id)
+        : await supabase.findCandidateByWaFiltered(d.wa);
+      if (cand === undefined) {
+        const found = await supabase.findCandidates();
+        cand =
+          (found.rows || []).find((r) =>
+            id
+              ? String(supabase.pick(r, ['id_kandidat', 'id']) || '') === id
+              : supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) ===
+                supabase.normalizeWa(d.wa),
+          ) || null;
+      }
       if (cand) row = await findMasterByWa(String(cand.no_wa || ''));
     }
     if (!row) return { success: true, data: null };

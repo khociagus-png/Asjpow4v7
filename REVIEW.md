@@ -221,10 +221,44 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
       payload `<img onerror>` & `" onmouseover="` dinetralkan di browser; semua
       suite E2E hijau (login-check 19/19, photo 7/7, modal 8/8, probe bersih).
 
-### 🟡 S2 — Sisa scan penuh
+### 🟡 S2 — Sisa scan penuh — ✅ LANJUTAN DIKERJAKAN
 
-- [ ] Target-kan 27 panggilan `findCandidates()`/`findJobs()`/`findForms()` tersisa
-      (path non-hot: hapus loker, daftar admin, diag) ke query ter-filter — bertahap.
+- [x] Target-kan panggilan `findCandidates()`/`findJobs()`/`findForms()` tersisa ke
+      query server-side ter-filter (bertahap). Implementasi sesi ini:
+
+      Helper baru di `supabase.js` (kontrak sama: `undefined` → caller fallback scan):
+      `findJobByCodeFiltered`, `findCandidateByIdFiltered`, `findFormsByWa`,
+      `findFormByIndexFiltered` (baris inbox posisi index urutan `timestamp.desc`),
+      `findFormsByWaList` (in-filter WA-set), `findCandidatesByJobFiltered` (ilike +
+      caller verifikasi token eksak di JS supaya `TG9ASJ` vs `TG90ASJ` tidak salah
+      tangkap), `maxJobCodeNumber`.
+
+      Dipasang di ±24 call site:
+      - **Mail inbox**: `handleFormStatus` / `handleDeleteForm` /
+        `handleTandaiDibacaForm` (rowIndex → query `order+offset` 1 baris),
+        `handleTandaiGagalJob`, `getAppData` kandidat (lamaran WA sendiri),
+        `handleCekDataPelamar`, `syncBiodataKeMail`, `findFormByWa` /
+        `findFormByWaJob`, `syncFormMailDariUpload`, `handleGetCandidatesPage`
+        (lamaran per WA-set halaman).
+      - **Kandidat/master**: `findMasterByWa` (via `fetchMasterByWa` in-filter),
+        `handleGetExistingCandidateJsonByWa`, `handleGetDrafCvMaster`,
+        `handleSubmitMasterForm`, `handleSimpanBerkasTahapan`,
+        `handleSimpanRevisiKandidat` (2×), `handleUploadDriveReplacement`
+        (by `id_kandidat`), `handleGetAdminAiContext` (by id/WA),
+        `nextCandidateId` (pakai `maxCandidateIdNumber`).
+      - **Job**: `nextJobCode` (`maxJobCodeNumber`), `getJobMapped`,
+        `handleIsJobRequiresCv`, `handleSubmitApply`, `handleShareData`
+        (job by code + kandidat by job + lamaran per WA-set).
+
+      Sisa scan penuh yang **sengaja dipertahankan** (butuh keputusan produk / memang
+      harus penuh): daftar admin `loadCandidatesUnik` (dedupe-by-WA global + urutan
+      `updated_at` — ganti ke queryPaged akan mengubah urutan list admin),
+      inbox admin `getAppData` (formInbox penuh), loker publik `getAppData`
+      (semua job), diagnostik `getAppConfig`, `handleGetDriveLinkCandidates`
+      (butuh semua baris), `daftarKandidat` (deteksi nama tabel).
+
+      Verifikasi: unit 49/49 · lint 0 error · `backend-fast-path` 12/12 · live preview
+      `share-data`/`isJobRequiresCv`/`getAppData` sukses (data Supabase asli).
 
 ### 🟡 S4 — Artefak stale
 
