@@ -14,20 +14,22 @@ function switchPublicTab(tab) {
   var btnLoker = document.getElementById('tab-pub-loker');
   var btnLayanan = document.getElementById('tab-pub-layanan');
 
+  var light = typeof CURRENT_THEME !== 'undefined' && CURRENT_THEME === 'SAKURA';
+  var inactive =
+    'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent ' +
+    (light ? 'text-stone-600 hover:bg-rose-900/10 hover:text-stone-900' : 'text-slate-400 hover:bg-white/10 hover:text-white');
+  var active = 'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-sky-600 text-white shadow-md';
+
   if (tab === 'loker') {
     secLoker.classList.remove('hidden');
     secLayanan.classList.add('hidden');
-    btnLoker.className =
-      'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-sky-600 text-white shadow-md';
-    btnLayanan.className =
-      'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent text-slate-400 hover:text-white';
+    btnLoker.className = active;
+    btnLayanan.className = inactive;
   } else {
     secLoker.classList.add('hidden');
     secLayanan.classList.remove('hidden');
-    btnLayanan.className =
-      'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-sky-600 text-white shadow-md';
-    btnLoker.className =
-      'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent text-slate-400 hover:text-white';
+    btnLayanan.className = active;
+    btnLoker.className = inactive;
   }
 }
 

@@ -36,8 +36,7 @@
            bg-slate-900/95, shadow-2xl (pola yang sama dengan bug hamburger). */
         @layer components {
             .glass-card {
-                background: rgba(30, 41, 59, 0.7);
-                backdrop-filter: blur(12px);
+                background: rgba(30, 41, 59, 0.97);
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
             }
@@ -47,9 +46,10 @@
         .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
-  <link rel="stylesheet" crossorigin href="/assets/main.css?v=a9642c4fe7">
+  <link rel="stylesheet" crossorigin href="/assets/main.css?v=4f2c8a1e73">
 </head>
-<body class="min-h-screen bg-slate-950 overflow-x-hidden selection:bg-pink-500/30 text-slate-100 relative">
+<body data-page="share" class="min-h-screen bg-slate-950 overflow-x-hidden selection:bg-pink-500/30 text-slate-100 relative">
+<script>try{var _t=localStorage.getItem('asj_theme');document.body.classList.add(_t==='SAKURA'?'theme-light':'theme-dark')}catch(e){document.body.classList.add('theme-dark')}</script>
   <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
   <a href="#main-content" id="skip-link" class="skip-link">Lewati ke konten utama</a>
     
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 glass-card border-b border-slate-700/50 backdrop-blur-xl shadow-2xl relative">
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-700/50 shadow-2xl relative">
         <div class="absolute inset-0 bg-gradient-to-r from-rose-900/10 to-pink-900/10"></div>
         <div class="max-w-7xl mx-auto px-3 md:px-8 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-2 md:gap-4 relative z-10">
             <div class="flex items-center gap-3 md:gap-4 min-w-0">

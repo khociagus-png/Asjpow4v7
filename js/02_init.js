@@ -73,6 +73,24 @@ var THEMES = {
   },
 };
 
+// Aset banner/footer DEFAULT (host Supabase Storage) — dipakai saat backend
+// belum kirim ASSETS (mis. data gagal dimuat / preview tanpa backend), supaya
+// banner & footer SELALU tampil dan tidak menunggu data.
+var DEFAULT_ASSETS = {
+  BANNER: {
+    TOKYO:
+      'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/tokyo_banner.jpg',
+    SAKURA:
+      'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/sakra_banner.webp',
+  },
+  FOOTER: {
+    TOKYO:
+      'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/tokyo_footer.jpg',
+    SAKURA:
+      'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/sakura_footer.webp',
+  },
+};
+
 // SATU tombol theme: menampilkan theme aktif (Dark/Light), ditekan = ganti
 // otomatis ke theme lainnya. Gaya pill mirip tombol ID-JP.
 function renderThemeToggle() {
@@ -82,7 +100,7 @@ function renderThemeToggle() {
   btn.className =
     'px-3 py-2 rounded-full text-[10px] font-bold transition-colors shadow-lg flex items-center gap-1.5 border ' +
     (light
-      ? 'bg-white text-slate-900 border-white shadow-xl scale-105'
+      ? 'bg-slate-100 text-stone-900 border-stone-300 shadow-xl scale-105'
       : 'bg-white/10 hover:bg-white/20 text-slate-200 border-white/25 hover:border-white/40');
   btn.innerHTML = light
     ? '<i class="fas fa-sun"></i> <span>Light</span>'
@@ -154,6 +172,14 @@ function setSakuraParticles(visible) {
 
 document.addEventListener('DOMContentLoaded', function () {
   injectModalWaPintar();
+  // Terapkan tema SEKARANG (banner/footer/panel sinkron sejak awal, tidak
+  // menunggu respons backend yang bisa lambat/gagal). initApp akan
+  // memanggil applyTheme lagi dengan data backend kalau berhasil dimuat.
+  var savedTheme = null;
+  try {
+    savedTheme = localStorage.getItem('asj_theme');
+  } catch (e) {}
+  applyTheme(savedTheme || 'TOKYO');
   refreshDataDinamis(false);
 
   // admin.html (window.IS_ADMIN_PORTAL) = portal admin khusus.
@@ -614,7 +640,7 @@ function applyTheme(theme) {
   if (wrap)
     wrap.className =
       'overflow-x-auto rounded-xl border shadow-xl transition-colors ' +
-      (light ? 'bg-white/95 border-rose-300/60 shadow-rose-200/30' : cfg.border);
+      (light ? 'bg-white border-rose-300/60 shadow-rose-200/30' : cfg.border);
   var head = document.getElementById('public-table-head');
   if (head)
     head.className =
@@ -632,7 +658,7 @@ function applyTheme(theme) {
   if (bar) {
     bar.className =
       'flex flex-wrap justify-between items-center p-4 rounded-xl border shadow-lg mb-6 gap-4 transition-colors ' +
-      (light ? 'bg-white/85 border-rose-200/80' : 'bg-black/20 border-white/10');
+      (light ? 'bg-white border-rose-200/80' : 'bg-slate-900 border-slate-700/60');
     bar.querySelectorAll('span.text-slate-400').forEach(function (s) {
       s.className = s.className.replace(
         'text-slate-400',
@@ -640,6 +666,12 @@ function applyTheme(theme) {
       );
     });
   }
+  // Tab navigasi Loker/Layanan (pill) ikut theme: solid, tanpa blur.
+  var tabWrap = document.getElementById('tab-pub-wrap');
+  if (tabWrap)
+    tabWrap.className =
+      'inline-flex rounded-full p-1 shadow-2xl border transition-colors ' +
+      (light ? 'bg-white border-rose-200' : 'bg-slate-900 border-slate-700');
   // Overlay gelap di header & footer: di theme light tetap cukup pekat di
   // bagian bawah (tempat teks putih) supaya TERBACA, tapi bagian atas
   // dibiarkan lebih terang agar gambar sakura terlihat.
@@ -649,7 +681,7 @@ function applyTheme(theme) {
   // yang terang — gambar sakura masih samar terlihat di balik scrim.
   if (overlay)
     overlay.className =
-      'absolute inset-0 rounded-[2.5rem] transition-colors duration-700 ' +
+      'absolute inset-0 transition-colors duration-700 ' +
       (light
         ? 'bg-gradient-to-t from-black/90 via-black/60 to-black/60'
         : 'bg-gradient-to-t from-black/95 via-black/40 to-transparent');
@@ -663,8 +695,7 @@ function applyTheme(theme) {
   var fOverlay = document.getElementById('asj-footer-overlay');
   if (fOverlay)
     fOverlay.className =
-      'absolute inset-0 backdrop-blur-sm transition-colors duration-700 ' +
-      (light ? 'bg-black/65' : 'bg-black/80');
+      'absolute inset-0 transition-colors duration-700 ' + (light ? 'bg-black/70' : 'bg-black/85');
   // Animasi transisi ganti theme: fade singkat konten publik supaya
   // pergantian terasa halus, tidak melompat.
   var pub = document.getElementById('page-public');
@@ -675,8 +706,10 @@ function applyTheme(theme) {
   }
   // Partikel sakura hanya tampil di theme Light (Sakura).
   setSakuraParticles(theme === 'SAKURA');
-  if (ASSETS.BANNER && ASSETS.BANNER[theme]) setBg('asj-header', ASSETS.BANNER[theme]);
-  if (ASSETS.FOOTER && ASSETS.FOOTER[theme]) setBg('asj-footer', ASSETS.FOOTER[theme]);
+  // Banner & Footer: pakai aset backend kalau tersedia, fallback ke default
+  // supaya selalu tampil & sinkron dengan theme walau backend gagal/lambat.
+  setBg('asj-header', (ASSETS.BANNER && ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
+  setBg('asj-footer', (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
   // Simpan pilihan theme pengunjung.
   try {
     localStorage.setItem('asj_theme', theme);

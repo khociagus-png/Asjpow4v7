@@ -134,8 +134,8 @@ function renderPublicFilterUI() {
     }).length;
   };
   var baseInactive = light
-    ? 'bg-slate-800/10 hover:bg-slate-800/20 text-slate-600'
-    : 'bg-white/10 hover:bg-white/20 text-slate-300';
+    ? 'bg-slate-100 hover:bg-slate-200 text-stone-700'
+    : 'bg-slate-700 hover:bg-slate-600 text-slate-200';
   ['ALL', 'OPEN', 'URGENT', 'CLOSE'].forEach(function (st) {
     var btn = document.getElementById('public-f-' + st);
     if (!btn) return;
@@ -152,8 +152,8 @@ function renderPublicFilterUI() {
       (active
         ? 'bg-white/30 text-white'
         : light
-          ? 'bg-slate-800/10 text-stone-700'
-          : 'bg-white/10 text-slate-200') +
+          ? 'bg-slate-200 text-stone-700'
+          : 'bg-slate-900 text-slate-200') +
       '">' +
       count(st) +
       '</span>';
@@ -307,7 +307,9 @@ function renderPublicFiltered() {
       ' transition">' +
       '<td data-label="' +
       tr('table.code') +
-      '" class="p-4 text-sky-400 font-mono text-sm text-center font-bold align-top">' +
+      '" class="p-4 font-mono text-sm text-center font-bold align-top ' +
+      (light ? 'text-sky-600' : 'text-sky-400') +
+      '">' +
       esc(j.code) +
       '</td>' +
       '<td data-label="' +
@@ -516,10 +518,10 @@ function badgeTahapanDb(tahapan) {
       var pipe = tahapanPipeline();
       var cls =
         idx >= pipe.length - 2
-          ? 'bg-emerald-900/40 text-emerald-300 border-emerald-500/40'
+          ? 'bg-emerald-600 text-white border-emerald-400/60'
           : idx >= 4
-            ? 'bg-amber-900/40 text-amber-300 border-amber-500/40'
-            : 'bg-sky-900/40 text-sky-300 border-sky-500/40';
+            ? 'bg-amber-600 text-white border-amber-400/60'
+            : 'bg-sky-600 text-white border-sky-400/60';
       return (
         '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold ' +
         cls +
@@ -532,19 +534,19 @@ function badgeTahapanDb(tahapan) {
   var up = t.toUpperCase();
   if (/OPEN/.test(up))
     return (
-      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-emerald-900/40 text-emerald-300 border-emerald-500/40"><i class="fas fa-door-open"></i> ' +
+      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-emerald-600 text-white border-emerald-400/60"><i class="fas fa-door-open"></i> ' +
       label +
       '</span>'
     );
   if (/URGENT/.test(up))
     return (
-      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-red-900/40 text-red-300 border-red-500/40 animate-pulse"><i class="fas fa-exclamation-triangle"></i> ' +
+      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-red-600 text-white border-red-400/60 animate-pulse"><i class="fas fa-exclamation-triangle"></i> ' +
       label +
       '</span>'
     );
   if (/CLOSE/.test(up))
     return (
-      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-red-900/40 text-red-300 border-red-500/40"><i class="fas fa-door-closed"></i> ' +
+      '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-red-600 text-white border-red-400/60"><i class="fas fa-door-closed"></i> ' +
       label +
       '</span>'
     );
