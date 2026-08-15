@@ -103,22 +103,32 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
   // S1 (XSS): semua nilai dari v() di-escape HTML sebelum masuk template A4 —
   // data kandidat (nama, sekolah, alamat, dst) bisa mengandung <, >, &, kutip.
   const v = (...keys) => esc(vRaw(...keys));
-  // Baca array riwayat dari d (hasil getDrafCvMaster) atau ai — kolom flat
-  // legacy tidak dipakai lagi karena backend sudah menormalkan ke array.
-  const getArr = (key) => {
-    let arr = getPath(d, key);
-    if (Array.isArray(arr) && arr.length) return arr;
-    let aiArr = getPath(ai, key);
-    if (aiArr) {
-      try {
-        let p = JSON.parse(aiArr);
-        if (Array.isArray(p) && p.length) return p;
-      } catch (e) {
-        if (Array.isArray(aiArr)) return aiArr;
-      }
-    }
-    return [];
+  // Baca array riwayat dari d (hasil getDrafCvMaster) + ai (AIDATAJSON) dan
+  // GABUNG keduanya (union + dedupe) — helper pure mergeArrRiwayat di
+  // helpers_cv.js. Backend sudah menggabungkan kolom master dengan isi CV AI
+  // di buildMasterNested, tapi jaring pengaman ini memastikan satu sumber
+  // tidak menutupi yang lain walau backend masih versi lama — kolom master
+  // sering hanya menyimpan baris pertama (mis. keluarga_1) padahal isi CV AI
+  // punya 3-4 anggota → preview CV tampak "dikit". Kolom flat legacy tidak
+  // dipakai lagi karena backend sudah menormalkan ke array.
+  const keyOf = {
+    pendidikan: (e) =>
+      String((e.tingkat || '') + (e.sekolah || e.sekolah_id || e.nama_sekolah || ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
+    pekerjaan: (e) =>
+      String(
+        (e.perusahaan || e.perusahaan_id || e.nama_perusahaan || '') +
+          (e.jabatan || e.jabatan_id || ''),
+      )
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
+    keluarga: (e) =>
+      String(e.nama || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
   };
+  const getArr = (key) => mergeArrRiwayat(getPath(d, key), getPath(ai, key), keyOf[key]);
   let eduList = getArr('pendidikan');
   let jobList = getArr('pekerjaan');
   let famList = getArr('keluarga');

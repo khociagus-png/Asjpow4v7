@@ -48,6 +48,42 @@
     };
   }
 
+  // Normalisasi sumber array riwayat: boleh array langsung atau string JSON
+  // (AIDATAJSON). Bukan array → [] (aman untuk null/undefined/'-'/objek).
+  function asArr(src) {
+    if (Array.isArray(src)) return src;
+    if (typeof src === 'string' && src.trim() && src !== '-') {
+      try {
+        const p = JSON.parse(src);
+        return Array.isArray(p) ? p : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  // Gabungkan dua sumber array riwayat (kolom master + isi CV AI) jadi union
+  // dengan dedupe per kunci — SATU sumber tidak boleh menutupi yang lain.
+  // Kolom master sering hanya menyimpan baris pertama (mis. keluarga_1)
+  // padahal isi CV AI punya 3-4 anggota → tanpa merge preview CV tampak
+  // "dikit". Algoritma disamakan dengan mergeRiwayatArrays backend
+  // (netlify/functions/_lib/actions-extra.js). keyOf menentukan kunci dedupe
+  // per tipe (pendidikan/pekerjaan/keluarga); entri tanpa kunci valid dibuang.
+  function mergeArrRiwayat(srcA, srcB, keyOf) {
+    const seen = new Set();
+    const out = [];
+    const lists = [].concat(asArr(srcA), asArr(srcB));
+    for (const e of lists) {
+      if (!e || typeof e !== 'object') continue;
+      const k = keyOf ? keyOf(e) : JSON.stringify(e);
+      if (!k || seen.has(k)) continue;
+      seen.add(k);
+      out.push(e);
+    }
+    return out;
+  }
+
   // Format Tahun & Bulan ala Jepang (2012年7月)
   // Regex dulu supaya akurat (tanpa pergeseran timezone):
   //   "2012"               -> 2012年
@@ -70,10 +106,12 @@
     window.isGood = isGood;
     window.makeV = makeV;
     window.fmtMonthYearJp = fmtMonthYearJp;
-    window.helpers_cv = { getPath, isGood, makeV, fmtMonthYearJp };
+    window.asArr = asArr;
+    window.mergeArrRiwayat = mergeArrRiwayat;
+    window.helpers_cv = { getPath, isGood, makeV, fmtMonthYearJp, asArr, mergeArrRiwayat };
   }
   // Ekspor CommonJS untuk vitest (test meng-import modul ini)
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { getPath, isGood, makeV, fmtMonthYearJp };
+    module.exports = { getPath, isGood, makeV, fmtMonthYearJp, asArr, mergeArrRiwayat };
   }
 })();

@@ -4,7 +4,6 @@
 // master-full.html, apply-full.html, ai_form.html, js/07_api.js, dll).
 'use strict';
 
-
 const bcrypt = require('bcryptjs');
 const supabase = require('./supabase');
 const session = require('./session');
@@ -389,9 +388,8 @@ async function handleCekDataPelamar(payload) {
         timestamp: supabase.toText(r.timestamp || r.created_at || ''),
       }))
       .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
-    const row = rows.find(
-      (r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want,
-    ) || null;
+    const row =
+      rows.find((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
     if (!row) return { found: false, applications: apps };
     return {
       found: true,
@@ -640,6 +638,40 @@ const SNAKE_TO_CAMEL = {
   exp_pasport: 'expPaspor',
 };
 
+// --- Penggabung riwayat: kolom master (form Master Lengkap) + AIDATAJSON ---
+// (isi CV AI / Jeklin). Dua sumber yang sama-sama sah; SATU sumber tidak boleh
+// menutupi yang lain. Kolom master sering hanya menyimpan baris pertama
+// (mis. keluarga_1 saja) padahal ai_data_json punya 3-4 anggota → preview CV
+// tampak "dikit"/kehilangan data. Union + dedupe: kolom dulu, lalu entri AI
+// yang belum ada (kunci normal per tipe).
+const cleanKey = (s) =>
+  String(s || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+function entryHasAny(entry, keys) {
+  return keys.some((k) => {
+    const val = entry[k];
+    return (
+      val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-'
+    );
+  });
+}
+
+function mergeRiwayatArrays(columns, aiArr, keyFn) {
+  const seen = new Set();
+  const out = [];
+  const lists = [].concat(Array.isArray(columns) ? columns : [], Array.isArray(aiArr) ? aiArr : []);
+  for (const e of lists) {
+    if (!e || typeof e !== 'object') continue;
+    const k = keyFn(e);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(e);
+  }
+  return out;
+}
+
 // Buat objek nested (identitas/fisik/medis/...) dari baris master untuk
 // getDrafCvMaster & CV builder.
 function buildMasterNested(row) {
@@ -651,6 +683,16 @@ function buildMasterNested(row) {
         ? fallback
         : '';
   };
+  // AIDATAJSON (isi CV AI) ikut digabung ke array riwayat supaya data dari
+  // salah satu sumber tidak menutupi yang lain (lihat mergeRiwayatArrays).
+  let aiParsed = null;
+  try {
+    const raw = row.ai_data_json;
+    if (typeof raw === 'string' && raw.trim() && raw !== '-') aiParsed = JSON.parse(raw);
+  } catch (e) {
+    aiParsed = null;
+  }
+  const aiArrOf = (key) => (aiParsed && Array.isArray(aiParsed[key]) ? aiParsed[key] : null);
   return {
     identitas: {
       nama_lengkap: v('nama_lengkap'),
@@ -762,7 +804,21 @@ function buildMasterNested(row) {
           tahun_lulus: v('pendidikan_' + i + '_tahun_lulus'),
         });
       }
-      return arr;
+      return mergeRiwayatArrays(
+        arr.filter((e) =>
+          entryHasAny(e, [
+            'tingkat',
+            'sekolah',
+            'nama_sekolah',
+            'jurusan_id',
+            'jurusan',
+            'masuk',
+            'lulus',
+          ]),
+        ),
+        aiArrOf('pendidikan'),
+        (e) => cleanKey((e.tingkat || '') + (e.sekolah || e.sekolah_id || e.nama_sekolah || '')),
+      );
     })(),
     pekerjaan: (function () {
       const arr = [];
@@ -782,7 +838,17 @@ function buildMasterNested(row) {
           gaji: v('pekerjaan_' + i + '_gaji'),
         });
       }
-      return arr;
+      return mergeRiwayatArrays(
+        arr.filter((e) =>
+          entryHasAny(e, ['perusahaan', 'nama_perusahaan', 'jabatan', 'masuk', 'keluar']),
+        ),
+        aiArrOf('pekerjaan'),
+        (e) =>
+          cleanKey(
+            (e.perusahaan || e.perusahaan_id || e.nama_perusahaan || '') +
+              (e.jabatan || e.jabatan_id || ''),
+          ),
+      );
     })(),
     keluarga: (function () {
       const arr = [];
@@ -799,7 +865,11 @@ function buildMasterNested(row) {
           pekerjaan_jp: v('keluarga_' + i + '_pekerjaan_jp'),
         });
       }
-      return arr;
+      return mergeRiwayatArrays(
+        arr.filter((e) => entryHasAny(e, ['nama', 'hubungan', 'umur', 'usia', 'pekerjaan'])),
+        aiArrOf('keluarga'),
+        (e) => cleanKey(e.nama || ''),
+      );
     })(),
     kenalan_jepang: {
       nama_id: v('kenalan_di_jepang_nama'),
@@ -1037,8 +1107,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     const changedLabels = [];
     for (const [from, col] of Object.entries(MASTER_COLUMN_MAP)) {
       if (d[from] === undefined || d[from] === null || d[from] === '') continue;
-      const oldVal =
-        row && row[col] !== undefined && row[col] !== null ? String(row[col]) : '';
+      const oldVal = row && row[col] !== undefined && row[col] !== null ? String(row[col]) : '';
       const newVal = String(d[from]);
       if (newVal !== oldVal) {
         const label = MASTER_FIELD_LABEL[col] || col;
@@ -1046,32 +1115,105 @@ async function handleSubmitMasterForm(payload, sessionToken) {
       }
     }
 
-    // Riwayat pendidikan (max 5), pekerjaan (max 3), keluarga (max 5).
-    (Array.isArray(d.pendidikan) ? d.pendidikan : []).slice(0, 5).forEach((p, i) => {
-      const n = i + 1;
-      if (p.tingkat !== undefined) body['pendidikan_' + n + '_tingkat'] = String(p.tingkat);
-      if (p.nama_sekolah !== undefined)
-        body['pendidikan_' + n + '_nama_sekolah'] = String(p.nama_sekolah);
-      if (p.jurusan !== undefined) body['pendidikan_' + n + '_jurusan_id'] = String(p.jurusan);
-    });
-    (Array.isArray(d.pekerjaan) ? d.pekerjaan : []).slice(0, 3).forEach((p, i) => {
-      const n = i + 1;
-      if (p.nama_perusahaan !== undefined)
-        body['pekerjaan_' + n + '_nama_perusahaan'] = String(p.nama_perusahaan);
-      if (p.jabatan !== undefined) body['pekerjaan_' + n + '_jabatan'] = String(p.jabatan);
-      if (p.tahun_masuk !== undefined)
-        body['pekerjaan_' + n + '_tahun_masuk'] = String(p.tahun_masuk);
-      if (p.tahun_keluar !== undefined)
-        body['pekerjaan_' + n + '_tahun_keluar'] = String(p.tahun_keluar);
-      if (p.gaji !== undefined) body['pekerjaan_' + n + '_gaji'] = String(p.gaji);
-    });
-    (Array.isArray(d.keluarga) ? d.keluarga : []).slice(0, 5).forEach((p, i) => {
-      const n = i + 1;
-      if (p.hubungan !== undefined) body['keluarga_' + n + '_hubungan'] = String(p.hubungan);
-      if (p.nama !== undefined) body['keluarga_' + n + '_nama'] = String(p.nama);
-      if (p.usia !== undefined) body['keluarga_' + n + '_usia'] = String(p.usia);
-      if (p.pekerjaan !== undefined) body['keluarga_' + n + '_pekerjaan'] = String(p.pekerjaan);
-    });
+    // Riwayat pendidikan (maks 5), pekerjaan (maks 3), keluarga (maks 5).
+    // FIX 2026-08-15: master-full.html mengirim kunci camelCase per item
+    // (namaSekolah/tahunMasuk/namaPt/tahunKeluar) sedangkan kolom master
+    // snake_case (nama_sekolah/tahun_masuk/nama_perusahaan/tahun_keluar) —
+    // nama sekolah/perusahaan & tahun pernah DIABAIKAN diam-diam (update
+    // biodata "hilang" dari CV). Sekarang kedua bentuk diterima.
+    // Kalau form mengirim array (form Master Lengkap selalu kirim semua slot,
+    // baris kosong = {}), SEMUA slot ditulis (kosong → '') supaya baris yang
+    // dihapus pengguna tidak menyisakan data lama; kalau array tidak dikirim
+    // (modal biodata dashboard / CV Mini) kolom riwayat dibiarkan utuh.
+    const pickItem = (p, ...keys) => {
+      for (const k of keys) {
+        if (p[k] !== undefined && p[k] !== null) return p[k];
+      }
+      return '';
+    };
+    if (Array.isArray(d.pendidikan)) {
+      for (let i = 0; i < 5; i++) {
+        const p = d.pendidikan[i] || {};
+        const n = i + 1;
+        body['pendidikan_' + n + '_tingkat'] = String(pickItem(p, 'tingkat'));
+        body['pendidikan_' + n + '_nama_sekolah'] = String(
+          pickItem(p, 'nama_sekolah', 'namaSekolah', 'sekolah'),
+        );
+        body['pendidikan_' + n + '_jurusan_id'] = String(pickItem(p, 'jurusan', 'jurusan_id'));
+        body['pendidikan_' + n + '_tahun_masuk'] = String(
+          pickItem(p, 'tahun_masuk', 'tahunMasuk', 'masuk'),
+        );
+        body['pendidikan_' + n + '_tahun_lulus'] = String(
+          pickItem(p, 'tahun_lulus', 'tahunLulus', 'lulus'),
+        );
+      }
+    }
+    if (Array.isArray(d.pekerjaan)) {
+      for (let i = 0; i < 3; i++) {
+        const p = d.pekerjaan[i] || {};
+        const n = i + 1;
+        body['pekerjaan_' + n + '_nama_perusahaan'] = String(
+          pickItem(p, 'nama_perusahaan', 'namaPt', 'namaPerusahaan', 'perusahaan'),
+        );
+        body['pekerjaan_' + n + '_jabatan'] = String(
+          pickItem(p, 'jabatan', 'jabatan_id', 'posisi'),
+        );
+        body['pekerjaan_' + n + '_tahun_masuk'] = String(
+          pickItem(p, 'tahun_masuk', 'tahunMasuk', 'masuk'),
+        );
+        body['pekerjaan_' + n + '_tahun_keluar'] = String(
+          pickItem(p, 'tahun_keluar', 'tahunKeluar', 'keluar'),
+        );
+        body['pekerjaan_' + n + '_gaji'] = String(pickItem(p, 'gaji', 'pendapatan'));
+      }
+    }
+    if (Array.isArray(d.keluarga)) {
+      for (let i = 0; i < 5; i++) {
+        const p = d.keluarga[i] || {};
+        const n = i + 1;
+        body['keluarga_' + n + '_hubungan'] = String(pickItem(p, 'hubungan', 'hubungan_id'));
+        body['keluarga_' + n + '_nama'] = String(pickItem(p, 'nama'));
+        body['keluarga_' + n + '_usia'] = String(pickItem(p, 'usia', 'umur'));
+        body['keluarga_' + n + '_pekerjaan'] = String(pickItem(p, 'pekerjaan', 'pekerjaan_id'));
+        body['keluarga_' + n + '_gaji'] = String(pickItem(p, 'gaji', 'pendapatan'));
+      }
+    }
+    // Ringkasan mail: kalau riwayat ikut berubah (array dikirim), tambahkan
+    // label "pendidikan/pekerjaan/keluarga" supaya admin tahu bagian mana
+    // yang di-update (bukan cuma fallback "data diperbarui").
+    for (const [key, label] of [
+      ['pendidikan', 'pendidikan'],
+      ['pekerjaan', 'pekerjaan'],
+      ['keluarga', 'keluarga'],
+    ]) {
+      if (Array.isArray(d[key]) && !changedLabels.includes(label)) {
+        const oldRaw =
+          row && row['pendidikan_1_tingkat'] !== undefined ? JSON.stringify(d[key]) : null;
+        if (oldRaw === null || d[key].some((p, i) => p && typeof p === 'object')) {
+          const slotPrefix = {
+            pendidikan: 'pendidikan_',
+            pekerjaan: 'pekerjaan_',
+            keluarga: 'keluarga_',
+          }[key];
+          const fields =
+            key === 'pendidikan'
+              ? ['tingkat']
+              : key === 'pekerjaan'
+                ? ['nama_perusahaan']
+                : ['nama'];
+          const slotKey = slotPrefix + '1_' + fields[0];
+          const oldVal =
+            row && row[slotKey] !== undefined && row[slotKey] !== null ? String(row[slotKey]) : '';
+          const first = d[key].find((p) => p && typeof p === 'object');
+          const newVal = first
+            ? String(
+                pickItem(first, ...(key === 'pekerjaan' ? ['nama_perusahaan', 'namaPt'] : fields)),
+              )
+            : '';
+          if (newVal !== oldVal) changedLabels.push(label);
+        }
+      }
+    }
 
     if (row && row.id !== undefined) {
       await supabase.supabaseJson('PATCH', 'master_database_candidate', {
@@ -1138,7 +1280,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
 // (kontrak sama: payload[0] = data master).
 async function handleSimpanUpdateMaster(payload, sessionToken) {
   return handleSubmitMasterForm(payload, sessionToken);
-}
+} // anchor3
 
 // ---------------------------------------------------------------------------
 // Admin: tambah kandidat manual + upload berkas + revisi
@@ -1420,7 +1562,9 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
       (nextStatus === 'UPDATE' && existing && existing.status
         ? '[[PREV:' + String(existing.status).toUpperCase() + ']] '
         : '') +
-      '[UPLOAD ' + label + ']';
+      '[UPLOAD ' +
+      label +
+      ']';
     const keterangan = Object.entries(docs)
       .filter(([, v]) => v)
       .map(([k, v]) => k + ':' + v)
@@ -1598,9 +1742,7 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
           (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
         ) || null;
       if (candRow) {
-        const jobCode = String(
-          supabase.pick(candRow, ['id_loker_pilihan', 'id_loker']) || '',
-        )
+        const jobCode = String(supabase.pick(candRow, ['id_loker_pilihan', 'id_loker']) || '')
           .trim()
           .toUpperCase()
           .replace(/[^A-Z0-9_-]/g, '_');

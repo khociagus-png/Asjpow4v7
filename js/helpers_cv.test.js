@@ -5,7 +5,7 @@
 // makeV (v()): pencari data dengan prioritas d -> ai -> '-', plus fallback flat
 // uppercase legacy.
 import { describe, it, expect } from 'vitest';
-import { getPath, isGood, makeV, fmtMonthYearJp } from './helpers_cv.js';
+import { getPath, isGood, makeV, fmtMonthYearJp, asArr, mergeArrRiwayat } from './helpers_cv.js';
 
 describe('fmtMonthYearJp', () => {
   it('tahun polos -> 2012年', () => {
@@ -91,6 +91,78 @@ describe('makeV (v) — prioritas d -> ai -> flat uppercase', () => {
   it('nilai "-" dianggap tidak ada (isGood false)', () => {
     const v2 = makeV({ kolom: '-' }, {});
     expect(v2('kolom')).toBe('-');
+  });
+});
+
+describe('asArr', () => {
+  it('array langsung dikembalikan apa adanya', () => {
+    const a = [{ nama: 'A' }];
+    expect(asArr(a)).toBe(a);
+  });
+
+  it('string JSON array di-parse', () => {
+    expect(asArr('[{"nama":"A"}]')).toEqual([{ nama: 'A' }]);
+  });
+
+  it('bukan array aman → []', () => {
+    expect(asArr(null)).toEqual([]);
+    expect(asArr(undefined)).toEqual([]);
+    expect(asArr('')).toEqual([]);
+    expect(asArr('-')).toEqual([]);
+    expect(asArr('bukan json')).toEqual([]);
+    expect(asArr({ a: 1 })).toEqual([]);
+  });
+});
+
+describe('mergeArrRiwayat — kolom master + isi CV AI tidak saling menutupi', () => {
+  const keyFam = (e) =>
+    String(e.nama || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
+  it('kolom master hanya baris pertama + AIDATAJSON 3 anggota → union 4', () => {
+    const kolom = [{ nama: 'Bapak', hubungan: 'Ayah' }]; // keluarga_1 saja
+    const ai = [
+      { nama: 'Bapak', hubungan: 'Ayah' }, // duplikat — harus dibuang
+      { nama: 'Ibu', hubungan: 'Ibu' },
+      { nama: 'Adik', hubungan: 'Adik' },
+    ];
+    const merged = mergeArrRiwayat(kolom, ai, keyFam);
+    expect(merged).toHaveLength(3);
+    expect(merged.map((e) => e.nama)).toEqual(['Bapak', 'Ibu', 'Adik']);
+  });
+
+  it('ai sebagai string JSON tetap digabung', () => {
+    const merged = mergeArrRiwayat([{ nama: 'Bapak' }], '[{"nama":"Ibu"}]', keyFam);
+    expect(merged.map((e) => e.nama)).toEqual(['Bapak', 'Ibu']);
+  });
+
+  it('hanya satu sumber → dikembalikan tanpa duplikat', () => {
+    expect(mergeArrRiwayat([{ nama: 'A' }, { nama: 'A' }], null, keyFam)).toHaveLength(1);
+    expect(mergeArrRiwayat(null, [{ nama: 'X' }], keyFam)).toHaveLength(1);
+  });
+
+  it('entri tanpa kunci valid dibuang (sama dengan backend)', () => {
+    const merged = mergeArrRiwayat([{ hubungan: 'Ayah' }], [{ nama: 'Ibu' }], keyFam);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].nama).toBe('Ibu');
+  });
+
+  it('pendidikan: dedupe pakai tingkat+sekolah (sekolah vs nama_sekolah alias)', () => {
+    const keyEdu = (e) =>
+      String((e.tingkat || '') + (e.sekolah || e.sekolah_id || e.nama_sekolah || ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+    const merged = mergeArrRiwayat(
+      [{ tingkat: 'SMA', sekolah: 'SMAN 1' }],
+      [
+        { tingkat: 'SMA', nama_sekolah: 'SMAN 1' },
+        { tingkat: 'SD', sekolah: 'SDN 2' },
+      ],
+      keyEdu,
+    );
+    expect(merged).toHaveLength(2);
+    expect(merged[1].tingkat).toBe('SD');
   });
 });
 
