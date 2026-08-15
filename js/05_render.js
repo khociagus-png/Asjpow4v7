@@ -283,7 +283,7 @@ function renderPublicFiltered() {
       '<td data-label="' +
       tr('table.code') +
       '" class="p-4 text-sky-400 font-mono text-sm text-center font-bold align-top">' +
-      j.code +
+      esc(j.code) +
       '</td>' +
       '<td data-label="' +
       tr('table.job') +
@@ -299,7 +299,7 @@ function renderPublicFiltered() {
       '<div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-[11px] ' +
       textSub +
       ' font-normal"><i class="fas fa-map-marker-alt mr-1 text-red-400"></i> ' +
-      trOption(j.lokasi) +
+      esc(trOption(j.lokasi)) +
       '</span>' +
       genderBadge +
       '</div>' +
@@ -319,7 +319,7 @@ function renderPublicFiltered() {
       String(j.syarat || '')
         .split(',')
         .map(function (s) {
-          return trOption(s.trim());
+          return esc(trOption(s.trim()));
         })
         .join(', ') +
       ketHtml +
@@ -484,7 +484,7 @@ function filterDbJob() {
 // Logika warna tetap pakai NILAI ASLI; label tampil sesuai bahasa (trOption).
 function badgeTahapanDb(tahapan) {
   var t = String(tahapan || '-');
-  var label = trOption(t);
+  var label = esc(trOption(t));
   if (typeof tahapanStepIndex === 'function' && typeof tahapanPipeline === 'function') {
     var idx = tahapanStepIndex(t);
     if (idx >= 0) {
@@ -556,9 +556,9 @@ function renderDbJobTable(arr) {
       esc(db.pekerjaan) +
       '</div>' +
       '<div class="text-[10px] text-slate-400 font-bold mt-1.5"><span class="text-sky-400"><i class="fas fa-tag mr-1"></i>' +
-      trOption(db.kategori) +
+      esc(trOption(db.kategori)) +
       '</span> <span class="mx-1.5">&bull;</span> <span class="text-amber-300"><i class="fas fa-map-marker-alt text-red-400 mr-1"></i>' +
-      trOption(db.lokasi) +
+      esc(trOption(db.lokasi)) +
       '</span></div>' +
       '</td>' +
       '<td data-label="' +
@@ -930,9 +930,9 @@ function renderKandidatTable(arr) {
       '<td data-label="' +
       tr('table.stage_status') +
       '" class="rt-full p-4 text-xs font-bold text-sky-400">' +
-      trOption(c.tahapan) +
+      esc(trOption(c.tahapan)) +
       '<br><span class="text-[10px] font-normal text-slate-400">' +
-      trOption(c.status) +
+      esc(trOption(c.status)) +
       '</span></td>' +
       '<td data-label="' +
       tr('table.admin_note') +
@@ -1228,7 +1228,7 @@ function renderFormInbox() {
       '<td data-label="' +
       tr('table.category') +
       '" class="p-4 text-[10px] font-bold text-amber-300 uppercase">' +
-      trOption(f.kategori || '-') +
+      esc(trOption(f.kategori || '-')) +
       '</td>' +
       '<td data-label="' +
       tr('table.applicant_name') +
@@ -1245,7 +1245,7 @@ function renderFormInbox() {
       '" class="p-4 text-center"><span class="px-2 py-1 rounded text-[9px] font-bold ' +
       badgeClass +
       '">' +
-      trOption(f.status) +
+      esc(trOption(f.status)) +
       '</span></td>' +
       '<td data-label="' +
       tr('table.doc_folder') +

@@ -178,8 +178,14 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
       pemilik WA atau admin → data penuh. `getExistingCandidateJsonByWa` ditambahkan ke
       `CANDIDATE_ACTIONS` (api-client) supaya alur prefill kandidat/admin tetap dapat data
       penuh. Terverifikasi live preview: anonim → field terbatas, sesi → penuh.
+- [x] `getDrafCvMaster` tanpa sesi TIDAK lagi mengembalikan `uploads` (URL pas foto/CV/JFT/SSW)
+      — hanya subset identitas dasar. Satu-satunya konsumen (preview CV admin & dashboard
+      kandidat) berjalan dengan sesi valid, jadi tidak ada alur yang rusak. Terverifikasi
+      live: anonim → `{identitas, limited}`, sesi pemilik → penuh (termasuk uploads).
 - [ ] (Opsional, lebih kuat) Sisipkan token sekali pakai di link `generateFormBridge` dan
-      validasi server sebelum mengembalikan data.
+      validasi server sebelum mengembalikan data. Keputusan saat ini: TIDAK dipasang karena
+      tidak ada konsumen anonim yang membutuhkan data penuh; dapat ditambah jika nanti ada
+      halaman publik yang butuh prefill data lengkap tanpa sesi.
 
 ### 🟠 M3 — Rate limit — ✅ DIPERBAIKI
 

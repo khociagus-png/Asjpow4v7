@@ -180,7 +180,8 @@ async function bukaDigitalCV(id) {
     safeSet('cv-email', c.email || '-');
     safeSet('cv-alamat', c.alamat || '-');
 
-    let statusText = trOption(c.tahapan || 'Baru') + ' \n(' + trOption(c.status || 'Aktif') + ')';
+    let statusText =
+      esc(trOption(c.tahapan || 'Baru')) + ' \n(' + esc(trOption(c.status || 'Aktif')) + ')';
     safeSet('cv-status', statusText);
 
     var waLink = document.getElementById('cv-wa-link');

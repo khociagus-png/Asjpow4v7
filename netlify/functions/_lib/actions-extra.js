@@ -825,6 +825,10 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
     });
     if (isOwnerOrAdmin(sessionToken, wa)) return full;
     // Tanpa sesi valid → jangan bocorkan NIK/alamat/riwayat/medis/dokumen.
+    // uploads (URL pas foto/CV/JFT/SSW) juga TIDAK ikut — hanya subset
+    // identitas dasar yang aman (REVIEW M2). Satu-satunya konsumen
+    // getDrafCvMaster (preview CV admin & dashboard kandidat) berjalan
+    // dengan sesi valid, jadi jalur anonim tidak kehilangan fungsionalitas.
     const i = nested.identitas || {};
     return {
       identitas: {
@@ -835,7 +839,6 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
         tgl_lahir: i.tgl_lahir || '',
         umur: i.umur || '',
       },
-      uploads: nested.uploads || {},
       limited: true,
     };
   } catch (e) {

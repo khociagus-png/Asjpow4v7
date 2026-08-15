@@ -4,3 +4,5 @@
 node_modules/
 .convex/
 dist/
+# Metadata internal Freebuff (preview harness) — bukan bagian proyek
+.freebuff/
