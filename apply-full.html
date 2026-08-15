@@ -182,6 +182,7 @@
             <span id="wa-loading" class="absolute right-4 top-1/2 -translate-y-1/2 hidden"><i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i></span>
           </div>
           <div id="wa-msg" class="text-xs text-emerald-400 font-bold hidden mt-3 bg-emerald-900/30 p-2.5 rounded-lg border border-emerald-500/30"><i class="fas fa-check-circle mr-1"></i> Data riwayat ditemukan! Form & Dokumen otomatis disesuaikan.</div>
+          <div id="wa-warn" class="text-xs text-amber-300 font-bold hidden mt-3 bg-amber-900/40 p-2.5 rounded-lg border border-amber-500/40"></div>
         </div>
 
         <div class="form-group">
@@ -405,6 +406,29 @@
                    oldSswUrl = res.sswUrl; 
                    $("sswInfo").innerHTML = "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"; 
                    $("sswWarn").style.display = "none";
+               }
+           }
+           // PERINGATAN MULTI-APPLY: WA sudah LULUS untuk job LAIN — tampilkan
+           // riwayat supaya kandidat sadar sebelum mengirim lamaran baru.
+           var warnEl = $("wa-warn");
+           if (warnEl) {
+               var curJob = ($("job").value || "").trim();
+               // Dedupe per kode job — baris duplikat di mail tidak boleh
+               // membuat kode yang sama muncul berkali-kali di peringatan.
+               var lulusLain = [];
+               var seenWarnCode = {};
+               (res && res.applications || []).forEach(function (a) {
+                   if (a && a.code && String(a.status || "").toUpperCase() === "LULUS" && a.code !== curJob && !seenWarnCode[a.code]) {
+                       seenWarnCode[a.code] = true;
+                       lulusLain.push(a);
+                   }
+               });
+               if (lulusLain.length > 0) {
+                   var daftar = lulusLain.map(function (a) { return a.code; }).join(", ");
+                   warnEl.classList.remove("hidden");
+                   warnEl.innerHTML = "<i class='fas fa-exclamation-triangle mr-1'></i> Nomor ini sudah <b>LULUS</b> untuk: <b>" + daftar + "</b>. Pastikan Anda memang ingin melamar <b>" + (curJob || "job ini") + "</b> — lamaran yang sudah LULUS tidak hilang.";
+               } else {
+                   warnEl.classList.add("hidden");
                }
            }
        });

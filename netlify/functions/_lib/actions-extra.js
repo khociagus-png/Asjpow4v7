@@ -279,13 +279,27 @@ async function findFormByWaJob(wa, code) {
   );
 }
 
-// cekDataPelamar([wa]) → { found, nama, gender, usia, tb, bb, pasPhoto, jftUrl, sswUrl }
+// cekDataPelamar([wa]) → { found, nama, gender, usia, tb, bb, pasPhoto,
+// jftUrl, sswUrl, applications } — applications = SEMUA lamaran WA (multi-apply),
+// dipakai apply-full.html untuk menampilkan peringatan kalau sudah LULUS job lain.
 async function handleCekDataPelamar(payload) {
   const wa = String((payload && payload[0]) || '');
-  if (!wa) return { found: false };
+  if (!wa) return { found: false, applications: [] };
   try {
-    const row = await findFormByWa(wa);
-    if (!row) return { found: false };
+    const rows = await supabase.findForms();
+    const want = supabase.normalizeWa(wa);
+    const apps = rows
+      .filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want)
+      .map((r) => ({
+        code: supabase.toText(r.code_job || ''),
+        status: supabase.toText(r.status || 'MENUNGGU'),
+        timestamp: supabase.toText(r.timestamp || r.created_at || ''),
+      }))
+      .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+    const row = rows.find(
+      (r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want,
+    ) || null;
+    if (!row) return { found: false, applications: apps };
     return {
       found: true,
       nama: supabase.toText(supabase.pick(row, ['nama_lengkap', 'nama'])),
@@ -297,9 +311,10 @@ async function handleCekDataPelamar(payload) {
       photoUrl: supabase.toText(supabase.pick(row, ['pas_photo', 'pasPhoto', 'photo'])) || '-',
       jftUrl: supabase.toText(supabase.pick(row, ['jft', 'jft_url'])) || '-',
       sswUrl: supabase.toText(supabase.pick(row, ['ssw', 'ssw_url'])) || '-',
+      applications: apps,
     };
   } catch (e) {
-    return { found: false };
+    return { found: false, applications: [] };
   }
 }
 

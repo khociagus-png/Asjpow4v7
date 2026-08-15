@@ -465,8 +465,35 @@ function isiEditCepatCv(c) {
         return s.trim();
       })
       .filter(Boolean);
+    // Job yang sudah LULUS di mail tampil PALING ATAS — biar admin langsung
+    // melihat lamaran aktif saat memilih job utama kandidat (id_loker_pilihan).
+    var lulusCodes = (c.applications || [])
+      .filter(function (a) {
+        return a && a.code && String(a.status || '').toUpperCase() === 'LULUS';
+      })
+      .map(function (a) {
+        return String(a.code).trim();
+      });
+    var jobs = (window.ALL_JOBS || []).slice();
+    jobs.sort(function (a, b) {
+      var ai = lulusCodes.indexOf(String((a && a.code) || '')) !== -1 ? 0 : 1;
+      var bi = lulusCodes.indexOf(String((b && b.code) || '')) !== -1 ? 0 : 1;
+      return ai - bi;
+    });
     var opts = '<option value="">-</option>';
-    (window.ALL_JOBS || []).forEach(function (j) {
+    // Job utama sekarang yang tidak ada di daftar loker (mis. "UMUM" atau
+    // loker CLOSE) tetap dipertahankan sebagai opsi agar tidak hilang saat
+    // admin menyimpan Edit Cepat.
+    if (
+      curCodes.length &&
+      !jobs.some(function (j) {
+        return String((j && j.code) || '') === curCodes[0];
+      })
+    ) {
+      opts +=
+        '<option value="' + esc(curCodes[0]) + '" selected>' + esc(curCodes[0]) + '</option>';
+    }
+    jobs.forEach(function (j) {
       var code = j && j.code ? String(j.code) : '';
       if (!code) return;
       var sel = curCodes.indexOf(code) !== -1 ? ' selected' : '';
