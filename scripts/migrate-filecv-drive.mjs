@@ -1,7 +1,8 @@
 // =============================================================================
-// migrate-filecv-drive.mjs — Migrasi kolom file_cv kandidat yang masih
-// menunjuk link Google Drive (data legacy era GAS) ke URL file CV yang
-// benar-benar ada di Supabase Storage master/<NAMA>/.
+// migrate-filecv-drive.mjs — Sambungkan kolom file_cv kandidat ke URL file
+// CV yang benar-benar ada di Supabase Storage master/<NAMA>/. Mencakup
+// kandidat yang file_cv-nya masih link Google Drive (data legacy era GAS)
+// ATAU masih kosong — dua-duanya bikin tombol CV tidak menampilkan file.
 //   bun run scripts/migrate-filecv-drive.mjs           # dry-run (default)
 //   bun run scripts/migrate-filecv-drive.mjs --apply   # backup JSON + PATCH
 //
@@ -30,6 +31,7 @@ if (!BASE || !KEY) {
 
 const normWa = (w) => String(w || '').replace(/\D/g, '');
 const isDrive = (u) => /drive\.google\.com|docs\.google\.com/i.test(String(u || ''));
+const isEmptyCv = (u) => !u || String(u).trim() === '' || String(u).trim() === '-';
 const pubUrl = (storagePath) =>
   BASE + '/storage/v1/object/public/' + BUCKET + '/' + storagePath.split('/').map(encodeURIComponent).join('/');
 
@@ -104,11 +106,13 @@ for (const m of masters) {
   if (m.id_kandidat && !masterByIdKand.has(String(m.id_kandidat))) masterByIdKand.set(String(m.id_kandidat), m);
 }
 
-const driveCands = candidates.filter((c) => isDrive(c.file_cv));
-console.log('Kandidat file_cv Google Drive:', driveCands.length, 'dari', candidates.length, '\n');
+const targetCands = candidates.filter((c) => isDrive(c.file_cv) || isEmptyCv(c.file_cv));
+const nDrive = targetCands.filter((c) => isDrive(c.file_cv)).length;
+const nKosong = targetCands.filter((c) => isEmptyCv(c.file_cv)).length;
+console.log('Kandidat file_cv link Drive:', nDrive, '| file_cv kosong:', nKosong, '| total target:', targetCands.length, 'dari', candidates.length, '\n');
 
 const results = [];
-for (const c of driveCands) {
+for (const c of targetCands) {
   const nama = String(c.nama_lengkap || '').trim();
   const baseName = nama.toUpperCase().replace(/[^A-Z0-9_-]/g, '_');
   const folders = [...new Set(['master/' + baseName + '/', 'master/' + nama.toUpperCase().replace(/\s+/g, '_') + '/'])];
@@ -135,6 +139,7 @@ for (const c of driveCands) {
     nama: c.nama_lengkap,
     wa: c.no_wa,
     lama: c.file_cv,
+    lamaTipe: isDrive(c.file_cv) ? 'DRIVE' : isEmptyCv(c.file_cv) ? 'KOSONG' : '?',
     baru,
     folderFiles: names.map((n) => n.name),
   });
@@ -147,8 +152,8 @@ console.log('akan dimigrasi :', withFix.length);
 console.log('TANPA CV       :', noFix.length);
 for (const r of results) {
   if (r.baru) {
-    console.log(`  [${r.id}] ${r.nama} (${r.wa})`);
-    console.log(`      lama: ${r.lama.slice(0, 70)}`);
+    console.log(`  [${r.id}] ${r.nama} (${r.wa}) [${r.lamaTipe}]`);
+    console.log(`      lama: ${r.lama ? r.lama.slice(0, 70) : '(kosong)'}`);
     console.log(`      baru: ${r.baru.slice(0, 100)}`);
   } else {
     console.log(`  [${r.id}] ${r.nama} (${r.wa}) → TANPA CV (folder: ${r.folderFiles.slice(0, 3).join(', ') || 'kosong'})`);

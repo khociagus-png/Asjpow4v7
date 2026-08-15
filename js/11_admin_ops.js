@@ -524,7 +524,9 @@ async function muatMigrasiDrive() {
   try {
     const res = await callAPI('getDriveLinkCandidates', []);
     if (!res || !res.success) return;
-    DRIVE_CANDIDATES = res.list || [];
+    // Handler backend mengembalikan `data`; dulu frontend baca `list` yang
+    // tidak pernah ada → fitur selalu kosong & banner tak pernah muncul.
+    DRIVE_CANDIDATES = res.data || res.list || [];
     var banner = document.getElementById('drive-migrate-banner');
     var count = document.getElementById('drive-migrate-count');
     if (count) count.textContent = DRIVE_CANDIDATES.length;
