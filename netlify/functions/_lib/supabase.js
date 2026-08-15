@@ -713,6 +713,7 @@ module.exports = {
   findPengumuman,
   queryPaged,
   mapForm,
+  parseDocs,
   findForms,
   normalizeWa,
   pick,

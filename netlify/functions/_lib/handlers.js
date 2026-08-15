@@ -1354,4 +1354,71 @@ async function dispatchAction(action, payload, sessionToken) {
   }
 }
 
-module.exports = { handleAction, NOT_IMPLEMENTED };
+// ---------------------------------------------------------------------------
+// share-data — viewer TSK publik (share.html?job=KODE). Dipanggil LANGSUNG
+// via GET dari netlify/functions/share-data.js (redirect /api/share-data),
+// bukan lewat dispatch POST seperti aksi lain.
+// ---------------------------------------------------------------------------
+async function handleShareData(jobCode) {
+  const code = String(jobCode || '').trim();
+  if (!code) return { error: 'Kode job tidak ditemukan.' };
+  try {
+    const found = await supabase.findJobs();
+    const jobRow = found.rows.find(
+      (r) => String(supabase.pick(r, ['code_job', 'code']) || '') === code,
+    );
+    if (!jobRow) return { error: 'Kode job tidak ditemukan: ' + code };
+    const name = supabase.toText(
+      supabase.pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']),
+    );
+    // Kandidat yang ter-approve untuk job ini (id_loker_pilihan berisi kode).
+    const cands = await supabase.findCandidates();
+    const rows = cands.rows.filter((r) =>
+      String(supabase.pick(r, ['id_loker_pilihan', 'id_loker']) || '')
+        .split(',')
+        .map((s) => s.trim())
+        .includes(code),
+    );
+    const mapped = rows.map(supabase.mapCandidate);
+    // extraDocs: dokumen tambahan dari keterangan form lamaran kandidat
+    // (format NAMA:URL;...) — dipakai tombol dokumen ekstra di kartu share.
+    const forms = await supabase.findForms();
+    const byWa = new Map();
+    for (const f of forms) {
+      const w = supabase.normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
+      if (!w) continue;
+      if (!byWa.has(w)) byWa.set(w, []);
+      for (const d of supabase.parseDocs(supabase.toText(f.keterangan))) byWa.get(w).push(d);
+    }
+    const candidates = mapped.map((c) => {
+      const docs = byWa.get(supabase.normalizeWa(String(c.wa || ''))) || [];
+      const seen = new Set();
+      const extraDocs = docs.filter((d) => {
+        const k = String(d.nama) + '|' + String(d.url);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      return {
+        id_kandidat: c.idKandidat,
+        nama_lengkap: c.nama,
+        gender: c.gender,
+        usia: c.usia,
+        tb: c.tb,
+        bb: c.bb,
+        pas_photo: c.pasPhoto,
+        file_cv: c.fileCv,
+        jft: c.jft,
+        ssw: c.ssw,
+        nilai_jft_text: c.jftText,
+        bidang_ssw_text: c.sswText,
+        extraDocs,
+      };
+    });
+    return { job: { code, name }, candidates };
+  } catch (e) {
+    return { error: 'Gagal memuat data share: ' + e.message };
+  }
+}
+
+module.exports = { handleAction, NOT_IMPLEMENTED, handleShareData };

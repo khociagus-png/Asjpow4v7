@@ -114,6 +114,23 @@ createServer(async (req, res) => {
       return;
     }
 
+    // share.html memakai GET /api/share-data?job=KODE (di Netlify di-redirect
+    // ke /.netlify/functions/share-data). Layani langsung di preview.
+    if (
+      req.method === 'GET' &&
+      (pathname === '/api/share-data' || pathname === '/.netlify/functions/share-data')
+    ) {
+      const q = new URL(req.url, 'http://localhost').searchParams.get('job') || '';
+      let out;
+      try {
+        out = await loadHandlers().handleShareData(q);
+      } catch (e) {
+        out = { error: 'Error internal: ' + e.message };
+      }
+      sendJson(res, out.error ? 400 : 200, out);
+      return;
+    }
+
     const file = await resolveFile(pathname);
     const body = await readFile(file);
     res.writeHead(200, {
