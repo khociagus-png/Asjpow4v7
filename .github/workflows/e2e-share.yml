@@ -33,3 +33,14 @@ jobs:
         env:
           BASE_URL: https://asjportal.netlify.app
           SHARE_JOB: TG633ASJ
+
+      # Audit read-only: pastikan kolom berkas kandidat (pas_photo/file_cv/
+      # jft/ssw) tidak menunjuk file yang hilang di Storage. Jalankan sebagai
+      # dry-run (tidak pernah menulis). Butuh secrets SUPABASE_URL &
+      # SUPABASE_SERVICE_ROLE_KEY — langkah dilewati bila belum di-set.
+      - name: Audit berkas kandidat vs Storage (dry-run)
+        if: env.SUPABASE_URL != '' && env.SUPABASE_SERVICE_ROLE_KEY != ''
+        run: node scripts/audit-pasphoto.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

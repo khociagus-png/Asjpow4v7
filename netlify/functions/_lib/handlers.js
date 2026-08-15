@@ -1446,6 +1446,13 @@ async function handleShareData(jobCode) {
           extraDocs.push(d);
         }
       }
+      // Foto: kalau pas_photo kandidat kosong/basi (404), pakai file foto dari
+      // folder master (PHOTOFILE/PAS_PHOTO/FOTO) — folder di-list di atas.
+      let pasPhoto = c.pasPhoto;
+      if (!pasPhoto || pasPhoto === '-') {
+        const photoFile = names.find((n) => docTypeOf(n) === 'PHOTO');
+        if (photoFile) pasPhoto = pubBase + folder + encodeURIComponent(photoFile);
+      }
       candidates.push({
         id_kandidat: c.idKandidat,
         no_wa: c.wa,
@@ -1454,7 +1461,7 @@ async function handleShareData(jobCode) {
         usia: c.usia,
         tb: c.tb,
         bb: c.bb,
-        pas_photo: c.pasPhoto,
+        pas_photo: pasPhoto,
         file_cv: c.fileCv,
         jft: c.jft,
         ssw: c.ssw,
