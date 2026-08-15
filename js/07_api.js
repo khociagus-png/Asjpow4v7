@@ -102,6 +102,19 @@ window.submitRejectForm = async function () {
     showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
 };
+// Tandai Dibaca — baris status UPDATE (kandidat ubah data) kembali ke
+// status aslinya (LULUS/GAGAL/REVIEW) via [[PREV:...]] di feedback_berkas.
+async function tandaiDibacaForm(r) {
+  try {
+    const res = await callAPI('tandaiDibacaForm', [r]);
+    if (res.success) {
+      MAIL_SELECTED[r] = false;
+      patchFormMail(r, res.form);
+    } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+  } catch (err) {
+    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+  }
+}
 function toggleMailSelect(cb) {
   if (!cb) return;
   var idx = cb.dataset && cb.dataset.idx;

@@ -4,6 +4,7 @@
 // master-full.html, apply-full.html, ai_form.html, js/07_api.js, dll).
 'use strict';
 
+
 const bcrypt = require('bcryptjs');
 const supabase = require('./supabase');
 const session = require('./session');
@@ -290,6 +291,87 @@ async function findFormByWaJob(wa, code) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Mail sync — status UPDATE + ringkasan aktivitas (feedback_berkas)
+// ---------------------------------------------------------------------------
+// Status lamaran (database_asj_form.status):
+//   MENUNGGU = lamaran baru / belum diproses admin
+//   UPDATE   = kandidat MENGUBAH data (biodata/berkas) setelah barisnya sudah
+//              pernah diproses admin — progres LULUS/GAGAL tidak di-reset,
+//              admin cukup melihat badge UPDATE + ringkasan apa yang berubah.
+const MAIL_PENDING_STATUS = ['MENUNGGU', 'MAIL', 'BARU', 'PENDING'];
+
+function mailStatusUntukUpdate(currentStatus) {
+  const cur = String(currentStatus || '').toUpperCase();
+  if (!cur || MAIL_PENDING_STATUS.includes(cur)) return 'MENUNGGU';
+  return 'UPDATE';
+}
+
+// Catat aktivitas terakhir (maks 3 entri) di feedback_berkas, mis.:
+//   "[BIODATA] email & alamat diubah · [UPLOAD KTP] · [UPLOAD CV]"
+function appendFeedback(prev, entry) {
+  const items = String(prev || '')
+    .split('·')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  items.unshift(String(entry || '').trim());
+  return items.slice(0, 3).join(' · ');
+}
+
+// Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
+const MASTER_FIELD_LABEL = {
+  nama_lengkap: 'nama',
+  furigana: 'furigana',
+  namapanggilan: 'panggilan',
+  panggilan_katakana: 'panggilan katakana',
+  gender: 'gender',
+  tempat_lahir: 'tempat lahir',
+  tgl_lahir: 'tgl lahir',
+  usia: 'usia',
+  agama: 'agama',
+  status_pernikahan: 'status nikah',
+  jumlah_anak: 'anak',
+  nik: 'KTP/NIK',
+  driver_license: 'SIM',
+  alamat_lengkap: 'alamat',
+  email: 'email',
+  tb: 'tinggi',
+  bb: 'berat',
+  no_pasport: 'paspor',
+  no_coe: 'nomor COE',
+};
+
+// Biodata diubah → tandai baris mail kandidat (SEMUA lamarannya) dengan
+// status UPDATE (kalau sudah pernah diproses admin) + ringkasan apa yang
+// berubah, supaya admin tidak bingung "email baru, tapi apa yang di-update?".
+async function syncBiodataKeMail(wa, nama, labels) {
+  const want = supabase.normalizeWa(wa);
+  const rows = await supabase.findForms();
+  const mine = rows.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+  if (!mine.length) return;
+  for (const r of mine) {
+    if (r.id === undefined || r.id === null) continue;
+    // [[PREV:xxx]] menyimpan status sebelum UPDATE supaya tombol "Tandai
+    // Dibaca" bisa mengembalikannya (LULUS/GAGAL/REVIEW tidak hilang).
+    const isUpdate = mailStatusUntukUpdate(r.status) === 'UPDATE';
+    const entry =
+      (isUpdate ? '[[PREV:' + String(r.status || '').toUpperCase() + ']] ' : '') +
+      '[BIODATA] ' +
+      (labels.length ? labels.join(', ') : 'data diperbarui');
+    const body = {
+      timestamp: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      feedback_berkas: appendFeedback(r.feedback_berkas, entry),
+    };
+    if (isUpdate) body.status = 'UPDATE';
+    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+      query: { id: 'eq.' + r.id },
+      body,
+      headers: { Prefer: 'return=minimal' },
+    });
+  }
+}
+
 // cekDataPelamar([wa]) → { found, nama, gender, usia, tb, bb, pasPhoto,
 // jftUrl, sswUrl, applications } — applications = SEMUA lamaran WA (multi-apply),
 // dipakai apply-full.html untuk menampilkan peringatan kalau sudah LULUS job lain.
@@ -378,10 +460,16 @@ async function handleSubmitApply(payload) {
       };
     }
 
+    // D. kategory otomatis dari bidang loker (kolom kategori/bidang/sektor)
+    // kalau form tidak membawa ?bidang= — supaya mail tidak semua tampil
+    // "Umum" di panel admin.
+    const jobBidang = String(
+      supabase.pick(job, ['kategori', 'category', 'bidang', 'sektor']) || '',
+    );
     const body = {
       timestamp: new Date().toISOString(),
       code_job: code,
-      kategory: String(d.bidang || ''),
+      kategory: String(d.bidang || jobBidang || ''),
       nama_lengkap: String(d.nama || '')
         .trim()
         .toUpperCase(),
@@ -534,6 +622,23 @@ async function findMasterByWa(wa) {
   if (!Array.isArray(rows)) return null;
   return rows.find((r) => supabase.normalizeWa(String(r.no_wa || '')) === want) || null;
 }
+
+// Form biodata dashboard (prosesSimpanBiodataLengkap) mengirim key snake_case,
+// sedangkan master-full.html mengirim camelCase (MASTER_COLUMN_MAP). Dulu
+// HANYA email yang tersimpan dari modal biodata — alamat/tempat lahir/tgl
+// lahir/no paspor/dll diabaikan diam-diam. Normalisasi ini menerjemahkan
+// key snake_case ke camelCase supaya KEDUA jalur tersimpan ke kolom master
+// yang sama (tetap additive — tidak mengubah kontrak master-full).
+const SNAKE_TO_CAMEL = {
+  tempat_lahir: 'tempatLahir',
+  tgl_lahir: 'tglLahir',
+  alamat_lengkap: 'alamat',
+  no_pasport: 'noPaspor',
+  no_coe: 'noCoe',
+  kota_pasport: 'kotaPaspor',
+  tgl_pasport: 'tglTerbitPaspor',
+  exp_pasport: 'expPaspor',
+};
 
 // Buat objek nested (identitas/fisik/medis/...) dari baris master untuk
 // getDrafCvMaster & CV builder.
@@ -913,12 +1018,33 @@ async function handleSubmitMasterForm(payload, sessionToken) {
       }
     }
 
+    // Terjemahkan key snake_case (modal biodata dashboard) -> camelCase
+    // (MASTER_COLUMN_MAP) kalau nilai camelCase belum ada.
+    for (const [from, to] of Object.entries(SNAKE_TO_CAMEL)) {
+      if (d[from] !== undefined && d[from] !== null && d[from] !== '' && d[to] === undefined) {
+        d[to] = d[from];
+      }
+    }
     const body = { no_wa: wa, updated_at: new Date().toISOString() };
     for (const [from, col] of Object.entries(MASTER_COLUMN_MAP)) {
       if (d[from] !== undefined && d[from] !== null && d[from] !== '') body[col] = String(d[from]);
     }
     body.nama_lengkap = nama;
     Object.assign(body, fileUrls);
+
+    // C. Ringkasan perubahan biodata (untuk mail inbox): bandingkan nilai lama
+    // (baris master sebelum PATCH) dengan nilai baru dari form.
+    const changedLabels = [];
+    for (const [from, col] of Object.entries(MASTER_COLUMN_MAP)) {
+      if (d[from] === undefined || d[from] === null || d[from] === '') continue;
+      const oldVal =
+        row && row[col] !== undefined && row[col] !== null ? String(row[col]) : '';
+      const newVal = String(d[from]);
+      if (newVal !== oldVal) {
+        const label = MASTER_FIELD_LABEL[col] || col;
+        if (!changedLabels.includes(label)) changedLabels.push(label);
+      }
+    }
 
     // Riwayat pendidikan (max 5), pekerjaan (max 3), keluarga (max 5).
     (Array.isArray(d.pendidikan) ? d.pendidikan : []).slice(0, 5).forEach((p, i) => {
@@ -995,6 +1121,9 @@ async function handleSubmitMasterForm(payload, sessionToken) {
           headers: { Prefer: 'return=minimal' },
         });
       }
+      // C. Kirim ringkasan perubahan biodata ke mail inbox (badge UPDATE +
+      // catatan "[BIODATA] email & alamat diubah"). Non-fatal.
+      await syncBiodataKeMail(wa, nama, changedLabels);
     } catch (e) {
       /* sinkronisasi opsional — jangan gagalkan simpan master */
     }
@@ -1233,68 +1362,103 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
   }
 }
 
-// simpanBerkasTahapan([{wa, nama, jenisBerkas, file}]) — upload dokumen
-// pemberkasan / file utama kandidat. Dipakai admin (modal edit/pemberkasan)
-// DAN kandidat (upload berkas sendiri dari dashboard).
 // ---------------------------------------------------------------------------
 // MAIL = UPLOAD-DRIVEN (kebijakan). Hanya perubahan dokumen/upload yang masuk
 // mail inbox (database_asj_form). Update data lain (status kandidat, CV mini,
 // CV AI, auto approve) TIDAK menyentuh mail.
 // ---------------------------------------------------------------------------
 // Sinkronkan/muat baris mail kandidat dengan satu upload dokumen terbaru.
-// Keterangan menyimpan daftar dokumen "NAMA:URL;..." — mail menampilkan
-// SEMUA dokumen yang sudah di-upload kandidat beserta preview-nya.
-async function syncFormMailDariUpload(wa, nama, docLabel, url) {
+// - Target baris: CV = dokumen PER LOKER → hanya baris lamaran itu (fallback
+//   WA saja); dokumen lain (KTP/KK/foto/JFT/SSW/dll) = dokumen KANDIDAT →
+//   SEMUA lamaran WA ikut ter-update (dulu hanya baris pertama).
+// - Status: lamaran masih MENUNGGU → tetap MENUNGGU; yang sudah pernah
+//   diproses admin (LULUS/GAGAL/REVIEW) → UPDATE (progres TIDAK di-reset,
+//   admin melihat badge UPDATE "kandidat ubah data").
+// - Keterangan = daftar dokumen "NAMA:URL;..." (mail menampilkan SEMUA
+//   dokumen + preview); feedback_berkas = catatan aktivitas terakhir
+//   ("[UPLOAD KTP]") supaya admin tahu apa yang baru di-upload.
+async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
   const want = supabase.normalizeWa(wa);
   const rows = await supabase.supabaseJson('GET', 'database_asj_form', {
     query: { select: '*', limit: 500 },
   });
-  const existing = (Array.isArray(rows) ? rows : []).find(
-    (r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want,
-  );
-  // Baca dokumen lama dari keterangan, lalu gabung dengan yang baru.
-  const docs = {};
-  const raw = String((existing && existing.keterangan) || '');
-  raw.split(';').forEach((chunk) => {
-    const i = chunk.indexOf(':');
-    if (i > 0) docs[chunk.slice(0, i).trim().toUpperCase()] = chunk.slice(i + 1).trim();
-  });
+  const all = Array.isArray(rows) ? rows : [];
   const label = String(docLabel || 'DOKUMEN')
     .trim()
     .toUpperCase();
-  docs[label] = String(url || '');
-  const keterangan = Object.entries(docs)
-    .filter(([, v]) => v)
-    .map(([k, v]) => k + ':' + v)
-    .join(';');
-  const body = {
-    timestamp: new Date().toISOString(),
-    code_job: existing && existing.code_job ? String(existing.code_job) : '',
-    nama_lengkap: String(nama || (existing && existing.nama_lengkap) || 'KANDIDAT').toUpperCase(),
-    no_wa: want,
-    keterangan,
-    status: 'MENUNGGU',
-    updated_at: new Date().toISOString(),
-  };
-  // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
-  if (label === 'PAS_PHOTO' || label === 'PHOTO') body.pas_photo = String(url || '');
-  if (label === 'CV' || label === 'CV_REVISI') body.file_cv = String(url || '');
-  if (label === 'JFT') body.jft = String(url || '');
-  if (label === 'SSW') body.ssw = String(url || '');
-  if (existing && existing.id !== undefined) {
-    await supabase.supabaseJson('PATCH', 'database_asj_form', {
-      query: { id: 'eq.' + existing.id },
-      body,
-      headers: { Prefer: 'return=minimal' },
-    });
+  const code = String(jobCode || '').trim();
+
+  let targets = [];
+  if (label === 'CV' || label === 'CV_REVISI') {
+    if (code) {
+      targets = all.filter(
+        (r) =>
+          supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want &&
+          String(r.code_job || '').trim() === code,
+      );
+    }
+    if (!targets.length) {
+      targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+    }
   } else {
-    await supabase.supabaseJson('POST', 'database_asj_form', {
-      body,
-      headers: { Prefer: 'return=minimal' },
+    targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+  }
+  if (!targets.length) targets = [null];
+
+  for (const existing of targets) {
+    // Baca dokumen lama dari keterangan baris ini, lalu gabung dengan yang baru.
+    const docs = {};
+    const raw = String((existing && existing.keterangan) || '');
+    raw.split(';').forEach((chunk) => {
+      const i = chunk.indexOf(':');
+      if (i > 0) docs[chunk.slice(0, i).trim().toUpperCase()] = chunk.slice(i + 1).trim();
     });
+    docs[label] = String(url || '');
+    // [[PREV:xxx]] = status sebelum UPDATE (dipulihkan tombol Tandai Dibaca).
+    const nextStatus = mailStatusUntukUpdate(existing && existing.status);
+    const entry =
+      (nextStatus === 'UPDATE' && existing && existing.status
+        ? '[[PREV:' + String(existing.status).toUpperCase() + ']] '
+        : '') +
+      '[UPLOAD ' + label + ']';
+    const keterangan = Object.entries(docs)
+      .filter(([, v]) => v)
+      .map(([k, v]) => k + ':' + v)
+      .join(';');
+    const body = {
+      timestamp: new Date().toISOString(),
+      code_job: String((existing && existing.code_job) || code || ''),
+      nama_lengkap: String(nama || (existing && existing.nama_lengkap) || 'KANDIDAT').toUpperCase(),
+      no_wa: want,
+      keterangan,
+      status: nextStatus,
+      feedback_berkas: appendFeedback(existing && existing.feedback_berkas, entry),
+      updated_at: new Date().toISOString(),
+    };
+    // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
+    if (label === 'PAS_PHOTO' || label === 'PHOTO') body.pas_photo = String(url || '');
+    if (label === 'CV' || label === 'CV_REVISI') body.file_cv = String(url || '');
+    if (label === 'JFT') body.jft = String(url || '');
+    if (label === 'SSW') body.ssw = String(url || '');
+    if (existing && existing.id !== undefined) {
+      await supabase.supabaseJson('PATCH', 'database_asj_form', {
+        query: { id: 'eq.' + existing.id },
+        body,
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'database_asj_form', {
+        body,
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
   }
 }
 
+// simpanBerkasTahapan([{wa, nama, jenisBerkas, file}]) — upload dokumen
+// pemberkasan / file utama kandidat. Dipakai admin (modal edit/pemberkasan)
+// DAN kandidat (upload berkas sendiri dari dashboard).
+// ---------------------------------------------------------------------------
 async function handleSimpanBerkasTahapan(payload, sessionToken) {
   const d = (payload && payload[0]) || {};
   const t = session.verifyToken(sessionToken);
@@ -1322,13 +1486,45 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
       String(f.name || 'file')
         .split('.')
         .pop() || 'jpg';
-    const url = await uploadBase64(f.data, folder, (jenis || 'DOKUMEN') + '.' + ext);
+
+    // CV per loker: nama file memakai kode job utama kandidat (konvensi sama
+    // dengan apply-full: JOB<code>_CV) supaya CV loker lama & baru tersimpan
+    // berdampingan di folder master/<NAMA> dan tidak saling menimpa.
+    let fileName = (jenis || 'DOKUMEN') + '.' + ext;
+    const isCv = jenis === 'CV' || jenis === 'CV_REVISI';
+    let candRow = null;
+    const want = supabase.normalizeWa(wa);
+    try {
+      const candFound = await supabase.findCandidates();
+      candRow =
+        candFound.rows.find(
+          (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+        ) || null;
+    } catch (e) {
+      /* lookup kandidat non-fatal */
+    }
+    if (isCv && candRow) {
+      const jobCode = String(supabase.pick(candRow, ['id_loker_pilihan', 'id_loker']) || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9_-]/g, '_');
+      if (jobCode) fileName = 'JOB' + jobCode + '_CV.' + ext;
+    }
+    const url = await uploadBase64(f.data, folder, fileName);
     if (!url) return { success: false, error: 'Upload gagal.' };
 
     // MAIL = upload-driven: upload berkas → masuk mail inbox (untuk review),
-    // menampilkan dokumen yang di-upload beserta preview-nya.
+    // menampilkan dokumen yang di-upload beserta preview-nya. Baris dipilih
+    // per (WA + loker utama kandidat) untuk CV; dokumen lain ikut ke semua
+    // lamaran — multi-apply tidak salah baris.
     try {
-      await syncFormMailDariUpload(wa, nama, jenis, url);
+      await syncFormMailDariUpload(
+        wa,
+        nama,
+        jenis,
+        url,
+        candRow ? String(supabase.pick(candRow, ['id_loker_pilihan', 'id_loker']) || '') : '',
+      );
     } catch (e) {
       /* sinkronisasi mail opsional — jangan gagalkan upload */
     }
@@ -1336,11 +1532,7 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     const labelKey = fileLabelKey(jenis);
     const map = labelKey ? FILE_LABEL_COLUMNS[labelKey] : null;
     if (map) {
-      const candFound = await supabase.findCandidates();
-      const want = supabase.normalizeWa(wa);
-      const c = candFound.rows.find(
-        (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
-      );
+      const c = candRow;
       if (c && c.id !== undefined && map.cand) {
         await supabase.supabaseJson('PATCH', 'database_candidate', {
           query: { id: 'eq.' + c.id },
@@ -1357,31 +1549,20 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
         });
       }
       if (map.pemberkasan) {
-        const pRows = await supabase.supabaseJson('GET', 'pemberkasan_checklist', {
-          query: { select: '*', limit: 500 },
+        // UPSERT by (wa, tahap): kandidat meng-upload KTP & KK secara PARALEL
+        // (Promise.allSettled di frontend) — GET-then-POST bikin dua baris.
+        // Konflik unik (wa,tahap) di-resolve di sisi DB, jadi selalu 1 baris.
+        await supabase.supabaseJson('POST', 'pemberkasan_checklist', {
+          query: { on_conflict: 'wa,tahap' },
+          body: {
+            wa: wa,
+            nama_lengkap: nama,
+            tahap: 1,
+            updated_at: new Date().toISOString(),
+            [map.pemberkasan]: url,
+          },
+          headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
         });
-        const existing = Array.isArray(pRows)
-          ? pRows.find((r) => supabase.normalizeWa(String(r.wa || '')) === want)
-          : null;
-        const pBody = {
-          wa: wa,
-          nama_lengkap: nama,
-          tahap: 1,
-          updated_at: new Date().toISOString(),
-          [map.pemberkasan]: url,
-        };
-        if (existing && existing.id !== undefined) {
-          await supabase.supabaseJson('PATCH', 'pemberkasan_checklist', {
-            query: { id: 'eq.' + existing.id },
-            body: pBody,
-            headers: { Prefer: 'return=minimal' },
-          });
-        } else {
-          await supabase.supabaseJson('POST', 'pemberkasan_checklist', {
-            body: pBody,
-            headers: { Prefer: 'return=minimal' },
-          });
-        }
       }
     }
     return { success: true };
@@ -1405,10 +1586,34 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
       String(f.name || 'file')
         .split('.')
         .pop() || 'jpg';
-    const url = await uploadBase64(f.data, folder, 'CV_REVISI.' + ext);
-    // Upload CV revisi juga masuk mail (dokumen pendukung).
+    // CV revisi juga memakai prefix loker utama (konvensi JOB<code>_CV) supaya
+    // versi CV per loker tetap utuh di folder kandidat.
+    let fileName = 'CV_REVISI.' + ext;
+    let cvJobCode = '';
     try {
-      await syncFormMailDariUpload(wa, nama, 'CV', url);
+      const candFound = await supabase.findCandidates();
+      const want = supabase.normalizeWa(wa);
+      const candRow =
+        candFound.rows.find(
+          (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+        ) || null;
+      if (candRow) {
+        const jobCode = String(
+          supabase.pick(candRow, ['id_loker_pilihan', 'id_loker']) || '',
+        )
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9_-]/g, '_');
+        if (jobCode) fileName = 'JOB' + jobCode + '_CV.' + ext;
+        cvJobCode = jobCode;
+      }
+    } catch (e) {
+      /* lookup kandidat non-fatal */
+    }
+    const url = await uploadBase64(f.data, folder, fileName);
+    // Upload CV revisi juga masuk mail (dokumen pendukung) — per loker.
+    try {
+      await syncFormMailDariUpload(wa, nama, 'CV', url, cvJobCode);
     } catch (e) {
       /* opsional */
     }

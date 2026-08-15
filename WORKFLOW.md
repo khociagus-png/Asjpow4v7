@@ -79,6 +79,8 @@ bun run test
 # E2E (butuh preview/live URL + Playwright chromium terinstall)
 bunx playwright install chromium
 BASE_URL="https://<url-preview-atau-live>" bun run e2e
+BASE_URL="https://<url-preview-atau-live>" bun run e2e:upload   # jalur upload (kandidat tes terisolasi + cleanup)
+BASE_URL="https://<url-preview-atau-live>" bun run e2e:biodata # update biodata kandidat (nilai asli dipulihkan)
 
 # Cek syntax semua JS frontend
 for f in js/*.js; do node --check "$f" || echo "ERROR: $f"; done

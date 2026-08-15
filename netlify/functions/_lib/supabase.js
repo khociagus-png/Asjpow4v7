@@ -237,6 +237,8 @@ function mapForm(row, i) {
     ssw: row.ssw || '',
     cv: row.file_cv || '',
     keterangan: toText(row.keterangan),
+    // Aktivitas terakhir kandidat (status UPDATE): "[BIODATA] email diubah · [UPLOAD KTP]".
+    feedback: toText(row.feedback_berkas),
     // Dokumen tambahan dari keterangan "NAMA:URL;NAMA2:URL2;..." — dipakai
     // mail inbox untuk menampilkan SEMUA yang di-upload kandidat + preview.
     docs: parseDocs(toText(row.keterangan)),
@@ -681,6 +683,8 @@ function attachApplications(candidates, forms) {
       status: toText(f.status || 'MENUNGGU'),
       timestamp: toText(f.timestamp || f.created_at || ''),
       nama: toText(f.nama_lengkap || f.nama || ''),
+      // CV milik lamaran loker ini (CV per loker: JOB<code>_CV di folder master).
+      cv: toText(f.file_cv || ''),
     });
   }
   for (const c of candidates) {

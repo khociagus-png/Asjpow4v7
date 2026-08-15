@@ -6,6 +6,10 @@
   "scripts": {
     "e2e": "node e2e/login-check.mjs",
     "e2e:share": "node e2e/share-view.mjs",
+    "e2e:upload": "node e2e/upload-check.mjs",
+    "e2e:biodata": "node e2e/biodata-check.mjs",
+    "dedupe": "node scripts/dedupe-duplicates.mjs",
+    "dedupe:apply": "node scripts/dedupe-duplicates.mjs --apply",
     "test": "vitest run",
     "lint": "eslint .",
     "ship": "bash scripts/ship.sh",

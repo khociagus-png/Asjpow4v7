@@ -240,7 +240,9 @@ async function renderStudentCard() {
 
   let catatan = myData.catatanInt || '';
   let isVip = catatan.includes('[VIP]');
-  let kelasMatch = catatan.match(/\[(?:KELAS\s*([A-Z0-9]+)|([A-Z0-9]+))\]/i);
+  // [VIP] bukan kelas — kalau tidak, kartu menampilkan "KELAS VIP"
+  // alih-alih "VIP MEMBER" untuk member berstatus VIP.
+  let kelasMatch = catatan.match(/\[(?:KELAS\s*([A-Z0-9]+)|(?![VIP\])([A-Z0-9]+))\]/i);
 
   // Munculkan kartu jika VIP atau punya KELAS
   if (isVip || kelasMatch) {

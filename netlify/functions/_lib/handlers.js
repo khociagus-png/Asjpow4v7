@@ -113,6 +113,62 @@ async function loadWaTemplates() {
   }
 }
 
+// Satu kandidat = satu baris di panel admin. (OK) Baris `database_candidate` dengan
+// WA yang sama dianggap duplikat (warisan data lama / baris ganda); simpan yang
+// paling baru (updated_at/created_at). Baris tanpa WA tetap dipertahankan.
+function dedupeKandidatRaw(rows) {
+  if (!Array.isArray(rows)) return rows;
+  const seen = new Map();
+  const out = [];
+  const tsOf = (r) =>
+    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  for (const r of rows) {
+    const wa = supabase.normalizeWa(
+      String(supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
+    );
+    if (!wa) {
+      out.push(r);
+      continue;
+    }
+    const ts = tsOf(r);
+    const prev = seen.get(wa);
+    // Seri: timestamp sama (mis. insert dalam satu request) → prefer baris
+    // dengan id lebih besar (insert terakhir).
+    if (!prev || ts > prev.ts || (ts === prev.ts && Number(r.id || 0) > Number(prev.row.id || 0))) {
+      seen.set(wa, { ts, row: r });
+    }
+  }
+  for (const v of seen.values()) out.push(v.row);
+  return out;
+}
+
+// Seluruh kandidat (maks 300 — batas findTable) → dedupe by WA → urut yang
+// paling baru di atas. Dipakai getAppData & getCandidatesPage supaya "satu
+// kandidat = satu baris" konsisten DAN ukuran halaman & total selalu
+// dihitung dari baris UNIK (pagination frontend: page = floor(loaded/50)+1).
+async function loadCandidatesUnik(q) {
+  const found = await supabase.findCandidates();
+  const rows = Array.isArray(found.rows) ? found.rows : [];
+  let uniq = dedupeKandidatRaw(rows);
+  const needle = String(q || '').trim().toLowerCase();
+  if (needle) {
+    const digit = needle.replace(/\D/g, '');
+    uniq = uniq.filter((r) => {
+      const nama = String(
+        supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '',
+      ).toLowerCase();
+      const wa = supabase.normalizeWa(
+        String(supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
+      );
+      return nama.includes(needle) || (digit && wa.includes(digit));
+    });
+  }
+  const tsOf = (r) =>
+    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
+  return uniq;
+}
+
 // ---------------------------------------------------------------------------
 // getAppData — data utama dashboard
 // ---------------------------------------------------------------------------
@@ -203,13 +259,13 @@ async function handleGetAppData(payload, sessionToken) {
     }
 
     if (mode === 'admin') {
-      // Halaman 1 (50) + total — sisa dimuat on-demand via getCandidatesPage.
-      const paged = await supabase.queryPaged('database_candidate', {
-        page: 1,
-        pageSize: 50,
-      });
+      // Satu kandidat = satu baris: WA ganda (duplikat warisan) di-dedupe
+      // GLOBAL dulu, baru ambil halaman 1 (50). Total = jumlah UNIK supaya
+      // pagination frontend (Muat Lebih) tetap konsisten.
+      const allUniq = await loadCandidatesUnik('');
+      const candRows = allUniq.slice(0, 50);
       result.dbJobs = stripRaw(jobs);
-      result.candidates = stripRaw(paged.rows.map(supabase.mapCandidate));
+      result.candidates = stripRaw(candRows.map(supabase.mapCandidate));
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
       // kandidat — dipakai modal admin (berkas tersimpan, auto-fill biodata).
       // Fetch sisa data dashboard diparalelkan (semuanya independen).
@@ -224,7 +280,7 @@ async function handleGetAppData(payload, sessionToken) {
       // Lampirkan SEMUA lamaran (per WA) ke tiap kandidat — mail inbox bisa
       // berisi banyak job per kandidat (multi-apply).
       supabase.attachApplications(result.candidates, allForms);
-      result.candidatesTotal = paged.total;
+      result.candidatesTotal = allUniq.length;
       result.schedules = schedules;
       result.tugas = tugas;
       result.formInbox = allForms.map(supabase.mapForm);
@@ -921,17 +977,17 @@ async function handleGetCandidatesPage(payload, sessionToken) {
   const page = Number(opts.page) || 1;
   const pageSize = Number(opts.pageSize) || 50;
   try {
-    const { rows, total } = await supabase.queryPaged('database_candidate', {
-      page,
-      pageSize,
-      q: opts.q || '',
-    });
-    const cands = stripRaw(rows.map(supabase.mapCandidate));
+    // Konsisten dengan getAppData: dedupe GLOBAL by WA lalu slice halaman —
+    // ukuran halaman & total selalu dihitung dari baris UNIK.
+    const allUniq = await loadCandidatesUnik(opts.q || '');
+    const start = (page - 1) * pageSize;
+    const candRows = allUniq.slice(start, start + pageSize);
+    const cands = stripRaw(candRows.map(supabase.mapCandidate));
     await supabase.attachBerkasBio(cands);
     // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
     const allForms = await supabase.findForms();
     supabase.attachApplications(cands, allForms);
-    return { success: true, candidates: cands, total };
+    return { success: true, candidates: cands, total: allUniq.length };
   } catch (e) {
     return { success: false, error: 'Gagal memuat kandidat: ' + e.message };
   }
@@ -1111,6 +1167,38 @@ async function handleDeleteForm(payload, sessionToken) {
   }
 }
 
+// Tandai Dibaca — baris status UPDATE (kandidat ubah data setelah lamaran
+// pernah diproses admin) kembali ke status aslinya. Status lama disimpan di
+// feedback_berkas sebagai "[[PREV:LULUS]] ..." saat UPDATE diset; tanpa
+// marker (data lama) → kembali ke antrean MENUNGGU.
+async function handleTandaiDibacaForm(payload, sessionToken) {
+  const guard = requireAdmin(sessionToken);
+  if (guard.error) return guard.error;
+  const idx = Number((payload || [])[0]);
+  if (!Number.isInteger(idx) || idx < 0) {
+    return { success: false, error: 'Index form tidak valid.' };
+  }
+  try {
+    const forms = await supabase.findForms();
+    const f = forms[idx];
+    if (!f) return { success: false, error: 'Form tidak ditemukan.' };
+    const fb = String(f.feedback_berkas || '');
+    const m = fb.match(/\[\[PREV:([^\]]+)\]\]/);
+    const prevStatus = m ? m[1].trim() : 'MENUNGGU';
+    const newFb = fb.replace(/\[\[PREV:[^\]]+\]\]\s*/, '').trim();
+    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+      query: { id: 'eq.' + f.id },
+      body: { status: prevStatus, feedback_berkas: newFb, updated_at: new Date().toISOString() },
+      headers: { Prefer: 'return=minimal' },
+    });
+    f.status = prevStatus;
+    f.feedback_berkas = newFb;
+    return { success: true, form: supabase.mapForm(f, idx) };
+  } catch (e) {
+    return { success: false, error: 'Gagal tandai dibaca: ' + e.message };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Rate limit (REVIEW.md M3) — lapisan proteksi di dispatcher supaya semua
 // endpoint (Netlify wrapper & preview server) kebagian, tanpa mengubah tiap
@@ -1251,6 +1339,8 @@ async function dispatchAction(action, payload, sessionToken) {
       return handleRejectForm(payload, sessionToken);
     case 'deleteForm':
       return handleDeleteForm(payload, sessionToken);
+    case 'tandaiDibacaForm':
+      return handleTandaiDibacaForm(payload, sessionToken);
     // Upload & file
     case 'getUploadUrls':
       return extra.handleGetUploadUrls(payload, sessionToken);

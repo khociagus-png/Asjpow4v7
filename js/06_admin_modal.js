@@ -139,8 +139,9 @@ async function bukaDigitalCV(id) {
         '">';
     }
 
-    // PERBAIKAN 1: Support deteksi [KELAS G] maupun tulisan [G]
-    let kelasMatch = catatanIntStr.match(/\[(?:KELAS\s*([A-Z0-9]+)|([A-Z0-9]+))\]/i);
+    // PERBAIKAN 1: Support deteksi [KELAS G] maupun tulisan [G] — tapi [VIP]
+    // BUKAN kelas (tag VIP dikelola checkbox tersendiri, jangan jadi badge KELAS).
+    let kelasMatch = catatanIntStr.match(/\[(?:KELAS\s*([A-Z0-9]+)|(?![VIP\])([A-Z0-9]+))\]/i);
     if (kelasMatch) {
       let namaKelas = kelasMatch[1] || kelasMatch[2];
       cvBadges += `<span class="px-2 py-0.5 ml-1 bg-indigo-900/60 text-indigo-300 border border-indigo-500/50 rounded text-[9px] font-bold shadow-sm whitespace-nowrap align-middle"><i class="fas fa-users mr-1"></i>${namaKelas.toUpperCase()}</span>`;
@@ -339,6 +340,10 @@ async function bukaDigitalCV(id) {
           .replace(/\[(?:KELAS\s*[A-Z0-9]+|[A-Z0-9]+)\]/gi, '')
           .trim();
         document.getElementById('cv-catatan-ext').value = c.catatanExt || '';
+        // FIX VIP: state checkbox mengikuti tag [VIP] yang tersimpan — tag
+        // tidak hilang lagi kalau admin simpan catatan tanpa menulis ulang.
+        var vipToggle = document.getElementById('cv-vip-toggle');
+        if (vipToggle) vipToggle.checked = /\[VIP\]/i.test(catatanIntStr);
       } else {
         notesArea.classList.add('hidden');
       }
@@ -650,7 +655,20 @@ async function simpanCatatanCv() {
   if (!id || id === '-') return;
 
   var c = ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
-  let kelasMatch = (c.catatanInt || '').match(/\[(?:KELAS\s*([A-Z0-9]+)|([A-Z0-9]+))\]/i);
+  // FIX VIP: tulis ulang [VIP] kalau checkbox aktif (mirip penanganan KELAS di
+  // bawah). Kalau dicentang maka [VIP] pasti tersimpan; kalau tidak dicentang
+  // tag dihapus secara eksplisit oleh admin.
+  var vipToggle = document.getElementById('cv-vip-toggle');
+  var vipOn = !!(vipToggle && vipToggle.checked);
+  if (vipOn && !/\[VIP\]/i.test(intNote)) {
+    intNote = (intNote.trim() ? '[VIP] ' + intNote.trim() : '[VIP]');
+  } else if (!vipOn && /\[VIP\]/i.test(intNote)) {
+    intNote = intNote.replace(/\[VIP\]/gi, '').trim();
+  }
+  // FIX VIP: regex kelas TIDAK boleh menangkap [VIP] — kalau tidak, VIP
+  // ditulis ulang diam-diam setiap save (bug: tag VIP selalu "kembali"
+  // walau checkbox sudah di-uncheck).
+  let kelasMatch = (c.catatanInt || '').match(/\[(?:KELAS\s*([A-Z0-9]+)|(?![VIP\])([A-Z0-9]+))\]/i);
   if (kelasMatch) {
     let namaKelas = kelasMatch[1] || kelasMatch[2];
     intNote += ` [${namaKelas.toUpperCase()}]`;

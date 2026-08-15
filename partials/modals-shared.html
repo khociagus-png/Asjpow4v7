@@ -274,6 +274,15 @@
           <div id="cv-admin-notes-area" class="border-t border-slate-700 pt-5 mt-5 hidden">
               <h4 class="text-sm font-bold text-white uppercase mb-3"><i class="fas fa-edit mr-2 text-pink-400"></i><span data-lang="ui.cand_eval"> Evaluasi Kandidat (Admin)</span></h4>
               <div class="space-y-3">
+                  <!-- FIX VIP: tag [VIP] dulu hilang karena di-strip dari
+                       textarea saat modal dibuka dan tidak ditulis ulang saat
+                       save. Checkbox ini menjaga status VIP secara eksplisit
+                       (bukan string di catatan), dan simpanCatatanCv menulis
+                       ulang [VIP] ke catatan internal kalau dicentang. -->
+                  <div class="flex items-center gap-2.5 bg-emerald-950/40 border border-emerald-500/30 rounded-lg px-3 py-2.5">
+                      <input type="checkbox" id="cv-vip-toggle" class="w-4 h-4 accent-emerald-500 cursor-pointer">
+                      <label for="cv-vip-toggle" class="text-xs font-black text-emerald-400 uppercase tracking-wide cursor-pointer select-none"><i class="fas fa-award mr-1"></i> Tandai VIP (lencana resmi)</label>
+                  </div>
                   <div>
                       <label class="text-xs text-red-400 font-bold uppercase block mb-1"><span data-lang="ui.note_internal">Catatan Internal (Private)</span></label>
                       <textarea id="cv-catatan-int" class="w-full bg-black/40 border border-red-900/50 focus:border-red-500 rounded-lg p-2.5 text-sm text-slate-300 outline-none transition" rows="2" placeholder="Kelemahan/Catatan khusus admin…"></textarea>

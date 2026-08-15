@@ -47,7 +47,26 @@ function jobDilamarCell(c) {
       extra +
       '</span>';
   }
-  return label;
+  // Riwayat lamaran (multi-apply): tombol CV per loker — tiap lamaran membawa
+  // file_cv sendiri (CV loker lama & baru tetap utuh di folder kandidat).
+  var appCvBtns = '';
+  (c.applications || []).forEach(function (a) {
+    var acode = a && a.code ? String(a.code).trim() : '';
+    var acv = a && a.cv ? String(a.cv) : '';
+    if (!acode || !acv || acv === '-' || !/^https?:/i.test(acv)) return;
+    var isImg = /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(acv) || /^data:image\//i.test(acv);
+    appCvBtns +=
+      '<button onclick="' +
+      (isImg ? 'bukaFotoPreview' : 'bukaPdfPreview') +
+      "('" +
+      escJs(acv) +
+      '\')" title="CV ' +
+      esc(acode) +
+      '" class="px-1.5 py-0.5 rounded bg-indigo-900/70 text-indigo-300 border border-indigo-600/50 text-[9px] font-bold hover:bg-indigo-700 hover:text-white transition whitespace-nowrap"><i class="fas fa-file-alt mr-0.5"></i>CV ' +
+      esc(acode) +
+      '</button>';
+  });
+  return label + (appCvBtns ? '<span class="flex flex-wrap gap-1 mt-1.5">' + appCvBtns + '</span>' : '');
 }
 
 function adminSwitchTab(t) {
@@ -951,7 +970,7 @@ function renderKandidatTable(arr) {
       '</td>' +
       '<td data-label="' +
       tr('table.applied_job') +
-      '" class="p-4 text-amber-300 font-mono text-xs max-w-[120px] truncate">' +
+      '" class="p-4 text-amber-300 font-mono text-xs max-w-[200px]">' +
       jobDilamarCell(c) +
       '</td>' +
       '<td data-label="' +
@@ -1021,9 +1040,10 @@ function renderKandidatTable(arr) {
 // Status baru (konsisten dgn config list_status_lamaran): MENUNGGU,
 // REVIEW ADMIN, LULUS, GAGAL — legacy APPROVED/REJECTED tetap dihitung
 // ke LULUS/GAGAL biar data lama tidak hilang dari daftar.
-var MAIL_STATUS_KEYS = ['MENUNGGU', 'REVIEW', 'LULUS', 'GAGAL', 'ALL'];
+var MAIL_STATUS_KEYS = ['MENUNGGU', 'UPDATE', 'REVIEW', 'LULUS', 'GAGAL', 'ALL'];
 var MAIL_STATUS_LABEL = {
   MENUNGGU: 'MENUNGGU',
+  UPDATE: 'UPDATE',
   REVIEW: 'REVIEW ADMIN',
   LULUS: 'LULUS',
   GAGAL: 'GAGAL',
@@ -1035,6 +1055,7 @@ var MAIL_STATE_OF = function (x) {
 // Kelompokkan status (baru + legacy) ke bucket filter.
 var MAIL_BUCKET = function (st) {
   if (st === 'MENUNGGU' || st === 'MAIL' || st === 'BARU' || st === 'PENDING') return 'MENUNGGU';
+  if (st === 'UPDATE' || st === 'UPDATED' || st === 'DATA DIUBAH') return 'UPDATE';
   if (st === 'REVIEW ADMIN' || st === 'REVIEW') return 'REVIEW';
   if (st === 'LULUS' || st === 'LOLOS' || st === 'APPROVED' || st === 'APPROVE') return 'LULUS';
   if (st === 'GAGAL' || st === 'TOLAK' || st === 'REJECTED' || st === 'REJECT') return 'GAGAL';
@@ -1063,6 +1084,10 @@ function renderMailFilterUI() {
       '<span class="text-sky-400">' +
       tr('ui.waiting_label') +
       count('MENUNGGU') +
+      '</span> &nbsp;|&nbsp; ' +
+      '<span class="text-violet-400">' +
+      tr('ui.update_label') +
+      count('UPDATE') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-amber-400">' +
       tr('ui.review_label') +
@@ -1094,7 +1119,9 @@ function renderFormInbox() {
     var bucket = MAIL_BUCKET(st);
     var ok = false;
     if (mailFilterStatus === 'ALL') ok = true;
-    else if (mailFilterStatus === 'MENUNGGU') ok = bucket === 'MENUNGGU';
+    // Tab MENUNGGU menampilkan lamaran baru + yang di-update kandidat
+    // (UPDATE) — keduanya butuh perhatian admin.
+    else if (mailFilterStatus === 'MENUNGGU') ok = bucket === 'MENUNGGU' || bucket === 'UPDATE';
     else if (mailFilterStatus === 'REVIEW') ok = bucket === 'REVIEW';
     else if (mailFilterStatus === 'LULUS') ok = bucket === 'LULUS';
     else if (mailFilterStatus === 'GAGAL') ok = bucket === 'GAGAL';
@@ -1168,9 +1195,11 @@ function renderFormInbox() {
         ? 'bg-emerald-900/50 border-emerald-500/40 text-emerald-300'
         : MAIL_BUCKET(st) === 'GAGAL'
           ? 'bg-red-900/50 border-red-500/40 text-red-300'
-          : MAIL_BUCKET(st) === 'REVIEW'
-            ? 'bg-sky-900/40 border-sky-500/30 text-sky-400'
-            : 'bg-amber-900/40 border-amber-500/30 text-amber-300';
+          : MAIL_BUCKET(st) === 'UPDATE'
+            ? 'bg-violet-900/50 border-violet-500/40 text-violet-300'
+            : MAIL_BUCKET(st) === 'REVIEW'
+              ? 'bg-sky-900/40 border-sky-500/30 text-sky-400'
+              : 'bg-amber-900/40 border-amber-500/30 text-amber-300';
     // Row yang sudah diproses: tampilkan keterangan feedback, tanpa tombol review.
     // Escape teks bebas (alasan reject dari admin) supaya tidak bisa
     // menyisipkan HTML/script saat dirender.
@@ -1188,11 +1217,31 @@ function renderFormInbox() {
       ')" class="px-2 py-1.5 bg-slate-700 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
       tr('ui.delete_mail') +
       '"><i class="fas fa-trash-alt"></i></button>';
-    if (isProcessed) {
+    if (MAIL_BUCKET(st) === 'UPDATE') {
+      // Baris UPDATE: tampilkan ringkasan apa yang berubah + tombol
+      // "Tandai Dibaca" (kembali ke status LULUS/GAGAL/REVIEW aslinya).
+      actionCell =
+        '<div class="flex items-center gap-2 justify-center flex-wrap">' +
+        '<div class="text-[10px] text-violet-300 max-w-[180px] truncate" title="' +
+        esc(f.feedback) +
+        '">' +
+        esc(f.feedback) +
+        '</div>' +
+        '<button onclick="tandaiDibacaForm(' +
+        f.rowIndex +
+        ')" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
+        tr('ui.mark_read_label') +
+        '"><i class="fas fa-check-double mr-1"></i>' +
+        tr('ui.mark_read_label') +
+        '</button> ' +
+        deleteBtn +
+        '</div>';
+    } else if (isProcessed) {
       actionCell =
         '<div class="flex items-center gap-2 justify-center"><div class="text-[10px] text-slate-400">' +
         esc(
-          f.keterangan ||
+          f.feedback ||
+            f.keterangan ||
             (MAIL_BUCKET(st) === 'GAGAL' ? tr('ui.lamaran_ditolak') : tr('ui.lamaran_disetujui')),
         ) +
         '</div>' +
@@ -1273,7 +1322,15 @@ function renderFormInbox() {
       badgeClass +
       '">' +
       esc(trOption(f.status)) +
-      '</span></td>' +
+      '</span>' +
+      (f.feedback
+        ? '<div class="text-[9px] text-violet-300/70 mt-1 max-w-[150px] break-words" title="' +
+          esc(f.feedback) +
+          '">' +
+          esc(f.feedback) +
+          '</div>'
+        : '') +
+      '</td>' +
       '<td data-label="' +
       tr('table.doc_folder') +
       '" class="rt-full p-4 text-center">' +
