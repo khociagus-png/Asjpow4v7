@@ -314,7 +314,10 @@ async function handleGetAppData(payload, sessionToken) {
         supabase.attachBerkasBio(result.candidates),
         loadSchedules(),
         loadTugas(),
-        supabase.findForms(),
+        // Inbox admin: proyeksi kolom ringan (mapForm & attachApplications
+        // hanya membaca kolom itu); fallback findForms() bila skema tidak
+        // cocok dengan FORM_LIGHT_COLS.
+        supabase.findFormsLight().then((r) => (r === undefined ? supabase.findForms() : r)),
         loadWaTemplates(),
       ]);
       result.candidates = berkas;

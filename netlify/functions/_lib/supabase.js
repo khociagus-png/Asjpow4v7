@@ -261,6 +261,14 @@ function parseDocs(keterangan) {
   return out;
 }
 
+// Kolom RINGAN mail inbox (database_asj_form) — gabungan semua kolom yang
+// benar-benar dibaca dari baris form: mapForm (formInbox admin),
+// attachApplications (lamaran per WA), parseDocs (keterangan NAMA:URL;...).
+// `select *` lama ikut kolom berat (ai_data_json, dll.) yang tidak pernah
+// dibaca dari formInbox.
+const FORM_LIGHT_COLS =
+  'id,timestamp,code_job,kategory,nama_lengkap,no_wa,status,folder_url,pas_photo,jft,ssw,file_cv,keterangan,feedback_berkas,created_at,updated_at';
+
 // Urutan form konsisten (dipakai getAppData DAN handler review/approve/reject/
 // delete yang menerima rowIndex = posisi di array ini).
 async function findForms() {
@@ -268,6 +276,23 @@ async function findForms() {
     query: { select: '*', order: 'timestamp.desc', limit: 500 },
   });
   return Array.isArray(rows) ? rows : [];
+}
+
+// Baris mail RINGAN (proyeksi FORM_LIGHT_COLS) untuk getAppData admin —
+// mapForm & attachApplications hanya membaca kolom di proyeksi ini, jadi
+// kolom berat tidak perlu ikut. Urutan TETAP timestamp.desc (sama dengan
+// findForms) supaya rowIndex di frontend konsisten dengan
+// findFormByIndexFiltered. Return: array | undefined (skema tidak cocok →
+// caller fallback findForms()).
+async function findFormsLight() {
+  try {
+    const rows = await supabaseJson('GET', 'database_asj_form', {
+      query: { select: FORM_LIGHT_COLS, order: 'timestamp.desc', limit: 500 },
+    });
+    return Array.isArray(rows) ? rows : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 // Query paginated dengan Range header + total dari Content-Range.
@@ -703,31 +728,36 @@ async function findFormByIndexFiltered(idx) {
   }
 }
 
-// Baris mail untuk daftar WA (in-filter) — share-data extra docs. Fallback:
-// undefined → scan penuh.
+// Baris mail untuk daftar WA (in-filter) — share-data extra docs &
+// attachApplications halaman kandidat. Hanya membaca kolom ringan
+// (keterangan/no_wa/dll.), jadi proyeksi FORM_LIGHT_COLS dicoba dulu;
+// fallback select * bila kolom tidak cocok; undefined → scan penuh.
 async function findFormsByWaList(waList) {
   const list = [
     ...new Set((Array.isArray(waList) ? waList : []).map((w) => normalizeWa(w)).filter(Boolean)),
   ];
   if (!list.length) return [];
   const inList = list.join(',');
-  try {
-    const rows = await supabaseJson('GET', 'database_asj_form', {
-      query: { select: '*', limit: '500', or: `(no_wa.in.(${inList}),wa.in.(${inList}))` },
-    });
-    if (Array.isArray(rows)) return rows;
-  } catch {
-    /* or gagal — coba no_wa saja */
-  }
-  try {
-    const rows = await supabaseJson('GET', 'database_asj_form', {
-      query: { select: '*', limit: '500', no_wa: 'in.(' + inList + ')' },
-    });
-    if (Array.isArray(rows)) return rows;
-  } catch {
-    /* fallback scan penuh */
-  }
-  return undefined;
+  const tryQuery = async (query) => {
+    try {
+      const light = await supabaseJson('GET', 'database_asj_form', {
+        query: { ...query, select: FORM_LIGHT_COLS },
+      });
+      if (Array.isArray(light)) return light;
+    } catch {
+      /* proyeksi tidak cocok — coba select * */
+    }
+    try {
+      const full = await supabaseJson('GET', 'database_asj_form', { query });
+      if (Array.isArray(full)) return full;
+    } catch {
+      /* coba jalur berikutnya */
+    }
+    return undefined;
+  };
+  const r1 = await tryQuery({ limit: '500', or: `(no_wa.in.(${inList}),wa.in.(${inList}))` });
+  if (r1 !== undefined) return r1;
+  return tryQuery({ limit: '500', no_wa: 'in.(' + inList + ')' });
 }
 
 // Kandidat yang terkait ke satu kode job (id_loker_pilihan bisa berisi banyak
@@ -780,6 +810,14 @@ async function fetchBerkasByWa(waList) {
   }
 }
 
+// Kolom RINGAN master_database_candidate — hanya kolom yang benar-benar
+// dibaca attachBerkasBio (BERKAS_COLUMNS *_url + BIO_COLUMNS + pencocok WA).
+// Tabel master 154 kolom (±6,5 KB/baris); proyeksi ini ±16 kolom. Jalur yang
+// butuh baris PENUH master (findMasterByWa → CV builder / getDrafCvMaster /
+// ai_data_json) TETAP memakai fetchMasterByWa select *.
+const MASTER_LIGHT_COLS =
+  'id,id_kandidat,nama_lengkap,no_wa,kk_url,ijazah_sd_url,ijazah_smp_url,ijazah_sma_url,univ_url,ktp_url,email,tempat_lahir,tgl_lahir,alamat_lengkap,no_coe,exp_pasport';
+
 // Tarik master_database_candidate hanya untuk WA di daftar. Coba kolom WA
 // umum (or), lalu no_wa saja — fallback null → scan penuh.
 async function fetchMasterByWa(waList) {
@@ -807,6 +845,37 @@ async function fetchMasterByWa(waList) {
   return null;
 }
 
+// Master RINGAN (proyeksi MASTER_LIGHT_COLS) untuk attachBerkasBio — TIDAK
+// membawa 138 kolom yang tidak pernah dibaca (berat ~6,5 KB/baris → ~0,5 KB).
+// Filter WA-set sama dengan fetchMasterByWa; proyeksi gagal (skema kolom
+// berbeda) → fallback select * agar perilaku tidak berubah. null → scan penuh.
+async function fetchMasterLightByWa(waList) {
+  const inList = waList.join(',');
+  const tryQuery = async (query) => {
+    try {
+      const light = await supabaseJson('GET', 'master_database_candidate', {
+        query: { ...query, select: MASTER_LIGHT_COLS },
+      });
+      if (Array.isArray(light)) return light;
+    } catch {
+      /* proyeksi tidak cocok — coba select * */
+    }
+    try {
+      const full = await supabaseJson('GET', 'master_database_candidate', { query });
+      if (Array.isArray(full)) return full;
+    } catch {
+      /* coba jalur berikutnya */
+    }
+    return null;
+  };
+  const r1 = await tryQuery({
+    limit: '500',
+    or: `(no_wa.in.(${inList}),wa.in.(${inList}),whatsapp.in.(${inList}))`,
+  });
+  if (r1 !== null) return r1;
+  return tryQuery({ limit: '500', no_wa: 'in.(' + inList + ')' });
+}
+
 async function attachBerkasBio(candidates) {
   if (!Array.isArray(candidates) || candidates.length === 0) return candidates;
   try {
@@ -817,7 +886,9 @@ async function attachBerkasBio(candidates) {
     ];
     const useFilter = waList.length > 0 && waList.length <= 150;
     let pRows = useFilter ? await fetchBerkasByWa(waList) : null;
-    let mRows = useFilter ? await fetchMasterByWa(waList) : null;
+    // Jalur ringan: master hanya butuh kolom BERKAS_COLUMNS/BIO_COLUMNS —
+    // jangan bawa 154 kolom penuh (sebelumnya ±6,5 KB/baris per kandidat).
+    let mRows = useFilter ? await fetchMasterLightByWa(waList) : null;
     // Fallback per-tabel: scan penuh (perilaku lama) kalau filter gagal.
     if (!Array.isArray(pRows)) {
       try {
@@ -986,6 +1057,7 @@ module.exports = {
   mapForm,
   parseDocs,
   findForms,
+  findFormsLight,
   normalizeWa,
   pick,
   toText,
