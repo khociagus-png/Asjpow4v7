@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `2f790ff` (lihat `git log`).
+**Update terakhir:** commit `1113647` (lihat `git log`).
 
 ---
 
@@ -57,6 +57,25 @@ konsistensi close modal + data foto kandidat.
   FIRMA ELGA PRATAMA (id 41), keduanya diperbaiki ke pas_photo master yang
   ada. Verifikasi ulang: **127 valid, 0 rusak**. Backup:
   `.freebuff/pasphoto-fix-backup-*.json`.
+
+### 6. Migrasi file_cv ke Storage + rapikan fitur drive-links (`dd241fe`, `1113647`)
+
+- **`migrate-filecv-drive.mjs`** (dry-run default, `--apply` + backup ke
+  `.freebuff/`): sambungkan `file_cv` kandidat ke file CV **terbaru** di
+  folder `master/<NAMA>/` (updated_at storage, fallback timestamp nama;
+  deteksi CVFILE / `1. X_CV` / RIREKI).
+- **Eksekusi 40 link Drive** (baris legacy 2026-08-01, era GAS): 40/40
+  dimigrasi → **0 link Drive tersisa** di file_cv. Tombol CV di share view /
+  dashboard kini membuka file Storage (SATORI → `CVFILE_…xlsx`).
+- **Eksekusi 135 file_cv kosong:** hanya **AZWAR ADUBA** yang punya file CV di
+  Storage (`nama_TG632ASJcv.xlsx`) → tersambung; 134 lain memang tidak punya
+  CV di Storage (folder cuma foto/empty) — dibiarkan.
+- **Fitur drive-links dirapikan:** (a) fix key mismatch — frontend baca
+  `res.list` padahal handler mengembalikan `res.data` → fitur selalu kosong
+  dan banner kuning tidak pernah muncul, kini `res.data || res.list`;
+  (b) `folder_url` CITRA ANANDA (satu-satunya link Drive tersisa, file lama)
+  di-clear karena dokumennya sudah di Storage → `getDriveLinkCandidates`
+  kembali `0` → banner "kandidat Drive" otomatis tersembunyi.
 
 ### 5. Audit diperluas ke 4 kolom + fallback foto share view + audit di CI (`2f790ff`)
 

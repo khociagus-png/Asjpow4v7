@@ -1,10 +1,19 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `2f790ff`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `1113647`.
 
 ---
 
 ## 2026-08-15 — Sesi terbaru: dedupe data & dokumen, share view, keamanan, CI
+
+### `1113647` — Sambungkan file_cv kosong + rapikan fitur drive-links
+- `migrate-filecv-drive.mjs` diperluas ke **file_cv kosong** (bukan hanya link Drive): dari 135 kosong, hanya **AZWAR ADUBA** yang punya file CV di Storage (`nama_TG632ASJcv.xlsx`) → tersambung; 134 lain memang tidak punya CV di Storage (dibiarkan).
+- **Fix key mismatch fitur drive-links:** frontend baca `res.list` padahal handler mengembalikan `res.data` → fitur selalu kosong & banner tak pernah muncul; kini `res.data || res.list`.
+- `folder_url` CITRA ANANDA (satu-satunya link Drive tersisa, file lama) di-clear — semua dokumennya sudah di Storage; `getDriveLinkCandidates` kini **0** → banner migrasi otomatis tersembunyi.
+
+### `dd241fe` — Migrasi 40 file_cv kandidat dari Google Drive ke Storage master/
+- Skrip baru `scripts/migrate-filecv-drive.mjs` (dry-run default, `--apply` + backup): file_cv → file CV **terbaru** di folder `master/<NAMA>/` (updated_at storage, fallback timestamp nama; deteksi CVFILE / `1. X_CV` / RIREKI).
+- **Eksekusi produksi:** 40/40 kandidat legacy (created 2026-08-01) dimigrasi → **0 link Drive tersisa**; tombol CV di share view/dashboard membuka file Storage (verifikasi SATORI → `CVFILE_…xlsx`).
 
 ### `2f790ff` — Audit berkas kandidat 4 kolom + fallback foto share view + audit di CI
 - `audit-pasphoto.mjs` diperluas: memeriksa **pas_photo, file_cv, jft, ssw** terhadap file Storage `master/` (paginasi penuh) dan memperbaiki ke nilai master sejenis (`pas_photo→pas_photo`, `file_cv→file_cv`, `jft→jft_url`, `ssw→ssw_url`). Hasil audit: **0 rusak** (40 link Google Drive legacy dicatat, tidak disentuh).
