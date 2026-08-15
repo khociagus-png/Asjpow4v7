@@ -264,7 +264,12 @@ async function handleGetAppData(payload, sessionToken) {
 // ---------------------------------------------------------------------------
 // getAppConfig — diagnostik koneksi (TIDAK membocorkan secret)
 // ---------------------------------------------------------------------------
-async function handleGetAppConfig() {
+async function handleGetAppConfig(sessionToken) {
+  // Endpoint ini mengembalikan info SENSITIF (skema DB, klasifikasi hash
+  // password kandidat, daftar env key yang terpasang) — wajib sesi admin.
+  // Tidak ada halaman publik yang memanggilnya; frontend mengirim token admin.
+  const guard = requireAdmin(sessionToken);
+  if (guard.error) return guard.error;
   const diag = {
     success: true,
     backend: 'netlify-functions-rebuild',
@@ -1087,7 +1092,7 @@ async function handleAction(action, payload, sessionToken) {
     case 'getAppData':
       return handleGetAppData(payload, sessionToken);
     case 'getAppConfig':
-      return handleGetAppConfig();
+      return handleGetAppConfig(sessionToken);
     case 'checkAdminMaster':
       return handleCheckAdminMaster(payload);
     case 'checkAdminPersonal':
