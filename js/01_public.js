@@ -420,7 +420,7 @@ function bukaDetailLoker(code) {
   var stUp = (j.status || '').toUpperCase();
   var isOpen = stUp.indexOf('OPEN') >= 0 || stUp.indexOf('URGENT') >= 0;
   // Status loker publik: OPEN hijau, URGENT amber pulse, CLOSE merah.
-  var statusLabel = trOption(j.status);
+  var statusLabel = esc(trOption(j.status));
   var statusBadge =
     stUp.indexOf('URGENT') >= 0
       ? '<span class="px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black animate-pulse"><i class="fas fa-bolt mr-1"></i>' +
@@ -438,39 +438,38 @@ function bukaDetailLoker(code) {
   html +=
     '<div class="flex items-start gap-4 mb-6">' +
     (pamfletUrl
-      ? '<img src="' +
-        thumbUrl +
+      ? '<img src="' +        esc(thumbUrl) +
         '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' +
-        pamfletUrl +
-        '\')" class="w-20 h-28 object-cover rounded-xl border border-slate-600 shadow-lg cursor-pointer hover:scale-105 transition flex-shrink-0" title="' +
+        escJs(pamfletUrl) +
+        '\') " class="w-20 h-28 object-cover rounded-xl border border-slate-600 shadow-lg cursor-pointer hover:scale-105 transition flex-shrink-0" title="' +
         tr('ui.click_zoom') +
         '" alt="Pamflet">'
       : '') +
     '<div class="flex-1 min-w-0">' +
     '<div class="flex flex-wrap items-center gap-2">' +
     '<span class="text-sky-400 font-mono text-xs font-bold">' +
-    j.code +
+    esc(j.code) +
     '</span>' +
     statusBadge +
     (j.kuota && j.kuota !== '-'
       ? '<span class="px-2 py-0.5 bg-slate-800 text-slate-300 border border-slate-600 rounded-full text-[9px] font-bold"><i class="fas fa-users mr-1"></i> ' +
         tr('ui.quota') +
         ': ' +
-        j.kuota +
+        esc(j.kuota) +
         '</span>'
       : '') +
     '</div>' +
     '<h3 class="text-xl md:text-2xl font-black text-white mt-1.5 leading-tight">' +
-    j.pekerjaan +
+    esc(j.pekerjaan) +
     '</h3>' +
     '<div class="flex flex-wrap items-center gap-2 mt-3 text-[11px]">' +
     lokerGenderBadge(j.gender) +
     '<span class="px-2.5 py-1 bg-slate-800 text-slate-300 border border-slate-600 rounded font-bold"><i class="fas fa-map-marker-alt mr-1 text-red-400"></i> ' +
-    trOption(j.lokasi) +
+    esc(trOption(j.lokasi)) +
     '</span></div>' +
     (j.kategori
       ? '<div class="text-[10px] text-slate-500 mt-2"><i class="fas fa-tag mr-1 text-sky-500/70"></i> ' +
-        trOption(j.kategori) +
+        esc(trOption(j.kategori)) +
         '</div>'
       : '') +
     '</div>' +
@@ -513,7 +512,7 @@ function bukaDetailLoker(code) {
         .map(function (s) {
           return (
             '<li class="flex items-start text-xs text-slate-300"><i class="fas fa-check text-emerald-500 mt-0.5 mr-2 text-[10px]"></i>' +
-            trOption(s) +
+            esc(trOption(s)) +
             '</li>'
           );
         })
@@ -528,7 +527,7 @@ function bukaDetailLoker(code) {
       tr('ui.detail_keterangan') +
       '</h4>' +
       '<p class="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">' +
-      j.keterangan +
+      esc(j.keterangan) +
       '</p></div>';
   }
 
@@ -543,15 +542,15 @@ function bukaDetailLoker(code) {
     j.pekerjaan +
     '). Mohon info lebih lanjut.';
   var directUrl = getDirectDownloadUrl(j.templateCv);
-  var katEsc = String(j.kategori || '').replace(/'/g, "\\'");
-  var reqEsc = String(j.dokumenShare || '').replace(/'/g, "\\'");
+  var katEsc = escJs(j.kategori || '');
+  var reqEsc = escJs(j.dokumenShare || '');
   var tutupLamar = jobTutupUntukLamar(j);
   var btnLamar = tutupLamar
     ? '<button disabled class="flex-1 px-5 py-3.5 bg-slate-600 text-white text-sm font-black text-center rounded-xl shadow-inner opacity-60 cursor-not-allowed"><i class="fas fa-door-closed mr-1.5"></i> ' +
       tr('button.closed') +
       '</button>'
     : '<button onclick="lamarJob(\'' +
-      j.code +
+      escJs(j.code) +
       "', '" +
       katEsc +
       "', '" +
@@ -563,7 +562,7 @@ function bukaDetailLoker(code) {
     '<div class="flex flex-col sm:flex-row gap-3">' +
     (directUrl
       ? '<a href="' +
-        directUrl +
+        esc(directUrl) +
         '" target="_blank" download class="flex-1 px-5 py-3.5 bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold text-center rounded-xl shadow-[0_4px_15px_rgba(2,132,199,0.4)] transition"><i class="fas fa-download mr-1.5"></i> ' +
         tr('button.format') +
         '</a>'

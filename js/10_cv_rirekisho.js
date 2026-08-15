@@ -89,7 +89,10 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
   // Prioritas: (a) d nested hasil getDrafCvMaster (identitas.nama_lengkap,
   // wawancara.kelebihan_jp, dst), (b) ai_data_json (AIDATAJSON), (c) key flat
   // uppercase lama (NAMALENGKAP, GENDER, dst) agar kompatibel data legacy.
-  const v = makeV(d, ai);
+  const vRaw = makeV(d, ai);
+  // S1 (XSS): semua nilai dari v() di-escape HTML sebelum masuk template A4 —
+  // data kandidat (nama, sekolah, alamat, dst) bisa mengandung <, >, &, kutip.
+  const v = (...keys) => esc(vRaw(...keys));
   // Baca array riwayat dari d (hasil getDrafCvMaster) atau ai — kolom flat
   // legacy tidak dipakai lagi karena backend sudah menormalkan ke array.
   const getArr = (key) => {

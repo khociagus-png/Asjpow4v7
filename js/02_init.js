@@ -510,7 +510,12 @@ function populate(id, list) {
   // supaya data yang dipilih/disimpan tidak berubah.
   if (list && list.length > 0) {
     for (var i = 0; i < list.length; i++)
-      html += '<option value="' + trOptionId(list[i]) + '">' + trOption(list[i]) + '</option>';
+      html +=
+        '<option value="' +
+        esc(trOptionId(list[i])) +
+        '">' +
+        esc(trOption(list[i])) +
+        '</option>';
   }
   el.innerHTML = html;
 }
@@ -554,9 +559,9 @@ function populateCheckboxes(id, list, nameAttr) {
         '<label class="flex items-center gap-2 cursor-pointer p-1 hover:bg-white/10 rounded text-slate-300"><input type="checkbox" name="' +
         nameAttr +
         '" value="' +
-        trOptionId(list[i]) +
+        esc(trOptionId(list[i])) +
         '" class="accent-red-500"> ' +
-        trOption(list[i]) +
+        esc(trOption(list[i])) +
         '</label>';
     }
   }

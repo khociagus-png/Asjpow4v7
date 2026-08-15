@@ -240,5 +240,44 @@ function callNetlify(action, payload) {
   return callAPI(action, payload);
 }
 
+// ============================================================
+// esc() / escJs() — escape HTML global (REVIEW.md S1).
+// Dipakai SEMUA halaman (bundel index/admin + halaman standalone)
+// untuk data user-supplied sebelum masuk ke innerHTML / atribut /
+// argumen onclick. esc() untuk teks & atribut; escJs() untuk nilai
+// yang disisipkan ke string JS di dalam onclick (escape \ dan kutip).
+// ============================================================
+function esc(x) {
+  return String(x == null ? '' : x)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escJs(x) {
+  // Nilai disisipkan ke string JS DI DALAM atribut HTML ber-tanda kutip
+  // ganda: onclick="fn('...')". Dua lapis yang harus dijaga:
+  //   1) JS: \\ -> \\\\ dulu, lalu ' -> \\' (urutan ini wajib supaya
+  //      payload \\ + ' tidak merusak literal string).
+  //   2) HTML: & < > " -> entity. Tanpa ini, " di payload tetap
+  //      memutus atribut (\\" bukan escape HTML) dan sisanya bocor
+  //      menjadi atribut baru (stored XSS — diverifikasi di browser).
+  //      Entity ter-decode balik oleh parser HTML sebelum masuk ke JS,
+  //      jadi string JS-nya tetap utuh dan aman.
+  return String(x == null ? '' : x)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/[\r\n\u2028\u2029]/g, ' ');
+}
+
+window.esc = esc;
+window.escJs = escJs;
+
 // Semua pemanggilan di frontend memakai callAPI() langsung ke Netlify Functions
 // + Supabase — tidak ada lagi jalur Google Apps Script / callGAS.

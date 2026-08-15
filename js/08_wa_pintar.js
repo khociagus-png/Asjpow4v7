@@ -252,7 +252,7 @@ function renderRiwayatKandidat() {
                     <div class="mt-3">
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fas fa-route mr-1 text-sky-400"></i> ${tr('form.txt_tahapan_saat_ini')}</span>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-black ${isGagal ? 'text-red-400' : 'text-emerald-400'}"><i class="fas ${isGagal ? 'fa-ban' : 'fa-map-pin'}"></i> ${isGagal ? tr('form.txt_proses_dihentikan') : trOption(stepNames[stepIdx])}</span>
+                            <span class="inline-flex items-center gap-1 text-[10px] font-black ${isGagal ? 'text-red-400' : 'text-emerald-400'}"><i class="fas ${isGagal ? 'fa-ban' : 'fa-map-pin'}"></i> ${isGagal ? tr('form.txt_proses_dihentikan') : esc(trOption(stepNames[stepIdx]))}</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 border border-slate-700/50">
                             <div class="bg-gradient-to-r ${progressData.color} h-1.5 rounded-full transition-all duration-1000 relative" style="width: ${isGagal ? 100 : progressData.percent}%">
@@ -278,7 +278,7 @@ function renderRiwayatKandidat() {
               '"><i class="fas ' +
               dot +
               ' flex-shrink-0"></i> ' +
-              trOption(nm) +
+              esc(trOption(nm)) +
               '</span>'
             );
           })
@@ -294,12 +294,12 @@ function renderRiwayatKandidat() {
         '<div class="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-1">' +
         '<div class="min-w-0">' +
         '<div class="text-sm font-black text-white tracking-wide break-words"><i class="fas fa-building text-slate-500 mr-2"></i>' +
-        (r.jobCode || r.kode || '-') +
+        esc(r.jobCode || r.kode || '-') +
         ' <span class="text-[9px] px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded ml-2 font-normal whitespace-nowrap">' +
         dateStr +
         '</span></div>' +
         '<div class="text-[11px] text-slate-400 mt-1 break-words"><i class="fas fa-tag mr-1 text-sky-500/70"></i> ' +
-        trOption(r.kategori || 'Umum') +
+        esc(trOption(r.kategori || 'Umum')) +
         '</div>' +
         '</div>' +
         '<div class="text-left sm:text-right min-w-0 max-w-full">' +
@@ -309,13 +309,13 @@ function renderRiwayatKandidat() {
         '<i class="fas ' +
         icon +
         ' mt-0.5 flex-shrink-0"></i> ' +
-        statusText +
+        esc(statusText) +
         '</span>' +
         '</div>' +
         '</div>' +
         ((st === 'REJECT' || st === 'TOLAK') && r.keterangan
           ? '<div class="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg"><div class="text-xs font-bold text-red-400 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Alasan Penolakan:</div><p class="text-[11px] text-slate-300 whitespace-pre-wrap leading-relaxed">' +
-            r.keterangan +
+            esc(r.keterangan) +
             '</p></div>'
           : '') +
         progressHtml +

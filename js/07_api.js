@@ -225,7 +225,7 @@ function renderTugas() {
       '<div class="flex justify-between items-center p-3 rounded-lg mb-2 border border-slate-700 ' +
       bg +
       '"><div><div class="text-xs font-bold text-white">' +
-      t.task +
+      esc(t.task) +
       '</div></div><div class="flex gap-1.5">' +
       btn +
       delBtn +
@@ -759,13 +759,13 @@ function cariKandidatManual(query) {
       .map(function (c) {
         return (
           '<div class="p-2.5 text-sm text-white hover:bg-sky-600/30 cursor-pointer border-b border-slate-700 last:border-0" onclick="pilihKandidatManual(\'' +
-          c.wa +
-          '\')">' +
+          escJs(c.wa) +
+          '\') ">' +
           '<div class="font-semibold">' +
-          (c.nama || '-') +
+          esc(c.nama || '-') +
           '</div>' +
           '<div class="text-xs text-slate-400">' +
-          (c.wa || '-') +
+          esc(c.wa || '-') +
           '</div>' +
           '</div>'
         );

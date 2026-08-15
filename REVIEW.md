@@ -200,8 +200,20 @@ Setelah M1, aman dari publik, tapi pertimbangkan memisahkan diagnostik
 
 ### 🟡 S1 — XSS stored (escape menyeluruh)
 
-- [ ] Audit render admin (`05_render.js`, `11_admin_ops.js`, `03_candidate.js`) +
+- [x] Audit render admin (`05_render.js`, `11_admin_ops.js`, `03_candidate.js`) +
       terapkan escape terpusat (helper global `esc()`) di semua data user-supplied.
+
+      Implementasi: helper global `esc()` (teks & atribut) + `escJs()` (nilai di
+      onclick ber-atribut kutip-ganda: escape JS `\\`→`\\\\` lalu `'`→`\\'`,
+      kemudian HTML-entity `& < > "` — tanpa lapis HTML, `"` tetap memutus atribut
+      dan payload bocor jadi atribut baru, terverifikasi di browser). Dipasang di:
+      `05_render.js`, `11_admin_ops.js`, `03_candidate.js`, `03_engine.js`, `02_init.js`,
+      `01_public.js` (detail loker publik), `06_admin_modal.js`, `07_api.js` (tugas &
+      pencarian kandidat), `08_wa_pintar.js`, `09_ai_copilot.js` (chat AI),
+      `12_esign_match.js` (matchmaking), `10_cv_rirekisho.js` (v() CV A4 di-escape
+      terpusat), `ai_form.html` (nama file & URL di status dokumen). Terverifikasi:
+      payload `<img onerror>` & `" onmouseover="` dinetralkan di browser; semua
+      suite E2E hijau (login-check 19/19, photo 7/7, modal 8/8, probe bersih).
 
 ### 🟡 S2 — Sisa scan penuh
 

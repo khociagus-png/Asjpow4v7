@@ -458,7 +458,7 @@ function jalankanMatchmaking() {
       let html = '';
       matchedCandidates.slice(0, 30).forEach((c, idx) => {
         // Batasi tampil 30 di layar agar tidak lag
-        let umur = c.usia !== '-' ? c.usia + ' Thn' : '? Thn';
+        let umur = c.usia !== '-' ? esc(c.usia) + ' Thn' : '? Thn';
         let tb_bb =
           c.tb !== '-' || c.bb !== '-'
             ? `TB:${c.tb.replace(/\D/g, '')} BB:${c.bb.replace(/\D/g, '')}`
@@ -481,7 +481,7 @@ function jalankanMatchmaking() {
                                 <i class="fas fa-user text-slate-400"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold text-white">${c.nama}</h4>
+                                <h4 class="text-xs font-bold text-white">${esc(c.nama)}</h4>
                                 <p class="text-[9px] text-slate-400 mt-0.5">${g} <span class="mx-1">|</span> ${umur} <span class="mx-1">|</span> ${tb_bb}</p>
                             </div>
                         </div>

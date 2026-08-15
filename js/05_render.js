@@ -175,11 +175,11 @@ function renderPublicFiltered() {
         tr('button.closed') +
         '</button>'
       : '<button onclick="lamarJob(\'' +
-        j.code +
+        escJs(j.code) +
         "', '" +
-        j.kategori +
+        escJs(j.kategori) +
         "', '" +
-        (j.dokumenShare || '') +
+        escJs(j.dokumenShare || '') +
         '\')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-[0_4px_15px_rgba(5,150,105,0.4)] transition text-[11px] font-bold border border-emerald-500/50"><i class="fas fa-paper-plane mr-1"></i> ' +
         tr('button.apply') +
         '</button>';
@@ -196,7 +196,7 @@ function renderPublicFiltered() {
     var actionBtns = '<div class="flex flex-col xl:flex-row gap-2 w-full justify-center">';
     actionBtns +=
       '<button onclick="bukaDetailLoker(\'' +
-      j.code +
+      escJs(j.code) +
       '\')" class="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-[0_4px_15px_rgba(245,158,11,0.4)] transition text-[10px] font-black border border-amber-500/50" title="' +
       tr('button.detail') +
       '"><i class="fas fa-eye mr-1"></i> ' +
@@ -211,7 +211,7 @@ function renderPublicFiltered() {
         ? '<div class="mt-2 pt-2 border-t border-slate-700/50 text-[10px] ' +
           (CURRENT_THEME === 'SAKURA' ? 'text-amber-700' : 'text-amber-300/90') +
           ' leading-relaxed"><i class="fas fa-info-circle mr-1"></i> ' +
-          j.keterangan +
+          esc(j.keterangan) +
           '</div>'
         : '';
 
@@ -257,9 +257,9 @@ function renderPublicFiltered() {
       let fullUrl = j.pamflet;
       pamfletHtml =
         '<img src="' +
-        thumbUrl +
+        esc(thumbUrl) +
         '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' +
-        fullUrl +
+        escJs(fullUrl) +
         '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border ' +
         (light ? 'border-rose-200' : 'border-slate-600') +
         ' shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' +
@@ -294,7 +294,7 @@ function renderPublicFiltered() {
       '<span class="font-bold text-base ' +
       textTitle +
       ' leading-tight">' +
-      j.pekerjaan +
+      esc(j.pekerjaan) +
       '</span>' +
       '<div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-[11px] ' +
       textSub +
@@ -385,12 +385,12 @@ function renderAdmin(filteredJobs) {
       '<td data-label="' +
       tr('table.code') +
       '" class="p-4 font-mono text-red-300 font-bold">' +
-      j.code +
+      esc(j.code) +
       '</td>' +
       '<td data-label="' +
       tr('table.job') +
       '" class="rt-full p-4 font-bold text-white">' +
-      j.pekerjaan +
+      esc(j.pekerjaan) +
       '</td>' +
       '<td data-label="' +
       tr('table.status') +
@@ -401,33 +401,33 @@ function renderAdmin(filteredJobs) {
       tr('table.admin_action') +
       '" class="rt-full p-4 text-center flex flex-wrap justify-center gap-2">' +
       "<button onclick=\"aksiAdmin('✅ OPEN', '" +
-      j.code +
+      escJs(j.code) +
       '\')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-full text-[11px] text-white font-bold shadow-lg transition-all">' +
       tr('admin.set_open') +
       '</button> ' +
       "<button onclick=\"aksiAdmin('❌ CLOSE', '" +
-      j.code +
+      escJs(j.code) +
       '\')" class="px-5 py-2 bg-slate-600 hover:bg-slate-500 rounded-full text-[11px] text-white font-bold shadow-lg transition-all">' +
       tr('admin.set_close') +
       '</button> ' +
       '<button onclick="bukaMatchmaking(\'' +
-      j.code +
+      escJs(j.code) +
       "', '" +
-      j.pekerjaan +
+      escJs(j.pekerjaan) +
       "', '" +
-      j.gender +
+      escJs(j.gender) +
       '\')" class="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-full text-[11px] font-bold shadow-[0_0_10px_rgba(139,92,246,0.4)] transition-all"><i class="fas fa-search-dollar mr-1"></i> ' +
       tr('admin.btn_match') +
       '</button> ' +
       '<button onclick="aksiGenerateQr(\'' +
-      j.code +
+      escJs(j.code) +
       "', '" +
-      j.kategori +
+      escJs(j.kategori) +
       '\')" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-full text-[11px] font-bold shadow-lg transition-all"><i class="fas fa-qrcode mr-1"></i> ' +
       tr('admin.btn_qr_pamflet') +
       '</button>' +
       '<button onclick="bukaEditFullLoker(\'' +
-      j.code +
+      escJs(j.code) +
       '\')" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-full text-[11px] font-bold shadow-lg transition-all"><i class="fas fa-edit"></i> ' +
       tr('admin.btn_edit') +
       '</button>' +
@@ -435,7 +435,7 @@ function renderAdmin(filteredJobs) {
       '<td data-label="' +
       tr('table.delete') +
       '" class="p-4 text-center"><button onclick="hapusLoker(\'' +
-      j.code +
+      escJs(j.code) +
       '\')" aria-label="' +
       tr('table.delete') +
       '" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"><i class="fas fa-trash"></i></button></td>' +
@@ -542,18 +542,18 @@ function renderDbJobTable(arr) {
       '<td data-label="' +
       tr('table.job_code') +
       '" class="p-4 font-mono text-purple-300 font-bold">' +
-      db.code +
+      esc(db.code) +
       '</td>' +
       '<td data-label="' +
       tr('table.tsk') +
       '" class="p-4">' +
-      db.tsk +
+      esc(db.tsk) +
       '</td>' +
       '<td data-label="' +
       tr('table.field_location') +
       '" class="rt-full p-4">' +
       '<div class="font-bold text-white text-[13px]">' +
-      db.pekerjaan +
+      esc(db.pekerjaan) +
       '</div>' +
       '<div class="text-[10px] text-slate-400 font-bold mt-1.5"><span class="text-sky-400"><i class="fas fa-tag mr-1"></i>' +
       trOption(db.kategori) +
@@ -564,7 +564,7 @@ function renderDbJobTable(arr) {
       '<td data-label="' +
       tr('table.candidate_count') +
       '" class="p-4 text-center cursor-pointer group" onclick="bukaModalListKandidat(\'' +
-      db.code +
+      escJs(db.code) +
       '\')"><div class="inline-block px-4 py-1.5 bg-sky-900/30 group-hover:bg-sky-600 rounded-lg transition-all"><span class="text-sky-400 group-hover:text-white font-bold text-lg">' +
       cands.length +
       '</span></div></td>' +
@@ -577,16 +577,16 @@ function renderDbJobTable(arr) {
       tr('table.action_db') +
       '" class="p-4 text-center">' +
       '<button onclick="bukaModalEditDbJob(\'' +
-      db.code +
+      escJs(db.code) +
       "', '" +
-      String(db.tahapan || '').replace(/'/g, "\\'") +
+      escJs(db.tahapan || '') +
       "', '" +
-      String(db.statusInt || '').replace(/'/g, "\\'") +
+      escJs(db.statusInt || '') +
       '\')" class="px-3 py-1.5 bg-purple-600 text-white rounded font-bold shadow text-[10px]"><i class="fas fa-edit"></i> ' +
       tr('admin.btn_edit') +
       '</button>' +
       '<button onclick="bukaModalShare(\'' +
-      db.code +
+      escJs(db.code) +
       '\')" class="ml-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold shadow text-[10px]" title="' +
       tr('ui.share_toggle_text') +
       '"><i class="fas fa-share-alt"></i> ' +
@@ -902,20 +902,20 @@ function renderKandidatTable(arr) {
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
 
     let namaTampil = isVip
-      ? c.nama +
+      ? esc(c.nama) +
         ' <img src="' +
-        logoSrc +
+        esc(logoSrc) +
         '" class="inline-block w-4 h-4 ml-1 rounded-full border border-emerald-500/50 object-contain drop-shadow-md" title="' +
         tr('ui.badge_official') +
         '">'
-      : c.nama;
+      : esc(c.nama);
 
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
       tr('table.candidate_id') +
       '" class="p-4 font-mono text-sky-300 font-bold">' +
-      c.idKandidat +
+      esc(c.idKandidat) +
       '</td>' +
       '<td data-label="' +
       tr('table.full_name') +
@@ -925,7 +925,7 @@ function renderKandidatTable(arr) {
       '<td data-label="' +
       tr('table.applied_job') +
       '" class="p-4 text-amber-300 font-mono text-xs max-w-[120px] truncate">' +
-      (c.idLoker || 'Umum') +
+      esc(c.idLoker || 'Umum') +
       '</td>' +
       '<td data-label="' +
       tr('table.stage_status') +
@@ -937,14 +937,14 @@ function renderKandidatTable(arr) {
       '<td data-label="' +
       tr('table.admin_note') +
       '" class="rt-full p-4 text-[11px] text-slate-400 max-w-[150px] truncate">' +
-      (c.catatanExt || c.catatan || '-') +
+      esc(c.catatanExt || c.catatan || '-') +
       '</td>' +
       '<td data-label="' +
       tr('table.action_candidate') +
       '" class="rt-full p-4 text-center flex gap-2 justify-center flex-wrap">' +
       // TOMBOL 1: Lihat Dashboard/Profil Digital
       '<button onclick="bukaDigitalCV(\'' +
-      c.idKandidat +
+      escJs(c.idKandidat) +
       '\')" aria-label="' +
       tr('button.view_cv') +
       '" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-[10px] shadow transition" title="' +
@@ -952,13 +952,13 @@ function renderKandidatTable(arr) {
       '"><i class="fas fa-user-circle"></i></button> ' +
       // TOMBOL 2: Tombol Baru Admin Lihat & Print CV
       '<button onclick="bukaPreviewCV_Admin(\'' +
-      c.wa +
+      escJs(c.wa) +
       '\')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] shadow transition font-bold" title="' +
       tr('ui.view_rireki') +
       '"><i class="fas fa-file-pdf mr-1"></i> CV</button> ' +
       // TOMBOL 3: Super Edit Kandidat
       '<button onclick="bukaSuperEditKandidat(\'' +
-      c.idKandidat +
+      escJs(c.idKandidat) +
       '\')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded text-[10px] font-bold shadow transition" title="' +
       tr('ui.edit_candidate') +
       '"><i class="fas fa-user-shield"></i> ' +
@@ -966,14 +966,14 @@ function renderKandidatTable(arr) {
       '</button> ' +
       // TOMBOL 4 & 5: Buka Form Master Manual & Kirim WA
       '<button onclick="bukaMasterEksternalAdmin(\'' +
-      c.wa +
+      escJs(c.wa) +
       "', '" +
-      c.nama +
+      escJs(c.nama) +
       '\')" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white rounded text-[10px] shadow transition" title="' +
       tr('ui.open_master_form') +
       '"><i class="fas fa-file-alt"></i> AI CV</button>' +
       '<button onclick="bukaModalWaPintar(\'' +
-      c.idKandidat +
+      escJs(c.idKandidat) +
       '\')" aria-label="' +
       tr('ui.send_wa_call') +
       '" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] shadow transition" title="' +
@@ -1090,25 +1090,25 @@ function renderFormInbox() {
     var btnPhoto =
       f.photo && f.photo !== '-' && f.photo.toLowerCase().startsWith('http')
         ? '<button onclick="bukaFotoPreview(\'' +
-          f.photo +
+          escJs(f.photo) +
           '\')" class="px-2 py-1 bg-pink-600 hover:bg-pink-500 text-white rounded text-[9px] font-bold shadow transition">Foto</button>'
         : '';
     var btnJft =
       f.jft && f.jft !== '-' && f.jft.toLowerCase().startsWith('http')
         ? '<button onclick="bukaPdfPreview(\'' +
-          f.jft +
+          escJs(f.jft) +
           '\')" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-[9px] font-bold shadow transition">JFT</button>'
         : '';
     var btnSsw =
       f.ssw && f.ssw !== '-' && f.ssw.toLowerCase().startsWith('http')
         ? '<button onclick="bukaPdfPreview(\'' +
-          f.ssw +
+          escJs(f.ssw) +
           '\')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[9px] font-bold shadow transition">SSW</button>'
         : '';
     var btnCv =
       f.cv && f.cv !== '-' && f.cv.toLowerCase().startsWith('http')
         ? '<button onclick="bukaPdfPreview(\'' +
-          f.cv +
+          escJs(f.cv) +
           '\')" class="px-2 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-[9px] font-bold shadow transition">CV</button>'
         : '';
 
@@ -1118,10 +1118,8 @@ function renderFormInbox() {
     (Array.isArray(f.docs) ? f.docs : []).forEach(function (dc) {
       var isImg =
         /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(dc.url) || /^data:image\//i.test(dc.url);
-      var escNama = String(dc.nama || 'DOKUMEN')
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '&quot;');
-      var escUrl = String(dc.url || '').replace(/'/g, "\\'");
+      var escNama = esc(dc.nama || 'DOKUMEN');
+      var escUrl = escJs(dc.url || '');
       extraDocBtns +=
         '<button onclick="' +
         (isImg ? 'bukaFotoPreview' : 'bukaPdfPreview') +
@@ -1225,7 +1223,7 @@ function renderFormInbox() {
       '<td data-label="' +
       tr('table.job_code') +
       '" class="p-4 font-mono text-sky-300 font-bold text-xs">' +
-      f.code +
+      esc(f.code) +
       '</td>' +
       '<td data-label="' +
       tr('table.category') +
@@ -1235,12 +1233,12 @@ function renderFormInbox() {
       '<td data-label="' +
       tr('table.applicant_name') +
       '" class="p-4 font-bold text-white text-xs whitespace-nowrap">' +
-      f.nama +
+      esc(f.nama) +
       '</td>' +
       '<td data-label="' +
       tr('table.wa_num') +
       '" class="p-4 text-xs text-emerald-400">' +
-      f.wa +
+      esc(f.wa) +
       '</td>' +
       '<td data-label="' +
       tr('table.status') +
@@ -1254,7 +1252,7 @@ function renderFormInbox() {
       '" class="rt-full p-4 text-center">' +
       '<div class="flex flex-wrap gap-1 justify-center">' +
       '<a href="' +
-      f.folderUrl +
+      esc(f.folderUrl) +
       '" target="_blank" aria-label="' +
       tr('table.doc_folder') +
       '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' +

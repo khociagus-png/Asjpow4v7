@@ -40,10 +40,10 @@ function renderDashboardAgenda() {
     var s = getStatusWaktu(j.waktu);
     html += `<div class="bg-black/40 border border-slate-700 p-3 rounded-xl flex justify-between items-center hover:bg-white/5 transition">
                         <div>
-                            <p class="text-xs font-bold text-white">${j.namaAgenda} <span class="px-1.5 py-0.5 rounded text-[8px] font-bold ml-1 ${s.bg} ${s.color}">${s.text}</span></p>
-                            <p class="text-[10px] text-amber-400 mt-0.5"><i class="fas fa-clock mr-1"></i> ${j.waktu} <span class="mx-1">|</span> <i class="fas fa-user mr-1"></i> ${j.kandidat}</p>
+                            <p class="text-xs font-bold text-white">${esc(j.namaAgenda)} <span class="px-1.5 py-0.5 rounded text-[8px] font-bold ml-1 ${s.bg} ${s.color}">${esc(s.text)}</span></p>
+                            <p class="text-[10px] text-amber-400 mt-0.5"><i class="fas fa-clock mr-1"></i> ${esc(j.waktu)} <span class="mx-1">|</span> <i class="fas fa-user mr-1"></i> ${esc(j.kandidat)}</p>
                         </div>
-                        <a href="${j.link !== '-' ? j.link : '#'}" target="_blank" aria-label="${tr('ui.open_link')}" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-full transition shadow"><i class="fas fa-video"></i></a>
+                        <a href="${esc(j.link !== '-' ? j.link : '#')}" target="_blank" aria-label="${tr('ui.open_link')}" class="w-8 h-8 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-full transition shadow"><i class="fas fa-video"></i></a>
                      </div>`;
   });
   if (upcoming.length === 0)
@@ -61,14 +61,14 @@ function renderJadwal() {
   for (var i = 0; i < Math.min(ALL_SCHEDULES.length, limitJad); i++) {
     var j = ALL_SCHEDULES[i];
     var s = getStatusWaktu(j.waktu);
-    var badgeWaktu = `<span class="px-2 py-0.5 rounded text-[9px] font-bold ml-2 ${s.bg} ${s.color}">${s.text}</span>`;
+    var badgeWaktu = `<span class="px-2 py-0.5 rounded text-[9px] font-bold ml-2 ${s.bg} ${s.color}">${esc(s.text)}</span>`;
 
     html += `<tr class="rt-row border-b border-slate-800 hover:bg-white/5">
-                <td data-label="ID Jadwal" class="p-4 font-mono text-amber-300 font-bold">${j.idJadwal}</td>
-                <td data-label="Agenda" class="p-4 font-bold text-white">${j.namaAgenda} ${badgeWaktu}</td>
-                <td data-label="Job / Waktu" class="rt-full p-4 text-xs font-bold text-sky-300">${j.idLoker}<br><span class="font-normal text-amber-100">${j.waktu}</span></td>
-                <td data-label="Lokasi / Link" class="p-4 text-xs"><a href="${j.link}" target="_blank" class="link-chip"><i class="fas fa-video mr-1"></i> Link Zoom</a></td>
-                <td data-label="Aksi" class="p-4 text-center"><button onclick="prosesHapusJadwal('${j.idJadwal}')" aria-label="${tr('table.delete')}" class="px-3 py-1.5 bg-red-600 text-white rounded font-bold text-[10px]"><i class="fas fa-trash"></i></button></td>
+                <td data-label="ID Jadwal" class="p-4 font-mono text-amber-300 font-bold">${esc(j.idJadwal)}</td>
+                <td data-label="Agenda" class="p-4 font-bold text-white">${esc(j.namaAgenda)} ${badgeWaktu}</td>
+                <td data-label="Job / Waktu" class="rt-full p-4 text-xs font-bold text-sky-300">${esc(j.idLoker)}<br><span class="font-normal text-amber-100">${esc(j.waktu)}</span></td>
+                <td data-label="Lokasi / Link" class="p-4 text-xs"><a href="${esc(j.link)}" target="_blank" class="link-chip"><i class="fas fa-video mr-1"></i> Link Zoom</a></td>
+                <td data-label="Aksi" class="p-4 text-center"><button onclick="prosesHapusJadwal('${escJs(j.idJadwal)}')" aria-label="${tr('table.delete')}" class="px-3 py-1.5 bg-red-600 text-white rounded font-bold text-[10px]"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
   }
   if (ALL_SCHEDULES.length > limitJad) {
@@ -99,10 +99,10 @@ async function bukaModalListKandidat(code) {
   } else {
     cands.forEach((c, i) => {
       html += `<div class="p-3 bg-black/40 border border-slate-700 rounded-lg flex justify-between items-center mb-2">
-                        <div class="font-bold text-white text-xs">${i + 1}. ${c.nama}</div>
+                        <div class="font-bold text-white text-xs">${i + 1}. ${esc(c.nama)}</div>
                         <div class="flex items-center gap-2">
-                        <button onclick="bukaDigitalCV('${c.idKandidat}')" aria-label="' + tr('ui.peek_cv') + '" class="w-7 h-7 flex items-center justify-center bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded-full transition shadow" title="' + tr('ui.peek_cv') + '"><i class="fas fa-eye text-xs"></i></button>
-                        <button onclick="keluarkanKandidatDariJob('${c.wa}', '${code}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="' + tr('ui.remove_from_job') + '">Gagal</button>
+                        <button onclick="bukaDigitalCV('${escJs(c.idKandidat)}')" aria-label="' + tr('ui.peek_cv') + '" class="w-7 h-7 flex items-center justify-center bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded-full transition shadow" title="' + tr('ui.peek_cv') + '"><i class="fas fa-eye text-xs"></i></button>
+                        <button onclick="keluarkanKandidatDariJob('${escJs(c.wa)}', '${escJs(code)}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="' + tr('ui.remove_from_job') + '">Gagal</button>
                         </div></div>`;
       txt += i + 1 + '. ' + c.nama + ' - WA: ' + c.wa + '\n';
     });
@@ -207,9 +207,9 @@ async function bukaModalCekDataSiswa() {
 
           html += `<tr class="hover:bg-white/5 transition duration-200">
                             <td class="p-3 text-center text-slate-400 text-xs">${i + 1}</td>
-                            <td class="p-3 font-bold text-white text-xs">${s.nama_lengkap || s.nama}</td>
+                            <td class="p-3 font-bold text-white text-xs">${esc(s.nama_lengkap || s.nama)}</td>
                             <td class="p-3 align-middle">${gBadge}</td>
-                            <td class="p-3 text-xs text-amber-300 font-medium"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i>${s.alamat_lengkap || '-'}</td>
+                            <td class="p-3 text-xs text-amber-300 font-medium"><i class="fas fa-map-marker-alt text-red-400 mr-1.5"></i>${esc(s.alamat_lengkap || '-')}</td>
                         </tr>`;
         });
       }
@@ -280,7 +280,7 @@ function renderSysConfig() {
             ? '<span class="mr-1 text-slate-500 font-black">' + (index + 1) + '.</span>'
             : '';
         chipHtml += `<span class="inline-flex items-center px-3 py-1 bg-${cat.color}-900/30 text-${cat.color}-300 border border-${cat.color}-500/30 rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap">
-                        ${num}${trOption(item)}
+                        ${num}${esc(trOption(item))}
                         <button onclick="pindahConfigItem('${cat.key}', ${index}, -1)" aria-label="${tr('ui.move_up')}" title="${tr('ui.move_up')}" class="ml-1.5 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === 0 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-up" style="font-size: 7px;"></i></button>
                         <button onclick="pindahConfigItem('${cat.key}', ${index}, 1)" aria-label="${tr('ui.move_down')}" title="${tr('ui.move_down')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === items.length - 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-down" style="font-size: 7px;"></i></button>
                         <button onclick="hapusConfigItem('${cat.key}', ${index})" aria-label="${tr('table.delete')}" title="${tr('table.delete')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/50 text-${cat.color}-300 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-colors"><i class="fas fa-times" style="font-size: 8px;"></i></button>
@@ -472,9 +472,9 @@ function renderMigrasiResults(list) {
         (icons[r.status] || icons.skip) +
         '</span>' +
         '<span><b>' +
-        r.step +
+        esc(r.step) +
         ':</b> ' +
-        r.detail +
+        esc(r.detail) +
         '</span></div>'
       );
     })
@@ -565,7 +565,7 @@ function renderMigrasiDriveList() {
           '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-900/40 text-amber-300 border border-amber-500/40 rounded-full text-[9px] font-bold"><i class="fas fa-' +
           info[1] +
           ' text-[8px]"></i> ' +
-          info[0] +
+          esc(info[0]) +
           '</span>'
         );
       })
@@ -574,12 +574,12 @@ function renderMigrasiDriveList() {
       '<div class="bg-black/40 border border-slate-700 rounded-xl p-3">' +
       '<div class="flex items-center justify-between gap-2 flex-wrap mb-2">' +
       '<div class="min-w-0"><p class="text-xs font-black text-white truncate">' +
-      c.nama +
+      esc(c.nama) +
       '</p>' +
       '<p class="text-[9px] text-slate-500 font-mono">' +
-      c.idKandidat +
+      esc(c.idKandidat) +
       ' · ' +
-      c.wa +
+      esc(c.wa) +
       '</p></div>' +
       '<div class="flex flex-wrap gap-1">' +
       chips +
@@ -609,7 +609,7 @@ function migrasiDriveFieldHtml(c, field) {
     '<div class="bg-slate-900/60 border border-slate-700 rounded-lg p-2.5">' +
     '<div class="flex items-center justify-between mb-1.5">' +
     '<label class="text-[9px] font-bold text-slate-300 uppercase"><i class="fas fa-link text-rose-400 mr-1"></i> ' +
-    info[0] +
+    esc(info[0]) +
     ' (Drive)</label>' +
     '<span id="dl-st-' +
     safeId +
@@ -620,11 +620,11 @@ function migrasiDriveFieldHtml(c, field) {
     safeId +
     '" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" class="flex-1 text-[9px] text-slate-300 file:mr-2 file:px-2 file:py-1 file:rounded-md file:border-0 file:bg-slate-700 file:text-white file:text-[9px] file:font-bold">' +
     '<button type="button" onclick="uploadDriveField(\'' +
-    c.idKandidat +
+    escJs(c.idKandidat) +
     "', '" +
-    c.nama.replace(/'/g, "\\'") +
+    escJs(c.nama) +
     "', '" +
-    field +
+    escJs(field) +
     '\')" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[9px] font-black transition flex-shrink-0"><i class="fas fa-upload mr-1"></i> Upload</button>' +
     '</div>' +
     '</div>'

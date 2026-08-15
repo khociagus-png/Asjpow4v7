@@ -258,7 +258,7 @@ function kalkulasiProgress(myData) {
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
     badges +=
       '<img src="' +
-      logoSrc +
+      esc(logoSrc) +
       '" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' +
       tr('ui.badge_official') +
       '">';
@@ -268,14 +268,14 @@ function kalkulasiProgress(myData) {
   let catatanIntStr = myData.catatanInt || '';
   let kelasMatch = catatanIntStr.match(/\[KELAS\s*([A-Z0-9]+)\]/i);
   if (kelasMatch) {
-    badges += `<span class="px-2 py-0.5 ml-1 bg-indigo-900/60 text-indigo-300 border border-indigo-500/50 rounded text-xs font-bold shadow-sm whitespace-nowrap align-middle"><i class="fas fa-users mr-1"></i>KELAS ${kelasMatch[1].toUpperCase()}</span>`;
+    badges += `<span class="px-2 py-0.5 ml-1 bg-indigo-900/60 text-indigo-300 border border-indigo-500/50 rounded text-xs font-bold shadow-sm whitespace-nowrap align-middle"><i class="fas fa-users mr-1"></i>KELAS ${esc(kelasMatch[1].toUpperCase())}</span>`;
   }
 
   badges += '</span>';
 
   let namaHeader = document.getElementById('k-dash-nama');
   if (namaHeader) {
-    namaHeader.innerHTML = tr('candidate.welcome') + ', ' + myData.nama + badges;
+    namaHeader.innerHTML = tr('candidate.welcome') + ', ' + esc(myData.nama) + badges;
   }
 
   let progMsg = document.getElementById('prog-msg');
@@ -599,26 +599,33 @@ function initApp(res, isSilent = false) {
     if (dlLoker) {
       let htmlDl = '<option value="UMUM">Lamar Umum (Tanpa Loker Spesifik)</option>';
       ALL_JOBS.forEach((j) => {
-        htmlDl += '<option value="' + j.code + '">' + j.code + ' - ' + j.pekerjaan + '</option>';
+        htmlDl +=
+          '<option value="' +
+          esc(j.code) +
+          '">' +
+          esc(j.code) +
+          ' - ' +
+          esc(j.pekerjaan) +
+          '</option>';
       });
       dlLoker.innerHTML = htmlDl;
     }
 
     let dlKodeJob = document.getElementById('list-kode-job');
     if (dlKodeJob) {
-      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + j.code + '">').join('');
+      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + esc(j.code) + '">').join('');
     }
 
     let dlLokasi = document.getElementById('list-lokasi');
     if (dlLokasi) {
       let uniqueLokasi = [...new Set(ALL_JOBS.map((j) => j.lokasi).filter(Boolean))];
-      dlLokasi.innerHTML = uniqueLokasi.map((l) => '<option value="' + l + '">').join('');
+      dlLokasi.innerHTML = uniqueLokasi.map((l) => '<option value="' + esc(l) + '">').join('');
     }
 
     let dlSyarat = document.getElementById('list-syarat');
     if (dlSyarat) {
       let uniqueSyarat = [...new Set(ALL_JOBS.map((j) => j.syarat).filter(Boolean))];
-      dlSyarat.innerHTML = uniqueSyarat.map((s) => '<option value="' + s + '">').join('');
+      dlSyarat.innerHTML = uniqueSyarat.map((s) => '<option value="' + esc(s) + '">').join('');
     }
   }
 
@@ -676,7 +683,7 @@ function initApp(res, isSilent = false) {
         document.getElementById('nav-mode').classList.add('hidden');
       if (document.getElementById('nav-kandidat-mode'))
         document.getElementById('nav-kandidat-mode').classList.remove('hidden');
-      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + currentKandidatName);
+      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + esc(currentKandidatName));
 
       var mLoggedOut = document.getElementById('mobile-nav-logged-out');
       var mAdmin = document.getElementById('mobile-nav-admin');
@@ -691,11 +698,11 @@ function initApp(res, isSilent = false) {
     );
     if (myData) {
       currentKandidatId = myData.idKandidat;
-      safeSet('k-dash-job', myData.idLoker || '-');
+      safeSet('k-dash-job', esc(myData.idLoker || '-'));
       // Tampilan tahapan/status sesuai bahasa; logika (evaluasiTahapanKandidat
       // & regex) tetap memakai nilai ASLI myData.tahapan/status.
-      safeSet('k-dash-tahapan', trOption(myData.tahapan));
-      safeSet('k-dash-status', trOption(myData.status));
+      safeSet('k-dash-tahapan', esc(trOption(myData.tahapan)));
+      safeSet('k-dash-status', esc(trOption(myData.status)));
 
       let boxCatatan = document.getElementById('k-dash-catatan-box');
       if (boxCatatan) {
@@ -705,7 +712,7 @@ function initApp(res, isSilent = false) {
           myData.catatanExt.trim() !== '-'
         ) {
           boxCatatan.classList.remove('hidden');
-          safeSet('k-dash-catatan-ext', '"' + myData.catatanExt + '"');
+          safeSet('k-dash-catatan-ext', '"' + esc(myData.catatanExt) + '"');
         } else {
           boxCatatan.classList.add('hidden');
         }
@@ -714,7 +721,7 @@ function initApp(res, isSilent = false) {
       let areaRev = document.getElementById('area-revisi');
       if (myData.status && myData.status.toUpperCase() === 'REVISI') {
         if (areaRev) areaRev.classList.remove('hidden');
-        safeSet('k-dash-catatan', myData.catatan || tr('candidate.doc_revise_desc'));
+        safeSet('k-dash-catatan', esc(myData.catatan || tr('candidate.doc_revise_desc')));
       } else {
         if (areaRev) areaRev.classList.add('hidden');
       }
@@ -737,17 +744,17 @@ function initApp(res, isSilent = false) {
           mySchedules.forEach((j) => {
             let linkBtn =
               j.link && j.link !== '-'
-                ? `<a href="${j.link}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition"><i class="fas fa-external-link-alt mr-1.5"></i> ${tr('ui.open_link')}</a>`
+                ? `<a href="${esc(j.link)}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition"><i class="fas fa-external-link-alt mr-1.5"></i> ${tr('ui.open_link')}</a>`
                 : '';
 
             htmlJadwal += `
                             <div class="bg-black/60 p-4 rounded-xl border border-amber-500/30 shadow-inner">
                                 <div class="flex justify-between items-start mb-2">
-                                    <p class="text-amber-300 font-black text-sm uppercase">${j.agenda}</p>
-                                    <span class="text-[9px] px-2 py-1 rounded bg-rose-900/50 text-rose-300 font-bold border border-rose-500/30 whitespace-nowrap">${trOption(j.status)}</span>
+                                    <p class="text-amber-300 font-black text-sm uppercase">${esc(j.agenda)}</p>
+                                    <span class="text-[9px] px-2 py-1 rounded bg-rose-900/50 text-rose-300 font-bold border border-rose-500/30 whitespace-nowrap">${esc(trOption(j.status))}</span>
                                 </div>
-                                <p class="text-xs text-slate-300 mb-1.5"><i class="fas fa-clock w-4 text-center mr-1 text-slate-400"></i> ${j.waktu}</p>
-                                <p class="text-xs text-slate-300 mb-1"><i class="fas fa-map-marker-alt w-4 text-center mr-1 text-rose-400"></i> ${trOption(j.lokasi)}</p>
+                                <p class="text-xs text-slate-300 mb-1.5"><i class="fas fa-clock w-4 text-center mr-1 text-slate-400"></i> ${esc(j.waktu)}</p>
+                                <p class="text-xs text-slate-300 mb-1"><i class="fas fa-map-marker-alt w-4 text-center mr-1 text-rose-400"></i> ${esc(trOption(j.lokasi))}</p>
                                 ${linkBtn}
                             </div>`;
           });

@@ -400,7 +400,7 @@ function bukaPreviewDokumen(url) {
   if (unduh) unduh.href = url;
   if (judul) {
     let nama = decodeURIComponent(url.split('/').pop() || 'Dokumen');
-    judul.innerHTML = `<i class="fas fa-file-alt mr-1.5 text-sky-400"></i> ${tr('ui.preview_label')}${nama}`;
+    judul.innerHTML = `<i class="fas fa-file-alt mr-1.5 text-sky-400"></i> ${tr('ui.preview_label')}${esc(nama)}`;
   }
   modal.classList.remove('hidden');
 }

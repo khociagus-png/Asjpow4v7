@@ -932,9 +932,9 @@
         var sudahPilihBaru = key === 'jft' ? !!currentJftBase64 : !!currentSswBase64;
         if (!statusEl || sudahPilihBaru) return;
         if (url && url !== '-') {
-          var namaFile = (url.split('/').pop() || key.toUpperCase()).replace(/_+/g, ' ');
+          var namaFile = escapeHtml((url.split('/').pop() || key.toUpperCase()).replace(/_+/g, ' '));
           statusEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_status_existing') + ': ' +
-            '<a href="' + url + '" target="_blank" rel="noopener" class="underline hover:text-amber-300">' + namaFile + '</a>';
+            '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="underline hover:text-amber-300">' + namaFile + '</a>';
           statusEl.classList.remove('hidden');
         }
       });

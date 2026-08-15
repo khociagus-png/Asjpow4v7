@@ -156,7 +156,7 @@ function tambahPesanAdminAi(text, sender) {
   const chatBox = document.getElementById('admin-ai-chat');
   const isUser = sender === 'user';
 
-  let cleanText = String(text).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let cleanText = esc(text);
   cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
   let htmlStr = '';
@@ -246,7 +246,7 @@ function appendInterviewChat(sender, text) {
   let chatBox = document.getElementById('interview-chat-box');
   let isUser = sender === 'user';
 
-  let cleanText = String(text).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let cleanText = esc(text);
   cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   cleanText = cleanText.replace(/\n/g, '<br>'); // Mengganti baris baru agar rapi
 

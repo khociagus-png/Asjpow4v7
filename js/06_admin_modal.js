@@ -39,13 +39,13 @@ function renderDbFilters() {
     DROPDOWNS.kategori.forEach((kat) => {
       bHtml +=
         '<button onclick="setFilterBidang(\'' +
-        trOptionId(kat) +
+        escJs(trOptionId(kat)) +
         '\')" class="px-3 py-1 rounded-full ' +
         (dbFilterBidang === trOptionId(kat)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +
-        trOption(kat) +
+        esc(trOption(kat)) +
         '</button>';
     });
     bContainer.innerHTML = bHtml;
@@ -60,13 +60,13 @@ function renderDbFilters() {
     DROPDOWNS.tahapan.forEach((thp) => {
       tHtml +=
         '<button onclick="setFilterTahapan(\'' +
-        trOptionId(thp) +
+        escJs(trOptionId(thp)) +
         '\')" class="px-3 py-1 rounded-full ' +
         (dbFilterTahapan === trOptionId(thp)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +
-        trOption(thp) +
+        esc(trOption(thp)) +
         '</button>';
     });
     tContainer.innerHTML = tHtml;
@@ -225,7 +225,7 @@ async function bukaDigitalCV(id) {
             let cleanJob = job.trim();
             return cleanJob
               ? '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' +
-                  cleanJob +
+                  esc(cleanJob) +
                   '</span>'
               : '';
           })
