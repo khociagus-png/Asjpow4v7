@@ -1,10 +1,15 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `1113647`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `cbfa8fc`.
 
 ---
 
 ## 2026-08-15 — Sesi terbaru: dedupe data & dokumen, share view, keamanan, CI
+
+### `cbfa8fc` — Kembalikan tombol FORMAT CV / SERTIF JFT / SERTIF SSW di dossier (ASJ DOSSIER)
+- **Bug "fitur Netlify lama yang hilang":** modal CV admin (dossier) membaca `c.jftUrl / c.sswUrl / c.cvUrl`, tapi `mapCandidate` (backend rebuild) hanya mengembalikan `jft / ssw / fileCv` → ketiga tombol dokumen selalu `hidden` walau file-nya terisi di DB (verifikasi live: dossier SUSILO HADI SAPUTRA ASJ00217 tampil tanpa tombol).
+- **Fix:** `mapCandidate` kini menambahkan alias `jftUrl` / `sswUrl` / `cvUrl` (nilai sama dengan jft / ssw / fileCv) → tombol FORMAT CV, SERTIF JFT, SERTIF SSW kembali muncul di dossier admin.
+- **Verifikasi:** API getCandidatesPage (q=SUSILO) → ketiga alias terisi URL Storage; preview admin → modal dossier SUSILO menampilkan 3 tombol, foto & CV termuat dari Storage, console bersih. Test 41/41.
 
 ### `1113647` — Sambungkan file_cv kosong + rapikan fitur drive-links
 - `migrate-filecv-drive.mjs` diperluas ke **file_cv kosong** (bukan hanya link Drive): dari 135 kosong, hanya **AZWAR ADUBA** yang punya file CV di Storage (`nama_TG632ASJcv.xlsx`) → tersambung; 134 lain memang tidak punya CV di Storage (dibiarkan).

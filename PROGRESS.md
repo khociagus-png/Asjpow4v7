@@ -4,11 +4,36 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `1113647` (lihat `git log`).
+**Update terakhir:** commit `cbfa8fc` (lihat `git log`).
 
 ---
 
-## 🆕 SESI TERBARU — Cek Data publik, CV rirekisho, z-index close, audit pas_photo
+## 🆕 SESI TERBARU — Dossier admin: tombol dokumen hilang di backend rebuild
+
+Keluhan user: "ini fitur Netlify lama yang hilang di yang baru" — di modal ASJ
+DOSSIER (modal CV admin) tombol **FORMAT CV / SERTIF JFT / SERTIF SSW** tidak
+muncul walau data file-nya ada di DB.
+
+### Akar masalah & fix
+
+- Modal dossier membaca `c.jftUrl / c.sswUrl / c.cvUrl` (nama yang dikirim
+  backend Netlify GAS lama), tapi `mapCandidate` di backend rebuild hanya
+  mengembalikan `jft / ssw / fileCv` → kondisi `if (c.jftUrl && …)` selalu
+  false → tombol permanen `hidden`.
+- **Fix** (`netlify/functions/_lib/supabase.js`): `mapCandidate` kini menambah
+  alias `jftUrl` / `sswUrl` / `cvUrl` (nilai = jft / ssw / fileCv). Konsumen
+  lain (`07_api.js`) sudah punya fallback `jftUrl || jft`, jadi tidak ada yang
+  rusak.
+- **Verifikasi:** probe API `getCandidatesPage` (q=SUSILO) → ketiga alias
+  terisi URL Storage; preview admin → dossier SUSILO HADI SAPUTRA (ASJ00217)
+  menampilkan FORMAT CV / SERTIF JFT / SERTIF SSW, foto (PHOTOFILE) & CV
+  (CVFILE) termuat dari Storage, console bersih. Test 41/41.
+
+Catatan: aktif di produksi setelah **deploy ulang ke Netlify**.
+
+---
+
+## SESI SEBELUMNYA — Cek Data publik, CV rirekisho, z-index close, audit pas_photo
 
 Rangkaian kerja terbaru (`1710865` → seterusnya), fokus: tombol publik yang
 mati, CV rirekisho yang tidak lengkap (foto / alamat JP / tombol X), dan
