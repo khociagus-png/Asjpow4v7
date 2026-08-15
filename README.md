@@ -68,3 +68,5 @@ Preview lokal: `node serve-static.mjs` (port 3000, backend in-process).
 6. Kredensial: lewat API keys (Supabase URL + service role), bukan di-commit.
 
 Status lengkap & riwayat kerja: `PROGRESS.md`. Pedoman pipeline & fitur: `PIPELINE.md`.
+Cara kerja build/verifikasi: `WORKFLOW.md`. **Hasil review menyeluruh + TODO checklist
+aksi (termasuk item keamanan yang WAJIB dicek): `REVIEW.md`.**
