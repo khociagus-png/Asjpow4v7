@@ -19,10 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
+      # Repo ini tidak punya package-lock.json — npm install (bukan npm ci)
+      # supaya lock dibuat on-the-fly; jangan pakai cache: npm (butuh lock).
       - name: Install deps (termasuk playwright)
         run: |
+          npm install
           npm i playwright
           npx playwright install chromium --with-deps
 

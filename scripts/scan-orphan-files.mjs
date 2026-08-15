@@ -1,14 +1,20 @@
 // =============================================================================
-// scan-orphan-files.mjs — Audit READ-ONLY: cari file di Supabase Storage
-// folder master/ yang TIDAK direferensikan oleh kolom mana pun
-// (database_candidate & master_database_candidate) ataupun keterangan form
-// (database_asj_form). Output = daftar file yang aman dihapus (tidak pernah
-// menulis apa pun — dry-run murni).
-//   bun run scripts/scan-orphan-files.mjs
+// scan-orphan-files.mjs — Audit file di Supabase Storage folder master/ yang
+// TIDAK direferensikan oleh kolom mana pun (database_candidate &
+// master_database_candidate) ataupun keterangan form (database_asj_form).
+//   bun run scripts/scan-orphan-files.mjs           # dry-run (default)
+//   bun run scripts/scan-orphan-files.mjs --apply   # backup JSON + hapus
+// Backup daftar path disimpan ke ../.freebuff/storage-delete-backup-*.json
+// SEBELUM penghapusan dimulai.
 // =============================================================================
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs';
 const require = createRequire(import.meta.url);
 const supabase = require('../netlify/functions/_lib/supabase.js');
+
+const APPLY = process.argv.includes('--apply');
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'asj-files';
 const BASE = supabase.supabaseUrl().replace(/\/$/, '');
@@ -21,23 +27,36 @@ if (!BASE || !KEY) {
 // ---- 1. List SEMUA file di bawah master/ -----------------------------------
 // API list dengan prefix 'master/' mengembalikan SATU level (nama folder,
 // tanpa prefix). Jadi: list folder dulu, lalu list tiap folder (paralel).
+// List semua object di prefix dengan PAGINASI (limit per panggilan 200,
+// offset naik sampai kosong) — tanpa ini, prefix dengan >200 entry (mis.
+// folder master/ itu sendiri) terpotong dan audit jadi tidak lengkap.
 async function listPrefix(prefix) {
-  const res = await fetch(`${BASE}/storage/v1/object/list/${BUCKET}`, {
-    method: 'POST',
-    headers: {
-      apikey: KEY,
-      Authorization: 'Bearer ' + KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prefix, limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } }),
-  });
-  if (!res.ok) throw new Error('storage list HTTP ' + res.status);
-  const j = await res.json();
-  return Array.isArray(j)
-    ? j
-        .map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : ''))
-        .filter(Boolean)
-    : [];
+  const out = [];
+  let offset = 0;
+  const LIMIT = 200;
+  for (;;) {
+    const res = await fetch(`${BASE}/storage/v1/object/list/${BUCKET}`, {
+      method: 'POST',
+      headers: {
+        apikey: KEY,
+        Authorization: 'Bearer ' + KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefix, limit: LIMIT, offset, sortBy: { column: 'name', order: 'asc' } }),
+    });
+    if (!res.ok) throw new Error('storage list HTTP ' + res.status);
+    const j = await res.json();
+    const batch = Array.isArray(j)
+      ? j
+          .map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : ''))
+          .filter(Boolean)
+      : [];
+    if (batch.length === 0) break;
+    out.push(...batch);
+    if (batch.length < LIMIT) break;
+    offset += LIMIT;
+  }
+  return out;
 }
 
 async function listAllUnderMaster() {
@@ -134,6 +153,23 @@ for (const o of files) {
   orphans.push(o);
 }
 
+// Hapus banyak object sekaligus (bulk DELETE via prefixes).
+async function storageDelete(rels) {
+  const res = await fetch(`${BASE}/storage/v1/object/${BUCKET}`, {
+    method: 'DELETE',
+    headers: {
+      apikey: KEY,
+      Authorization: 'Bearer ' + KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prefixes: rels }),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error('storage DELETE HTTP ' + res.status + ' ' + t.slice(0, 200));
+  }
+}
+
 console.log(`\nFile TIDAK direferensikan kolom/keterangan: ${orphans.length}\n`);
 
 // Kategorikan dengan mempertimbangkan folder (share view menampilkan SEMUA
@@ -199,7 +235,39 @@ console.log(
     `(A varian-lama: ${byTag['A-varian-lama'] || 0}, ` +
     `B folder-yatim: ${byTag['B-folder-yatim'] || 0}, ` +
     `P placeholder: ${byTag['P-placeholder'] || 0}).` +
-    `\n${USED.length} file dipakai folder (share view) — jangan dihapus.` +
-    `\nAudit ini read-only — tidak ada yang dihapus.`,
+    `\n${USED.length} file dipakai folder (share view) — jangan dihapus.`,
 );
+
+if (!APPLY) {
+  console.log('\nDry-run selesai — tidak ada yang dihapus. Pakai --apply untuk eksekusi.');
+  process.exit(0);
+}
+
+// ---- --apply: backup JSON dulu, lalu hapus ---------------------------------
+const backupDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '.freebuff',
+);
+fs.mkdirSync(backupDir, { recursive: true });
+const ts = new Date().toISOString().replace(/[:.]/g, '-');
+const backupFile = path.join(backupDir, `storage-delete-backup-${ts}.json`);
+const backup = {
+  timestamp: ts,
+  total: SAFE.length,
+  byTag,
+  files: SAFE.map(({ tag, o }) => ({ tag, rel: o.rel, folder: o.folder, name: o.name })),
+};
+fs.writeFileSync(backupFile, JSON.stringify(backup, null, 2));
+console.log(`\n✅ Backup ${SAFE.length} path → ${backupFile}`);
+
+let deleted = 0;
+for (let i = 0; i < SAFE.length; i += 100) {
+  const chunk = SAFE.slice(i, i + 100).map(({ o }) => o.rel);
+  await storageDelete(chunk);
+  deleted += chunk.length;
+  console.log(`  hapus ${deleted}/${SAFE.length}…`);
+}
+console.log(`\n✅ ${deleted} file dihapus dari Storage (backup di ${backupFile}).`);
 process.exit(0);
