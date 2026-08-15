@@ -8,6 +8,33 @@
 
 ---
 
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### Commit `beb294a` — Kebijakan GitHub main base & deploy Netlify wajib izin (DEPLOY.md)
+
+- **Latar:** user punya akun Netlify baru (`nerazzurri190889@gmail.com`) dan minta
+  deploy kode terbaru ke Netlify. Token `NETLIFY_AUTH_TOKEN` diberikan via chat.
+- **Situs dibuat:** `asjportal-379` → https://asjportal-379.netlify.app
+  (project `7e433a31-82cd-4afb-8d1b-f0391cabdd3e`, tim `asjamnag`). Nama `asjportal`
+  sudah dipakai akun lama, Netlify memberi suffix `-379`.
+- **12 env var dipasang** via Netlify CLI: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_ANON_KEY, SUPABASE_STORAGE_BUCKET, ADMIN_MASTER_PIN, PIN_KHOCI,
+  ASJ_ADMINS, ADMIN_NUMBERS, SESSION_SECRET (acak), GEMINI_API_KEY, FONNTE_TOKEN,
+  NETLIFY_SITE_URL (= URL baru).
+- **Deploy produksi:** 237 file + 19 functions ✅ live.
+- ⚠️ **Project baru privat by default** (Netlify sejak 2026-07-28) → homepage & API
+  401 "Login Redirect". Tidak bisa diubah via API — user klik **Make public** di
+  dashboard. Setelah itu semua hijau.
+- **Review live:** homepage/admin.html/share.html HTTP 200; `checkAdminMaster` PIN
+  benar → success, PIN salah → ditolak; `getDaftarSiswaBaru` (publik, PII aman);
+  `getAppData` → 132 jobs + assets.
+- **Aturan baru (permintaan user):** GitHub = **main base** (semua update/patch/
+  revisi kode lewat repo); **Netlify DILARANG deploy kecuali diizinkan eksplisit
+  pemilik** — setiap izin dicatat di `DEPLOY.md` §4. WORKFLOW.md §4 & AGENTS.md
+  (checklist 8 + larangan) diselaraskan; `.gitignore` menambah `.netlify`.
+
+---
+
 ## 🆕 Sesi 2026-08-15 (lanjutan) — dikerjakan oleh: khoci89 (via Freebuff)
 
 ### Commit `c1433d2` — Proyeksi kolom ringan master & inbox admin

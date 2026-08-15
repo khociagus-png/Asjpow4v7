@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `c1433d2`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `beb294a`.
+
+---
+
+## 2026-08-15 — Kebijakan deploy & deploy Netlify pertama (asjportal-379)
+
+### `beb294a` — Docs: kebijakan GitHub main base & deploy Netlify wajib izin (DEPLOY.md)
+- `DEPLOY.md` baru: GitHub = satu-satunya sumber kode (branch `main`); **Netlify
+  DILARANG deploy kecuali diizinkan eksplisit pemilik**; tabel riwayat izin;
+  detail situs aktif `asjportal-379` (env vars, checklist, cara deploy CLI).
+- `WORKFLOW.md` §4 & `AGENTS.md` (checklist 8 + larangan) diselaraskan;
+  `.gitignore` menambah `.netlify` (state lokal CLI).
+- **Deploy Netlify (dengan izin user):** site `asjportal-379` dibuat di akun
+  `nerazzurri190889@gmail.com`; 12 env var dipasang; deploy prod 237 file + 19
+  functions; visibility di-set **Public** (project baru privat by default);
+  verifikasi live OK — homepage 200, PIN admin benar/salah, `getDaftarSiswaBaru`,
+  `getAppData` (132 jobs).
 
 ---
 
