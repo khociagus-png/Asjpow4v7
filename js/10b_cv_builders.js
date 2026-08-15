@@ -367,7 +367,7 @@ function buildCvKertasA4(p) {
                 <!-- BLOK ALAMAT -->
                 <tr><td colspan="7" class="bg-amber val-center">通信欄 ALAMAT RUMAH</td></tr>
                 <tr><td colspan="7" class="val-center uppercase font-normal">${v('ALAMATLENGKAP', 'ALAMAT', 'ALAMATID', 'identitas.alamat_id', 'identitas.alamat')}</td></tr>
-                <tr><td colspan="7" class="val-center font-normal"><i>${v('ALAMATJP', 'identitas.alamat_jp') === '-' ? '' : v('ALAMATJP', 'identitas.alamat_jp')}</i></td></tr>
+                <tr><td colspan="7" class="val-center font-normal"><i>${v('ALAMATJP', 'identitas.alamatjp', 'identitas.alamat_jp') === '-' ? '' : v('ALAMATJP', 'identitas.alamatjp', 'identitas.alamat_jp')}</i></td></tr>
                 
                 <!-- BLOK PENDIDIKAN -->
                 <tr><td colspan="7" class="bg-amber val-center">学歴 PENDIDIKAN</td></tr>

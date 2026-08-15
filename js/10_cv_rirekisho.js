@@ -20,10 +20,15 @@ async function bukaPreviewCV_Admin(waTarget) {
     }
 
     let c = ALL_CANDIDATES.find((k) => normalizePhone(k.wa) === normalizePhone(waTarget));
-    let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
-    // Fallback foto dari getDrafCvMaster (uploads.photo)
-    if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
-      photoUrl = getHighResImage(fullData.uploads.photo);
+    // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
+    // bisa basi/menunjuk file yang sudah tidak ada (mis. PAS_PHOTO.jpg terhapus).
+    let photoUrl =
+      fullData && fullData.uploads && fullData.uploads.photo
+        ? getHighResImage(fullData.uploads.photo)
+        : '';
+    // Fallback: pas_photo di daftar kandidat
+    if (!photoUrl && c && c.pasPhoto !== '-') {
+      photoUrl = getHighResImage(c.pasPhoto);
     }
 
     try {
@@ -59,10 +64,15 @@ async function prosesBukaRirekisho(waTarget) {
     }
 
     let c = ALL_CANDIDATES.find((k) => normalizePhone(k.wa) === normalizePhone(waTarget));
-    let photoUrl = c && c.pasPhoto !== '-' ? getHighResImage(c.pasPhoto) : '';
-    // Fallback foto dari getDrafCvMaster (uploads.photo)
-    if (!photoUrl && fullData && fullData.uploads && fullData.uploads.photo) {
-      photoUrl = getHighResImage(fullData.uploads.photo);
+    // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
+    // bisa basi/menunjuk file yang sudah tidak ada (mis. PAS_PHOTO.jpg terhapus).
+    let photoUrl =
+      fullData && fullData.uploads && fullData.uploads.photo
+        ? getHighResImage(fullData.uploads.photo)
+        : '';
+    // Fallback: pas_photo di daftar kandidat
+    if (!photoUrl && c && c.pasPhoto !== '-') {
+      photoUrl = getHighResImage(c.pasPhoto);
     }
 
     try {
