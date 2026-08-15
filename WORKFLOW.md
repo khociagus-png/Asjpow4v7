@@ -17,9 +17,10 @@ ke branch `main` di GitHub**, supaya anggota tim selalu bisa download versi terb
 - Branch kerja: **`main`** (bukan branch lain).
 - Setelah selesai satu tugas (fix bug, fitur baru, refactor):
   1. `git add -A` (jangan sertakan `.env*`, sudah di `.gitignore`)
-  2. `git commit -m "pesan singkat & jelas"`
+  2. `git commit -m "pesan singkat & jelas"` (format wajib: lihat §7.1)
   3. `git push origin main`
 - Kalau lupa: cek dengan `git status` — kalau ada file belum di-commit, langsung commit + push.
+- **Jejak siapa & kapan wajib jelas** — baca §7 sebelum commit.
 
 ### Cara tim mengambil versi terbaru
 
@@ -128,3 +129,60 @@ Kalau kamu (assistant) sedang mengerjakan repo ini, patuhi:
 8. **Patuhi `PIPELINE.md`** — sebelum menambah/mengubah fitur yang menyentuh tahapan
    kandidat, seleksi, atau pendokumenan, cek dulu pipeline-nya. Jangan mengubah urutan
    tahapan lapangan; fitur baru harus lewat checklist di `PIPELINE.md` bagian 6.
+9. **Jejak kerja wajib jelas (siapa & kapan)** — cek `git config user.name/email` sebelum
+   commit, update `PROGRESS.md` dengan header sesi (tanggal + pengerja + hash commit),
+   dan ikuti format pesan commit di §7.
+
+---
+
+## 7. Jejak kerja — WAJIB jelas SIAPA & KAPAN ⏱️
+
+Repo ini dikerjakan dari beberapa akun/workspace (mis. `khoci89`, `ASJ OS DOKUMEN`),
+jadi riwayat commit harus selalu bisa menjawab: *siapa* yang mengubah dan *kapan*.
+
+### 7.1 Format pesan commit (wajib)
+
+```
+<Kategori>: <ringkasan apa yang dikerjakan>
+
+<detail 1-3 baris: kenapa & apa yang berubah>
+
+# footer otomatis kalau dikerjakan AI (Codebuff):
+🤖 Generated with Codebuff
+Co-Authored-By: Codebuff <noreply@codebuff.com>
+```
+
+- Kategori: `Fix`, `Feat`, `Optimasi`, `Refactor`, `Docs`, `Test`, dll.
+- **Dilarang** pesan generik tanpa keterangan (mis. hanya "update", "fix", "perbaikan").
+- Contoh: `Optimasi S2: sisa scan penuh Supabase dikonversi ke query server-side ter-filter`
+
+### 7.2 Cek identitas git sebelum commit (wajib)
+
+```bash
+git config user.name   # contoh: khoci89 / ASJ OS DOKUMEN
+ git config user.email
+```
+
+- Pastikan nama akun yang benar sesuai pengerja. Kalau identitas tidak dikenal,
+  beri tahu tim — **jangan commit dengan identitas yang tidak jelas**.
+
+### 7.3 Update PROGRESS.md di akhir setiap sesi (wajib)
+
+Setiap sesi kerja WAJIB menambah entri di `PROGRESS.md` dengan header berisi
+**tanggal, nama/akun pengerja, hash commit, ringkasan kerja**:
+
+```markdown
+## Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+- Commit: `56382b1` — Optimasi S2 lanjutan: daftar admin baris ringan + paginasi penuh
+- Ringkasan: ...
+```
+
+`CHANGELOG.md` juga di-update per fitur/commit (format sudah ada di sana).
+
+### 7.4 Cara cek "siapa & kapan terakhir"
+
+```bash
+git log --format='%h | %an | %ad | %s' --date=format:'%Y-%m-%d %H:%M' -5
+# 1 baris terakhir saja:
+git log -1 --format='%an | %ad | %s' --date=format:'%Y-%m-%d %H:%M'
+```

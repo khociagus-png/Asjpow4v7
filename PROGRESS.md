@@ -4,11 +4,49 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi lanjutan REVIEW.md S2 (scan penuh → query ter-filter).
+**Update terakhir:** sesi 2026-08-15 — dikerjakan oleh **khoci89** (via Freebuff).
 
 ---
 
-## 🆕 SESI TERBARU — Lanjutan bottleneck: sisa scan penuh → query server-side (REVIEW S2)
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### 1. Commit `56382b1` — Optimasi S2 lanjutan: daftar admin kandidat baris ringan + paginasi penuh
+
+Bottleneck terakhir yang tersisa dari S2 (daftar admin `loadCandidatesUnik` masih
+scan penuh `select *` + terpotong diam-diam di 300 baris):
+
+- `findAllCandidatesLight()` (supabase.js): proyeksi kolom ringan (dedupe/filter/sort
+  saja) dengan paginasi Range penuh tanpa batas 300 → payload ~5–10× lebih kecil.
+- `loadCandidatesUnik(q, {page, pageSize})` (handlers.js): dedupe-by-WA + filter +
+  sort di JS atas baris ringan, lalu `findCandidatesByIds()` hanya menarik baris
+  PENUH untuk halaman yang diminta. Total = jumlah UNIK (pagination frontend
+  konsisten). Fallback scan penuh lama kalau skema tabel tidak dikenal.
+- `fetchPagedAll()` helper (loop Range 1000/halaman, `count=exact`).
+- Probe read-only `scripts/probe-cols.mjs` & `scripts/probe-sizes.mjs`.
+- Verifikasi: `node --check` OK, unit 49/49 hijau. Sudah di-push ke `main`.
+
+### 2. Aturan jejak kerja: SIAPA & KAPAN wajib jelas (WORKFLOW.md §7 + AGENTS.md)
+
+Aturan baru supaya riwayat tidak lagi ambigu (dulu ada commit dari akun berbeda
+`khoci89` vs `ASJ OS DOKUMEN` di hari yang sama):
+
+- Format pesan commit wajib `<Kategori>: <ringkasan>` + detail; dilarang pesan
+  generik tanpa keterangan.
+- Wajib cek `git config user.name/email` sebelum commit (identitas sesuai pengerja).
+- Wajib update PROGRESS.md di akhir sesi dengan header: **tanggal + pengerja + hash commit**.
+- Cara cek siapa/kapan terakhir: `git log -1 --format='%an | %ad | %s' --date=format:'%Y-%m-%d %H:%M'`
+
+### Status riwayat saat ini (bukti siapa & kapan)
+
+| Hash | Siapa | Kapan | Isi |
+| --- | --- | --- | --- |
+| `56382b1` | **khoci89** | 2026-08-15 19:15 | Optimasi S2 lanjutan: daftar admin baris ringan + paginasi penuh |
+| `8f18bc3` | **khoci89** | 2026-08-15 18:54 | Optimasi S2: 39 scan penuh → query ter-filter |
+| `d973794` | **ASJ OS DOKUMEN** | 2026-08-15 18:11 | Tambah AGENTS.md |
+
+---
+
+## SESI SEBELUMNYA — Lanjutan bottleneck: sisa scan penuh → query server-side (REVIEW S2)
 
 Lanjutan optimasi "filter query Supabase SERVER-SIDE" (bagian 7 di bawah):
 39 call `findCandidates()`/`findJobs()`/`findForms()` dipangkas ke ±15, sisanya
@@ -40,8 +78,8 @@ fallback (hanya jalan saat kolom/tabel tidak dikenal) atau memang harus penuh.
   preview: `share-data?job=TG591ASJ`, `isJobRequiresCv`, `getAppData` sukses
   dengan data Supabase asli.
 
-> ⚠️ Belum di-commit/deploy. Perlu `git add -A && git commit && git push` +
-> deploy ulang lewat Freebuff supaya live ikut versi ini.
+> ✅ Sudah di-commit `8f18bc3` & di-push ke `main`. Tinggal deploy ulang lewat
+> Freebuff supaya live ikut versi ini.
 
 ---
 

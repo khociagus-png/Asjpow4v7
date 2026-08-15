@@ -18,7 +18,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 | **WORKFLOW.md** | Aturan kerja tim: commit/push, struktur, command, larangan deploy | Setiap sesi |
 | **PIPELINE.md** | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline** | Sebelum menyentuh fitur tahapan kandidat |
 | **REVIEW.md** | Audit keamanan & rekomendasi | Saat kerja di backend/keamanan |
-| **PROGRESS.md / CHANGELOG.md** | Riwayat kerja & keputusan | Saat butuh konteks perubahan lama |
+| **PROGRESS.md / CHANGELOG.md** | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama |
 
 ---
 
@@ -146,8 +146,10 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 2. ✅ `bun run build` kalau menyentuh frontend/partial/css
 3. ✅ `freebuff-preview restart` + pastikan status `running/listening`
 4. ✅ E2E regresi (upload + biodata) kalau menyentuh alur kandidat/upload
-5. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`
-6. ✅ Ingatkan user: deploy ulang lewat **Freebuff** supaya live ikut versi terbaru
+5. ✅ Update `PROGRESS.md` (header sesi: **tanggal + pengerja + hash commit** — lihat WORKFLOW.md §7.3)
+6. ✅ Cek `git config user.name/email` benar sesuai pengerja (WORKFLOW.md §7.2)
+7. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`
+8. ✅ Ingatkan user: deploy ulang lewat **Freebuff** supaya live ikut versi terbaru
    (**JANGAN PERNAH deploy manual ke Netlify**)
 
 ---
