@@ -591,6 +591,7 @@ const LANG = {
       toast_upload_locked: 'Upload Dokumen Terkunci. Anda belum lolos seleksi Loker.',
       toast_uploaded_n: 'Berhasil mengunggah {n} dokumen!',
       toast_wa_invalid: 'Nomor WA tidak valid',
+      toast_wa_format: 'Nomor WA tidak valid. Gunakan format 08xx atau 628xx (12-13 digit).',
       toast_wa_invalid_cand: 'Nomor WA Kandidat tidak valid',
       toast_wa_invalid_cand2: 'Nomor WA kandidat tidak valid!',
       toast_wa_template_saved: 'Template WA tersimpan!',

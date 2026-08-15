@@ -496,10 +496,20 @@ async function handleCheckAdminPersonal(payload) {
   };
 }
 
+// Gate WA: hanya nomor HP Indonesia (62 + 8xx, total 12-13 digit) yang
+// diterima — mencegah typo (mis. 6223... bukan 6282...) melahirkan kandidat
+// duplikat seperti kasus SATRIA (2026-08-15).
+function isValidWaFormat(wa) {
+  return /^628\d{9,10}$/.test(supabase.normalizeWa(wa));
+}
+
 async function handleLoginKandidat(payload) {
-  const wa = String((payload && payload[0]) || '').replace(/\D/g, '');
+  const wa = supabase.normalizeWa(String((payload && payload[0]) || ''));
   const password = String((payload && payload[1]) || '');
   if (!wa || !password) return { success: false, error: 'Nomor WA dan password wajib diisi.' };
+  if (!isValidWaFormat(wa)) {
+    return { success: false, error: 'Nomor WA tidak valid. Gunakan format 08xx atau 628xx (12-13 digit).' };
+  }
   if (!supabase.hasBackend()) {
     return { success: false, error: 'Backend belum dikonfigurasi (Supabase keys belum ada).' };
   }
@@ -534,18 +544,17 @@ async function handleLoginKandidat(payload) {
 
 async function handleDaftarKandidat(payload) {
   const nama = String((payload && payload[0]) || '').trim();
-  const wa = String((payload && payload[1]) || '').replace(/\D/g, '');
+  const wa = supabase.normalizeWa(String((payload && payload[1]) || ''));
   if (!nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
-  // Cegah pendaftaran dengan WA salah format (62 + 10/11 digit) — biasanya
-  // salah ketik yang melahirkan kandidat duplikat di masa lalu.
-  const nw = supabase.normalizeWa(wa);
-  if (nw.length < 12 || nw.length > 13) {
+  // Gate WA: tolak nomor yang bukan HP Indonesia (62 8xx, total 12-13 digit) —
+  // biasanya salah ketik yang melahirkan kandidat duplikat di masa lalu.
+  if (!isValidWaFormat(wa)) {
     return {
       success: false,
       error:
         'Nomor WA tidak valid (' +
-        nw +
-        '). Harus 62 + 10/11 digit (total 12-13 digit). Periksa nomor kembali.',
+        wa +
+        '). Gunakan format 08xx atau 628xx (12-13 digit). Periksa nomor kembali.',
     };
   }
   if (!supabase.hasBackend()) {

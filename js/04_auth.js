@@ -35,6 +35,25 @@ async function runAuthAction(btn, loadingHtml, idleText, fn) {
   }
 }
 
+// Gate WA (login & daftar): normalisasi 0xx/8xx → 628xx + validasi nomor HP
+// Indonesia (62 8xx, total 12-13 digit). Mencegah typo (mis. 6223... bukan
+// 6282...) melahirkan kandidat duplikat seperti kasus SATRIA (2026-08-15).
+function normalizeWaInput(w) {
+  let d = String(w || '').replace(/\D/g, '');
+  if (d.startsWith('0')) d = '62' + d.slice(1);
+  else if (d.startsWith('8')) d = '62' + d;
+  return d;
+}
+function isValidWaInput(w) {
+  return /^628\d{9,10}$/.test(normalizeWaInput(w));
+}
+// Pesan gate WA: pakai teks panjang (id) kalau ada, fallback ke key lama yang
+// sudah diterjemahkan di semua bahasa.
+function toastWaFormat() {
+  const m = tr('ui.toast_wa_format');
+  return m && m !== 'ui.toast_wa_format' ? m : tr('ui.toast_wa_invalid');
+}
+
 async function prosesDaftarKandidat() {
   const btn = document.getElementById('btn-reg-kandidat');
   const n = document.getElementById('reg-nama').value;
@@ -43,13 +62,18 @@ async function prosesDaftarKandidat() {
     showToast(tr('alert.mandatory'), 'error');
     return;
   }
+  const waNorm = normalizeWaInput(w);
+  if (!isValidWaInput(w)) {
+    showToast(toastWaFormat(), 'error');
+    return;
+  }
   // Password tidak diminta lagi: otomatis 4 digit terakhir nomor WA
   // (kebijakan seragam, lihat daftarKandidat di auth.ts).
   const res = await runAuthAction(
     btn,
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.registering'),
     tr('button.register'),
-    () => callAPI('daftarKandidat', [n, w]),
+    () => callAPI('daftarKandidat', [n, waNorm]),
   );
   if (res && res.success) {
     showToast(tr('alert.success'), 'success');
@@ -116,12 +140,17 @@ async function prosesLoginKandidat() {
     showToast(tr('alert.mandatory'), 'error');
     return;
   }
+  const waNorm = normalizeWaInput(w);
+  if (!isValidWaInput(w)) {
+    showToast(toastWaFormat(), 'error');
+    return;
+  }
 
   const res = await runAuthAction(
     btn,
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.searching_data'),
     tr('button.enter_dashboard'),
-    () => callAPI('loginKandidat', [w, p]),
+    () => callAPI('loginKandidat', [waNorm, p]),
   );
 
   if (res && res.success) {
