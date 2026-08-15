@@ -579,7 +579,12 @@
       }
       return callAPI('getAppData', ['kandidat', targetWa]).then(function(res) {
         if (res && res.sessionInvalid) return true; // tidak bisa diverifikasi → jangan redirect
-        var catatan = res && res.myData ? (res.myData.catatanInt || '') : '';
+        // Respons backend rebuild menaruh data kandidat di res.candidates[0]
+        // (dulu myData di backend GAS lama). Ambil catatanInt dari sana agar
+        // kandidat VIP tidak salah redirect ke Form Master.
+        var cand = res && Array.isArray(res.candidates) ? res.candidates[0] : null;
+        var catatan = cand ? String(cand.catatanInt || cand.catatan || '') : '';
+        if (!catatan && res && res.myData) catatan = String(res.myData.catatanInt || '');
         return isVipCatatan(catatan);
       }).catch(function() {
         // Kalau gagal jaringan, jangan blokir (fallback aman: biarkan masuk)
@@ -594,7 +599,11 @@
         $('aiTypingStatus').innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> ' + tr('form.ai_loading_master');
       }
       
-      callAPI('getExistingCandidateJsonByWa', [targetWa]).then(function(masterData) {
+      // FIX: pakai getDrafCvMaster (nested: identitas/fisik/medis/…/uploads +
+      // AIDATAJSON) — dulu getExistingCandidateJsonByWa yang bentuknya FLAT
+      // (kolom legacy untuk form apply), jadi form CV hanya terisi nama/HP
+      // dan SIMPAN DB menimpa ai_data_json master dengan data hampir kosong.
+      callAPI('getDrafCvMaster', [targetWa]).then(function(masterData) {
           if ($('aiTypingStatus')) $('aiTypingStatus').classList.add('hidden');
           if (masterData) {
             latestCandidateData = mergeCandidateData(masterData, latestCandidateData);

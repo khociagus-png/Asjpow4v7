@@ -141,8 +141,9 @@ function env(key) {
   // baris berisi variabel lain) — ambil hanya URL valid pertama.
   if (key === 'NETLIFY_SITE_URL') {
     // Nilai bisa tercemar paste tabel env Netlify — ambil host saja
-    // (https://<subdomain>.<domain>), tanpa path.
-    const m = String(v).match(/https?:\/\/[a-z0-9.-]+/i);
+    // (https://<subdomain>.<domain>), tanpa path. Port dipertahankan
+    // (mis. http://127.0.0.1:3000 untuk preview lokal).
+    const m = String(v).match(/https?:\/\/[a-z0-9.-]+(?::\d+)?/i);
     if (m) return m[0];
   }
   return v;

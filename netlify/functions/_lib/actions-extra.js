@@ -1850,15 +1850,28 @@ async function handleGetLinkSiswaBaru() {
 }
 
 async function handleGenerateFormBridge(payload) {
+  // Pemanggil:
+  //  - aksiGenerateQr(c, k)        → [code, bidang]
+  //  - lamarJob(jc, b, wa, nama, req) → [code, bidang, wa, nama, req]
+  // Map posisional supaya WA/nama/req kandidat yang login ikut terbawa ke
+  // apply-full.html (?job=&bidang=&wa=&nama=&req=).
   const code = String((payload && payload[0]) || '');
   const bidang = String((payload && payload[1]) || '');
+  const wa = String((payload && payload[2]) || '');
+  const nama = String((payload && payload[3]) || '');
+  const req = String((payload && payload[4]) || '');
   const formUrl =
     siteBase() +
     '/apply-full.html?job=' +
     encodeURIComponent(code) +
     '&bidang=' +
     encodeURIComponent(bidang) +
-    '&wa=&nama=';
+    '&wa=' +
+    encodeURIComponent(wa) +
+    '&nama=' +
+    encodeURIComponent(nama) +
+    '&req=' +
+    encodeURIComponent(req);
   return { formUrl };
 }
 
@@ -1875,10 +1888,28 @@ async function handleGenerateLegacyMasterBridge(payload) {
 }
 
 async function handleGenerateAiFormBridge(payload) {
-  const code = String((payload && payload[0]) || '');
-  const wa = String((payload && payload[1]) || '');
+  // Pemanggil: bukaAiFormPortal(flow, job, bidang, wa, nama) → payload
+  // [flow, job, bidang, wa, nama]. Dulu hanya payload[0]/[1] yang dibaca,
+  // jadi ?job=<flow>&wa= (WA kandidat HILANG) → ai_form tidak dapat
+  // auto-fill dan SIMPAN DB gagal. Sekarang seluruh context diteruskan ke
+  // ai_form.html (?flow=&job=&bidang=&wa=&nama=).
+  const flow = String((payload && payload[0]) || '');
+  const job = String((payload && payload[1]) || '');
+  const bidang = String((payload && payload[2]) || '');
+  const wa = String((payload && payload[3]) || '');
+  const nama = String((payload && payload[4]) || '');
   const formUrl =
-    siteBase() + '/ai_form.html?job=' + encodeURIComponent(code) + '&wa=' + encodeURIComponent(wa);
+    siteBase() +
+    '/ai_form.html?flow=' +
+    encodeURIComponent(flow) +
+    '&job=' +
+    encodeURIComponent(job) +
+    '&bidang=' +
+    encodeURIComponent(bidang) +
+    '&wa=' +
+    encodeURIComponent(wa) +
+    '&nama=' +
+    encodeURIComponent(nama);
   return { formUrl };
 }
 

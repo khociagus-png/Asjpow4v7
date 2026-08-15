@@ -22,6 +22,11 @@ const require = createRequire(import.meta.url);
 
 const PORT = Number(process.env.PORT) || 3000;
 
+// Bridge links (generateFormBridge / generateAiFormBridge) memakai
+// NETLIFY_SITE_URL dari env; di preview override ke origin lokal supaya
+// navigasi form (apply/ai/master) tidak lari ke situs produksi.
+process.env.NETLIFY_SITE_URL = `http://127.0.0.1:${PORT}`;
+
 // Root dokumen: kalau file ini dijalankan dari dalam dist/ (hasil build
 // deploy — index.html + netlify/ ikut disalin), pakai direktori file-nya.
 // Kalau dijalankan dari repo root (preview), pakai cwd.
