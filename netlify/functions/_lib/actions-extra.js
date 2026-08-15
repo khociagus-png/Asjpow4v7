@@ -1024,9 +1024,45 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
   const d = (payload && payload[0]) || {};
   const wa = supabase.normalizeWa(String(d.wa || ''));
   if (!d.nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
+  // Validasi format WA Indonesia: 62 + 10/11 digit (12-13 total). Nomor yang
+  // lebih pendek (mis. 62135812198 — kehilangan 1 digit "8") atau lebih panjang
+  // jelas salah ketik; menolak di sini mencegah lahirnya kandidat duplikat.
+  if (wa.length < 12 || wa.length > 13) {
+    return {
+      success: false,
+      error:
+        'Nomor WA tidak valid (' +
+        wa +
+        '). Harus 62 + 10/11 digit (total 12-13 digit). Periksa nomor kembali.',
+    };
+  }
   try {
     const nama = String(d.nama).trim().toUpperCase();
-    const idKand = await nextCandidateId();
+    // CEGAH DUPLIKAT: kalau WA sudah punya baris kandidat, perbarui baris itu
+    // (id_kandidat, password, tahapan/status tetap) — jangan membuat baris baru.
+    let existing = null;
+    try {
+      existing = await supabase.findCandidateByWaFiltered(wa);
+    } catch {
+      /* kolom WA tidak dikenal query filter → fallback scan */
+    }
+    if (!existing) {
+      try {
+        const found = await supabase.findCandidates();
+        existing =
+          found.rows.find(
+            (r) =>
+              supabase.normalizeWa(
+                supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
+              ) === wa,
+          ) || null;
+      } catch {
+        existing = null;
+      }
+    }
+    const idKand = existing
+      ? String(supabase.pick(existing, ['id_kandidat', 'id']) || '')
+      : await nextCandidateId();
     const folder = 'master/' + nama.replace(/[^A-Z0-9_-]/g, '_');
     const uploaded = [];
 
@@ -1071,48 +1107,84 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
       created_at: now,
       updated_at: now,
     };
-    await supabase.supabaseJson('POST', 'database_candidate', {
-      body: candBody,
-      headers: { Prefer: 'return=minimal' },
-    });
-    await supabase.supabaseJson('POST', 'master_database_candidate', {
-      body: {
-        id_kandidat: idKand,
-        nama_lengkap: nama,
-        gender: candBody.gender,
-        usia: candBody.usia,
-        tb: candBody.tb,
-        bb: candBody.bb,
-        no_wa: wa,
-        pas_photo: candBody.pas_photo,
-        jft_url: fileUrls.JFT || '',
-        ssw_url: fileUrls.SSW || '',
-        file_cv: fileUrls.CV || '',
-        created_at: now,
-        updated_at: now,
-      },
-      headers: { Prefer: 'return=minimal' },
-    });
-    await supabase.supabaseJson('POST', 'database_asj_form', {
-      body: {
-        timestamp: now,
-        code_job: String(d.loker || ''),
-        nama_lengkap: nama,
-        no_wa: wa,
-        gender: candBody.gender,
-        usia: candBody.usia,
-        tb: candBody.tb,
-        bb: candBody.bb,
-        pas_photo: candBody.pas_photo,
-        jft: fileUrls.JFT || '',
-        ssw: fileUrls.SSW || '',
-        file_cv: fileUrls.CV || '',
-        status: 'MENUNGGU',
-        created_at: now,
-        updated_at: now,
-      },
-      headers: { Prefer: 'return=minimal' },
-    });
+    const masterBody = {
+      id_kandidat: idKand,
+      nama_lengkap: nama,
+      gender: candBody.gender,
+      usia: candBody.usia,
+      tb: candBody.tb,
+      bb: candBody.bb,
+      no_wa: wa,
+      pas_photo: candBody.pas_photo,
+      jft_url: fileUrls.JFT || '',
+      ssw_url: fileUrls.SSW || '',
+      file_cv: fileUrls.CV || '',
+    };
+    const formBody = {
+      timestamp: now,
+      code_job: String(d.loker || ''),
+      nama_lengkap: nama,
+      no_wa: wa,
+      gender: candBody.gender,
+      usia: candBody.usia,
+      tb: candBody.tb,
+      bb: candBody.bb,
+      pas_photo: candBody.pas_photo,
+      jft: fileUrls.JFT || '',
+      ssw: fileUrls.SSW || '',
+      file_cv: fileUrls.CV || '',
+      status: 'MENUNGGU',
+    };
+
+    if (existing && existing.id !== undefined) {
+      // Update baris kandidat yang sudah ada: hanya data profil + dokumen.
+      // Password, tanggal daftar, tahapan/status, id_kandidat TIDAK diubah.
+      const upd = Object.assign({}, candBody);
+      delete upd.id_kandidat;
+      delete upd.password_kandidat;
+      delete upd.password_diubah;
+      delete upd.tanggal_daftar;
+      delete upd.tahapan_seleksi;
+      delete upd.status_kandidat;
+      delete upd.created_at;
+      await supabase.supabaseJson('PATCH', 'database_candidate', {
+        query: { id: 'eq.' + existing.id },
+        body: upd,
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'database_candidate', {
+        body: candBody,
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
+    // Master & mail: upsert per WA (jangan menumpuk baris duplikat).
+    const mRow = await findMasterByWa(wa);
+    if (mRow && mRow.id !== undefined) {
+      await supabase.supabaseJson('PATCH', 'master_database_candidate', {
+        query: { id: 'eq.' + mRow.id },
+        body: Object.assign({}, masterBody, { updated_at: now }),
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'master_database_candidate', {
+        body: Object.assign({ created_at: now, updated_at: now }, masterBody),
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
+    const fRow = await findFormByWa(wa);
+    if (fRow && fRow.id !== undefined) {
+      await supabase.supabaseJson('PATCH', 'database_asj_form', {
+        query: { id: 'eq.' + fRow.id },
+        body: Object.assign({}, formBody, { updated_at: now }),
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'database_asj_form', {
+        body: Object.assign({ created_at: now, updated_at: now }, formBody),
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
     return { success: true, uploaded };
   } catch (e) {
     return { success: false, error: 'Gagal simpan kandidat: ' + e.message };

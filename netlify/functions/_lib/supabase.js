@@ -269,7 +269,8 @@ async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
   const params = { select: '*' };
   if (q && q.trim()) {
     const needle = q.trim().replace(/'/g, "''");
-    params.or = `nama_lengkap.ilike.*${needle}*,no_wa.ilike.*${needle}*`;
+    // PostgREST or= wajib dibungkus kurung, kalau tidak gagal (HTTP 400).
+    params.or = `(nama_lengkap.ilike.*${needle}*,no_wa.ilike.*${needle}*)`;
   }
   const qs = new URLSearchParams(params).toString();
   const res = await fetch(supabaseUrl().replace(/\/$/, '') + '/rest/v1/' + table + '?' + qs, {

@@ -474,6 +474,18 @@ async function handleDaftarKandidat(payload) {
   const nama = String((payload && payload[0]) || '').trim();
   const wa = String((payload && payload[1]) || '').replace(/\D/g, '');
   if (!nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
+  // Cegah pendaftaran dengan WA salah format (62 + 10/11 digit) — biasanya
+  // salah ketik yang melahirkan kandidat duplikat di masa lalu.
+  const nw = supabase.normalizeWa(wa);
+  if (nw.length < 12 || nw.length > 13) {
+    return {
+      success: false,
+      error:
+        'Nomor WA tidak valid (' +
+        nw +
+        '). Harus 62 + 10/11 digit (total 12-13 digit). Periksa nomor kembali.',
+    };
+  }
   if (!supabase.hasBackend()) {
     return { success: false, error: 'Backend belum dikonfigurasi (Supabase keys belum ada).' };
   }
