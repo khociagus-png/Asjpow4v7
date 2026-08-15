@@ -1,10 +1,15 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `17e6973`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `2f790ff`.
 
 ---
 
 ## 2026-08-15 — Sesi terbaru: dedupe data & dokumen, share view, keamanan, CI
+
+### `2f790ff` — Audit berkas kandidat 4 kolom + fallback foto share view + audit di CI
+- `audit-pasphoto.mjs` diperluas: memeriksa **pas_photo, file_cv, jft, ssw** terhadap file Storage `master/` (paginasi penuh) dan memperbaiki ke nilai master sejenis (`pas_photo→pas_photo`, `file_cv→file_cv`, `jft→jft_url`, `ssw→ssw_url`). Hasil audit: **0 rusak** (40 link Google Drive legacy dicatat, tidak disentuh).
+- Share view: `share.html` punya `onerror` → placeholder ui-avatars saat foto 404; `share-data` memakai file foto dari folder master (PHOTOFILE/PAS_PHOTO/FOTO) saat pas_photo kandidat kosong/basi.
+- CI e2e-share: step **audit dry-run** tiap push ke `main` (butuh secrets SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY; dilewati bila belum di-set). `run.md` mendapat bagian skrip maintenance.
 
 ### `17e6973` — Perbaiki CV rirekisho: foto, alamat JP, tombol X
 - **Foto:** pas_photo di `database_candidate` bisa menunjuk file yang sudah tidak ada (404); CV kini memakai `uploads.photo` dari **master dulu** (file terbaru yang benar), fallback ke pas_photo kandidat.

@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `17e6973` (lihat `git log`).
+**Update terakhir:** commit `2f790ff` (lihat `git log`).
 
 ---
 
@@ -57,6 +57,25 @@ konsistensi close modal + data foto kandidat.
   FIRMA ELGA PRATAMA (id 41), keduanya diperbaiki ke pas_photo master yang
   ada. Verifikasi ulang: **127 valid, 0 rusak**. Backup:
   `.freebuff/pasphoto-fix-backup-*.json`.
+
+### 5. Audit diperluas ke 4 kolom + fallback foto share view + audit di CI (`2f790ff`)
+
+- **`audit-pasphoto.mjs`** kini memeriksa **pas_photo, file_cv, jft, ssw**
+  kandidat terhadap file Storage `master/` dan memperbaiki ke nilai master
+  sejenis (`pas_photo→pas_photo`, `file_cv→file_cv`, `jft→jft_url`,
+  `ssw→ssw_url`; cocok via no_wa / id_kandidat). Hasil: **0 rusak**
+  (pas_photo 127 · file_cv 48 · jft 79 · ssw 79 valid).
+- **40 kandidat `file_cv` masih link Google Drive** (baris lama 2026-08-01,
+  era GAS): file CV-nya **sudah ada di Storage** `master/` (CVFILE… /
+  `1. NAMA_CV.xlsx`) — hanya kolom `file_cv` yang belum di-update ke URL
+  Storage. Bukan "kembali ke Drive": backend 100% Supabase; tinggal migrasi
+  kolom (fitur admin "Migrasi Berkas dari Google Drive" / skrip khusus).
+- **Share view:** `share.html` kini `onerror` → placeholder ui-avatars saat
+  foto 404; `share-data` fallback ke file foto folder master
+  (PHOTOFILE/PAS_PHOTO/FOTO) saat pas_photo kandidat kosong/basi.
+- **CI e2e-share:** step audit **dry-run** tiap push ke `main` (butuh secrets
+  `SUPABASE_URL` & `SUPABASE_SERVICE_ROLE_KEY`; dilewati bila belum di-set).
+  `run.md` mendapat bagian "Skrip maintenance".
 
 ---
 
