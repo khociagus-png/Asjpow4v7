@@ -627,15 +627,35 @@
                 
                 // Dokumen ekstra (SIM, KTP, ijazah, dll) dari folder master —
                 // share view tidak baku 3 tombol saja: file apa pun yang ada
-                // ikut tampil & bisa dipratinjau. Label pakai jenis dokumen
-                // (SIM/KTP/CV/…) kalau dikenali, selain itu nama file.
+                // ikut tampil & bisa dipratinjau. Klasifikasi tipe SAMA dengan
+                // backend (handlers.js docTypeOf): nama lawas dikenali
+                // (1. X_CV.xlsx → CV, nama_jft.pdf → JFT, X_PAS_PHOTO.jpg →
+                // FOTO), alias dinormalisasi, CV/JFT/SSW/foto bukan tombol
+                // ekstra, dan 1 tipe = 1 tombol (dedupe defensif di sini juga
+                // — jaga-jaga backend lama yang belum di-deploy).
+                const EXTRA_TYPE_ALIAS = { CVFILE:'CV', FILE_CV:'CV', CV_REVISI:'CV', PHOTOFILE:'FOTO', PAS_PHOTO:'FOTO', PASSPHOTO:'FOTO', FOTO:'FOTO', PHOTO:'FOTO', JFTFILE:'JFT', SSWFILE:'SSW', KARTU_KELUARGA:'KK' };
+                const EXTRA_TYPE_TOKENS = ['PAS_PHOTO','PHOTOFILE','KARTU_KELUARGA','CVFILE','FILE_CV','CV_REVISI','JFTFILE','SSWFILE','PASSPHOTO','PASSPORT','IJAZAH','KTP','KK','CV','JFT','SSW','FOTO','PHOTO'];
+                function docTypeOf(nm) {
+                    const base = String(nm || '').replace(/\.[a-z0-9]+$/i, '');
+                    const m = base.match(/^[A-Z]+/);
+                    let t = m ? m[0] : null;
+                    if (!t) {
+                        const up = base.toUpperCase();
+                        t = EXTRA_TYPE_TOKENS.find((tk) => up.includes(tk)) || up;
+                    }
+                    return EXTRA_TYPE_ALIAS[t] || t;
+                }
                 let extraBtns = '';
-                const EXTRA_TYPE_MAP = ['SIM','KTP','JFT','SSW','CV','FOTO','IJAZAH','PASPORT','PASPOR','SKCK','KK','AKTE','MCU','KONTRAK','CERTIFICATE','SURAT','UNIVERSITAS','UNIV'];
+                const seenExtraTypes = new Set();
                 (c.extraDocs || []).forEach(d => {
+                    const type = docTypeOf(d.name);
+                    if (type === 'CV' || type === 'JFT' || type === 'SSW' || type === 'FOTO') return; // sudah ada tombol utama
+                    if (seenExtraTypes.has(type)) return; // 1 tipe = 1 tombol
+                    seenExtraTypes.add(type);
                     let raw = String(d.name).replace(/\.[a-z0-9]+$/i, '').replace(/_\d{10,}$/g, '').toUpperCase().trim();
                     // File standar nama_<loker>cv (CV per loker lain) -> label "CV <loker>"
                     const stdCv = raw.match(/^NAMA_?(.+?)CV$/);
-                    let label = stdCv ? 'CV ' + stdCv[1].replace(/_/g, ' ').trim() : (EXTRA_TYPE_MAP.find(t => raw.startsWith(t)) || raw.replace(/_/g, ' ').trim());
+                    let label = stdCv ? 'CV ' + stdCv[1].replace(/_/g, ' ').trim() : (type === raw ? raw.replace(/_/g, ' ').trim() : type);
                     if (!label) label = 'FILE';
                     label = label.slice(0, 16);
                     extraBtns += `<button onclick="window.openPreview('${d.url}', '${label} - ${safeName}')" class="${btnBase} bg-amber-600/20 hover:bg-amber-600 border-amber-500/50 text-amber-400 hover:text-white text-[10px] md:text-xs"><i class="fas fa-file-alt text-xs md:text-sm"></i> ${label}</button>`;
