@@ -4,7 +4,44 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** commit `cbfa8fc` (lihat `git log`).
+**Update terakhir:** commit `67bd3e0` (lihat `git log`).
+
+---
+
+## 🆕 SESI TERBARU — Perombakan UI solid + tema light/dark merata (`67bd3e0`)
+
+Tujuan: tampilan **solid** (tanpa backdrop-blur/transparansi) supaya teks selalu
+terbaca jelas di semua halaman & tema, dan menu samping ikut tema light/dark.
+
+### Yang berubah
+
+- **`.glass-panel` solid** — `background:#0d0d0d` (sebelumnya `#000000b3` +
+  `backdrop-filter: blur(12px)`); semua tombol header/nav yang translucent
+  (`bg-white/20` + blur) jadi solid (`bg-black hover:bg-zinc-800`,
+  `border-white/60`); header tanpa `rounded-[2.5rem]`, overlay gradient tanpa
+  rounding; tombol close-loader & shield admin `bg-red-600` solid; overlay
+  share.html `rgba(30,41,59,0.97)` (sebelumnya 0.7 + blur).
+- **Menu samping (hamburger) ikut tema** — `#mobile-nav-menu` memakai CSS
+  variables `--mn-bg/--mn-surface/--mn-text/…`; `body.theme-light` menimpanya
+  (src/main.css +596 baris, assets/main.css rebuild → `?v=4f2c8a1e73`).
+- **Tema merata ke semua halaman mandiri** — `ai_form`, `apply-full`,
+  `master-full`, `share`, `siswa-baru` kini punya `data-page` + inline theme
+  script (`theme-light`/`theme-dark` di `<body>`); sebelumnya hanya index/admin
+  yang ikut tema (menu samping halaman mandiri tidak pernah ter-tema).
+- **Fallback banner/footer** — `DEFAULT_ASSETS` di `js/02_init.js`: banner/footer
+  default dari Supabase Storage dipakai saat backend belum mengirim ASSETS
+  (mis. preview tanpa backend) → banner & footer SELALU tampil.
+- **Filter & tab publik solid per-tema** — warna tombol filter (`js/05_render.js`)
+  dan tab Loker/Layanan (`js/01_public.js`) solid untuk tema terang & gelap;
+  theme toggle light style solid (`bg-slate-100 … border-stone-300`).
+
+### Verifikasi
+
+- Build byte-identik dengan working copy; test 41/41; lint 0 error.
+- Preview lokal (port 3100): halaman termuat, `getAppData` sukses dari Supabase
+  asli (data job live), console bersih.
+
+Catatan: aktif di produksi setelah **deploy ulang ke Netlify**.
 
 ---
 

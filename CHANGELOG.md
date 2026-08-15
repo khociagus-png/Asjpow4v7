@@ -1,6 +1,18 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `cbfa8fc`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `67bd3e0`.
+
+---
+
+## 2026-08-15 — Perombakan UI solid + tema light/dark merata
+
+### `67bd3e0` — UI solid: hapus backdrop-blur/transparansi, menu samping ikut tema, tema diterapkan ke semua halaman
+- **Tampilan SOLID:** semua elemen `backdrop-blur` & transparansi dihilangkan — `.glass-panel` kini `background:#0d0d0d` solid (teks selalu terbaca, tidak glossy); tombol header/nav solid (`bg-black hover:bg-zinc-800`, `border-white/60`); header tanpa `rounded-[2.5rem]`, overlay tanpa rounding; tombol "Tutup Paksa Loading" & shield admin `bg-red-600` solid; overlay share.html `rgba(30,41,59,0.97)` (sebelumnya 0.7 + blur).
+- **Menu samping (hamburger) ikut tema light/dark:** warna dikontrol CSS variables `--mn-*` dan ditimpa `body.theme-light` → konsisten di kedua tema (`src/main.css` +596 baris, `assets/main.css` rebuild → `?v=4f2c8a1e73`).
+- **Tema diterapkan ke SEMUA halaman mandiri:** `ai_form`, `apply-full`, `master-full`, `share`, `siswa-baru` kini punya `data-page="…"` + inline theme script (`theme-light`/`theme-dark` di `<body>`) — sebelumnya hanya index/admin yang ikut tema.
+- **Fallback banner/footer:** `DEFAULT_ASSETS` di `js/02_init.js` — banner/footer default dari Supabase Storage selalu tampil walau backend belum mengirim ASSETS (mis. data gagal dimuat / preview tanpa backend).
+- **Filter & tab publik solid per-tema:** warna tombol filter (js/05_render) dan tab Loker/Layanan (js/01_public) kini solid untuk tema terang & gelap; theme toggle button light style solid (`bg-slate-100 … border-stone-300`).
+- **Verifikasi:** build byte-identik dengan working copy; test 41/41; lint 0 error; preview lokal → halaman termuat & `getAppData` sukses dari Supabase asli.
 
 ---
 
