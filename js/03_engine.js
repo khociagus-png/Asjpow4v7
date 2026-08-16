@@ -453,6 +453,37 @@ function refreshDataDinamis(switchTab, isSilent = false) {
     payload = localStorage.getItem('asj_kandidat_wa');
   }
 
+  // AUTO-LOGIN hardening: flag login ada tapi token sesi / WA hilang
+  // (localStorage terhapus sebagian) → jangan panggil API dengan token
+  // kosong (hasilnya data kosong diam-diam). Bersihkan & arahkan ke login
+  // dengan pesan jelas.
+  if (modeLoad !== 'public') {
+    const token =
+      modeLoad === 'admin'
+        ? localStorage.getItem('asj_admin_session')
+        : localStorage.getItem('asj_kandidat_session');
+    const identLengkap = modeLoad === 'admin' || !!payload;
+    if (!token || (modeLoad === 'kandidat' && !payload)) {
+      localStorage.removeItem('asj_admin_login');
+      localStorage.removeItem('asj_admin_session');
+      localStorage.removeItem('asj_admin_name');
+      localStorage.removeItem('asj_kandidat_login');
+      localStorage.removeItem('asj_kandidat_name');
+      localStorage.removeItem('asj_kandidat_wa');
+      localStorage.removeItem('asj_kandidat_session');
+      try {
+        const msg =
+          modeLoad === 'admin'
+            ? tr('ui.toast_admin_session_expired')
+            : tr('ui.toast_kandidat_session_expired');
+        if (typeof showToast === 'function') showToast(msg, 'error');
+        else if (typeof alert === 'function') alert(msg);
+      } catch (e) { /* opsional */ }
+      if (identLengkap) location.reload();
+      return;
+    }
+  }
+
   // getAppData = muat data utama dashboard (BACA SAJA — aman diulang).
   // Kalau backend sempat mati / jaringan drop sesaat, coba SEKALI LAGI
   // setelah jeda singkat sebelum menampilkan toast error — kejadian

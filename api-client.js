@@ -231,8 +231,25 @@ async function callAPI(action, payload) {
       parsed = { success: false, message: text };
     }
     if (parsed && parsed.sessionInvalid) {
+      // Pesan jelas sebelum reload — dulu ini diam-diam (data kosong /
+      // logout sendiri tanpa penjelasan). Sekarang beri tahu user sesi
+      // sudah berakhir dan minta login ulang.
+      try {
+        const adminLogged = localStorage.getItem('asj_admin_login') === 'sukses';
+        const kandidatLogged = localStorage.getItem('asj_kandidat_login') === 'sukses';
+        const msg = adminLogged
+          ? tr('ui.toast_admin_session_expired')
+          : kandidatLogged
+            ? tr('ui.toast_kandidat_session_expired')
+            : 'Sesi berakhir, silakan login ulang.';
+        if (typeof showToast === 'function') showToast(msg, 'error');
+        else if (typeof alert === 'function') alert(msg);
+      } catch (e) {
+        /* toast opsional — jangan sampai memblokir reload */
+      }
       localStorage.removeItem('asj_admin_login');
       localStorage.removeItem('asj_admin_session');
+      localStorage.removeItem('asj_admin_name');
       localStorage.removeItem('asj_kandidat_login');
       localStorage.removeItem('asj_kandidat_name');
       localStorage.removeItem('asj_kandidat_wa');
