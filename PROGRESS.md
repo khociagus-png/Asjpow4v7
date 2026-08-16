@@ -10,6 +10,24 @@
 
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `57ea59b` — Print CV rirekisho FIT 1 halaman A4
+
+- Keluhan user: print CV rirekisho jadi **3 lembar** (dan CV render berbasis
+  HTML→PDF, bukan Excel — template Excel "FORMAT CV" tetap terpisah).
+- Akar masalah: **tidak ada CSS print sama sekali** → print ikut mencetak seluruh
+  halaman web. Kini `@media print` khusus CV: hanya `#modal-preview-cv` yang
+  tampil, lembar dipaksa A4 210×297mm margin 0, isi tabel dirapikan (font 9px,
+  padding kecil, warna header tetap dicetak via print-color-adjust).
+- Verifikasi (CV AGUS KHOCI): PDF A4 = **1 halaman** (`/Count 1`); emulasi
+  media print `scrollHeight == clientHeight` di dua sumbu → **tidak terpotong**.
+- `assets/main.css` rebuild, hash bump `4f2c8a1e73 → 8657590e50` (7 halaman).
+- Juga diverifikasi jawaban pertanyaan user: tabel kandidat admin **sudah 1 baris
+  per kandidat** — `getCandidatesPage` total 222 = 222 WA unik, 0 duplikat.
+
+---
+
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `ecc1828` — Tes menyeluruh live + fix kritis export fetchMasterByWa
 
 ### Lanjutan: redeploy live + verifikasi ulang + tes lokal (semua hijau)

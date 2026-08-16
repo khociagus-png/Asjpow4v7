@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `ecc1828`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `57ea59b`.
+
+---
+
+## 2026-08-15 — Print CV rirekisho FIT 1 halaman A4
+
+### `57ea59b` — Feat: print CV rirekisho FIT 1 halaman A4 (dulu 3 lembar)
+- Sebelumnya **tidak ada CSS print sama sekali** → print CV rirekisho ikut mencetak
+  seluruh halaman web (2-3 lembar). Kini `@media print` menyembunyikan semua
+  kecuali `#modal-preview-cv`, lembar di-paksa ukuran A4 (210×297mm, margin 0),
+  isi tabel dirapikan (font 9px, padding kecil, warna header tetap dicetak).
+- Verifikasi: PDF hasil `page.pdf` A4 = **1 halaman** (`/Count 1`); di emulasi
+  media print `scrollHeight == clientHeight` di dua sumbu → **tidak ada konten
+  terpotong** (CV AGUS KHOCI, tabel 1138px → muat 297mm).
+- Hash `assets/main.css` di-bump `4f2c8a1e73 → 8657590e50` di 7 halaman.
+- Catatan: preview CV memang berupa render HTML→PDF (bukan Excel) — file Excel
+  "FORMAT CV" tetap tersedia sebagai template terpisah di dossier.
 
 ---
 
