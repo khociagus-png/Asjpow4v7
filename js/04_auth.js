@@ -4,7 +4,7 @@
 // State tombol dikelola lewat finally sehingga tidak pernah terkunci,
 // dan pesan kesalahan ditangani di satu tempat (showAuthError).
 
-function bukaModalKandidat(mode) {
+export function bukaModalKandidat(mode) {
   const m = document.getElementById('modal-kandidat');
   if (m) m.classList.remove('hidden');
   const fd = document.getElementById('form-daftar-kandidat');
@@ -16,7 +16,7 @@ function bukaModalKandidat(mode) {
 // Helper: jalankan callAPI dengan state tombol loading + error terpusat.
 // Optimistic UI: tombol langsung menampilkan spinner, lalu dikembalikan
 // di finally — UI tidak pernah macet walau request gagal/timeout.
-async function runAuthAction(btn, loadingHtml, idleText, fn) {
+export async function runAuthAction(btn, loadingHtml, idleText, fn) {
   if (btn) {
     btn.innerHTML = loadingHtml;
     btn.disabled = true;
@@ -25,7 +25,7 @@ async function runAuthAction(btn, loadingHtml, idleText, fn) {
     const res = await fn();
     return res;
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
     return null;
   } finally {
     if (btn) {
@@ -38,119 +38,119 @@ async function runAuthAction(btn, loadingHtml, idleText, fn) {
 // Gate WA (login & daftar): normalisasi 0xx/8xx → 628xx + validasi nomor HP
 // Indonesia (62 8xx, total 12-13 digit). Mencegah typo (mis. 6223... bukan
 // 6282...) melahirkan kandidat duplikat seperti kasus SATRIA (2026-08-15).
-function normalizeWaInput(w) {
+export function normalizeWaInput(w) {
   let d = String(w || '').replace(/\D/g, '');
   if (d.startsWith('0')) d = '62' + d.slice(1);
   else if (d.startsWith('8')) d = '62' + d;
   return d;
 }
-function isValidWaInput(w) {
+export function isValidWaInput(w) {
   return /^628\d{9,10}$/.test(normalizeWaInput(w));
 }
 // Pesan gate WA: pakai teks panjang (id) kalau ada, fallback ke key lama yang
 // sudah diterjemahkan di semua bahasa.
-function toastWaFormat() {
-  const m = tr('ui.toast_wa_format');
-  return m && m !== 'ui.toast_wa_format' ? m : tr('ui.toast_wa_invalid');
+export function toastWaFormat() {
+  const m = window.tr('ui.toast_wa_format');
+  return m && m !== 'ui.toast_wa_format' ? m : window.tr('ui.toast_wa_invalid');
 }
 
-async function prosesDaftarKandidat() {
+export async function prosesDaftarKandidat() {
   const btn = document.getElementById('btn-reg-kandidat');
   const n = document.getElementById('reg-nama').value;
   const w = document.getElementById('reg-wa').value;
   if (!n || !w) {
-    showToast(tr('alert.mandatory'), 'error');
+    window.showToast(window.tr('alert.mandatory'), 'error');
     return;
   }
   const waNorm = normalizeWaInput(w);
   if (!isValidWaInput(w)) {
-    showToast(toastWaFormat(), 'error');
+    window.showToast(toastWaFormat(), 'error');
     return;
   }
   // Password tidak diminta lagi: otomatis 4 digit terakhir nomor WA
   // (kebijakan seragam, lihat daftarKandidat di auth.ts).
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.registering'),
-    tr('button.register'),
-    () => callAPI('daftarKandidat', [n, waNorm]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.registering'),
+    window.tr('button.register'),
+    () => window.callAPI('daftarKandidat', [n, waNorm]),
   );
   if (res && res.success) {
-    showToast(tr('alert.success'), 'success');
+    window.showToast(window.tr('alert.success'), 'success');
     bukaModalKandidat('login');
-  } else if (res) showToast(res.error, 'error');
+  } else if (res) window.showToast(res.error, 'error');
 }
 
 // Ganti password kandidat (fitur 2026-08-12): password default 4 digit WA
 // bisa diganti password pribadi. Backend (auth.ts gantiPasswordKandidat)
 // memverifikasi sesi + password lama, menyimpan hash bcrypt baru + flag
 // password_diubah=true (UI admin lalu menampilkan peringatan, bukan 4 digit).
-function bukaModalGantiPass() {
+export function bukaModalGantiPass() {
   const m = document.getElementById('modal-ganti-pass');
   if (m) m.classList.remove('hidden');
 }
-function tutupModalGantiPass() {
+export function tutupModalGantiPass() {
   const m = document.getElementById('modal-ganti-pass');
   if (m) m.classList.add('hidden');
 }
-async function prosesGantiPasswordKandidat() {
+export async function prosesGantiPasswordKandidat() {
   const btn = document.getElementById('btn-gp-submit');
   const lama = document.getElementById('gp-pass-lama').value;
   const baru = document.getElementById('gp-pass-baru').value;
   const konfirmasi = document.getElementById('gp-pass-konfirmasi').value;
   if (!lama || !baru || !konfirmasi) {
-    showToast(tr('alert.mandatory'), 'error');
+    window.showToast(window.tr('alert.mandatory'), 'error');
     return;
   }
   if (baru !== konfirmasi) {
-    showToast(tr('ui.pass_mismatch'), 'error');
+    window.showToast(window.tr('ui.pass_mismatch'), 'error');
     return;
   }
   if (baru.length < 6 || baru.length > 20 || /\s/.test(baru)) {
-    showToast(tr('ui.pass_new_hint'), 'error');
+    window.showToast(window.tr('ui.pass_new_hint'), 'error');
     return;
   }
-  if (!currentKandidatWa) {
-    showToast(tr('ui.toast_kandidat_session_expired'), 'error');
+  if (!window.currentKandidatWa) {
+    window.showToast(window.tr('ui.toast_kandidat_session_expired'), 'error');
     return;
   }
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.change_password') + '…',
-    '<i class="fas fa-check mr-1.5"></i> ' + tr('ui.change_password'),
-    () => callAPI('gantiPasswordKandidat', [currentKandidatWa, lama, baru]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.change_password') + '…',
+    '<i class="fas fa-check mr-1.5"></i> ' + window.tr('ui.change_password'),
+    () => window.callAPI('gantiPasswordKandidat', [window.currentKandidatWa, lama, baru]),
   );
   if (res && res.success) {
-    showToast(tr('ui.pass_changed_ok'), 'success');
+    window.showToast(window.tr('ui.pass_changed_ok'), 'success');
     tutupModalGantiPass();
     document.getElementById('gp-pass-lama').value = '';
     document.getElementById('gp-pass-baru').value = '';
     document.getElementById('gp-pass-konfirmasi').value = '';
   } else if (res) {
-    showToast(res.error || tr('ui.pass_mismatch'), 'error');
+    window.showToast(res.error || window.tr('ui.pass_mismatch'), 'error');
   }
 }
 
-async function prosesLoginKandidat() {
+export async function prosesLoginKandidat() {
   const btn = document.getElementById('btn-log-kandidat');
   const w = document.getElementById('log-wa').value;
   const p = document.getElementById('log-pass').value;
 
   if (!w || !p) {
-    showToast(tr('alert.mandatory'), 'error');
+    window.showToast(window.tr('alert.mandatory'), 'error');
     return;
   }
   const waNorm = normalizeWaInput(w);
   if (!isValidWaInput(w)) {
-    showToast(toastWaFormat(), 'error');
+    window.showToast(toastWaFormat(), 'error');
     return;
   }
 
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.searching_data'),
-    tr('button.enter_dashboard'),
-    () => callAPI('loginKandidat', [waNorm, p]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.searching_data'),
+    window.tr('button.enter_dashboard'),
+    () => window.callAPI('loginKandidat', [waNorm, p]),
   );
 
   if (res && res.success) {
@@ -167,9 +167,9 @@ async function prosesLoginKandidat() {
     );
 
     document.getElementById('modal-kandidat').classList.add('hidden');
-    isKandidat = true;
-    currentKandidatName = res.nama;
-    currentKandidatWa = res.wa;
+    window.isKandidat = true;
+    window.currentKandidatName = res.nama;
+    window.currentKandidatWa = res.wa;
 
     const navM = document.getElementById('nav-mode');
     if (navM) navM.classList.add('hidden');
@@ -185,13 +185,13 @@ async function prosesLoginKandidat() {
     if (mKandidat) mKandidat.classList.remove('hidden');
 
     // Optimistic UI: pindah tampilan dulu, data di-refresh paralel di background
-    await refreshDataDinamis();
+    await window.refreshDataDinamis();
   } else if (res) {
-    showToast(res.error, 'error');
+    window.showToast(res.error, 'error');
   }
 }
 
-function showLoginAdminMaster() {
+export function showLoginAdminMaster() {
   const s1 = document.getElementById('login-step-1');
   if (s1) s1.classList.remove('hidden');
   const s2 = document.getElementById('login-step-2');
@@ -202,44 +202,44 @@ function showLoginAdminMaster() {
   if (m) m.classList.remove('hidden');
 }
 
-async function prosesLoginMaster() {
+export async function prosesLoginMaster() {
   const pin = document.getElementById('admin-pin-master').value;
   const btn = document.getElementById('btn-login-master');
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
-    tr('button.verify'),
-    () => callAPI('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || '']),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.checking'),
+    window.tr('button.verify'),
+    () => window.callAPI('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || '']),
   );
   if (res && res.success) {
     document.getElementById('login-step-1').classList.add('hidden');
     document.getElementById('login-step-2').classList.remove('hidden');
   } else if (res) {
-    showToast(res.error, 'error');
+    window.showToast(res.error, 'error');
   }
 }
 
-function showLoginPersonal(name) {
+export function showLoginPersonal(name) {
   const s2 = document.getElementById('login-step-2');
   if (s2) s2.classList.add('hidden');
-  safeSet('lbl-nama-admin', tr('header.admin_login') + ' ' + name);
+  window.safeSet('lbl-nama-admin', window.tr('header.admin_login') + ' ' + name);
   const t = document.getElementById('admin-name-temp');
   if (t) t.value = name;
   const s3 = document.getElementById('login-step-3');
   if (s3) s3.classList.remove('hidden');
 }
 
-async function prosesLoginPersonal() {
+export async function prosesLoginPersonal() {
   const name = document.getElementById('admin-name-temp').value;
   const pin = document.getElementById('admin-pin-personal').value;
   const btn = document.getElementById('btn-login-personal');
 
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
-    tr('button.enter_portal'),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.checking'),
+    window.tr('button.enter_portal'),
     () =>
-      callAPI('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || '']),
+      window.callAPI('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || '']),
   );
 
   if (res && res.success) {
@@ -252,8 +252,8 @@ async function prosesLoginPersonal() {
     // ulang oleh doPost untuk semua aksi admin.
     localStorage.setItem('asj_admin_session', res.sessionToken || '');
     document.getElementById('modal-admin').classList.add('hidden');
-    isAdmin = true;
-    currentAdminName = name;
+    window.isAdmin = true;
+    window.currentAdminName = name;
     document.getElementById('nav-mode').classList.add('hidden');
     document.getElementById('nav-admin-mode').classList.remove('hidden');
 
@@ -264,16 +264,39 @@ async function prosesLoginPersonal() {
     if (mAdmin) mAdmin.classList.remove('hidden');
     if (mKandidat) mKandidat.classList.add('hidden');
 
-    changePage('admin');
-    await refreshDataDinamis();
+    window.changePage('admin');
+    await window.refreshDataDinamis();
 
     // 👉 TRIGGER TEMA KHOCI SAAT BARU LOGIN
-    if (currentAdminName === 'KHOCI') {
-      setTimeout(applyInterMilanVibe, 50);
+    if (window.currentAdminName === 'KHOCI') {
+      setTimeout(window.applyInterMilanVibe, 50);
     }
   } else if (res) {
-    showToast(res.error, 'error');
+    window.    window.showToast(res.error, 'error');
   }
 }
+
+// ---------------------------------------------------------------------------
+// BRIDGE ESM → classic (bundel admin/index): alias window.* untuk SEMUA
+// fungsi auth. Diperlukan karena pemanggil utama adalah HTML inline
+// onclick (bukaModalKandidat, prosesLoginKandidat, showLoginAdminMaster,
+// …) + lintas file (util.js pakai window.toastWaFormat, boot.js pakai
+// window.showLoginAdminMaster). js/04_auth.js TIDAK dimuat halaman
+// standalone — bridge hanya untuk bundel.
+// ---------------------------------------------------------------------------
+window.bukaModalKandidat = bukaModalKandidat;
+window.runAuthAction = runAuthAction;
+window.normalizeWaInput = normalizeWaInput;
+window.isValidWaInput = isValidWaInput;
+window.toastWaFormat = toastWaFormat;
+window.prosesDaftarKandidat = prosesDaftarKandidat;
+window.bukaModalGantiPass = bukaModalGantiPass;
+window.tutupModalGantiPass = tutupModalGantiPass;
+window.prosesGantiPasswordKandidat = prosesGantiPasswordKandidat;
+window.prosesLoginKandidat = prosesLoginKandidat;
+window.showLoginAdminMaster = showLoginAdminMaster;
+window.prosesLoginMaster = prosesLoginMaster;
+window.showLoginPersonal = showLoginPersonal;
+window.prosesLoginPersonal = prosesLoginPersonal;
 
 // ==========================================

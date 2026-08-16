@@ -53,7 +53,7 @@ root/
 | Yang diubah | Sumber | Build wajib | Artifact ter-generate |
 | --- | --- | --- | --- |
 | Logika frontend | `js/*.js`, `api-client.js`, `i18n.js`, `pwa.js` | `bun run build:js` | `assets/app-<hash>.js` + ref di `index.html`/`admin.html` + `sw.js` |
-| ESM core (`api-client.js`, `i18n.js`, `js/core/*`, `js/init/state.js`, `js/init/util.js`) | **export + alias `window.*`** (state mutable pakai accessor get/set — lihat `ESM_BRIDGE.md` §3.2) | build otomatis di-strip export (IIFE per file) utk bundel | halaman standalone load via `<script type="module">` |
+| ESM core (`api-client.js`, `i18n.js`, `js/core/*`, `js/init/state.js`, `js/init/util.js`, `js/04_auth.js`) | **export + alias `window.*`** (state mutable pakai accessor get/set; fungsi yang dipanggil HTML onclick wajib alias — lihat `ESM_BRIDGE.md` §3.2) | build otomatis di-strip export (IIFE per file) utk bundel | halaman standalone load via `<script type="module">` |
 | Modal | `partials/modals-shared.html` | `bun run build:html` (+ `build:css` kalau kelas baru) | `assets/modals-shared.html` |
 | Styling | `src/main.css` + kelas Tailwind di HTML/JS | `bun run build:css` | `assets/main.css` |
 | Backend | `netlify/functions/_lib/*.js` | **tidak perlu build** | — (preview baca langsung, wajib **restart preview**) |

@@ -100,6 +100,8 @@ const ESM_CORE = new Set([
   // Fase 3 langkah 3: state global (accessor get/set) + util DOM/WA/toast.
   '/js/init/state.js',
   '/js/init/util.js',
+  // Fase 3 langkah 4: domain auth (gate WA login/daftar + sesi admin/kandidat).
+  '/js/04_auth.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

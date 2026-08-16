@@ -245,13 +245,29 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       modul ikut; getter baca binding; CURRENT_THEME/ACTIVE_PEMBERKASAN_WA
       live) ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file /
       **395 simbol** HIGH=0.
+- [x] **Langkah 4 — `js/04_auth.js` ESM (domain auth pertama)** — commit menyusul
+      Domain pertama dari konversi per-domain: 14 fungsi auth (bukaModalKandidat,
+      prosesLoginKandidat, prosesLoginMaster, prosesLoginPersonal, gate WA
+      normalizeWaInput/isValidWaInput/toastWaFormat, ganti password, dll) jadi
+      `export` + 14 alias window.*. Alias wajib: pemanggil utama adalah HTML
+      inline onclick (10 fungsi) + lintas file (`window.toastWaFormat` dipakai
+      util.js, `window.showLoginAdminMaster` dipakai init/boot.js).
+      Referensi global implisit di-window-kan eksplisit: `window.tr`,
+      `window.callAPI`, `window.showToast`, `window.safeSet`, state writes
+      (`window.isAdmin = true`, `window.currentAdminName = name`, dll — lewat
+      accessor bridge state.js), `window.refreshDataDinamis`,
+      `window.changePage`, `window.applyInterMilanVibe` (no-undef 0 error).
+      Build: ESM_CORE + 1 entri → `app-23ec7d1632.js` (412.2 KB, 0 export
+      bocor). js/04_auth.js tidak dimuat halaman standalone → tanpa perubahan
+      HTML. Verifikasi: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
+      test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
       (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
       2. ✅ `init/{state,util}.js` (state: accessor bridge; util: alias window),
-      3. domain per domain (auth → engine → render → api → admin_* → ai_copilot → sisanya),
+      3. ✅ `04_auth.js` (langkah 4) — lanjut: engine → render → api → admin_* → ai_copilot → sisanya,
       tiap langkah: `export` simbol + `import` di pemakainya, `bun run check:globals`
       tetap hijau, lint/test hijau, bundel tetap sama ukurannya.
 - [ ] Objek global publik (`callAPI`, `tr`, `LANG`, `CURRENT_LANG`) — ✅ sudah diekspor dari `api-client.js` & `i18n.js` (langkah 2); pemakai classic tetap dapat via `window` alias (uji kompat); hapus alias satu per satu setelah semua pemakainya di-import.

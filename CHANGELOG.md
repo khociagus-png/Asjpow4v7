@@ -1,6 +1,17 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 3 — commit `6478be9`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 4 — commit menyusul).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 4: domain auth js/04_auth.js ESM (refactor)
+
+### Refactor: `js/04_auth.js` jadi ES Module (domain per-domain pertama)
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 14 fungsi auth jadi `export` + alias window.* (wajib: pemanggil utama HTML inline onclick + util.js/boot.js lintas file).
+- Referensi global implisit di-window-kan eksplisit (`tr`, `callAPI`, `showToast`, `safeSet`, state writes via accessor, `refreshDataDinamis`, `changePage`, `applyInterMilanVibe`) — scan no-undef 0 error.
+- Build `build-js.mjs`: ESM_CORE + 1 entri (bundel `app-23ec7d1632.js`, 412.2 KB, 0 export bocor).
 
 ---
 

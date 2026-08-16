@@ -319,7 +319,9 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    bridge hanya untuk pemakai bundel.
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
-   semua pemakai di-import.
+   semua pemakai di-import. **`04_auth.js` ✅ SELESAI (langkah 4, turn ini)** —
+   catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat alias
+   window; referensi global implisit di dalam modul di-window-kan eksplisit.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake

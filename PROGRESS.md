@@ -4,7 +4,32 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 3: `js/init/state.js` + `js/init/util.js` ESM (accessor bridge) (commit `6478be9`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 4: domain auth (`js/04_auth.js`) jadi ESM (commit menyusul).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 4 — domain auth: js/04_auth.js ESM (commit menyusul)
+
+- **`js/04_auth.js` → ESM** (domain pertama konversi per-domain): 14 fungsi
+  auth jadi `export` + **14 alias window.***. Alias wajib karena pemanggil
+  utama adalah HTML inline `onclick` (10 fungsi: bukaModalKandidat,
+  prosesLoginKandidat, prosesLoginMaster, prosesLoginPersonal,
+  showLoginAdminMaster/Personal, buka/tutupModalGantiPass, dll) + lintas
+  file (`window.toastWaFormat` dipakai js/init/util.js, `window.showLoginAdminMaster`
+  dipakai js/init/boot.js).
+- Referensi global implisit di-window-kan eksplisit (no-undef scan **0 error**):
+  `window.tr`, `window.callAPI`, `window.showToast`, `window.safeSet`,
+  state writes via accessor (`window.isAdmin = true`, `window.currentAdminName
+  = name`, `window.isKandidat = true`, `window.currentKandidatName/Wa`),
+  `window.refreshDataDinamis`, `window.changePage`, `window.applyInterMilanVibe`.
+- Build: `build-js.mjs` ESM_CORE + 1 entri → bundel `app-23ec7d1632.js`
+  (412.2 KB, 45 file, 0 export bocor). check:globals nol kolisi (390 simbol).
+- `js/04_auth.js` tidak dimuat halaman standalone → tanpa perubahan HTML.
+- **Verifikasi**: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
+  test **81/81** ✓ · **E2E SEMUA LULUS** — login-check (kandidat + admin
+  master PIN + admin personal, 0 JS error), upload-check, biodata-check.
 
 ---
 
