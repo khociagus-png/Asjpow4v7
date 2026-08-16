@@ -4,11 +4,27 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 11: init sisanya (`js/init/{theme,preview,nav,boot}`) jadi ESM (commit `6ca9d05`) + 🐛 fix `window.THEMES` undefined (ketahuan E2E).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 12: sisa file classic bundle-only (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`) jadi ESM + 🐛 fix `CURRENT_LANG` accessor (toggle bahasa basi sejak langkah 2).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 12 — sisa file classic bundle-only jadi ESM (8 file)
+
+- **`js/01_public.js` → ESM** (9): switchPublicTab/renderLanguage/setLanguage/parseRincianBiaya/renderRincianSections/lokerGenderBadge/jobTutupUntukLamar/bukaDetailLoker/tutupDetailLoker — `export` + 9 alias (HTML onclick + render/public.js + admin_modal/job.js + engine/api/i18n window.renderLanguage + 13_rincian_builder window.parseRincianBiaya). Onclick string bukaDetailLoker di-window-kan (`window.lamarJob`, `window.tutupDetailLoker`, `window.bukaPamflet`).
+- **`js/03_candidate.js` → ESM** (22 deklarasi): CV mini, portal bridge, guard upload, pemberkasan — `export` + 18 alias (HTML onclick: bukaModalCvMini/bukaMasterEksternal/bukaMasterLengkapPortal/bukaFormSiswa/bukaModalPemberkasan/prosesUploadPemberkasan/tutupPreviewDokumen; lintas file: bukaFormBridge→admin_modal/job, isVipCatatan→ai_copilot/interview, cekUkuranFile/cekEkstensiFile/bacaFileBase64/normalizeGenderValue→api/candidates, bukaPreviewDokumen→admin_modal/cv, bukaMasterEksternalAdmin→render/candidate). State pemberkasan ditulis via accessor (`window.ACTIVE_PEMBERKASAN_WA/NAMA`).
+- **`js/08_wa_pintar.js` → ESM** (15 + `_riwayatLokerAktif` PRIVATE): WA pintar + template + riwayat kandidat + lightbox — `export` + 15 alias (HTML onclick + render/admin+candidate+mail onclick string + init/boot injectModalWaPintar + engine/init renderRiwayatKandidat). `window.CURRENT_WA_KANDIDAT` via accessor.
+- **`js/10_cv_rirekisho.js` → ESM** (5): bukaPreviewCV_Admin/bukaPreviewCV/prosesBukaRirekisho/renderCVAjaib/cetakCVRirekisho — `export` + 5 alias (HTML + render/candidate onclick). Helper CV via window.* (`window.makeV/mergeArrRiwayat/getPath` dari helpers_cv, `window.buildEduRows/dll` dari 10b).
+- **`js/10b_cv_builders.js` → ESM** (5 builder murni): `export` + 5 alias; `isGood`/`fmtMonthYearJp` → `window.isGood`/`window.fmtMonthYearJp` (helpers_cv ESM).
+- **`js/12_esign_match.js` → ESM** (16 + 6 state PRIVATE): e-sign canvas + student card + matchmaking — `export` + 16 alias (HTML onclick modals-shared: bukaModalTtd/bukaLayarCanvas/clearFsCanvas/saveFsCanvas/submitDataEsignFull/jalankanMatchmaking/kirimTawaranMassal; render/admin onclick bukaMatchmaking; engine/init renderStudentCard). State fsCanvas/activeDrawingType/signData/matchedCandidates/currentMatchJobCode tetap PRIVATE modul.
+- **`js/13_rincian_builder.js` → ESM** (24 + 6 state): rincian biaya builder — semua `export` + alias window.* yang SUDAH ada di bawah file dilengkapi. `callAPI`/`tr`/`showToast`/`parseRincianBiaya` (yang bare + typeof guard) di-window-kan eksplisit — penting: guard `typeof callAPI` di modul scope selalu 'undefined' tanpa window prefix → koleksi DB preset tidak pernah dimuat (bug halus, dicegah).
+- **`js/helpers_cv.js` → ESM** (6 helper + helpers_cv const): UMD IIFE → `export function` murni (vitest import tetap jalan — 24 test ✓) + alias window.* di dalam guard `typeof window !== 'undefined'` (node/vitest aman).
+- 🐛 **Bugfix nyata (latent sejak langkah 2)**: `CURRENT_LANG` di i18n.js cuma alias data property satu arah — `setLanguage` (01_public) menulis `window.CURRENT_LANG` tapi binding modul i18n basi → tr()/trOption() tetap bahasa lama (toggle ID/JP diam-diam tidak jalan). Fix: `Object.defineProperty(window,'CURRENT_LANG',{get/set})` accessor → tulis via window.* men-delegate ke binding modul. **Diverifikasi di browser**: toggle id→jp membuat tr('ui.tab_loker') jadi '求人情報' + DOM ikut, balik ke id bersih, 0 error JS.
+- Referensi global implisit di-window-kan eksplisit (scan no-undef **0 error** di 8 file + i18n). Build: ESM_CORE + 8 entri → bundel `app-5718b3d669.js` (419.5 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 401 simbol). Audit: 52 file · **403 simbol** · HIGH=0 · MEDIUM=24 · LOW=379.
+- Verifikasi: node --check ESM 8 file + i18n ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ (helpers_cv 24/24) · **E2E SEMUA LULUS**: login, upload, biodata, backend-fast-path ✓ + **cek terarah**: toggle bahasa (accessor CURRENT_LANG), Rincian Builder (21 chip preset), canvas e-sign, CV Rirekisho render (実習生経歴書) + cetak, WA Pintar inject, Modal Pemberkasan — 0 error JS.
+
+---
 
 ### Fase 3 langkah 11 — init sisanya: js/init/{theme,preview,nav,boot} ESM
 

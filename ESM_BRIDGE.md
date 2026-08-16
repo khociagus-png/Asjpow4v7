@@ -1,12 +1,13 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 11 — core (i18n/api-client) + init (state/util +
+> **Status:** Fase 3 langkah 12 — core (i18n/api-client) + init (state/util +
 > theme/preview/nav/boot) + auth + engine + render + api (`js/api/*`) +
 > admin_modal (`js/admin_modal/*`) + admin_ops (`js/admin_ops/*`) +
-> **ai_copilot (`js/ai_copilot/*`) sudah ESM**. Sisa classic: `01_public`,
-> `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`,
-> `12_esign_match`, `13_rincian_builder`, `apply-docs`, `upload-guard`,
-> `helpers_cv`, `pwa` (lihat urutan §6).
+> ai_copilot (`js/ai_copilot/*`) + **sisa file classic bundle-only
+> (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
+> `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`)
+> sudah ESM**. Sisa classic: `upload-guard`, `apply-docs`, `pwa`,
+> `js/pages/*` (dimuat halaman standalone — lihat urutan §6).
 > Dokumen ini = hasil **audit global pollution** + pola **bridge** yang dipakai
 > supaya konversi bertahap TANPA regresi. Update di sini setiap kali modul baru
 > di-ESM-kan (lihat urutan konversi di bagian 6).
@@ -340,7 +341,12 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
    `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9) +
    `js/ai_copilot/*` ✅ (langkah 10) + `js/init/{theme,preview,nav,boot}` ✅
-   (langkah 11, turn ini)** — catatan: fungsi yang dipanggil HTML inline
+   (langkah 11) + **sisa classic bundle-only ✅ (langkah 12, turn ini):
+   `01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
+   `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`**
+   — sisa classic: `upload-guard`, `apply-docs`, `pwa`, `js/pages/*` (dimuat
+   halaman standalone, digarap langkah terakhir bersama entry `js/main.js`)**
+   — catatan: fungsi yang dipanggil HTML inline
    `onclick` WAJIB dapat alias window; referensi global implisit di dalam
    modul di-window-kan eksplisit; **antar-file ESM belum boleh `import`
    (build masih concat + IIFE per file) — panggilan lintas modul ESM
@@ -354,7 +360,17 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    accessor bridge; **catatan langkah 11: konstanta lintas-file yang dipakai
    via `window.X` (mis. `window.THEMES` di render/public.js) WAJIB dapat
    alias window juga — bukan cuma fungsi** (regresi ini ketahuan E2E,
-   `Cannot read properties of undefined (reading 'INTER_VIP')`).
+   `Cannot read properties of undefined (reading 'INTER_VIP')`). Catatan
+   langkah 12: (a) **typeof-guard di modul scope selalu 'undefined'** untuk
+   bare identifier — `typeof callAPI` di 13_rincian_builder tanpa `window.`
+   prefix membuat fallback koleksi DB tidak pernah dimuat; (b) **state murni
+   internal jadikan PRIVATE modul** (`_riwayatLokerAktif`, `fsCanvas`,
+   `signData`, `matchedCandidates`, `RB_*` dll) — tidak perlu alias window
+   kalau tak ada pemakai luar; (c) **CURRENT_LANG accessor** — binding modul
+   i18n basi kalau cuma alias data property (toggle bahasa diam-diam mati);
+   (d) alias window utk onclick string yang DI-GENERATE modul itu sendiri
+   (`window.bukaPreviewDokumen` di setStatusBerkas, `window.tutupDetailLoker`
+   di bukaDetailLoker) — string dieval di global scope, bukan scope modul.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -365,6 +381,37 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 12 — sisa file classic bundle-only ESM (commit `3af237a`, turn ini)
+
+8 file terakhir yang TIDAK dimuat halaman standalone → aman di-IIFE tanpa
+ubah HTML: `01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
+`10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`.
+±119 deklarasi → `export` + ±100 alias `window.*` (HTML onclick + onclick
+string lintas file + window.* eksplisit dari modul ESM lain).
+
+- **State yang di-reassign tetap accessor** (§3.2): `window.CURRENT_WA_KANDIDAT`
+  (ditulis bare di bukaModalWaPintar), `window.ACTIVE_PEMBERKASAN_WA/NAMA`
+  (ditulis bare di bukaModalPemberkasan). State murni internal dijadikan
+  PRIVATE modul (tak ada pemakai luar): `_riwayatLokerAktif`, `fsCanvas`/
+  `activeDrawingType`/`isLandscapeMode`/`signData`/`matchedCandidates`/
+  `currentMatchJobCode`, `RB_*`, `MAX_FILE_BYTES`/`ALLOWED_FILE_EXT`/
+  `ekstensiDariAccept`/`compressImage`/`setStatusBerkas` (hanya dipakai file
+  sendiri; apply_full.js punya salinan lokal sendiri).
+- **helpers_cv jadi `export function` murni** (bukan UMD): vitest meng-import
+  langsung (`js/helpers_cv.test.js`), alias window.* dibungkus guard
+  `typeof window !== 'undefined'` supaya aman di node.
+- **Hati-hati typeof-guard di modul scope**: `typeof callAPI` di file ESM
+  SELALU 'undefined' (tidak fallback ke global) — 13_rincian_builder punya
+  guard `typeof callAPI !== 'function'` → tanpa `window.` prefix, koleksi DB
+  preset tidak pernah dimuat. Semua bare `callAPI`/`tr`/`showToast`/`parseRincianBiaya`
+  di-window-kan eksplisit.
+- 🐛 **CURRENT_LANG accessor (latent sejak langkah 2)**: i18n.js cuma
+  `window.CURRENT_LANG = CURRENT_LANG` (alias data property satu arah).
+  `setLanguage` (01_public) menulis `window.CURRENT_LANG` tapi binding modul
+  i18n basi → tr()/trOption() tetap bahasa lama. Fix: `Object.defineProperty`
+  get/set mendelegasikan ke binding modul (pola §3.2). Diverifikasi browser:
+  id→jp→id, tr('ui.tab_loker')='求人情報', 0 error JS.
 
 ### Langkah 11 — init sisanya (theme/preview/nav/boot) ESM (commit `6ca9d05`, turn ini)
 

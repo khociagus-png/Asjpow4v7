@@ -1,6 +1,43 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 11 — commit `6ca9d05`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 12 — commit `3af237a`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 12: sisa file classic bundle-only jadi ESM (8 file) + fix CURRENT_LANG accessor (refactor & bugfix)
+
+### Refactor: 8 file classic terakhir (bundle-only) jadi ES Modules
+
+- `01_public` (9 fn: tab publik, bahasa, detail loker) · `03_candidate` (22:
+  CV mini, bridge form, guard upload, pemberkasan) · `08_wa_pintar` (15:
+  WA pintar/template, riwayat kandidat, lightbox) · `10_cv_rirekisho` (5) +
+  `10b_cv_builders` (5 builder) + `helpers_cv` (6 helper; UMD → export murni,
+  vitest tetap jalan) · `12_esign_match` (16: e-sign canvas, student card,
+  matchmaking) · `13_rincian_builder` (24: editor rincian biaya).
+  Total ±119 deklarasi → `export` + ±100 alias `window.*`. State internal
+  murni jadi PRIVATE modul (`_riwayatLokerAktif`, `fsCanvas`, `signData`,
+  `matchedCandidates`, `RB_*` dll); state yang di-reassign tetap accessor
+  (`CURRENT_WA_KANDIDAT`, `ACTIVE_PEMBERKASAN_WA/NAMA`).
+
+### Bugfix: toggle bahasa ID/JP diam-diam tidak bekerja (latent sejak Fase 3 langkah 2)
+
+- `CURRENT_LANG` di i18n.js hanya alias data property satu arah —
+  `setLanguage` menulis `window.CURRENT_LANG` tapi binding modul i18n basi,
+  jadi `tr()`/`trOption()` tetap membalas bahasa lama. Ganti dengan accessor
+  `Object.defineProperty(window,'CURRENT_LANG',{get,set})` yang mendelegasikan
+  ke binding modul (pola accessor bridge state.js). Diverifikasi di browser:
+  toggle id→jp membuat `tr('ui.tab_loker')` = `求人情報` dan DOM ikut berubah,
+  balik ke id bersih, 0 error JS.
+
+### Catatan refactor
+
+- 13_rincian_builder: guard `typeof callAPI` di modul scope selalu 'undefined'
+  tanpa `window.` prefix → koleksi DB preset tidak pernah dimuat (dicegah).
+- helpers_cv: alias window.* dibungkus guard `typeof window !== 'undefined'`
+  supaya aman di vitest/node.
+- Build: `app-5718b3d669.js` (419.5 KB, 45 file, 0 export bocor, idempoten) ·
+  check:globals nol kolisi (401 simbol) · audit 403 simbol HIGH=0 · lint 0/12
+  · test 81/81 (helpers_cv 24/24) · E2E login/upload/biodata/backend lulus.
 
 ---
 

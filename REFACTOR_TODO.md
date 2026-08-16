@@ -416,6 +416,33 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       (`reading 'INTER_VIP'`). Fix: alias `window.THEMES` + `window.DEFAULT_ASSETS`.
       Verifikasi: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓
       · test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓.
+- [x] **Langkah 12 — sisa file classic bundle-only jadi ESM (8 file)** — commit `3af237a`
+      Sisa classic yang TIDAK dimuat halaman standalone (aman di-IIFE tanpa
+      ubah HTML): `01_public` (9), `03_candidate` (22), `08_wa_pintar` (15 +
+      `_riwayatLokerAktif` PRIVATE), `10_cv_rirekisho` (5), `10b_cv_builders`
+      (5), `12_esign_match` (16 + 6 state PRIVATE: fsCanvas/activeDrawingType/
+      signData/matchedCandidates/currentMatchJobCode), `13_rincian_builder`
+      (24 + 6 state), `helpers_cv` (6, UMD → export murni; vitest 24 test
+      tetap jalan). Total ±119 deklarasi → export + ±100 alias window.*.
+      Alias wajib = pemakai HTML onclick, onclick string lintas file, dan
+      window.* eksplisit dari modul ESM lain; state yang di-reassign tetap
+      lewat accessor (CURRENT_WA_KANDIDAT/ACTIVE_PEMBERKASAN_WA/NAMA).
+      helpers_cv export murni (bukan UMD) → vitest import langsung.
+      🐛 **Bugfix CURRENT_LANG (latent sejak langkah 2)**: i18n.js cuma
+      `window.CURRENT_LANG = CURRENT_LANG` (alias data property satu arah) →
+      `setLanguage` menulis window property tapi binding modul basi → tr()
+      tidak pernah pindah bahasa. Fix: accessor `Object.defineProperty`
+      (get/set men-delegate ke binding modul). Diverifikasi di browser:
+      id→jp→id, tr('ui.tab_loker') = '求人情報', 0 error JS.
+      Build: ESM_CORE + 8 entri → `app-5718b3d669.js` (419.5 KB, 45 file, 0
+      export bocor, idempoten). check:globals nol kolisi (401 simbol).
+      Audit 52 file / **403 simbol** HIGH=0. Verifikasi: node --check ✓ ·
+      no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E
+      login/upload/biodata/backend **SEMUA LULUS** ✓ + cek terarah (toggle
+      bahasa, Rincian Builder 21 chip, canvas e-sign, CV Rirekisho render,
+      WA Pintar inject, Modal Pemberkasan) ✓.
+      Sisa classic di STACK: `upload-guard.js` + `pwa.js` (+ `js/pages/*`
+      standalone) → langkah terakhir bersama entry `js/main.js`.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
