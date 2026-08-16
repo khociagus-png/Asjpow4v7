@@ -10,6 +10,36 @@
 
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `5081693` — Admin parse dokumen biodata (upload CV/Excel/PDF → Gemini → update master)
+
+- **Permintaan user:** "Khusus CV AI untuk panel admin kasih file attachment buat
+  upload doc/Excel/PDF, parse isinya, extract buat masukin biodata & update ke
+  kandidat — jangan ketik manual."
+- **Backend** (`actions-ai.js`): action baru `parseDokumenBiodata` (admin-only,
+  masuk `AI_ACTIONS` rate limit). Menerima `{candidateId|wa, file:{name,mimeType,
+  data(base64)}}` → validasi mime (pdf/xls/xlsx/doc/docx/csv/txt/gambar) & ukuran
+  (maks 8MB) → resolve target kandidat (candidateId → WA via
+  `findCandidateByIdFiltered`) → Gemini `inlineData` ekstrak JSON kunci
+  `MASTER_COLUMN_MAP` camelCase + array `pendidikan/pekerjaan/keluarga` →
+  `{success, wa, namaSekarang, data, fieldCount, riwayat}`.
+- **Backend** (`actions-extra.js`): `handleSubmitMasterForm` kini menerima sesi
+  **admin** (sebelumnya hanya kandidat) → admin bisa langsung update biodata
+  master dari hasil parse.
+- **Frontend** (`js/09_ai_copilot.js`): bar upload di-inject ke `modal-admin-ai`
+  (file input + WA target + tombol Parse & Update) — pilih file → parse otomatis →
+  `submitMasterForm` → toast + ringkasan di chat. Partial modal tidak diubah
+  (tetap satu sumber) — bar dibuat via JS di `pastikanBarParseAdminAi()`.
+- **Verifikasi:** parse live OK — CV teks → 11 field (nama, furigana アグス・コチ,
+  tglLahir, tb/bb, dll) + 1 pendidikan + 1 pekerjaan + 1 keluarga; guard admin
+  `submitMasterForm` lulus (wa kosong → "Nomor WA wajib diisi." bukan
+  sessionInvalid); unit test **49/49**; `node --check` + `build:js` bersih.
+- Catatan: preview sandbox sempat turun saat verifikasi UI browser (infra),
+  tapi jalur backend sudah dibuktikan via HTTP sebelum turun.
+
+---
+
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `57ea59b` — Print CV rirekisho FIT 1 halaman A4
 
 - Keluhan user: print CV rirekisho jadi **3 lembar** (dan CV render berbasis

@@ -1,6 +1,25 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `57ea59b`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `5081693`.
+
+---
+
+## 2026-08-15 — Admin parse dokumen biodata (upload CV/Excel/PDF → Gemini)
+
+### `5081693` — Feat: admin parse dokumen biodata (upload CV/Excel/PDF → Gemini → update master)
+- **Kebutuhan user:** admin tidak perlu ketik biodata manual — cukup upload file
+  CV/biodata kandidat (doc/Excel/PDF) di panel AI copilot, sistem parse & update
+  status biodata kandidat otomatis.
+- Action baru `parseDokumenBiodata` (admin-only, rate limit AI): file
+  pdf/xls/xlsx/doc/docx/csv/txt/gambar maks 8MB → target dari `candidateId`/`wa`
+  → Gemini inline file → JSON biodata kunci MASTER_COLUMN_MAP + riwayat
+  (pendidikan/pekerjaan/keluarga) → siap di-save.
+- `handleSubmitMasterForm` kini menerima sesi admin (kandidat OR admin) — hasil
+  parse langsung dipakai update master biodata.
+- Frontend: bar upload di-inject ke modal-admin-ai (file + WA target + tombol
+  Parse & Update); alur pilih file → parse → update otomatis + ringkasan chat.
+- Verifikasi: parse live 11 field + riwayat; guard admin OK; unit test 49/49;
+  build:js bersih (bundle `app-5ac0306bdf.js`).
 
 ---
 
