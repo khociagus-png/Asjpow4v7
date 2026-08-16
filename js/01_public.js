@@ -38,21 +38,10 @@ function switchPublicTab(tab) {
 // sudah diganti callAPI di semua 45 titik pemanggilan)
 // ------------------------------------------------------------
 
-// CURRENT_LANG & LANG dictionary sudah didefinisikan di public/i18n.js
-// yang dimuat lebih awal. Tidak perlu deklarasi ulang di sini.
-
-function tr(path) {
-  try {
-    let obj = LANG[CURRENT_LANG];
-    for (const p of path.split('.')) {
-      obj = obj[p];
-      if (obj === undefined) return path;
-    }
-    return obj;
-  } catch (e) {
-    return path;
-  }
-}
+// CURRENT_LANG & LANG dictionary + tr() sudah didefinisikan di i18n.js
+// yang dimuat lebih awal — tr() TIDAK dideklarasikan ulang di sini (dulu
+// ada duplikat; Fase 3 konversi ESM butuh nol kolisi global lintas file).
+// i18n.js: function tr(path) { LANG[CURRENT_LANG] lookup + fallback path }
 
 function renderLanguage() {
   // Header (desktop) + menu hamburger (mobile) — keduanya update.
