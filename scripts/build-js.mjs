@@ -40,7 +40,11 @@ const STACK = [
   '/js/01_public.js',
   '/js/02_init.js',
   '/js/03_candidate.js',
-  '/js/03_engine.js',
+  // Fase 2: js/03_engine.js dipecah per domain (pipeline/dashboard/guards/init).
+  '/js/engine/pipeline.js',
+  '/js/engine/dashboard.js',
+  '/js/engine/guards.js',
+  '/js/engine/init.js',
   '/js/04_auth.js',
   // Fase 2: js/05_render.js dipecah per domain (public/admin/candidate/share/mail).
   '/js/render/public.js',
