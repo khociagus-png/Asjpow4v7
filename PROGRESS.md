@@ -4,7 +4,39 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.4: `actions-ai.js` dipecah jadi `_lib/ai/{providers,cv,chat,classify}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.5: unit test backend (81/81) + bug fix normalizeGender.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.5 — Test backend per modul — commit `557c869` (test 51 → **81/81**)
+
+- **Baru** `db/client.test.js` (12 test) — normalisasi WA (0xx→62xx, buang
+  non-digit, format baku 628…), `normalizeStatus` (OPEN/CLOSE/URGENT),
+  `normalizeGender` (PRIA/WANITA + fallback L/P).
+- **Baru** `actions-auth.test.js` (6) — gate WA login/daftar
+  (`isValidWaFormat`): terima 628+9/10 digit, **tolak 6223… (kasus
+  SATRIA)**, terlalu pendek/panjang, non-digit.
+- **Baru** `ai/chat.test.js` (3) — `normalizeBidang`: 7 bidang SSW +
+  sinonim ID/EN (perawat lansia/caregiver/food/pertanian/dll), tidak
+  dikenal → null (caller pakai BIDANG_DEFAULT).
+- **Baru** `ai/providers.test.js` (3) — `parseJsonLoose`: JSON murni,
+  markdown fence, teks di sekitar JSON, invalid melempar (bukan silent).
+- **Baru** `actions-mail.test.js` (6) — `mailStatusUntukUpdate` (MENUNGGU
+  vs UPDATE — progres LULUS/GAGAL tidak di-reset) + `appendFeedback`
+  (maks 3 entri, yang lama dibuang). Kedua helper kini di-export dari
+  `actions-mail.js` (dulu internal).
+- 🐛 **BUG FIX `normalizeGender`** (ketahuan unit test): dulu `'L'` → L/P
+  (tidak dikenal), `'P'` → PRIA, dan `'FEMALE'` → PRIA (substring `'MALE'`
+  kena duluan) — semua TERBALIK dari konvensi L/P aplikasi
+  (PARSE_SYSTEM_PROMPT di ai/classify.js: L = Laki-laki, P = Perempuan).
+  Kini: L/M/MALE → PRIA; P/F/FEMALE/W/WANITA → WANITA. Satu-satunya
+  pemakai `normalizeGender`: `actions-register` (display siswa baru) —
+  tidak ada yang bergantung perilaku lama.
+- Verifikasi: **test 81/81 lulus** (9 file) · lint 0 error/12 warn
+  (baseline) · module-map backend tetap **34 file / 204 simbol** ·
+  `node --check` bersih.
 
 ---
 

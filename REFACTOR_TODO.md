@@ -111,9 +111,28 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       node --check ✓ · lint 0 error/12 warn ✓ · test 51/51 ✓ · smoke guard admin/kandidat
       + fallback AI (tanpa key) ✓.
 
-### 1.5 Test backend per modul
-- [ ] Tambah `*.test.js` (Vitest) per modul baru: auth (PIN + WA gate), mail (status transisi), kandidat (merge/dedupe rule), job (tutup lamar), supabase normalisasi WA.
-- [ ] Contoh target: `actions-auth.test.js`, `db/candidates.test.js` — pola dari `handlers.test.js`/`storage.test.js` yang sudah ada.
+### 1.5 Test backend per modul — **SELESAI** (commit `557c869`) — test 51 → **81/81**
+- [x] `db/client.test.js` (12) — normalisasi WA (0xx→62xx, buang non-digit,
+      format baku 628…), normalizeStatus (OPEN/CLOSE/URGENT), normalizeGender.
+- [x] `actions-auth.test.js` (6) — gate WA login/daftar (`isValidWaFormat`):
+      terima 628+9/10 digit, tolak 6223… (kasus SATRIA), terlalu pendek/
+      panjang, non-digit.
+- [x] `ai/chat.test.js` (3) — `normalizeBidang`: 7 bidang SSW + sinonim
+      ID/EN, tidak dikenal → null (caller pakai BIDANG_DEFAULT).
+- [x] `ai/providers.test.js` (3) — `parseJsonLoose`: JSON murni, fence
+      markdown, teks sekitar, invalid melempar (bukan silent).
+- [x] `actions-mail.test.js` (6) — `mailStatusUntukUpdate` (MENUNGGU vs
+      UPDATE — progres LULUS/GAGAL tidak di-reset) + `appendFeedback` (maks
+      3 entri, yang lama dibuang). Kedua helper kini di-export (dulu internal).
+- [x] 🐛 **BUG FIX normalizeGender** (ketahuan test): dulu 'L' → L/P, 'P' →
+      PRIA, 'FEMALE' → PRIA (substring 'MALE' kena duluan) — TERBALIK dari
+      konvensi L/P aplikasi (PARSE_SYSTEM_PROMPT). Kini L/M/MALE → PRIA,
+      P/F/FEMALE/W/WANITA → WANITA. Satu-satunya pemakai: actions-register
+      (display siswa baru) — tidak ada yang bergantung perilaku lama.
+- Catatan: aturan merge/dedupe kandidat hidup di `scripts/dedupe-duplicates.mjs`
+  yang dieksekusi saat di-import (bukan ekspor) — tidak di-test unit tanpa
+  refactor tambahan; cakupan diganti normalisasi WA + status job (di atas).
+  Job handler DB-bound sudah tercakup E2E (backend-fast-path).
 
 ---
 
