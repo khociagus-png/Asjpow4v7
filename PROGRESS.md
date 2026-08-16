@@ -4,13 +4,13 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 4: domain auth (`js/04_auth.js`) jadi ESM (commit menyusul).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 4: domain auth (`js/04_auth.js`) jadi ESM (commit `2463b5a`).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 4 — domain auth: js/04_auth.js ESM (commit menyusul)
+### Fase 3 langkah 4 — domain auth: js/04_auth.js ESM (commit `2463b5a`)
 
 - **`js/04_auth.js` → ESM** (domain pertama konversi per-domain): 14 fungsi
   auth jadi `export` + **14 alias window.***. Alias wajib karena pemanggil

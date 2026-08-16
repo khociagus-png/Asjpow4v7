@@ -245,7 +245,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       modul ikut; getter baca binding; CURRENT_THEME/ACTIVE_PEMBERKASAN_WA
       live) ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file /
       **395 simbol** HIGH=0.
-- [x] **Langkah 4 — `js/04_auth.js` ESM (domain auth pertama)** — commit menyusul
+- [x] **Langkah 4 — `js/04_auth.js` ESM (domain auth pertama)** — commit `2463b5a`
       Domain pertama dari konversi per-domain: 14 fungsi auth (bukaModalKandidat,
       prosesLoginKandidat, prosesLoginMaster, prosesLoginPersonal, gate WA
       normalizeWaInput/isValidWaInput/toastWaFormat, ganti password, dll) jadi
