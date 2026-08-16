@@ -16,6 +16,7 @@
 export var ALL_JOBS = [];
 export var ALL_DB_JOBS = [];
 export var ALL_CANDIDATES = [];
+export var ALL_CANDIDATES_TOTAL = 0; // phantom global lama — kini dideklarasikan resmi (dipakai pagination candidates.js + render admin)
 export var ALL_SCHEDULES = [];
 export var ALL_TUGAS = [];
 export var ALL_FORM = [];
@@ -65,6 +66,7 @@ function bridgeState(name, get, set) {
 bridgeState('ALL_JOBS', () => ALL_JOBS, (v) => { ALL_JOBS = v; });
 bridgeState('ALL_DB_JOBS', () => ALL_DB_JOBS, (v) => { ALL_DB_JOBS = v; });
 bridgeState('ALL_CANDIDATES', () => ALL_CANDIDATES, (v) => { ALL_CANDIDATES = v; });
+bridgeState('ALL_CANDIDATES_TOTAL', () => ALL_CANDIDATES_TOTAL, (v) => { ALL_CANDIDATES_TOTAL = v; });
 bridgeState('ALL_SCHEDULES', () => ALL_SCHEDULES, (v) => { ALL_SCHEDULES = v; });
 bridgeState('ALL_TUGAS', () => ALL_TUGAS, (v) => { ALL_TUGAS = v; });
 bridgeState('ALL_FORM', () => ALL_FORM, (v) => { ALL_FORM = v; });

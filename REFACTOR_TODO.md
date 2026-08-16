@@ -261,13 +261,41 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       bocor). js/04_auth.js tidak dimuat halaman standalone → tanpa perubahan
       HTML. Verifikasi: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
       test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓.
+- [x] **Langkah 5 — `js/engine/*` ESM (4 file: pipeline, dashboard, guards, init)** — commit menyusul
+      Engine = mesin tarik data + init dashboard: `pipeline.js` (4 fn tahapan),
+      `dashboard.js` (6: BERKAS_17/BIO_FIELDS_19 + render progres), `guards.js`
+      (3: adaModalTerbuka/sedangDiscrollTabel/updateMailBadge), `init.js` (2:
+      refreshDataDinamis/initApp) → semua `export` + alias window.* (kontrak
+      terberat: refreshDataDinamis 10 pemakai, initApp 6, updateMailBadge 2 +
+      HTML onclick).
+      Referensi global implisit di-window-kan eksplisit: state writes/reads
+      via accessor (`window.ALL_JOBS = ...`, `window.AUTO_REFRESH_TIMER`,
+      `window.isAdmin`, …), `window.tr/callAPI/showToast/esc/safeSet/`
+      `populate/populateCheckboxes/normalizePhone/trOption`, render lintas
+      domain (`window.renderAdminFull/renderFormInbox/renderJobDilamar/`
+      `renderRiwayatKandidat/renderStudentCard/bukaDigitalCV`), `window.`
+      `changePage/applyTheme/applyInterMilanVibe/renderLanguage/`
+      `jalankanSemuaSkeleton/adminSwitchTab/muatMigrasiDrive` — no-undef 0 error.
+      🐛 **Phantom global difix**: `ALL_CANDIDATES_TOTAL` (dulu di-assign bare
+      di initApp tanpa deklarasi — strict mode akan ReferenceError) kini
+      dideklarasikan resmi di state.js + accessor bridge (candidates.js sudah
+      memakainya via window.*).
+      ⚠️ Catatan penting: antar-file ESM belum boleh `import` (build masih
+      concat+IIFE per file) → panggilan lintas modul engine (init → dashboard/
+      guards/pipeline) memakai `window.*` eksplisit (lihat ESM_BRIDGE.md §3.3).
+      Build: ESM_CORE + 4 entri → `app-a32c94c192.js` (413.5 KB, 0 export
+      bocor). Verifikasi: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓
+      · test **81/81** ✓ · uji import Node (pipeline 9 langkah, initApp
+      DOM-safe, refreshDataDinamis via window.callAPI stub) ✓ · E2E
+      login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file / **396 simbol**
+      HIGH=0.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
       (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
       2. ✅ `init/{state,util}.js` (state: accessor bridge; util: alias window),
-      3. ✅ `04_auth.js` (langkah 4) — lanjut: engine → render → api → admin_* → ai_copilot → sisanya,
+      3. ✅ `04_auth.js` (langkah 4) + `engine/*` (langkah 5) — lanjut: render → api → admin_* → ai_copilot → sisanya,
       tiap langkah: `export` simbol + `import` di pemakainya, `bun run check:globals`
       tetap hijau, lint/test hijau, bundel tetap sama ukurannya.
 - [ ] Objek global publik (`callAPI`, `tr`, `LANG`, `CURRENT_LANG`) — ✅ sudah diekspor dari `api-client.js` & `i18n.js` (langkah 2); pemakai classic tetap dapat via `window` alias (uji kompat); hapus alias satu per satu setelah semua pemakainya di-import.

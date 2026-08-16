@@ -4,7 +4,42 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 4: domain auth (`js/04_auth.js`) jadi ESM (commit `2463b5a`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 5: engine (`js/engine/*`) jadi ESM (commit menyusul).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 5 — engine: js/engine/* (pipeline, dashboard, guards, init) ESM (commit menyusul)
+
+- **`js/engine/pipeline.js` → ESM** (4 fn): tahapanPipeline, tahapanMatchIdx,
+  getTahapanProgress, tahapanStepIndex — export + alias window.*; referensi
+  DROPDOWNS di-window-kan.
+- **`js/engine/dashboard.js` → ESM** (6): evaluasiTahapanKandidat,
+  renderJobDilamar, **BERKAS_17 / BIO_FIELDS_19** (konstanta),
+  renderProgresPemberkasan, kalkulasiProgress — export + alias; esc/tr/ASSETS
+  → window.*.
+- **`js/engine/guards.js` → ESM** (3): adaModalTerbuka, sedangDiscrollTabel,
+  updateMailBadge — export + alias; ALL_FORM/PREV_MAIL_COUNT/showToast/tr →
+  window.*.
+- **`js/engine/init.js` → ESM** (2): **refreshDataDinamis (10 pemakai) +
+  initApp (6 pemakai)** — export + alias; seluruh referensi lintas file
+  di-window-kan eksplisit (state via accessor, tr/callAPI/showToast/esc/safeSet,
+  render lintas domain, changePage/applyTheme/renderLanguage, dll).
+- 🐛 **Phantom global difix**: `ALL_CANDIDATES_TOTAL` (dulu di-assign bare di
+  initApp tanpa deklarasi — di strict mode ESM akan ReferenceError) kini
+  dideklarasikan resmi di `js/init/state.js` + accessor bridge (candidates.js
+  sudah memakainya via `window.ALL_CANDIDATES_TOTAL`).
+- ⚠️ Catatan arsitektur: antar-file ESM belum boleh `import` (build masih
+  concat + IIFE per file) → panggilan lintas modul engine memakai `window.*`
+  eksplisit — dicatat di ESM_BRIDGE.md §3.3.
+- Build: `build-js.mjs` ESM_CORE + 4 entri → bundel `app-a32c94c192.js`
+  (413.5 KB, 45 file, 0 export bocor). check:globals nol kolisi (391 simbol).
+- Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.
+- **Verifikasi**: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓
+  · test **81/81** ✓ · uji import Node (tahapanPipeline 9 langkah, initApp
+  DOM-safe, refreshDataDinamis via stub window.callAPI) ✓ · **E2E SEMUA
+  LULUS**: login-check, upload-check, biodata-check.
 
 ---
 

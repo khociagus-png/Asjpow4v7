@@ -237,6 +237,17 @@ bare baca `ALL_JOBS` → getter → nilai modul. Tidak ada jalur yang bisa basi.
 Catatan: import namespace bersifat read-only — modul ESM lain yang mau
 MENULIS state harus lewat fungsi setter/action (belum ada), bukan assignment.
 
+### 3.3 Panggilan lintas-file ESM — pakai `window.*`, BELUM `import`
+
+Build saat ini masih concat + IIFE per file (export di-strip per file, bundel
+classic). Konsekuensi: **file ESM tidak boleh saling `import`** — statement
+import tidak di-resolve oleh transform dan akan bocor ke bundel classic
+(SyntaxError). Sampai bundle jadi ESM (langkah 6 roadmap), panggilan lintas
+modul ESM memakai `window.*` eksplisit, mis. init.js (ESM) memanggil
+renderJobDilamar dari dashboard.js (ESM) via `window.renderJobDilamar(...)`.
+Ekspor tiap modul tetap ada (untuk import ESM masa depan) — hanya pemakaian
+lintas modul saat ini yang lewat window alias.
+
 ---
 
 ## 4. Petunjuk Integrasi (HTML Load)
@@ -319,9 +330,12 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    bridge hanya untuk pemakai bundel.
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
-   semua pemakai di-import. **`04_auth.js` ✅ SELESAI (langkah 4, turn ini)** —
-   catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat alias
-   window; referensi global implisit di dalam modul di-window-kan eksplisit.
+   semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
+   (langkah 5, turn ini)** — catatan: fungsi yang dipanggil HTML inline
+   `onclick` WAJIB dapat alias window; referensi global implisit di dalam modul
+   di-window-kan eksplisit; **antar-file ESM belum boleh `import` (build masih
+   concat + IIFE per file) — panggilan lintas modul ESM memakai `window.*`
+   eksplisit sampai bundle jadi ESM (lihat §3.3)**.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -371,3 +385,24 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
   LULUS** (bundle classic tetap jalan dengan state/util ESM via accessor) ✓
 - Audit diperbarui: 52 file · **395 simbol** · HIGH=0 · MEDIUM=24 · LOW=371
   (`.freebuff/audit-globals.json` + `module-map-frontend.json`).
+
+### Langkah 5 — engine/* ESM (turn ini, commit menyusul)
+
+- `node --check --input-type=module` 4 file js/engine/* ✓
+- Scan `no-undef` strict: **0 error** (referensi eksplisit `window.*`:
+  state via accessor, tr/callAPI/showToast/esc/safeSet/trOption,
+  render lintas domain, changePage/applyTheme/renderLanguage, dll) ✓
+- `bun run lint`: 0 / 12 ✓ · `bun run test`: **81/81** ✓
+- `bun run build`: check:globals **nol kolisi** (45 file / **391 simbol**) ·
+  bundel `app-a32c94c192.js` (413.5 KB) · 0 export bocor · alias
+  `window.refreshDataDinamis/initApp/updateMailBadge/tahapanPipeline/`
+  `kalkulasiProgress/renderJobDilamar` hadir ✓
+- Uji impor ESM di Node: tahapanPipeline fallback 9 langkah; getTahapanProgress
+  FLIGHT=100; BERKAS_17 = 17; initApp(isSilent) DOM-safe; refreshDataDinamis
+  jalan via stub `window.callAPI` ✓
+- 🐛 Phantom global `ALL_CANDIDATES_TOTAL` kini dideklarasikan resmi di
+  state.js (sebelumnya di-assign bare tanpa deklarasi — strict mode ESM akan
+  ReferenceError) ✓
+- E2E Playwright: `login-check`, `upload-check`, `biodata-check` **SEMUA
+  LULUS** ✓
+- Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.

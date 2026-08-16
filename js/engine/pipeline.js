@@ -8,9 +8,9 @@
 // Pipeline tahapan kandidat DINAMIS dari system config (list_tahapan):
 // CHECK KAIWA → MENDAN → MENSETSU → LOLOS USER → MCU PARPOR → TTD KONTRAK
 // → PROSES COE → VISA → FLIGHT. Fallback ke daftar lama kalau config kosong.
-function tahapanPipeline() {
-  if (window.DROPDOWNS && Array.isArray(DROPDOWNS.tahapan) && DROPDOWNS.tahapan.length)
-    return DROPDOWNS.tahapan;
+export function tahapanPipeline() {
+  if (window.DROPDOWNS && Array.isArray(window.DROPDOWNS.tahapan) && window.DROPDOWNS.tahapan.length)
+    return window.DROPDOWNS.tahapan;
   return [
     'CHECK KAIWA',
     'MENDAN',
@@ -26,7 +26,7 @@ function tahapanPipeline() {
 
 // Cocokkan tahapan kandidat ke salah satu langkah pipeline (case-insensitive,
 // prefix match). Return -1 kalau tidak ketemu (mis. status loker publik).
-function tahapanMatchIdx(thpRaw) {
+export function tahapanMatchIdx(thpRaw) {
   if (!thpRaw || thpRaw === '-') return -1;
   let thp = String(thpRaw).toUpperCase().trim();
   let pipe = tahapanPipeline();
@@ -37,7 +37,7 @@ function tahapanMatchIdx(thpRaw) {
   return -1;
 }
 
-function getTahapanProgress(thpRaw) {
+export function getTahapanProgress(thpRaw) {
   if (!thpRaw || thpRaw === '-') return { percent: 10, color: 'from-slate-600 to-slate-400' };
   let thp = String(thpRaw).toUpperCase();
   if (/TOLAK|REJECT|GAGAL/i.test(thp)) return { percent: 100, color: 'from-red-600 to-rose-400' };
@@ -68,7 +68,7 @@ function getTahapanProgress(thpRaw) {
 
 // Posisi tahapan kandidat dalam pipeline. -1 = proses dihentikan (gagal)
 // atau status tidak dikenali (menunggu/review admin).
-function tahapanStepIndex(thpRaw) {
+export function tahapanStepIndex(thpRaw) {
   if (!thpRaw || thpRaw === '-') return -1;
   let thp = String(thpRaw).toUpperCase();
   if (/TOLAK|REJECT|GAGAL/i.test(thp)) return -1;
@@ -80,3 +80,11 @@ function tahapanStepIndex(thpRaw) {
   if (/WAWANCARA|INTERVIEW|SELEKSI|MATCH|MENDAN|MENSETSU/i.test(thp)) return 1;
   return -1; // MENUNGGU / REVIEW ADMIN dll → belum masuk pipeline
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
+// (render/admin.js, api/*.js, HTML onclick, dll).
+window.tahapanPipeline = tahapanPipeline;
+window.tahapanMatchIdx = tahapanMatchIdx;
+window.getTahapanProgress = getTahapanProgress;
+window.tahapanStepIndex = tahapanStepIndex;

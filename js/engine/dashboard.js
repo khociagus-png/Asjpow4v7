@@ -6,7 +6,7 @@
 // ==========================================
 
 // Logika Pemunculan Tombol Modal Pemberkasan
-function evaluasiTahapanKandidat(thpRaw) {
+export function evaluasiTahapanKandidat(thpRaw) {
   if (!thpRaw) return;
   let thp = String(thpRaw).toUpperCase();
   let btnArea = document.getElementById('btn-pemberkasan-area');
@@ -25,10 +25,10 @@ function evaluasiTahapanKandidat(thpRaw) {
 
 // Badge job di dashboard kandidat: tampilkan SEMUA lamaran (mail) sebagai
 // chip kode job + warna status; fallback ke id_loker_pilihan kalau kosong.
-function renderJobDilamar(myData) {
+export function renderJobDilamar(myData) {
   var apps = (myData && myData.applications) || [];
   var loker = (myData && myData.idLoker) || '';
-  if (!apps.length) return esc(loker || '-');
+  if (!apps.length) return window.esc(loker || '-');
   var chips = '';
   apps.forEach(function (a) {
     if (!a || !a.code) return;
@@ -43,11 +43,11 @@ function renderJobDilamar(myData) {
       '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold ' +
       color +
       '" title="' +
-      esc(a.code) +
+      window.esc(a.code) +
       ' — ' +
-      esc(st) +
+      window.esc(st) +
       '">' +
-      esc(a.code) +
+      window.esc(a.code) +
       '</span> ';
   });
   return chips;
@@ -55,7 +55,7 @@ function renderJobDilamar(myData) {
 
 // Ringkasan progres pemberkasan di dashboard kandidat: x/17 dokumen + status
 // biodata KTKLN/VISA. Data berkas & bio di-populate backend (get-app-data).
-var BERKAS_17 = [
+export var BERKAS_17 = [
   ['kk', 'KK'],
   ['akte', 'AKTE'],
   ['sd', 'IJAZAH SD'],
@@ -74,7 +74,7 @@ var BERKAS_17 = [
   ['bpjs', 'BPJS KETENAGAKERJAAN'],
   ['psikotes', 'HASIL PSIKOTES'],
 ];
-var BIO_FIELDS_19 = [
+export var BIO_FIELDS_19 = [
   'email',
   'tmplahir',
   'tgllahir',
@@ -95,7 +95,7 @@ var BIO_FIELDS_19 = [
   'alamatpt',
 ];
 
-function renderProgresPemberkasan(myData) {
+export function renderProgresPemberkasan(myData) {
   var berkas = (myData && myData.berkas) || {};
   var bio = (myData && myData.bio) || {};
   var done = 0;
@@ -120,7 +120,7 @@ function renderProgresPemberkasan(myData) {
   var listEl = document.getElementById('prog-berkas-list');
   if (bar) bar.style.width = pct + '%';
   if (pctEl) pctEl.textContent = pct + '%';
-  if (txtEl) txtEl.textContent = done + tr('ui.docs_count');
+  if (txtEl) txtEl.textContent = done + window.tr('ui.docs_count');
   if (listEl) listEl.innerHTML = listHtml;
 
   // Biodata: 18 field yang tersedia (19 di antaranya; pasport/coe dibagi jadi
@@ -134,11 +134,11 @@ function renderProgresPemberkasan(myData) {
   if (badge) {
     if (bioFull)
       badge.innerHTML =
-        '<i class="fas fa-check-circle mr-0.5"></i> ' + tr('ui.biodata_complete') + '';
+        '<i class="fas fa-check-circle mr-0.5"></i> ' + window.tr('ui.biodata_complete') + '';
     else
       badge.innerHTML =
         '<i class="fas fa-exclamation-circle mr-0.5"></i> ' +
-        tr('ui.biodata_partial') +
+        window.tr('ui.biodata_partial') +
         bioDone +
         '/18';
     badge.className =
@@ -147,7 +147,7 @@ function renderProgresPemberkasan(myData) {
   }
 }
 
-function kalkulasiProgress(myData) {
+export function kalkulasiProgress(myData) {
   let miniFields = [
     myData.nama,
     myData.wa,
@@ -193,29 +193,29 @@ function kalkulasiProgress(myData) {
 
   badges +=
     '<i class="fas fa-medal text-orange-500 text-2xl md:text-3xl drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" title="' +
-    tr('ui.badge_bronze') +
+    window.tr('ui.badge_bronze') +
     '"></i>';
   if (progMini === 100) {
     badges +=
       '<i class="fas fa-award text-slate-300 text-2xl md:text-3xl drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]" title="' +
-      tr('ui.badge_silver') +
+      window.tr('ui.badge_silver') +
       '"></i>';
   }
   if (progMaster === 100) {
     badges +=
       '<i class="fas fa-crown text-yellow-400 text-3xl md:text-4xl drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" title="' +
-      tr('ui.badge_gold') +
+      window.tr('ui.badge_gold') +
       '"></i>';
   }
   if (isVip) {
     let logoSrc =
-      ASSETS.LOGO ||
+      window.ASSETS.LOGO ||
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
     badges +=
       '<img src="' +
-      esc(logoSrc) +
+      window.esc(logoSrc) +
       '" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' +
-      tr('ui.badge_official') +
+      window.tr('ui.badge_official') +
       '">';
   }
 
@@ -223,14 +223,14 @@ function kalkulasiProgress(myData) {
   let catatanIntStr = myData.catatanInt || '';
   let kelasMatch = catatanIntStr.match(/\[KELAS\s*([A-Z0-9]+)\]/i);
   if (kelasMatch) {
-    badges += `<span class="px-2 py-0.5 ml-1 bg-indigo-900/60 text-indigo-300 border border-indigo-500/50 rounded text-xs font-bold shadow-sm whitespace-nowrap align-middle"><i class="fas fa-users mr-1"></i>KELAS ${esc(kelasMatch[1].toUpperCase())}</span>`;
+    badges += `<span class="px-2 py-0.5 ml-1 bg-indigo-900/60 text-indigo-300 border border-indigo-500/50 rounded text-xs font-bold shadow-sm whitespace-nowrap align-middle"><i class="fas fa-users mr-1"></i>KELAS ${window.esc(kelasMatch[1].toUpperCase())}</span>`;
   }
 
   badges += '</span>';
 
   let namaHeader = document.getElementById('k-dash-nama');
   if (namaHeader) {
-    namaHeader.innerHTML = tr('candidate.welcome') + ', ' + esc(myData.nama) + badges;
+    namaHeader.innerHTML = window.tr('candidate.welcome') + ', ' + window.esc(myData.nama) + badges;
   }
 
   let progMsg = document.getElementById('prog-msg');
@@ -238,16 +238,26 @@ function kalkulasiProgress(myData) {
     if (isVip && progMaster === 100 && progMini === 100) {
       progMsg.innerHTML =
         '<span class="text-amber-400 font-black tracking-widest"><i class="fas fa-star mr-1"></i> ' +
-        tr('ui.perfect_student') +
+        window.tr('ui.perfect_student') +
         ' <i class="fas fa-star ml-1"></i></span>';
     } else if (progMaster === 100 && progMini === 100) {
       progMsg.innerHTML =
-        '<span class="text-yellow-400 font-bold">' + tr('ui.profile_100') + '</span>';
+        '<span class="text-yellow-400 font-bold">' + window.tr('ui.profile_100') + '</span>';
     } else if (progMini === 100) {
       progMsg.innerHTML =
-        '<span class="text-slate-300 font-bold">' + tr('ui.profile_silver_next') + '</span>';
+        '<span class="text-slate-300 font-bold">' + window.tr('ui.profile_silver_next') + '</span>';
     } else {
-      progMsg.innerHTML = '' + tr('ui.profile_incomplete') + '';
+      progMsg.innerHTML = '' + window.tr('ui.profile_incomplete') + '';
     }
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
+// (engine/init.js via window.*, render/candidate.js, dll).
+window.evaluasiTahapanKandidat = evaluasiTahapanKandidat;
+window.renderJobDilamar = renderJobDilamar;
+window.BERKAS_17 = BERKAS_17;
+window.BIO_FIELDS_19 = BIO_FIELDS_19;
+window.renderProgresPemberkasan = renderProgresPemberkasan;
+window.kalkulasiProgress = kalkulasiProgress;

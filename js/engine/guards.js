@@ -11,7 +11,7 @@
 // Dipakai sebagai guard auto-refresh: kalau admin sedang membaca modal
 // (preview CV, form, pemberkasan, dst) refresh ditunda supaya tidak
 // menutup/mengganggu modal tersebut.
-function adaModalTerbuka() {
+export function adaModalTerbuka() {
   var els = document.querySelectorAll('[id^="modal-"]');
   for (var i = 0; i < els.length; i++) {
     var el = els[i];
@@ -28,7 +28,7 @@ function adaModalTerbuka() {
 // Deteksi apakah admin sedang meng-scroll halaman/tabel (mis. Mail Inbox).
 // Kalau iya, refresh TIDAK boleh render ulang tabel supaya posisi scroll
 // tidak ter-reset — data tetap diperbarui di memori + badge notif tetap jalan.
-function sedangDiscrollTabel() {
+export function sedangDiscrollTabel() {
   if (window.scrollY > 80) return true;
   var boxes = document.querySelectorAll('.overflow-x-auto, .overflow-y-auto, .custom-scrollbar');
   for (var i = 0; i < boxes.length; i++) {
@@ -40,11 +40,11 @@ function sedangDiscrollTabel() {
 
 // Hitung jumlah mail pending (MENUNGGU/MAIL/BARU) & perbarui SEMUA badge
 // mail: badge sidebar, tombol tab Mail Inbox, notif tombol WA bot + sinkron
-// PREV_MAIL_COUNT (dipakai deteksi mail baru saat auto-refresh). Dipakai
+// window.PREV_MAIL_COUNT (dipakai deteksi mail baru saat auto-refresh). Dipakai
 // oleh initApp (auto-refresh) DAN patch-in-place aksi admin (07_api.js)
 // supaya angka selalu konsisten tanpa harus tarik ulang semua data.
-function updateMailBadge() {
-  let pendingMails = ALL_FORM.filter(
+export function updateMailBadge() {
+  let pendingMails = window.ALL_FORM.filter(
     (f) =>
       f.status.toUpperCase() === 'MENUNGGU' ||
       f.status.toUpperCase() === 'MAIL' ||
@@ -86,15 +86,22 @@ function updateMailBadge() {
   // Toast mail baru hanya terpicu jika pending NAIK dibanding siklus
   // sebelumnya — aksi admin (review/lulus/gagal/hapus) selalu MENURUNKAN
   // pending, jadi aman dipanggil dari patch-in-place tanpa bunyi palsu.
-  if (PREV_MAIL_COUNT !== null && pendingMails > PREV_MAIL_COUNT) {
-    showToast(
-      tr('ui.toast_new_mail').replace('{n}', pendingMails - PREV_MAIL_COUNT) +
-        tr('ui.toast_mail_inbox_n'),
+  if (window.PREV_MAIL_COUNT !== null && pendingMails > window.PREV_MAIL_COUNT) {
+    window.showToast(
+      window.tr('ui.toast_new_mail').replace('{n}', pendingMails - window.PREV_MAIL_COUNT) +
+        window.tr('ui.toast_mail_inbox_n'),
       'success',
     );
     try {
       new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play();
     } catch (e) {}
   }
-  PREV_MAIL_COUNT = pendingMails;
+  window.PREV_MAIL_COUNT = pendingMails;
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
+// (engine/init.js via window.*, api/*.js patch-in-place).
+window.adaModalTerbuka = adaModalTerbuka;
+window.sedangDiscrollTabel = sedangDiscrollTabel;
+window.updateMailBadge = updateMailBadge;

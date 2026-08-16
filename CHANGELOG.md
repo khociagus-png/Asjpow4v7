@@ -1,6 +1,19 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 4 — commit `2463b5a`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 5 — commit menyusul).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 5: engine js/engine/* ESM (refactor)
+
+### Refactor: pipeline, dashboard, guards, init jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- `pipeline.js` (4 fn), `dashboard.js` (6: BERKAS_17/BIO_FIELDS_19 + render progres), `guards.js` (3: guard auto-refresh + badge mail), `init.js` (2: refreshDataDinamis/initApp) → export + alias window.*.
+- Referensi global implisit di-window-kan eksplisit; state writes via accessor bridge (state.js).
+- 🐛 Fix phantom global `ALL_CANDIDATES_TOTAL` (dulu di-assign tanpa deklarasi — kini var resmi di state.js + accessor).
+- Build `build-js.mjs`: ESM_CORE + 4 entri (bundel `app-a32c94c192.js`, 413.5 KB, 0 export bocor).
+- Catatan: antar-file ESM memakai `window.*` eksplisit (belum `import`) sampai bundle jadi ESM — ESM_BRIDGE.md §3.3.
 
 ---
 

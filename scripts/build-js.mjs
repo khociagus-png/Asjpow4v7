@@ -102,6 +102,11 @@ const ESM_CORE = new Set([
   '/js/init/util.js',
   // Fase 3 langkah 4: domain auth (gate WA login/daftar + sesi admin/kandidat).
   '/js/04_auth.js',
+  // Fase 3 langkah 5: engine (pipeline tahapan, dashboard kandidat, guards auto-refresh, mesin init).
+  '/js/engine/pipeline.js',
+  '/js/engine/dashboard.js',
+  '/js/engine/guards.js',
+  '/js/engine/init.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;
