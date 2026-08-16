@@ -350,7 +350,7 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 
 ---
 
-### Langkah 6 — render/* ESM (turn ini, commit `HASH6`)
+### Langkah 6 — render/* ESM (turn ini, commit `5afe39b`)
 
 - `node --check --input-type=module` 5 file js/render/* ✓ · scan `no-undef`
   **0 error** ✓ (44 nama lintas-file di-window-kan eksplisit) · `bun run

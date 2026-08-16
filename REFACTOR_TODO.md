@@ -289,7 +289,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       DOM-safe, refreshDataDinamis via window.callAPI stub) ✓ · E2E
       login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file / **396 simbol**
       HIGH=0.
-- [x] **Langkah 6 — `js/render/*` ESM (5 file: public, admin, candidate, share, mail)** — commit `HASH6`
+- [x] **Langkah 6 — `js/render/*` ESM (5 file: public, admin, candidate, share, mail)** — commit `5afe39b`
       Domain render terbesar (pecahan 05_render.js): `public.js` (4: filter/tab
       publik + filter kelola loker), `admin.js` (6: renderAdminFull/switchTab/
       table DB job/badgeTahapanDb), `candidate.js` (tabel daftar kandidat +

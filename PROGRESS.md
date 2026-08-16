@@ -4,13 +4,13 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 6: render (`js/render/*`) jadi ESM (commit `HASH6`) + 🐛 fix backend `nextCandidateId()` (409 simpan biodata).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 6: render (`js/render/*`) jadi ESM (commit `5afe39b`) + 🐛 fix backend `nextCandidateId()` (409 simpan biodata).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 6 — render: js/render/* (5 file) ESM (commit `HASH6`)
+### Fase 3 langkah 6 — render: js/render/* (5 file) ESM (commit `5afe39b`)
 
 - **`js/render/*.js` → ESM** — domain render terbesar: public.js (4 fn: filter/tab
   publik + filter kelola loker), admin.js (6: renderAdminFull/switchTab/table
