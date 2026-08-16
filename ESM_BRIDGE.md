@@ -386,7 +386,7 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 - Audit diperbarui: 52 file · **395 simbol** · HIGH=0 · MEDIUM=24 · LOW=371
   (`.freebuff/audit-globals.json` + `module-map-frontend.json`).
 
-### Langkah 5 — engine/* ESM (turn ini, commit menyusul)
+### Langkah 5 — engine/* ESM (turn ini, commit `4ea3e32`)
 
 - `node --check --input-type=module` 4 file js/engine/* ✓
 - Scan `no-undef` strict: **0 error** (referensi eksplisit `window.*`:

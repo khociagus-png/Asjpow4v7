@@ -4,13 +4,13 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 5: engine (`js/engine/*`) jadi ESM (commit menyusul).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 5: engine (`js/engine/*`) jadi ESM (commit `4ea3e32`).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 5 — engine: js/engine/* (pipeline, dashboard, guards, init) ESM (commit menyusul)
+### Fase 3 langkah 5 — engine: js/engine/* (pipeline, dashboard, guards, init) ESM (commit `4ea3e32`)
 
 - **`js/engine/pipeline.js` → ESM** (4 fn): tahapanPipeline, tahapanMatchIdx,
   getTahapanProgress, tahapanStepIndex — export + alias window.*; referensi

@@ -261,7 +261,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       bocor). js/04_auth.js tidak dimuat halaman standalone → tanpa perubahan
       HTML. Verifikasi: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
       test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓.
-- [x] **Langkah 5 — `js/engine/*` ESM (4 file: pipeline, dashboard, guards, init)** — commit menyusul
+- [x] **Langkah 5 — `js/engine/*` ESM (4 file: pipeline, dashboard, guards, init)** — commit `4ea3e32`
       Engine = mesin tarik data + init dashboard: `pipeline.js` (4 fn tahapan),
       `dashboard.js` (6: BERKAS_17/BIO_FIELDS_19 + render progres), `guards.js`
       (3: adaModalTerbuka/sedangDiscrollTabel/updateMailBadge), `init.js` (2:
