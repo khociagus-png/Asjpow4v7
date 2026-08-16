@@ -105,7 +105,10 @@ async function bukaFormBridge(endpoint, params, toastUrlMissing) {
   try {
     const res = await callAPI(endpoint, params);
     if (res && res.formUrl) {
-      window.location.href = res.formUrl;
+      // FIX: backend memakai NETLIFY_SITE_URL (bisa basi / menunjuk situs
+      // lain). Di preview lokal / Netlify aktif yang berbeda, paksa form
+      // terbuka di aplikasi yang sedang dipakai (origin sendiri).
+      window.location.href = resolveSelfUrl(res.formUrl);
     } else {
       showToast(toastUrlMissing, 'error');
     }
@@ -156,8 +159,9 @@ async function bukaFormSiswa() {
   try {
     const url = await callAPI('getLinkSiswaBaru', []);
     if (url) {
-      // FIX: tetap di dalam PWA (tab sama), bukan tab browser.
-      window.location.href = url.url || url.formUrl || url;
+      // FIX: tetap di dalam PWA (tab sama), bukan tab browser — dan paksa
+      // ke origin sendiri (lihat resolveSelfUrl).
+      window.location.href = resolveSelfUrl(url.url || url.formUrl || url);
     } else {
       showToast(tr('ui.toast_siswa_form_url_missing'), 'error');
     }

@@ -289,5 +289,30 @@ function escJs(x) {
 window.esc = esc;
 window.escJs = escJs;
 
+// ============================================================
+// resolveSelfUrl(url) — paksa URL form bridge ke origin aplikasi
+// yang sedang dipakai.
+// Backend siteBase() memakai env NETLIFY_SITE_URL (nilai bisa basi,
+// mis. menunjuk situs lama). Akibatnya di preview lokal / Netlify aktif
+// yang berbeda, tombol "Form Master Lengkap / AI CV / Lamaran / Siswa"
+// melompat ke situs lain. Kalau origin hasil bridge berbeda dengan
+// window.location.origin, ganti origin-nya (path/query tetap) supaya
+// form terbuka di aplikasi yang sedang dipakai. URL relatif dibiarkan.
+// ============================================================
+function resolveSelfUrl(url) {
+  if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return url;
+  try {
+    const u = new URL(url);
+    if (u.origin !== window.location.origin) {
+      return window.location.origin + u.pathname + u.search + u.hash;
+    }
+  } catch (e) {
+    /* URL tidak valid — biarkan apa adanya */
+  }
+  return url;
+}
+
+window.resolveSelfUrl = resolveSelfUrl;
+
 // Semua pemanggilan di frontend memakai callAPI() langsung ke Netlify Functions
 // + Supabase — tidak ada lagi jalur Google Apps Script / callGAS.
