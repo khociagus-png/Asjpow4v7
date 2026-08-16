@@ -443,6 +443,28 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       WA Pintar inject, Modal Pemberkasan) ✓.
       Sisa classic di STACK: `upload-guard.js` + `pwa.js` (+ `js/pages/*`
       standalone) → langkah terakhir bersama entry `js/main.js`.
+- [x] **Langkah 13 (TERAKHIR) — file dimuat halaman standalone jadi ESM (8 file) + HTML type=module** — commit `ba59519`
+      File yang TIDAK di-IIFE (dimuat `<script type="module">` langsung):
+      `upload-guard` (cekUploadFile + helper PRIVATE), `apply-docs`
+      (applyDocsPlan), `pwa` (cobaInstallApp + bersihkanDraftLamaBase64 +
+      listener top-level + migrasi jalan saat evaluasi), `js/pages/siswa_baru`,
+      `share`, `apply_full`, `master_full`, `ai_form` (12 export utk HTML
+      onclick/onchange/onload + string onclick dinamis; state chat PRIVATE).
+      HTML 5 halaman standalone: tag upload-guard/pages/*/pwa.js (dan
+      apply-docs di apply-full) → `<script type="module">` (urutan dokumen
+      dipertahankan; inline theme classic tetap jalan duluan).
+      Build: ESM_CORE + upload-guard + pwa (wajib — keduanya juga masuk
+      bundel admin/index; tanpa IIFE `export` bocor ke bundel classic) →
+      bundel `app-cff3e89658.js` (419.5 KB, 45 file, 0 export bocor,
+      idempoten). check:globals nol kolisi (405 simbol). Audit HIGH=0.
+      Verifikasi: node --check ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
+      test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓ +
+      smoke halaman standalone (ai_form initApp + sapaan chat + konteks URL,
+      apply-full applyDocsPlan, master-full nama terisi, share/siswa-baru
+      render, upload-guard & pwa ter-expose, 0 error JS) ✓.
+      ⏭️ **Fase 3 TUNTAS** — semua file frontend kini ES Modules. Sisa
+      roadmap: entry `js/main.js` + `esbuild bundle` mode (optimasi,
+      bukan lagi konversi).
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**

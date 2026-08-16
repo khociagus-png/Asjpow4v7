@@ -1,13 +1,14 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 12 — core (i18n/api-client) + init (state/util +
-> theme/preview/nav/boot) + auth + engine + render + api (`js/api/*`) +
-> admin_modal (`js/admin_modal/*`) + admin_ops (`js/admin_ops/*`) +
-> ai_copilot (`js/ai_copilot/*`) + **sisa file classic bundle-only
-> (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
-> `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`)
-> sudah ESM**. Sisa classic: `upload-guard`, `apply-docs`, `pwa`,
-> `js/pages/*` (dimuat halaman standalone — lihat urutan §6).
+> **Status: Fase 3 TUNTAS (langkah 13)** — SEMUA file frontend kini ES
+> Modules: core (i18n/api-client) + init (state/util + theme/preview/nav/boot)
+> + auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
+> + admin_ops (`js/admin_ops/*`) + ai_copilot (`js/ai_copilot/*`) + sisa
+> bundle-only (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
+> `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`) +
+> **file halaman standalone (`upload-guard`, `apply-docs`, `pwa`,
+> `js/pages/*`) — halaman standalone kini memuat via `<script
+> type="module">`**. Tidak ada lagi file classic di frontend.
 > Dokumen ini = hasil **audit global pollution** + pola **bridge** yang dipakai
 > supaya konversi bertahap TANPA regresi. Update di sini setiap kali modul baru
 > di-ESM-kan (lihat urutan konversi di bagian 6).
@@ -25,12 +26,12 @@
 | Metrik | Nilai |
 | --- | --- |
 | File frontend diaudit | **52** (js/** rekursif + api-client.js + i18n.js + pwa.js) |
-| Simbol global (deklarasi top-level + `window.*`) | **396** |
+| Simbol global (deklarasi top-level + `window.*`) | **405** |
 | Kolisi (1 nama dideklarasikan 2+ file) | **0** ✓ (guard `check:globals` juga memastikan 0 per build) |
 | Shadowing API bawaan browser (`window.name`, `window.status`, `window.open`, …) | **0** ✓ |
 | Risk HIGH | **0** |
-| Risk MEDIUM (kontrak lintas-file berat) | **24** |
-| Risk LOW (spesifik / privat-able) | **370** |
+| Risk MEDIUM (kontrak lintas-file berat) | **25** |
+| Risk LOW (spesifik / privat-able) | **382** |
 
 ### 1.2 Inventaris risk MEDIUM (kontrak global yang WAJIB diekspor saat ESM)
 
@@ -341,11 +342,12 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
    `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9) +
    `js/ai_copilot/*` ✅ (langkah 10) + `js/init/{theme,preview,nav,boot}` ✅
-   (langkah 11) + **sisa classic bundle-only ✅ (langkah 12, turn ini):
-   `01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
-   `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`**
-   — sisa classic: `upload-guard`, `apply-docs`, `pwa`, `js/pages/*` (dimuat
-   halaman standalone, digarap langkah terakhir bersama entry `js/main.js`)**
+   (langkah 11) + sisa classic bundle-only ✅ (langkah 12): `01_public`,
+   `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`,
+   `12_esign_match`, `13_rincian_builder`, `helpers_cv` — **✅ (langkah 13,
+   TERAKHIR): `upload-guard`, `apply-docs`, `pwa`, `js/pages/*` jadi ESM;
+   halaman standalone memuat via `<script type="module">`. Konversi Fase 3
+   TUNTAS — tidak ada file classic tersisa.**
    — catatan: fungsi yang dipanggil HTML inline
    `onclick` WAJIB dapat alias window; referensi global implisit di dalam
    modul di-window-kan eksplisit; **antar-file ESM belum boleh `import`
@@ -371,6 +373,14 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    (d) alias window utk onclick string yang DI-GENERATE modul itu sendiri
    (`window.bukaPreviewDokumen` di setStatusBerkas, `window.tutupDetailLoker`
    di bukaDetailLoker) — string dieval di global scope, bukan scope modul.
+   Catatan langkah 13: (a) **file yang juga masuk bundel admin/index
+   (`upload-guard`, `pwa`) wajib ditambah ke ESM_CORE** — tanpa IIFE,
+   `export` bocor jadi SyntaxError di bundel classic; (b) **halaman
+   standalone → `type="module"`**: urutan dokumen tag dipertahankan (modul
+   dieksekusi berurutan setelah parse), inline classic (theme) tetap jalan
+   duluan, `onload`/`onclick` HTML tetap aman karena modul selesai sebelum
+   event; (c) **state UI halaman (chatHistory/latestCandidateData/*Base64)
+   PRIVATE modul** — tidak ada pemakai lintas file, jangan di-alias.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake

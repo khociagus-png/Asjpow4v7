@@ -4,7 +4,25 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 12: sisa file classic bundle-only (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `helpers_cv`) jadi ESM + 🐛 fix `CURRENT_LANG` accessor (toggle bahasa basi sejak langkah 2).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 13 (TERAKHIR): semua file classic tersisa (`upload-guard`, `apply-docs`, `pwa`, `js/pages/*`) jadi ESM + halaman standalone dimuat via `type="module"` — konversi ESM Fase 3 **TUNTAS**.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 13 (TERAKHIR) — file dimuat halaman standalone jadi ESM (8 file) + HTML type=module
+
+- **`js/upload-guard.js` → ESM** (1 + helper PRIVATE): `cekUploadFile` — `export` + alias window.* (pemakai classic/bundel & HTML onchange semua halaman). Helper internal (extDariAccept/formatBoleh/pesan) PRIVATE modul.
+- **`js/apply-docs.js` → ESM** (1): `applyDocsPlan` — `export` + alias window.* (dipakai apply_full.js).
+- **`pwa.js` → ESM** (2): `cobaInstallApp`/`bersihkanDraftLamaBase64` — `export` + alias window.* + migrasi `bersihkanDraftLamaBase64()` jalan di evaluasi modul (semua halaman). Listener SW/beforeinstallprompt/appinstalled tetap top-level.
+- **`js/pages/siswa_baru.js` → ESM** (2 + konteks URL): `export` + alias window.* (HTML onclick/onload).
+- **`js/pages/share.js` → ESM**: fungsi share + lightbox — `export` + alias window.*; bare global (tr/callAPI/esc) di-window-kan.
+- **`js/pages/apply_full.js` → ESM**: alur lamaran lengkap — `export` + alias window.*; `window.applyDocsPlan` (apply-docs ESM).
+- **`js/pages/master_full.js` → ESM**: form master wizard — `export` + alias window.*; `tr/callAPI/esc` via window.*.
+- **`js/pages/ai_form.js` → ESM** (12 export): initApp/switchTab/handleEnter/sendMessage/updateFormUI/compressImage/handleDocUpload/saveToDatabase/updateArrayField/removeArrayItem/addArrayItem — alias window.* utk HTML onclick/onchange/onload + string onclick dinamis renderEditableArray. State chat (chatHistory/latestCandidateData/*Base64/*File/fieldPaths) PRIVATE modul. Bare global `tr/callAPI/CURRENT_LANG/renderLanguageLight/cekUploadFile` di-window-kan eksplisit.
+- **HTML standalone → `type="module"`**: ai_form/apply-full/master-full/share/siswa-baru — tag upload-guard, pages/*, pwa.js (dan apply-docs di apply-full) jadi `<script type="module">` (urutan dokumen dipertahankan → eksekusi berurutan setelah parse; inline theme classic tetap jalan duluan).
+- **Build**: ESM_CORE + `upload-guard.js` + `pwa.js` (keduanya juga masuk bundel admin/index — wajib di-IIFE, kalau tidak `export` bocor ke bundel classic) → bundel `app-cff3e89658.js` (419.5 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 405 simbol). Audit: HIGH=0 · MEDIUM=25 · LOW=382.
+- Verifikasi: node --check ESM semua file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login, upload, biodata ✓ + **smoke halaman standalone**: ai_form (initApp onload + sapaan chat + AI_FORM_CONTEXT dari URL + alias onclick), apply-full (applyDocsPlan), master-full (nama terisi dari URL), share & siswa-baru render, upload-guard & pwa ter-expose — **0 error JS** ✓.
 
 ---
 

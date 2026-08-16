@@ -1,6 +1,40 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 12 — commit `3af237a`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 13 — commit `ba59519`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 13 (TERAKHIR): semua file halaman standalone jadi ESM (8 file) + HTML type=module — konversi ESM Fase 3 TUNTAS (refactor)
+
+### Refactor: upload-guard, apply-docs, pwa, js/pages/* jadi ES Modules
+
+- `js/upload-guard.js` (cekUploadFile) · `js/apply-docs.js` (applyDocsPlan) ·
+  `pwa.js` (cobaInstallApp/bersihkanDraftLamaBase64 + listener top-level +
+  migrasi jalan saat evaluasi) · `js/pages/{siswa_baru,share,apply_full,
+  master_full,ai_form}.js` — `export` + alias window.* (HTML onclick/onchange/
+  onload + string onclick dinamis); state UI (chatHistory/latestCandidateData/
+  *Base64/*File) jadi PRIVATE modul.
+- 5 halaman standalone (ai_form, apply-full, master-full, share, siswa-baru):
+  tag upload-guard/pages/*/pwa.js (+ apply-docs di apply-full) →
+  `<script type="module">` — urutan dokumen dipertahankan, inline theme
+  classic tetap jalan duluan.
+- Build: ESM_CORE + upload-guard + pwa (wajib — keduanya juga di bundel
+  admin/index) → bundel `app-cff3e89658.js` (419.5 KB, 45 file, 0 export
+  bocor, idempoten). check:globals nol kolisi (405 simbol).
+
+### Verifikasi
+
+- node --check ESM semua file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
+  test 81/81 ✓ · E2E login/upload/biodata SEMUA LULUS ✓ + smoke halaman
+  standalone (ai_form initApp + sapaan chat + konteks URL, apply-full
+  applyDocsPlan, master-full nama terisi, share/siswa-baru render,
+  upload-guard & pwa ter-expose, 0 error JS) ✓.
+
+### Catatan
+
+- **Fase 3 TUNTAS** — tidak ada file classic tersisa di frontend. Roadmap
+  berikutnya (optimasi, bukan konversi): entry `js/main.js` + esbuild bundle
+  mode, lalu evaluasi halaman standalone jadi entry ESM per halaman.
 
 ---
 
