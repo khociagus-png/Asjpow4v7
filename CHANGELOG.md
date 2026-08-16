@@ -1,6 +1,33 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `59c6fed`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `7260b93`.
+
+---
+
+## 2026-08-15 — Wawancara AI jadi percakapan asli + hasil → admin → update biodata
+
+### `7260b93` — Feat: wawancara AI jadi percakapan asli + hasil wawancara → admin → update biodata
+- **Feedback user:** dokumen HERLINA cuma contoh; model sebelumnya "mesin cetak
+  doc". User minta wawancara seperti **wawancara asli** (bukan nulis dokumen),
+  dan hasilnya dikirim ke admin untuk update biodata.
+- `processAiInterview` (actions-ai.js): prompt dirombak → **percakapan natural**
+  (sapaan hangat → jikoshoukai → 1 pertanyaan per pesan, follow-up menggali,
+  reaksi manusiawi, tanpa nomor/daftar). Bidang SSW tetap jadi konteks
+  pertanyaan (kaigo/shokuhin/nougyou/kensetsu/jidousha/binbou/sougou).
+- **Fix bug pra-ada:** `processAiInterview` tidak terdaftar di CANDIDATE_ACTIONS
+  api-client → token sesi kandidat tidak pernah dikirim → wawancara gagal
+  sesi. Kini + `selesaikanWawancara` & `simpanHasilWawancara` masuk
+  CANDIDATE_ACTIONS.
+- **Alur hasil wawancara (baru):** tombol **SELESAI** di simulator →
+  `selesaikanWawancara` (Gemini rangkum transcript → JSON {score, nilai,
+  rekomendasi, biodata, catatan}) → `simpanHasilWawancara`
+  (ai_form_submissions, `submitted_via='interview'`; mode/status pakai
+  AI_MASTER/MENUNGGU karena CHECK constraint tabel) → admin lihat via
+  **Hasil Wawancara** & terapkan via **Update Biodata** (submitMasterForm
+  admin). Fallback marker `===HASIL===` di chat tetap ada.
+- Verifikasi in-process: Q1 natural tanpa nomor; selesaikanWawancara → hasil
+  score 6/C + 5 field biodata; simpan OK; getHasilWawancara admin OK;
+  cleanup OK. Unit test **49/49**.
 
 ---
 

@@ -10,6 +10,35 @@
 
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `7260b93` — Wawancara AI jadi percakapan asli + hasil → admin → update biodata
+
+- **Feedback user:** "Herlina itu siswa kelas lama, itu cuma contoh pertanyaan.
+  AI sekarang wawancaranya b aja — saya pingin kayak wawancara ASLI, bukan
+  nulis doc. Ide bagus: hasil wawancara dikeluarkan jadi doc, kirim ke admin,
+  dipakai update biodata."
+- **processAiInterview** (`actions-ai.js`): prompt diubah total → percakapan
+  natural (sapaan hangat → jikoshoukai → 1 pertanyaan per pesan, follow-up
+  menggali, reaksi manusiawi, TANPA nomor/daftar). Bidang SSW tetap konteks
+  pertanyaan (kaigo/shokuhin/nougyou/dll).
+- **Fix bug pra-ada:** `processAiInterview` tidak ada di `CANDIDATE_ACTIONS`
+  api-client → `callAPI` tidak pernah kirim token kandidat → backend
+  requireRole gagal (sesi invalid/reload di browser). Kini + `selesaikanWawancara`
+  & `simpanHasilWawancara` masuk CANDIDATE_ACTIONS.
+- **Alur hasil wawancara (baru):** tombol **SELESAI** di simulator →
+  `selesaikanWawancara` (Gemini rangkum transcript → JSON {score, nilai,
+  rekomendasi, biodata, catatan}) → `simpanHasilWawancara` (ai_form_submissions,
+  `submitted_via='interview'`; mode/status pakai AI_MASTER/MENUNGGU karena
+  CHECK constraint tabel) → admin lihat via **Hasil Wawancara** & terapkan via
+  **Update Biodata** (submitMasterForm admin). Fallback marker `===HASIL===`
+  di chat tetap ada.
+- **Verifikasi in-process:** Q1 natural tanpa nomor; selesaikanWawancara →
+  hasil score 6/C + 5 field biodata (nama, alamat, hobi, ssw, keahlianKhusus);
+  simpan OK; getHasilWawancara admin OK; cleanup OK. Unit test **49/49**.
+
+---
+
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `59c6fed` — Model wawancara AI per bidang SSW (14 pertanyaan gaya dokumen isian)
 
 - **Permintaan user:** "Bikin model wawancara AI seperti ini tergantung SSW nya
