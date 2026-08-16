@@ -44,7 +44,12 @@ const STACK = [
   '/js/04_auth.js',
   '/js/05_render.js',
   '/js/06_admin_modal.js',
-  '/js/07_api.js',
+  // Fase 2: js/07_api.js dipecah per domain (forms/jobs/candidates/wa).
+  // Urutan antar-modul bebas (fungsi global di-hoist), dipakai runtime.
+  '/js/api/forms.js',
+  '/js/api/jobs.js',
+  '/js/api/candidates.js',
+  '/js/api/wa.js',
   '/js/08_wa_pintar.js',
   '/js/09_ai_copilot.js',
   '/js/11_admin_ops.js',

@@ -30,11 +30,21 @@ const WANT_JSON = ARGS.has('--json');
 // Daftar file yang diaudit
 // ---------------------------------------------------------------------------
 function frontendFiles() {
+  // Pindai js/ rekursif (termasuk subdirektori api/ sejak Fase 2).
   const jsDir = join(ROOT, 'js');
-  const jsFiles = readdirSync(jsDir)
-    .filter((f) => f.endsWith('.js') && !f.includes('.test.'))
-    .sort((a, b) => a.localeCompare(b));
-  const stack = ['/api-client.js', '/i18n.js', '/pwa.js', ...jsFiles.map((f) => `/js/${f}`)];
+  const jsFiles = [];
+  const walk = (d, prefix) => {
+    for (const f of readdirSync(d).sort((a, b) => a.localeCompare(b))) {
+      const abs = join(d, f);
+      if (f.endsWith('.js') && !f.includes('.test.')) {
+        jsFiles.push(`/js/${prefix}${f}`);
+      } else if (!f.includes('.') && f !== 'node_modules') {
+        walk(abs, prefix + f + '/');
+      }
+    }
+  };
+  walk(jsDir, '');
+  const stack = ['/api-client.js', '/i18n.js', '/pwa.js', ...jsFiles.sort((a, b) => a.localeCompare(b))];
   return stack
     .map((p) => {
       const abs = join(ROOT, p);
