@@ -1,0 +1,269 @@
+// actions-auth.js — autentikasi & otorisasi backend.
+//
+// MODUL BARU (Fase 1.1b REFACTOR_TODO.md): kode dipindah dari handlers.js —
+// masterPins, requireAdmin, isValidWaFormat, handleCheckAdminMaster/Personal,
+// handleLoginKandidat, handleDaftarKandidat, handleGantiPasswordKandidat.
+// findCandidateByWa & CAND_WA_COLS dipakai lintas domain → ada di
+// candidate-helpers.js (bukan di sini).
+'use strict';
+
+const bcrypt = require('bcryptjs');
+const { env } = require('./env');
+const supabase = require('./supabase');
+const session = require('./session');
+const { findCandidateByWa, CAND_WA_COLS } = require('./candidate-helpers');
+
+function masterPins() {
+  return [
+    'ADMIN_PASSWORD',
+    'ADMIN_MASTER_PASSWORD',
+    'MASTER_PASSWORD',
+    'ASJ_ADMIN_PASSWORD',
+    'ADMIN_PIN',
+    'PIN_ADMIN',
+    'ADMIN_MASTER_PIN',
+  ]
+    .map(env)
+    .filter(Boolean);
+}
+
+async function handleCheckAdminMaster(payload) {
+  const pin = String((payload && payload[0]) || '');
+  const pins = masterPins();
+  if (pins.length === 0) {
+    return {
+      success: false,
+      error:
+        'PIN master admin belum dikonfigurasi di server. Set env ADMIN_PASSWORD (nilai dari dashboard Netlify) lewat Keys/API keys.',
+    };
+  }
+  if (pins.includes(pin)) return { success: true };
+  return { success: false, error: 'PIN master salah.' };
+}
+
+async function handleCheckAdminPersonal(payload) {
+  const name = String((payload && payload[0]) || '').trim();
+  const pin = String((payload && payload[1]) || '');
+  if (!name || !pin) return { success: false, error: 'Nama dan PIN wajib diisi.' };
+
+  let ok = false;
+  // 1) KHOCI istimewa: pin-nya dari env PIN_KHOCI (tema Inter Milan di UI).
+  if (name.toLowerCase() === 'khoci') {
+    const khociPin = env('PIN_KHOCI');
+    if (khociPin && khociPin === pin) ok = true;
+  }
+  // 2) Env ASJ_ADMINS="Nama1:pin1,Nama2:pin2" (cara cepat untuk rebuild).
+  const envAdmins = env('ASJ_ADMINS');
+  if (envAdmins) {
+    for (const item of envAdmins.split(',')) {
+      const idx = item.indexOf(':');
+      if (idx < 0) continue;
+      const n = item.slice(0, idx).trim();
+      const p = item.slice(idx + 1).trim();
+      if (n.toLowerCase() === name.toLowerCase() && p === pin) ok = true;
+    }
+  }
+  // 3) Tabel admin di Supabase (adaptif).
+  if (!ok && supabase.hasBackend()) {
+    try {
+      const found = await supabase.findAdmins();
+      for (const row of found.rows) {
+        const rn = supabase.toText(
+          supabase.pick(row, ['nama', 'name', 'admin_name', 'username', 'nama_admin']),
+        );
+        const rp = supabase.toText(
+          supabase.pick(row, ['pin', 'password', 'pass', 'pin_admin', 'kode']),
+        );
+        if (rn && rp && rn.toLowerCase() === name.toLowerCase() && rp === pin) ok = true;
+      }
+    } catch {
+      /* tabel admin tidak ditemukan — lanjut */
+    }
+  }
+
+  if (!ok) return { success: false, error: 'Nama atau PIN salah.' };
+  return {
+    success: true,
+    sessionToken: session.signToken({ role: 'admin', name }),
+  };
+}
+
+// Gate WA: hanya nomor HP Indonesia (62 + 8xx, total 12-13 digit) yang
+// diterima — mencegah typo (mis. 6223... bukan 6282...) melahirkan kandidat
+// duplikat seperti kasus SATRIA (2026-08-15).
+function isValidWaFormat(wa) {
+  return /^628\d{9,10}$/.test(supabase.normalizeWa(wa));
+}
+
+async function handleLoginKandidat(payload) {
+  const wa = supabase.normalizeWa(String((payload && payload[0]) || ''));
+  const password = String((payload && payload[1]) || '');
+  if (!wa || !password) return { success: false, error: 'Nomor WA dan password wajib diisi.' };
+  if (!isValidWaFormat(wa)) {
+    return {
+      success: false,
+      error: 'Nomor WA tidak valid. Gunakan format 08xx atau 628xx (12-13 digit).',
+    };
+  }
+  if (!supabase.hasBackend()) {
+    return { success: false, error: 'Backend belum dikonfigurasi (Supabase keys belum ada).' };
+  }
+  try {
+    const row = await findCandidateByWa(wa);
+    if (!row) return { success: false, error: 'Nomor WA belum terdaftar.' };
+    const stored = supabase.pick(row, ['password_kandidat', 'password', 'pass', 'pin', 'hash']);
+    const defaultPass = wa.slice(-4);
+    let okPass = false;
+    if (stored && String(stored).startsWith('$2')) {
+      // bcrypt hash (daftar asli: hash dari 4 digit terakhir WA, atau
+      // password pribadi yang sudah diganti kandidat).
+      okPass = await bcrypt.compare(password, String(stored));
+    } else if (stored == null || stored === '') {
+      okPass = password === defaultPass;
+    } else {
+      okPass = String(stored) === password;
+    }
+    if (!okPass) return { success: false, error: 'Password salah.' };
+    const nama =
+      supabase.toText(supabase.pick(row, ['nama_lengkap', 'nama', 'name', 'full_name'])) || wa;
+    return {
+      success: true,
+      nama,
+      wa,
+      sessionToken: session.signToken({ role: 'kandidat', wa }),
+    };
+  } catch (e) {
+    return { success: false, error: 'Gagal memeriksa kandidat: ' + e.message };
+  }
+}
+
+async function handleDaftarKandidat(payload) {
+  const nama = String((payload && payload[0]) || '').trim();
+  const wa = supabase.normalizeWa(String((payload && payload[1]) || ''));
+  if (!nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
+  // Gate WA: tolak nomor yang bukan HP Indonesia (62 8xx, total 12-13 digit) —
+  // biasanya salah ketik yang melahirkan kandidat duplikat di masa lalu.
+  if (!isValidWaFormat(wa)) {
+    return {
+      success: false,
+      error:
+        'Nomor WA tidak valid (' +
+        wa +
+        '). Gunakan format 08xx atau 628xx (12-13 digit). Periksa nomor kembali.',
+    };
+  }
+  if (!supabase.hasBackend()) {
+    return { success: false, error: 'Backend belum dikonfigurasi (Supabase keys belum ada).' };
+  }
+  try {
+    const found = await supabase.findCandidates();
+    if (!found.table) {
+      return { success: false, error: 'Tabel kandidat belum terdeteksi di Supabase.' };
+    }
+    // Cek duplikat (format fleksibel 0xx/62xx).
+    if (await findCandidateByWa(wa)) {
+      return { success: false, error: 'Nomor WA sudah terdaftar.' };
+    }
+    const defaultPass = wa.slice(-4);
+    const hash = bcrypt.hashSync(defaultPass, 10);
+    const variants = [
+      { nama_lengkap: nama, no_wa: wa, password_kandidat: hash, password_diubah: false },
+      { nama_lengkap: nama, no_wa: wa, password: hash },
+      { nama, wa, password: hash },
+      { nama, whatsapp: wa, password: hash },
+      { name: nama, wa, password: hash },
+      { name: nama, whatsapp: wa, password: hash },
+      { nama, no_wa: wa, password: hash },
+    ];
+    for (const body of variants) {
+      try {
+        await supabase.supabaseJson('POST', found.table, {
+          body,
+          headers: { Prefer: 'return=minimal' },
+        });
+        return { success: true };
+      } catch {
+        /* coba varian kolom berikutnya */
+      }
+    }
+    return {
+      success: false,
+      error:
+        'Pendaftaran gagal: kolom tabel kandidat tidak cocok dengan mapping. Hubungi developer.',
+    };
+  } catch (e) {
+    return { success: false, error: 'Gagal mendaftar: ' + e.message };
+  }
+}
+
+async function handleGantiPasswordKandidat(payload, sessionToken) {
+  const wa = supabase.normalizeWa(String((payload && payload[0]) || ''));
+  const lama = String((payload && payload[1]) || '');
+  const baru = String((payload && payload[2]) || '');
+  if (!wa || !lama || !baru) return { success: false, error: 'Data tidak lengkap.' };
+  if (baru.length < 6 || baru.length > 20 || /\s/.test(baru)) {
+    return { success: false, error: 'Password baru 6-20 karakter tanpa spasi.' };
+  }
+  const t = session.verifyToken(sessionToken);
+  if (!t || t.role !== 'kandidat' || supabase.normalizeWa(t.wa) !== wa) {
+    return { success: false, sessionInvalid: true, message: 'Sesi kandidat tidak valid' };
+  }
+  if (!supabase.hasBackend()) {
+    return { success: false, error: 'Backend belum dikonfigurasi.' };
+  }
+  try {
+    // Jalur cepat: cari baris kandidat via query server-side (filter WA).
+    let row = await supabase.findCandidateByWaFiltered(wa);
+    let table = 'database_candidate';
+    let colWa = null;
+    if (row) {
+      colWa = CAND_WA_COLS.find((c) => c in row);
+    } else if (row === undefined) {
+      // Fallback: scan penuh (skema kolom WA tidak dikenal) — sekaligus
+      // deteksi nama tabel & kolom.
+      const found = await supabase.findCandidates();
+      table = found.table;
+      colWa = CAND_WA_COLS.find((c) => found.rows[0] && c in found.rows[0]);
+      if (!colWa) return { success: false, error: 'Kolom password tidak ditemukan.' };
+      row = found.rows.find((r) => supabase.normalizeWa(String(r[colWa] || '')) === wa);
+    }
+    const colPass = ['password_kandidat', 'password', 'pass', 'pin'].find((c) => row && c in row);
+    if (!row || !colPass) return { success: false, error: 'Kandidat tidak ditemukan.' };
+    const stored = row[colPass];
+    let okLama =
+      stored && String(stored).startsWith('$2')
+        ? await bcrypt.compare(lama, String(stored))
+        : String(stored || '') === lama;
+    if (!okLama) return { success: false, error: 'Password lama salah.' };
+    const body = { [colPass]: bcrypt.hashSync(baru, 10) };
+    if ('password_diubah' in row) body.password_diubah = true;
+    await supabase.supabaseJson('PATCH', table, {
+      query: { [colWa]: 'eq.' + row[colWa] },
+      body,
+      headers: { Prefer: 'return=minimal' },
+    });
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: 'Gagal mengganti password: ' + e.message };
+  }
+}
+
+// Guard admin untuk aksi admin lain (dipakai banyak handler di handlers.js).
+function requireAdmin(sessionToken) {
+  const t = session.verifyToken(sessionToken);
+  if (!t || t.role !== 'admin') {
+    return { error: { success: false, sessionInvalid: true, message: 'Sesi admin tidak valid' } };
+  }
+  return { token: t };
+}
+
+module.exports = {
+  masterPins,
+  requireAdmin,
+  isValidWaFormat,
+  handleCheckAdminMaster,
+  handleCheckAdminPersonal,
+  handleLoginKandidat,
+  handleDaftarKandidat,
+  handleGantiPasswordKandidat,
+};

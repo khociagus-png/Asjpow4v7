@@ -4,7 +4,28 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1 + Optimasi performa getAppData.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1b (modul auth).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.1b — modul auth + candidate-helpers — commit `(menyusul)`
+
+- **Baru** `netlify/functions/_lib/actions-auth.js` — kluster auth dipindah dari
+  `handlers.js`: `masterPins`, `requireAdmin`, `isValidWaFormat`,
+  `handleCheckAdminMaster/Personal`, `handleLoginKandidat`, `handleDaftarKandidat`,
+  `handleGantiPasswordKandidat`.
+- **Baru** `netlify/functions/_lib/candidate-helpers.js` — `findCandidateByWa` +
+  `CAND_WA_COLS` (dipakai lintas domain: auth, job, form) supaya tidak ada
+  saling-require antar modul action.
+- `handlers.js` berkurang lagi (1.413 → **±1.080 baris**); dispatcher auth
+  memakai `auth.handleXxx`; `requireAdmin`/`masterPins` di-import balik.
+- Verifikasi: `node --check` bersih, test 51/51, smoke auth (PIN master OK,
+  KHOCI OK, PIN salah ditolak, WA typo ditolak gate), E2E login-check SEMUA
+  LULUS, getAppData publik 335 ms cold / 0 ms warm (132 jobs).
+- Backend module-map: 11 → **13 file**, 204 simbol. `bcrypt` tetap di handlers
+  (dipakai handler kandidat lain, line 598).
 
 ---
 

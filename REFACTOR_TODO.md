@@ -38,7 +38,7 @@ import/export eksplisit) → mem-patch satu fitur bisa menyentuh file lain tanpa
 
 - [x] Jalankan semua check di repo bersih: `bun run lint` (0 error/12 warn), `bun run test` (51/51), `bun run build` (idempotent, `app-d80b6b5088.js` 411 KB), E2E read-only (login/share/modal/probe semua lulus) — tercatat di `PROGRESS.md` (sesi 2026-08-16 agus khoci).
 - [x] Catat ukuran bundel & hash: `assets/app-d80b6b5088.js` (411.1 KB, 21 file, hash `d80b6b5088`) — pembanding tiap fase.
-- [x] Buat `scripts/module-map.mjs` — audit dependensi global frontend (22 file, 353 simbol) + backend (9 → **11 file, 204 simbol** setelah Fase 1.1a). Baseline JSON di `.freebuff/module-map-frontend.json` & `.freebuff/module-map-backend.json`.
+- [x] Buat `scripts/module-map.mjs` — audit dependensi global frontend (22 file, 353 simbol) + backend (9 → 11 → **13 file, 204 simbol** setelah Fase 1.1a+1.1b). Baseline JSON di `.freebuff/module-map-frontend.json` & `.freebuff/module-map-backend.json`.
 - [x] `git config user.name/email` benar: `agus khoci` / `316617518+khociagus-png@users.noreply.github.com`.
 
 **Temuan baseline (untuk fase berikutnya):**
@@ -61,7 +61,7 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       `_lib/cache.js` baru). `handlers.js` −573 baris; `stripRaw`/`loadCandidatesUnik`
       di-import balik. Terukur: publik 1.518 → 937 ms cold / **0 ms warm**; 51/51 test,
       E2E lulus. Detail: `PROGRESS.md` sesi 2026-08-16.
-- [ ] Pindahkan blok auth + WA gate (`masterPins`, `handleCheckAdminMaster`, `handleCheckAdminPersonal`, `handleLoginKandidat`, `isValidWaFormat`, `handleGantiPasswordKandidat`, dll) → `_lib/actions-auth.js`.
+- [x] **DONE (2026-08-16):** kluster auth + WA gate (`masterPins`, `requireAdmin`, `isValidWaFormat`, `handleCheckAdminMaster/Personal`, `handleLoginKandidat`, `handleDaftarKandidat`, `handleGantiPasswordKandidat`) → **`_lib/actions-auth.js`**; `findCandidateByWa`/`CAND_WA_COLS` → **`_lib/candidate-helpers.js`** (dipakai lintas domain). Test 51/51, smoke auth OK, E2E login lulus.
 - [ ] Pindahkan handler mail/form (`handleFormStatus`, `handleDeleteForm`, dll) → `_lib/actions-mail.js`.
 - [ ] Pindahkan handler kandidat (approve/reject/tandai gagal, update biodata, dll) → `_lib/actions-candidate.js`.
 - [ ] Pindahkan handler job/loker (status, hapus, update tahapan, dll) → `_lib/actions-job.js`.
