@@ -309,6 +309,9 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 - Uji impor ESM di Node (shim browser): `PortalBridge` + semua alias + `tr()`
   + `toggleFormLanguage` (live CURRENT_LANG) + internal privat — **13/14 OK**
   (1 gagal karena key test salah, bukan bug — `tr('public.filter')` = 'Filter') ✓
-- E2E Playwright: **belum dijalankan** (preview belum di-start dari UI) —
-  jalankan `BASE_URL=... node e2e/login-check.mjs` + upload/biodata sebelum
-  rilis.
+- E2E Playwright (preview :3000): **SEMUA LULUS** — `login-check` (landing +
+  login kandidat + admin, 0 JS error), `upload-check` (guard + upload KTP/KK
+  end-to-end + Storage + sinkron DB + cleanup), `biodata-check`
+  (simpanBiodataLengkap + cleanup), plus smoke 5 halaman standalone
+  (ai_form/master-full via bridge; apply-full/siswa-baru api-client; share
+  i18n) — core ESM load via `<script type="module">` **0 JS error**.

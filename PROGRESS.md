@@ -46,8 +46,18 @@
 - **Verifikasi**: node --check ESM ✓ · scan no-undef 0 error ✓ · lint
   0 error/12 warn ✓ · test **81/81** ✓ · build idempoten ✓ · uji impor
   ESM di Node (PortalBridge + alias + tr + toggle bahasa live + internal
-  privat) ✓ · **E2E Playwright belum dijalankan** (preview belum di-start
-  dari UI — jalankan e2e/login-check + upload/biodata sebelum rilis).
+  privat) ✓.
+- **E2E Playwright — SEMUA LULUS** (preview :3000, serve-static):
+  `login-check` (landing + login kandidat Agus khoci + admin KHOCI, 0 JS
+  error) ✓ · `upload-check` (guard client + upload KTP/KK end-to-end +
+  Storage + sinkron DB + cleanup) ✓ · `biodata-check` (simpanBiodataLengkap
+  + cleanup) ✓ · smoke 5 halaman standalone (`ai_form`, `master-full`,
+  `apply-full`, `share`, `siswa-baru`) — core ESM load via
+  `<script type="module">` **0 JS error**, `PortalBridge`/`callAPI`/`tr`
+  tersedia sesuai halaman ✓.
+- Catatan: preview server sempat mati di sela test (CLI platform tidak
+  ter-inject di sandbox) — dihidupkan ulang via `scripts/preview-watchdog.sh`
+  (mekanisme resmi repo, log di `/tmp/preview-watchdog.log`).
 - Detail lengkap + roadmap: **`ESM_BRIDGE.md`**.
 
 ---
