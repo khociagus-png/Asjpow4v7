@@ -1,6 +1,23 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `ec24dba`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `8874164`.
+
+---
+
+## 2026-08-16 — Sesi: pesan jelas + auto-login kokoh
+
+### `8874164` — Fix: pesan jelas saat sesi berakhir + auto-login lebih kokoh
+- **callAPI:** saat backend membalas `sessionInvalid`, tampilkan toast
+  "Sesi admin/kandidat sudah berakhir, silakan login lagi" sebelum
+  membersihkan storage & reload (dulu diam-diam → data kosong / logout
+  sendiri tanpa penjelasan).
+- **refreshDataDinamis:** guard auto-login — kalau flag login 'sukses'
+  tapi token sesi / WA hilang (localStorage terhapus sebagian), bersihkan
+  + pesan jelas; tidak panggil API dengan token kosong (dulu berujung
+  data kosong diam-diam).
+- Auto-login sudah berjalan (restore localStorage saat app dibuka, token
+  tanpa expiry). Diuji: login → reload → dashboard kembali ±3 dtk;
+  token palsu → dibersihkan tanpa error JS; login-check & unit 49/49.
 
 ---
 

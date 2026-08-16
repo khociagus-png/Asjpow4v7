@@ -10,6 +10,28 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `8874164` — Sesi: pesan jelas + auto-login kokoh
+
+- **Permintaan user:** "kok bermasalah terus sih kandidat sesi apa admin
+  juga apa ga perlu sesi" → dijawab: sesi TETAP perlu (proteksi PII, admin
+  vs kandidat); yang bermasalah dulu adalah bug integrasi (token tidak
+  terkirim), bukan konsep sesi. User pilih opsi 1 & 2: pesan error jelas +
+  auto-login.
+- **callAPI** (api-client.js): saat backend balas `sessionInvalid`, tampilkan
+  toast "Sesi admin/kandidat sudah berakhir, silakan login lagi" sebelum
+  bersihkan storage & reload (dulu diam-diam).
+- **refreshDataDinamis** (03_engine.js): guard auto-login — flag login
+  'sukses' tapi token sesi/WA hilang → bersihkan + pesan jelas, bukan
+  panggil API dengan token kosong (data kosong diam-diam).
+- Auto-login sudah jalan (restore localStorage, token tanpa expiry).
+- Verifikasi: login → reload → dashboard kembali ±3 dtk; token hilang &
+  token palsu → dibersihkan + toast, tanpa error JS; login-check 20/20,
+  unit 49/49.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `ec24dba` — Form bridge paksa ke origin sendiri
 
 - **Keluhan user:** di local preview "ga bisa check form" (AI master, master
