@@ -4,7 +4,29 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 2 (WA/Fonnte + config dipisah dari actions-extra).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 3 (siswa baru + bridge dipisah dari actions-extra).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.2 langkah 3 — modul `actions-register.js` — commit *(isi hash)*
+
+- **Baru** `_lib/actions-register.js` (6 export) — siswa baru
+  (`respon_siswa_baru`: `getDaftarSiswaBaru` publik tanpa PII, `submitDaftarSiswa`)
+  + link & bridge form (`siteBase`, `getLinkSiswaBaru`, `generateFormBridge`,
+  `generateLegacyMasterBridge`, `generateAiFormBridge`). Dipindah utuh dari
+  `actions-extra.js` (perilaku identik).
+- `actions-extra.js` 2100 → **1956 baris**; 6 handler dilepas dari
+  `module.exports`; dispatcher `handlers.js` route ke `register.*`.
+- Catatan: potongan drive & migrasi ditunda — `handleUploadDriveReplacement`
+  butuh helper inti upload (`uploadBase64`, `FILE_LABEL_COLUMNS`,
+  `findMasterByWa`) yang masih di `actions-extra.js`; akan dipisah bareng
+  ekstraksi helper storage (Fase 1.2 lanjutan).
+- Verifikasi: node --check ✓, test 51/51 ✓, smoke getDaftarSiswaBaru (3 baris)
+  + getLinkSiswaBaru (NETLIFY_SITE_URL) + generateFormBridge + getAppData OK ✓,
+  E2E login-check SEMUA LULUS ✓, backend module-map 21 → **22 file**, 204
+  simbol, cross-file `actions-extra` 20 → 14.
 
 ---
 

@@ -14,6 +14,7 @@ const extra = require('./actions-extra');
 const schedule = require('./actions-schedule');
 const wa = require('./actions-wa');
 const config = require('./actions-config');
+const register = require('./actions-register');
 const ai = require('./actions-ai');
 const rateLimit = require('./rate-limit');
 const publicData = require('./actions-public');
@@ -291,18 +292,18 @@ async function dispatchAction(action, payload, sessionToken) {
       return config.handleDeleteRincianPreset(payload, sessionToken);
     // Siswa baru
     case 'getDaftarSiswaBaru':
-      return extra.handleGetDaftarSiswaBaru(payload, sessionToken);
+      return register.handleGetDaftarSiswaBaru(payload, sessionToken);
     case 'submitDaftarSiswa':
-      return extra.handleSubmitDaftarSiswa(payload);
+      return register.handleSubmitDaftarSiswa(payload);
     // Link & bridge (QR / form)
     case 'getLinkSiswaBaru':
-      return extra.handleGetLinkSiswaBaru();
+      return register.handleGetLinkSiswaBaru();
     case 'generateFormBridge':
-      return extra.handleGenerateFormBridge(payload);
+      return register.handleGenerateFormBridge(payload);
     case 'generateLegacyMasterBridge':
-      return extra.handleGenerateLegacyMasterBridge(payload);
+      return register.handleGenerateLegacyMasterBridge(payload);
     case 'generateAiFormBridge':
-      return extra.handleGenerateAiFormBridge(payload);
+      return register.handleGenerateAiFormBridge(payload);
     // Drive links & migrasi
     case 'getDriveLinkCandidates':
       return extra.handleGetDriveLinkCandidates(payload, sessionToken);
