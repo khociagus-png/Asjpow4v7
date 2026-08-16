@@ -4,7 +4,60 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🐛 Fix teks JFT/SSW & pendidikan di modal CV Mini tidak tersimpan.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — ⚡ AI kembali cepat: model Gemini LITE (sama seperti Netlify lama) + timeout + fix history.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### ⚡ Fix: AI lambat / 502 — pakai model Gemini LITE yang sama dengan Netlify lama
+
+**Gejala user:** "AI lemot banget, setelah balasan pertama gak bales, error".
+
+**Bukti (dites langsung ke API dengan key yang sama):**
+
+| Model (urutan lama di `providers.js`) | Hasil tes 2026-08-16 |
+| --- | --- |
+| `gemini-flash-latest` | ❌ **503 "high demand"** — tiap request buang 3–9 dtk |
+| `gemini-3.5-flash` | ⚠️ 200 tapi **7–29 dtk** → kena timeout Netlify (502) |
+| `gemini-2.5-flash` | ❌ **404** — tidak tersedia untuk key baru |
+| **`gemini-flash-lite-latest`** (BARU) | ✅ **0,4–1,3 dtk** stabil |
+| **`gemini-3.5-flash-lite`** (BARU) | ✅ **0,5–1,7 dtk** stabil |
+
+**Netlify lama (`asjportal.netlify.app`) respons AI ±1,0–1,4 dtk** dengan key yang sama → terbukti dia pakai model LITE. Kode baru di-rebuild pakai flash penuh → jadi lambat/502.
+
+**Fix di `netlify/functions/_lib/ai/providers.js`:**
+- Urutan model → `['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash']` (LITE pin paling stabil dulu, lalu alias LITE terbaru, flash penuh hanya fallback terakhir).
+- Tambah **timeout per-model 7 dtk** (`AbortSignal.timeout`) — model yang menggantung tidak lagi menghabiskan budget fungsi Netlify (±10 dtk → 502).
+- **Trim giliran model di akhir history** sebelum kirim — perbaiki error Gemini 400 `"Requests ending with a model turn are not supported"` (dulu balasan "AI sedang sibuk" setelah chat pertama).
+
+**Verifikasi:** handler `processAIChat` 3 panggilan (kosong → history user+assistant → history penuh) = **1,1 dtk / 0,8 dtk / 0,7 dtk** (sebelumnya 72 dtk / 14 dtk / 29 dtk) · test **81/81** ✓ · lint 0 error ✓ · `node --check` ✓.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### 🗂️ Kronologi: hubungan repo GitHub ↔ Netlify lama ↔ Netlify baru (biar tim tidak bingung)
+
+Konfirmasi langsung dari pemilik (khoci89):
+
+| Aset | URL / lokasi | Status | Peran |
+| --- | --- | --- | --- |
+| **Netlify LAMA (produksi, masih dipakai user)** | `https://asjportal.netlify.app/` | **LIVE & dipakai sehari-hari** | **Pembanding / baseline** — jangan di-deploy tanpa izin (token akun tipis) |
+| **Kode di GitHub ini** (`Asjpow4v7`) | repo `main` | **Rebuild hampir total** | Sumber kode masa depan; menunggu stabil & bebas bug baru dipindahkan |
+| **Netlify BARU (uji)** | `https://asjportal-379.netlify.app/` | Deploy uji (riwayat izin di DEPLOY.md §4) | Tempat uji hasil rebuild sebelum dipindah ke produksi |
+
+**Kronologi singkat (cerita asli dari pemilik):**
+1. **Awalnya** semua hidup di Netlify lama (`asjportal.netlify.app`); build-nya ada di komputer pemilik (tapi sudah **rusak**).
+2. **Unduhan deploy Netlify lama** dijadikan dasar repo ini — tapi **hasil build-nya tidak ikut ter-unduh** (hanya source).
+3. **Build baru dibuat ulang** untuk menyamakan perilaku Netlify lama, lalu **refactor ESM Fase 3** dijalankan di atasnya.
+4. Karena langkah 2–3, **kode di GitHub ini hampir semuanya hasil rebuild** — bukan salinan persis kode Netlify lama.
+5. **Env var SAMA** (Supabase, Gemini, Fonnte, dll) antara Netlify lama & baru → bisa dites langsung ke Netlify lama sebagai pembanding (seperti sesi ini: model AI dibandingkan lewat latensi API).
+
+**Konsekuensi yang perlu diingat tim:**
+- ⚠️ **Netlify lama ≠ kode repo ini.** Kalau perilaku beda (mis. AI cepat di lama tapi lambat di baru), jangan anggap "bug Netlify" — itu perbedaan rebuild/refactor, cek kode repo dulu.
+- Setiap fix di repo **tidak otomatis sampai ke Netlify lama** — user masih pakai yang lama sampai repo dinyatakan stabil; hanya deploy yang diizinkan (DEPLOY.md §2).
+- Saat membandingkan fitur: tes ke Netlify lama (baseline) DAN preview/repo (hasil rebuild), lalu catat perbedaannya.
 
 ---
 

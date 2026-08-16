@@ -8,6 +8,58 @@ const { env } = require('../env');
 // ---------------------------------------------------------------------------
 // Gemini
 // ---------------------------------------------------------------------------
+// Timeout per-model (ms): model yang menggantung tidak boleh menghabiskan
+// budget fungsi Netlify (limit sinkron ±10 dtk) — kalau model pertama lambat/
+// hang, langsung fallback ke model berikutnya.
+const MODEL_TIMEOUT_MS = 7000;
+
+// Model saat ini (Agt 2026): gemini-1.5-flash & 2.0-flash sudah dihapus Google (404),
+// gemini-2.5-flash & 2.5-pro sudah tidak tersedia untuk key baru (404),
+// gemini-flash-latest sering 503 "high demand" (lambat), gemini-3.5-flash
+// respons 7-29 dtk (sering kena timeout Netlify 502). Pakai model LITE yang
+// stabil & cepat (~0,6-1,3 dtk, dibuktikan 2026-08-16 vs Netlify lama
+// asjportal.netlify.app yang respons ~1 dtk): gemini-3.5-flash-lite (pin,
+// lolos SEMUA tes, paling stabil) dulu, lalu alias flash-lite-latest (ikut
+// model terbaru; sesekali 503), terakhir flash penuh sebagai jaring pengaman.
+const MODELS = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'];
+
+// Gemini API menolak request yang berakhiran giliran model ("Requests ending
+// with a model turn are not supported") — buang giliran model di akhir history
+// sebelum dikirim (bisa terjadi kalau history frontend terakumulasi asinkron).
+function trimTrailingModelTurn(contents) {
+  const out = contents.slice();
+  while (out.length > 1 && out[out.length - 1].role === 'model') out.pop();
+  return out;
+}
+
+async function fetchGemini(model, key, contents) {
+  const res = await fetch(
+    'https://generativelanguage.googleapis.com/v1beta/models/' +
+      model +
+      ':generateContent?key=' +
+      key,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents }),
+      signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
+    },
+  );
+  if (!res.ok) {
+    throw new Error('Gemini HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
+  }
+  const j = await res.json();
+  return (
+    j &&
+    j.candidates &&
+    j.candidates[0] &&
+    j.candidates[0].content &&
+    j.candidates[0].content.parts
+      ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
+      : ''
+  );
+}
+
 async function geminiGenerate(systemPrompt, history) {
   const key = env('GEMINI_API_KEY');
   if (!key) {
@@ -21,38 +73,11 @@ async function geminiGenerate(systemPrompt, history) {
     const role = h && h.role === 'assistant' ? 'model' : 'user';
     if (h && h.content) contents.push({ role, parts: [{ text: String(h.content) }] });
   }
-  // Model saat ini (Agt 2026): gemini-1.5-flash & 2.0-flash sudah dihapus Google (404),
-  // gemini-2.5-flash sudah tidak tersedia untuk key baru. Urutan = prioritas;
-  // fallback otomatis ke model berikutnya. gemini-flash-latest selalu menunjuk ke
-  // model flash stabil terbaru, sehingga tidak perlu update manual tiap migrasi.
-  const models = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+  const body = trimTrailingModelTurn(contents);
   let lastErr = null;
-  for (const model of models) {
+  for (const model of MODELS) {
     try {
-      const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/' +
-          model +
-          ':generateContent?key=' +
-          key,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents }),
-        },
-      );
-      if (!res.ok) {
-        lastErr = new Error('Gemini HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
-        continue;
-      }
-      const j = await res.json();
-      const text =
-        j &&
-        j.candidates &&
-        j.candidates[0] &&
-        j.candidates[0].content &&
-        j.candidates[0].content.parts
-          ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
-          : '';
+      const text = await fetchGemini(model, key, body);
       if (text) return { reply: text };
     } catch (e) {
       lastErr = e;
@@ -75,34 +100,10 @@ async function geminiParseFile(systemPrompt, file) {
       ],
     },
   ];
-  const models = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'];
   let lastErr = null;
-  for (const model of models) {
+  for (const model of MODELS) {
     try {
-      const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/' +
-          model +
-          ':generateContent?key=' +
-          key,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents }),
-        },
-      );
-      if (!res.ok) {
-        lastErr = new Error('Gemini HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
-        continue;
-      }
-      const j = await res.json();
-      const text =
-        j &&
-        j.candidates &&
-        j.candidates[0] &&
-        j.candidates[0].content &&
-        j.candidates[0].content.parts
-          ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
-          : '';
+      const text = await fetchGemini(model, key, contents);
       if (text) return text;
     } catch (e) {
       lastErr = e;

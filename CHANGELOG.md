@@ -1,6 +1,35 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (🐛 Fix simpan teks JFT/SSW di CV Mini).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (⚡ AI cepat lagi — model Gemini LITE + timeout + fix history).
+
+---
+
+## 2026-08-16 — ⚡ Fix: AI lambat & 502 — pakai model Gemini LITE (sama dengan Netlify lama)
+
+### Gejala (laporan user)
+
+- "Check semua AI, keknya lemot bgt dan setelah balasan pertama gak bales eror."
+- Di Netlify baru (`asjportal-379`) respons AI bisa **30 dtk → HTTP 502** (timeout fungsi Netlify); di Netlify lama (`asjportal.netlify.app`) AI jalan **±1 dtk**.
+
+### Akar masalah
+
+- Urutan model di `netlify/functions/_lib/ai/providers.js` memakai flash penuh yang tidak cocok untuk key saat ini (dibuktikan dgn tes langsung ke API Gemini, key sama):
+  - `gemini-flash-latest` → **503 "high demand"** (tiap request buang 3–9 dtk),
+  - `gemini-3.5-flash` → **200 tapi 7–29 dtk** (sering kena limit waktu fungsi Netlify → 502),
+  - `gemini-2.5-flash` → **404** (tidak tersedia untuk key baru).
+- Netlify lama respons ±1,0–1,4 dtk → dia pakai model **LITE** (`gemini-flash-lite-latest` / `gemini-3.5-flash-lite`), yang dites stabil **0,4–1,7 dtk**.
+- Bonus: panggilan dengan history berakhiran giliran model (asinkron di frontend) kena **Gemini 400 "Requests ending with a model turn are not supported"** → balasan "AI sedang sibuk" setelah chat pertama.
+
+### Perbaikan (`netlify/functions/_lib/ai/providers.js`)
+
+- Urutan model → `['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash']` — LITE pin yang paling stabil dulu, lalu alias LITE terbaru, flash penuh hanya fallback terakhir.
+- **Timeout per-model 7 dtk** (`AbortSignal.timeout`) — model menggantung tidak lagi menghabiskan budget fungsi Netlify.
+- **Trim giliran model di akhir history** sebelum dikirim — mencegah error 400 & balasan "AI sibuk" palsu di chat multi-putaran.
+
+### Verifikasi
+
+- Handler `processAIChat` 3 panggilan (kosong → user+assistant → history penuh): **1,1 dtk / 0,8 dtk / 0,7 dtk** (sebelum: 72 dtk / 14 dtk / 29 dtk).
+- Test **81/81** ✓ · lint 0 error ✓ · `node --check` ✓ · `bun run build` ✓.
 
 ---
 
