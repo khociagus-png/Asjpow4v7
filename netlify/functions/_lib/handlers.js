@@ -1303,6 +1303,7 @@ const AI_ACTIONS = new Set([
   'processSiswaAIChat',
   'processAdminAIChat',
   'processAiInterview',
+  'parseDokumenBiodata',
 ]);
 const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
 
@@ -1399,6 +1400,8 @@ async function dispatchAction(action, payload, sessionToken) {
       return handleSimpanJobBaru(payload, sessionToken);
     case 'editLokerFull':
       return handleEditLokerFull(payload, sessionToken);
+    case 'parseDokumenBiodata':
+      return ai.handleParseDokumenBiodata(payload, sessionToken);
     case 'ubahStatusJob':
       return handleUbahStatusJob(payload, sessionToken);
     case 'hapusJobData':

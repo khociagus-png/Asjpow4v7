@@ -519,6 +519,196 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// parseDokumenBiodata — admin upload file CV (PDF/Excel/Word/CSV/TXT/gambar)
+// → Gemini parse → JSON biodata (kunci MASTER_COLUMN_MAP camelCase, sama
+// dengan payload submitMasterForm) → frontend bisa langsung update master.
+// ---------------------------------------------------------------------------
+const PARSE_MAX_BYTES = 8 * 1024 * 1024;
+const PARSE_ALLOWED_MIME = new Set([
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+  'application/vnd.ms-excel', // xls
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+  'application/msword', // doc
+  'text/csv',
+  'text/plain',
+  'text/html',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif', // hasil scan foto CV
+]);
+
+const PARSE_SYSTEM_PROMPT = [
+  'Kamu adalah asisten HRD ASJ (PT Amanah Sakura Japan).',
+  'Admin mengupload dokumen biodata/CV kandidat kerja ke Jepang.',
+  'Ekstrak semua data yang bisa kamu baca ke JSON MURNI (tanpa teks lain, tanpa markdown fence).',
+  'Hanya isi field yang benar-benar ada di dokumen — yang tidak ada, OMIT (jangan null/string kosong).',
+  'Normalisasi: nama dalam HURUF KAPITAL, tanggal lahir format YYYY-MM-DD, nomor HP/WA tanpa spasi.',
+  'Kunci yang diizinkan (persis, camelCase):',
+  'nama, furigana, panggilan, panggilanKatakana, gender, tempatLahir, tglLahir, usia, agama, statusNikah,',
+  'anak, ktp, sim, alamat, email, tb, bb, goldar, tangan, baju, sepatu, topi, tahanAc,',
+  'mataKiri, mataKanan, kacamata, butaWarna, tato, tindik, merokok, alkohol, penyakit, alergi, laka,',
+  'promosi, kelebihan, kekurangan, keahlianKhusus, hobi, alasanBidang, motivasiJepang, keinginan,',
+  'rencanaPulang, tujuanJepang, eksJepang, daruratNama, daruratHubungan, daruratWa,',
+  'kenalanNama, kenalanHubungan, kenalanPekerjaan, kenalanUsia, kenalanAlamat, lamaJepang,',
+  'gajiYen, tabungan, bhsJepang, nilai, lisensi, ssw, noPaspor, tglTerbitPaspor, expPaspor, kotaPaspor, noCoe.',
+  'gender: Laki-laki/L/P/MALE → "L", Perempuan/P/FEMALE → "P".',
+  'Riwayat sebagai ARRAY (maks 5 pendidikan, 3 pekerjaan, 5 keluarga):',
+  'pendidikan: [{ tingkat, namaSekolah, jurusan, tahunMasuk, tahunLulus }]',
+  'pekerjaan: [{ namaPerusahaan, jabatan, tahunMasuk, tahunKeluar, gaji }]',
+  'keluarga: [{ nama, usia, hubungan, pekerjaan }]',
+  'Bahasa Jepang pada dokumen (nama katakana, alamat jp, dll) tetap disalin apa adanya.',
+  'Kembalikan HANYA objek JSON valid.',
+].join(' ');
+
+async function geminiParseFile(systemPrompt, file) {
+  const key = env('GEMINI_API_KEY');
+  if (!key) {
+    throw new Error('GEMINI_API_KEY belum dikonfigurasi');
+  }
+  const contents = [
+    {
+      role: 'user',
+      parts: [
+        { inlineData: { mimeType: file.mimeType, data: file.data } },
+        { text: systemPrompt },
+      ],
+    },
+  ];
+  const models = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+  let lastErr = null;
+  for (const model of models) {
+    try {
+      const res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/' +
+          model +
+          ':generateContent?key=' +
+          key,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents }),
+        },
+      );
+      if (!res.ok) {
+        lastErr = new Error('Gemini HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
+        continue;
+      }
+      const j = await res.json();
+      const text =
+        j &&
+        j.candidates &&
+        j.candidates[0] &&
+        j.candidates[0].content &&
+        j.candidates[0].content.parts
+          ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
+          : '';
+      if (text) return text;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('Gemini tidak tersedia');
+}
+
+function parseJsonLoose(text) {
+  let t = String(text || '').trim();
+  t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  try {
+    return JSON.parse(t);
+  } catch (e) {
+    const start = t.indexOf('{');
+    const end = t.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(t.slice(start, end + 1));
+      } catch (e2) {
+        /* fallthrough */
+      }
+    }
+    throw e;
+  }
+}
+
+async function handleParseDokumenBiodata(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'admin');
+  if (guard.error) return guard.error;
+  const d = (payload && payload[0]) || {};
+  const file = d.file || {};
+  const name = String(file.name || '').trim();
+  const mimeType = String(file.mimeType || file.type || '').trim();
+  const data = String(file.data || '').trim();
+  if (!name || !data) return { success: false, error: 'File belum dipilih.' };
+  let buf;
+  try {
+    buf = Buffer.from(data, 'base64');
+  } catch (e) {
+    return { success: false, error: 'File tidak bisa dibaca.' };
+  }
+  if (buf.length > PARSE_MAX_BYTES) {
+    return { success: false, error: 'File terlalu besar (maks 8 MB).' };
+  }
+  if (!PARSE_ALLOWED_MIME.has(mimeType)) {
+    return {
+      success: false,
+      error: 'Format tidak didukung: ' + (name.split('.').pop() || mimeType || '?') + '. Gunakan PDF/Excel/Word/CSV/TXT/gambar.',
+    };
+  }
+
+  // Target kandidat: dari WA eksplisit, atau resolve dari candidateId (admin
+  // membuka AI copilot dari baris kandidat → cukup klik upload).
+  let wa = supabase.normalizeWa(String(d.wa || ''));
+  if (!wa && d.candidateId) {
+    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    if (cand === undefined) {
+      const found = await supabase.findCandidates();
+      cand =
+        (found.rows || []).find((r) =>
+          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        ) || null;
+    }
+    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+  }
+  if (!wa) {
+    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+  }
+
+  let namaSekarang = '';
+  try {
+    const m = await findMasterByWa(wa);
+    if (m) namaSekarang = String(m.nama_lengkap || '');
+  } catch (e) {
+    /* opsional */
+  }
+
+  try {
+    const reply = await geminiParseFile(PARSE_SYSTEM_PROMPT, { mimeType, data });
+    const parsed = parseJsonLoose(reply);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return { success: false, error: 'AI tidak bisa mengekstrak data dari file ini. Coba file lain.' };
+    }
+    const fields = Object.keys(parsed).filter((k) => k !== 'pendidikan' && k !== 'pekerjaan' && k !== 'keluarga');
+    return {
+      success: true,
+      wa,
+      namaSekarang,
+      fileName: name,
+      data: parsed,
+      fieldCount: fields.length,
+      riwayat: {
+        pendidikan: Array.isArray(parsed.pendidikan) ? parsed.pendidikan.length : 0,
+        pekerjaan: Array.isArray(parsed.pekerjaan) ? parsed.pekerjaan.length : 0,
+        keluarga: Array.isArray(parsed.keluarga) ? parsed.keluarga.length : 0,
+      },
+    };
+  } catch (e) {
+    console.error('[AI] parseDokumenBiodata error:', e && e.message ? e.message : e);
+    return { success: false, error: 'Gagal parse dokumen: ' + (e && e.message ? e.message : 'AI sibuk') };
+  }
+}
+
 module.exports = {
   handleProcessAIChat,
   handleProcessAdminAIChat,
@@ -526,6 +716,7 @@ module.exports = {
   handleProcessAiInterview,
   handleGetAdminAiContext,
   handleBuildAdminAiCandidateSummary,
+  handleParseDokumenBiodata,
   handleSubmitDataAsj,
   handleSimpanDataTtdNaitei,
 };

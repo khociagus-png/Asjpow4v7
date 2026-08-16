@@ -1098,8 +1098,11 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
 async function handleSubmitMasterForm(payload, sessionToken) {
   const d = (payload && payload[0]) || {};
   const wa = supabase.normalizeWa(String(d.wa || ''));
-  const guard = requireRole(sessionToken, 'kandidat');
-  if (guard.error) return guard.error;
+  // Kandidat pemilik WA (dashboard/CV AI) ATAU admin (parse dokumen biodata).
+  const t = session.verifyToken(sessionToken);
+  if (!t || (t.role !== 'kandidat' && t.role !== 'admin')) {
+    return { success: false, sessionInvalid: true, message: 'Sesi tidak valid' };
+  }
   if (!wa) return { success: false, message: 'Nomor WA wajib diisi.' };
   try {
     let row = await findMasterByWa(wa);
