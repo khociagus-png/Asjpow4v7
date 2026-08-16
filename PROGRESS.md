@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.2 langkah 1 — modul `actions-schedule.js` (jadwal & tugas) — commit *(isi hash)*
+### Fase 1.2 langkah 1 — modul `actions-schedule.js` (jadwal & tugas) — commit `aec1e9f`
 
 - **Baru** `_lib/actions-schedule.js` (165 baris) — `handleSimpanJadwalBaru`,
   `handleHapusJadwal`, `handleTambahTugasBaru`, `handleSetTugasStatus`,
