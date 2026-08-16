@@ -4,7 +4,19 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 13 (TERAKHIR): semua file classic tersisa (`upload-guard`, `apply-docs`, `pwa`, `js/pages/*`) jadi ESM + halaman standalone dimuat via `type="module"` — konversi ESM Fase 3 **TUNTAS**.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 14: entry `js/main.js` + **esbuild bundle mode** (ganti concat + IIFE per file) untuk bundel admin/index — roadmap optimasi pertama jalan.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 14 — entry js/main.js + esbuild bundle mode (concat → bundle)
+
+- **`js/main.js` (BARU, entry)** — side-effect `import` SEMUA modul domain sesuai urutan STACK (sumber kebenaran di build-js.mjs). Tidak ada export/exposure tambahan: tiap modul sudah alias window.* sendiri (bridge §3.2/§5 ESM_BRIDGE.md). Boot TIDAK dipicu dari sini — `js/init/boot.js` tetap mendaftarkan listener DOMContentLoaded (jalan saat evaluasi bundel) yang memanggil `initApp` (engine/init.js). Halaman standalone TIDAK memuat file ini (tetap `<script type="module">` per halaman).
+- **`scripts/build-js.mjs` → bundle mode**: hapus concat + ESM_CORE (tidak relevan lagi — semua file sudah ESM). Sekarang `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false, minify: true, write: false })` → 1 file IIFE. `treeShaking: false` WAJIB (import side-effect + alias window.* harus dipertahankan — eksperimen langkah 1 membuktikan tree-shake RENAME/membuang simbol & mematahkan referensi global). STACK tetap ada (dipakai check-globals + validasi semua file ada). Sisa pipeline (ganti tag HTML, sw.js SHELL/VERSION, bersihkan bundel lama, hapus stub Vite) tidak berubah.
+- **Hasil**: bundel `app-f90fc61af6.js` (419.8 KB, 45 file via entry — ukuran hampir sama dengan era concat, perbedaan kecil dari cara esbuild menggabung).
+- Verifikasi: node --check ESM ✓ · lint 0/12 ✓ · test **81/81** ✓ · build idempoten (hash sama saat rerun) · **0 export bocor** di bundel · check:globals nol kolisi (45 file / 405 simbol) · audit HIGH=0 MEDIUM=25 LOW=382 · **E2E SEMUA LULUS**: login, upload, biodata (dashboard admin KHOCI render via bundel baru, 0 error JS) ✓.
+- ⏭️ Roadmap berikutnya: evaluasi halaman standalone jadi entry ESM per halaman (opsional — kini bisa via esbuild `entryPoints` array / `--splitting`) — atau langsung lanjut fitur/perbaikan lain.
 
 ---
 

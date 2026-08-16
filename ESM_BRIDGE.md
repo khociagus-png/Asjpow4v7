@@ -1,7 +1,7 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status: Fase 3 TUNTAS (langkah 13)** — SEMUA file frontend kini ES
-> Modules: core (i18n/api-client) + init (state/util + theme/preview/nav/boot)
+> **Status: Fase 3 TUNTAS (langkah 13) + bundel bundle-mode (langkah 14)** —
+> SEMUA file frontend kini ES Modules: core (i18n/api-client) + init (state/util + theme/preview/nav/boot)
 > + auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
 > + admin_ops (`js/admin_ops/*`) + ai_copilot (`js/ai_copilot/*`) + sisa
 > bundle-only (`01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`,
@@ -348,6 +348,10 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    TERAKHIR): `upload-guard`, `apply-docs`, `pwa`, `js/pages/*` jadi ESM;
    halaman standalone memuat via `<script type="module">`. Konversi Fase 3
    TUNTAS — tidak ada file classic tersisa.**
+   Bundel admin/index kini **bundle mode**: entry `js/main.js` (side-effect
+   import semua modul sesuai STACK) → `esbuild.build` 1 IIFE
+   (`treeShaking:false`, `minify:true`) — langkah 14. Concatenation & ESM_CORE
+   dihapus dari build-js.mjs; STACK dipertahankan untuk check-globals.
    — catatan: fungsi yang dipanggil HTML inline
    `onclick` WAJIB dapat alias window; referensi global implisit di dalam
    modul di-window-kan eksplisit; **antar-file ESM belum boleh `import`
@@ -381,12 +385,17 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    duluan, `onload`/`onclick` HTML tetap aman karena modul selesai sebelum
    event; (c) **state UI halaman (chatHistory/latestCandidateData/*Base64)
    PRIVATE modul** — tidak ada pemakai lintas file, jangan di-alias.
-4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
-   semua referensi lintas file jadi `import` eksplisit (nol referensi global
-   implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
-   simbol dan mematahkan referensi global (lihat PROGRESS.md Fase 3 langkah 1).
-5. ⏭️ Halaman standalone jadi entry ESM per halaman ATAU tetap classic —
-   keputusan dicatat di PROGRESS.md.
+4. ✅ **Entry `js/main.js` + `esbuild bundle` (ganti concat)** — SELESAI
+   (langkah 14, turn ini). `js/main.js` side-effect import semua modul sesuai
+   STACK; `build-js.mjs` memakai `esbuild.build({ entryPoints: ['js/main.js'],
+   bundle: true, format: 'iife', treeShaking: false, minify: true })`.
+   `treeShaking: false` WAJIB — import side-effect + alias window.* harus
+   dipertahankan (pengalaman empiris langkah 1: bundle mode RENAME/tree-shake
+   simbol dan mematahkan referensi global).
+5. ⏭️ Halaman standalone jadi entry ESM per halaman (esbuild `entryPoints`
+   array / `--splitting`) ATAU tetap `<script type="module">` per halaman —
+   keputusan dicatat di PROGRESS.md. Sekarang tidak mendesak: halaman
+   standalone tetap jalan tanpa bundel.
 6. ⏭️ Aktifkan `no-undef` per file yang sudah ESM (deteksi referensi terlewat —
    manfaat utama ESM).
 

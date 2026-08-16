@@ -465,8 +465,16 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       ⏭️ **Fase 3 TUNTAS** — semua file frontend kini ES Modules. Sisa
       roadmap: entry `js/main.js` + `esbuild bundle` mode (optimasi,
       bukan lagi konversi).
-- [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
-- [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
+- [x] **Langkah 14 — entry `js/main.js` + esbuild bundle mode** — commit `006eadd`
+      `js/main.js` (BARU): side-effect `import` semua modul domain sesuai urutan
+      STACK (tiap modul sudah alias window.* sendiri — plugin exposure tidak
+      perlu). `build-js.mjs`: concat + ESM_CORE dihapus → `esbuild.build({ entry
+      Points: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false,
+      minify: true })`. STACK tetap (check-globals + validasi). Boot tetap lewat
+      boot.js DOMContentLoaded (bukan dari entry). Bundel `app-f90fc61af6.js`
+      (419.8 KB, 45 file). Verifikasi: lint 0/12 ✓ · test 81/81 ✓ · build
+      idempoten · 0 export bocor · check:globals nol kolisi (405 simbol) ·
+      E2E login/upload/biodata SEMUA LULUS ✓.
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
       (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),

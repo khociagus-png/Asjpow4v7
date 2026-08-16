@@ -1,6 +1,31 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 13 — commit `ba59519`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 14 — commit `006eadd`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 14: entry js/main.js + esbuild bundle mode (concat → bundle) (refactor)
+
+### Refactor: build bundel admin/index pakai esbuild bundle
+
+- `js/main.js` (BARU): entry side-effect `import` semua modul domain sesuai
+  urutan STACK; boot tetap lewat `boot.js` DOMContentLoaded → `initApp`.
+- `scripts/build-js.mjs`: concat + ESM_CORE dihapus → `esbuild.build({
+  entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking:
+  false, minify: true })`. STACK dipertahankan untuk check-globals + validasi.
+- Hasil: bundel `app-f90fc61af6.js` (419.8 KB, 45 file via entry), idempoten,
+  0 export bocor.
+
+### Verifikasi
+
+- lint 0/12 ✓ · test 81/81 ✓ · check:globals nol kolisi (405 simbol) ·
+  audit HIGH=0 · E2E login/upload/biodata SEMUA LULUS ✓.
+
+### Catatan
+
+- `treeShaking: false` wajib (import side-effect + alias window.* harus
+  dipertahankan). Halaman standalone tetap `<script type="module">` per
+  halaman — bundel hanya untuk admin/index.
 
 ---
 
