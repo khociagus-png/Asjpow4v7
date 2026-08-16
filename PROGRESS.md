@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.2 langkah 2 — modul `actions-wa.js` + `actions-config.js` — commit *(isi hash)*
+### Fase 1.2 langkah 2 — modul `actions-wa.js` + `actions-config.js` — commit `c611a60`
 
 - **Baru** `_lib/actions-wa.js` (5 export) — template WA (`wa_templates`),
   `fonnteSend` (Fonnte API, pakai `FONNTE_TOKEN`), kirim satu pesan,
