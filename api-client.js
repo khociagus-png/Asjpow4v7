@@ -186,11 +186,36 @@ function getApiUrl(action) {
   return NETLIFY_API_BASE + '/' + (funcName || action);
 }
 
+// ============================================================
+// SWR-lite cache (Fase 3 langkah 16) — kurangi tarikan data berulang.
+// Tarikan data utama (getAppData / getAppConfig) di-cache in-memory dengan
+// TTL pendek: navigasi antar-tab di SPA langsung render dari cache (0 ms)
+// tanpa fetch ulang; siklus auto-refresh 120 dtk + refresh saat tab kembali
+// terlihat memvalidasi ulang di background. Semua action BUKAN pembaca
+// (mutasi/login/logout) meng-invalidate cache — data basi setelah perubahan.
+// Cache in-memory SAJA (bukan localStorage): response getAppData bisa
+// ratusan KB, tidak aman untuk kuota localStorage 5 MB.
+const CACHEABLE_READS = new Set(['getAppData', 'getAppConfig']);
+const READ_CACHE_TTL_MS = 10000; // 10 dtk — cukup utk navigasi antar-tab
+const swrCache = new Map(); // key (action:payload) -> { at, value }
+
 export async function callAPI(action, payload) {
   const funcName = NETLIFY_FUNCTIONS[action];
   if (!funcName) {
     console.error('[api-client] Tidak ada function Netlify terdaftar untuk action:', action);
     return { success: false, error: 'Aksi tidak dikenal: ' + action };
+  }
+
+  // SWR-lite: pembaca yang masih fresh → balas dari cache tanpa jaringan.
+  if (CACHEABLE_READS.has(action)) {
+    const cacheKey = action + ':' + JSON.stringify(payload || []);
+    const hit = swrCache.get(cacheKey);
+    if (hit && Date.now() - hit.at < READ_CACHE_TTL_MS) return hit.value;
+    swrCache.delete(cacheKey); // basi → buang, fetch ulang
+  } else {
+    // Bukan pembaca (mutasi/login/logout) → data yang di-cache berpeluang
+    // basi, invalidate semua.
+    swrCache.clear();
   }
 
   const url = NETLIFY_API_BASE + '/' + funcName;
@@ -260,6 +285,10 @@ export async function callAPI(action, payload) {
       localStorage.removeItem('asj_kandidat_wa');
       localStorage.removeItem('asj_kandidat_session');
       window.location.reload();
+    }
+    // Simpan hasil pembaca yang valid utk cache SWR-lite (skip sessionInvalid).
+    if (CACHEABLE_READS.has(action) && parsed && !parsed.sessionInvalid) {
+      swrCache.set(action + ':' + JSON.stringify(payload || []), { at: Date.now(), value: parsed });
     }
     return parsed;
   } catch (err) {

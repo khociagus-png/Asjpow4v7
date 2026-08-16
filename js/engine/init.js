@@ -303,17 +303,27 @@ export function initApp(res, isSilent = false) {
 
     window.updateMailBadge();
 
-    // AUTO-REFRESH PINTAR (60 detik): refresh hanya berjalan jika TIDAK ada
-    // modal yang terbuka (preview CV, form tambah/edit, pemberkasan, dst),
-    // supaya modal yang sedang dibaca admin tidak tertutup paksa. Guard
-    // scroll ada di refreshDataDinamis/initApp (skip render tabel yang
-    // sedang di-scroll). Kalau ada modal terbuka, refresh ditunda dan akan
-    // jalan di siklus berikutnya.
+    // AUTO-REFRESH PINTAR (120 detik, Fase 3 langkah 16): refresh hanya
+    // berjalan jika TIDAK ada modal yang terbuka (preview CV, form tambah/edit,
+    // pemberkasan, dst), supaya modal yang sedang dibaca admin tidak tertutup
+    // paksa. Guard scroll ada di refreshDataDinamis/initApp (skip render tabel
+    // yang sedang di-scroll). Kalau ada modal terbuka, refresh ditunda dan akan
+    // jalan di siklus berikutnya. Tab yang tidak terlihat (hidden) juga di-skip
+    // — tarikan sia-sia dikurangi (kandidat/admin buka tab lain).
     if (!window.AUTO_REFRESH_TIMER) {
       window.AUTO_REFRESH_TIMER = setInterval(() => {
+        if (document.hidden) return; // tab tidak terlihat → skip tarikan sia-sia
         if (window.adaModalTerbuka()) return; // modal terbuka → skip refresh
         refreshDataDinamis(null, true);
-      }, 60000);
+      }, 120000);
+      // Tab kembali terlihat → refresh SEKALI segera (tanpa menunggu siklus
+      // interval berikutnya) supaya data tidak basi saat user balik ke tab.
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) return;
+        if (!window.AUTO_REFRESH_TIMER) return;
+        if (window.adaModalTerbuka()) return;
+        refreshDataDinamis(null, true);
+      });
     }
   } else if (localStorage.getItem('asj_kandidat_login') === 'sukses') {
     window.isKandidat = true;
