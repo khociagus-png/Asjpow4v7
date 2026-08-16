@@ -4,7 +4,22 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **verifikasi Fase 3.17**: migrasi index SQL 8/8 terpasang di Supabase + script ukur performa `scripts/verify-index-perf.mjs` + E2E penuh SEMUA LULUS.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **Fase 3.18**: optimasi paralel tarikan data backend (getAppData kandidat −45%, getCandidatesPage −57%, getAppData admin −18%) — terukur dengan `scripts/verify-index-perf.mjs`.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3.18 — optimasi paralel tarikan data backend (hasil verifikasi Fase 3.17 → eksekusi)
+
+Latar: verifikasi Fase 3.17 menemukan `getAppData kandidat` (~2,5–3,0 dtk) & `getCandidatesPage` (~1,9 dtk) paling lambat karena **banyak roundtrip berurutan** ke Supabase (latensi per request ±260–290 ms). Optimasi: jalankan query independen PARALEL, tanpa mengubah perilaku/respons.
+
+- **`actions-public.js` — `handleGetAppData`**: (1) validasi sesi dipindah PALING AWAL (murni lokal, tanpa query) — sesi tidak valid langsung pulang; (2) SEMUA tarikan independen diparalelkan: publik (jobs/assets/settings) + [admin: `loadCandidatesUnik`] / [kandidat: `findCandidateByWaFiltered` + `findFormsByWa` + `loadSchedules`] → 1 gelombang RTT. `Promise.all` aman karena semua fetch sudah catch internal.
+- **`actions-candidate.js` — `handleGetCandidatesPage`**: `attachBerkasBio` (berkas+master) & `findFormsByWaList` (lamaran per-WA) ditarik PARALEL — dulu berurutan.
+- **`db/candidates.js` — `findCandidateByWaFiltered`**: probe 3 kolom WA (`no_wa`/`wa`/`whatsapp`) via `Promise.allSettled` PARALEL (dulu serial s/d 3 roundtrip); prioritas hasil tetap no_wa → wa → whatsapp.
+- **`db/berkas.js` — `attachBerkasBio`**: fetch `pemberkasan_checklist` & `master_database_candidate` (light) PARALEL — dulu serial.
+- **Hasil terukur** (`node scripts/verify-index-perf.mjs`, dingin → sesudah): getAppData kandidat **2.482–3.043 → 1.631 ms** (−45%), getCandidatesPage **1.898–1.965 → 832 ms** (−57%), getAppData admin **1.673–1.693 → 1.379 ms** (−18%); warm: kandidat 1.370 ms, admin 821 ms. Integritas handler = DB TETAP COCOK (kandidat 223, inbox 12, loker 132, tugas 2, template WA 2).
+- Verifikasi: node --check 4 file ✓ · lint 0 error ✓ · test **81/81** ✓ · E2E SEMUA LULUS (backend-fast-path 12/12, login, upload, biodata — kandidat tes dibersihkan) ✓.
 
 ---
 

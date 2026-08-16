@@ -1,6 +1,30 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (verifikasi Fase 3.17 — script `verify-index-perf.mjs`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3.18 — optimasi paralel tarikan data backend).
+
+---
+
+## 2026-08-16 — Fase 3.18: optimasi paralel tarikan data backend (perf)
+
+### Paralelkan query independen (dulu serial)
+
+- `actions-public.js` handleGetAppData: validasi sesi dipindah paling awal
+  (lokal, tanpa query); tarikan publik + data kandidat/admin diparalelkan
+  via Promise.all (1 gelombang RTT, bukan serial).
+- `actions-candidate.js` getCandidatesPage: attachBerkasBio & findFormsByWaList
+  paralel (dulu berurutan).
+- `db/candidates.js` findCandidateByWaFiltered: probe kolom WA
+  (no_wa/wa/whatsapp) via Promise.allSettled paralel; prioritas hasil tetap.
+- `db/berkas.js` attachBerkasBio: fetch pemberkasan & master light paralel.
+
+### Hasil terukur (dingin, scripts/verify-index-perf.mjs)
+
+- getAppData kandidat: 2.482–3.043 ms → **1.631 ms** (−45%)
+- getCandidatesPage: 1.898–1.965 ms → **832 ms** (−57%)
+- getAppData admin: 1.673–1.693 ms → **1.379 ms** (−18%)
+- Integritas handler = DB tetap cocok; verifikasi: node --check, lint 0
+  error, test 81/81, E2E (backend-fast-path/login/upload/biodata) SEMUA
+  LULUS.
 
 ---
 
