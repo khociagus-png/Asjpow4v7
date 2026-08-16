@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.1d — modul share + diagnostics, backend modular SELESAI — commit `(menyusul)`
+### Fase 1.1d — modul share + diagnostics, backend modular SELESAI — commit `ba68c49`
 
 - **Baru** `_lib/actions-share.js` — `handleShareData`, `docTypeOf`, `docAge`,
   `TYPE_ALIAS`/`TYPE_TOKENS` (viewer TSK publik via GET). `share-data.js` kini
