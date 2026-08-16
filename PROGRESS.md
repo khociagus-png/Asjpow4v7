@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.2 langkah 5 (TERAKHIR) — `actions-extra.js` DIHAPUS — modul storage/upload/drive — commit *(isi hash)*
+### Fase 1.2 langkah 5 (TERAKHIR) — `actions-extra.js` DIHAPUS — modul storage/upload/drive — commit `dd9ccd5`
 
 - **Baru** `_lib/storage.js` (166 baris) — helper Supabase Storage murni:
   `bucket`, `storageRequest`, `publicUrl`, `b64ToBuffer`, `mimeFromName`,
