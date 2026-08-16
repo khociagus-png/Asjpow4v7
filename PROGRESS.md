@@ -4,11 +4,36 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4a: `js/02_init.js` dipecah jadi `js/init/{state,theme,util,preview,nav,boot}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4b: `js/06_admin_modal.js` dipecah jadi `js/admin_modal/{dbfilter,cv,job}.js`.
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 4b — `js/06_admin_modal.js` (729 baris) → `js/admin_modal/*` — commit `78f01f0`
+
+- **Baru** `js/admin_modal/dbfilter.js` (4 fn) — chip filter bidang/tahapan
+  + tombol sort tabel DB job: setFilterBidang, setFilterTahapan, setSortDb,
+  renderDbFilters.
+- **Baru** `js/admin_modal/cv.js` (8 fn) — modal CV digital (dossier):
+  bukaDigitalCV (render profil + badge VIP/KELAS + foto fallback + tombol
+  pemberkasan), isiEditCepatCv, toDateInputValue, toggleEditCepatCv,
+  simpanEditCepatCv (updateKandidatSuper), bukaInlinePreview, bukaPdfPreview,
+  simpanCatatanCv (updateCatatanKandidat + normalisasi [VIP]/[KELAS]).
+- **Baru** `js/admin_modal/job.js` (2 fn) — lamarJob (form bridge + guard
+  job tutup), copyInfoLoker (salin info loker ke WA).
+- Body 14 deklarasi dipindah **byte-identik** (verifikasi brace-matching —
+  semua OK).
+- `scripts/build-js.mjs` STACK: `/js/06_admin_modal.js` → 3 entri
+  `js/admin_modal/*`.
+- `js/06_admin_modal.js` **DIHAPUS** — module-map frontend 37 → **39 file /
+  353 simbol** (total simbol TIDAK berubah). Bundel: hash & ukuran SAMA
+  (`app-7c1aea6337.js`, 421.022 byte) — urutan deklarasi identik → output
+  minify byte-identik, bukti paling kuat tidak ada yang berubah.
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 4a — `js/02_init.js` (852 baris) → `js/init/*` — commit `e76f885`
 
