@@ -64,7 +64,14 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 - [x] **DONE (2026-08-16):** kluster auth + WA gate (`masterPins`, `requireAdmin`, `isValidWaFormat`, `handleCheckAdminMaster/Personal`, `handleLoginKandidat`, `handleDaftarKandidat`, `handleGantiPasswordKandidat`) → **`_lib/actions-auth.js`**; `findCandidateByWa`/`CAND_WA_COLS` → **`_lib/candidate-helpers.js`** (dipakai lintas domain). Test 51/51, smoke auth OK, E2E login lulus.
 - [x] **DONE (2026-08-16):** handler mail/form (`handleFormStatus`, `syncCandidateDariForm`, review/approve/reject/delete/tandai dibaca) → **`_lib/actions-mail.js`**; handler kandidat (`updateCatatanKandidat`, `updateKandidatSuper`, `getCandidatesPage`) → **`_lib/actions-candidate.js`**; handler job/loker (simpan/edit/status/hapus/tahapan/dokumen/tandai gagal) → **`_lib/actions-job.js`**. `handlers.js` kini **629 baris** (dari 1.792). Test 51/51, smoke wiring OK, E2E login + backend-fast-path SEMUA LULUS.
 - [ ] Pindahkan handler upload/pemberkasan → `_lib/actions-upload.js`.
-- [ ] **Hampir selesai** — `handlers.js` 629 baris: dispatcher + core (handleAction, rateLimit, sessionIdentity) + diagnostics (getAppConfig) + share-data. Sisa: pindah `handleShareData`/`docTypeOf`/`docAge` → `_lib/actions-share.js` dan `handleGetAppConfig` → `_lib/actions-diagnostics.js`, lalu target ≤ 300 baris tercapai.
+- [x] **SELESAI (2026-08-16)** — `handlers.js` kini **343 baris** = dispatcher + core
+      murni (handleAction, rateLimitChecks, sessionIdentity, NOT_IMPLEMENTED,
+      sets LOGIN/AI/FONNTE). `handleShareData`/`docTypeOf`/`docAge` →
+      **`_lib/actions-share.js`** (share-data.js & serve-static.mjs kompat via
+      re-export); `handleGetAppConfig` → **`_lib/actions-diagnostics.js`**.
+      Test 51/51, smoke share-data (TG591ASJ → 20 kandidat) + getAppConfig OK,
+      E2E login + share-view SEMUA LULUS. Target ≤300 baris hampir tercapai
+      (343 — sisa bisa dirapikan kapan saja, opsional).
 - [ ] Pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah).
 
 ### 1.2 Pecah `actions-extra.js` (2549 baris)

@@ -4,7 +4,31 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1c (modul job/candidate/mail).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1d (backend modular SELESAI).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.1d — modul share + diagnostics, backend modular SELESAI — commit `(menyusul)`
+
+- **Baru** `_lib/actions-share.js` — `handleShareData`, `docTypeOf`, `docAge`,
+  `TYPE_ALIAS`/`TYPE_TOKENS` (viewer TSK publik via GET). `share-data.js` kini
+  require langsung ke modul ini; `handlers.js` re-export `handleShareData`/`docTypeOf`
+  supaya `serve-static.mjs` tetap kompat.
+- **Baru** `_lib/actions-diagnostics.js` — `handleGetAppConfig` (diagnostik,
+  wajib sesi admin).
+- **`handlers.js` 629 → 343 baris** — kini isinya: dispatcher + core murni
+  (handleAction, rateLimitChecks, sessionIdentity, NOT_IMPLEMENTED, sets
+  LOGIN/AI/FONNTE). Import tak terpakai dibersihkan (env/supabase/requireAdmin
+  tidak lagi dipakai langsung).
+- **Backend modular SELESAI**: 7 modul domain + helper (`actions-public/auth/job/
+  candidate/mail/share/diagnostics` + `cache` + `candidate-helpers`) dari satu
+  file 1.792 baris.
+- Verifikasi: node --check, test 51/51, smoke share-data (TG591ASJ → 20
+  kandidat) + getAppConfig OK, E2E login + share-view SEMUA LULUS, backend
+  module-map 16 → **18 file**, 204 simbol. Perilaku identik (tidak ada logika
+  yang diubah — hanya dipindah).
 
 ---
 
