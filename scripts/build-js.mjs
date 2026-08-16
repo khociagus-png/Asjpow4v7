@@ -1,11 +1,11 @@
 // =============================================================================
 // build-js.mjs — Bundel JS aplikasi (ASJ Portal)
 // -----------------------------------------------------------------------------
-// admin.html & index.html memuat 20 file JS klasik (api-client, i18n, js/*,
-// pwa) secara berurutan. Skrip ini:
-//   1. Menggabung + minify (esbuild) menjadi assets/app-<hash>.js
-//   2. Mengganti stack 20 tag <script> di admin.html & index.html dengan 1 tag
-//      bundel (atau mengganti bundel lama kalau hash berubah)
+// admin.html & index.html memuat bundel 1 file dari ENTRY js/main.js yang
+// meng-import SEMUA modul domain (urutan STACK di bawah). Skrip ini:
+//   1. Bundle + minify (esbuild, entry js/main.js → IIFE) jadi assets/app-<hash>.js
+//   2. Mengganti tag <script> bundel di admin.html & index.html (atau mengganti
+//      bundel lama kalau hash berubah)
 //   3. Menghapus stub Vite mati (assets/*-DONYcaRI.js) dari SEMUA halaman
 //   4. Memperbarui sw.js (SHELL + VERSION) supaya service worker ikut bundel
 //   5. Membersihkan assets/app-*.js lama (hanya bundel terbaru yang bertahan)
@@ -17,7 +17,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { transform } from 'esbuild';
+import { build } from 'esbuild';
 
 const ROOT = process.cwd();
 const PAGES = [
@@ -88,94 +88,37 @@ const STACK = [
   '/pwa.js',
 ];
 
-// 1. Gabung + minify + hash.
-// Fase 3: api-client.js & i18n.js kini modul ES (export + alias window.*).
-// Bundel admin/index tetap CLASSIC (<script> biasa) — export di-strip
-// per-file via esbuild format:'iife' (isi identik, alias window.* jalan).
-// File lain classic: JANGAN dibungkus IIFE (deklarasi top-level harus tetap
-// global utk inline onclick & panggilan lintas file).
-const ESM_CORE = new Set([
-  '/api-client.js',
-  '/i18n.js',
-  // Fase 3 langkah 3: state global (accessor get/set) + util DOM/WA/toast.
-  '/js/init/state.js',
-  '/js/init/util.js',
-  // Fase 3 langkah 4: domain auth (gate WA login/daftar + sesi admin/kandidat).
-  '/js/04_auth.js',
-  // Fase 3 langkah 5: engine (pipeline tahapan, dashboard kandidat, guards auto-refresh, mesin init).
-  '/js/engine/pipeline.js',
-  '/js/engine/dashboard.js',
-  '/js/engine/guards.js',
-  '/js/engine/init.js',
-  // Fase 3 langkah 6: render (publik/admin/kandidat/share/mail — renderAdminFull, renderFormInbox, dll).
-  '/js/render/public.js',
-  '/js/render/admin.js',
-  '/js/render/candidate.js',
-  '/js/render/share.js',
-  '/js/render/mail.js',
-  // Fase 3 langkah 7: api domain (forms/jobs/candidates/wa — patch-in-place mail, loker, kandidat, tugas/jadwal).
-  '/js/api/forms.js',
-  '/js/api/jobs.js',
-  '/js/api/candidates.js',
-  '/js/api/wa.js',
-  // Fase 3 langkah 8: admin_modal (dbfilter/cv/job — modal CV digital, filter DB job, aksi lamar).
-  '/js/admin_modal/dbfilter.js',
-  '/js/admin_modal/cv.js',
-  '/js/admin_modal/job.js',
-  // Fase 3 langkah 9: admin_ops (schedule/candidates/sysconfig/loading/migration/drive — agenda, list kandidat, config, skeleton, migrasi).
-  '/js/admin_ops/schedule.js',
-  '/js/admin_ops/candidates.js',
-  '/js/admin_ops/sysconfig.js',
-  '/js/admin_ops/loading.js',
-  '/js/admin_ops/migration.js',
-  '/js/admin_ops/drive.js',
-  // Fase 3 langkah 10: ai_copilot (admin/interview/parse/results — AI HR copilot, simulator wawancara, parse dokumen, hasil).
-  '/js/ai_copilot/admin.js',
-  '/js/ai_copilot/interview.js',
-  '/js/ai_copilot/parse.js',
-  '/js/ai_copilot/results.js',
-  // Fase 3 langkah 11: init sisanya (theme/preview/nav/boot — theme & partikel sakura, preview file, navigasi/logout, boot DOM).
-  '/js/init/theme.js',
-  '/js/init/preview.js',
-  '/js/init/nav.js',
-  '/js/init/boot.js',
-  // Fase 3 langkah 12: sisa file classic bundle-only jadi ESM (public/candidate/wa_pintar/cv/esign/rincian/helpers).
-  '/js/01_public.js',
-  '/js/03_candidate.js',
-  '/js/08_wa_pintar.js',
-  '/js/10_cv_rirekisho.js',
-  '/js/10b_cv_builders.js',
-  '/js/12_esign_match.js',
-  '/js/13_rincian_builder.js',
-  '/js/helpers_cv.js',
-  // Fase 3 langkah 13 (terakhir): upload-guard + pwa (dimuat juga halaman standalone via type=module).
-  '/js/upload-guard.js',
-  '/pwa.js',
-]);
-const sources = STACK.map((src) => {
-  const path = ROOT + src;
-  if (!existsSync(path)) {
+// 1. Bundle semua modul via entry js/main.js (esbuild bundle mode → IIFE).
+//    - treeShaking:false — import side-effect + alias window.* wajib dipertahankan
+//      (bundle mode dengan tree-shake RENAME/membuang simbol & mematahkan
+//      referensi global — eksperimen Fase 3 langkah 1).
+//    - minify:true — hasil tetap 1 file terkompres seperti era concat.
+//    - Semua file sudah ESM (Fase 3 tuntas langkah 13): tidak ada lagi concat
+//      classic / ESM_CORE — entry meng-import modul, esbuild menjaga scope tiap
+//      modul tetap privat, alias window.* dijalankan oleh modul itu sendiri.
+// Validasi dulu: semua file STACK harus ada (sumber kebenaran urutan).
+for (const src of STACK) {
+  if (!existsSync(ROOT + src)) {
     console.error(`[build-js] File tidak ada: ${src}`);
     process.exit(1);
   }
-  return readFileSync(path, 'utf8');
-});
-const processed = [];
-for (let i = 0; i < sources.length; i++) {
-  if (ESM_CORE.has(STACK[i])) {
-    const out = await transform(sources[i], { format: 'iife' });
-    processed.push(out.code);
-  } else {
-    processed.push(sources[i]);
-  }
 }
-const min = await transform(processed.join('\n'), { minify: true });
-const hash = createHash('sha1').update(min.code).digest('hex').slice(0, 10);
+const result = await build({
+  entryPoints: [`${ROOT}/js/main.js`],
+  bundle: true,
+  format: 'iife',
+  treeShaking: false,
+  minify: true,
+  logLevel: 'silent',
+  write: false,
+});
+const code = result.outputFiles[0].text;
+const hash = createHash('sha1').update(code).digest('hex').slice(0, 10);
 const bundleName = `app-${hash}.js`;
 const bundlePath = `${ROOT}/assets/${bundleName}`;
-writeFileSync(bundlePath, min.code);
+writeFileSync(bundlePath, code);
 console.log(
-  `[build-js] Bundel: assets/${bundleName} (${(min.code.length / 1024).toFixed(1)} KB, ${STACK.length} file)`,
+  `[build-js] Bundel: assets/${bundleName} (${(code.length / 1024).toFixed(1)} KB, ${STACK.length} file via js/main.js)`,
 );
 
 // 2. admin.html & index.html: stack 20 tag -> 1 tag bundel (idempotent, dan
