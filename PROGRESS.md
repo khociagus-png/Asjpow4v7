@@ -4,7 +4,38 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 5 (actions-extra.js dihapus; storage/upload/drive modular + fix bug findMasterByWa).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.3 (supabase.js 1.073 baris dipecah jadi `_lib/db/*`, agregat 44 export identik).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.3 — `supabase.js` (1.073 baris) → `_lib/db/*` + agregat — commit *(isi hash)*
+
+- **Baru** `_lib/db/` (7 modul repo):
+  - `client.js` (13 export) — fondasi PostgREST: supabaseUrl/Key, supabaseJson,
+    findTable, pick, toText, normalizeWa/Status/Gender, getSchema.
+  - `jobs.js` (5) — mapJob, findJobs, lookup by kode, max kode job.
+  - `forms.js` (7) — mail inbox: mapForm, parseDocs, findForms(+Light), per WA.
+  - `candidates.js` (10) — mapCandidate, findCandidates(+Light/ByIds), query WA/ID/job,
+    max id ASJ, attachApplications.
+  - `berkas.js` — pemberkasan_checklist + `attachBerkasBio` + listStorageFolder
+    (`fetchBerkasByWa` tetap internal — kontrak export PERSIS).
+  - `master.js` — fetchMasterByWa / fetchMasterLightByWa.
+  - `misc.js` (6) — queryPaged, admins, settings, announcements, assets, pengumuman.
+- `supabase.js` → **re-export agregat** (spread 7 modul) — 18 pemakai
+  (actions-*, storage.js, e2e) jalan tanpa perubahan. Ekstraksi **byte-identik**
+  via skrip Node (`.freebuff/split-supabase.mjs`, bracket-matched `{}[]()` +
+  assertion baris + verifikasi otomatis kontrak export).
+- `scripts/module-map.mjs` diperluas: pemindaian `_lib` **rekursif** (subfolder
+  `db/` ikut) — backend 25 → **32 file / 204 simbol** (total simbol TIDAK
+  berubah, artinya tidak ada fungsi yang hilang/duplikat).
+- **Verifikasi:** node --check ✓ · test 51/51 ✓ · kontrak export: 44 identik
+  vs HEAD (0 hilang, 0 tambahan) ✓ · smoke data asli: findJobs 132 loker,
+  findForms 14 mail, findCandidates 222 kandidat, findSettings 154 baris ✓ ·
+  getAppData 349 ms cold / 0 ms warm (sama dengan sebelum split) ✓ · **E2E
+  SEMUA LULUS**: login-check, backend-fast-path, upload-check, share-view,
+  biodata-check, photo-check ✓
 
 ---
 

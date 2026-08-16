@@ -44,11 +44,21 @@ function frontendFiles() {
 }
 
 function backendFiles() {
+  // Pindai _lib rekursif (termasuk subdirektori db/ sejak Fase 1.3).
   const dir = join(ROOT, 'netlify/functions/_lib');
-  return readdirSync(dir)
-    .filter((f) => f.endsWith('.js') && !f.includes('.test.'))
-    .sort((a, b) => a.localeCompare(b))
-    .map((f) => ({ rel: `netlify/functions/_lib/${f}`, abs: join(dir, f) }));
+  const out = [];
+  const walk = (d, prefix) => {
+    for (const f of readdirSync(d).sort((a, b) => a.localeCompare(b))) {
+      const abs = join(d, f);
+      if (f.endsWith('.js') && !f.includes('.test.')) {
+        out.push({ rel: `netlify/functions/_lib/${prefix}${f}`, abs });
+      } else if (!f.includes('.') && f !== 'node_modules') {
+        walk(abs, prefix + f + '/');
+      }
+    }
+  };
+  walk(dir, '');
+  return out;
 }
 
 // ---------------------------------------------------------------------------

@@ -83,15 +83,16 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 - [x] **BUG FIX (bukan refactor) — ketahuan oleh E2E `upload-check`**: sejak langkah 4 (`adadb30`), `actions-master.js` TIDAK mengexport `findMasterByWa` → semua pemakainya (`simpanBerkasTahapan`, `submitApply`, `simpanRevisiKandidat`, `uploadDriveReplacement`) dapat `undefined` dan gagal diam-diam. Ditambah 2 bug senyap lain dari ekstraksi master: `syncBiodataKeMail` + `nextCandidateId` dipakai tanpa import (ReferenceError ditelan `try/catch`). Ketiganya diperbaiki di langkah ini.
 - [x] Ekspor per fitur (bukan satu objek raksasa) supaya dispatcher hanya impor yang dipakai.
 
-### 1.3 Pecah `supabase.js` (1073 baris) → client + repositori
-- [ ] `_lib/db/client.js`: client PostgREST + `normalizeWa` + `toText`/`pick`/`supabaseJson` (fondasi).
-- [ ] `_lib/db/candidates.js`: `findCandidateByWaFiltered`, `upsertCandidate`, dll.
-- [ ] `_lib/db/jobs.js`: query jobs/loker.
-- [ ] `_lib/db/forms.js`: `database_asj_form` (mail inbox).
-- [ ] `_lib/db/berkas.js`: `pemberkasan_checklist` + storage.
-- [ ] `_lib/db/master.js`: `master_database_candidate` (CV/master).
-- [ ] `_lib/db/misc.js`: schedules, tugas, wa_templates, sys_config, admins.
-- [ ] `supabase.js` lama jadi re-export agregat (backward-compat dulu) → setelah semua modul migrasi, hapus.
+### 1.3 Pecah `supabase.js` (1073 baris) → client + repositori — **SELESAI**
+- [x] `_lib/db/client.js` (13 export) — fondasi: `supabaseUrl`/`supabaseKey`/`hasBackend`/`supabaseJson`/`findTable`/`pick`/`toText`/`normalizeWa`/`normalizeStatus`/`normalizeGender` + skema (`getSchema`/`tablesFromSchema`/`columnsFromSchema`).
+- [x] `_lib/db/candidates.js` (10 export) — `mapCandidate`, `findCandidates`, `findAllCandidatesLight`, `findCandidatesByIds`, `findCandidateByWaFiltered`/`findCandidateByIdFiltered`/`findCandidatesByJobFiltered`, `maxCandidateIdNumber`, `attachApplications`.
+- [x] `_lib/db/jobs.js` (5 export) — `mapJob`, `findJobs`, `findJobByCodeFiltered`, `maxJobCodeNumber`, `countCandidatesForJob`.
+- [x] `_lib/db/forms.js` (7 export) — `mapForm`, `parseDocs`, `findForms`, `findFormsLight`, `findFormsByWa`, `findFormByIndexFiltered`, `findFormsByWaList`.
+- [x] `_lib/db/berkas.js` — `pemberkasan_checklist` + `attachBerkasBio` (berkas+bio kandidat) + `listStorageFolder` (Storage). `fetchBerkasByWa` tetap internal (tanpa export tambahan — kontrak 44 export PERSIS).
+- [x] `_lib/db/master.js` — `fetchMasterByWa`/`fetchMasterLightByWa` (`master_database_candidate`).
+- [x] `_lib/db/misc.js` (6 export) — `queryPaged`, `findAdmins`, `findSettings`, `findAnnouncements`, `findAssets`, `findPengumuman`.
+- [x] `supabase.js` lama → **re-export agregat** (spread 7 modul db) — semua 18 pemakai (actions-*, storage.js, e2e) jalan tanpa perubahan. Ekstraksi **byte-identik** via skrip Node (`.freebuff/split-supabase.mjs`, bracket-matched + assertion baris). `scripts/module-map.mjs` diperluas agar memindai `_lib` rekursif (db/ ikut terhitung: 25 → **32 file / 204 simbol** — total simbol TIDAK berubah).
+- [ ] **Langkah lanjutan**: migrasi pemakai supabase.js → import db/* langsung (mis. `candidate-helpers.js` → `db/candidates.js`, `storage.js` → `db/client.js`), lalu hapus agregat `supabase.js`.
 
 ### 1.4 AI (1193 baris)
 - [ ] `actions-ai.js` → pecah: `ai/cv.js` (master/CV auto-fill), `ai/chat.js` (copilot/chat), `ai/classify.js` (docTypeOf/klasifikasi berkas). Provider call (Gemini/Groq) dipisah `ai/providers.js` dengan fallback.
