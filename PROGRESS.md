@@ -10,6 +10,28 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `ec24dba` — Form bridge paksa ke origin sendiri
+
+- **Keluhan user:** di local preview "ga bisa check form" (AI master, master
+  lengkap, lamaran, dll) — form selalu lompat ke situs lain.
+- **Akar masalah:** backend `siteBase()` memakai env `NETLIFY_SITE_URL`
+  (nilai lama `https://asjportal.netlify.app`) → semua tombol form
+  (master-full/ai_form/apply-full/siswa-baru) menghasilkan URL ke situs
+  live, bukan aplikasi yang sedang dibuka. Ini juga bug di live
+  asjportal-379 (form menunjuk situs lama).
+- **Fix:** helper `resolveSelfUrl(url)` di api-client.js — kalau origin
+  hasil bridge beda dengan `window.location.origin`, ganti origin-nya
+  (path/query tetap). Dipakai di `bukaFormBridge` & `bukaFormSiswa`
+  (js/03_candidate.js).
+- Verifikasi: klik "Form Master Lengkap" di preview → navigasi ke
+  `http://localhost:3000/master-full.html?wa=...` (bukan situs live);
+  master-full (154 input) & ai_form (85 input) render tanpa error JS;
+  login-check & unit 49/49.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `0bd05a6` — Jadwal muncul di kandidat + selector loker card progres + riwayat lamaran
 
 - **Permintaan user:** (1) hapus tugas admin, (2) cek kode jadwal reminder

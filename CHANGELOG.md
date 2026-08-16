@@ -1,6 +1,25 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `0bd05a6`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `ec24dba`.
+
+---
+
+## 2026-08-16 — Form bridge paksa ke origin sendiri
+
+### `ec24dba` — Fix: form bridge paksa ke origin sendiri (preview lokal & Netlify aktif)
+- **Keluhan user:** di local preview "ga bisa check form" (AI master, master
+  lengkap, lamaran, dll). Akar: backend `siteBase()` memakai env
+  `NETLIFY_SITE_URL` (nilai lama `https://asjportal.netlify.app`) → tombol
+  form melompat ke situs lain, bukan aplikasi yang sedang dibuka.
+- Helper `resolveSelfUrl(url)` di api-client.js: kalau origin hasil bridge
+  beda dengan `window.location.origin`, ganti origin (path/query tetap).
+  Dipakai di `bukaFormBridge` (master-full/ai_form/apply-full) &
+  `bukaFormSiswa` (siswa-baru.html).
+- Bonus: memperbaiki juga kasus live asjportal-379 yang form-nya menunjuk
+  situs lama karena NETLIFY_SITE_URL basi.
+- Verifikasi: klik "Form Master Lengkap" di preview lokal → navigasi ke
+  localhost:3000/master-full.html?wa=...; master-full & ai_form render
+  normal tanpa error JS; login-check & unit 49/49.
 
 ---
 
