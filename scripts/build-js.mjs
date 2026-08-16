@@ -148,6 +148,9 @@ const ESM_CORE = new Set([
   '/js/12_esign_match.js',
   '/js/13_rincian_builder.js',
   '/js/helpers_cv.js',
+  // Fase 3 langkah 13 (terakhir): upload-guard + pwa (dimuat juga halaman standalone via type=module).
+  '/js/upload-guard.js',
+  '/pwa.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

@@ -2,8 +2,13 @@
    - Registrasi service worker
    - Tangkap beforeinstallprompt (Chrome Android/Desktop) agar tombol "Install App" bisa memicu prompt asli browser
    - Fallback ke modal panduan manual (iOS Safari / browser yang tidak support prompt)
+
+   ESM (Fase 3 langkah 13): modul ES — cobaInstallApp/bersihkanDraftLamaBase64
+   di-export + alias window.* (pemakai classic/bundel & HTML onclick).
+   Listener top-level tetap terdaftar saat modul dievaluasi (bundel: IIFE per
+   file; standalone: <script type="module"> yang dieksekusi setelah parse,
+   sebelum DOMContentLoaded/onload).
 */
-(function () {
   // 0. MODE DEV (localhost) — preview SELALU fresh, tanpa chance versi lama.
   // Service worker memakai strategi stale-while-revalidate: di production VERSION
   // SW naik tiap deploy (bump-cache-versions) jadi cache dibuang otomatis, tapi
@@ -94,7 +99,7 @@
   });
 
   // 3. Fungsi global untuk tombol "Install App"
-  window.cobaInstallApp = function () {
+  export function cobaInstallApp() {
     var modal = document.getElementById('modal-install');
     var evt = deferredPrompt || pendingInstallEvent;
     if (evt) {
@@ -151,7 +156,7 @@
   // hapus total): data teks (chatHistory/latestCandidateData) & foto kecil
   // dipertahankan, hanya field base64/file yang dibuang. Idempotent: format
   // baru tidak mengandung field itu, jadi aman dipanggil tiap load.
-  window.bersihkanDraftLamaBase64 = function () {
+  export function bersihkanDraftLamaBase64() {
     try {
       var prefix = 'asj_qween_cv_data_';
       // Kumpulkan dulu SEMUA key ber-prefix (jangan iterasi sambil menghapus:
@@ -199,7 +204,10 @@
     }
   };
 
-  // Jalankan migrasi begitu pwa.js termuat (script sync di semua halaman,
-  // sebelum onload/initApp halaman mana pun).
-  window.bersihkanDraftLamaBase64();
-})();
+  // BRIDGE ESM → classic/bundel & HTML onclick: alias window.*.
+  window.cobaInstallApp = cobaInstallApp;
+  window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;
+
+  // Jalankan migrasi begitu pwa.js termuat (semua halaman, sebelum
+  // onload/initApp halaman mana pun).
+  bersihkanDraftLamaBase64();

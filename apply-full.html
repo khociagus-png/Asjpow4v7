@@ -331,10 +331,10 @@
   <!-- Fase 3: core ESM — api-client.js sebagai module (deferred) -->
   <script type="module" src="/api-client.js?v=esm1"></script>
   <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
-  <script src="/js/apply-docs.js?v=0d887d9d43"></script>
-  <script src="/js/upload-guard.js?v=1"></script>
+  <script type="module" src="/js/apply-docs.js?v=esm13"></script>
+  <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script dipindah ke js/pages/apply_full.js (isi byte-identik) -->
-  <script src="/js/pages/apply_full.js?v=1"></script>
-  <script src="/pwa.js?v=3a746281c5"></script>
+  <script type="module" src="/js/pages/apply_full.js?v=esm13"></script>
+  <script type="module" src="/pwa.js?v=esm13"></script>
 </body>
 </html>

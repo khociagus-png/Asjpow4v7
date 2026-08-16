@@ -55,7 +55,7 @@
   </style>
   <!-- Fase 3: core ESM — bridge memuat i18n + api-client sebagai module (deferred) -->
   <script type="module" src="/js/core/bridge.js?v=esm1"></script>
-  <script src="/js/upload-guard.js?v=1"></script>
+  <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script (konteks URL) dipindah ke js/pages/ai_form.js (isi byte-identik) -->
   <link rel="stylesheet" crossorigin href="/assets/main.css?v=8657590e50">
 </head>
@@ -351,8 +351,8 @@
   </div>
 
     <!-- Fase 2: inline script utama dipindah ke js/pages/ai_form.js (isi byte-identik) -->
-  <script src="/js/pages/ai_form.js?v=1"></script>
-  <script src="/pwa.js?v=3a746281c5"></script>
+  <script type="module" src="/js/pages/ai_form.js?v=esm13"></script>
+  <script type="module" src="/pwa.js?v=esm13"></script>
 </body>
 </html>
 

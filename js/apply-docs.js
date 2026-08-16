@@ -1,14 +1,18 @@
 // apply-docs.js — Logika MURNI model dokumen upload di apply-full.html.
 //
-// Dipisah dari HTML supaya bisa di-unit-test (scripts/__tests__/apply-docs.test.js)
-// dan mencegah regresi diam-diam: dulu kartu upload JFT/SSW TIDAK PERNAH tampil
-// walau loker mewajibkannya (logika onload cuma menambah class 'hidden', tidak
-// pernah menghapus). Aturan model dokumen:
+// Dipisah dari HTML supaya mudah di-unit-test dan mencegah regresi diam-diam:
+// dulu kartu upload JFT/SSW TIDAK PERNAH tampil walau loker mewajibkannya
+// (logika onload cuma menambah class 'hidden', tidak pernah menghapus).
+//
+// ESM (Fase 3 langkah 13): modul ES — `applyDocsPlan` di-export + alias
+// window.* utk apply_full.js (window.applyDocsPlan) & pemakai classic.
+//
+// Aturan model dokumen:
 //   - req datang dari generateFormBridge (?req=) = dokumen_share loker
 //     (mis. 'CV,JFT,SSW' default, atau 'CV,JFT,SSW,SIM A,KTP' custom).
 //   - 'ALL' (Semua file folder) = semua chip dokumen wajib upload.
 //   - Token dinormalisasi: uppercase, trim, buang duplikat, "SIM A" satu token.
-function applyDocsPlan(reqStr) {
+export function applyDocsPlan(reqStr) {
   var arr = String(reqStr || '')
     .split(',')
     .map(function (s) {
@@ -47,3 +51,6 @@ function applyDocsPlan(reqStr) {
     }),
   };
 }
+
+// BRIDGE ESM → classic/bundel: apply_full.js memanggil via window.*.
+window.applyDocsPlan = applyDocsPlan;

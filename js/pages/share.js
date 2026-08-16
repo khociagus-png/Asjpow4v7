@@ -1,6 +1,11 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script share.html dipindah ke
-// js/pages/share.js (diload dengan <script> biasa, urutan sama). Isi
-// byte-identik dengan blok inline asli — perilaku tidak berubah.
+// js/pages/share.js. ESM (Fase 3 langkah 13): modul ES dimuat
+// <script type="module"> — export + alias window.* utk HTML inline
+// (toggleLang/renderGrid/submitSelection) & onclick string yang di-generate
+// renderGrid (window.openPreview/toggleSelection). Helper preview lokal
+// (isPreviewableFile/previewFinalUrl/render*Ke*/*KeDiv/pesanPreviewTidakTersedia)
+// tetap PRIVATE modul — jangan di-window-kan (bentrok dengan util.js
+// window.isPreviewableFile/previewFinalUrl). Vendor XLSX/mammoth via window.*.
 // ==========================================
 // SHARE VIEW — viewer kandidat aman untuk kaisha + modal preview dokumen
 // ==========================================
@@ -46,7 +51,7 @@
         let selectedIds = new Set();
         let selectedNames = {};
 
-        function toggleLang() {
+        export function toggleLang() {
             currentLang = currentLang === 'id' ? 'jp' : 'id';
             try { localStorage.setItem('asj_lang', currentLang); } catch(e) {}
             // Sinkronkan CURRENT_LANG global i18n.js supaya tr() ikut berganti bahasa.
@@ -57,7 +62,7 @@
             renderGrid();
         }
 
-        function updateStaticText() {
+        export function updateStaticText() {
             const l = SHARE_LANG[currentLang];
             const setTxt = (id, txt) => { let el = document.getElementById(id); if(el) el.innerText = txt; };
             setTxt('skip-link', l.skip);
@@ -86,7 +91,7 @@
             const pcA = document.getElementById('preview-close'); if (pcA) pcA.setAttribute('aria-label', l.close);
         }
 
-        function toggleSelection(id, name) {
+        export function toggleSelection(id, name) {
             if(selectedIds.has(id)) {
                 selectedIds.delete(id);
                 delete selectedNames[id];
@@ -109,7 +114,7 @@
             }
         }
 
-        function submitSelection() {
+        export function submitSelection() {
             if(!currentJob || selectedIds.size === 0) return;
             let l = SHARE_LANG[currentLang];
             let msg = l.wa_greet + " *" + currentJob.code + " - " + currentJob.name + "*:\n\n";
@@ -150,16 +155,16 @@
         // Render file Excel (xls/xlsx/xlsm/csv) CLIENT-SIDE via SheetJS -> HTML
         // table di iframe — render lokal tidak bergantung layanan eksternal.
         function renderExcelKeFrame(frame, url) {
-            if (typeof XLSX === 'undefined' || !frame) return Promise.resolve(false);
+            if (typeof window.XLSX === 'undefined' || !frame) return Promise.resolve(false);
             return fetch(url).then(function (res) {
                 if (!res.ok) throw new Error('fetch fail');
                 return res.arrayBuffer();
             }).then(function (buf) {
-                var wb = XLSX.read(buf, { type: 'array' });
+                var wb = window.XLSX.read(buf, { type: 'array' });
                 if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('no sheet');
                 var sheet = wb.Sheets[wb.SheetNames[0]];
                 if (!sheet) throw new Error('empty sheet');
-                var html = XLSX.utils.sheet_to_html(sheet);
+                var html = window.XLSX.utils.sheet_to_html(sheet);
                 var nama = decodeURIComponent(String(url).split('/').pop() || 'spreadsheet');
                 var doc = '<!doctype html><html><head><meta charset="utf-8"><title>' + nama + '</title>' +
                     '<style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:16px;font-size:13px}table{border-collapse:collapse;background:#fff;color:#0f172a;min-width:60%}td,th{border:1px solid #cbd5e1;padding:6px 10px;white-space:nowrap}th{background:#e2e8f0;position:sticky;top:0;font-weight:700}tr:nth-child(even) td{background:#f8fafc}</style>' +
@@ -172,12 +177,12 @@
 
         // Render Word (docx) CLIENT-SIDE via mammoth -> HTML di iframe.
         function renderDocxKeFrame(frame, url) {
-            if (typeof mammoth === 'undefined' || !frame) return Promise.resolve(false);
+            if (typeof window.mammoth === 'undefined' || !frame) return Promise.resolve(false);
             return fetch(url).then(function (res) {
                 if (!res.ok) throw new Error('fetch fail');
                 return res.arrayBuffer();
             }).then(function (buf) {
-                return mammoth.convertToHtml({ arrayBuffer: buf });
+                return window.mammoth.convertToHtml({ arrayBuffer: buf });
             }).then(function (result) {
                 if (!result || !result.value) throw new Error('empty');
                 var nama = decodeURIComponent(String(url).split('/').pop() || 'document.docx');
@@ -214,9 +219,9 @@
             var ext = (String(url).match(/[.]([a-z0-9]+)([?#].*)?$/i) || [])[1] || '';
             // Satu sumber terjemahan: pakai tr() dari i18n.js (sama dengan index/admin);
             // fallback ke SHARE_LANG lokal kalau i18n.js tidak termuat.
-            var judul = (typeof window.tr === 'function' && tr('ui.preview_unavailable') !== 'ui.preview_unavailable') ? tr('ui.preview_unavailable') : l.prev_unavail;
-            var hint = (typeof window.tr === 'function' && tr('ui.preview_unavailable_hint') !== 'ui.preview_unavailable_hint') ? tr('ui.preview_unavailable_hint') : l.prev_unavail_hint;
-            var btn = (typeof window.tr === 'function' && tr('ui.download') !== 'ui.download') ? tr('ui.download') : l.dl;
+            var judul = (typeof window.tr === 'function' && window.tr('ui.preview_unavailable') !== 'ui.preview_unavailable') ? window.tr('ui.preview_unavailable') : l.prev_unavail;
+            var hint = (typeof window.tr === 'function' && window.tr('ui.preview_unavailable_hint') !== 'ui.preview_unavailable_hint') ? window.tr('ui.preview_unavailable_hint') : l.prev_unavail_hint;
+            var btn = (typeof window.tr === 'function' && window.tr('ui.download') !== 'ui.download') ? window.tr('ui.download') : l.dl;
             return '<div style="font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;">' +
                 '<div style="font-size:40px;">📄</div>' +
                 '<div style="font-size:17px;font-weight:700;">' + judul + (ext ? ' (.' + ext + ')' : '') + '</div>' +
@@ -225,7 +230,7 @@
                 '</div>';
         }
 
-        window.openPreview = function(url, title) {
+        export function openPreview(url, title) {
             document.getElementById('preview-title').innerText = title;
             document.getElementById('preview-download').href = url;
             document.getElementById('preview-loading').classList.remove('hidden');
@@ -304,7 +309,7 @@
             document.getElementById('modal-preview').classList.remove('hidden');
         }
 
-        window.closePreview = function() {
+        export function closePreview() {
             document.getElementById('modal-preview').classList.add('hidden');
             document.getElementById('preview-iframe').src = '';
             document.getElementById('preview-iframe').removeAttribute('srcdoc');
@@ -350,7 +355,7 @@
             }
         });
 
-        function renderGrid() {
+        export function renderGrid() {
             const grid = document.getElementById('candidates-grid');
             grid.innerHTML = '';
             
@@ -507,9 +512,24 @@
             });
         }
 
-        function showError(msg) {
+        export function showError(msg) {
             document.getElementById('loading-state').classList.add('hidden');
             document.getElementById('error-state').classList.remove('hidden');
             let el = document.getElementById('error-message');
             if(el) el.innerText = msg;
         }
+
+        // BRIDGE ESM → classic/HTML inline: alias window.* utk handler HTML
+        // (onclick toggleLang/submitSelection, onchange renderGrid) & onclick
+        // string yang di-generate renderGrid (toggleSelection — dipanggil bare
+        // dari string, dieval global). openPreview/closePreview dipanggil
+        // renderGrid dengan prefix window.* eksplisit.
+        window.toggleLang = toggleLang;
+        window.updateStaticText = updateStaticText;
+        window.toggleSelection = toggleSelection;
+        window.submitSelection = submitSelection;
+        window.openPreview = openPreview;
+        window.closePreview = closePreview;
+        window.renderGrid = renderGrid;
+        window.showError = showError;
+

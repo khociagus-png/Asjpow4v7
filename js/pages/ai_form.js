@@ -1,6 +1,10 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script ai_form.html dipindah ke
-// js/pages/ai_form.js (diload dengan <script> biasa, urutan sama). Isi
-// byte-identik dengan blok inline asli — perilaku tidak berubah.
+// js/pages/ai_form.js — sekarang ESM (Fase 3 langkah 13): diload type=module.
+// State (chatHistory, latestCandidateData, *Base64/*File, dll) PRIVATE modul;
+// fungsi yang dipanggil HTML onclick/onchange/onload + string onclick dinamis
+// (renderEditableArray) di-alias ke window di bridge bawah. Bare global dari
+// luar dipanggil via window.* eksplisit (tr, callAPI, CURRENT_LANG,
+// renderLanguageLight, cekUploadFile).
 // ==========================================
 // AI FORM (Qween CV) — konteks dari URL + logika chat/autofill/upload
 // ==========================================
@@ -146,7 +150,7 @@
     function enableManualPreview() {
       document.querySelectorAll('#formPanel input[readonly], #formPanel textarea[readonly]').forEach(function(el) {
         el.removeAttribute('readonly');
-        el.setAttribute('title', tr('form.ai_f_tooltip'));
+        el.setAttribute('title', window.tr('form.ai_f_tooltip'));
       });
       Object.keys(fieldPaths).forEach(function(id) {
         var el = $(id);
@@ -161,14 +165,14 @@
       });
     }
 
-    function updateArrayField(type, index, field, value) {
+    export function updateArrayField(type, index, field, value) {
       if (!Array.isArray(latestCandidateData[type])) latestCandidateData[type] = [];
       if (!latestCandidateData[type][index]) latestCandidateData[type][index] = {};
       latestCandidateData[type][index][field] = value;
       saveToLocal();
     }
 
-    function addArrayItem(type) {
+    export function addArrayItem(type) {
       latestCandidateData = latestCandidateData && typeof latestCandidateData === 'object' ? latestCandidateData : {};
       if (!Array.isArray(latestCandidateData[type])) latestCandidateData[type] = [];
       var item = {};
@@ -178,7 +182,7 @@
       saveToLocal();
     }
 
-    function removeArrayItem(type, index) {
+    export function removeArrayItem(type, index) {
       if (!Array.isArray(latestCandidateData[type])) return;
       latestCandidateData[type].splice(index, 1);
       updateFormUI();
@@ -230,7 +234,7 @@
       if (localStorage.getItem('asj_admin_login') === 'sukses') {
         return Promise.resolve(true);
       }
-      return callAPI('getAppData', ['kandidat', targetWa]).then(function(res) {
+      return window.callAPI('getAppData', ['kandidat', targetWa]).then(function(res) {
         if (res && res.sessionInvalid) return true; // tidak bisa diverifikasi → jangan redirect
         // Respons backend rebuild menaruh data kandidat di res.candidates[0]
         // (dulu myData di backend GAS lama). Ambil catatanInt dari sana agar
@@ -249,14 +253,14 @@
     function jalankanAutoFill(targetWa) {
       if ($('aiTypingStatus')) {
         $('aiTypingStatus').classList.remove('hidden');
-        $('aiTypingStatus').innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> ' + tr('form.ai_loading_master');
+        $('aiTypingStatus').innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> ' + window.tr('form.ai_loading_master');
       }
       
       // FIX: pakai getDrafCvMaster (nested: identitas/fisik/medis/…/uploads +
       // AIDATAJSON) — dulu getExistingCandidateJsonByWa yang bentuknya FLAT
       // (kolom legacy untuk form apply), jadi form CV hanya terisi nama/HP
       // dan SIMPAN DB menimpa ai_data_json master dengan data hampir kosong.
-      callAPI('getDrafCvMaster', [targetWa]).then(function(masterData) {
+      window.callAPI('getDrafCvMaster', [targetWa]).then(function(masterData) {
           if ($('aiTypingStatus')) $('aiTypingStatus').classList.add('hidden');
           if (masterData) {
             latestCandidateData = mergeCandidateData(masterData, latestCandidateData);
@@ -283,13 +287,13 @@
     // satu kali jalan di halaman pertama yang dibuka user, bukan hanya ai_form.
     // Alasan tidak via service worker: SW tidak punya akses localStorage.
     // Di sini cukup fallback defensif kalau pwa.js belum termuat.
-    function initApp() {
+    export function initApp() {
       $("logoAsj").src = urlLogo;
       // Terjemahkan label statis sesuai bahasa terpilih (asj_lang).
-      if (typeof renderLanguageLight === 'function') {
-        renderLanguageLight();
+      if (typeof window.renderLanguageLight === 'function') {
+        window.renderLanguageLight();
         var lb = document.getElementById('lang-btn-ai');
-        if (lb) lb.textContent = CURRENT_LANG === 'jp' ? 'ID' : 'JP';
+        if (lb) lb.textContent = window.CURRENT_LANG === 'jp' ? 'ID' : 'JP';
       }
       enableManualPreview();
       
@@ -346,11 +350,11 @@
       if(currentPhotoBase64) {
         $("previewFoto").src = "data:image/jpeg;base64," + currentPhotoBase64;
         $("previewFoto").classList.remove("hidden");
-        $("compressStatus").innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_status_saved');
+        $("compressStatus").innerHTML = '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved');
         $("compressStatus").classList.remove("hidden");
       }
-      if(currentJftBase64) { $("status_jft").innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_status_saved_auto'); $("status_jft").classList.remove("hidden"); }
-      if(currentSswBase64) { $("status_ssw").innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_status_saved_auto'); $("status_ssw").classList.remove("hidden"); }
+      if(currentJftBase64) { $("status_jft").innerHTML = '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto'); $("status_jft").classList.remove("hidden"); }
+      if(currentSswBase64) { $("status_ssw").innerHTML = '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto'); $("status_ssw").classList.remove("hidden"); }
       
       window.addEventListener('resize', handleResize); 
       // Desktop (>=768px): display kedua panel ditangani CSS (override `md:block`/
@@ -366,31 +370,31 @@
       if (nama) {
         // Deteksi daftar bidang yang masih kosong
         var missing = [];
-        if (!id.ktp) missing.push(tr('form.chat_missing_ktp'));
-        if (!id.paspor) missing.push(tr('form.chat_missing_paspor'));
-        if (!iv.promosi_jp && iv.promosi_id) missing.push(tr('form.chat_missing_jiko'));
-        if (!fs.topi) missing.push(tr('form.chat_missing_topi'));
-        if (!fs.tahan_ac) missing.push(tr('form.chat_missing_ac'));
-        if (!fs.tb) missing.push(tr('form.chat_missing_tb'));
-        if (!fs.bb) missing.push(tr('form.chat_missing_bb'));
-        if (!data.pendidikan || !data.pendidikan.length) missing.push(tr('form.chat_missing_pendidikan'));
-        if (!data.pekerjaan || !data.pekerjaan.length) missing.push(tr('form.chat_missing_pekerjaan'));
+        if (!id.ktp) missing.push(window.tr('form.chat_missing_ktp'));
+        if (!id.paspor) missing.push(window.tr('form.chat_missing_paspor'));
+        if (!iv.promosi_jp && iv.promosi_id) missing.push(window.tr('form.chat_missing_jiko'));
+        if (!fs.topi) missing.push(window.tr('form.chat_missing_topi'));
+        if (!fs.tahan_ac) missing.push(window.tr('form.chat_missing_ac'));
+        if (!fs.tb) missing.push(window.tr('form.chat_missing_tb'));
+        if (!fs.bb) missing.push(window.tr('form.chat_missing_bb'));
+        if (!data.pendidikan || !data.pendidikan.length) missing.push(window.tr('form.chat_missing_pendidikan'));
+        if (!data.pekerjaan || !data.pekerjaan.length) missing.push(window.tr('form.chat_missing_pekerjaan'));
 
-        var welcomeText = tr('form.chat_welcome_named_intro').replace('{nama}', nama);
+        var welcomeText = window.tr('form.chat_welcome_named_intro').replace('{nama}', nama);
 
         if (missing.length > 0) {
-          welcomeText += tr('form.chat_welcome_missing').replace('{missing}', missing.slice(0, 2).join(" & "));
+          welcomeText += window.tr('form.chat_welcome_missing').replace('{missing}', missing.slice(0, 2).join(" & "));
         } else {
-          welcomeText += tr('form.chat_welcome_complete');
+          welcomeText += window.tr('form.chat_welcome_complete');
         }
         return welcomeText;
       } else {
-        return tr('form.chat_welcome_nameless');
+        return window.tr('form.chat_welcome_nameless');
       }
     }
 
     function sendWelcomeMessage() {
-      var welcome = tr('form.chat_welcome_nameless');
+      var welcome = window.tr('form.chat_welcome_nameless');
       appendHTML('ai', welcome);
       chatHistory.push({ "role": "assistant", "content": JSON.stringify({reply: welcome, data: {}}) });
       saveToLocal();
@@ -414,7 +418,7 @@
     // (URL bar Safari naik/turun) — penyebab kolom chat "puter-puter".
     var lastMobileTab = "chat";
     var wasDesktop = window.innerWidth >= 768;
-    function switchTab(target) {
+    export function switchTab(target) {
       lastMobileTab = target;
       if(window.innerWidth >= 768) return; 
       var cPanel = $('chatPanel'), fPanel = $('formPanel'), tChat = $('btnTabChat'), tForm = $('btnTabForm');
@@ -438,7 +442,7 @@
       wasDesktop = isDesktop;
       if (!isDesktop) switchTab(lastMobileTab);
     }
-    function handleEnter(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }
+    export function handleEnter(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }
 
     function appendHTML(sender, text) {
       var isUser = (sender === 'user');
@@ -476,7 +480,7 @@
       setTimeout(function() { $("chatBox").scrollTop = $("chatBox").scrollHeight; }, 100);
     }
 
-    function sendMessage() {
+    export function sendMessage() {
       var inputEl = $("userInput"), btnEl = $("sendBtn");
       var text = inputEl.value.trim(); if(!text) return;
       
@@ -487,12 +491,12 @@
       inputEl.disabled = true; btnEl.disabled = true; 
       
       // PERBAIKAN: Ubah teks loading saat chat dikirim agar tidak "tersangkut" teks lama
-      $("aiTypingStatus").innerHTML = '<i class="fas fa-magic fa-spin mr-2"></i> ' + tr('form.ai_chat_typing');
+      $("aiTypingStatus").innerHTML = '<i class="fas fa-magic fa-spin mr-2"></i> ' + window.tr('form.ai_chat_typing');
       $("aiTypingStatus").classList.remove("hidden");
       
-      var payloadToAI = { flow: formContext.flow, history: chatHistory, currentData: latestCandidateData, lang: (typeof CURRENT_LANG !== 'undefined' ? CURRENT_LANG : 'id') };
+      var payloadToAI = { flow: formContext.flow, history: chatHistory, currentData: latestCandidateData, lang: (typeof window.CURRENT_LANG !== 'undefined' ? window.CURRENT_LANG : 'id') };
       
-      callAPI('processAIChat', payloadToAI).then(function(res) {
+      window.callAPI('processAIChat', payloadToAI).then(function(res) {
           inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); 
           $("aiTypingStatus").classList.add("hidden");
           
@@ -519,7 +523,7 @@
       }).catch(function(err) {
           inputEl.disabled = false; btnEl.disabled = false; 
           $("aiTypingStatus").classList.add("hidden");
-          appendHTML('ai', tr('form.ai_chat_error'));
+          appendHTML('ai', window.tr('form.ai_chat_error'));
       });
     }
 
@@ -534,7 +538,7 @@
     }
 
     function renderOptionsHtml(currentVal, opts) {
-      var html = '<option value="">' + tr('form.ai_f_pilih') + '</option>';
+      var html = '<option value="">' + window.tr('form.ai_f_pilih') + '</option>';
       var found = false;
       opts.forEach(function(o) {
         var v = Array.isArray(o) ? o[0] : o;
@@ -552,7 +556,7 @@
       var fields = arrayFields[type];
       var cards = items.map(function(item, index) {
         var inputs = fields.map(function(definition) {
-          var field = definition[0], label = tr(definition[1]), ctrl = definition[2], opts = definition[3];
+          var field = definition[0], label = window.tr(definition[1]), ctrl = definition[2], opts = definition[3];
           if (ctrl === 'select') {
             return '<div><label class="label-micro">' + label + '</label><select class="input-micro" onchange="updateArrayField(\'' + type + '\',' + index + ',\'' + field + '\',this.value)">' + renderOptionsHtml(item[field], opts) + '</select></div>';
           }
@@ -561,13 +565,13 @@
           }
           return '<div><label class="label-micro">' + label + '</label><input type="text" class="input-micro" value="' + escapeHtml(item[field]) + '" oninput="updateArrayField(\'' + type + '\',' + index + ',\'' + field + '\',this.value)"></div>';
         }).join('');
-        return '<div class="bg-slate-800 p-2 rounded border border-slate-700 text-[9px] mb-1.5"><div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-300">' + tr('form.ai_f_data') + ' ' + (index + 1) + '</span><button type="button" class="text-rose-300 hover:text-rose-200" onclick="removeArrayItem(\'' + type + '\',' + index + ')"><i class="fas fa-trash"></i> ' + tr('form.ai_f_hapus') + '</button></div><div class="grid grid-cols-2 gap-1.5">' + inputs + '</div></div>';
+        return '<div class="bg-slate-800 p-2 rounded border border-slate-700 text-[9px] mb-1.5"><div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-300">' + window.tr('form.ai_f_data') + ' ' + (index + 1) + '</span><button type="button" class="text-rose-300 hover:text-rose-200" onclick="removeArrayItem(\'' + type + '\',' + index + ')"><i class="fas fa-trash"></i> ' + window.tr('form.ai_f_hapus') + '</button></div><div class="grid grid-cols-2 gap-1.5">' + inputs + '</div></div>';
       }).join('');
-      if (!cards) cards = '<div class="text-[9px] text-slate-500 italic py-1">' + tr('form.txt_belum_data') + '</div>';
-      container.innerHTML = cards + '<button type="button" class="w-full mt-1 py-1 text-[9px] font-bold rounded border border-dashed border-slate-600 text-slate-300 hover:bg-slate-800" onclick="addArrayItem(\'' + type + '\')"><i class="fas fa-plus mr-1"></i>' + tr('form.ai_f_tambah') + '</button>';
+      if (!cards) cards = '<div class="text-[9px] text-slate-500 italic py-1">' + window.tr('form.txt_belum_data') + '</div>';
+      container.innerHTML = cards + '<button type="button" class="w-full mt-1 py-1 text-[9px] font-bold rounded border border-dashed border-slate-600 text-slate-300 hover:bg-slate-800" onclick="addArrayItem(\'' + type + '\')"><i class="fas fa-plus mr-1"></i>' + window.tr('form.ai_f_tambah') + '</button>';
     }
 
-    function updateFormUI() {
+    export function updateFormUI() {
       latestCandidateData = latestCandidateData && typeof latestCandidateData === 'object' ? latestCandidateData : {};
       Object.keys(fieldPaths).forEach(function(id) { setValue(id, getByPath(latestCandidateData, fieldPaths[id])); });
       renderEditableArray('pendidikan', 'c_pendidikan');
@@ -597,7 +601,7 @@
         if (!statusEl || sudahPilihBaru) return;
         if (url && url !== '-') {
           var namaFile = escapeHtml((url.split('/').pop() || key.toUpperCase()).replace(/_+/g, ' '));
-          statusEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_status_existing') + ': ' +
+          statusEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_existing') + ': ' +
             '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="underline hover:text-amber-300">' + namaFile + '</a>';
           statusEl.classList.remove('hidden');
         }
@@ -605,12 +609,12 @@
       // ------------------------------------------------------
     }
 
-    function compressImage(event) {
+    export function compressImage(event) {
       var file = event.target.files[0]; if (!file) return;
       // Guard seragam: format (image/*) + ukuran maks 10 MB — pesan jelas + reset.
-      if (!cekUploadFile(event.target, { maxMb: 10 })) return;
+      if (!window.cekUploadFile(event.target, { maxMb: 10 })) return;
       var status = $("compressStatus"), preview = $("previewFoto");
-      status.classList.remove("hidden"); status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + tr('form.ai_f_proses');
+      status.classList.remove("hidden"); status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.ai_f_proses');
       var reader = new FileReader(); reader.readAsDataURL(file);
       reader.onload = function(e) {
         var img = new Image(); img.src = e.target.result;
@@ -621,7 +625,7 @@
           canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
           var dataUrl = canvas.toDataURL("image/jpeg", 0.6);
           preview.src = dataUrl; preview.classList.remove("hidden");
-          status.innerHTML = '<i class="fas fa-check-circle"></i> ' + tr('form.ai_f_berhasil');
+          status.innerHTML = '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_f_berhasil');
           currentPhotoBase64 = dataUrl.split(',')[1]; saveToLocal();
         };
       };
@@ -659,13 +663,13 @@
       reader.readAsDataURL(file);
     }
 
-    function handleDocUpload(event, type) {
+    export function handleDocUpload(event, type) {
       var file = event.target.files[0]; if (!file) return;
       // Guard seragam: format sesuai accept + ukuran maks 3 MB — pesan jelas + reset.
-      if (!cekUploadFile(event.target, { maxMb: 3 })) return;
+      if (!window.cekUploadFile(event.target, { maxMb: 3 })) return;
       var statusEl = $("status_" + type);
       statusEl.classList.remove("hidden");
-      statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400"></i> ' + tr('form.ai_f_membaca');
+      statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400"></i> ' + window.tr('form.ai_f_membaca');
       // Downscale scan gambar dulu; pdf & gagal-decode dibiarkan utuh oleh helper.
       downscaleScanImage(file, 800, 0.8, function(hasil) {
         if(type === 'jft') { currentJftBase64 = hasil.data; currentJftFile = hasil; }
@@ -702,7 +706,7 @@
         return { key: k, prefix: k.toUpperCase(), ext: (file.name || '').split('.').pop() || 'bin' };
       });
       
-      var res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
+      var res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload');
       
       var uploadedUrls = {};
@@ -723,7 +727,7 @@
       return uploadedUrls;
     }
 
-    async function saveToDatabase() {
+    export async function saveToDatabase() {
       if (!latestCandidateData.identitas || !latestCandidateData.identitas.nama_lengkap) {
         alert("⚠️ Wah, datanya masih kosong! Yuk ngobrol sama Jeklin dulu di Tab Chat.");
         if(window.innerWidth < 768) switchTab('chat'); return;
@@ -788,7 +792,7 @@
           univFile: uploadedUrls.univFile || null
         };
         
-        callAPI('submitDataAsj', payload).then(function(res) {
+        window.callAPI('submitDataAsj', payload).then(function(res) {
             btn.disabled = false;
           if(res.success) {
             btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!'; btn.classList.replace("bg-emerald-600", "bg-sky-600");
@@ -803,3 +807,17 @@
         alert("Gagal mengunggah dokumen: " + e.message);
       }
     }
+
+    // Bridge ESM→legacy (Fase 3 langkah 13): HTML onclick/onchange/onload +
+    // string onclick dinamis dari renderEditableArray tetap butuh global.
+    window.initApp = initApp;
+    window.switchTab = switchTab;
+    window.handleEnter = handleEnter;
+    window.sendMessage = sendMessage;
+    window.updateFormUI = updateFormUI;
+    window.compressImage = compressImage;
+    window.handleDocUpload = handleDocUpload;
+    window.saveToDatabase = saveToDatabase;
+    window.updateArrayField = updateArrayField;
+    window.removeArrayItem = removeArrayItem;
+    window.addArrayItem = addArrayItem;

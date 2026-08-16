@@ -1,10 +1,13 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script siswa-baru.html dipindah
-// ke js/pages/siswa_baru.js (diload dengan <script> biasa, urutan sama). Isi
-// byte-identik dengan blok inline asli — perilaku tidak berubah.
+// ke js/pages/siswa_baru.js. ESM (Fase 3 langkah 13): modul ES dimuat
+// <script type="module"> — export + alias window.* utk HTML inline (body
+// onload="initApp()", onkeypress="handleEnter(event)", onchange=
+// "handleDocUpload(event,'…')", onclick switchTab/sendMessage/saveToDatabase).
+// callAPI/cekUploadFile via window.* eksplisit.
 // ==========================================
 // SISWA BARU — pendaftaran siswa via chat AI + upload berkas + draft
 // ==========================================
-    function $(id) { return document.getElementById(id); }
+    export function $(id) { return document.getElementById(id); }
     var chatHistory = []; 
     var candidateData = {}; 
     var uploadedFiles = { ktp: null, kk: null, ijazah: null };
@@ -19,7 +22,7 @@
 
     function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
 
-    function switchTab(target) {
+    export function switchTab(target) {
       if(window.innerWidth >= 768) return; 
       var cPanel = $('chatPanel'), fPanel = $('formPanel'), tChat = $('btnTabChat'), tForm = $('btnTabForm');
       if(target === 'chat') {
@@ -47,7 +50,7 @@
       }
     }
 
-    function initApp() {
+    export function initApp() {
       // Izinkan form diedit manual jika malas chat
       Object.keys(fieldPaths).forEach(function(id) {
         var el = $(id);
@@ -107,7 +110,7 @@
       saveToLocal();
     }
 
-    function handleEnter(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }
+    export function handleEnter(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }
 
     function appendHTML(sender, text) {
       var isUser = (sender === 'user');
@@ -137,7 +140,7 @@
       Object.keys(fieldPaths).forEach(function(id) { setValue(id, candidateData[fieldPaths[id]]); });
     }
 
-    function sendMessage() {
+    export function sendMessage() {
       var inputEl = $("userInput"), btnEl = $("sendBtn");
       var text = inputEl.value.trim(); if(!text) return;
       
@@ -153,7 +156,7 @@
       
       var payloadToAI = { history: chatHistory, currentData: candidateData };
       
-      callAPI('processSiswaAIChat', payloadToAI).then(function(res) {
+      window.callAPI('processSiswaAIChat', payloadToAI).then(function(res) {
           inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); 
           $("aiTypingStatus").classList.add("hidden");
           
@@ -217,10 +220,10 @@
       reader.readAsDataURL(file);
     }
 
-    function handleDocUpload(event, type) {
+    export function handleDocUpload(event, type) {
       var file = event.target.files[0]; if (!file) return;
       // Guard seragam: format sesuai accept + ukuran maks 3 MB — alert jelas + reset.
-      if (!cekUploadFile(event.target, { maxMb: 3 })) return;
+      if (!window.cekUploadFile(event.target, { maxMb: 3 })) return;
       var statusEl = $("status_" + type);
       statusEl.classList.remove("hidden");
       statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400"></i> Membaca…';
@@ -254,7 +257,7 @@
         return { key: k, prefix: k.toUpperCase(), ext: (file.name || '').split('.').pop() || 'bin' };
       });
       
-      var res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
+      var res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload');
       
       var uploadedUrls = {};
@@ -275,7 +278,7 @@
       return uploadedUrls;
     }
 
-    async function saveToDatabase() {
+    export async function saveToDatabase() {
       // === VALIDASI WAJIB ISI SEMUA KOLOM ===
       let missingFields = [];
       
@@ -314,7 +317,7 @@
           ijazah: uploadedUrls.ijazah || null
         });
         
-        callAPI('submitDaftarSiswa', payload).then(function(res) {
+        window.callAPI('submitDaftarSiswa', payload).then(function(res) {
           btn.disabled = false;
           if(res.success) {
             btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!'; btn.classList.replace("bg-emerald-600", "bg-sky-600");
@@ -335,3 +338,15 @@
           alert("Gagal mengunggah dokumen: " + e.message);
       }
     }
+
+    // BRIDGE ESM → classic/HTML inline: alias window.* utk handler yang
+    // dipanggil dari atribut HTML (body onload / onkeypress / onchange /
+    // onclick). $/escapeHtml/chatHistory/candidateData/uploadedFiles dll
+    // tetap PRIVATE modul (tak ada pemakai luar).
+    window.$ = $;
+    window.switchTab = switchTab;
+    window.initApp = initApp;
+    window.handleEnter = handleEnter;
+    window.sendMessage = sendMessage;
+    window.handleDocUpload = handleDocUpload;
+    window.saveToDatabase = saveToDatabase;

@@ -1,6 +1,9 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script apply-full.html dipindah
-// ke js/pages/apply_full.js (diload dengan <script> biasa, urutan sama). Isi
-// byte-identik dengan blok inline asli — perilaku tidak berubah.
+// ke js/pages/apply_full.js. ESM (Fase 3 langkah 13): modul ES dimuat
+// <script type="module"> — export + alias window.* utk HTML inline
+// (onclick changeStep/submitApply, onblur formatInputWA) & onclick string
+// yang di-generate (handleExtraFile). callAPI/applyDocsPlan/cekUploadFile
+// via window.* eksplisit (apply-docs.js & upload-guard.js modul ES juga).
 // ==========================================
 // APPLY FULL — form lamaran loker 3 langkah + auto-fill riwayat + upload
 // ==========================================
@@ -35,7 +38,7 @@
     let oldSswUrl = "-";
 
     // --- FITUR AUTO-FILL & CEK RIWAYAT ---
-    function formatInputWA(el) { let val = el.value.replace(/\D/g, ''); if (val.startsWith('0')) { val = '62' + val.substring(1); } else if (val.startsWith('8')) { val = '62' + val; } el.value = val.length > 0 ? '+' + val : ''; }
+    export function formatInputWA(el) { let val = el.value.replace(/\D/g, ''); if (val.startsWith('0')) { val = '62' + val.substring(1); } else if (val.startsWith('8')) { val = '62' + val; } el.value = val.length > 0 ? '+' + val : ''; }
     
     function cekRiwayat() {
        let wa = $("wa").value.trim().replace(/\D/g, '');
@@ -43,7 +46,7 @@
        $("wa-loading").classList.remove("hidden");
        $("wa-msg").classList.add("hidden");
        
-       callAPI('cekDataPelamar', [wa]).then(res => {
+       window.callAPI('cekDataPelamar', [wa]).then(res => {
            $("wa-loading").classList.add("hidden");
            if(res && res.found) {
                $("wa-msg").classList.remove("hidden");
@@ -104,12 +107,12 @@
        });
     }
 
-    function handleExtraFile(el, idx) {
+    export function handleExtraFile(el, idx) {
       handleFile(el, 'extraInfo_' + idx, 'extraWarn_' + idx, null);
     }
 
     // --- STEPPER NAVIGATION WIZARD ---
-    function changeStep(direction) {
+    export function changeStep(direction) {
       if (direction === 1) {
         if (currentStep === 1 && !validateStep1()) return;
         if (currentStep === 2 && !validateStep2()) return;
@@ -197,7 +200,7 @@
       }
 
       // Guard seragam: format (accept) + ukuran maks 2 MB — alert jelas + reset input.
-      if (!cekUploadFile(input, { maxMb: 2 })) {
+      if (!window.cekUploadFile(input, { maxMb: 2 })) {
         warn.style.display = "none"; info.innerHTML = "Belum ada file dipilih"; if (preview) preview.style.display = "none";
         return;
       }
@@ -259,7 +262,7 @@
         return { key: k, prefix: prefix, ext: file.name.split('.').pop() || 'bin' };
       });
       
-      const res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
+      const res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
       if (!res.success) throw new Error('Gagal mendapatkan link upload: ' + (res.message || res.error || ''));
       
       const uploadedUrls = {};
@@ -303,7 +306,7 @@
       return '';
     }
 
-    async function submitApply() {
+    export async function submitApply() {
       if(!$("agree").checked) { alert("Anda harus menyetujui persyaratan sebelum mengirim lamaran!"); return; }
 
       // Guard ekstensi: cek semua input file SEBELUM upload (toast cepat).
@@ -369,7 +372,7 @@
           extraFiles: extraFilesPayload
         };
 
-        callAPI('submitApply', [payload]).then(function(res) {
+        window.callAPI('submitApply', [payload]).then(function(res) {
             $("loading").style.display = "none";
             if(!res.success) { alert(res.message); $("btnSubmit").disabled = false; $("btnPrev").disabled = false; return; }
             $("success").style.display = "flex";
@@ -388,7 +391,7 @@
     window.onload = function() {
       // Logika murni model dokumen ada di /js/apply-docs.js (applyDocsPlan) —
       // di-unit-test supaya bug JFT/SSW tidak muncul diam-diam lagi.
-      const plan = applyDocsPlan(window.dynamicReqStr);
+      const plan = window.applyDocsPlan(window.dynamicReqStr);
 
       // Kartu upload default hidden — tampilkan HANYA yang diminta model loker.
       if (plan.showCv) $("card-cv").classList.remove("hidden");
@@ -427,3 +430,14 @@
           cekRiwayat(); // Panggil radar pengecek ke Database!
       }
     };
+
+    // BRIDGE ESM → classic/HTML inline: alias window.* utk handler HTML
+    // (onclick changeStep/submitApply, onblur formatInputWA) & onclick string
+    // yang di-generate window.onload (handleExtraFile). State $/currentStep/
+    // oldPhotoUrl dll tetap PRIVATE modul (tak ada pemakai luar);
+    // window.dynamicReqStr/window.dynamicExtraFiles sengaja tetap global
+    // (dibaca onload & generateFormBridge).
+    window.formatInputWA = formatInputWA;
+    window.handleExtraFile = handleExtraFile;
+    window.changeStep = changeStep;
+    window.submitApply = submitApply;

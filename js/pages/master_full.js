@@ -1,14 +1,18 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script master-full.html dipindah
-// ke js/pages/master_full.js (diload dengan <script> biasa, urutan sama). Isi
-// byte-identik dengan blok inline asli — perilaku tidak berubah.
+// ke js/pages/master_full.js. ESM (Fase 3 langkah 13): modul ES dimuat
+// <script type="module"> — export + alias window.* utk HTML inline
+// (changeStep/gateLogin/handleFile/onSswSelect/submitMaster) & onchange string
+// yang di-generate window.onload (toggleImaMade/onPekerjaanSelect/
+// onFamPekerjaanSelect). CURRENT_LANG/renderLanguageLight/tr/callAPI/
+// cekUploadFile via window.* eksplisit.
 // ==========================================
 // MASTER FULL — form master 5 langkah + gerbang login kandidat + auto-fill
 // ==========================================
     // Bahasa terpilih (asj_lang) ikut serta; label statis diterjemahkan onload.
     document.addEventListener('DOMContentLoaded', function () {
       var lb = document.getElementById('lang-btn-mf');
-      if (lb) lb.textContent = CURRENT_LANG === 'jp' ? 'ID' : 'JP';
-      if (typeof renderLanguageLight === 'function') renderLanguageLight();
+      if (lb) lb.textContent = window.CURRENT_LANG === 'jp' ? 'ID' : 'JP';
+      if (typeof window.renderLanguageLight === 'function') window.renderLanguageLight();
     });
     // FASE 3/4: WA/NAMA dulu diisi server (GAS scriptlet) dari e.parameter.
     // Sekarang dibaca dari query string URL (?wa=&nama=), sumbernya sama
@@ -39,7 +43,7 @@
         try { let d = new Date(ds); if (isNaN(d.getTime())) return ds; return d.toISOString().split('T')[0]; } catch(e) { return ds; }
     };
 
-    function toggleImaMade(i) {
+    export function toggleImaMade(i) {
         let outEl = getEl(`job_out_${i}`);
         let chk = getEl(`job_now_${i}`).checked;
         if(chk) { outEl.value = ""; outEl.disabled = true; }
@@ -55,20 +59,20 @@
         let gm = document.getElementById('gate-msg'); if(gm) gm.textContent = msg || '';
         let gate = document.getElementById('login-gate'); if(gate) gate.classList.remove('hidden');
         let pass = document.getElementById('gate-pass'); if(pass) { pass.value = ''; pass.focus(); }
-        renderLanguageLight();
+        window.renderLanguageLight();
     }
     function hideLoginGate() {
         let gate = document.getElementById('login-gate'); if(gate) gate.classList.add('hidden');
     }
-    async function gateLogin() {
+    export async function gateLogin() {
         let wa = getEl('wa').value;
         let pass = document.getElementById('gate-pass') ? document.getElementById('gate-pass').value : '';
         let btn = document.getElementById('gate-btn');
         let msg = document.getElementById('gate-msg');
-        if(!pass) { if(msg) msg.textContent = tr('form.mf_gate_pw_wajib'); return; }
-        if(btn) { btn.disabled = true; btn.innerHTML = tr('form.mf_memeriksa'); }
+        if(!pass) { if(msg) msg.textContent = window.tr('form.mf_gate_pw_wajib'); return; }
+        if(btn) { btn.disabled = true; btn.innerHTML = window.tr('form.mf_memeriksa'); }
         try {
-            let res = await callAPI('loginKandidat', [wa, pass]);
+            let res = await window.callAPI('loginKandidat', [wa, pass]);
             if(res && res.success) {
                 localStorage.setItem('asj_kandidat_login', 'sukses');
                 localStorage.setItem('asj_kandidat_name', res.nama || '');
@@ -77,12 +81,12 @@
                 hideLoginGate();
                 window.location.reload();
             } else {
-                if(msg) msg.textContent = (res && res.error) || tr('form.mf_gagal_masuk');
+                if(msg) msg.textContent = (res && res.error) || window.tr('form.mf_gagal_masuk');
             }
         } catch(e) {
-            if(msg) msg.textContent = tr('alert.network') + (e && e.message ? e.message : e);
+            if(msg) msg.textContent = window.tr('alert.network') + (e && e.message ? e.message : e);
         } finally {
-            if(btn) { btn.disabled = false; btn.innerHTML = tr('form.mf_masuk'); }
+            if(btn) { btn.disabled = false; btn.innerHTML = window.tr('form.mf_masuk'); }
         }
     }
 
@@ -147,19 +151,19 @@
       return h;
     }
     function buildSswSelect(id) { var el = getEl(id); if (el) el.innerHTML = sswOptionsHtml(); }
-    function onSswSelect(id) {
+    export function onSswSelect(id) {
       var sel = getEl(id), manual = getEl(id + '_manual');
       if (!sel) return;
       if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
       else if (manual) { manual.classList.add('hidden'); manual.value = ''; }
     }
-    function onPekerjaanSelect(i) {
+    export function onPekerjaanSelect(i) {
       var sel = getEl('job_pos_' + i), manual = getEl('job_pos_manual_' + i);
       if (!sel) return;
       if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
       else if (manual) { manual.classList.add('hidden'); manual.value = ''; }
     }
-    function onFamPekerjaanSelect(i) {
+    export function onFamPekerjaanSelect(i) {
       var sel = getEl('fam_job_' + i), manual = getEl('fam_job_manual_' + i);
       if (!sel) return;
       if (sel.value === '__LAINNYA__') { if (manual) { manual.classList.remove('hidden'); manual.focus(); } }
