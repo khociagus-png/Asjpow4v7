@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 10 — commit `01e3f81`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 11 — commit `6ca9d05`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 11: init js/init/{theme,preview,nav,boot} ESM + fix window.THEMES (refactor & bugfix)
+
+### Refactor: theme, preview, nav, boot jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 4 file (18 deklarasi) → export + 22 alias window.*; `VENDOR_V`/`_vendorPromises` jadi PRIVATE modul (tanpa pemakai eksternal).
+- Referensi global implisit di-window-kan eksplisit (no-undef 0 error): state via accessor (CURRENT_THEME/ASSETS/isAdmin/current*/AUTO_REFRESH_TIMER/PREV_MAIL_COUNT), util/render/core via window, classic injectModalWaPintar, vendor XLSX.
+- Bundel `app-ad18b34535.js` (418.6 KB, 0 export bocor, nol kolisi, idempoten). Audit 52 file / 396 simbol, HIGH=0.
+
+### 🐛 Bugfix: `window.THEMES` undefined — crash dashboard admin KHOCI
+
+- E2E login-check gagal: `Cannot read properties of undefined (reading 'INTER_VIP')` di dashboard admin — `render/public.js:217` memakai `window.THEMES[window.CURRENT_THEME]`, tapi setelah THEMES jadi scoped modul `window.THEMES` undefined (dulu global `var THEMES`).
+- Fix: alias `window.THEMES` + `window.DEFAULT_ASSETS` di bridge theme.js. Pelajaran dicatat: konstanta lintas-file yang dipakai via `window.X` wajib di-alias juga (bukan cuma fungsi).
 
 ---
 

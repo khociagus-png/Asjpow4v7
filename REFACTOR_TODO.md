@@ -396,6 +396,26 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       E2E login/upload/biodata **SEMUA LULUS** ✓ · cek ai_copilot terarah
       (modal AI copilot + bar parse + saran + accessor live + klik Hasil
       Wawancara tanpa error JS) ✓.
+- [x] **Langkah 11 — `js/init/*` sisanya ESM (4 file: theme, preview, nav, boot)** — commit `6ca9d05`
+      Pecahan 02_init yang tersisa (state/util sudah ESM di langkah 3):
+      `theme.js` (8 fn + THEMES/DEFAULT_ASSETS), `preview.js` (6 fn +
+      VENDOR_V/_vendorPromises PRIVATE), `nav.js` (4 fn), `boot.js` (2
+      listener top-level, tanpa deklarasi) → `export` + 22 alias window.*.
+      Referensi global implisit di-window-kan eksplisit (no-undef 0 error):
+      state via accessor (CURRENT_THEME/ASSETS/isAdmin/isKandidat/current*/
+      AUTO_REFRESH_TIMER/PREV_MAIL_COUNT), util ESM (setBg/isPreviewableFile/
+      previewFinalUrl), render ESM (renderPublicFilter*), core (callAPI/tr),
+      classic (injectModalWaPintar 08_wa_pintar), 04_auth ESM
+      (showLoginAdminMaster), vendor (XLSX). Build: ESM_CORE + 4 entri →
+      `app-ad18b34535.js` (418.6 KB, 0 export bocor, idempoten).
+      check:globals nol kolisi (45 file / 394 simbol). Audit 52 file /
+      **396 simbol** HIGH=0.
+      🐛 **Bugfix window.THEMES** (ketahuan E2E): render/public.js memakai
+      `window.THEMES[window.CURRENT_THEME]` — setelah THEMES jadi scoped
+      modul, window.THEMES undefined → crash dashboard admin KHOCI
+      (`reading 'INTER_VIP'`). Fix: alias `window.THEMES` + `window.DEFAULT_ASSETS`.
+      Verifikasi: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓
+      · test **81/81** ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**

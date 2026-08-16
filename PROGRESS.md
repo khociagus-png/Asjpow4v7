@@ -4,7 +4,21 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 10: ai_copilot (`js/ai_copilot/*`) jadi ESM (commit `01e3f81`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 11: init sisanya (`js/init/{theme,preview,nav,boot}`) jadi ESM (commit `6ca9d05`) + 🐛 fix `window.THEMES` undefined (ketahuan E2E).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 11 — init sisanya: js/init/{theme,preview,nav,boot} ESM
+
+- **`js/init/theme.js` → ESM** (8 + THEMES/DEFAULT_ASSETS const): renderThemeToggle/toggleTheme/buatPartikelSakura/setSakuraParticles/applyInterMilanVibe/applyTheme — `export` + 8 alias + **`window.THEMES`/`window.DEFAULT_ASSETS`** (lihat bugfix di bawah). State writes via accessor (`window.CURRENT_THEME = theme`), `window.ASSETS` (accessor), `window.setBg` (util ESM), `window.renderPublicFilterUI/Filtered` (render ESM).
+- **`js/init/preview.js` → ESM** (6 + VENDOR_V/_vendorPromises PRIVATE): muatVendorLib/renderExcelKeFrame/_pasangTimerPreviewFallback/previewFileInFrame/pesanLoadingPreview/pesanPreviewTidakTersedia — `export` + 6 alias. `VENDOR_V` & `_vendorPromises` tetap internal (tanpa pemakai eksternal, §5 rule 2). `window.XLSX` (vendor), `window.isPreviewableFile/previewFinalUrl` (util ESM), `window.tr`.
+- **`js/init/nav.js` → ESM** (4): changePage/closeMobileMenu/toggleMobileMenu/logoutApp — `export` + 4 alias (HTML onclick + engine/04_auth window.changePage). State writes via accessor (isAdmin/isKandidat/current*/AUTO_REFRESH_TIMER/PREV_MAIL_COUNT), `window.callAPI`, `window.renderPublicFilter*`.
+- **`js/init/boot.js` → ESM** (0 deklarasi — murni 2 listener top-level): `window.injectModalWaPintar` (08_wa_pintar classic), `window.applyTheme`, `window.refreshDataDinamis`, `window.showLoginAdminMaster` (04_auth ESM). Listener tetap terdaftar di posisi bundel yang sama (IIFE per file).
+- 🐛 **Bugfix nyata (ketahuan E2E login-check)**: `render/public.js:217` memakai `window.THEMES[window.CURRENT_THEME]` — sebelum langkah ini `var THEMES` global → window.THEMES ada; setelah ESM, THEMES jadi scoped modul → `window.THEMES` undefined → `Cannot read properties of undefined (reading 'INTER_VIP')` di dashboard admin KHOCI. Fix: alias `window.THEMES` + `window.DEFAULT_ASSETS` di bridge theme.js. Pelajaran: setelah ESM-kan modul dengan konstanta yang dipakai lintas file, cek SEMUA pemakai `window.<konstanta>` (bukan hanya fungsi) — E2E menangkapnya.
+- Referensi global implisit di-window-kan eksplisit (scan no-undef **0 error**; 2 `DEFAULT_window` dari blanket `ASSETS.BANNER` kena `DEFAULT_ASSETS.BANNER` diperbaiki). Build: ESM_CORE + 4 entri → bundel `app-ad18b34535.js` (418.6 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 394 simbol). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.
+- Verifikasi: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login (dashboard admin KHOCI tanpa error JS — bugfix window.THEMES), upload, biodata ✓.
 
 ---
 

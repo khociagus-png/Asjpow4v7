@@ -1,9 +1,9 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 10 — core (i18n/api-client) + init (state/util) +
-> auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
-> + admin_ops (`js/admin_ops/*`) + **ai_copilot (`js/ai_copilot/*`) sudah
-> ESM**. Sisa classic: `init/{theme,preview,nav,boot}`, `01_public`,
+> **Status:** Fase 3 langkah 11 — core (i18n/api-client) + init (state/util +
+> theme/preview/nav/boot) + auth + engine + render + api (`js/api/*`) +
+> admin_modal (`js/admin_modal/*`) + admin_ops (`js/admin_ops/*`) +
+> **ai_copilot (`js/ai_copilot/*`) sudah ESM**. Sisa classic: `01_public`,
 > `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`,
 > `12_esign_match`, `13_rincian_builder`, `apply-docs`, `upload-guard`,
 > `helpers_cv`, `pwa` (lihat urutan §6).
@@ -339,19 +339,22 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
    (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
    `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9) +
-   `js/ai_copilot/*` ✅ (langkah 10, turn ini)** — catatan: fungsi yang
-   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
-   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
-   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
-   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
-   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
-   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
-   harus dicek self-reference alias (`window.x = window.x`) DAN literal
-   template (`<tr` → `<window.tr` — ketahuan langkah 7, diperbaiki di
-   render/public-admin-candidate-mail) setelah jalan. Catatan langkah 9:
+   `js/ai_copilot/*` ✅ (langkah 10) + `js/init/{theme,preview,nav,boot}` ✅
+   (langkah 11, turn ini)** — catatan: fungsi yang dipanggil HTML inline
+   `onclick` WAJIB dapat alias window; referensi global implisit di dalam
+   modul di-window-kan eksplisit; **antar-file ESM belum boleh `import`
+   (build masih concat + IIFE per file) — panggilan lintas modul ESM
+   memakai `window.*` eksplisit sampai bundle jadi ESM (lihat §3.3)**.
+   `render/mail.js` punya `var esc` LOKAL (hoisting mencakup renderFormInbox)
+   — jangan di-window-kan; blanket replace lintas file harus dicek
+   self-reference alias (`window.x = window.x`) DAN literal template (`<tr`
+   → `<window.tr` — ketahuan langkah 7) setelah jalan. Catatan langkah 9:
    `event.currentTarget` → `window.event.currentTarget`; catatan langkah 10:
    state lintas-modul yang di-reassign (`currentAiCandidateId`) pakai
-   accessor bridge, bukan alias biasa.
+   accessor bridge; **catatan langkah 11: konstanta lintas-file yang dipakai
+   via `window.X` (mis. `window.THEMES` di render/public.js) WAJIB dapat
+   alias window juga — bukan cuma fungsi** (regresi ini ketahuan E2E,
+   `Cannot read properties of undefined (reading 'INTER_VIP')`).
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -362,6 +365,26 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 11 — init sisanya (theme/preview/nav/boot) ESM (commit `6ca9d05`, turn ini)
+
+- `node --check --input-type=module` 4 file js/init/* ✓ · scan `no-undef` **0
+  error** ✓ (state accessor CURRENT_THEME/ASSETS/isAdmin/current*/
+  AUTO_REFRESH_TIMER/PREV_MAIL_COUNT; util ESM setBg/isPreviewableFile/
+  previewFinalUrl; render ESM renderPublicFilter*; classic
+  injectModalWaPintar; 04_auth ESM showLoginAdminMaster; vendor XLSX) ·
+  `bun run lint` 0/12 ✓ · `bun run test` **81/81** ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **394 simbol**) ·
+  bundel `app-ad18b34535.js` (418.6 KB) · 0 export bocor ✓ · idempoten ✓.
+- 22 alias window.* total (4 file); `VENDOR_V`/`_vendorPromises` PRIVATE
+  modul (tanpa pemakai eksternal). Audit: 52 file · **396 simbol** · HIGH=0
+  · MEDIUM=24 · LOW=372 (`.freebuff/audit-globals.json` diperbarui).
+- 🐛 **Bugfix window.THEMES** (ketahuan E2E login-check): render/public.js
+  memakai `window.THEMES[window.CURRENT_THEME]` → setelah THEMES scoped
+  modul, `window.THEMES` undefined → crash dashboard admin KHOCI. Fix: alias
+  `window.THEMES` + `window.DEFAULT_ASSETS` di bridge theme.js.
+- **E2E SEMUA LULUS**: login-check (dashboard admin KHOCI 0 error JS),
+  upload-check, biodata-check ✓.
 
 ### Langkah 10 — ai_copilot/* ESM (commit `01e3f81`, turn ini)
 
