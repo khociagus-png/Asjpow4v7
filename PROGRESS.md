@@ -4,11 +4,51 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 5: engine (`js/engine/*`) jadi ESM (commit `4ea3e32`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 6: render (`js/render/*`) jadi ESM (commit `HASH6`) + 🐛 fix backend `nextCandidateId()` (409 simpan biodata).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 6 — render: js/render/* (5 file) ESM (commit `HASH6`)
+
+- **`js/render/*.js` → ESM** — domain render terbesar: public.js (4 fn: filter/tab
+  publik + filter kelola loker), admin.js (6: renderAdminFull/switchTab/table
+  DB job/badgeTahapanDb), candidate.js (tabel daftar kandidat + jobDilamarCell),
+  share.js (modal share loker + template WA), mail.js (MAIL_SELECTED + status/
+  bucket + filter UI + renderFormInbox) → `export` + alias window.* (15 total).
+- **`MAIL_SELECTED`** di-reassign bare oleh `js/api/forms.js` → **accessor
+  bridge** (pola state.js §3.2) supaya binding modul tidak basi.
+- Referensi global implisit di-window-kan eksplisit — scan no-undef **0 error**
+  (44 nama lintas-file; `var esc` lokal di mail.js dipertahankan lokal — blanket
+  replacement sempat menimpa 4 alias jadi self-reference `window.x =
+  window.x` → ketahuan E2E & diperbaiki manual).
+- **`ALL_CANDIDATES_TOTAL`** (phantom global dari langkah 5) kini var resmi di
+  state.js + accessor bridge.
+- Build: ESM_CORE + 5 entri → `app-4c1c681c7c.js` (415.3 KB, 0 export bocor,
+  nol kolisi 391 simbol). Verifikasi: node --check ESM 5 file ✓ · no-undef
+  0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · audit HIGH=0 ✓.
+
+### 🐛 Fix backend (ditemukan E2E langkah 6): `nextCandidateId()` bentrok antar-tabel
+
+- **Gejala**: biodata-check GAGAL — modal pemberkasan tidak tertutup setelah
+  Simpan, tanpa error JS. Diagnostik fetch menangkap: `simpanBiodataLengkap` →
+  **HTTP 409 duplicate key** `uq_master_id_kandidat` `(id_kandidat)=(ASJ00226)`.
+- **Akar masalah (bukan regresi frontend)**: `nextCandidateId()` hanya membaca
+  max `id_kandidat` dari `database_candidate`; `master_database_candidate`
+  sudah punya `ASJ00226` (leftover E2E dari run yang mati sebelum cleanup,
+  wa 6281201154027) → INSERT master berikutnya untuk kandidat baru tanpa baris
+  master 409 permanen. Ini bug laten produksi: begitu master memakai id ≥ max
+  kandidat, simpan biodata kandidat baru rusak total.
+- **Fix** (`netlify/functions/_lib/db/candidates.js` + `candidate-helpers.js`):
+  `maxCandidateIdNumber()` kini mengambil max dari **KEDUA** tabel
+  (`database_candidate` + `master_database_candidate`), fallback scan penuh
+  ikut master. Read-only, aman untuk skema apa pun (kolom tidak ada → skip).
+- **Bersihkan data**: 2 baris leftover E2E (database_candidate `E2E1786880030`
+  + master `ASJ00226`, wa 6281201154027, nama KANDIDAT, dibuat 11:33 UTC oleh
+  run yang di-kill) dihapus via REST (semantik cleanup test yang sama).
+- **Verifikasi**: biodata-check **🎉 SEMUA LULUS** (modal tertutup + data
+  tersinkron + persist), login-check ✓, upload-check ✓. Test 81/81 ✓.
 
 ### Fase 3 langkah 5 — engine: js/engine/* (pipeline, dashboard, guards, init) ESM (commit `4ea3e32`)
 

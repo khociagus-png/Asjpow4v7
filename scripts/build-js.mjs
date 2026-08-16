@@ -107,6 +107,12 @@ const ESM_CORE = new Set([
   '/js/engine/dashboard.js',
   '/js/engine/guards.js',
   '/js/engine/init.js',
+  // Fase 3 langkah 6: render (publik/admin/kandidat/share/mail — renderAdminFull, renderFormInbox, dll).
+  '/js/render/public.js',
+  '/js/render/admin.js',
+  '/js/render/candidate.js',
+  '/js/render/share.js',
+  '/js/render/mail.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

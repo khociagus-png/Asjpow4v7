@@ -185,19 +185,27 @@ async function findCandidateByWaFiltered(wa) {
 
 
 // Max nomor id kandidat (ASJ#####) dari kolom id_kandidat — server-side.
+// FIX 2026-08-16: id_kandidat juga dialokasikan ke master_database_candidate
+// (handleSubmitMasterForm → nextCandidateId). Kalau master sudah memakai id
+// yang >= max(database_candidate), INSERT master berikutnya 409 duplicate key
+// (kasus nyata: ASJ00226 di master vs max 225 di database_candidate → simpan
+// biodata kandidat baru gagal permanen). Ambil max dari KEDUA tabel.
 async function maxCandidateIdNumber() {
   try {
-    const rows = await supabaseJson('GET', 'database_candidate', {
-      query: { select: 'id_kandidat', order: 'id_kandidat.desc', limit: '5' },
-    });
-    if (!Array.isArray(rows) || rows.length === 0) return undefined;
+    const tables = ['database_candidate', 'master_database_candidate'];
     let max = 0;
     let found = false;
-    for (const r of rows) {
-      const m = String(r.id_kandidat || '').match(/ASJ(\d+)/i);
-      if (m) {
-        max = Math.max(max, parseInt(m[1], 10));
-        found = true;
+    for (const table of tables) {
+      const rows = await supabaseJson('GET', table, {
+        query: { select: 'id_kandidat', order: 'id_kandidat.desc', limit: '5' },
+      });
+      if (!Array.isArray(rows)) continue;
+      for (const r of rows) {
+        const m = String(r.id_kandidat || '').match(/ASJ(\d+)/i);
+        if (m) {
+          max = Math.max(max, parseInt(m[1], 10));
+          found = true;
+        }
       }
     }
     return found ? max : undefined;

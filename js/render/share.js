@@ -27,7 +27,7 @@ var SHARE_DOC_CHIPS = [
   'ALL',
 ];
 
-function shareLinkFor(jobCode) {
+export function shareLinkFor(jobCode) {
   var domain = window.location.origin + window.location.pathname.replace('index.html', '');
   return domain + 'share.html?job=' + encodeURIComponent(jobCode);
 }
@@ -37,19 +37,19 @@ function shareLinkFor(jobCode) {
 // (3) template copas WA GAYA LAMA (era GAS) — URL menyesuaikan loker
 // (link share view), bukan link Google Drive.
 
-function getJobByCode(jobCode) {
+export function getJobByCode(jobCode) {
   var arr =
-    typeof ALL_DB_JOBS !== 'undefined' && ALL_DB_JOBS.length
-      ? ALL_DB_JOBS
-      : typeof ALL_JOBS !== 'undefined'
-        ? ALL_JOBS
+    typeof window.ALL_DB_JOBS !== 'undefined' && window.ALL_DB_JOBS.length
+      ? window.ALL_DB_JOBS
+      : typeof window.ALL_JOBS !== 'undefined'
+        ? window.ALL_JOBS
         : [];
   for (var i = 0; i < arr.length; i++) if (arr[i].code === jobCode) return arr[i];
   return null;
 }
 
 // Buka modal share untuk 1 loker: isi semua seksi + tampilkan.
-function bukaModalShare(jobCode) {
+export function bukaModalShare(jobCode) {
   var modal = document.getElementById('modal-share-loker');
   if (!modal) return;
   window.__shareJobCode = jobCode;
@@ -78,7 +78,7 @@ function bukaModalShare(jobCode) {
 }
 
 // Tutup modal share (X / backdrop) + reset preview supaya tidak nyangkut.
-function tutupModalShare() {
+export function tutupModalShare() {
   var modal = document.getElementById('modal-share-loker');
   if (!modal) return;
   modal.classList.add('hidden');
@@ -90,7 +90,7 @@ function tutupModalShare() {
 
 // Toggle pratinjau share view DI DALAM modal (iframe same-origin) — admin
 // bisa cek tampilan TSK loker ini tanpa menutup modal / pindah tab.
-function toggleSharePreview(jobCode) {
+export function toggleSharePreview(jobCode) {
   var prevBox = document.getElementById('share-preview-box');
   if (!prevBox) return;
   var prevFrame = document.getElementById('share-preview-frame');
@@ -104,9 +104,9 @@ function toggleSharePreview(jobCode) {
   }
 }
 
-// Label chip dokumen share (dwi-bahasa via tr()); token tanpa kunci
+// Label chip dokumen share (dwi-bahasa via window.tr()); token tanpa kunci
 // (SIM A, KTP, dll) tampil apa adanya.
-function shareDocLabel(key) {
+export function shareDocLabel(key) {
   var kunci = {
     CV: 'ui.share_doc_cv',
     JFT: 'ui.share_doc_jft',
@@ -117,11 +117,11 @@ function shareDocLabel(key) {
     UNIVERSITAS: 'admin.doc_univ',
     ALL: 'ui.share_doc_all',
   }[key];
-  return kunci ? tr(kunci) : key;
+  return kunci ? window.tr(kunci) : key;
 }
 
 // Render checkbox dokumen yang di-share (di dalam modal).
-function renderShareCheckboxes(jobCode, db) {
+export function renderShareCheckboxes(jobCode, db) {
   var wrap = document.getElementById('share-doc-checks');
   if (!wrap) return;
   var docsStr = String((db && db.dokumenShare) || 'CV,JFT,SSW').toUpperCase();
@@ -185,7 +185,7 @@ function renderShareCheckboxes(jobCode, db) {
 // URL di baris "KAMI APLOD /UPDATE DI SINI" = LINK SHARE VIEW sesuai loker
 // (shareLinkFor) — TSK membuka tautan itu untuk melihat/mengunggah berkas
 // kandidat loker tersebut. Bukan link Google Drive.
-function templateShareWa(jobCode, pekerjaan) {
+export function templateShareWa(jobCode, pekerjaan) {
   return (
     'お疲れ様です\n\n DOKUMEN\n ' +
     jobCode +
@@ -198,7 +198,7 @@ function templateShareWa(jobCode, pekerjaan) {
 }
 
 // Live preview template di textarea modal (URL share view otomatis per loker).
-function updateSharePreview(jobCode) {
+export function updateSharePreview(jobCode) {
   var pre = document.getElementById('share-template-preview');
   if (!pre) return;
   var db = getJobByCode(jobCode);
@@ -207,30 +207,30 @@ function updateSharePreview(jobCode) {
 
 // Copas template ke WA.
 // Copas template ke WA.
-async function copasShareWa(jobCode) {
+export async function copasShareWa(jobCode) {
   var db = getJobByCode(jobCode);
   var textToCopy = templateShareWa(jobCode, db ? db.pekerjaan : '');
   try {
     await navigator.clipboard.writeText(textToCopy);
-    showToast(tr('ui.toast_tsk_copied'), 'success');
+    window.showToast(window.tr('ui.toast_tsk_copied'), 'success');
   } catch (err) {
-    showToast(tr('ui.toast_copy_text_failed'), 'error');
+    window.showToast(window.tr('ui.toast_copy_text_failed'), 'error');
   }
 }
 
 // Copas link share view (share.html?job=...) dari modal.
-async function copyShareLink() {
+export async function copyShareLink() {
   var linkInput = document.getElementById('share-link-view');
   if (!linkInput || !linkInput.value) return;
   try {
     await navigator.clipboard.writeText(linkInput.value);
-    showToast(tr('ui.toast_tsk_copied'), 'success');
+    window.showToast(window.tr('ui.toast_tsk_copied'), 'success');
   } catch (err) {
-    showToast(tr('ui.toast_copy_text_failed'), 'error');
+    window.showToast(window.tr('ui.toast_copy_text_failed'), 'error');
   }
 }
 
-function currentShareDocs(jobCode) {
+export function currentShareDocs(jobCode) {
   var vals = [];
   var els = document.querySelectorAll('.share-chk-' + jobCode);
   els.forEach(function (el) {
@@ -239,17 +239,35 @@ function currentShareDocs(jobCode) {
   return vals;
 }
 
-async function simpanDokumenShare(jobCode) {
+export async function simpanDokumenShare(jobCode) {
   var joined = currentShareDocs(jobCode).join(',');
   try {
-    const res = await callAPI('updateDokumenShare', [jobCode, joined]);
+    const res = await window.callAPI('updateDokumenShare', [jobCode, joined]);
     if (res.success) {
-      showToast(tr('ui.toast_share_saved'), 'success');
-      refreshDataDinamis('dbjob');
+      window.showToast(window.tr('ui.toast_share_saved'), 'success');
+      window.refreshDataDinamis('dbjob');
     } else {
-      showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+      window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (tutupModalShare, copasShareWa, simpanDokumenShare,
+// toggleSharePreview, copyShareLink, dll).
+window.shareLinkFor = shareLinkFor;
+window.getJobByCode = getJobByCode;
+window.bukaModalShare = bukaModalShare;
+window.tutupModalShare = tutupModalShare;
+window.toggleSharePreview = toggleSharePreview;
+window.shareDocLabel = shareDocLabel;
+window.renderShareCheckboxes = renderShareCheckboxes;
+window.templateShareWa = templateShareWa;
+window.updateSharePreview = updateSharePreview;
+window.copasShareWa = copasShareWa;
+window.copyShareLink = copyShareLink;
+window.currentShareDocs = currentShareDocs;
+window.simpanDokumenShare = simpanDokumenShare;

@@ -6,16 +6,16 @@
 // kelola loker. Body fungsi byte-identik dari 05_render.js — perilaku tidak
 // berubah.
 
-function filterPublicData(s) {
-  currentPublicFilter = s;
-  limitPub = 10;
+export function filterPublicData(s) {
+  window.currentPublicFilter = s;
+  window.limitPub = 10;
   renderPublicFiltered();
 }
 
 // Filter status publik (Semua/Buka/Urgent/Tutup) dengan hitungan per status
 // + state aktif yang kontras di bar terang (Sakura) maupun gelap (Tokyo).
-function renderPublicFilterUI() {
-  var light = CURRENT_THEME === 'SAKURA';
+export function renderPublicFilterUI() {
+  var light = window.CURRENT_THEME === 'SAKURA';
   var defs = {
     ALL: {
       key: 'public.all',
@@ -39,8 +39,8 @@ function renderPublicFilterUI() {
     },
   };
   var count = function (st) {
-    if (st === 'ALL') return ALL_JOBS.length;
-    return ALL_JOBS.filter(function (j) {
+    if (st === 'ALL') return window.ALL_JOBS.length;
+    return window.ALL_JOBS.filter(function (j) {
       return String(j.status || '')
         .toUpperCase()
         .includes(st);
@@ -52,7 +52,7 @@ function renderPublicFilterUI() {
   ['ALL', 'OPEN', 'URGENT', 'CLOSE'].forEach(function (st) {
     var btn = document.getElementById('public-f-' + st);
     if (!btn) return;
-    var active = currentPublicFilter === st;
+    var active = window.currentPublicFilter === st;
     btn.className =
       'px-4 py-2 rounded-lg text-xs font-bold shadow-md transition ' +
       (active ? defs[st].active : baseInactive);
@@ -60,7 +60,7 @@ function renderPublicFilterUI() {
       '<i class="fas ' +
       defs[st].icon +
       ' mr-1"></i> ' +
-      tr(defs[st].key) +
+      window.tr(defs[st].key) +
       ' <span class="px-1.5 py-0.5 rounded-full text-[9px] ml-0.5 font-black ' +
       (active
         ? 'bg-white/30 text-white'
@@ -73,14 +73,14 @@ function renderPublicFilterUI() {
   });
 }
 
-function renderPublicFiltered() {
+export function renderPublicFiltered() {
   var tb = document.getElementById('public-table-body');
   if (!tb) return;
   renderPublicFilterUI();
   var html = '';
-  var arr = ALL_JOBS;
-  if (currentPublicFilter !== 'ALL') {
-    arr = ALL_JOBS.filter((j) => j.status.includes(currentPublicFilter));
+  var arr = window.ALL_JOBS;
+  if (window.currentPublicFilter !== 'ALL') {
+    arr = window.ALL_JOBS.filter((j) => j.status.includes(window.currentPublicFilter));
   }
 
   var sourceArray = [...arr];
@@ -98,47 +98,47 @@ function renderPublicFiltered() {
     return timeB - timeA;
   });
 
-  for (var i = 0; i < Math.min(sourceArray.length, limitPub); i++) {
+  for (var i = 0; i < Math.min(sourceArray.length, window.limitPub); i++) {
     var j = sourceArray[i];
 
     let statusKey = j.status.toLowerCase().replace(/[^a-z0-9]/g, '');
-    let translatedStatus = tr('status.' + statusKey);
+    let translatedStatus = window.tr('status.' + statusKey);
     if (translatedStatus === 'status.' + statusKey) translatedStatus = j.status;
 
     // FIX: tombol Lamar ikut tertutup kalau tahapan job sudah berjalan
     // (CHECK KAIWA dst) — bukan hanya dari kolom status CLOSE.
-    var tutupLamar = jobTutupUntukLamar(j);
+    var tutupLamar = window.jobTutupUntukLamar(j);
     var btnLamar = tutupLamar
       ? '<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-600 rounded-lg text-white text-[10px] font-bold opacity-50 cursor-not-allowed shadow-inner border border-slate-500">' +
-        tr('button.closed') +
+        window.tr('button.closed') +
         '</button>'
       : '<button onclick="lamarJob(\'' +
-        escJs(j.code) +
+        window.escJs(j.code) +
         "', '" +
-        escJs(j.kategori) +
+        window.escJs(j.kategori) +
         "', '" +
-        escJs(j.dokumenShare || '') +
+        window.escJs(j.dokumenShare || '') +
         '\')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-[0_4px_15px_rgba(5,150,105,0.4)] transition text-[11px] font-bold border border-emerald-500/50"><i class="fas fa-paper-plane mr-1"></i> ' +
-        tr('button.apply') +
+        window.tr('button.apply') +
         '</button>';
 
-    var directUrl = getDirectDownloadUrl(j.templateCv);
+    var directUrl = window.getDirectDownloadUrl(j.templateCv);
     var btnTemplate = directUrl
       ? '<a href="' +
         directUrl +
         '" target="_blank" download class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg shadow-[0_4px_15px_rgba(2,132,199,0.4)] transition text-[10px] font-bold border border-sky-500/50"><i class="fas fa-download mr-1"></i> ' +
-        tr('button.format') +
+        window.tr('button.format') +
         '</a>'
       : '';
 
     var actionBtns = '<div class="flex flex-col xl:flex-row gap-2 w-full justify-center">';
     actionBtns +=
       '<button onclick="bukaDetailLoker(\'' +
-      escJs(j.code) +
+      window.escJs(j.code) +
       '\')" class="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-[0_4px_15px_rgba(245,158,11,0.4)] transition text-[10px] font-black border border-amber-500/50" title="' +
-      tr('button.detail') +
+      window.tr('button.detail') +
       '"><i class="fas fa-eye mr-1"></i> ' +
-      tr('button.detail') +
+      window.tr('button.detail') +
       '</button>';
     if (btnTemplate) actionBtns += btnTemplate;
     actionBtns += btnLamar;
@@ -147,16 +147,16 @@ function renderPublicFiltered() {
     let ketHtml =
       j.keterangan && j.keterangan !== '-'
         ? '<div class="mt-2 pt-2 border-t border-slate-700/50 text-[10px] ' +
-          (CURRENT_THEME === 'SAKURA' ? 'text-amber-700' : 'text-amber-300/90') +
+          (window.CURRENT_THEME === 'SAKURA' ? 'text-amber-700' : 'text-amber-300/90') +
           ' leading-relaxed"><i class="fas fa-info-circle mr-1"></i> ' +
-          esc(j.keterangan) +
+          window.esc(j.keterangan) +
           '</div>'
         : '';
 
     let gText = (j.gender || '').toUpperCase();
-    let gLabel = trOption(j.gender);
+    let gLabel = window.trOption(j.gender);
     // Badge gender ikut theme: di SAKURA (light) pakai latar terang + teks gelap.
-    let light = CURRENT_THEME === 'SAKURA';
+    let light = window.CURRENT_THEME === 'SAKURA';
     let genderBadge = '';
     if (gText.includes('PRIA') || gText.includes('LAKI')) {
       genderBadge =
@@ -191,17 +191,17 @@ function renderPublicFiltered() {
     if (j.pamflet && j.pamflet !== '-' && j.pamflet.length > 5) {
       // Pamflet di Supabase Storage. Thumbnail versi kecil + lazy;
       // gambar penuh hanya diunduh saat diklik zoom (bukaPamflet).
-      let thumbUrl = thumbnailUrl(j.pamflet, 200);
+      let thumbUrl = window.thumbnailUrl(j.pamflet, 200);
       let fullUrl = j.pamflet;
       pamfletHtml =
         '<img src="' +
-        esc(thumbUrl) +
+        window.esc(thumbUrl) +
         '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' +
-        escJs(fullUrl) +
+        window.escJs(fullUrl) +
         '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border ' +
         (light ? 'border-rose-200' : 'border-slate-600') +
         ' shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' +
-        tr('ui.click_zoom') +
+        window.tr('ui.click_zoom') +
         '" alt="Pamflet">';
     }
 
@@ -213,20 +213,20 @@ function renderPublicFiltered() {
     let rowHover = light ? 'hover:bg-rose-900/5' : 'hover:bg-black/10';
 
     html +=
-      '<tr class="rt-row border-b ' +
-      (THEMES[CURRENT_THEME] ? THEMES[CURRENT_THEME].border : 'border-slate-800') +
+      '<window.tr class="rt-row border-b ' +
+      (window.THEMES[window.CURRENT_THEME] ? window.THEMES[window.CURRENT_THEME].border : 'border-slate-800') +
       ' ' +
       rowHover +
       ' transition">' +
       '<td data-label="' +
-      tr('table.code') +
+      window.tr('table.code') +
       '" class="p-4 font-mono text-sm text-center font-bold align-top ' +
       (light ? 'text-sky-600' : 'text-sky-400') +
       '">' +
-      esc(j.code) +
+      window.esc(j.code) +
       '</td>' +
       '<td data-label="' +
-      tr('table.job') +
+      window.tr('table.job') +
       '" class="rt-full p-4 align-top whitespace-normal min-w-[250px]">' +
       '<div class="flex items-start gap-4">' +
       pamfletHtml +
@@ -234,12 +234,12 @@ function renderPublicFiltered() {
       '<span class="font-bold text-base ' +
       textTitle +
       ' leading-tight">' +
-      esc(j.pekerjaan) +
+      window.esc(j.pekerjaan) +
       '</span>' +
       '<div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-[11px] ' +
       textSub +
       ' font-normal"><i class="fas fa-map-marker-alt mr-1 text-red-400"></i> ' +
-      esc(trOption(j.lokasi)) +
+      window.esc(window.trOption(j.lokasi)) +
       '</span>' +
       genderBadge +
       '</div>' +
@@ -247,51 +247,58 @@ function renderPublicFiltered() {
       '</div>' +
       '</td>' +
       '<td data-label="' +
-      tr('table.status') +
+      window.tr('table.status') +
       '" class="p-4 text-center align-top">' +
-      badgeTahapanDb(j.status) +
+      window.badgeTahapanDb(j.status) +
       '</td>' +
       '<td data-label="' +
-      tr('table.req') +
+      window.tr('table.req') +
       '" class="rt-full p-4 text-xs ' +
       textSub +
       ' whitespace-normal min-w-[250px] max-w-sm leading-relaxed align-top">' +
       String(j.syarat || '')
         .split(',')
         .map(function (s) {
-          return esc(trOption(s.trim()));
+          return window.esc(window.trOption(s.trim()));
         })
         .join(', ') +
       ketHtml +
       '</td>' +
       '<td data-label="' +
-      tr('table.action') +
+      window.tr('table.action') +
       '" class="rt-full p-4 align-top w-48">' +
       actionBtns +
       '</td>' +
-      '</tr>';
+      '</window.tr>';
   }
 
   if (arr.length === 0) {
     html =
-      '<tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
-      tr('public.empty') +
-      '</td></tr>';
-  } else if (arr.length > limitPub) {
+      '<window.tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
+      window.tr('public.empty') +
+      '</td></window.tr>';
+  } else if (arr.length > window.limitPub) {
     html +=
-      '<tr><td colspan="5" class="p-5 text-center"><button onclick="limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
-      tr('button.more') +
-      ' <i class="fas fa-chevron-down ml-2"></i></button></td></tr>';
+      '<window.tr><td colspan="5" class="p-5 text-center"><button onclick="window.limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
+      window.tr('button.more') +
+      ' <i class="fas fa-chevron-down ml-2"></i></button></td></window.tr>';
   }
   tb.innerHTML = html;
 }
 
-function filterKelolaLoker() {
+export function filterKelolaLoker() {
   var el = document.getElementById('search-kelola');
   var val = el ? el.value.toLowerCase() : '';
-  var arr = ALL_JOBS.filter(function (db) {
+  var arr = window.ALL_JOBS.filter(function (db) {
     return db.code.toLowerCase().includes(val) || db.pekerjaan.toLowerCase().includes(val);
   });
-  renderAdmin(arr);
+  window.renderAdmin(arr);
 }
 window.filterKelolaLoker = filterKelolaLoker;
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (filterPublicData, renderPublicFiltered, window.limitPub+=10;...).
+window.filterPublicData = filterPublicData;
+window.renderPublicFilterUI = renderPublicFilterUI;
+window.renderPublicFiltered = renderPublicFiltered;

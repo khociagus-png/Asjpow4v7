@@ -289,13 +289,35 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       DOM-safe, refreshDataDinamis via window.callAPI stub) ✓ · E2E
       login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file / **396 simbol**
       HIGH=0.
+- [x] **Langkah 6 — `js/render/*` ESM (5 file: public, admin, candidate, share, mail)** — commit `HASH6`
+      Domain render terbesar (pecahan 05_render.js): `public.js` (4: filter/tab
+      publik + filter kelola loker), `admin.js` (6: renderAdminFull/switchTab/
+      table DB job/badgeTahapanDb), `candidate.js` (tabel daftar kandidat +
+      jobDilamarCell), `share.js` (modal share + template WA), `mail.js`
+      (MAIL_SELECTED + status/bucket + filter UI + renderFormInbox) → export +
+      alias window.* (15).
+      `MAIL_SELECTED` di-reassign bare `js/api/forms.js` → **accessor bridge**
+      (pola state.js). 44 referensi lintas-file di-window-kan eksplisit
+      (no-undef 0 error); `var esc` lokal mail.js dipertahankan lokal (hoisting
+      mencakup renderFormInbox). ⚠️ Blanket replace sempat menimpa 4 alias
+      jadi self-reference (`window.x = window.x` → undefined) — ketahuan E2E,
+      diperbaiki manual; scan `window.X = window.X` wajib setelah blanket.
+      Build: ESM_CORE + 5 entri → `app-4c1c681c7c.js` (415.3 KB, 0 export
+      bocor). Verifikasi: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓
+      · test **81/81** ✓ · audit 45 file STACK / **391 simbol** HIGH=0 ✓.
+      🐛 **Fix backend lintas-domain**: `nextCandidateId()` hanya scan
+      `database_candidate` → master_database_candidate yang sudah punya id ≥ max
+      bikin simpan biodata kandidat baru 409 `uq_master_id_kandidat` (kasus
+      nyata ASJ00226). `maxCandidateIdNumber()` + fallback scan KEDUA tabel
+      (`db/candidates.js` + `candidate-helpers.js`); 2 baris leftover E2E
+      dibersihkan. E2E login/upload/biodata **SEMUA LULUS** ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
       (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
       2. ✅ `init/{state,util}.js` (state: accessor bridge; util: alias window),
-      3. ✅ `04_auth.js` (langkah 4) + `engine/*` (langkah 5) — lanjut: render → api → admin_* → ai_copilot → sisanya,
+      3. ✅ `04_auth.js` (langkah 4) + `engine/*` (langkah 5) + `render/*` (langkah 6) — lanjut: api → admin_* → ai_copilot → sisanya,
       tiap langkah: `export` simbol + `import` di pemakainya, `bun run check:globals`
       tetap hijau, lint/test hijau, bundel tetap sama ukurannya.
 - [ ] Objek global publik (`callAPI`, `tr`, `LANG`, `CURRENT_LANG`) — ✅ sudah diekspor dari `api-client.js` & `i18n.js` (langkah 2); pemakai classic tetap dapat via `window` alias (uji kompat); hapus alias satu per satu setelah semua pemakainya di-import.

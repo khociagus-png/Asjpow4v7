@@ -331,11 +331,14 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
-   (langkah 5, turn ini)** — catatan: fungsi yang dipanggil HTML inline
-   `onclick` WAJIB dapat alias window; referensi global implisit di dalam modul
-   di-window-kan eksplisit; **antar-file ESM belum boleh `import` (build masih
-   concat + IIFE per file) — panggilan lintas modul ESM memakai `window.*`
-   eksplisit sampai bundle jadi ESM (lihat §3.3)**.
+   (langkah 5) + `render/*` ✅ (langkah 6, turn ini)** — catatan: fungsi yang
+   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
+   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
+   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
+   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
+   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
+   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
+   harus dicek self-reference alias (`window.x = window.x`) setelah jalan.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -346,6 +349,23 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 6 — render/* ESM (turn ini, commit `HASH6`)
+
+- `node --check --input-type=module` 5 file js/render/* ✓ · scan `no-undef`
+  **0 error** ✓ (44 nama lintas-file di-window-kan eksplisit) · `bun run
+  lint` 0/12 ✓ · `bun run test` **81/81** ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **391 simbol**) ·
+  bundel `app-4c1c681c7c.js` (415.3 KB) · 0 export bocor ✓.
+- Temuan proses: blanket replace sempat menimpa 4 alias jadi self-reference
+  (`window.badgeTahapanDb = window.badgeTahapanDb`, `filterKandidat`,
+  `renderFormInbox`, `renderJobDilamar`) → E2E menangkapnya; `var esc` lokal
+  mail.js dipertahankan lokal (12 call-site).
+- 🐛 **Fix backend lintas-domain** (ditemukan E2E): `nextCandidateId()` hanya
+  scan `database_candidate` → bentrok id dengan `master_database_candidate`
+  (409 `uq_master_id_kandidat` ASJ00226) → `maxCandidateIdNumber()` + fallback
+  kini scan KEDUA tabel. Leftover E2E dibersihkan. **E2E SEMUA LULUS**: login,
+  upload, biodata (modal tertutup + data tersinkron + persist) ✓.
 
 ## 7. Verifikasi turn ini (2026-08-16)
 

@@ -139,29 +139,32 @@ describe('Sink render js/render/* (S1 coverage)', () => {
   // dibungkus esc(...) / escJs(...). Kalau pola "mentah" di bawah muncul,
   // artinya ada regresi escape di jalur render tersebut.
 
+  // Catatan Fase 3 (ESM): render/*.js kini modul ES — pemanggilan lintas file
+  // memakai window.* eksplisit (`window.esc(window.trOption(...))`); mail.js
+  // punya esc LOKAL sendiri di renderFormInbox (`esc(window.trOption(...))`).
   it('tabel mail (kategori & status) di-escape', () => {
-    expect(renderSrc).toContain("esc(trOption(f.kategori || '-'))");
-    expect(renderSrc).toContain('esc(trOption(f.status))');
+    expect(renderSrc).toContain("esc(window.trOption(f.kategori || '-'))");
+    expect(renderSrc).toContain('esc(window.trOption(f.status))');
   });
 
   it('tabel kandidat (tahapan & status) di-escape', () => {
-    expect(renderSrc).toContain('esc(trOption(c.tahapan))');
-    expect(renderSrc).toContain('esc(trOption(c.status))');
+    expect(renderSrc).toContain('window.esc(window.trOption(c.tahapan))');
+    expect(renderSrc).toContain('window.esc(window.trOption(c.status))');
   });
 
   it('tabel db-job (kategori & lokasi) di-escape', () => {
-    expect(renderSrc).toContain('esc(trOption(db.kategori))');
-    expect(renderSrc).toContain('esc(trOption(db.lokasi))');
+    expect(renderSrc).toContain('window.esc(window.trOption(db.kategori))');
+    expect(renderSrc).toContain('window.esc(window.trOption(db.lokasi))');
   });
 
   it('tabel loker publik (code, lokasi, syarat) di-escape', () => {
-    expect(renderSrc).toContain('esc(j.code)');
-    expect(renderSrc).toContain('esc(trOption(j.lokasi))');
-    expect(renderSrc).toContain('return esc(trOption(s.trim()));');
+    expect(renderSrc).toContain('window.esc(j.code)');
+    expect(renderSrc).toContain('window.esc(window.trOption(j.lokasi))');
+    expect(renderSrc).toContain('return window.esc(window.trOption(s.trim()));');
   });
 
   it('badge status/tahapan (badgeTahapanDb) di-escape di sumber', () => {
-    expect(renderSrc).toContain('var label = esc(trOption(t));');
+    expect(renderSrc).toContain('var label = window.esc(window.trOption(t));');
   });
 
   it('argumen onclick selalu lewat escJs (tidak ada data mentah di onclick)', () => {

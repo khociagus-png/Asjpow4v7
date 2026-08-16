@@ -1,6 +1,23 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 5 — commit `4ea3e32`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 6 — commit `HASH6`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 6: render js/render/* ESM + fix id kandidat (refactor & bugfix)
+
+### Refactor: public, admin, candidate, share, mail jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 5 file render (15 fungsi) → export + alias window.*; `MAIL_SELECTED` pakai accessor bridge (di-reassign `js/api/forms.js`).
+- Referensi global implisit di-window-kan eksplisit (no-undef 0 error); 4 alias self-reference korup dari blanket replace diperbaiki (ketahuan E2E).
+- Bundel `app-4c1c681c7c.js` (415.3 KB, 0 export bocor, nol kolisi).
+
+### 🐛 Bugfix: simpan biodata 409 — nextCandidateId() tidak melihat master_database_candidate
+
+- E2E biodata-check gagal (modal tidak tertutup, tanpa error JS) → diagnostik: `simpanBiodataLengkap` HTTP 409 `uq_master_id_kandidat` ASJ00226.
+- `maxCandidateIdNumber()` kini scan `database_candidate` + `master_database_candidate` (fast path & fallback) — cegah bentrok id ASJ antar-tabel.
+- Leftover E2E (2 baris wa 6281201154027) dibersihkan; biodata-check hijau kembali.
 
 ---
 

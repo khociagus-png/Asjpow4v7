@@ -8,7 +8,7 @@
 
 // Kolom "Job Dilamar" di tabel kandidat: job utama (id_loker_pilihan) +
 // chip +N kalau kandidat punya lamaran lain di mail (multi-apply).
-function jobDilamarCell(c) {
+export function jobDilamarCell(c) {
   var primaryRaw = String((c && c.idLoker) || '').trim();
   var primaryCodes = primaryRaw
     .split(',')
@@ -21,7 +21,7 @@ function jobDilamarCell(c) {
     var code = a && a.code ? String(a.code).trim() : '';
     if (code && primaryCodes.indexOf(code) === -1) extra++;
   });
-  var label = primaryRaw && primaryRaw !== '-' ? esc(primaryRaw) : esc('Umum');
+  var label = primaryRaw && primaryRaw !== '-' ? window.esc(primaryRaw) : window.esc('Umum');
   if (extra > 0) {
     label +=
       '<span class="px-1.5 py-0.5 ml-1 rounded-md bg-sky-900/70 text-sky-300 border border-sky-600/50 text-[9px] font-bold">+' +
@@ -40,17 +40,17 @@ function jobDilamarCell(c) {
       '<button onclick="' +
       (isImg ? 'bukaFotoPreview' : 'bukaPdfPreview') +
       "('" +
-      escJs(acv) +
+      window.escJs(acv) +
       '\')" title="CV ' +
-      esc(acode) +
+      window.esc(acode) +
       '" class="px-1.5 py-0.5 rounded bg-indigo-900/70 text-indigo-300 border border-indigo-600/50 text-[9px] font-bold hover:bg-indigo-700 hover:text-white transition whitespace-nowrap"><i class="fas fa-file-alt mr-0.5"></i>CV ' +
-      esc(acode) +
+      window.esc(acode) +
       '</button>';
   });
   return label + (appCvBtns ? '<span class="flex flex-wrap gap-1 mt-1.5">' + appCvBtns + '</span>' : '');
 }
 
-async function filterKandidat() {
+export async function filterKandidat() {
   // Pencarian admin butuh daftar penuh - pastikan semua halaman sudah dimuat.
   if (typeof window.ensureAllCandidates === 'function') {
     try {
@@ -70,7 +70,7 @@ async function filterKandidat() {
     ? document.getElementById('filter-db-jft').value
     : 'all';
 
-  var arr = ALL_CANDIDATES.filter(function (c) {
+  var arr = window.ALL_CANDIDATES.filter(function (c) {
     // Text Search
     let matchText =
       c.nama.toLowerCase().includes(val) ||
@@ -107,104 +107,111 @@ async function filterKandidat() {
   renderKandidatTable(arr);
 }
 
-function renderKandidatTable(arr) {
+export function renderKandidatTable(arr) {
   var tb = document.getElementById('admin-kandidat-body');
   if (!tb) return;
   var html = '';
-  for (var i = 0; i < Math.min(arr.length, limitKan); i++) {
+  for (var i = 0; i < Math.min(arr.length, window.limitKan); i++) {
     var c = arr[i];
     var waLink = 'https://wa.me/' + String(c.wa).replace(/\D/g, '');
 
     let isVip = (c.catatanInt || '').includes('[VIP]');
     let logoSrc =
-      ASSETS.LOGO ||
+      window.ASSETS.LOGO ||
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
 
     let namaTampil = isVip
-      ? esc(c.nama) +
+      ? window.esc(c.nama) +
         ' <img src="' +
-        esc(logoSrc) +
+        window.esc(logoSrc) +
         '" class="inline-block w-4 h-4 ml-1 rounded-full border border-emerald-500/50 object-contain drop-shadow-md" title="' +
-        tr('ui.badge_official') +
+        window.tr('ui.badge_official') +
         '">'
-      : esc(c.nama);
+      : window.esc(c.nama);
 
     html +=
-      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+      '<window.tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
-      tr('table.candidate_id') +
+      window.tr('table.candidate_id') +
       '" class="p-4 font-mono text-sky-300 font-bold">' +
-      esc(c.idKandidat) +
+      window.esc(c.idKandidat) +
       '</td>' +
       '<td data-label="' +
-      tr('table.full_name') +
+      window.tr('table.full_name') +
       '" class="p-4 font-bold text-white">' +
       namaTampil +
       '</td>' +
       '<td data-label="' +
-      tr('table.applied_job') +
+      window.tr('table.applied_job') +
       '" class="p-4 text-amber-300 font-mono text-xs max-w-[200px]">' +
       jobDilamarCell(c) +
       '</td>' +
       '<td data-label="' +
-      tr('table.stage_status') +
+      window.tr('table.stage_status') +
       '" class="rt-full p-4 text-xs font-bold text-sky-400">' +
-      esc(trOption(c.tahapan)) +
+      window.esc(window.trOption(c.tahapan)) +
       '<br><span class="text-[10px] font-normal text-slate-400">' +
-      esc(trOption(c.status)) +
+      window.esc(window.trOption(c.status)) +
       '</span></td>' +
       '<td data-label="' +
-      tr('table.admin_note') +
+      window.tr('table.admin_note') +
       '" class="rt-full p-4 text-[11px] text-slate-400 max-w-[150px] truncate">' +
-      esc(c.catatanExt || c.catatan || '-') +
+      window.esc(c.catatanExt || c.catatan || '-') +
       '</td>' +
       '<td data-label="' +
-      tr('table.action_candidate') +
+      window.tr('table.action_candidate') +
       '" class="rt-full p-4 text-center flex gap-2 justify-center flex-wrap">' +
       // TOMBOL 1: Lihat Dashboard/Profil Digital
       '<button onclick="bukaDigitalCV(\'' +
-      escJs(c.idKandidat) +
+      window.escJs(c.idKandidat) +
       '\')" aria-label="' +
-      tr('button.view_cv') +
+      window.tr('button.view_cv') +
       '" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-[10px] shadow transition" title="' +
-      tr('button.view_cv') +
+      window.tr('button.view_cv') +
       '"><i class="fas fa-user-circle"></i></button> ' +
       // TOMBOL 2: Tombol Baru Admin Lihat & Print CV
       '<button onclick="bukaPreviewCV_Admin(\'' +
-      escJs(c.wa) +
+      window.escJs(c.wa) +
       '\')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] shadow transition font-bold" title="' +
-      tr('ui.view_rireki') +
+      window.tr('ui.view_rireki') +
       '"><i class="fas fa-file-pdf mr-1"></i> CV</button> ' +
       // TOMBOL 3: Super Edit Kandidat
       '<button onclick="bukaSuperEditKandidat(\'' +
-      escJs(c.idKandidat) +
+      window.escJs(c.idKandidat) +
       '\')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded text-[10px] font-bold shadow transition" title="' +
-      tr('ui.edit_candidate') +
+      window.tr('ui.edit_candidate') +
       '"><i class="fas fa-user-shield"></i> ' +
-      tr('admin.btn_edit') +
+      window.tr('admin.btn_edit') +
       '</button> ' +
       // TOMBOL 4 & 5: Buka Form Master Manual & Kirim WA
       '<button onclick="bukaMasterEksternalAdmin(\'' +
-      escJs(c.wa) +
+      window.escJs(c.wa) +
       "', '" +
-      escJs(c.nama) +
+      window.escJs(c.nama) +
       '\')" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white rounded text-[10px] shadow transition" title="' +
-      tr('ui.open_master_form') +
+      window.tr('ui.open_master_form') +
       '"><i class="fas fa-file-alt"></i> AI CV</button>' +
       '<button onclick="bukaModalWaPintar(\'' +
-      escJs(c.idKandidat) +
+      window.escJs(c.idKandidat) +
       '\')" aria-label="' +
-      tr('ui.send_wa_call') +
+      window.tr('ui.send_wa_call') +
       '" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] shadow transition" title="' +
-      tr('ui.send_wa_call') +
+      window.tr('ui.send_wa_call') +
       '"><i class="fab fa-whatsapp"></i></button>' +
-      '</td></tr>';
+      '</td></window.tr>';
   }
-  if (arr.length > limitKan) {
+  if (arr.length > window.limitKan) {
     html +=
-      '<tr><td colspan="6" class="p-4 text-center"><button onclick="limitKan+=10; filterKandidat();" class="text-xs text-sky-400 font-bold">' +
-      tr('form.txt_lebih_banyak') +
-      '</button></td></tr>';
+      '<window.tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      window.tr('form.txt_lebih_banyak') +
+      '</button></td></window.tr>';
   }
   tb.innerHTML = html;
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
+window.jobDilamarCell = jobDilamarCell;
+window.filterKandidat = filterKandidat;
+window.renderKandidatTable = renderKandidatTable;
