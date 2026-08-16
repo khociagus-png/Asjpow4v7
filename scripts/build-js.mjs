@@ -36,7 +36,6 @@ const STACK = [
   '/api-client.js',
   '/i18n.js',
   '/js/upload-guard.js',
-  '/js/00_dictionary.js',
   '/js/01_public.js',
   // Fase 2: js/02_init.js dipecah per domain (state/theme/util/preview/nav/boot).
   '/js/init/state.js',
