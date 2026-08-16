@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
-### Commit `<next>` — Fix: AI form gagal simpan ke Supabase + verifikasi auto-fill
+### Commit `d0c1a71` — Fix: AI form gagal simpan ke Supabase + verifikasi auto-fill
 
 - **Permintaan user:** "Ai form dan CV ai check apakah semua data bisa
   masuk dan save di superbase dan auto fill sudah benar ambil semua".

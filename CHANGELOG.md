@@ -1,12 +1,12 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `<next>`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `d0c1a71`.
 
 ---
 
 ## 2026-08-16 — Fix simpan AI form (CHECK constraint) + verifikasi auto-fill
 
-### Commit `<next>` — Fix: AI form gagal simpan (mode/status ditolak DB)
+### Commit `d0c1a71` — Fix: AI form gagal simpan (mode/status ditolak DB)
 - **BUG:** `handleSubmitDataAsj` (alur `ai_form.html`) menulis
   `mode:'ai'` + `status:'SUBMITTED'` ke `ai_form_submissions` — tetapi
   tabel itu punya CHECK constraint yang hanya mengizinkan
