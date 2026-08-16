@@ -8,6 +8,7 @@ const { requireRole } = require('./actions-auth');
 const { uploadBase64 } = require('./storage');
 const { FILE_LABEL_COLUMNS, fileLabelKey } = require('./actions-upload');
 const { findMasterByWa } = require('./actions-master');
+const { cacheClear } = require('./cache');
 
 async function handleGetDriveLinkCandidates(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
@@ -37,6 +38,7 @@ async function handleUploadDriveReplacement(payload, sessionToken) {
     .toUpperCase();
   const f = d.fileData || {};
   if (!idKand || !f.data) return { success: false, error: 'Data tidak lengkap.' };
+  cacheClear(); // berkas kandidat diganti (Drive→Storage) → buang cache dedupe
   try {
     const nama = String(d.nama || 'KANDIDAT').toUpperCase();
     const folder = 'master/' + nama.replace(/[^A-Z0-9_-]/g, '_');

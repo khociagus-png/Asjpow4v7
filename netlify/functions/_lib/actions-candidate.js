@@ -10,10 +10,12 @@ const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa } = require('./candidate-helpers');
 const { stripRaw, loadCandidatesUnik } = require('./actions-public');
+const { cacheClear } = require('./cache');
 
 async function handleUpdateCatatanKandidat(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
   if (guard.error) return guard.error;
+  cacheClear(); // catatan kandidat berubah → buang cache dedupe
   const [id, intNote, extNote] = payload || [];
   if (!id) return { success: false, error: 'ID kandidat tidak ditemukan.' };
   try {
@@ -34,6 +36,7 @@ async function handleUpdateCatatanKandidat(payload, sessionToken) {
 async function handleUpdateKandidatSuper(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
   if (guard.error) return guard.error;
+  cacheClear(); // data kandidat berubah → buang cache dedupe
   const data = (payload && payload[0]) || {};
   if (!data.wa) return { success: false, error: 'Nomor WA tidak ditemukan.' };
   const body = {

@@ -173,9 +173,20 @@ function saringKandidatUnik(uniq, q) {
 // TANPA batas 300 baris → dedupe+filter+sort di JS → baris PENUH hanya untuk
 // halaman yang diminta (findCandidatesByIds). Semantik urutan TIDAK berubah.
 // Fallback: scan penuh lama (skema kolom/tabel tidak dikenal).
+// TTL cache hasil dedupe kandidat (Fase 3 langkah 17) — getAppData admin
+// dipanggil tiap buka halaman / ganti tab / auto-refresh 120 dtk; tanpa cache,
+// SETIAP panggilan full-scan seluruh tabel kandidat (findAllCandidatesLight
+// paginasi penuh tanpa limit). TTL pendek + invalidasi saat mutasi
+// (cacheClear di handler review/approve/reject/delete/kandidat/master/upload/
+// register) menjaga data tetap segar. Cache per (q, page, pageSize).
+const CAND_CACHE_TTL_MS = 25_000;
+
 async function loadCandidatesUnik(q, opts = {}) {
   const page = Number(opts.page) || 1;
   const pageSize = Number(opts.pageSize) || 50;
+  const cacheKey = 'cand:' + String(q || '') + '|p' + page + '|s' + pageSize;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
   const start = (page - 1) * pageSize;
   const tsOf = (r) =>
     String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
@@ -195,7 +206,9 @@ async function loadCandidatesUnik(q, opts = {}) {
       // Semua id halaman harus ter-resolve ke baris penuh; kalau ada yang
       // tidak (data legacy tanpa id) → fallback scan penuh biar aman.
       if (slice.every((r) => byId.has(String(r.id)))) {
-        return { rows: slice.map((r) => byId.get(String(r.id))), total };
+        const result = { rows: slice.map((r) => byId.get(String(r.id))), total };
+        cacheSet(cacheKey, result, CAND_CACHE_TTL_MS);
+        return result;
       }
     }
   }

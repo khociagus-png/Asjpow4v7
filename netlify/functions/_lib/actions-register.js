@@ -6,6 +6,7 @@
 
 const { normalizeGender, supabaseJson } = require('./db/client');
 const { env } = require('./env');
+const { cacheClear } = require('./cache');
 
 // ---------------------------------------------------------------------------
 // Siswa baru (respon_siswa_baru)
@@ -40,6 +41,7 @@ async function handleGetDaftarSiswaBaru(payload, sessionToken) {
 }
 
 async function handleSubmitDaftarSiswa(payload) {
+  cacheClear(); // siswa baru masuk → daftar kandidat berubah
   const d = payload || {};
   const nama = String(d.nama || '').trim();
   if (!nama) return { success: false, message: 'Nama wajib diisi.' };

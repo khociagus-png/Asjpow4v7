@@ -13,6 +13,7 @@ const { hasBackend, normalizeWa, pick, supabaseJson, toText } = require('./db/cl
 const { findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
 const { findAdmins } = require('./db/misc');
 const session = require('./session');
+const { cacheClear } = require('./cache');
 const { findCandidateByWa, CAND_WA_COLS } = require('./candidate-helpers');
 
 function masterPins() {
@@ -143,6 +144,7 @@ async function handleDaftarKandidat(payload) {
   const nama = String((payload && payload[0]) || '').trim();
   const wa = normalizeWa(String((payload && payload[1]) || ''));
   if (!nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
+  cacheClear(); // kandidat baru terdaftar → buang cache dedupe
   // Gate WA: tolak nomor yang bukan HP Indonesia (62 8xx, total 12-13 digit) —
   // biasanya salah ketik yang melahirkan kandidat duplikat di masa lalu.
   if (!isValidWaFormat(wa)) {

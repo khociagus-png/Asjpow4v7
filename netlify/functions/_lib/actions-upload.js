@@ -11,6 +11,7 @@ const { findCandidateByWaFiltered, findCandidates, mapCandidate } = require('./d
 const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { findMasterByWa } = require('./actions-master');
+const { cacheClear } = require('./cache');
 const {
   bucket,
   storageRequest,
@@ -194,6 +195,7 @@ async function handleIsJobRequiresCv(payload) {
 
 // submitApply([payload]) → simpan/update lamaran di database_asj_form.
 async function handleSubmitApply(payload) {
+  cacheClear(); // lamaran baru masuk → inbox/kandidat berubah
   const d = (payload && payload[0]) || {};
   const wa = normalizeWa(String(d.wa || ''));
   const code = String(d.job || '').trim();
@@ -346,6 +348,7 @@ function fileLabelKey(label) {
 async function handleSimpanKandidatDanUpload(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
   if (guard.error) return guard.error;
+  cacheClear(); // kandidat/berkas baru → buang cache dedupe
   const d = (payload && payload[0]) || {};
   const wa = normalizeWa(String(d.wa || ''));
   if (!d.nama || !wa) return { success: false, error: 'Nama dan nomor WA wajib diisi.' };
@@ -521,6 +524,7 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
 // DAN kandidat (upload berkas sendiri dari dashboard).
 // ---------------------------------------------------------------------------
 async function handleSimpanBerkasTahapan(payload, sessionToken) {
+  cacheClear(); // berkas tahapan berubah → buang cache dedupe
   const d = (payload && payload[0]) || {};
   const t = session.verifyToken(sessionToken);
   if (!t || (t.role !== 'admin' && t.role !== 'kandidat')) {
@@ -640,6 +644,7 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
 async function handleSimpanRevisiKandidat(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'kandidat');
   if (guard.error) return guard.error;
+  cacheClear(); // revisi kandidat → buang cache dedupe
   const wa = String((payload && payload[0]) || '');
   const f = (payload && payload[1]) || {};
   if (!wa || !f.data) return { success: false, error: 'Data tidak lengkap.' };

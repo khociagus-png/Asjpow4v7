@@ -10,6 +10,7 @@ const { findCandidates, mapCandidate } = require('./db/candidates');
 const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa } = require('./candidate-helpers');
+const { cacheClear } = require('./cache');
 const { stripRaw } = require('./actions-public');
 
 // Pemetaan payload frontend -> kolom tabel job_database (snake_case).
@@ -203,6 +204,7 @@ async function handleTandaiGagalJob(payload, sessionToken) {
   if (guard.error) return guard.error;
   const [wa, jobCode] = payload || [];
   if (!wa || !jobCode) return { success: false, error: 'Data tidak lengkap.' };
+  cacheClear(); // status kandidat berubah (GAGAL) → buang cache dedupe
   try {
     const row = await findCandidateByWa(wa);
     if (!row) {

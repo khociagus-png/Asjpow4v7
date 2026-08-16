@@ -10,6 +10,7 @@ const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { syncBiodataKeMail } = require('./actions-mail');
 const { nextCandidateId } = require('./candidate-helpers');
+const { cacheClear } = require('./cache');
 
 // Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
 // Dipakai handleSimpanUpdateMaster untuk mencatat "[BIODATA] … diubah" ke mail
@@ -584,6 +585,7 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
 
 // submitMasterForm([payload]) → simpan/update master_database_candidate.
 async function handleSubmitMasterForm(payload, sessionToken) {
+  cacheClear(); // biodata/CV master berubah → buang cache dedupe kandidat
   const d = (payload && payload[0]) || {};
   const wa = normalizeWa(String(d.wa || ''));
   // Kandidat pemilik WA (dashboard/CV AI) ATAU admin (parse dokumen biodata).

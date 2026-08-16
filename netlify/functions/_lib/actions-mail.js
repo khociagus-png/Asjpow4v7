@@ -11,10 +11,14 @@ const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa, nextCandidateId } = require('./candidate-helpers');
 const { stripRaw } = require('./actions-public');
+const { cacheClear } = require('./cache');
 
 // Frontend mengirim rowIndex (posisi di array formInbox). Urutan harus sama
 // dengan findForms() yang dipakai getAppData.
 async function handleFormStatus(rowIndex, status, reason) {
+  // Status lamaran berubah → data kandidat/inbox berubah → buang cache
+  // dedupe kandidat (loadCandidatesUnik) supaya getAppData berikutnya fresh.
+  cacheClear();
   const idx = Number(rowIndex);
   if (!Number.isInteger(idx) || idx < 0) {
     return { success: false, error: 'Index form tidak valid.' };
@@ -155,6 +159,7 @@ async function handleRejectForm(payload, sessionToken) {
 async function handleDeleteForm(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
   if (guard.error) return guard.error;
+  cacheClear(); // lamaran dihapus → data kandidat/inbox berubah
   const idx = Number((payload || [])[0]);
   if (!Number.isInteger(idx) || idx < 0) {
     return { success: false, error: 'Index form tidak valid.' };
