@@ -75,6 +75,7 @@ async function loadSchedules() {
       link: supabase.toText(r.lokasi_link || '-'),
       kandidat: supabase.toText(r.daftar_kandidat || '-'),
       tsk: supabase.toText(r.tsk || ''),
+      status: supabase.toText(r.status_jadwal || 'AKTIF'),
     }));
   } catch {
     return [];
@@ -361,7 +362,47 @@ async function handleGetAppData(payload, sessionToken) {
       if (myForms === undefined) myForms = await supabase.findForms();
       supabase.attachApplications(myCands, myForms);
       result.candidates = myCands;
-      result.kandidatRiwayat = myCands;
+      // Riwayat lamaran kandidat = daftar aplikasi (code/status/timestamp),
+      // bukan objek kandidat — frontend renderRiwayatKandidat membaca field
+      // r.jobCode/r.kode/r.code. Sebelumnya dikirim myCands (objek kandidat)
+      // → kode loker selalu kosong & card progres tidak bisa di-filter per loker.
+      result.kandidatRiwayat = (myCands[0] && myCands[0].applications) || [];
+      // Jadwal untuk kandidat: filter jadwal yang relevan — WA kandidat ada di
+      // daftar_kandidat ATAU jadwal terkait loker yang kandidat lamar. Bentuk
+      // objek disesuaikan dgn render frontend (agenda/status/waktu/lokasi/link).
+      // Sebelumnya `mySchedules` tidak pernah dibangun backend → box jadwal
+      // kandidat selalu kosong walau admin sudah membuat jadwal.
+      try {
+        const allSched = await loadSchedules();
+        const myJobCodes = new Set(
+          (Array.isArray(myForms) ? myForms : [])
+            .map((f) => String(supabase.pick(f, ['code_job', 'code']) || '').toUpperCase())
+            .filter(Boolean),
+        );
+        result.mySchedules = allSched
+          .filter((s) => {
+            const kandidatList = String(s.kandidat || '')
+              .split(/[\n,;]+/)
+              .map((x) => supabase.normalizeWa(x))
+              .filter(Boolean);
+            const inDaftar =
+              kandidatList.length > 0 &&
+              kandidatList.some((k) => k === w || k.endsWith(w.slice(-9)));
+            const lokerSama =
+              String(s.idLoker || '').toUpperCase() !== '-' &&
+              myJobCodes.has(String(s.idLoker || '').toUpperCase());
+            return inDaftar || lokerSama;
+          })
+          .map((s) => ({
+            agenda: s.namaAgenda || '',
+            status: s.status || 'AKTIF',
+            waktu: s.waktu || '',
+            lokasi: s.link && s.link !== '-' ? s.link : '-',
+            link: s.link && s.link !== '-' ? s.link : '',
+          }));
+      } catch {
+        result.mySchedules = [];
+      }
     }
 
     return result;

@@ -183,6 +183,15 @@ function kirimWaPintar() {
   document.getElementById('modal-wa-pintar').classList.add('hidden');
 }
 
+// Filter loker aktif di card progres "Status Lamaran Terkini". Default: loker
+// dengan status LULUS/AKTIF, kalau tidak ada ambil yang pertama (terbaru).
+let _riwayatLokerAktif = null;
+
+function pilihLokerRiwayat(code) {
+  _riwayatLokerAktif = code || null;
+  renderRiwayatKandidat();
+}
+
 function renderRiwayatKandidat() {
   var container = document.getElementById('k-dash-riwayat');
   if (!container) return;
@@ -206,7 +215,52 @@ function renderRiwayatKandidat() {
     let sorted = ALL_RIWAYAT_KANDIDAT.slice().sort(
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
     );
+
+    // PILL PILIHAN LOKER — 1 klik = progres tahapan loker itu saja (tidak
+    // menumpuk semua lamaran jadi satu). Data per lamaran: code_job -> status.
+    var lokerList = [];
+    var seen = new Set();
     sorted.forEach((r) => {
+      var code = String(r.jobCode || r.kode || r.code || '').trim();
+      if (!code || seen.has(code)) return;
+      seen.add(code);
+      lokerList.push({
+        code,
+        st: String(r.status || '').toUpperCase(),
+      });
+    });
+    if (lokerList.length > 0 && !lokerList.some((l) => l.code === _riwayatLokerAktif)) {
+      // Default: loker LULUS/AKTIF lebih dulu, sisanya terbaru.
+      var prev = lokerList.find((l) => l.st === 'LULUS' || l.st === 'AKTIF' || l.st === 'LOLOS');
+      _riwayatLokerAktif = (prev ? prev : lokerList[0]).code;
+    }
+    if (lokerList.length > 1) {
+      html +=
+        '<div class="flex flex-wrap gap-1.5 mb-3"><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider self-center">' +
+        tr('ui.pilih_loker') +
+        '</span>';
+      lokerList.forEach((l) => {
+        var aktif = l.code === _riwayatLokerAktif;
+        var cls = aktif
+          ? 'bg-emerald-600 text-white border-emerald-400'
+          : 'bg-slate-800 text-slate-300 border-slate-600 hover:border-emerald-500/60 hover:text-white';
+        html +=
+          '<button onclick="pilihLokerRiwayat(\'' +
+          escJs(l.code) +
+          '\')" class="px-2.5 py-1 rounded-full border text-[10px] font-black transition ' +
+          cls +
+          '">' +
+          esc(l.code) +
+          (l.st === 'LULUS' || l.st === 'AKTIF' || l.st === 'LOLOS' ? ' <i class="fas fa-check-circle"></i>' : '') +
+          '</button>';
+      });
+      html += '</div>';
+    }
+
+    var listShown = _riwayatLokerAktif
+      ? sorted.filter((r) => String(r.jobCode || r.kode || r.code || '').trim() === _riwayatLokerAktif)
+      : sorted;
+    listShown.forEach((r) => {
       let st = String(r.status || '').toUpperCase();
       let badgeClass = '';
       let icon = '';
@@ -299,7 +353,7 @@ function renderRiwayatKandidat() {
         dateStr +
         '</span></div>' +
         '<div class="text-[11px] text-slate-400 mt-1 break-words"><i class="fas fa-tag mr-1 text-sky-500/70"></i> ' +
-        esc(trOption(r.kategori || 'Umum')) +
+        esc(trOption(r.kategori || r.jobCode || r.kode || r.code || '-')) +
         '</div>' +
         '</div>' +
         '<div class="text-left sm:text-right min-w-0 max-w-full">' +
