@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
-### Commit `<next>` — Fix: Chat Jeklin tanya TB/BB yang sudah ada di DB
+### Commit `5e8f65e` — Fix: Chat Jeklin tanya TB/BB yang sudah ada di DB
 
 - **Laporan user (screenshot live ai_form):** user tanya ukuran baju/sepatu/topi
   berdasarkan TB/BB → Jeklin malah bertanya "TB & BB berapa?" padahal di master
