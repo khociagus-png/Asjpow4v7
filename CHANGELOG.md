@@ -1,6 +1,25 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `5e8f65e`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `<next>`.
+
+---
+
+## 2026-08-16 — Fix Simpan Final master-full: id duplikat `ktp` (NIK vs file KTP)
+
+### Fix: rename file input KTP → `ktpFile` (master-full.html)
+- **BUG (screenshot live):** klik **Simpan Final** di Form Master Lengkap → alert
+  "Terjadi kesalahan sistem: Cannot read properties of null (reading 'length')".
+- **Akar:** id `ktp` dipakai 2× — `<input id="ktp" type="number">` (NIK, step Data
+  Diri, line 124) dan `<input type="file" id="ktp">` (upload KTP PDF, step
+  Dokumen, line 308). `getEl('ktp')` selalu mengembalikan elemen PERTAMA → saat
+  simpan, `getEl("ktp").files` = `null` (input number tidak punya FileList) →
+  `.files.length` melempar TypeError. Efek samping lain: tombol **PILIH** KTP
+  men-trigger input NIK sehingga dialog pilih file tidak pernah terbuka.
+- Fix: file input KTP di-rename jadi `ktpFile` (input & tombol PILIH & pembaca
+  `fileKtp` di `submitMaster`); NIK tetap `id="ktp"` (valSafe("ktp") tidak
+  berubah). Cek id duplikat di halaman lain: bersih.
+- Verifikasi: node --check inline script OK; hanya `ktp` yang duplikat sebelum
+  fix, `NO_DUP` setelah.
 
 ---
 

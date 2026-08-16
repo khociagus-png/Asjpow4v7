@@ -10,6 +10,19 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `<next>` — Fix: Simpan Final master-full error (id duplikat ktp)
+
+- **Laporan user (screenshot live master-full):** klik Simpan Final → alert
+  "Terjadi kesalahan sistem: Cannot read properties of null (reading 'length')".
+- **Akar:** id `ktp` duplikat — NIK (`<input type="number">`) dan file upload
+  KTP (`<input type="file">`). `getEl("ktp")` ambil elemen pertama (NIK) →
+  `.files` null → `.files.length` TypeError saat simpan; tombol PILIH KTP juga
+  salah sasaran (men-trigger input NIK).
+- Fix di master-full.html: file input KTP di-rename `ktpFile` (3 tempat: input,
+  tombol PILIH, pembaca fileKtp). NIK tetap `ktp`. Cek duplikat id di semua
+  halaman: bersih.
+- Verifikasi: node --check inline script OK; grep duplikat id NO_DUP.
+
 ### Commit `5e8f65e` — Fix: Chat Jeklin tanya TB/BB yang sudah ada di DB
 
 - **Laporan user (screenshot live ai_form):** user tanya ukuran baju/sepatu/topi

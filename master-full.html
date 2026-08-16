@@ -304,8 +304,8 @@
                 <div class="text-xs font-bold text-white" data-lang="form.mf_ktp_file">KTP (PDF)</div>
                 <div id="ktpInfo" aria-live="polite" class="file-info" data-lang="form.mf_belum_file">Belum ada file</div>
             </div>
-            <button onclick="document.getElementById('ktp').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
-            <input type="file" id="ktp" accept=".pdf" class="hidden" onchange="handleFile(this, 'ktpInfo')">
+            <button onclick="document.getElementById('ktpFile').click()" class="file-btn" data-lang="form.mf_pilih">PILIH</button>
+            <input type="file" id="ktpFile" accept=".pdf" class="hidden" onchange="handleFile(this, 'ktpInfo')">
         </div>
         <div class="file-card">
             <div>
@@ -827,7 +827,7 @@
             let fileIjazahSmp = getEl("ijazahSmp") && getEl("ijazahSmp").files.length > 0 ? await fileToBase64(getEl("ijazahSmp").files[0]) : null;
             let fileIjazahSma = getEl("ijazahSma") && getEl("ijazahSma").files.length > 0 ? await fileToBase64(getEl("ijazahSma").files[0]) : null;
             let fileUniv = getEl("univ") && getEl("univ").files.length > 0 ? await fileToBase64(getEl("univ").files[0]) : null;
-            let fileKtp = getEl("ktp") && getEl("ktp").files.length > 0 ? await fileToBase64(getEl("ktp").files[0]) : null;
+            let fileKtp = getEl("ktpFile") && getEl("ktpFile").files.length > 0 ? await fileToBase64(getEl("ktpFile").files[0]) : null;
             let fileKk = getEl("kk") && getEl("kk").files.length > 0 ? await fileToBase64(getEl("kk").files[0]) : null;
 
             const payload = {
