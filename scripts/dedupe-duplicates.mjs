@@ -27,17 +27,17 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { normalizeWa: normWa, supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
 
 const APPLY = process.argv.includes('--apply');
-const BASE = supabase.supabaseUrl().replace(/\/$/, '');
-const KEY = supabase.supabaseKey();
+const BASE = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseKey();
 if (!BASE || !KEY) {
   console.error('Supabase belum dikonfigurasi (cek .env.local / Keys).');
   process.exit(1);
 }
 const H = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
-const normalizeWa = (v) => supabase.normalizeWa(v);
+const normalizeWa = (v) => normWa(v);
 
 // ---- Helper fetch semua baris (paginasi Range) ------------------------------
 async function getAll(table) {

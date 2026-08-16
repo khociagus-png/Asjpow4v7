@@ -4,56 +4,60 @@
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, pick, supabaseUrl, toText } = require('./db/client');
+const { findJobByCodeFiltered, findJobs } = require('./db/jobs');
+const { findForms, findFormsByWaList, parseDocs } = require('./db/forms');
+const { findCandidates, findCandidatesByJobFiltered, mapCandidate } = require('./db/candidates');
+const { listStorageFolder } = require('./db/berkas');
 
 async function handleShareData(jobCode) {
   const code = String(jobCode || '').trim();
   if (!code) return { error: 'Kode job tidak ditemukan.' };
   try {
     // Jalur cepat: cari baris job via query server-side (filter code_job).
-    let jobRow = await supabase.findJobByCodeFiltered(code);
+    let jobRow = await findJobByCodeFiltered(code);
     if (jobRow === undefined) {
-      const found = await supabase.findJobs();
+      const found = await findJobs();
       jobRow =
-        found.rows.find((r) => String(supabase.pick(r, ['code_job', 'code']) || '') === code) ||
+        found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) ||
         null;
     }
     if (!jobRow) return { error: 'Kode job tidak ditemukan: ' + code };
-    const name = supabase.toText(
-      supabase.pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']),
+    const name = toText(
+      pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']),
     );
     // Kandidat yang ter-approve untuk job ini (id_loker_pilihan berisi kode).
     // Jalur cepat: filter server-side via ilike, lalu verifikasi token eksak di
     // JS (kode bisa banyak dipisah koma) supaya tidak salah tangkap.
-    let candRows = await supabase.findCandidatesByJobFiltered(code);
+    let candRows = await findCandidatesByJobFiltered(code);
     if (candRows === undefined) {
-      const cands = await supabase.findCandidates();
+      const cands = await findCandidates();
       candRows = cands.rows;
     }
     const rows = (Array.isArray(candRows) ? candRows : []).filter((r) =>
-      String(supabase.pick(r, ['id_loker_pilihan', 'id_loker']) || '')
+      String(pick(r, ['id_loker_pilihan', 'id_loker']) || '')
         .split(',')
         .map((s) => s.trim())
         .includes(code),
     );
-    const mapped = rows.map(supabase.mapCandidate);
+    const mapped = rows.map(mapCandidate);
     // extraDocs: SEMUA file folder master kandidat (KK/KTP/ijazah/dll) KECUALI
     // yang sudah jadi tombol utama (pas_photo, file_cv, jft, ssw) — persis
     // perilaku backend lama (produksi). Folder = master/<NAMA_HURUF_KAPITAL>/
     // (spasi → underscore), didaftarkan via Supabase Storage list API.
-    const storageBase = supabase.supabaseUrl().replace(/\/$/, '');
+    const storageBase = supabaseUrl().replace(/\/$/, '');
     const pubBase = storageBase + '/storage/v1/object/public/asj-files/';
     // Jalur cepat: tarik lamaran hanya untuk WA kandidat job ini (in-filter),
     // bukan scan 500 baris inbox — cukup untuk membangun byWa extra docs.
-    const waList = mapped.map((c) => supabase.normalizeWa(String(c.wa || ''))).filter(Boolean);
-    let forms = await supabase.findFormsByWaList(waList);
-    if (forms === undefined) forms = await supabase.findForms();
+    const waList = mapped.map((c) => normalizeWa(String(c.wa || ''))).filter(Boolean);
+    let forms = await findFormsByWaList(waList);
+    if (forms === undefined) forms = await findForms();
     const byWa = new Map();
     for (const f of forms) {
-      const w = supabase.normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
+      const w = normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
       if (!w) continue;
       if (!byWa.has(w)) byWa.set(w, []);
-      for (const d of supabase.parseDocs(supabase.toText(f.keterangan))) byWa.get(w).push(d);
+      for (const d of parseDocs(toText(f.keterangan))) byWa.get(w).push(d);
     }
     const candidates = [];
     for (const c of mapped) {
@@ -65,7 +69,7 @@ async function handleShareData(jobCode) {
         '/';
       let names = [];
       try {
-        names = await supabase.listStorageFolder(folder);
+        names = await listStorageFolder(folder);
       } catch {
         /* non-fatal: tanpa folder → tanpa tombol ekstra */
       }
@@ -109,7 +113,7 @@ async function handleShareData(jobCode) {
       const extraDocs = [...byType.values()];
       // Gabungkan juga dokumen dari keterangan form (NAMA:URL;...) — dedupe
       // per URL biar tidak dobel dengan folder master.
-      const formDocs = byWa.get(supabase.normalizeWa(String(c.wa || ''))) || [];
+      const formDocs = byWa.get(normalizeWa(String(c.wa || ''))) || [];
       const seenUrl = new Set(extraDocs.map((d) => d.url));
       for (const d of formDocs) {
         if (!seenUrl.has(String(d.url))) {
@@ -141,7 +145,7 @@ async function handleShareData(jobCode) {
         extraDocs,
       });
     }
-    const tsk = supabase.toText(supabase.pick(jobRow, ['tsk', 'pengurus']));
+    const tsk = toText(pick(jobRow, ['tsk', 'pengurus']));
     return { job: { code, name, tsk }, candidates };
   } catch (e) {
     return { error: 'Gagal memuat data share: ' + e.message };

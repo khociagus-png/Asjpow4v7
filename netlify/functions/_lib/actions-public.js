@@ -12,7 +12,12 @@
 //     Redis, cukup untuk skala ASJ).
 'use strict';
 
-const supabase = require('./supabase');
+const { columnsFromSchema, findTable, getSchema, hasBackend, normalizeWa, pick, supabaseJson, tablesFromSchema, toText } = require('./db/client');
+const { findJobs, mapJob } = require('./db/jobs');
+const { findForms, findFormsByWa, findFormsLight, mapForm } = require('./db/forms');
+const { attachApplications, findAllCandidatesLight, findCandidateByWaFiltered, findCandidates, findCandidatesByIds, mapCandidate } = require('./db/candidates');
+const { attachBerkasBio } = require('./db/berkas');
+const { findAssets, findSettings } = require('./db/misc');
 const session = require('./session');
 const demo = require('./demo');
 const { cacheGet, cacheSet } = require('./cache');
@@ -60,18 +65,18 @@ function stripRaw(list) {
 // database_tugas, wa_templates — bentuk yang dipakai frontend).
 async function loadSchedules() {
   try {
-    const rows = await supabase.supabaseJson('GET', 'database_schedule', {
+    const rows = await supabaseJson('GET', 'database_schedule', {
       query: { select: '*', limit: 500, order: 'created_at.desc' },
     });
     return (Array.isArray(rows) ? rows : []).map((r) => ({
-      idJadwal: supabase.toText(r.id_jadwal || r.id || ''),
-      namaAgenda: supabase.toText(r.nama_agenda || ''),
-      idLoker: supabase.toText(r.id_loker_terkait || '-'),
-      waktu: supabase.toText(r.tanggal_waktu || ''),
-      link: supabase.toText(r.lokasi_link || '-'),
-      kandidat: supabase.toText(r.daftar_kandidat || '-'),
-      tsk: supabase.toText(r.tsk || ''),
-      status: supabase.toText(r.status_jadwal || 'AKTIF'),
+      idJadwal: toText(r.id_jadwal || r.id || ''),
+      namaAgenda: toText(r.nama_agenda || ''),
+      idLoker: toText(r.id_loker_terkait || '-'),
+      waktu: toText(r.tanggal_waktu || ''),
+      link: toText(r.lokasi_link || '-'),
+      kandidat: toText(r.daftar_kandidat || '-'),
+      tsk: toText(r.tsk || ''),
+      status: toText(r.status_jadwal || 'AKTIF'),
     }));
   } catch {
     return [];
@@ -80,15 +85,15 @@ async function loadSchedules() {
 
 async function loadTugas() {
   try {
-    const rows = await supabase.supabaseJson('GET', 'database_tugas', {
+    const rows = await supabaseJson('GET', 'database_tugas', {
       query: { select: '*', limit: 500, order: 'created_at.desc' },
     });
     return (Array.isArray(rows) ? rows : []).map((r) => ({
-      id: supabase.toText(r.id_tugas || r.id || ''),
-      task: supabase.toText(r.nama_tugas || ''),
-      status: supabase.toText(r.status || 'BARU'),
-      dibuatOleh: supabase.toText(r.dibuat_oleh || ''),
-      waktuDibuat: supabase.toText(r.waktu_dibuat || ''),
+      id: toText(r.id_tugas || r.id || ''),
+      task: toText(r.nama_tugas || ''),
+      status: toText(r.status || 'BARU'),
+      dibuatOleh: toText(r.dibuat_oleh || ''),
+      waktuDibuat: toText(r.waktu_dibuat || ''),
     }));
   } catch {
     return [];
@@ -97,13 +102,13 @@ async function loadTugas() {
 
 async function loadWaTemplates() {
   try {
-    const rows = await supabase.supabaseJson('GET', 'wa_templates', {
+    const rows = await supabaseJson('GET', 'wa_templates', {
       query: { select: '*', limit: 500 },
     });
     return (Array.isArray(rows) ? rows : []).map((r) => ({
-      id: supabase.toText(r.id || ''),
-      nama: supabase.toText(r.nama || ''),
-      isi: supabase.toText(r.isi || ''),
+      id: toText(r.id || ''),
+      nama: toText(r.nama || ''),
+      isi: toText(r.isi || ''),
     }));
   } catch {
     return [];
@@ -118,11 +123,11 @@ function dedupeKandidatRaw(rows) {
   const seen = new Map();
   const out = [];
   const tsOf = (r) =>
-    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+    String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
   for (const r of rows) {
-    const wa = supabase.normalizeWa(
+    const wa = normalizeWa(
       String(
-        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+        pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
       ),
     );
     if (!wa) {
@@ -150,10 +155,10 @@ function saringKandidatUnik(uniq, q) {
   if (!needle) return uniq;
   const digit = needle.replace(/\D/g, '');
   return uniq.filter((r) => {
-    const nama = String(supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
-    const wa = supabase.normalizeWa(
+    const nama = String(pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
+    const wa = normalizeWa(
       String(
-        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+        pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
       ),
     );
     return nama.includes(needle) || (digit && wa.includes(digit));
@@ -173,18 +178,18 @@ async function loadCandidatesUnik(q, opts = {}) {
   const pageSize = Number(opts.pageSize) || 50;
   const start = (page - 1) * pageSize;
   const tsOf = (r) =>
-    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+    String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
   const urutkan = (uniq) =>
     uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
 
-  const light = await supabase.findAllCandidatesLight();
+  const light = await findAllCandidatesLight();
   if (light !== undefined) {
     let uniq = dedupeKandidatRaw(light);
     uniq = saringKandidatUnik(uniq, q);
     urutkan(uniq);
     const total = uniq.length;
     const slice = uniq.slice(start, start + pageSize);
-    const full = await supabase.findCandidatesByIds(slice.map((r) => r.id));
+    const full = await findCandidatesByIds(slice.map((r) => r.id));
     if (full !== undefined) {
       const byId = new Map(full.map((r) => [String(r.id), r]));
       // Semua id halaman harus ter-resolve ke baris penuh; kalau ada yang
@@ -196,7 +201,7 @@ async function loadCandidatesUnik(q, opts = {}) {
   }
 
   // Fallback lama: scan penuh (perilaku persis sebelum optimasi).
-  const found = await supabase.findCandidates();
+  const found = await findCandidates();
   const rows = Array.isArray(found.rows) ? found.rows : [];
   let uniq = dedupeKandidatRaw(rows);
   uniq = saringKandidatUnik(uniq, q);
@@ -215,9 +220,9 @@ async function loadPublicBase(mode) {
   const base = demo.demoGetAppData(mode || 'public'); // reuse assets default
   // PARALEL: 3 query independen (dulu berurutan ~1 detik).
   const [found, assets, settings] = await Promise.all([
-    supabase.findJobs(),
-    supabase.findAssets(),
-    supabase.findSettings(),
+    findJobs(),
+    findAssets(),
+    findSettings(),
   ]);
 
   // Fallback skema: hanya bila findJobs tidak menemukan tabel (query tambahan
@@ -225,15 +230,15 @@ async function loadPublicBase(mode) {
   let foundTable = found;
   if (!foundTable.table) {
     // Skema asli beda nama tabel — cari lewat skema OpenAPI berdasarkan kolom.
-    const spec = await supabase.getSchema();
-    const names = supabase.tablesFromSchema(spec);
+    const spec = await getSchema();
+    const names = tablesFromSchema(spec);
     for (const name of names) {
-      const cols = supabase.columnsFromSchema(spec, name);
+      const cols = columnsFromSchema(spec, name);
       if (
         cols.some((c) => /pekerjaan|judul|nama_loker|lowongan|title/.test(c)) &&
         cols.some((c) => /status|kode|code/.test(c))
       ) {
-        const hit = await supabase.findTable([name]);
+        const hit = await findTable([name]);
         if (hit.table) {
           foundTable = hit;
           break;
@@ -248,7 +253,7 @@ async function loadPublicBase(mode) {
   }
 
   const jobs = foundTable.rows
-    .map(supabase.mapJob)
+    .map(mapJob)
     .filter((j) => j.pekerjaan && j.pekerjaan !== '');
 
   // dropdowns + pengumuman dari sys_config (list_*, broadcast).
@@ -256,14 +261,14 @@ async function loadPublicBase(mode) {
   let pengumuman = '';
   if (settings.table) {
     for (const row of settings.rows) {
-      const type = supabase.toText(row.config_type);
+      const type = toText(row.config_type);
       const key = DROPDOWN_MAP[type];
       // Setiap baris sys_config = SATU opsi (atau satu daftar) — gabungkan.
       if (key) {
         dropdowns[key] = (dropdowns[key] || []).concat(parseConfigList(row.config_value));
       }
-      if (type === 'broadcast' && supabase.toText(row.config_value).trim() && !pengumuman) {
-        pengumuman = supabase.toText(row.config_value);
+      if (type === 'broadcast' && toText(row.config_value).trim() && !pengumuman) {
+        pengumuman = toText(row.config_value);
       }
     }
     // TANPA dedupe — backend asli mengirim apa adanya (termasuk duplikat
@@ -286,7 +291,7 @@ async function loadPublicBase(mode) {
 async function handleGetAppData(payload, sessionToken) {
   const mode = (payload && payload[0]) || 'public';
 
-  if (!supabase.hasBackend()) {
+  if (!hasBackend()) {
     // Belum ada key Supabase -> mode demo supaya preview tetap hidup.
     return demo.demoGetAppData(mode);
   }
@@ -333,28 +338,28 @@ async function handleGetAppData(payload, sessionToken) {
         pageSize: 50,
       });
       result.dbJobs = pub.jobs;
-      result.candidates = stripRaw(candRows.map(supabase.mapCandidate));
+      result.candidates = stripRaw(candRows.map(mapCandidate));
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
       // kandidat — dipakai modal admin (berkas tersimpan, auto-fill biodata).
       // Fetch sisa data dashboard diparalelkan (semuanya independen).
       const [berkas, schedules, tugas, allForms, waTemplates] = await Promise.all([
-        supabase.attachBerkasBio(result.candidates),
+        attachBerkasBio(result.candidates),
         loadSchedules(),
         loadTugas(),
         // Inbox admin: proyeksi kolom ringan (mapForm & attachApplications
         // hanya membaca kolom itu); fallback findForms() bila skema tidak
         // cocok dengan FORM_LIGHT_COLS.
-        supabase.findFormsLight().then((r) => (r === undefined ? supabase.findForms() : r)),
+        findFormsLight().then((r) => (r === undefined ? findForms() : r)),
         loadWaTemplates(),
       ]);
       result.candidates = berkas;
       // Lampirkan SEMUA lamaran (per WA) ke tiap kandidat — mail inbox bisa
       // berisi banyak job per kandidat (multi-apply).
-      supabase.attachApplications(result.candidates, allForms);
+      attachApplications(result.candidates, allForms);
       result.candidatesTotal = candidatesTotal;
       result.schedules = schedules;
       result.tugas = tugas;
-      result.formInbox = allForms.map(supabase.mapForm);
+      result.formInbox = allForms.map(mapForm);
       result.waTemplates = waTemplates;
       result.kandidatRiwayat = [];
     }
@@ -362,16 +367,16 @@ async function handleGetAppData(payload, sessionToken) {
     if (mode === 'kandidat') {
       // Data kandidat miliknya sendiri — query server-side (filter WA),
       // bukan tarik 300 baris lalu cari di JS.
-      const w = supabase.normalizeWa(t.wa || '');
-      let row = await supabase.findCandidateByWaFiltered(w);
+      const w = normalizeWa(t.wa || '');
+      let row = await findCandidateByWaFiltered(w);
       if (row === undefined) {
         // Fallback: scan penuh (skema kolom WA tidak dikenal).
-        const foundCand = await supabase.findCandidates();
+        const foundCand = await findCandidates();
         row =
           foundCand.rows.find(
             (r) =>
-              supabase.normalizeWa(
-                supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
+              normalizeWa(
+                pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
               ) === w,
           ) || null;
       }
@@ -380,13 +385,13 @@ async function handleGetAppData(payload, sessionToken) {
       // seperti backend asli) supaya dashboard (progres pemberkasan x/17,
       // biodata, progress bar) punya myData — plus berkas/bio dari master &
       // pemberkasan_checklist.
-      const myCands = row ? stripRaw([supabase.mapCandidate(row)]) : [];
-      await supabase.attachBerkasBio(myCands);
+      const myCands = row ? stripRaw([mapCandidate(row)]) : [];
+      await attachBerkasBio(myCands);
       // Dashboard kandidat menampilkan semua job yang dilamar dari mail.
       // Jalur cepat: tarik hanya lamaran WA-nya sendiri, bukan scan 500 baris.
-      let myForms = await supabase.findFormsByWa(w);
-      if (myForms === undefined) myForms = await supabase.findForms();
-      supabase.attachApplications(myCands, myForms);
+      let myForms = await findFormsByWa(w);
+      if (myForms === undefined) myForms = await findForms();
+      attachApplications(myCands, myForms);
       result.candidates = myCands;
       // Riwayat lamaran kandidat = daftar aplikasi (code/status/timestamp),
       // bukan objek kandidat — frontend renderRiwayatKandidat membaca field
@@ -402,14 +407,14 @@ async function handleGetAppData(payload, sessionToken) {
         const allSched = await loadSchedules();
         const myJobCodes = new Set(
           (Array.isArray(myForms) ? myForms : [])
-            .map((f) => String(supabase.pick(f, ['code_job', 'code']) || '').toUpperCase())
+            .map((f) => String(pick(f, ['code_job', 'code']) || '').toUpperCase())
             .filter(Boolean),
         );
         result.mySchedules = allSched
           .filter((s) => {
             const kandidatList = String(s.kandidat || '')
               .split(/[\n,;]+/)
-              .map((x) => supabase.normalizeWa(x))
+              .map((x) => normalizeWa(x))
               .filter(Boolean);
             const inDaftar =
               kandidatList.length > 0 &&

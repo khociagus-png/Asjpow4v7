@@ -3,7 +3,11 @@
 // — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { hasBackend, normalizeWa, pick, supabaseJson, toText } = require('./db/client');
+const { countCandidatesForJob, findJobByCodeFiltered, findJobs, mapJob, maxJobCodeNumber } = require('./db/jobs');
+const { findForms, findFormsByWa, mapForm } = require('./db/forms');
+const { findCandidates, mapCandidate } = require('./db/candidates');
+const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa } = require('./candidate-helpers');
 const { stripRaw } = require('./actions-public');
@@ -39,10 +43,10 @@ function mapJobPayloadToRow(data) {
 // Kode loker baru: TG<max+1>ASJ (pola asli, mis. TG591ASJ).
 async function nextJobCode() {
   // Jalur cepat: ambil kode job tertinggi via query server-side.
-  const fastMax = await supabase.maxJobCodeNumber();
+  const fastMax = await maxJobCodeNumber();
   if (fastMax !== undefined) return 'TG' + (fastMax + 1) + 'ASJ';
   // Fallback: scan penuh (perilaku lama).
-  const found = await supabase.findJobs();
+  const found = await findJobs();
   let max = 0;
   for (const row of found.rows) {
     const m = String(row.code_job || row.code || '').match(/TG(\d+)ASJ/);
@@ -56,11 +60,11 @@ async function handleSimpanJobBaru(payload, sessionToken) {
   if (guard.error) return guard.error;
   const data = (payload && payload[0]) || {};
   if (!data.pekerjaan) return { success: false, error: 'Nama pekerjaan wajib diisi.' };
-  if (!supabase.hasBackend()) return { success: false, error: 'Backend belum dikonfigurasi.' };
+  if (!hasBackend()) return { success: false, error: 'Backend belum dikonfigurasi.' };
   try {
     const code = await nextJobCode();
     const body = { code_job: code, ...mapJobPayloadToRow(data) };
-    await supabase.supabaseJson('POST', 'job_database', {
+    await supabaseJson('POST', 'job_database', {
       body,
       headers: { Prefer: 'return=minimal' },
     });
@@ -75,7 +79,7 @@ async function handleEditLokerFull(payload, sessionToken) {
   if (guard.error) return guard.error;
   const data = (payload && payload[0]) || {};
   if (!data.code) return { success: false, error: 'Kode loker tidak ditemukan.' };
-  if (!supabase.hasBackend()) return { success: false, error: 'Backend belum dikonfigurasi.' };
+  if (!hasBackend()) return { success: false, error: 'Backend belum dikonfigurasi.' };
   try {
     const body = mapJobPayloadToRow(data);
     // Kosong = pertahankan nilai lama (kontrak asli), kecuali dokumenShare
@@ -83,7 +87,7 @@ async function handleEditLokerFull(payload, sessionToken) {
     for (const k of Object.keys(body)) {
       if (k !== 'dokumen_share' && (body[k] === '' || body[k] === '-')) delete body[k];
     }
-    await supabase.supabaseJson('PATCH', 'job_database', {
+    await supabaseJson('PATCH', 'job_database', {
       query: { code_job: 'eq.' + data.code },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -99,15 +103,15 @@ async function handleEditLokerFull(payload, sessionToken) {
 // place) tanpa frontend harus tarik ulang getAppData.
 async function getJobMapped(code) {
   // Jalur cepat: cari baris job via query server-side (filter code_job).
-  let row = await supabase.findJobByCodeFiltered(code);
+  let row = await findJobByCodeFiltered(code);
   if (row === undefined) {
     // Fallback: scan penuh (skema kolom tidak dikenal).
-    const found = await supabase.findJobs();
+    const found = await findJobs();
     row =
       (found.rows || []).find((r) => String(r.code_job || r.code || '') === String(code)) || null;
   }
   if (!row) return null;
-  return stripRaw([supabase.mapJob(row)])[0] || null;
+  return stripRaw([mapJob(row)])[0] || null;
 }
 
 async function handleUbahStatusJob(payload, sessionToken) {
@@ -116,7 +120,7 @@ async function handleUbahStatusJob(payload, sessionToken) {
   const [code, status] = payload || [];
   if (!code || !status) return { success: false, error: 'Data tidak lengkap.' };
   try {
-    await supabase.supabaseJson('PATCH', 'job_database', {
+    await supabaseJson('PATCH', 'job_database', {
       query: { code_job: 'eq.' + code },
       body: { status },
       headers: { Prefer: 'return=minimal' },
@@ -135,19 +139,19 @@ async function handleHapusJobData(payload, sessionToken) {
   try {
     // Tolak hapus bila masih ada kandidat terkait (pesan sama seperti asli).
     // Jalur cepat: query server-side (ada kandidat dengan id_loker_pilihan=code?).
-    const adaTerkait = await supabase.countCandidatesForJob(code);
+    const adaTerkait = await countCandidatesForJob(code);
     if (adaTerkait === true) {
       return { success: false, error: 'Gagal hapus loker. Mungkin masih ada kandidat terkait.' };
     }
     if (adaTerkait === undefined) {
       // Fallback: scan penuh.
-      const cands = await supabase.findCandidates();
+      const cands = await findCandidates();
       const terkait = cands.rows.some((r) => String(r.id_loker_pilihan || '') === String(code));
       if (terkait) {
         return { success: false, error: 'Gagal hapus loker. Mungkin masih ada kandidat terkait.' };
       }
     }
-    await supabase.supabaseJson('DELETE', 'job_database', {
+    await supabaseJson('DELETE', 'job_database', {
       query: { code_job: 'eq.' + code },
       headers: { Prefer: 'return=minimal' },
     });
@@ -166,7 +170,7 @@ async function handleUpdateTahapanDbJob(payload, sessionToken) {
   if (tahapan !== undefined && tahapan !== null) body.tahapan = tahapan;
   if (status !== undefined && status !== null) body.status = status;
   try {
-    await supabase.supabaseJson('PATCH', 'job_database', {
+    await supabaseJson('PATCH', 'job_database', {
       query: { code_job: 'eq.' + code },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -183,7 +187,7 @@ async function handleUpdateDokumenShare(payload, sessionToken) {
   const [code, joined] = payload || [];
   if (!code) return { success: false, error: 'Kode loker tidak ditemukan.' };
   try {
-    await supabase.supabaseJson('PATCH', 'job_database', {
+    await supabaseJson('PATCH', 'job_database', {
       query: { code_job: 'eq.' + code },
       body: { dokumen_share: joined || '' },
       headers: { Prefer: 'return=minimal' },
@@ -205,11 +209,11 @@ async function handleTandaiGagalJob(payload, sessionToken) {
       return { success: false, error: 'Kandidat tidak ditemukan.' };
     }
     // Kolom loker bisa id_loker_pilihan ATAU id_loker (skema adaptif).
-    const idLoker = supabase.toText(supabase.pick(row, ['id_loker_pilihan', 'id_loker']));
+    const idLoker = toText(pick(row, ['id_loker_pilihan', 'id_loker']));
     if (String(idLoker) !== String(jobCode)) {
       return { success: false, error: 'Kandidat tidak terdaftar di job ini.' };
     }
-    await supabase.supabaseJson('PATCH', 'database_candidate', {
+    await supabaseJson('PATCH', 'database_candidate', {
       query: { id: 'eq.' + row.id },
       body: {
         status_kandidat: 'GAGAL',
@@ -222,19 +226,19 @@ async function handleTandaiGagalJob(payload, sessionToken) {
     // review lagi). Jalur cepat: tarik hanya lamaran WA-nya sendiri.
     let formUpdated = null;
     try {
-      let forms = await supabase.findFormsByWa(wa);
-      if (forms === undefined) forms = await supabase.findForms();
-      const want = supabase.normalizeWa(wa);
-      const m = forms.find((r) => supabase.normalizeWa(String(r.no_wa || '')) === want) || null;
+      let forms = await findFormsByWa(wa);
+      if (forms === undefined) forms = await findForms();
+      const want = normalizeWa(wa);
+      const m = forms.find((r) => normalizeWa(String(r.no_wa || '')) === want) || null;
       if (m && m.id !== undefined) {
-        await supabase.supabaseJson('PATCH', 'database_asj_form', {
+        await supabaseJson('PATCH', 'database_asj_form', {
           query: { id: 'eq.' + m.id },
           body: { status: 'GAGAL' },
           headers: { Prefer: 'return=minimal' },
         });
         m.status = 'GAGAL';
         // rowIndex -1 → frontend patchFormMail fallback cari by id.
-        formUpdated = supabase.mapForm(m, -1);
+        formUpdated = mapForm(m, -1);
       }
     } catch (e) {
       /* opsional */
@@ -245,10 +249,10 @@ async function handleTandaiGagalJob(payload, sessionToken) {
     try {
       const row2 = await findCandidateByWa(wa);
       if (row2 && row2.id !== undefined) {
-        candidate = stripRaw([supabase.mapCandidate(row2)])[0] || null;
+        candidate = stripRaw([mapCandidate(row2)])[0] || null;
         if (candidate) {
           try {
-            await supabase.attachBerkasBio([candidate]);
+            await attachBerkasBio([candidate]);
           } catch (e2) {
             /* best-effort */
           }

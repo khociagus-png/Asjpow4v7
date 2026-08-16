@@ -3,7 +3,7 @@
 // (2.549 baris), perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { supabaseJson, toText } = require('./db/client');
 const { requireRole } = require('./actions-auth');
 
 async function handleSimpanJadwalBaru(payload, sessionToken) {
@@ -13,7 +13,7 @@ async function handleSimpanJadwalBaru(payload, sessionToken) {
   if (!d.nama) return { success: false, error: 'Nama agenda wajib diisi.' };
   const idJadwal = 'JDW' + Date.now();
   try {
-    await supabase.supabaseJson('POST', 'database_schedule', {
+    await supabaseJson('POST', 'database_schedule', {
       body: {
         id_jadwal: idJadwal,
         nama_agenda: String(d.nama),
@@ -57,7 +57,7 @@ async function handleHapusJadwal(payload, sessionToken) {
     // `id_jadwal` — DELETE dengan filter id_jadwal yang tidak cocok diam-diam
     // menghapus 0 baris (kenapa dulu "gak bisa hapus jadwal"). Cari barisnya
     // dulu (id_jadwal ATAU id), lalu hapus berdasarkan primary key `id`.
-    const rows = await supabase.supabaseJson('GET', 'database_schedule', {
+    const rows = await supabaseJson('GET', 'database_schedule', {
       query: { select: '*', limit: 500 },
     });
     const row = (Array.isArray(rows) ? rows : []).find(
@@ -66,7 +66,7 @@ async function handleHapusJadwal(payload, sessionToken) {
     if (!row || row.id === undefined || row.id === null) {
       return { success: false, error: 'Jadwal tidak ditemukan.' };
     }
-    await supabase.supabaseJson('DELETE', 'database_schedule', {
+    await supabaseJson('DELETE', 'database_schedule', {
       query: { id: 'eq.' + row.id },
       headers: { Prefer: 'return=minimal' },
     });
@@ -85,7 +85,7 @@ async function handleTambahTugasBaru(payload, sessionToken) {
   const idTugas = 'TGS' + Date.now();
   const waktuDibuat = new Date().toISOString();
   try {
-    await supabase.supabaseJson('POST', 'database_tugas', {
+    await supabaseJson('POST', 'database_tugas', {
       body: {
         id_tugas: idTugas,
         nama_tugas: nama,
@@ -115,7 +115,7 @@ async function handleSetTugasStatus(payload, sessionToken) {
   try {
     // FIX sama seperti hapus jadwal: tugas legacy hanya punya `id`, bukan
     // `id_tugas` — cari barisnya dulu, update berdasarkan primary key `id`.
-    const rows = await supabase.supabaseJson('GET', 'database_tugas', {
+    const rows = await supabaseJson('GET', 'database_tugas', {
       query: { select: '*', limit: 500 },
     });
     const row = (Array.isArray(rows) ? rows : []).find(
@@ -126,7 +126,7 @@ async function handleSetTugasStatus(payload, sessionToken) {
     }
     const body = { status: st, updated_at: new Date().toISOString() };
     if (st === 'SELESAI') body.waktu_selesai = new Date().toISOString();
-    await supabase.supabaseJson('PATCH', 'database_tugas', {
+    await supabaseJson('PATCH', 'database_tugas', {
       query: { id: 'eq.' + row.id },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -135,10 +135,10 @@ async function handleSetTugasStatus(payload, sessionToken) {
       success: true,
       tugas: {
         id: String(row.id_tugas || row.id || ''),
-        task: supabase.toText(row.nama_tugas || ''),
+        task: toText(row.nama_tugas || ''),
         status: st,
-        dibuatOleh: supabase.toText(row.dibuat_oleh || ''),
-        waktuDibuat: supabase.toText(row.waktu_dibuat || ''),
+        dibuatOleh: toText(row.dibuat_oleh || ''),
+        waktuDibuat: toText(row.waktu_dibuat || ''),
       },
     };
   } catch (e) {
@@ -152,7 +152,7 @@ async function handleHapusTugas(payload, sessionToken) {
   const id = String((payload && payload[0]) || '');
   if (!id) return { success: false, error: 'ID tugas tidak ditemukan.' };
   try {
-    const rows = await supabase.supabaseJson('GET', 'database_tugas', {
+    const rows = await supabaseJson('GET', 'database_tugas', {
       query: { select: '*', limit: 500 },
     });
     const row = (Array.isArray(rows) ? rows : []).find(
@@ -161,7 +161,7 @@ async function handleHapusTugas(payload, sessionToken) {
     if (!row || row.id === undefined || row.id === null) {
       return { success: false, error: 'Tugas tidak ditemukan.' };
     }
-    await supabase.supabaseJson('DELETE', 'database_tugas', {
+    await supabaseJson('DELETE', 'database_tugas', {
       query: { id: 'eq.' + row.id },
       headers: { Prefer: 'return=minimal' },
     });

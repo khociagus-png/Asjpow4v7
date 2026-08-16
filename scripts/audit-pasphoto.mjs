@@ -18,12 +18,12 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
 
 const APPLY = process.argv.includes('--apply');
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'asj-files';
-const BASE = supabase.supabaseUrl().replace(/\/$/, '');
-const KEY = supabase.supabaseKey();
+const BASE = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseKey();
 if (!BASE || !KEY) {
   console.error('Supabase belum dikonfigurasi (cek .env.local / Keys).');
   process.exit(1);

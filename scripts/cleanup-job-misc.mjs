@@ -15,13 +15,15 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { findTable, supabaseKey, supabaseUrl, toText } = require('../netlify/functions/_lib/db/client');
+const { findJobs } = require('../netlify/functions/_lib/db/jobs');
+const { findForms, parseDocs } = require('../netlify/functions/_lib/db/forms');
 
 const APPLY = process.argv.includes('--apply');
 const PREFIXES = ['jobs/', 'misc/'];
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'asj-files';
-const BASE = supabase.supabaseUrl().replace(/\/$/, '');
-const KEY = supabase.supabaseKey();
+const BASE = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseKey();
 if (!BASE || !KEY) {
   console.error('Supabase belum dikonfigurasi (cek .env.local / Keys).');
   process.exit(1);
@@ -105,13 +107,13 @@ function pathsFromUrls(cells) {
 async function collectReferences() {
   const refs = new Set();
   // a) job_database — link_pamflet & format_cv (plus kolom URL lain apa pun).
-  const jobs = await supabase.findJobs();
+  const jobs = await findJobs();
   for (const r of jobs.rows) for (const u of pathsFromUrls(Object.values(r))) refs.add(u);
   console.log(`  (info) referensi dari job_database: ${jobs.rows.length} baris`);
   // b) Tabel lain yang mungkin menyimpan URL jobs/ (legacy).
   for (const table of ['database_candidate', 'master_database_candidate']) {
     try {
-      const { rows, table: found } = await supabase.findTable([table]);
+      const { rows, table: found } = await findTable([table]);
       for (const r of rows || []) for (const u of pathsFromUrls(Object.values(r))) refs.add(u);
       console.log(`  (info) referensi dari ${found || table}: ${(rows || []).length} baris`);
     } catch (e) {
@@ -119,9 +121,9 @@ async function collectReferences() {
     }
   }
   // c) Keterangan form lamaran (NAMA:URL;...).
-  const forms = await supabase.findForms();
+  const forms = await findForms();
   for (const f of forms) {
-    for (const d of supabase.parseDocs(supabase.toText(f.keterangan))) {
+    for (const d of parseDocs(toText(f.keterangan))) {
       if (d && d.url) for (const p of pathsFromUrls([d.url])) refs.add(p);
     }
   }

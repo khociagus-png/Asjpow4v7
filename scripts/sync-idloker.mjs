@@ -12,16 +12,18 @@
 // =============================================================================
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { normalizeWa, pick, supabaseJson } = require('../netlify/functions/_lib/db/client');
+const { findForms } = require('../netlify/functions/_lib/db/forms');
+const { findCandidates } = require('../netlify/functions/_lib/db/candidates');
 
 const APPLY = process.argv.includes('--apply');
 
-const [forms, cands] = await Promise.all([supabase.findForms(), supabase.findCandidates()]);
+const [forms, cands] = await Promise.all([findForms(), findCandidates()]);
 
 // Index lamaran LULUS per WA, urut timestamp terbaru dulu.
 const byWa = new Map();
 for (const f of forms) {
-  const w = supabase.normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
+  const w = normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
   const code = String(f.code_job || '').trim();
   if (!w || !code) continue;
   if (String(f.status || '').toUpperCase() !== 'LULUS') continue;
@@ -35,8 +37,8 @@ let skipped = 0;
 const report = [];
 
 for (const r of cands.rows) {
-  const w = supabase.normalizeWa(
-    String(supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || ''),
+  const w = normalizeWa(
+    String(pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || ''),
   );
   if (!w) {
     skipped++;
@@ -48,7 +50,7 @@ for (const r of cands.rows) {
     continue;
   }
   const latest = lulus[0].code;
-  const cur = String(supabase.pick(r, ['id_loker_pilihan', 'id_loker']) || '').trim();
+  const cur = String(pick(r, ['id_loker_pilihan', 'id_loker']) || '').trim();
   if (cur === latest) {
     skipped++; // sudah konsisten
     continue;
@@ -62,7 +64,7 @@ for (const r of cands.rows) {
   });
   changed++;
   if (APPLY) {
-    await supabase.supabaseJson('PATCH', 'database_candidate', {
+    await supabaseJson('PATCH', 'database_candidate', {
       query: { id: 'eq.' + r.id },
       body: { id_loker_pilihan: latest, updated_at: new Date().toISOString() },
       headers: { Prefer: 'return=minimal' },

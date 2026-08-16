@@ -3,7 +3,8 @@
 // perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { supabaseJson } = require('./db/client');
+const { findSettings } = require('./db/misc');
 const { requireRole } = require('./actions-auth');
 
 const CONFIG_TYPE_MAP = {
@@ -30,18 +31,18 @@ async function handleUpdateSysConfig(payload, sessionToken) {
   const type = CONFIG_TYPE_MAP[key] || key;
   const items = Array.isArray(arr) ? arr.map((x) => String(x)) : [String(arr)];
   try {
-    const settings = await supabase.findSettings();
+    const settings = await findSettings();
     const rows = Array.isArray(settings.rows) ? settings.rows : [];
     const toDelete = rows.filter((r) => String(r.config_type || '') === type).map((r) => r.id);
     for (const id of toDelete) {
-      await supabase.supabaseJson('DELETE', 'sys_config', {
+      await supabaseJson('DELETE', 'sys_config', {
         query: { id: 'eq.' + id },
         headers: { Prefer: 'return=minimal' },
       });
     }
     for (const item of items) {
       if (!item) continue;
-      await supabase.supabaseJson('POST', 'sys_config', {
+      await supabaseJson('POST', 'sys_config', {
         body: {
           config_type: type,
           config_value: item,
@@ -62,7 +63,7 @@ async function handleUpdateSysConfig(payload, sessionToken) {
 // ---------------------------------------------------------------------------
 async function handleGetRincianPresets() {
   try {
-    const rows = await supabase.supabaseJson('GET', 'rincian_presets', {
+    const rows = await supabaseJson('GET', 'rincian_presets', {
       query: { select: '*', limit: 500 },
     });
     const presets = { include: [], exclude: [], benefit: [], persyaratan: [] };
@@ -87,7 +88,7 @@ async function handleSaveRincianPreset(payload, sessionToken) {
     let lastId = null;
     for (const item of items) {
       if (!item) continue;
-      const rows = await supabase.supabaseJson('POST', 'rincian_presets', {
+      const rows = await supabaseJson('POST', 'rincian_presets', {
         body: { kategori: cat, item, created_at: new Date().toISOString() },
         headers: { Prefer: 'return=representation' },
       });
@@ -105,7 +106,7 @@ async function handleDeleteRincianPreset(payload, sessionToken) {
   const id = String((payload && payload[0] && payload[0].id) || '');
   if (!id) return { success: false, error: 'ID preset tidak ditemukan.' };
   try {
-    await supabase.supabaseJson('DELETE', 'rincian_presets', {
+    await supabaseJson('DELETE', 'rincian_presets', {
       query: { id: 'eq.' + id },
       headers: { Prefer: 'return=minimal' },
     });

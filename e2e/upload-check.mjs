@@ -22,7 +22,7 @@
 import { chromium } from 'playwright';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
 const TEST_WA =
@@ -51,8 +51,8 @@ async function waitFor(condition, timeoutMs = 40000, intervalMs = 300) {
 }
 
 // ---- Supabase direct (setup & cleanup kandidat tes) -------------------------
-const SB = supabase.supabaseUrl().replace(/\/$/, '');
-const KEY = supabase.supabaseKey();
+const SB = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseKey();
 if (!SB || !KEY) {
   console.error('Supabase belum dikonfigurasi (cek .env.local / Keys).');
   process.exit(1);

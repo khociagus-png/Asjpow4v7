@@ -3,7 +3,8 @@
 // saling-require antar modul action.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, pick } = require('./db/client');
+const { findCandidateByWaFiltered, findCandidates, maxCandidateIdNumber } = require('./db/candidates');
 
 // Kolom WA yang dikenali di tabel kandidat (urutan prioritas).
 const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
@@ -12,13 +13,13 @@ const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
 // actions-extra, actions-mail, actions-master).
 async function nextCandidateId() {
   // Jalur cepat: id_kandidat tertinggi via query server-side.
-  const fastMax = await supabase.maxCandidateIdNumber();
+  const fastMax = await maxCandidateIdNumber();
   if (fastMax !== undefined) return 'ASJ' + String(fastMax + 1).padStart(5, '0');
   // Fallback: scan penuh (perilaku lama).
-  const found = await supabase.findCandidates();
+  const found = await findCandidates();
   let max = 0;
   for (const r of found.rows) {
-    const m = String(supabase.pick(r, ['id_kandidat', 'id']) || '').match(/ASJ(\d+)/i);
+    const m = String(pick(r, ['id_kandidat', 'id']) || '').match(/ASJ(\d+)/i);
     if (m) max = Math.max(max, parseInt(m[1], 10));
   }
   return 'ASJ' + String(max + 1).padStart(5, '0');
@@ -26,14 +27,14 @@ async function nextCandidateId() {
 
 // Cari baris kandidat berdasarkan WA (format fleksibel 0xx / 62xx).
 async function findCandidateByWa(wa) {
-  const want = supabase.normalizeWa(wa);
+  const want = normalizeWa(wa);
   // Jalur cepat: query server-side (filter kolom WA) — tanpa tarik 300 baris.
-  const hit = await supabase.findCandidateByWaFiltered(want);
+  const hit = await findCandidateByWaFiltered(want);
   if (hit !== undefined) return hit;
   // Fallback: scan penuh (skema kolom WA tidak dikenal).
-  const found = await supabase.findCandidates();
+  const found = await findCandidates();
   return (
-    found.rows.find((r) => supabase.normalizeWa(supabase.pick(r, CAND_WA_COLS) || '') === want) ||
+    found.rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want) ||
     null
   );
 }

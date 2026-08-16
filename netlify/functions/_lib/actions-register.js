@@ -4,7 +4,7 @@
 // perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeGender, supabaseJson } = require('./db/client');
 const { env } = require('./env');
 
 // ---------------------------------------------------------------------------
@@ -17,7 +17,7 @@ async function handleGetDaftarSiswaBaru(payload, sessionToken) {
   // HANYA kolom yang ditampilkan modal yang dikirim (id, nama, gender, alamat)
   // — WA/email/URL berkas (PII) TIDAK ikut, demi keamanan.
   try {
-    const rows = await supabase.supabaseJson('GET', 'respon_siswa_baru', {
+    const rows = await supabaseJson('GET', 'respon_siswa_baru', {
       query: {
         select: 'id,nama_lengkap,jenis_kelamin,alamat_lengkap',
         limit: 500,
@@ -25,7 +25,7 @@ async function handleGetDaftarSiswaBaru(payload, sessionToken) {
       },
     });
     const data = (Array.isArray(rows) ? rows : []).map((r) => {
-      const g = supabase.normalizeGender(r.jenis_kelamin || r.gender);
+      const g = normalizeGender(r.jenis_kelamin || r.gender);
       return {
         id: r.id,
         nama_lengkap: r.nama_lengkap || '',
@@ -44,7 +44,7 @@ async function handleSubmitDaftarSiswa(payload) {
   const nama = String(d.nama || '').trim();
   if (!nama) return { success: false, message: 'Nama wajib diisi.' };
   try {
-    await supabase.supabaseJson('POST', 'respon_siswa_baru', {
+    await supabaseJson('POST', 'respon_siswa_baru', {
       body: {
         timestamp: new Date().toISOString(),
         nama_lengkap: nama,

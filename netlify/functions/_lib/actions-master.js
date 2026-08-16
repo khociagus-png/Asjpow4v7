@@ -3,7 +3,9 @@
 // — kode dipindah dari actions-extra.js, perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, pick, supabaseJson, toText } = require('./db/client');
+const { findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
+const { fetchMasterByWa } = require('./db/master');
 const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { syncBiodataKeMail } = require('./actions-mail');
@@ -120,17 +122,17 @@ const MASTER_COLUMN_MAP = {
 };
 
 async function findMasterByWa(wa) {
-  const want = supabase.normalizeWa(wa);
+  const want = normalizeWa(wa);
   // Jalur cepat: tarik hanya baris master WA ini (in-filter), bukan scan 500.
-  let rows = await supabase.fetchMasterByWa([want]);
+  let rows = await fetchMasterByWa([want]);
   if (rows === null) {
     // Fallback: scan penuh (perilaku lama).
-    rows = await supabase.supabaseJson('GET', 'master_database_candidate', {
+    rows = await supabaseJson('GET', 'master_database_candidate', {
       query: { select: '*', limit: 500 },
     });
   }
   const arr = Array.isArray(rows) ? rows : [];
-  return arr.find((r) => supabase.normalizeWa(String(r.no_wa || '')) === want) || null;
+  return arr.find((r) => normalizeWa(String(r.no_wa || '')) === want) || null;
 }
 
 // Form biodata dashboard (prosesSimpanBiodataLengkap) mengirim key snake_case,
@@ -190,7 +192,7 @@ function buildMasterNested(row) {
   const v = (col, fallback) => {
     const x = row[col];
     return x !== undefined && x !== null && x !== ''
-      ? supabase.toText(x)
+      ? toText(x)
       : fallback !== undefined
         ? fallback
         : '';
@@ -303,7 +305,7 @@ function buildMasterNested(row) {
         // Kunci yang dibaca builder CV: sekolah/masuk/lulus/jurusan_id (nama_sekolah/
         // tahun_masuk/dll dipertahankan sebagai alias untuk kompatibilitas).
         arr.push({
-          tingkat: supabase.toText(tingkat),
+          tingkat: toText(tingkat),
           sekolah: v('pendidikan_' + i + '_nama_sekolah'),
           nama_sekolah: v('pendidikan_' + i + '_nama_sekolah'),
           sekolah_jp: v('pendidikan_' + i + '_sekolah_jp'),
@@ -338,8 +340,8 @@ function buildMasterNested(row) {
         const nm = row['pekerjaan_' + i + '_nama_perusahaan'];
         if (nm === undefined || nm === null) continue;
         arr.push({
-          perusahaan: supabase.toText(nm),
-          nama_perusahaan: supabase.toText(nm),
+          perusahaan: toText(nm),
+          nama_perusahaan: toText(nm),
           perusahaan_jp: v('pekerjaan_' + i + '_perusahaan_jp'),
           jabatan: v('pekerjaan_' + i + '_jabatan'),
           jabatan_jp: v('pekerjaan_' + i + '_jabatan_jp'),
@@ -368,7 +370,7 @@ function buildMasterNested(row) {
         const nm = row['keluarga_' + i + '_nama'];
         if (nm === undefined || nm === null) continue;
         arr.push({
-          nama: supabase.toText(nm),
+          nama: toText(nm),
           umur: v('keluarga_' + i + '_usia'),
           usia: v('keluarga_' + i + '_usia'),
           hubungan: v('keluarga_' + i + '_hubungan'),
@@ -414,7 +416,7 @@ async function handleGetMasterDataByWa(payload, sessionToken) {
     if (!row) return { error: 'Data Master belum ada. Silakan isi form Master dulu.' };
     const v = (col) => {
       const x = row[col];
-      return x !== undefined && x !== null ? supabase.toText(x) : '';
+      return x !== undefined && x !== null ? toText(x) : '';
     };
     const out = {
       NAMA_LENGKAP: v('nama_lengkap'),
@@ -529,16 +531,16 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
       let nama = '';
       try {
         // Jalur cepat: cari baris kandidat via query server-side (filter WA).
-        let c = await supabase.findCandidateByWaFiltered(wa);
+        let c = await findCandidateByWaFiltered(wa);
         if (c === undefined) {
-          const found = await supabase.findCandidates();
-          const want = supabase.normalizeWa(wa);
+          const found = await findCandidates();
+          const want = normalizeWa(wa);
           c =
             ((found && found.rows) || []).find(
-              (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+              (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
             ) || null;
         }
-        if (c) nama = String(supabase.pick(c, ['nama_lengkap', 'nama']) || '');
+        if (c) nama = String(pick(c, ['nama_lengkap', 'nama']) || '');
       } catch (e) {
         /* lookup nama gagal — lanjut tanpa nama */
       }
@@ -583,7 +585,7 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
 // submitMasterForm([payload]) → simpan/update master_database_candidate.
 async function handleSubmitMasterForm(payload, sessionToken) {
   const d = (payload && payload[0]) || {};
-  const wa = supabase.normalizeWa(String(d.wa || ''));
+  const wa = normalizeWa(String(d.wa || ''));
   // Kandidat pemilik WA (dashboard/CV AI) ATAU admin (parse dokumen biodata).
   const t = session.verifyToken(sessionToken);
   if (!t || (t.role !== 'kandidat' && t.role !== 'admin')) {
@@ -736,7 +738,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     }
 
     if (row && row.id !== undefined) {
-      await supabase.supabaseJson('PATCH', 'master_database_candidate', {
+      await supabaseJson('PATCH', 'master_database_candidate', {
         query: { id: 'eq.' + row.id },
         body,
         headers: { Prefer: 'return=minimal' },
@@ -744,7 +746,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     } else {
       const idKand = await nextCandidateId();
       body.id_kandidat = idKand;
-      await supabase.supabaseJson('POST', 'master_database_candidate', {
+      await supabaseJson('POST', 'master_database_candidate', {
         body,
         headers: { Prefer: 'return=minimal' },
       });
@@ -753,13 +755,13 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     // Sinkronisasi ringan ke database_candidate (kolom yang dipakai dashboard).
     try {
       // Jalur cepat: cari baris kandidat via query server-side (filter WA).
-      let c = await supabase.findCandidateByWaFiltered(wa);
+      let c = await findCandidateByWaFiltered(wa);
       if (c === undefined) {
-        const candFound = await supabase.findCandidates();
-        const want = supabase.normalizeWa(wa);
+        const candFound = await findCandidates();
+        const want = normalizeWa(wa);
         c =
           candFound.rows.find(
-            (r) => supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+            (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
           ) || null;
       }
       const candBody = {
@@ -782,7 +784,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
       };
       for (const k of Object.keys(candBody)) if (candBody[k] === undefined) delete candBody[k];
       if (c && c.id !== undefined) {
-        await supabase.supabaseJson('PATCH', 'database_candidate', {
+        await supabaseJson('PATCH', 'database_candidate', {
           query: { id: 'eq.' + c.id },
           body: candBody,
           headers: { Prefer: 'return=minimal' },

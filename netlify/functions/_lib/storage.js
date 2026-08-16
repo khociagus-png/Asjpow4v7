@@ -3,7 +3,7 @@
 // actions-extra.js, perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { supabaseKey, supabaseUrl } = require('./db/client');
 const { env } = require('./env');
 
 function bucket() {
@@ -12,8 +12,8 @@ function bucket() {
 
 // Request ke Supabase Storage (di luar /rest/v1).
 async function storageRequest(method, pathname, opts = {}) {
-  const url = supabase.supabaseUrl();
-  const key = supabase.supabaseKey();
+  const url = supabaseUrl();
+  const key = supabaseKey();
   if (!url || !key) throw new Error('Supabase belum dikonfigurasi');
   const res = await fetch(url.replace(/\/$/, '') + '/storage/v1/' + pathname, {
     method,
@@ -34,7 +34,7 @@ async function storageRequest(method, pathname, opts = {}) {
 
 function publicUrl(path) {
   return (
-    supabase.supabaseUrl().replace(/\/$/, '') + '/storage/v1/object/public/' + bucket() + '/' + path
+    supabaseUrl().replace(/\/$/, '') + '/storage/v1/object/public/' + bucket() + '/' + path
   );
 }
 

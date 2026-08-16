@@ -3,7 +3,8 @@
 // tetap ringkas.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, pick, supabaseJson, toText } = require('./db/client');
+const { findCandidateByIdFiltered, findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
 const session = require('./session');
 const { env } = require('./env');
 
@@ -20,19 +21,19 @@ function requireRole(sessionToken, role) {
 const APPLY_WA_COLS = ['no_wa', 'wa', 'whatsapp'];
 
 async function findMasterByWa(wa) {
-  const want = supabase.normalizeWa(wa);
-  const rows = await supabase.supabaseJson('GET', 'master_database_candidate', {
+  const want = normalizeWa(wa);
+  const rows = await supabaseJson('GET', 'master_database_candidate', {
     query: { select: '*', limit: 500 },
   });
   if (!Array.isArray(rows)) return null;
-  return rows.find((r) => supabase.normalizeWa(String(r.no_wa || '')) === want) || null;
+  return rows.find((r) => normalizeWa(String(r.no_wa || '')) === want) || null;
 }
 
 function buildMasterNested(row) {
   const v = (col, fallback) => {
     const x = row[col];
     return x !== undefined && x !== null && x !== ''
-      ? supabase.toText(x)
+      ? toText(x)
       : fallback !== undefined
         ? fallback
         : '';
@@ -135,7 +136,7 @@ function buildMasterNested(row) {
         // Kunci yang dibaca builder CV: sekolah/masuk/lulus/jurusan_id (nama_sekolah/
         // tahun_masuk/dll dipertahankan sebagai alias untuk kompatibilitas).
         arr.push({
-          tingkat: supabase.toText(tingkat),
+          tingkat: toText(tingkat),
           sekolah: v('pendidikan_' + i + '_nama_sekolah'),
           nama_sekolah: v('pendidikan_' + i + '_nama_sekolah'),
           sekolah_jp: v('pendidikan_' + i + '_sekolah_jp'),
@@ -156,8 +157,8 @@ function buildMasterNested(row) {
         const nm = row['pekerjaan_' + i + '_nama_perusahaan'];
         if (nm === undefined || nm === null) continue;
         arr.push({
-          perusahaan: supabase.toText(nm),
-          nama_perusahaan: supabase.toText(nm),
+          perusahaan: toText(nm),
+          nama_perusahaan: toText(nm),
           perusahaan_jp: v('pekerjaan_' + i + '_perusahaan_jp'),
           jabatan: v('pekerjaan_' + i + '_jabatan'),
           jabatan_jp: v('pekerjaan_' + i + '_jabatan_jp'),
@@ -176,7 +177,7 @@ function buildMasterNested(row) {
         const nm = row['keluarga_' + i + '_nama'];
         if (nm === undefined || nm === null) continue;
         arr.push({
-          nama: supabase.toText(nm),
+          nama: toText(nm),
           umur: v('keluarga_' + i + '_usia'),
           usia: v('keluarga_' + i + '_usia'),
           hubungan: v('keluarga_' + i + '_hubungan'),
@@ -509,7 +510,7 @@ function normalizeBidang(raw) {
 
 // Resolve bidang + nama kandidat dari WA (master dulu, fallback kandidat).
 async function resolveProfilKandidat(wa) {
-  const want = supabase.normalizeWa(String(wa || ''));
+  const want = normalizeWa(String(wa || ''));
   if (!want) return null;
   let nama = '';
   let bidangRaw = '';
@@ -524,12 +525,12 @@ async function resolveProfilKandidat(wa) {
   }
   if (!nama || !bidangRaw) {
     try {
-      let c = await supabase.findCandidateByWaFiltered(want);
+      let c = await findCandidateByWaFiltered(want);
       if (c === undefined) {
-        const found = await supabase.findCandidates();
+        const found = await findCandidates();
         c =
           (found.rows || []).find((r) =>
-            supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+            normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
           ) || null;
       }
       if (c) {
@@ -602,17 +603,17 @@ async function handleGenerateWawancaraModel(payload, sessionToken) {
   if (guard.error) return guard.error;
   const d = (payload && payload[0]) || {};
   // Resolve WA dari candidateId (sama seperti parseDokumenBiodata) atau wa eksplisit.
-  let wa = supabase.normalizeWa(String(d.wa || ''));
+  let wa = normalizeWa(String(d.wa || ''));
   if (!wa && d.candidateId) {
-    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    let cand = await findCandidateByIdFiltered(String(d.candidateId));
     if (cand === undefined) {
-      const found = await supabase.findCandidates();
+      const found = await findCandidates();
       cand =
         (found.rows || []).find((r) =>
-          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
-    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+    if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
     return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
@@ -700,21 +701,21 @@ async function handleSimpanHasilWawancara(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'kandidat');
   if (guard.error) return guard.error;
   const d = (payload && payload[0]) || {};
-  const wa = supabase.normalizeWa(String(d.wa || ''));
+  const wa = normalizeWa(String(d.wa || ''));
   if (!wa) return { success: false, error: 'Nomor WA tidak ditemukan.' };
   const hasil = d.hasil || {};
   if (!hasil || typeof hasil !== 'object' || Array.isArray(hasil)) {
     return { success: false, error: 'Hasil wawancara kosong/tidak valid.' };
   }
   try {
-    const rows = await supabase.supabaseJson('GET', 'ai_form_submissions', {
+    const rows = await supabaseJson('GET', 'ai_form_submissions', {
       query: { select: '*', limit: 100 },
     });
     // Discriminator: submitted_via='interview' (mode/status tabel ini punya
     // CHECK constraint — pakai nilai yang diizinkan: AI_MASTER/MENUNGGU).
     const existing = (Array.isArray(rows) ? rows : []).find(
       (r) =>
-        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        normalizeWa(String(r.wa || '')) === wa &&
         String(r.submitted_via || '') === 'interview',
     );
     const bio = (hasil.biodata || {}).nama || '';
@@ -730,13 +731,13 @@ async function handleSimpanHasilWawancara(payload, sessionToken) {
       updated_at: new Date().toISOString(),
     };
     if (existing && existing.id !== undefined) {
-      await supabase.supabaseJson('PATCH', 'ai_form_submissions', {
+      await supabaseJson('PATCH', 'ai_form_submissions', {
         query: { id: 'eq.' + existing.id },
         body,
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabase.supabaseJson('POST', 'ai_form_submissions', {
+      await supabaseJson('POST', 'ai_form_submissions', {
         body: Object.assign({ created_at: new Date().toISOString() }, body),
         headers: { Prefer: 'return=minimal' },
       });
@@ -755,28 +756,28 @@ async function handleGetHasilWawancara(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
   if (guard.error) return guard.error;
   const d = (payload && payload[0]) || {};
-  let wa = supabase.normalizeWa(String(d.wa || ''));
+  let wa = normalizeWa(String(d.wa || ''));
   if (!wa && d.candidateId) {
-    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    let cand = await findCandidateByIdFiltered(String(d.candidateId));
     if (cand === undefined) {
-      const found = await supabase.findCandidates();
+      const found = await findCandidates();
       cand =
         (found.rows || []).find((r) =>
-          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
-    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+    if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
     return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
   }
   try {
-    const rows = await supabase.supabaseJson('GET', 'ai_form_submissions', {
+    const rows = await supabaseJson('GET', 'ai_form_submissions', {
       query: { select: '*', limit: 100 },
     });
     const row = (Array.isArray(rows) ? rows : []).find(
       (r) =>
-        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        normalizeWa(String(r.wa || '')) === wa &&
         String(r.submitted_via || '') === 'interview',
     );
     if (!row) return { success: true, hasil: null };
@@ -810,16 +811,16 @@ async function handleGetAdminAiContext(payload, sessionToken) {
       const id = String(d.candidateId || d.idKandidat || '');
       // Jalur cepat: cari baris kandidat via query server-side (by id / WA).
       let cand = id
-        ? await supabase.findCandidateByIdFiltered(id)
-        : await supabase.findCandidateByWaFiltered(d.wa);
+        ? await findCandidateByIdFiltered(id)
+        : await findCandidateByWaFiltered(d.wa);
       if (cand === undefined) {
-        const found = await supabase.findCandidates();
+        const found = await findCandidates();
         cand =
           (found.rows || []).find((r) =>
             id
-              ? String(supabase.pick(r, ['id_kandidat', 'id']) || '') === id
-              : supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) ===
-                supabase.normalizeWa(d.wa),
+              ? String(pick(r, ['id_kandidat', 'id']) || '') === id
+              : normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) ===
+                normalizeWa(d.wa),
           ) || null;
       }
       if (cand) row = await findMasterByWa(String(cand.no_wa || ''));
@@ -856,7 +857,7 @@ async function handleSubmitDataAsj(payload, sessionToken) {
   const d = payload || {};
   const ctx = d.context || {};
   const identitas = d.identitas || {};
-  const wa = supabase.normalizeWa(String(ctx.wa || identitas.hp || ''));
+  const wa = normalizeWa(String(ctx.wa || identitas.hp || ''));
   if (!wa) return { success: false, message: 'Nomor WA tidak ditemukan.' };
   const guard = requireRole(sessionToken, 'kandidat');
   if (guard.error) return guard.error;
@@ -889,22 +890,22 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       submitted_via: 'ai_form',
       updated_at: new Date().toISOString(),
     };
-    const existingRows = await supabase.supabaseJson('GET', 'ai_form_submissions', {
+    const existingRows = await supabaseJson('GET', 'ai_form_submissions', {
       query: { select: '*', limit: 100 },
     });
     const existing = (Array.isArray(existingRows) ? existingRows : []).find(
       (r) =>
-        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        normalizeWa(String(r.wa || '')) === wa &&
         String(r.submitted_via || '') === 'ai_form',
     );
     if (existing && existing.id !== undefined) {
-      await supabase.supabaseJson('PATCH', 'ai_form_submissions', {
+      await supabaseJson('PATCH', 'ai_form_submissions', {
         query: { id: 'eq.' + existing.id },
         body,
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabase.supabaseJson('POST', 'ai_form_submissions', {
+      await supabaseJson('POST', 'ai_form_submissions', {
         body: Object.assign({ created_at: new Date().toISOString() }, body),
         headers: { Prefer: 'return=minimal' },
       });
@@ -912,7 +913,7 @@ async function handleSubmitDataAsj(payload, sessionToken) {
     try {
       const m = await findMasterByWa(wa);
       if (m && m.id !== undefined) {
-        await supabase.supabaseJson('PATCH', 'master_database_candidate', {
+        await supabaseJson('PATCH', 'master_database_candidate', {
           query: { id: 'eq.' + m.id },
           body: { ai_data_json: JSON.stringify(aiData), ai_updated_at: new Date().toISOString() },
           headers: { Prefer: 'return=minimal' },
@@ -934,7 +935,7 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'kandidat');
   if (guard.error) return guard.error;
   const d = payload || {};
-  const wa = supabase.normalizeWa(String(d.wa || ''));
+  const wa = normalizeWa(String(d.wa || ''));
   if (!wa) return { success: false, error: 'Nomor WA tidak ditemukan.' };
   try {
     const data = {
@@ -945,20 +946,20 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
       nama2: d.nama2 || '',
     };
     try {
-      const rows = await supabase.supabaseJson('GET', 'esignatures', {
+      const rows = await supabaseJson('GET', 'esignatures', {
         query: { select: '*', limit: 100 },
       });
       const existing = (Array.isArray(rows) ? rows : []).find(
-        (r) => supabase.normalizeWa(String(r.wa || '')) === wa,
+        (r) => normalizeWa(String(r.wa || '')) === wa,
       );
       if (existing && existing.id !== undefined) {
-        await supabase.supabaseJson('PATCH', 'esignatures', {
+        await supabaseJson('PATCH', 'esignatures', {
           query: { id: 'eq.' + existing.id },
           body: Object.assign(data, { updated_at: new Date().toISOString() }),
           headers: { Prefer: 'return=minimal' },
         });
       } else {
-        await supabase.supabaseJson('POST', 'esignatures', {
+        await supabaseJson('POST', 'esignatures', {
           body: Object.assign(data, {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -968,7 +969,7 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
       }
     } catch (e) {
       /* tabel esignatures mungkin kosong/tanpa kolom wa — fallback ke ai_form_submissions */
-      await supabase.supabaseJson('POST', 'ai_form_submissions', {
+      await supabaseJson('POST', 'ai_form_submissions', {
         body: {
           wa,
           mode: 'ttd',
@@ -1125,17 +1126,17 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
 
   // Target kandidat: dari WA eksplisit, atau resolve dari candidateId (admin
   // membuka AI copilot dari baris kandidat → cukup klik upload).
-  let wa = supabase.normalizeWa(String(d.wa || ''));
+  let wa = normalizeWa(String(d.wa || ''));
   if (!wa && d.candidateId) {
-    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    let cand = await findCandidateByIdFiltered(String(d.candidateId));
     if (cand === undefined) {
-      const found = await supabase.findCandidates();
+      const found = await findCandidates();
       cand =
         (found.rows || []).find((r) =>
-          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
-    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+    if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
     return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };

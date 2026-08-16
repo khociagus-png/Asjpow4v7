@@ -4,7 +4,10 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
-const supabase = require('./supabase');
+const { normalizeWa, pick, supabaseJson } = require('./db/client');
+const { findFormByIndexFiltered, findForms, findFormsByWa, mapForm } = require('./db/forms');
+const { mapCandidate } = require('./db/candidates');
+const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa, nextCandidateId } = require('./candidate-helpers');
 const { stripRaw } = require('./actions-public');
@@ -19,15 +22,15 @@ async function handleFormStatus(rowIndex, status, reason) {
   try {
     // Jalur cepat: ambil baris mail di posisi index (urutan timestamp.desc)
     // via query server-side, bukan scan 500 baris inbox.
-    let f = await supabase.findFormByIndexFiltered(idx);
+    let f = await findFormByIndexFiltered(idx);
     if (f === undefined) {
-      const forms = await supabase.findForms();
+      const forms = await findForms();
       f = forms[idx] || null;
     }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
     const body = { status };
     if (reason !== null && reason !== undefined) body.keterangan = reason;
-    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+    await supabaseJson('PATCH', 'database_asj_form', {
       query: { id: 'eq.' + f.id },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -46,15 +49,15 @@ async function handleFormStatus(rowIndex, status, reason) {
     f.status = status;
     if (reason !== null && reason !== undefined) f.keterangan = reason;
     let candidate = null;
-    const wa = supabase.normalizeWa(String(f.no_wa || f.wa || ''));
+    const wa = normalizeWa(String(f.no_wa || f.wa || ''));
     if (wa) {
       try {
         const row = await findCandidateByWa(wa);
         if (row && row.id !== undefined) {
-          candidate = stripRaw([supabase.mapCandidate(row)])[0] || null;
+          candidate = stripRaw([mapCandidate(row)])[0] || null;
           if (candidate) {
             try {
-              await supabase.attachBerkasBio([candidate]);
+              await attachBerkasBio([candidate]);
             } catch (e2) {
               /* best-effort */
             }
@@ -64,7 +67,7 @@ async function handleFormStatus(rowIndex, status, reason) {
         /* best-effort: frontend tetap dapat baris mail */
       }
     }
-    return { success: true, form: supabase.mapForm(f, idx), candidate };
+    return { success: true, form: mapForm(f, idx), candidate };
   } catch (e) {
     return { success: false, error: 'Gagal proses form: ' + e.message };
   }
@@ -74,7 +77,7 @@ async function handleFormStatus(rowIndex, status, reason) {
 // code_job supaya kandidat muncul di list DB JOB. Reject (GAGAL) → status GAGAL
 // + lepas dari job. Data diambil dari baris mail (form lamaran).
 async function syncCandidateDariForm(f, status) {
-  const wa = supabase.normalizeWa(String(f.no_wa || f.wa || ''));
+  const wa = normalizeWa(String(f.no_wa || f.wa || ''));
   const codeJob = String(f.code_job || '');
   if (!wa) return;
   const row = await findCandidateByWa(wa);
@@ -96,7 +99,7 @@ async function syncCandidateDariForm(f, status) {
     if (codeJob) base.id_loker_pilihan = codeJob;
     if (row && row.id !== undefined) {
       for (const k of Object.keys(base)) if (base[k] === undefined) delete base[k];
-      await supabase.supabaseJson('PATCH', 'database_candidate', {
+      await supabaseJson('PATCH', 'database_candidate', {
         query: { id: 'eq.' + row.id },
         body: base,
         headers: { Prefer: 'return=minimal' },
@@ -112,17 +115,17 @@ async function syncCandidateDariForm(f, status) {
       base.tanggal_daftar = now;
       base.created_at = now;
       base.updated_at = now;
-      await supabase.supabaseJson('POST', 'database_candidate', {
+      await supabaseJson('POST', 'database_candidate', {
         body: base,
         headers: { Prefer: 'return=minimal' },
       });
     }
   } else if (status === 'GAGAL' && row && row.id !== undefined) {
     const upd = { status_kandidat: 'GAGAL', updated_at: new Date().toISOString() };
-    if (codeJob && String(supabase.pick(row, ['id_loker_pilihan', 'id_loker']) || '') === codeJob) {
+    if (codeJob && String(pick(row, ['id_loker_pilihan', 'id_loker']) || '') === codeJob) {
       upd.id_loker_pilihan = null;
     }
-    await supabase.supabaseJson('PATCH', 'database_candidate', {
+    await supabaseJson('PATCH', 'database_candidate', {
       query: { id: 'eq.' + row.id },
       body: upd,
       headers: { Prefer: 'return=minimal' },
@@ -158,13 +161,13 @@ async function handleDeleteForm(payload, sessionToken) {
   }
   try {
     // Jalur cepat: ambil baris mail di posisi index via query server-side.
-    let f = await supabase.findFormByIndexFiltered(idx);
+    let f = await findFormByIndexFiltered(idx);
     if (f === undefined) {
-      const forms = await supabase.findForms();
+      const forms = await findForms();
       f = forms[idx] || null;
     }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
-    await supabase.supabaseJson('DELETE', 'database_asj_form', {
+    await supabaseJson('DELETE', 'database_asj_form', {
       query: { id: 'eq.' + f.id },
       headers: { Prefer: 'return=minimal' },
     });
@@ -187,9 +190,9 @@ async function handleTandaiDibacaForm(payload, sessionToken) {
   }
   try {
     // Jalur cepat: ambil baris mail di posisi index via query server-side.
-    let f = await supabase.findFormByIndexFiltered(idx);
+    let f = await findFormByIndexFiltered(idx);
     if (f === undefined) {
-      const forms = await supabase.findForms();
+      const forms = await findForms();
       f = forms[idx] || null;
     }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
@@ -197,14 +200,14 @@ async function handleTandaiDibacaForm(payload, sessionToken) {
     const m = fb.match(/\[\[PREV:([^\]]+)\]\]/);
     const prevStatus = m ? m[1].trim() : 'MENUNGGU';
     const newFb = fb.replace(/\[\[PREV:[^\]]+\]\]\s*/, '').trim();
-    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+    await supabaseJson('PATCH', 'database_asj_form', {
       query: { id: 'eq.' + f.id },
       body: { status: prevStatus, feedback_berkas: newFb, updated_at: new Date().toISOString() },
       headers: { Prefer: 'return=minimal' },
     });
     f.status = prevStatus;
     f.feedback_berkas = newFb;
-    return { success: true, form: supabase.mapForm(f, idx) };
+    return { success: true, form: mapForm(f, idx) };
   } catch (e) {
     return { success: false, error: 'Gagal tandai dibaca: ' + e.message };
   }
@@ -241,11 +244,11 @@ function appendFeedback(prev, entry) {
 // status UPDATE (kalau sudah pernah diproses admin) + ringkasan apa yang
 // berubah, supaya admin tidak bingung "email baru, tapi apa yang di-update?".
 async function syncBiodataKeMail(wa, nama, labels) {
-  const want = supabase.normalizeWa(wa);
+  const want = normalizeWa(wa);
   // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
-  let rows = await supabase.findFormsByWa(wa);
-  if (rows === undefined) rows = await supabase.findForms();
-  const mine = rows.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+  let rows = await findFormsByWa(wa);
+  if (rows === undefined) rows = await findForms();
+  const mine = rows.filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want);
   if (!mine.length) return;
   for (const r of mine) {
     if (r.id === undefined || r.id === null) continue;
@@ -262,7 +265,7 @@ async function syncBiodataKeMail(wa, nama, labels) {
       feedback_berkas: appendFeedback(r.feedback_berkas, entry),
     };
     if (isUpdate) body.status = 'UPDATE';
-    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+    await supabaseJson('PATCH', 'database_asj_form', {
       query: { id: 'eq.' + r.id },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -286,11 +289,11 @@ async function syncBiodataKeMail(wa, nama, labels) {
 //   dokumen + preview); feedback_berkas = catatan aktivitas terakhir
 //   ("[UPLOAD KTP]") supaya admin tahu apa yang baru di-upload.
 async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
-  const want = supabase.normalizeWa(wa);
+  const want = normalizeWa(wa);
   // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
-  let rows = await supabase.findFormsByWa(wa);
+  let rows = await findFormsByWa(wa);
   if (rows === undefined) {
-    rows = await supabase.supabaseJson('GET', 'database_asj_form', {
+    rows = await supabaseJson('GET', 'database_asj_form', {
       query: { select: '*', limit: 500 },
     });
   }
@@ -305,15 +308,15 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
     if (code) {
       targets = all.filter(
         (r) =>
-          supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want &&
+          normalizeWa(String(r.no_wa || r.wa || '')) === want &&
           String(r.code_job || '').trim() === code,
       );
     }
     if (!targets.length) {
-      targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+      targets = all.filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want);
     }
   } else {
-    targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+    targets = all.filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want);
   }
   if (!targets.length) targets = [null];
 
@@ -355,13 +358,13 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
     if (label === 'JFT') body.jft = String(url || '');
     if (label === 'SSW') body.ssw = String(url || '');
     if (existing && existing.id !== undefined) {
-      await supabase.supabaseJson('PATCH', 'database_asj_form', {
+      await supabaseJson('PATCH', 'database_asj_form', {
         query: { id: 'eq.' + existing.id },
         body,
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabase.supabaseJson('POST', 'database_asj_form', {
+      await supabaseJson('POST', 'database_asj_form', {
         body,
         headers: { Prefer: 'return=minimal' },
       });

@@ -3,7 +3,10 @@
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, supabaseJson } = require('./db/client');
+const { findForms, findFormsByWaList } = require('./db/forms');
+const { attachApplications, mapCandidate } = require('./db/candidates');
+const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa } = require('./candidate-helpers');
 const { stripRaw, loadCandidatesUnik } = require('./actions-public');
@@ -14,7 +17,7 @@ async function handleUpdateCatatanKandidat(payload, sessionToken) {
   const [id, intNote, extNote] = payload || [];
   if (!id) return { success: false, error: 'ID kandidat tidak ditemukan.' };
   try {
-    await supabase.supabaseJson('PATCH', 'database_candidate', {
+    await supabaseJson('PATCH', 'database_candidate', {
       query: { id_kandidat: 'eq.' + id },
       body: {
         catatan_internal: intNote || '',
@@ -50,7 +53,7 @@ async function handleUpdateKandidatSuper(payload, sessionToken) {
   try {
     const row = await findCandidateByWa(data.wa);
     if (!row) return { success: false, error: 'Kandidat tidak ditemukan.' };
-    await supabase.supabaseJson('PATCH', 'database_candidate', {
+    await supabaseJson('PATCH', 'database_candidate', {
       query: { id: 'eq.' + row.id },
       body,
       headers: { Prefer: 'return=minimal' },
@@ -75,15 +78,15 @@ async function handleGetCandidatesPage(payload, sessionToken) {
       page,
       pageSize,
     });
-    const cands = stripRaw(candRows.map(supabase.mapCandidate));
-    await supabase.attachBerkasBio(cands);
+    const cands = stripRaw(candRows.map(mapCandidate));
+    await attachBerkasBio(cands);
     // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
     // Jalur cepat: tarik lamaran hanya untuk WA kandidat di halaman ini
     // (in-filter), bukan scan 500 baris inbox.
-    const waList = cands.map((c) => supabase.normalizeWa(String(c.wa || ''))).filter(Boolean);
-    let allForms = await supabase.findFormsByWaList(waList);
-    if (allForms === undefined) allForms = await supabase.findForms();
-    supabase.attachApplications(cands, allForms);
+    const waList = cands.map((c) => normalizeWa(String(c.wa || ''))).filter(Boolean);
+    let allForms = await findFormsByWaList(waList);
+    if (allForms === undefined) allForms = await findForms();
+    attachApplications(cands, allForms);
     return { success: true, candidates: cands, total };
   } catch (e) {
     return { success: false, error: 'Gagal memuat kandidat: ' + e.message };

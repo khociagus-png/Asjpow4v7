@@ -184,29 +184,6 @@ async function findCandidateByWaFiltered(wa) {
 }
 
 
-// Cari kandidat via query SERVER-SIDE (filter kolom WA) — bukan tarik 300 baris
-// lalu filter di JS. Return: row (ketemu) | null (tidak ketemu, query jalan) |
-// undefined (kolom tidak cocok — caller pakai fallback scan).
-async function findCandidateByWaFiltered(wa) {
-  const want = normalizeWa(wa);
-  let anySucceed = false;
-  for (const col of CAND_WA_COLS.slice(0, 3)) {
-    try {
-      const rows = await supabaseJson('GET', 'database_candidate', {
-        query: { select: '*', limit: '5', [col]: 'eq.' + want },
-      });
-      anySucceed = true;
-      if (!Array.isArray(rows) || rows.length === 0) continue;
-      const hit = rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want);
-      if (hit) return hit;
-    } catch {
-      /* kolom ini tidak ada di skema — coba kolom berikutnya */
-    }
-  }
-  return anySucceed ? null : undefined;
-}
-
-
 // Max nomor id kandidat (ASJ#####) dari kolom id_kandidat — server-side.
 async function maxCandidateIdNumber() {
   try {

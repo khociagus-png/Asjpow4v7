@@ -12,13 +12,15 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const supabase = require('../netlify/functions/_lib/supabase.js');
+const { findTable, supabaseKey, supabaseUrl, toText } = require('../netlify/functions/_lib/db/client');
+const { findForms, parseDocs } = require('../netlify/functions/_lib/db/forms');
+const { findCandidates } = require('../netlify/functions/_lib/db/candidates');
 
 const APPLY = process.argv.includes('--apply');
 
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'asj-files';
-const BASE = supabase.supabaseUrl().replace(/\/$/, '');
-const KEY = supabase.supabaseKey();
+const BASE = supabaseUrl().replace(/\/$/, '');
+const KEY = supabaseKey();
 if (!BASE || !KEY) {
   console.error('Supabase belum dikonfigurasi (cek .env.local / Keys).');
   process.exit(1);
@@ -104,7 +106,7 @@ async function collectReferences() {
   // a) Semua kolom bertipe URL di tabel kandidat & master.
   for (const table of ['database_candidate', 'master_database_candidate']) {
     try {
-      const { rows, table: found } = await supabase.findTable([table]);
+      const { rows, table: found } = await findTable([table]);
       for (const r of rows || []) {
         for (const u of pathsFromUrls(Object.values(r))) refs.add(u);
       }
@@ -115,9 +117,9 @@ async function collectReferences() {
   }
   // b) Keterangan form lamaran (NAMA:URL;...) via parseDocs — URL penuh,
   // dinormalisasi ke path relatif dengan regex yang sama seperti di atas.
-  const forms = await supabase.findForms();
+  const forms = await findForms();
   for (const f of forms) {
-    for (const d of supabase.parseDocs(supabase.toText(f.keterangan))) {
+    for (const d of parseDocs(toText(f.keterangan))) {
       if (d && d.url) for (const p of pathsFromUrls([d.url])) refs.add(p);
     }
   }
@@ -127,7 +129,7 @@ async function collectReferences() {
 
 // ---- 3. Cocokkan folder -> nama kandidat (untuk laporan "folder yatim") -----
 async function candidateFolderNames() {
-  const found = await supabase.findCandidates();
+  const found = await findCandidates();
   const set = new Set();
   for (const r of found.rows || []) {
     const nama = String(r.nama_lengkap || r.nama || r.name || '').trim();

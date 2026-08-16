@@ -3,7 +3,7 @@
 // perilaku TIDAK berubah.
 'use strict';
 
-const supabase = require('./supabase');
+const { normalizeWa, supabaseJson } = require('./db/client');
 const { env } = require('./env');
 const { requireRole } = require('./actions-auth');
 
@@ -16,13 +16,13 @@ async function handleSimpanWaTemplate(payload, sessionToken) {
   if (!nama) return { success: false, error: 'Nama template wajib diisi.' };
   try {
     if (id && id !== '') {
-      await supabase.supabaseJson('PATCH', 'wa_templates', {
+      await supabaseJson('PATCH', 'wa_templates', {
         query: { id: 'eq.' + id },
         body: { nama, isi, updated_at: new Date().toISOString() },
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabase.supabaseJson('POST', 'wa_templates', {
+      await supabaseJson('POST', 'wa_templates', {
         body: {
           id: 'WA' + Date.now(),
           nama,
@@ -45,7 +45,7 @@ async function handleHapusWaTemplate(payload, sessionToken) {
   const id = String((payload && payload[0]) || '');
   if (!id) return { success: false, error: 'ID template tidak ditemukan.' };
   try {
-    await supabase.supabaseJson('DELETE', 'wa_templates', {
+    await supabaseJson('DELETE', 'wa_templates', {
       query: { id: 'eq.' + id },
       headers: { Prefer: 'return=minimal' },
     });
@@ -85,7 +85,7 @@ async function handleKirimSatuPesanFonnte(payload, sessionToken) {
   const message = String((payload && payload[1]) || '');
   if (!wa || !message) return { success: false, error: 'Nomor WA dan pesan wajib diisi.' };
   try {
-    const result = await fonnteSend(supabase.normalizeWa(wa), message);
+    const result = await fonnteSend(normalizeWa(wa), message);
     return { success: true, result };
   } catch (e) {
     return { success: false, error: e.message };
@@ -106,7 +106,7 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
   try {
     let templateIsi = null;
     try {
-      const rows = await supabase.supabaseJson('GET', 'wa_templates', {
+      const rows = await supabaseJson('GET', 'wa_templates', {
         query: { select: '*', limit: 100 },
       });
       const tpl = (Array.isArray(rows) ? rows : []).find(
@@ -123,7 +123,7 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
       /* template opsional */
     }
     for (const c of cands) {
-      const wa = supabase.normalizeWa(String(c.wa || ''));
+      const wa = normalizeWa(String(c.wa || ''));
       const nama = String(c.nama || 'Kandidat');
       let message =
         d.customMessage ||
