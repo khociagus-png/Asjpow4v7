@@ -227,7 +227,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       internal privat) ✓ · E2E login/upload/biodata + smoke standalone
       **SEMUA LULUS** (commit `af49b82`).
       Detail & roadmap: **`ESM_BRIDGE.md`**.
-- [x] **Langkah 3 — `js/init/state.js` + `js/init/util.js` ESM** — commit menyusul
+- [x] **Langkah 3 — `js/init/state.js` + `js/init/util.js` ESM** — commit `6478be9`
       State global (33 var, termasuk yang di-REASSIGN oleh classic seperti
       `ALL_JOBS = ...` di engine/init, `isAdmin = true` di auth, `CURRENT_THEME
       = theme` di theme) memakai **accessor get/set bridge** di window

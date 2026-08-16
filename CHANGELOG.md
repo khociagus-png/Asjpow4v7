@@ -1,6 +1,6 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 3 — commit menyusul).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 3 — commit `6478be9`).
 
 ---
 

@@ -351,7 +351,7 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
   (ai_form/master-full via bridge; apply-full/siswa-baru api-client; share
   i18n) — core ESM load via `<script type="module">` **0 JS error**.
 
-### Langkah 3 — state.js + util.js ESM (turn ini, commit menyusul)
+### Langkah 3 — state.js + util.js ESM (turn ini, commit `6478be9`)
 
 - `node --check --input-type=module` js/init/state.js + js/init/util.js ✓
 - Scan `no-undef` strict: **0 error** ✓ (referensi eksplisit `window.*`:

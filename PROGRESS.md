@@ -4,13 +4,13 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 3: `js/init/state.js` + `js/init/util.js` ESM (accessor bridge) (commit menyusul).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 3: `js/init/state.js` + `js/init/util.js` ESM (accessor bridge) (commit `6478be9`).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 3 — state.js + util.js ESM + accessor bridge + E2E penuh (commit menyusul)
+### Fase 3 langkah 3 — state.js + util.js ESM + accessor bridge + E2E penuh (commit `6478be9`)
 
 - **`js/init/state.js` → ESM**: 33 var state (`ALL_*`, `ASSETS`,
   `CURRENT_THEME`, `DROPDOWNS`, `isAdmin/isKandidat`, `current*`,
