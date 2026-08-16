@@ -69,7 +69,11 @@ const STACK = [
   '/js/api/candidates.js',
   '/js/api/wa.js',
   '/js/08_wa_pintar.js',
-  '/js/09_ai_copilot.js',
+  // Fase 2: js/09_ai_copilot.js dipecah per domain (admin/interview/parse/results).
+  '/js/ai_copilot/admin.js',
+  '/js/ai_copilot/interview.js',
+  '/js/ai_copilot/parse.js',
+  '/js/ai_copilot/results.js',
   // Fase 2: js/11_admin_ops.js dipecah per domain (schedule/candidates/sysconfig/loading/migration/drive).
   '/js/admin_ops/schedule.js',
   '/js/admin_ops/candidates.js',
