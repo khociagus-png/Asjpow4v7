@@ -1,8 +1,8 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 7 — core (i18n/api-client) + init (state/util) +
-> auth + engine + render + **api (`js/api/*`) sudah ESM**. Sisa classic:
-> `init/{theme,preview,nav,boot}`, `admin_modal/*`, `admin_ops/*`,
+> **Status:** Fase 3 langkah 8 — core (i18n/api-client) + init (state/util) +
+> auth + engine + render + api (`js/api/*`) + **admin_modal (`js/admin_modal/*`)
+> sudah ESM**. Sisa classic: `init/{theme,preview,nav,boot}`, `admin_ops/*`,
 > `ai_copilot/*`, `01_public`, `03_candidate`, `08_wa_pintar`,
 > `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`,
 > `apply-docs`, `upload-guard`, `helpers_cv`, `pwa` (lihat urutan §6).
@@ -336,16 +336,17 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
-   (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7, turn
-   ini)** — catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat
-   alias window; referensi global implisit di dalam modul di-window-kan
-   eksplisit; **antar-file ESM belum boleh `import` (build masih concat +
-   IIFE per file) — panggilan lintas modul ESM memakai `window.*` eksplisit
-   sampai bundle jadi ESM (lihat §3.3)**. `render/mail.js` punya `var esc`
-   LOKAL (hoisting mencakup renderFormInbox) — jangan di-window-kan; blanket
-   replace lintas file harus dicek self-reference alias (`window.x =
-   window.x`) DAN literal template (`<tr` → `<window.tr` — ketahuan langkah
-   7, diperbaiki di render/public-admin-candidate-mail) setelah jalan.
+   (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
+   `js/admin_modal/*` ✅ (langkah 8, turn ini)** — catatan: fungsi yang
+   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
+   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
+   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
+   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
+   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
+   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
+   harus dicek self-reference alias (`window.x = window.x`) DAN literal
+   template (`<tr` → `<window.tr` — ketahuan langkah 7, diperbaiki di
+   render/public-admin-candidate-mail) setelah jalan.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -356,6 +357,25 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 8 — admin_modal/* ESM (commit `720e28e`, turn ini)
+
+- `node --check --input-type=module` 3 file js/admin_modal/* ✓ · scan
+  `no-undef` **0 error** ✓ (state via accessor dbFilter*/DROPDOWNS/
+  ALL_CANDIDATES/ALL_DB_JOBS/ASSETS/isAdmin; helper classic
+  jobTutupUntukLamar/bukaFormBridge/bukaPreviewDokumen/normalizeGenderValue/
+  previewFileInFrame; util/core via window) · `bun run lint` 0/12 ✓ ·
+  `bun run test` **81/81** ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **394 simbol**) ·
+  bundel `app-1057be7ccc.js` (417.7 KB) · 0 export bocor ✓ · idempoten ✓.
+- `toDateInputValue` DEFINISI di cv.js, dipakai api/candidates.js via
+  `window.toDateInputValue` — alias wajib (pemakai ESM yang sudah konversi
+  memakai window.* eksplisit, jadi kontrak tidak patah). 14 alias window.*
+  total (3 file). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 ·
+  LOW=372 (`.freebuff/audit-globals.json` + module-map diperbarui).
+- **E2E SEMUA LULUS**: login-check, upload-check, biodata-check ✓ + cek modal
+  CV terarah: admin login → `window.bukaDigitalCV` (ESM) → modal CV render
+  (nama SATRIA PUTRA DEWANGG, tombol Edit Cepat tampil) · 0 error JS ✓.
 
 ### Langkah 7 — api/* ESM (commit `fca83b6`, turn ini)
 

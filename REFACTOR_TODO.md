@@ -335,6 +335,25 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       admin, candidate, mail (blanket replace `tr(` ikut mengubah literal `<tr`
       template tabel) — diverifikasi di browser (tabel mail/DB Job/landing render
       `tr.rt-row` asli, 0 elemen `window.tr`).
+- [x] **Langkah 8 — `js/admin_modal/*` ESM (3 file: dbfilter, cv, job)** — commit `720e28e`
+      Domain modal CV digital & filter DB job (pecahan 06_admin_modal.js):
+      `dbfilter.js` (4: setFilterBidang/Tahapan/setSortDb/renderDbFilters — chip
+      filter/sort tabel DB job), `cv.js` (8: bukaDigitalCV/isiEditCepatCv/
+      toDateInputValue/toggleEditCepatCv/simpanEditCepatCv/bukaInlinePreview/
+      bukaPdfPreview/simpanCatatanCv), `job.js` (2: lamarJob/copyInfoLoker) →
+      `export` + 14 alias window.*. `toDateInputValue` (definisi di cv.js)
+      dipakai api/candidates.js via `window.toDateInputValue` — alias wajib.
+      Referensi global implisit di-window-kan eksplisit (no-undef 0 error):
+      state via accessor (dbFilter*/DROPDOWNS/ALL_CANDIDATES/ALL_DB_JOBS/
+      ASSETS/isAdmin), helper classic (jobTutupUntukLamar 01_public,
+      bukaFormBridge/bukaPreviewDokumen/normalizeGenderValue 03_candidate,
+      previewFileInFrame init/preview), util/core via window. Build: ESM_CORE
+      + 3 entri → `app-1057be7ccc.js` (417.7 KB, 0 export bocor, idempoten).
+      check:globals nol kolisi (45 file / 394 simbol). Audit 52 file /
+      **396 simbol** HIGH=0. Verifikasi: node --check ESM 3 file ✓ · no-undef
+      0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E login/upload/biodata
+      **SEMUA LULUS** ✓ · cek modal CV terarah (bukaDigitalCV → modal render,
+      Edit Cepat tampil, 0 error JS) ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**

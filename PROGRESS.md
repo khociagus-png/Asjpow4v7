@@ -4,7 +4,20 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 7: api (`js/api/*`) jadi ESM (commit `fca83b6`) + 🐛 fix artefak `<window.tr>` di tabel render.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 8: admin_modal (`js/admin_modal/*`) jadi ESM (commit `720e28e`).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 8 — admin_modal: js/admin_modal/* (dbfilter, cv, job) ESM
+
+- **`js/admin_modal/dbfilter.js` → ESM** (4): setFilterBidang/setFilterTahapan/setSortDb/renderDbFilters — `export` + 4 alias window.*. State writes via accessor (`window.dbFilterBidang/dbFilterTahapan/dbSortType = ...`), `window.DROPDOWNS` (accessor), `window.filterDbJob` (render/admin.js ESM).
+- **`js/admin_modal/job.js` → ESM** (2): lamarJob/copyInfoLoker — `export` + 2 alias. Pemakai classic (`window.jobTutupUntukLamar` dari 01_public.js, `window.bukaFormBridge` dari 03_candidate.js) di-window-kan; `window.currentKandidatWa/Name`, `window.salinTeksDecode`.
+- **`js/admin_modal/cv.js` → ESM** (8): bukaDigitalCV, isiEditCepatCv, **toDateInputValue** (dipakai api/candidates.js via `window.toDateInputValue` — alias WAJIB), toggleEditCepatCv, simpanEditCepatCv, bukaInlinePreview, bukaPdfPreview (onclick HTML render/mail.js + candidate.js), simpanCatatanCv — `export` + 8 alias. Referensi global di-window-kan eksplisit (no-undef **0 error**): `window.ALL_CANDIDATES/ALL_DB_JOBS/ASSETS/isAdmin` (accessor), `window.ensureAllCandidates` (sudah), util (`safeSet/formatPendidikanTingkat/getHighResImage/getDirectDownloadUrl/normalizePhone`), helper classic (`normalizeGenderValue` 03_candidate, `bukaPreviewDokumen` 03_candidate, `previewFileInFrame` init/preview), core (`tr/esc/callAPI/showToast`). `toDateInputValue` DEFINISI di cv.js, dipakai internal bare + eksternal via alias.
+- Build: ESM_CORE + 3 entri → bundel `app-1057be7ccc.js` (417.7 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 394 simbol). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.
+- Verifikasi: node --check ESM 3 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login-check, upload-check, biodata-check ✓ + **cek modal CV terarah**: admin login → `window.bukaDigitalCV` (ESM) → modal CV render (nama SATRIA PUTRA DEWANGG, tombol Edit Cepat tampil) · 0 error JS ✓.
+- Catatan infrastruktur: preview platform (freebuff-preview) beberapa kali mati/502 di sesi ini — E2E dijalankan pakai pola resmi repo (server hidup dalam 1 perintah bersama test, `kill $!` di akhir).
 
 ---
 

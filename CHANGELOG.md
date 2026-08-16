@@ -1,6 +1,18 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 7 — commit `fca83b6`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 8 — commit `720e28e`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 8: admin_modal js/admin_modal/* ESM (refactor)
+
+### Refactor: dbfilter, cv, job jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 3 file (14 deklarasi) → export + 14 alias window.*; `toDateInputValue` (definisi di cv.js) tetap tersedia via `window.toDateInputValue` untuk api/candidates.js.
+- Referensi global implisit di-window-kan eksplisit (no-undef 0 error): state via accessor (dbFilter*/DROPDOWNS/ALL_CANDIDATES/ALL_DB_JOBS/ASSETS/isAdmin), helper classic (jobTutupUntukLamar, bukaFormBridge, bukaPreviewDokumen, normalizeGenderValue, previewFileInFrame).
+- Bundel `app-1057be7ccc.js` (417.7 KB, 0 export bocor, nol kolisi, idempoten). Audit 52 file / 396 simbol, HIGH=0.
+- Verifikasi tambahan: modal CV digital dibuka via `window.bukaDigitalCV` (ESM) di browser — render nama kandidat + tombol Edit Cepat, 0 error JS.
 
 ---
 
