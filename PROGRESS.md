@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
-### Commit `<next>` — Fix: Simpan Final master-full error (id duplikat ktp)
+### Commit `f6dc1bb` — Fix: Simpan Final master-full error (id duplikat ktp)
 
 - **Laporan user (screenshot live master-full):** klik Simpan Final → alert
   "Terjadi kesalahan sistem: Cannot read properties of null (reading 'length')".

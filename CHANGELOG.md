@@ -1,6 +1,6 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `<next>`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `f6dc1bb`.
 
 ---
 
