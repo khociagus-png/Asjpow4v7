@@ -1,0 +1,449 @@
+// actions-public.js — data publik & dashboard utama (getAppData).
+//
+// MODUL BARU (Fase 1.1 REFACTOR_TODO.md): kode dipindah dari handlers.js
+// (dispatcher pusat) supaya tiap domain punya file sendiri dan mudah di-patch.
+//
+// PLUS optimasi performa 2026-08-16 (terukur: 3 query berurutan 1.489 ms →
+// paralel 297 ms):
+//   - Query publik (jobs/assets/settings) dijalankan PARALEL (dulu berurutan,
+//     ~1 detik hangus karena latensi per-request ke Supabase ~300-500 ms).
+//   - Data publik di-cache TTL 20 dtk di memori (cache.js) — getAppData
+//     publik berikutnya terlayani tanpa roundtrip DB (versi "Redis" tanpa
+//     Redis, cukup untuk skala ASJ).
+'use strict';
+
+const supabase = require('./supabase');
+const session = require('./session');
+const demo = require('./demo');
+const { cacheGet, cacheSet } = require('./cache');
+
+// sys_config.config_type -> key dropdown yang dikirim ke frontend
+// (kunci ekstra statusLoker/lokasiZoom/dst. ikut dikirim persis seperti
+// backend asli, walau UI utama hanya memakai 6 key pertama).
+const DROPDOWN_MAP = {
+  list_kategori: 'kategori',
+  list_gender: 'gender',
+  list_tahapan: 'tahapan',
+  tsk: 'tsk',
+  list_lokasi: 'lokasi',
+  list_syarat: 'syarat',
+  lokasi__link_zoom: 'lokasiZoom',
+  list_status_loker: 'statusLoker',
+  status_form: 'statusForm',
+  list_status_lamaran: 'statusLamaran',
+  broadcast: 'broadcast',
+};
+
+function parseConfigList(v) {
+  if (Array.isArray(v)) return v;
+  const s = String(v || '').trim();
+  // Nilai bisa berupa JSON array string ("[\"a\",\"b\"]").
+  if (s.startsWith('[') || s.startsWith('{')) {
+    try {
+      const p = JSON.parse(s);
+      if (Array.isArray(p)) return p;
+    } catch {
+      /* bukan JSON valid — lanjut split biasa */
+    }
+  }
+  return s
+    .split(/[\n,;]+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function stripRaw(list) {
+  return (list || []).map(({ _raw, ...rest }) => rest);
+}
+
+// Jadwal & tugas & template WA untuk dashboard admin (database_schedule,
+// database_tugas, wa_templates — bentuk yang dipakai frontend).
+async function loadSchedules() {
+  try {
+    const rows = await supabase.supabaseJson('GET', 'database_schedule', {
+      query: { select: '*', limit: 500, order: 'created_at.desc' },
+    });
+    return (Array.isArray(rows) ? rows : []).map((r) => ({
+      idJadwal: supabase.toText(r.id_jadwal || r.id || ''),
+      namaAgenda: supabase.toText(r.nama_agenda || ''),
+      idLoker: supabase.toText(r.id_loker_terkait || '-'),
+      waktu: supabase.toText(r.tanggal_waktu || ''),
+      link: supabase.toText(r.lokasi_link || '-'),
+      kandidat: supabase.toText(r.daftar_kandidat || '-'),
+      tsk: supabase.toText(r.tsk || ''),
+      status: supabase.toText(r.status_jadwal || 'AKTIF'),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function loadTugas() {
+  try {
+    const rows = await supabase.supabaseJson('GET', 'database_tugas', {
+      query: { select: '*', limit: 500, order: 'created_at.desc' },
+    });
+    return (Array.isArray(rows) ? rows : []).map((r) => ({
+      id: supabase.toText(r.id_tugas || r.id || ''),
+      task: supabase.toText(r.nama_tugas || ''),
+      status: supabase.toText(r.status || 'BARU'),
+      dibuatOleh: supabase.toText(r.dibuat_oleh || ''),
+      waktuDibuat: supabase.toText(r.waktu_dibuat || ''),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function loadWaTemplates() {
+  try {
+    const rows = await supabase.supabaseJson('GET', 'wa_templates', {
+      query: { select: '*', limit: 500 },
+    });
+    return (Array.isArray(rows) ? rows : []).map((r) => ({
+      id: supabase.toText(r.id || ''),
+      nama: supabase.toText(r.nama || ''),
+      isi: supabase.toText(r.isi || ''),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// Satu kandidat = satu baris di panel admin. (OK) Baris `database_candidate` dengan
+// WA yang sama dianggap duplikat (warisan data lama / baris ganda); simpan yang
+// paling baru (updated_at/created_at). Baris tanpa WA tetap dipertahankan.
+function dedupeKandidatRaw(rows) {
+  if (!Array.isArray(rows)) return rows;
+  const seen = new Map();
+  const out = [];
+  const tsOf = (r) =>
+    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  for (const r of rows) {
+    const wa = supabase.normalizeWa(
+      String(
+        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+      ),
+    );
+    if (!wa) {
+      out.push(r);
+      continue;
+    }
+    const ts = tsOf(r);
+    const prev = seen.get(wa);
+    // Seri: timestamp sama (mis. insert dalam satu request) → prefer baris
+    // dengan id lebih besar (insert terakhir).
+    if (!prev || ts > prev.ts || (ts === prev.ts && Number(r.id || 0) > Number(prev.row.id || 0))) {
+      seen.set(wa, { ts, row: r });
+    }
+  }
+  for (const v of seen.values()) out.push(v.row);
+  return out;
+}
+
+// Saring daftar kandidat unik dengan kata kunci (nama / WA) — dipakai jalur
+// cepat & fallback supaya perilaku sama persis.
+function saringKandidatUnik(uniq, q) {
+  const needle = String(q || '')
+    .trim()
+    .toLowerCase();
+  if (!needle) return uniq;
+  const digit = needle.replace(/\D/g, '');
+  return uniq.filter((r) => {
+    const nama = String(supabase.pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
+    const wa = supabase.normalizeWa(
+      String(
+        supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
+      ),
+    );
+    return nama.includes(needle) || (digit && wa.includes(digit));
+  });
+}
+
+// Daftar kandidat UNIK (satu baris per WA) urut paling baru di atas + total.
+// Dipakai getAppData & getCandidatesPage supaya "satu kandidat = satu baris"
+// konsisten DAN ukuran halaman & total selalu dihitung dari baris UNIK.
+//
+// Jalur cepat: baris RINGAN (proyeksi kolom dedupe/filter/sort) paginasi penuh
+// TANPA batas 300 baris → dedupe+filter+sort di JS → baris PENUH hanya untuk
+// halaman yang diminta (findCandidatesByIds). Semantik urutan TIDAK berubah.
+// Fallback: scan penuh lama (skema kolom/tabel tidak dikenal).
+async function loadCandidatesUnik(q, opts = {}) {
+  const page = Number(opts.page) || 1;
+  const pageSize = Number(opts.pageSize) || 50;
+  const start = (page - 1) * pageSize;
+  const tsOf = (r) =>
+    String(supabase.pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  const urutkan = (uniq) =>
+    uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
+
+  const light = await supabase.findAllCandidatesLight();
+  if (light !== undefined) {
+    let uniq = dedupeKandidatRaw(light);
+    uniq = saringKandidatUnik(uniq, q);
+    urutkan(uniq);
+    const total = uniq.length;
+    const slice = uniq.slice(start, start + pageSize);
+    const full = await supabase.findCandidatesByIds(slice.map((r) => r.id));
+    if (full !== undefined) {
+      const byId = new Map(full.map((r) => [String(r.id), r]));
+      // Semua id halaman harus ter-resolve ke baris penuh; kalau ada yang
+      // tidak (data legacy tanpa id) → fallback scan penuh biar aman.
+      if (slice.every((r) => byId.has(String(r.id)))) {
+        return { rows: slice.map((r) => byId.get(String(r.id))), total };
+      }
+    }
+  }
+
+  // Fallback lama: scan penuh (perilaku persis sebelum optimasi).
+  const found = await supabase.findCandidates();
+  const rows = Array.isArray(found.rows) ? found.rows : [];
+  let uniq = dedupeKandidatRaw(rows);
+  uniq = saringKandidatUnik(uniq, q);
+  urutkan(uniq);
+  return { rows: uniq.slice(start, start + pageSize), total: uniq.length };
+}
+
+const PUBLIC_CACHE_TTL_MS = 20_000;
+
+// Bagian data PUBLIK dari getAppData (jobs/dropdowns/assets/pengumuman) —
+// identik untuk semua mode (public/admin/kandidat) → aman di-cache TTL.
+async function loadPublicBase(mode) {
+  const cached = cacheGet('public-base');
+  if (cached) return cached;
+
+  const base = demo.demoGetAppData(mode || 'public'); // reuse assets default
+  // PARALEL: 3 query independen (dulu berurutan ~1 detik).
+  const [found, assets, settings] = await Promise.all([
+    supabase.findJobs(),
+    supabase.findAssets(),
+    supabase.findSettings(),
+  ]);
+
+  // Fallback skema: hanya bila findJobs tidak menemukan tabel (query tambahan
+  // dependen — tidak bisa ikut paralel).
+  let foundTable = found;
+  if (!foundTable.table) {
+    // Skema asli beda nama tabel — cari lewat skema OpenAPI berdasarkan kolom.
+    const spec = await supabase.getSchema();
+    const names = supabase.tablesFromSchema(spec);
+    for (const name of names) {
+      const cols = supabase.columnsFromSchema(spec, name);
+      if (
+        cols.some((c) => /pekerjaan|judul|nama_loker|lowongan|title/.test(c)) &&
+        cols.some((c) => /status|kode|code/.test(c))
+      ) {
+        const hit = await supabase.findTable([name]);
+        if (hit.table) {
+          foundTable = hit;
+          break;
+        }
+      }
+    }
+  }
+  if (!foundTable.table) {
+    base.pengumuman =
+      '⚠ Backend Supabase terhubung, tapi tabel lowongan belum terdeteksi otomatis. Mapping skema perlu disesuaikan.';
+    return { notFound: true, base };
+  }
+
+  const jobs = foundTable.rows
+    .map(supabase.mapJob)
+    .filter((j) => j.pekerjaan && j.pekerjaan !== '');
+
+  // dropdowns + pengumuman dari sys_config (list_*, broadcast).
+  const dropdowns = {};
+  let pengumuman = '';
+  if (settings.table) {
+    for (const row of settings.rows) {
+      const type = supabase.toText(row.config_type);
+      const key = DROPDOWN_MAP[type];
+      // Setiap baris sys_config = SATU opsi (atau satu daftar) — gabungkan.
+      if (key) {
+        dropdowns[key] = (dropdowns[key] || []).concat(parseConfigList(row.config_value));
+      }
+      if (type === 'broadcast' && supabase.toText(row.config_value).trim() && !pengumuman) {
+        pengumuman = supabase.toText(row.config_value);
+      }
+    }
+    // TANPA dedupe — backend asli mengirim apa adanya (termasuk duplikat
+    // pada tsk), dan kita samakan persis.
+  }
+
+  const data = {
+    jobs: stripRaw(jobs),
+    assets: assets || base.assets,
+    dropdowns,
+    pengumuman,
+  };
+  cacheSet('public-base', data, PUBLIC_CACHE_TTL_MS);
+  return data;
+}
+
+// ---------------------------------------------------------------------------
+// getAppData — data utama dashboard
+// ---------------------------------------------------------------------------
+async function handleGetAppData(payload, sessionToken) {
+  const mode = (payload && payload[0]) || 'public';
+
+  if (!supabase.hasBackend()) {
+    // Belum ada key Supabase -> mode demo supaya preview tetap hidup.
+    return demo.demoGetAppData(mode);
+  }
+
+  try {
+    const pub = await loadPublicBase(mode);
+    if (pub.notFound) return pub.base;
+
+    const result = {
+      success: true,
+      activeTheme: '',
+      sessionInvalid: false,
+      jobs: pub.jobs,
+      dropdowns: pub.dropdowns,
+      assets: pub.assets,
+      pengumuman: pub.pengumuman,
+    };
+
+    // Mode admin/kandidat: validasi sesi. TIDAK valid -> kirim data publik
+    // + sessionInvalid:true (persis perilaku live — frontend lalu membersihkan
+    // sesi & reload ke layar login).
+    let t = null;
+    if (mode === 'admin' || mode === 'kandidat') {
+      const role = mode === 'admin' ? 'admin' : 'kandidat';
+      t = session.verifyToken(sessionToken);
+      const waPayload = String((payload && payload[1]) || '').replace(/\D/g, '');
+      const valid =
+        t &&
+        t.role === role &&
+        (mode !== 'kandidat' || (t.wa || '') === waPayload || waPayload === '');
+      if (!valid) {
+        result.sessionInvalid = true;
+        return result;
+      }
+    }
+
+    if (mode === 'admin') {
+      // Satu kandidat = satu baris: WA ganda (duplikat warisan) di-dedupe
+      // GLOBAL dulu, baru ambil halaman 1 (50). Total = jumlah UNIK supaya
+      // pagination frontend (Muat Lebih) tetap konsisten. Jalur cepat: baris
+      // ringan untuk dedupe+sort, baris penuh hanya untuk halaman ini.
+      const { rows: candRows, total: candidatesTotal } = await loadCandidatesUnik('', {
+        page: 1,
+        pageSize: 50,
+      });
+      result.dbJobs = pub.jobs;
+      result.candidates = stripRaw(candRows.map(supabase.mapCandidate));
+      // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
+      // kandidat — dipakai modal admin (berkas tersimpan, auto-fill biodata).
+      // Fetch sisa data dashboard diparalelkan (semuanya independen).
+      const [berkas, schedules, tugas, allForms, waTemplates] = await Promise.all([
+        supabase.attachBerkasBio(result.candidates),
+        loadSchedules(),
+        loadTugas(),
+        // Inbox admin: proyeksi kolom ringan (mapForm & attachApplications
+        // hanya membaca kolom itu); fallback findForms() bila skema tidak
+        // cocok dengan FORM_LIGHT_COLS.
+        supabase.findFormsLight().then((r) => (r === undefined ? supabase.findForms() : r)),
+        loadWaTemplates(),
+      ]);
+      result.candidates = berkas;
+      // Lampirkan SEMUA lamaran (per WA) ke tiap kandidat — mail inbox bisa
+      // berisi banyak job per kandidat (multi-apply).
+      supabase.attachApplications(result.candidates, allForms);
+      result.candidatesTotal = candidatesTotal;
+      result.schedules = schedules;
+      result.tugas = tugas;
+      result.formInbox = allForms.map(supabase.mapForm);
+      result.waTemplates = waTemplates;
+      result.kandidatRiwayat = [];
+    }
+
+    if (mode === 'kandidat') {
+      // Data kandidat miliknya sendiri — query server-side (filter WA),
+      // bukan tarik 300 baris lalu cari di JS.
+      const w = supabase.normalizeWa(t.wa || '');
+      let row = await supabase.findCandidateByWaFiltered(w);
+      if (row === undefined) {
+        // Fallback: scan penuh (skema kolom WA tidak dikenal).
+        const foundCand = await supabase.findCandidates();
+        row =
+          foundCand.rows.find(
+            (r) =>
+              supabase.normalizeWa(
+                supabase.pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp']) || '',
+              ) === w,
+          ) || null;
+      }
+      result.dbJobs = pub.jobs;
+      // Kandidat juga mengisi ALL_CANDIDATES dengan datanya sendiri (sama
+      // seperti backend asli) supaya dashboard (progres pemberkasan x/17,
+      // biodata, progress bar) punya myData — plus berkas/bio dari master &
+      // pemberkasan_checklist.
+      const myCands = row ? stripRaw([supabase.mapCandidate(row)]) : [];
+      await supabase.attachBerkasBio(myCands);
+      // Dashboard kandidat menampilkan semua job yang dilamar dari mail.
+      // Jalur cepat: tarik hanya lamaran WA-nya sendiri, bukan scan 500 baris.
+      let myForms = await supabase.findFormsByWa(w);
+      if (myForms === undefined) myForms = await supabase.findForms();
+      supabase.attachApplications(myCands, myForms);
+      result.candidates = myCands;
+      // Riwayat lamaran kandidat = daftar aplikasi (code/status/timestamp),
+      // bukan objek kandidat — frontend renderRiwayatKandidat membaca field
+      // r.jobCode/r.kode/r.code. Sebelumnya dikirim myCands (objek kandidat)
+      // → kode loker selalu kosong & card progres tidak bisa di-filter per loker.
+      result.kandidatRiwayat = (myCands[0] && myCands[0].applications) || [];
+      // Jadwal untuk kandidat: filter jadwal yang relevan — WA kandidat ada di
+      // daftar_kandidat ATAU jadwal terkait loker yang kandidat lamar. Bentuk
+      // objek disesuaikan dgn render frontend (agenda/status/waktu/lokasi/link).
+      // Sebelumnya `mySchedules` tidak pernah dibangun backend → box jadwal
+      // kandidat selalu kosong walau admin sudah membuat jadwal.
+      try {
+        const allSched = await loadSchedules();
+        const myJobCodes = new Set(
+          (Array.isArray(myForms) ? myForms : [])
+            .map((f) => String(supabase.pick(f, ['code_job', 'code']) || '').toUpperCase())
+            .filter(Boolean),
+        );
+        result.mySchedules = allSched
+          .filter((s) => {
+            const kandidatList = String(s.kandidat || '')
+              .split(/[\n,;]+/)
+              .map((x) => supabase.normalizeWa(x))
+              .filter(Boolean);
+            const inDaftar =
+              kandidatList.length > 0 &&
+              kandidatList.some((k) => k === w || k.endsWith(w.slice(-9)));
+            const lokerSama =
+              String(s.idLoker || '').toUpperCase() !== '-' &&
+              myJobCodes.has(String(s.idLoker || '').toUpperCase());
+            return inDaftar || lokerSama;
+          })
+          .map((s) => ({
+            agenda: s.namaAgenda || '',
+            status: s.status || 'AKTIF',
+            waktu: s.waktu || '',
+            lokasi: s.link && s.link !== '-' ? s.link : '-',
+            link: s.link && s.link !== '-' ? s.link : '',
+          }));
+      } catch {
+        result.mySchedules = [];
+      }
+    }
+
+    return result;
+  } catch (e) {
+    return { success: false, message: 'Gagal memuat data dari Supabase: ' + e.message };
+  }
+}
+
+module.exports = {
+  handleGetAppData,
+  // Helper yang masih dipakai handler lain di handlers.js (getCandidatesPage,
+  // getJobMapped, dll) — export supaya tidak dobel definisi.
+  loadCandidatesUnik,
+  stripRaw,
+  loadSchedules,
+  loadTugas,
+  loadWaTemplates,
+};

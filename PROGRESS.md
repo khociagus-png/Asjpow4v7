@@ -4,7 +4,112 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1 + Optimasi performa getAppData.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.1 (sebagian) + Optimasi performa getAppData — `handlers.js` dipecah
+
+**Masalah (laporan user):** aplikasi mulai terasa lambat padahal baru 2-3 job uji coba.
+
+**Diagnosis terukur (sebelum fix):**
+- `getAppData` publik **1.518 ms** (79 KB) / admin **2.573 ms** (242 KB) — padahal payload kecil.
+- Tes mentah: 3 query ke Supabase berurutan = **1.489 ms**, paralel = **297 ms**.
+- Akar: latensi per-request ke Supabase ~300-500 ms + query inti (jobs/assets/settings)
+  dijalankan **berurutan** di `handlers.js`, plus auto-refresh 60 dtk.
+- Bukan masalah data besar: 132 job = 66 KB, kolom ringan, tanpa base64 raksasa.
+
+**Fix (digabung dengan langkah modularisasi Fase 1.1):**
+- **Baru** `netlify/functions/_lib/cache.js` — TTL cache in-memory (20 dtk, max 50 entry),
+  versi "Redis" tanpa Redis (cukup untuk skala ASJ).
+- **Baru** `netlify/functions/_lib/actions-public.js` — modul data publik: `handleGetAppData`
+  + helper (DROPDOWN_MAP, parseConfigList, stripRaw, loadSchedules/Tugas/WaTemplates,
+  dedupe/saring/loadCandidatesUnik) dipindah dari `handlers.js`. Query publik
+  **diparalelkan** (`Promise.all` jobs/assets/settings) + **di-cache TTL**.
+- `handlers.js` −573 baris (1.792 → ±1.230): jadi dispatcher + handler lain;
+  `stripRaw`/`loadCandidatesUnik` di-import balik dari modul (dipakai handler lain).
+- Dispatcher: `getAppData` → `publicData.handleGetAppData`. Perilaku TIDAK berubah.
+
+**Hasil terukur (setelah fix):**
+
+| Mode | Sebelum | Sesudah cold | Sesudah warm (cache) |
+| --- | --- | --- | --- |
+| Publik | 1.518 ms | **937 ms** | **0 ms** |
+| Admin | 2.573 ms | **2.074 ms** | **1.661 ms** |
+| Kandidat | — | 1.968 ms | 1.627 ms |
+
+- Data identik (132 jobs, 50 kandidat, sessionInvalid false) — perilaku terjaga.
+- `bun run test` 51/51 lulus; `node --check` bersih; E2E login + share + probe SEMUA LULUS.
+- Backend module-map: 9 → **11 file**, 204 simbol; `actions-public.js` modul bersih
+  (12 definisi, 1 dipakai lintas file). Baseline JSON di-`gitignore`d (` .freebuff/`).
+
+**Catatan:** admin/kandidat masih ~1,6-2 dtk warm karena query khusus (berkas/forms/
+jadwal) tetap berjalan — panel admin dipakai sedikit orang, prioritas rendah. Yang
+paling penting untuk publik (dipakai SEMUA user) sudah 0 ms warm. Lanjutan
+optimasi: cache admin TTL pendek, atau per-halaman split bundel (Fase 3).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 0 REFACTOR — baseline modularisasi (commit `5305fdd` + dokumen baru)
+
+**Setup sesi ini (sebelumnya, konteks):** env var 12 key dipasang di `.env.local`
+(SUPABASE_URL/SERVICE_ROLE/ANON/STORAGE_BUCKET, ADMIN_MASTER_PIN, PIN_KHOCI,
+ADMIN_NUMBERS, FONNTE_TOKEN, GEMINI_API_KEY, GROQ_API_KEY, LOG_DRAIN_TOKEN,
+NETLIFY_SITE_URL). Verifikasi backend langsung: `getAppData` success (132 jobs),
+`checkAdminMaster(123456)` OK, `checkAdminPersonal(khoci,4444)` OK. Preview
+commands terpasang: install `bun install`, preview `node serve-static.mjs :3000`,
+build `bun run build`.
+
+**Dokumen baru:**
+- `REFACTOR_TODO.md` — rencana 6 fase modularisasi (backend split → frontend
+  split → ESM → i18n → HTML partial → build/tooling) + aturan main & larangan.
+- `scripts/module-map.mjs` — alat audit dependensi GLOBAL classic scripts
+  (frontend & backend), untuk memutuskan batas modul tanpa tebakan.
+
+**Baseline terukur (2026-08-16):**
+
+| Check | Hasil |
+| --- | --- |
+| `bun run lint` | ✅ 0 error, 12 warning (eqeqeq saja) |
+| `bun run test` | ✅ 51/51 lulus (4 file: helpers_cv 24, xss-escape 12, actions-extra 10, handlers 5) |
+| `bun run build` | ✅ idempotent — bundel `assets/app-d80b6b5088.js` 411.1 KB (21 file, hash `d80b6b5088`) |
+| E2E `login-check` | ✅ SEMUA LULUS (login kandidat + admin, dashboard render) |
+| E2E `share-view` | ✅ SEMUA LULUS (22 kandidat render, tanpa error JS) |
+| E2E `modal-runtime-check` | ✅ SEMUA LULUS |
+| E2E `probe-cleanup` | ✅ SEMUA BERSIH (0 callGAS, 0 request Google) |
+| Chromium Playwright | `bunx playwright install chromium` + `install-deps` (libglib dll.) |
+
+*Catatan: E2E `upload-check` / `biodata-check` / `photo-check` TIDAK dijalankan
+(di-skip untuk baseline karena menulis data kandidat) — jalankan saat fase
+refactor yang menyentuh alur upload/biodata.*
+
+**Hasil module-map (baseline disimpan di `.freebuff/module-map-*.json`):**
+
+- **Frontend:** 22 file JS, **353 simbol global**. File paling tergantung lintas
+  file: `js/07_api.js` (13 cross-file), `js/02_init.js` (12), `js/08_wa_pintar.js` (5).
+- **Kontrak global frontend** (dipakai ≥3 file — WAJIB di-export saat ESM):
+  `safeSet`, `normalizePhone`, `trOption`, `trOptionId`, `renderAdminFull`,
+  `bukaDigitalCV`, `adminSwitchTab`.
+- **Backend:** 9 file _lib, **200 simbol**. `actions-extra.js` (2.549 baris)
+  dipanggil 33× lintas file — target split terbesar Fase 1.
+- **Kontrak global backend:** `findCandidateByWaFiltered`, `findCandidates`, `verifyToken`.
+- **Kandidat dead code:** 14 (frontend) — `callNetlify` & `getApiUrl` di
+  `api-client.js` **terkonfirmasi mati** (warisan GAS, 0 pemanggil); sisanya
+  perlu verifikasi manual (beberapa false-positive: fungsi nested seperti
+  `finalize`, atau global yang diakses via property seperti `LANG.xxx`).
+
+**Cara deteksi regresi cepat (pakai baseline ini):**
+```bash
+node scripts/module-map.mjs           # harus ≤ baseline (353 simbol frontend)
+node scripts/module-map.mjs --backend # ≤ 200 simbol backend
+bun run lint && bun run test && bun run build
+```
+Kalau jumlah simbol/kontrak berubah drastis tanpa sengaja → ada global baru
+(bocor scope) atau fungsi terhapus → cek sebelum lanjut.
 
 ---
 
