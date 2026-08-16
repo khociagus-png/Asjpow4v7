@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.3 — `supabase.js` (1.073 baris) → `_lib/db/*` + agregat — commit *(isi hash)*
+### Fase 1.3 — `supabase.js` (1.073 baris) → `_lib/db/*` + agregat — commit `d6d8c76`
 
 - **Baru** `_lib/db/` (7 modul repo):
   - `client.js` (13 export) — fondasi PostgREST: supabaseUrl/Key, supabaseJson,
