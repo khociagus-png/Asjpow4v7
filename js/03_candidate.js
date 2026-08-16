@@ -22,7 +22,7 @@ export function bukaModalCvMini() {
     if (cleanGender.includes('WANITA') || cleanGender === 'P') cleanGender = 'PEREMPUAN';
 
     window.safeSetVal('um-gender', cleanGender);
-    window.    window.safeSetVal('um-usia',
+    window.safeSetVal('um-usia',
       myData.usia && myData.usia !== '-' ? String(myData.usia).replace(/\D/g, '') : '',
     );
     window.safeSetVal('um-tb', myData.tb && myData.tb !== '-' ? String(myData.tb).replace(/\D/g, '') : '');

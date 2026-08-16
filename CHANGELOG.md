@@ -1,6 +1,52 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3.18 lanjutan — pembersihan index redundan).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (🐛 Fix simpan teks JFT/SSW di CV Mini).
+
+---
+
+## 2026-08-16 — 🐛 Fix: teks JFT/SSW & pendidikan di modal CV Mini (kandidat) tidak tersimpan
+
+### Gejala (laporan user)
+
+- Di modal **Update CV Mini** (dashboard kandidat): ganti usia/TB/BB/gender
+  tersimpan, tapi ganti **teks JFT/JLPT** & **Bidang SSW** tidak tersimpan
+  (setelah refresh kembali ke nilai lama). Field Pendidikan Terakhir ikut
+  bermasalah (kelas bug yang sama).
+
+### Akar masalah
+
+- `prosesSimpanCvMini` (`js/03_candidate.js`) mengirim key `jft_text` /
+  `ssw_text` ke action `simpanUpdateMaster` → `handleSubmitMasterForm`
+  (`netlify/functions/_lib/actions-master.js`).
+- Handler hanya mengenal `nilai`/`lisensi` (MASTER_COLUMN_MAP → kolom
+  `jft`/`bidangssw`) dan `jftText`/`sswText` (jalur admin
+  `updateKandidatSuper`) — key CV mini **diabaikan diam-diam**, jadi kolom
+  `nilai_jft_text`/`bidang_ssw_text` (database_candidate) & `jft`/
+  `bidangssw` (master) tidak pernah di-update. `pendidikan` string dari CV
+  mini juga tidak dipetakan (master-full kirim array slot).
+
+### Perbaikan (additif, tidak mengubah kontrak jalur lain)
+
+- `actions-master.js` — `handleSubmitMasterForm`: normalisasi key
+  `jft_text`/`jftText` → `nilai`, `ssw_text`/`sswText` → `lisensi` sebelum
+  loop MASTER_COLUMN_MAP (guard `d[to] === undefined` → jalur
+  master-full/AI form yang sudah kirim `nilai`/`lisensi` tidak tersentuh).
+  Pendidikan string (CV mini) → `pendidikan_1_tingkat` (master) +
+  `pendidikan` (database_candidate) via sync kandidat.
+- `js/03_candidate.js` — bersihkan artefak double-prefix
+  `window.window.safeSetVal('um-usia',` → `window.safeSetVal('um-usia',`
+  (baris korup dari konversi ESM; selama ini jalan karena `window.window`
+  valid, tapi berantakan).
+
+### Verifikasi
+
+- Unit test **81/81** ✓ · lint 0 error ✓ · `bun run build` ✓ (bundel
+  `app-ddf857242b.js`).
+- E2E CV Mini (Playwright, preview lokal): login kandidat → ubah teks
+  JFT/SSW → simpan → **nilai tampil kembali setelah refresh** (terbukti
+  tersimpan di database_candidate) → nilai asli dipulihkan. ✓
+- Regresi: `login-check` ✓ · `biodata-check` (jalur `simpanUpdateMaster`
+  yang sama) ✓.
 
 ---
 

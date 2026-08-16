@@ -4,7 +4,18 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **Fase 3.18 lanjutan**: pembersihan index redundan (`idx_cand_no_wa`, `idx_master_no_wa`) — dibuktikan dari definisi `pg_indexes` + revisi file migrasi.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🐛 Fix teks JFT/SSW & pendidikan di modal CV Mini tidak tersimpan.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### 🐛 Fix: teks JFT/SSW & pendidikan di modal CV Mini (kandidat) tidak tersimpan
+
+- **Gejala user**: di Update CV Mini (dashboard kandidat) ganti usia bisa, tapi ganti teks JFT/JLPT & Bidang SSW tidak tersimpan (balik ke nilai lama setelah refresh).
+- **Akar masalah**: `prosesSimpanCvMini` kirim key `jft_text`/`ssw_text` ke `simpanUpdateMaster` → `handleSubmitMasterForm` (actions-master.js) hanya mengenal `nilai`/`lisensi` (MASTER_COLUMN_MAP → kolom `jft`/`bidangssw`) & `jftText`/`sswText` (jalur admin `updateKandidatSuper`) → key CV mini **diabaikan diam-diam**; kolom `nilai_jft_text`/`bidang_ssw_text` (database_candidate) & `jft`/`bidangssw` (master) tidak pernah di-update. `pendidikan` string dari CV mini juga tidak dipetakan (master-full kirim array slot).
+- **Fix** (additif, kontrak jalur lain tidak berubah): normalisasi `jft_text`/`jftText` → `nilai` & `ssw_text`/`sswText` → `lisensi` sebelum loop MASTER_COLUMN_MAP (guard `d[to] === undefined` → master-full/AI form yang sudah kirim `nilai`/`lisensi` tidak tersentuh); pendidikan string → `pendidikan_1_tingkat` (master) + `pendidikan` (database_candidate). Plus bersihkan artefak double-prefix `window.window.safeSetVal('um-usia',` di js/03_candidate.js (baris korup dari konversi ESM — jalan karena `window.window` valid).
+- **Verifikasi**: unit **81/81** ✓ · lint 0 error ✓ · build `app-ddf857242b.js` ✓ · **E2E CV Mini** (login kandidat → ubah JFT/SSW → simpan → nilai tampil kembali setelah refresh → nilai asli dipulihkan) ✓ · regresi login-check ✓ + biodata-check (jalur `simpanUpdateMaster` yang sama) ✓.
 
 ---
 

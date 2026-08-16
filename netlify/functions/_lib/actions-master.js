@@ -619,12 +619,37 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         d[to] = d[from];
       }
     }
+    // JFT/SSW text: CV mini (jft_text/ssw_text) & modal edit admin
+    // (jftText/sswText) → key kanonikal MASTER_COLUMN_MAP (nilai → kolom
+    // jft, lisensi → kolom bidangssw). Sebelumnya key ini DIABAIKAN
+    // diam-diam: teks JFT/SSW dari CV mini tidak pernah tersimpan —
+    // kolom jft/bidangssw (master) & nilai_jft_text/bidang_ssw_text
+    // (database_candidate) tidak pernah di-update, sedangkan usia/TB/BB/
+    // gender ikut tersimpan (itu sebabnya "ganti tahun bisa, ganti teks
+    // JFT/SSW tidak").
+    for (const [from, to] of [
+      ['jft_text', 'nilai'],
+      ['jftText', 'nilai'],
+      ['ssw_text', 'lisensi'],
+      ['sswText', 'lisensi'],
+    ]) {
+      if (d[from] !== undefined && d[from] !== null && d[from] !== '' && d[to] === undefined) {
+        d[to] = d[from];
+      }
+    }
+    // Pendidikan terakhir: CV mini mengirim string ('SMA'), master-full
+    // mengirim array slot — simpan string ke slot pertama master +
+    // kolom ringan database_candidate supaya pilihan di CV mini
+    // round-trip (sebelumnya diabaikan diam-diam juga).
+    const pendidikanStr =
+      typeof d.pendidikan === 'string' && d.pendidikan.trim() !== '' ? d.pendidikan.trim() : null;
     const body = { no_wa: wa, updated_at: new Date().toISOString() };
     for (const [from, col] of Object.entries(MASTER_COLUMN_MAP)) {
       if (d[from] !== undefined && d[from] !== null && d[from] !== '') body[col] = String(d[from]);
     }
     body.nama_lengkap = nama;
     Object.assign(body, fileUrls);
+    if (pendidikanStr) body.pendidikan_1_tingkat = pendidikanStr;
 
     // C. Ringkasan perubahan biodata (untuk mail inbox): bandingkan nilai lama
     // (baris master sebelum PATCH) dengan nilai baru dari form.
@@ -783,6 +808,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         file_cv: fileUrls.file_cv !== undefined ? fileUrls.file_cv : undefined,
         nilai_jft_text: body.jft !== undefined ? body.jft : undefined,
         bidang_ssw_text: body.bidangssw !== undefined ? body.bidangssw : undefined,
+        pendidikan: pendidikanStr !== null ? pendidikanStr : undefined,
       };
       for (const k of Object.keys(candBody)) if (candBody[k] === undefined) delete candBody[k];
       if (c && c.id !== undefined) {
