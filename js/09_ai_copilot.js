@@ -232,13 +232,51 @@ async function bukaSimulatorInterview() {
   // Jika VIP, buka modal
   document.getElementById('modal-interview').classList.remove('hidden');
 
-  // Reset chat jika baru pertama buka
+  // Reset chat & langsung mulai: AI menanyakan pertanyaan pertama sesuai
+  // bidang SSW kandidat (model wawancara 14 pertanyaan, gaya dokumen isian).
   let chatBox = document.getElementById('interview-chat-box');
-  if (interviewHistory.length === 0) {
-    chatBox.innerHTML = '';
+  chatBox.innerHTML = '';
+  interviewHistory = [];
+  await mulaiWawancaraInterview();
+}
+
+async function mulaiWawancaraInterview() {
+  const chatBox = document.getElementById('interview-chat-box');
+  const typingId = 'iv-typing-' + Date.now();
+  chatBox.insertAdjacentHTML(
+    'beforeend',
+    '<div id="' +
+      typingId +
+      '" class="flex items-start gap-3 mt-4">' +
+      '<img src="' +
+      urlFotoJeklin +
+      '" class="w-8 h-8 rounded-full object-cover shadow-sm border border-violet-400 flex-shrink-0" alt="Jeklin" onerror="this.style.display=\'none\'">' +
+      '<div class="bg-slate-800 p-3.5 rounded-2xl rounded-tl-none shadow-md border border-violet-500/30 flex gap-1.5 items-center h-10" style="width: fit-content;">' +
+      '<div class="w-2 h-2 bg-violet-400/80 rounded-full animate-bounce"></div>' +
+      '<div class="w-2 h-2 bg-violet-400/80 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>' +
+      '<div class="w-2 h-2 bg-violet-400/80 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>' +
+      '</div>' +
+      '</div>',
+  );
+  chatBox.scrollTop = chatBox.scrollHeight;
+  try {
+    const res = await callAPI('processAiInterview', {
+      wa: currentKandidatWa,
+      candidateName: currentKandidatName,
+      history: [],
+    });
+    const el = document.getElementById(typingId);
+    if (el) el.remove();
+    const reply = (res && res.reply) || 'Konnichiwa ' + currentKandidatName + '-san! Mari mulai wawancara kita.';
+    appendInterviewChat('ai', reply);
+    interviewHistory.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    console.error('[AI] mulai wawancara:', err);
+    const el = document.getElementById(typingId);
+    if (el) el.remove();
     appendInterviewChat(
       'ai',
-      `Konnichiwa **${currentKandidatName}**-san! Saya Jeklin-sensei.\nMulai hari ini kita akan berlatih wawancara kerja.\nKetik **"Hajimemashou"** (Mari mulai) untuk memulai pertanyaan pertama!`,
+      `Konnichiwa **${currentKandidatName}**-san! Saya Jeklin-sensei.\nKetik jawabanmu untuk memulai latihan wawancara ya!`,
     );
   }
 }
@@ -297,6 +335,7 @@ async function sendInterviewMessage() {
   typingEl.classList.remove('hidden');
 
   let payload = {
+    wa: currentKandidatWa,
     candidateName: currentKandidatName,
     history: interviewHistory.slice(-6), // Kirim 6 chat terakhir agar AI tidak lupa konteks
   };
@@ -343,6 +382,10 @@ function pastikanBarParseAdminAi() {
     '<div class="flex items-center gap-2 mt-2">' +
     '<i class="fas fa-mobile-alt text-slate-500 text-xs flex-shrink-0"></i>' +
     '<input type="tel" id="admin-ai-wa" placeholder="WA kandidat (08… atau 628…)" class="flex-1 min-w-0 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500">' +
+    '<input type="text" id="admin-ai-bidang" placeholder="Bidang (mis. Kaigo)" class="w-24 min-w-0 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500" title="Bidang SSW — isi untuk kandidat yang belum terdaftar">' +
+    '<button type="button" onclick="generateWawancaraModelAdmin()" class="flex-shrink-0 px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg shadow-md transition active:scale-95" title="Buat model wawancara sesuai bidang SSW kandidat (copy ke Google Sheet)">' +
+    '<i class="fas fa-clipboard-list mr-1"></i><span class="hidden md:inline">Model Wawancara</span>' +
+    '</button>' +
     '</div>' +
     '<div id="admin-ai-parse-status" class="hidden mt-2 text-[11px] text-sky-300 bg-sky-900/30 border border-sky-700/50 rounded-lg px-3 py-2"></div>';
   chatBox.parentElement.insertBefore(div, chatBox.nextSibling);
@@ -428,6 +471,62 @@ async function uploadDokumenBiodataAdmin(input) {
   } catch (err) {
     console.error('[AI] parseDokumenBiodata error:', err);
     tambahPesanAdminAi('⚠️ Gagal parse dokumen: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    if (statusEl) {
+      statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
+      setTimeout(() => statusEl.classList.add('hidden'), 8000);
+    }
+  }
+}
+
+// ==========================================
+// MODEL WAWANCARA per bidang SSW (admin): hasilkan dokumen 14 pertanyaan
+// (ID + romaji + panduan jawaban) sesuai bidang SSW kandidat — siap disalin
+// ke Google Sheet kandidat, gaya dokumen wawancara kaigo yang dibagikan tim.
+// ==========================================
+async function generateWawancaraModelAdmin() {
+  if (!isAdmin) {
+    showToast(tr('ui.toast_admin_login_first'), 'error');
+    return;
+  }
+  const waInput = document.getElementById('admin-ai-wa');
+  const wa = waInput ? waInput.value.trim() : '';
+  const bidangInput = document.getElementById('admin-ai-bidang');
+  const bidang = bidangInput ? bidangInput.value.trim() : '';
+  if (!wa && !currentAiCandidateId) {
+    showToast('Isi WA kandidat dulu atau pilih kandidatnya', 'error');
+    return;
+  }
+  const statusEl = document.getElementById('admin-ai-parse-status');
+  if (statusEl) {
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = '⏳ Jeklin menyusun model wawancara sesuai bidang SSW…';
+  }
+  try {
+    const res = await callAPI('generateWawancaraModel', [
+      {
+        candidateId: currentAiCandidateId || undefined,
+        wa: wa || undefined,
+        bidang: bidang || undefined,
+      },
+    ]);
+    if (!res || res.success === false) {
+      throw new Error((res && res.error) || 'Gagal membuat model wawancara');
+    }
+    const chatBox = document.getElementById('admin-ai-chat');
+    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    tambahPesanAdminAi(
+      '📋 **Model Wawancara — ' + esc(res.nama || res.bidang || 'SSW') + ' (' + esc(res.bidang) + ')**\n' +
+        'Bidang SSW: ' + esc(res.bidang) + '\n\n' + esc(res.model),
+      'ai',
+    );
+    if (waInput && res.wa) waInput.value = res.wa;
+    if (typeof showToast === 'function') {
+      showToast('Model wawancara ' + (res.nama || '') + ' siap disalin', 'success');
+    }
+    if (statusEl) statusEl.classList.add('hidden');
+  } catch (err) {
+    console.error('[AI] generateWawancaraModel:', err);
+    tambahPesanAdminAi('⚠️ Gagal membuat model wawancara: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);

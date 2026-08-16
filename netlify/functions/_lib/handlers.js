@@ -1304,6 +1304,7 @@ const AI_ACTIONS = new Set([
   'processAdminAIChat',
   'processAiInterview',
   'parseDokumenBiodata',
+  'generateWawancaraModel',
 ]);
 const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
 
@@ -1402,6 +1403,8 @@ async function dispatchAction(action, payload, sessionToken) {
       return handleEditLokerFull(payload, sessionToken);
     case 'parseDokumenBiodata':
       return ai.handleParseDokumenBiodata(payload, sessionToken);
+    case 'generateWawancaraModel':
+      return ai.handleGenerateWawancaraModel(payload, sessionToken);
     case 'ubahStatusJob':
       return handleUbahStatusJob(payload, sessionToken);
     case 'hapusJobData':

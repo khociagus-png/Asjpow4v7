@@ -74,6 +74,7 @@ const ADMIN_ACTIONS = new Set([
   'getAdminAiContext',
   'buildAdminAiCandidateSummary',
   'parseDokumenBiodata',
+  'generateWawancaraModel',
   // Signed upload URL ke Storage (files.ts) - sekarang wajib sesi admin.
   'getUploadUrls',
 ]);
@@ -92,6 +93,7 @@ const NETLIFY_FUNCTIONS = {
   getAdminAiContext: 'admin-ai-context',
   buildAdminAiCandidateSummary: 'admin-ai-context',
   parseDokumenBiodata: 'admin-ai-context',
+  generateWawancaraModel: 'admin-ai-context',
   // Jadwal & tugas
   checkAndSendAgendaReminders: 'schedule-reminders',
   simpanJadwalBaru: 'schedule-reminders',

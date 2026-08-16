@@ -321,17 +321,237 @@ async function handleProcessSiswaAIChat(payload) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Model wawancara per bidang SSW (Tokutei Ginou) — gaya dokumen isian
+// wawancara tim (14 pertanyaan: ID + romaji + panduan jawaban).
+// ---------------------------------------------------------------------------
+const BIDANG_INTERVIEW = {
+  kaigo: {
+    label: 'Kaigo (介護)',
+    extra: [
+      'Apa saja tugas utama seorang kaigo / caregiver? Jelaskan dengan contoh.',
+      'Bagaimana cara menghadapi lansia yang sedang marah, bingung, atau susah diatur?',
+      'Apa yang kamu ketahui tentang sertifikat Kaigo Fukushishi / ujian Kouka Shiken di Jepang?',
+      'Apakah kamu punya pengalaman merawat anggota keluarga yang lanjut usia? Ceritakan.',
+    ],
+  },
+  shokuhin: {
+    label: 'Shokuhin Seizou (食品製造)',
+    extra: [
+      'Pernahkah kamu bekerja di produksi/pengolahan makanan? Ceritakan pengalamanmu.',
+      'Apa yang kamu ketahui tentang kebersihan dan keamanan pangan (food safety)?',
+      'Bagaimana perasaanmu bekerja shift malam atau lembur?',
+      'Apakah kamu bisa bekerja cepat, teliti, dan mengikuti SOP dengan disiplin?',
+    ],
+  },
+  nougyou: {
+    label: 'Nougyou (農業)',
+    extra: [
+      'Apakah kamu pernah bekerja di sawah/ladang? Ceritakan pengalamanmu.',
+      'Bagaimana perasaanmu bekerja di luar ruangan dengan cuaca panas/dingin?',
+      'Apakah fisikmu kuat untuk kerja lapangan yang berat?',
+      'Apa yang kamu ketahui tentang teknologi pertanian Jepang?',
+    ],
+  },
+  kensetsu: {
+    label: 'Kensetsu (建設)',
+    extra: [
+      'Apakah kamu pernah bekerja di proyek bangunan? Ceritakan pengalamanmu.',
+      'Apa yang kamu ketahui tentang keselamatan kerja (anzen) di lokasi konstruksi?',
+      'Bagaimana perasaanmu bekerja di ketinggian atau di luar ruangan?',
+      'Apakah kamu bisa bekerja dengan alat berat / mesin?',
+    ],
+  },
+  jidousha: {
+    label: 'Jidousha Seibi (自動車整備)',
+    extra: [
+      'Apakah kamu punya pengalaman di bengkel atau perawatan kendaraan? Ceritakan.',
+      'Apa yang kamu ketahui tentang alat-alat bengkel dan keselamatan kerjanya?',
+      'Apakah kamu teliti dan sabar mengerjakan detail mekanik?',
+      'Apakah kamu bisa membaca manual / mengikuti instruksi teknis?',
+    ],
+  },
+  binbou: {
+    label: 'Binbou (ビルクリーニング)',
+    extra: [
+      'Apakah kamu pernah bekerja cleaning service? Ceritakan pengalamanmu.',
+      'Apa yang kamu ketahui tentang cara membersihkan bangunan/gedung secara profesional?',
+      'Apakah kamu teliti dan bertanggung jawab dengan detail kecil?',
+      'Bagaimana perasaanmu bekerja sendiri di malam hari?',
+    ],
+  },
+  sougou: {
+    label: 'Sougou Service (総合サービス)',
+    extra: [
+      'Apakah kamu punya pengalaman melayani pelanggan? Ceritakan.',
+      'Bagaimana cara kamu menghadapi pelanggan yang sedang komplain?',
+      'Apa itu omotenashi? Bagaimana kamu menerapkannya?',
+      'Apakah kamu bisa ramah dan sopan dalam bahasa Jepang?',
+    ],
+  },
+};
+const BIDANG_DEFAULT = {
+  label: 'SSW (Tokutei Ginou)',
+  extra: [
+    'Apakah kamu punya pengalaman kerja di bidang ini? Ceritakan secara detail.',
+    'Apa yang kamu ketahui tentang pekerjaan SSW yang kamu lamar?',
+    'Menurutmu apa yang paling berat dari bidang ini? Bagaimana kamu mengatasinya?',
+    'Kenapa kamu memilih bidang pekerjaan ini?',
+  ],
+};
+
+function normalizeBidang(raw) {
+  const s = String(raw || '').toLowerCase();
+  if (!s) return null;
+  if (/kaigo|kaig|caregiver|perawat.?lansia|care.?giving/.test(s)) return BIDANG_INTERVIEW.kaigo;
+  if (/shokuhin|syokuhin|food|makanan|ryouri|seizou/.test(s)) return BIDANG_INTERVIEW.shokuhin;
+  if (/nougyou|noukou|agricultur|pertanian|sawah|farming/.test(s)) return BIDANG_INTERVIEW.nougyou;
+  if (/kensetsu|konstruksi|construction|bangunan/.test(s)) return BIDANG_INTERVIEW.kensetsu;
+  if (/jidousha|seibi|otomotif|automotif|auto.?maint/.test(s)) return BIDANG_INTERVIEW.jidousha;
+  if (/binbou|cleaning|kebersihan|sapu|bencah/.test(s)) return BIDANG_INTERVIEW.binbou;
+  if (/sougou|service|pelayanan|omotenashi|restoran|hotel/.test(s)) return BIDANG_INTERVIEW.sougou;
+  return null;
+}
+
+// Resolve bidang + nama kandidat dari WA (master dulu, fallback kandidat).
+async function resolveProfilKandidat(wa) {
+  const want = supabase.normalizeWa(String(wa || ''));
+  if (!want) return null;
+  let nama = '';
+  let bidangRaw = '';
+  try {
+    const m = await findMasterByWa(want);
+    if (m) {
+      nama = String(m.nama_lengkap || '');
+      bidangRaw = String(m.bidangssw || m.ssw || m.bidang || m.lisensi || '');
+    }
+  } catch (e) {
+    /* opsional */
+  }
+  if (!nama || !bidangRaw) {
+    try {
+      let c = await supabase.findCandidateByWaFiltered(want);
+      if (c === undefined) {
+        const found = await supabase.findCandidates();
+        c =
+          (found.rows || []).find((r) =>
+            supabase.normalizeWa(String(supabase.pick(r, APPLY_WA_COLS) || '')) === want,
+          ) || null;
+      }
+      if (c) {
+        if (!nama) nama = String(c.nama || c.nama_lengkap || '');
+        if (!bidangRaw) bidangRaw = String(c.bidang || c.ssw || c.bidangssw || '');
+      }
+    } catch (e2) {
+      /* opsional */
+    }
+  }
+  return { wa: want, nama, bidang: normalizeBidang(bidangRaw) || BIDANG_DEFAULT, bidangRaw };
+}
+
+function buildInterviewSystem(profil, kota) {
+  const b = profil.bidang || BIDANG_DEFAULT;
+  const lines = [
+    'Kamu adalah Jeklin Sensei, pewawancara kerja (mensetsu) Jepang untuk LPK ASJ (PT Amanah Sakura Japan).',
+    'Kandidat: ' + (profil.nama || 'Kandidat') + '-san. Bidang SSW: ' + b.label + '.',
+    'Kota penempatan: ' + (kota || 'belum ditentukan') + '.',
+    'Ikuti MODEL WAWANCARA 14 pertanyaan berikut SECARA BERURUTAN (jangan lompat-lompat):',
+    '1. Hobi kamu apa? Harus aktifitas fisik. (shumi wa nandesu ka?)',
+    '2. Siapakah tokoh Jepang terkenal yang kamu kagumi? (nihon no yuumei na hito o shitte imasu ka?)',
+    '3. Ingin bekerja di Jepang berapa lama? Target 5 tahun+, sebutkan target sertifikat/bahasa. (nihon de nan nen gurai hatarakitaidesu ka?)',
+    '4. Apa yang kamu ketahui tentang kota/tempat penempatanmu?',
+    '5. Apa tujuan/alasanmu ingin bekerja di Jepang? (naze nihon de hatarakitaidesu ka?)',
+    '6. Apa kelebihanmu? (chousho wa nandesu ka?)',
+    '7. Apa kekuranganmu? (tansho wa nandesu ka?)',
+    '8. Setelah pulang dari Jepang ingin melakukan apa?',
+    '9. Apakah kamu punya pengalaman kerja di bidang SSW ini? Ceritakan secara detail. (keiken wa arimasu ka?)',
+    '10. Jepang itu negara seperti apa menurutmu? (nihon wa donna kuni desu ka?)',
+    '11. Apa yang kamu ketahui tentang pekerjaan SSW / bidang ini? (... wa donna shigoto desu ka?)',
+    '12. Kenapa kamu memilih bidang pekerjaan ini? (doushite kono shigoto o shitai desu ka?)',
+    '13. Menurutmu apa yang paling berat dari bidang ini? Jelaskan. (kono shigoto de ichiban taihen na koto wa nandesu ka?)',
+    '14. Apakah ada pertanyaan untuk perusahaan? (shitsumon wa arimasu ka?) — lalu tutup dengan doumo arigatou gozaimasu + ojigi.',
+    'Pertanyaan khusus bidang ' + b.label + ' — sisipkan di nomor yang sesuai:',
+  ];
+  lines.push.apply(lines, b.extra.map((q, i) => '  • ' + (i + 1) + ') ' + q));
+  lines.push(
+    'CARA MENANYAKAN: tampilkan nomor pertanyaan, lalu pertanyaan dalam Bahasa Indonesia DENGAN romaji dalam kurung (contoh: "Hobi kamu apa? (shumi wa nandesu ka?)").',
+    'SETELAH kandidat menjawab: beri evaluasi singkat (1-2 kalimat) + saran perbaikan + contoh jawaban yang baik (Bahasa Indonesia + romaji singkat), lalu LANJUT ke pertanyaan berikutnya.',
+    'Di akhir (setelah nomor 14 & penutup): beri SKOR keseluruhan 1-10 + rekomendasi + saran latihan.',
+    'Balas dalam Bahasa Indonesia, ramah dan profesional seperti sensei.',
+  );
+  return lines.join('\n');
+}
+
 async function handleProcessAiInterview(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'kandidat');
   if (guard.error) return guard.error;
   const p = payload || {};
-  const system =
-    'Kamu adalah Jeklin Sensei, pewawancara kerja Jepang untuk LPK ASJ. Lakukan simulasi wawancara (Mentsetsu) ' +
-    'dengan pertanyaan bertahap (perkenalan → motivasi → pengalaman → bahasa Jepang). Beri evaluasi singkat setelah jawaban.';
+  const profil = await resolveProfilKandidat(p.wa || p.waTarget || '');
+  const system = buildInterviewSystem(
+    profil || { nama: p.candidateName, bidang: normalizeBidang(p.bidang) || BIDANG_DEFAULT },
+    p.kota || p.jobKota,
+  );
   try {
     return await geminiGenerate(system, Array.isArray(p.history) ? p.history : []);
   } catch (e) {
     return { reply: 'Maaf, jaringan AI sedang sibuk. Coba lagi ya!' };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// generateWawancaraModel — admin: hasilkan DOKUMEN model wawancara lengkap
+// (14 pertanyaan: ID + romaji + panduan jawaban ID/romaji/kanji) per kandidat
+// sesuai bidang SSW-nya — bisa langsung disalin ke Google Sheet kandidat.
+// ---------------------------------------------------------------------------
+async function handleGenerateWawancaraModel(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'admin');
+  if (guard.error) return guard.error;
+  const d = (payload && payload[0]) || {};
+  // Resolve WA dari candidateId (sama seperti parseDokumenBiodata) atau wa eksplisit.
+  let wa = supabase.normalizeWa(String(d.wa || ''));
+  if (!wa && d.candidateId) {
+    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    if (cand === undefined) {
+      const found = await supabase.findCandidates();
+      cand =
+        (found.rows || []).find((r) =>
+          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        ) || null;
+    }
+    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+  }
+  if (!wa) {
+    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+  }
+  const profil = await resolveProfilKandidat(wa);
+  // Bidang bisa di-override admin (berguna untuk kandidat yang belum terdaftar
+  // di DB — mis. Herlina belum daftar, admin tinggal ketik bidangnya).
+  const b = normalizeBidang(d.bidang) || (profil && profil.bidang) || BIDANG_DEFAULT;
+  const kota = String(d.kota || d.jobKota || '');
+  const system =
+    'Kamu adalah Jeklin, asisten HRD LPK ASJ (PT Amanah Sakura Japan).' +
+    'Buatkan MODEL WAWANCARA KERJA JEPANG untuk kandidat ' +
+    ((profil && profil.nama) || 'kandidat') +
+    ' (bidang SSW: ' +
+    b.label +
+    (kota ? ', kota penempatan: ' + kota : '') +
+    '), format PERSIS seperti dokumen isian yang dibagikan tim ke kandidat:' +
+    '\n- 14 pertanyaan bernomor 1-14.' +
+    '\n- Setiap pertanyaan: judul Bahasa Indonesia + pertanyaan romaji dalam kurung (contoh: "Hobi kamu apa? (shumi wa nandesu ka?)").' +
+    '\n- Di bawahnya: "jawaban translate kanji alfabet (watashiwa):" lalu panduan jawaban romaji, kemudian arti Indonesia.' +
+    '\n- Untuk kalimat kunci sertakan kanji di akhir sebagai catatan "kanji wajib di isi boleh menyusul".' +
+    '\n- Masukkan pertanyaan khusus bidang ' +
+    b.label +
+    ' (pengalaman kerja bidang, hal terberat, pengetahuan pekerjaan, kenapa memilih bidang ini).' +
+    '\n- Nomor 14: pertanyaan ke perusahaan (2 pertanyaan) + penutup (doumo arigatou gozaimasu + ojigi).' +
+    '\n- Tambahkan juga instruksi di awal dokumen: "SILAHKAN ISI DI DRIVE INI (TANPA DOWNLOAD FILE)" dan catatan bahwa jawaban akan diperbaiki sensei.' +
+    '\nKembalikan HANYA teks dokumen lengkap siap salin, tanpa penjelasan tambahan.';
+  try {
+    const r = await geminiGenerate(system, []);
+    return { success: true, model: r.reply, bidang: b.label, nama: (profil && profil.nama) || '', wa };
+  } catch (e) {
+    console.error('[AI] generateWawancaraModel error:', e && e.message ? e.message : e);
+    return { success: false, error: 'Gagal membuat model wawancara: ' + (e && e.message ? e.message : 'AI sibuk') };
   }
 }
 
@@ -717,6 +937,7 @@ module.exports = {
   handleGetAdminAiContext,
   handleBuildAdminAiCandidateSummary,
   handleParseDokumenBiodata,
+  handleGenerateWawancaraModel,
   handleSubmitDataAsj,
   handleSimpanDataTtdNaitei,
 };
