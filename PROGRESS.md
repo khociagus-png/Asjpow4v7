@@ -4,7 +4,28 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1b (modul auth).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1c (modul job/candidate/mail).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.1c — modul job, candidate, mail — commit `(menyusul)`
+
+- **Baru** `_lib/actions-job.js` (274) — kelola lowongan: simpan/edit/status/
+  hapus/tahapan/dokumen share/tandai gagal + JOB_COLUMNS/mapJobPayloadToRow/
+  nextJobCode/getJobMapped.
+- **Baru** `_lib/actions-candidate.js` (97) — updateCatatanKandidat,
+  updateKandidatSuper, getCandidatesPage.
+- **Baru** `_lib/actions-mail.js` (234) — handleFormStatus, nextCandidateId,
+  syncCandidateDariForm, review/approve/reject/delete/tandai dibaca.
+- `handlers.js` 1.413 → **629 baris** (dari 1.792 awal). Import tidak terpakai
+  dibersihkan (bcrypt pindah ke mail; stripRaw/findCandidateByWa/loadCandidatesUnik
+  tidak lagi dipakai langsung di handlers).
+- Verifikasi: node --check, test 51/51, smoke wiring (job/candidate/mail OK,
+  guard admin menolak token kandidat), E2E login SEMUA LULUS, backend-fast-path
+  SEMUA LULUS, getAppData publik tetap 0 ms warm (132 jobs).
+- Backend module-map: 13 → **16 file**, 204 simbol.
 
 ---
 

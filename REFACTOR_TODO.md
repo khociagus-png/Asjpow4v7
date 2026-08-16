@@ -62,11 +62,9 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       di-import balik. Terukur: publik 1.518 → 937 ms cold / **0 ms warm**; 51/51 test,
       E2E lulus. Detail: `PROGRESS.md` sesi 2026-08-16.
 - [x] **DONE (2026-08-16):** kluster auth + WA gate (`masterPins`, `requireAdmin`, `isValidWaFormat`, `handleCheckAdminMaster/Personal`, `handleLoginKandidat`, `handleDaftarKandidat`, `handleGantiPasswordKandidat`) → **`_lib/actions-auth.js`**; `findCandidateByWa`/`CAND_WA_COLS` → **`_lib/candidate-helpers.js`** (dipakai lintas domain). Test 51/51, smoke auth OK, E2E login lulus.
-- [ ] Pindahkan handler mail/form (`handleFormStatus`, `handleDeleteForm`, dll) → `_lib/actions-mail.js`.
-- [ ] Pindahkan handler kandidat (approve/reject/tandai gagal, update biodata, dll) → `_lib/actions-candidate.js`.
-- [ ] Pindahkan handler job/loker (status, hapus, update tahapan, dll) → `_lib/actions-job.js`.
+- [x] **DONE (2026-08-16):** handler mail/form (`handleFormStatus`, `syncCandidateDariForm`, review/approve/reject/delete/tandai dibaca) → **`_lib/actions-mail.js`**; handler kandidat (`updateCatatanKandidat`, `updateKandidatSuper`, `getCandidatesPage`) → **`_lib/actions-candidate.js`**; handler job/loker (simpan/edit/status/hapus/tahapan/dokumen/tandai gagal) → **`_lib/actions-job.js`**. `handlers.js` kini **629 baris** (dari 1.792). Test 51/51, smoke wiring OK, E2E login + backend-fast-path SEMUA LULUS.
 - [ ] Pindahkan handler upload/pemberkasan → `_lib/actions-upload.js`.
-- [ ] Sisakan `handlers.js` sebagai **dispatcher murni**: `dispatchAction` (map action → fungsi dari modul) + `handleAction` + payload validation. Target ≤ 300 baris.
+- [ ] **Hampir selesai** — `handlers.js` 629 baris: dispatcher + core (handleAction, rateLimit, sessionIdentity) + diagnostics (getAppConfig) + share-data. Sisa: pindah `handleShareData`/`docTypeOf`/`docAge` → `_lib/actions-share.js` dan `handleGetAppConfig` → `_lib/actions-diagnostics.js`, lalu target ≤ 300 baris tercapai.
 - [ ] Pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah).
 
 ### 1.2 Pecah `actions-extra.js` (2549 baris)
