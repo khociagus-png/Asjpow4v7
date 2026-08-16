@@ -1,6 +1,29 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `7260b93`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `0bd05a6`.
+
+---
+
+## 2026-08-16 — Jadwal kandidat + selector loker card progres
+
+### `0bd05a6` — Fix: jadwal muncul di kandidat + selector loker di card progres + riwayat lamaran
+- **Jadwal kandidat:** getAppData mode kandidat kini membangun `mySchedules`
+  (sebelumnya tidak pernah dikirim → panel "JADWAL ANDA" selalu kosong).
+  Filter: WA kandidat ada di `daftar_kandidat` ATAU jadwal terkait loker yang
+  kandidat lamar. Format objek disesuaikan dgn render (agenda/status/waktu/
+  lokasi/link) + `loadSchedules` mengirim `status_jadwal`.
+- **Riwayat lamaran:** `kandidatRiwayat` = daftar applications
+  (code/status/timestamp), bukan objek kandidat — sebelumnya kode loker
+  selalu "-" & card progres tidak bisa difilter per loker.
+- **Card "Status Lamaran Terkini":** pill pilihan loker (chip per code_job,
+  default loker LULUS/terbaru) — klik = progres tahapan loker itu saja,
+  tidak menumpuk semua lamaran. Label kategori kosong tidak lagi "Umum"
+  (fallback kode loker). Key i18n `ui.pilih_loker` (ID/JP).
+- **Kode Fonnte diverifikasi (tanpa tes kirim):** `fonnteSend` POST
+  api.fonnte.com/send dengan Authorization = FONNTE_TOKEN; tidak ada
+  reminder otomatis (database_schedule = agenda; pengingat manual).
+- Verifikasi: mySchedules via loker lamaran & daftar_kandidat; chips 2 loker
+  → klik → 1 kartu; login-check & modal-runtime hijau; unit 49/49.
 
 ---
 

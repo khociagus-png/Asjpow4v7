@@ -4,7 +4,43 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-15 — dikerjakan oleh **khoci89** (via Freebuff).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### Commit `0bd05a6` — Jadwal muncul di kandidat + selector loker card progres + riwayat lamaran
+
+- **Permintaan user:** (1) hapus tugas admin, (2) cek kode jadwal reminder
+  Fonnte, (3) jadwal muncul di kandidat, (4) card "Umum" di dashboard
+  kandidat diganti update biodata + loker terpilih, (5) card progres punya
+  pilihan loker — klik code_job → tampil tahapan loker itu saja.
+- **Bug: `mySchedules` tidak pernah dibangun backend** — getAppData mode
+  kandidat hanya kirim candidates/kandidatRiwayat; frontend sudah render
+  `k-dash-jadwal-box` sejak lama tapi selalu kosong. Kini dibangun
+  (loadSchedules + filter: WA di daftar_kandidat ATAU loker lamaran
+  kandidat) dengan format objek yg benar (agenda/status/waktu/lokasi/link).
+- **Bug: `kandidatRiwayat` = objek kandidat, bukan lamaran** —
+  renderRiwayatKandidat baca r.jobCode/r.kode/r.code; karena isinya objek
+  kandidat, kode loker selalu kosong ("-") & card tidak bisa difilter.
+  Sekarang = daftar applications (code/status/timestamp).
+- **Card progres:** pill pilihan loker (chip per code_job, default loker
+  LULUS/terbaru) — klik = kartu progres tahapan loker itu saja (tidak
+  numpuk). Label kategori kosong tidak lagi "Umum" (fallback kode loker).
+- **Kode Fonnte dicek (TANPA tes kirim):** `fonnteSend` benar — POST
+  api.fonnte.com/send, header Authorization = FONNTE_TOKEN, body
+  x-www-form-urlencoded target+message; `kirimSatuPesanFonnte` &
+  `kirimTawaranMassal` (template {nama}/{job}/{link}) rate-limit
+  FONNTE_ACTIONS. Catatan: fitur "reminder otomatis" tidak ada —
+  database_schedule murni agenda; pengingat via WA tetap manual
+  (kirim pesan/tawaran massal).
+- **Hapus tugas/jadwal:** sudah berfungsi (lookup id_tugas|id lalu hapus
+  by PK, termasuk baris legacy). Verifikasi e2e: tambah→hapus→
+  "Tidak ditemukan".
+- Verifikasi: mySchedules tampil via loker lamaran & via daftar_kandidat;
+  chips 2 loker → klik → 1 kartu; login-check 20/20, modal-runtime 8/8,
+  unit 49/49.
 
 ---
 
