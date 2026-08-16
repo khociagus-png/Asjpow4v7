@@ -83,10 +83,18 @@ async function attachBerkasBio(candidates) {
       ...new Set(candidates.map((c) => normalizeWa(String(c.wa || ''))).filter(Boolean)),
     ];
     const useFilter = waList.length > 0 && waList.length <= 150;
-    let pRows = useFilter ? await fetchBerkasByWa(waList) : null;
+    // Fase 3.18: berkas (pemberkasan_checklist) & bio (master) ditarik
+    // PARALEL — independen, dulu berurutan (2 roundtrip serial di getAppData
+    // admin & halaman kandidat). Kedua fetch sudah catch internal → aman.
     // Jalur ringan: master hanya butuh kolom BERKAS_COLUMNS/BIO_COLUMNS —
     // jangan bawa 154 kolom penuh (sebelumnya ±6,5 KB/baris per kandidat).
-    let mRows = useFilter ? await fetchMasterLightByWa(waList) : null;
+    let pRows = null;
+    let mRows = null;
+    if (useFilter) {
+      const [p, m] = await Promise.all([fetchBerkasByWa(waList), fetchMasterLightByWa(waList)]);
+      pRows = p;
+      mRows = m;
+    }
     // Fallback per-tabel: scan penuh (perilaku lama) kalau filter gagal.
     if (!Array.isArray(pRows)) {
       try {

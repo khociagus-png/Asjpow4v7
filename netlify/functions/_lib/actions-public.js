@@ -310,7 +310,46 @@ async function handleGetAppData(payload, sessionToken) {
   }
 
   try {
-    const pub = await loadPublicBase(mode);
+    // Mode admin/kandidat: validasi sesi DULU (murni lokal, tanpa query
+    // Supabase) — sesi tidak valid langsung pulang tanpa menunggu tarikan
+    // data berat. Respons sama persis: data publik + sessionInvalid:true
+    // (frontend lalu membersihkan sesi & reload ke layar login).
+    let t = null;
+    if (mode === 'admin' || mode === 'kandidat') {
+      const role = mode === 'admin' ? 'admin' : 'kandidat';
+      t = session.verifyToken(sessionToken);
+      const waPayload = String((payload && payload[1]) || '').replace(/\D/g, '');
+      const valid =
+        t &&
+        t.role === role &&
+        (mode !== 'kandidat' || (t.wa || '') === waPayload || waPayload === '');
+      if (!valid) {
+        const pub0 = await loadPublicBase(mode);
+        if (pub0.notFound) return pub0.base;
+        return {
+          success: true,
+          activeTheme: '',
+          sessionInvalid: true,
+          jobs: pub0.jobs,
+          dropdowns: pub0.dropdowns,
+          assets: pub0.assets,
+          pengumuman: pub0.pengumuman,
+        };
+      }
+    }
+
+    // Fase 3.18: SEMUA tarikan independen dijalankan PARALEL — dulu
+    // loadPublicBase (3 query) berurutan dulu, baru data kandidat/admin.
+    // Sekarang publik + (admin: daftar kandidat unik) / (kandidat: baris by
+    // WA, lamaran by WA, jadwal) berjalan bersamaan → 1 gelombang RTT.
+    const w = mode === 'kandidat' ? normalizeWa(t.wa || '') : '';
+    const jobs = [];
+    if (mode === 'admin') jobs.push(loadCandidatesUnik('', { page: 1, pageSize: 50 }));
+    if (mode === 'kandidat') {
+      jobs.push(findCandidateByWaFiltered(w), findFormsByWa(w), loadSchedules());
+    }
+    const results = await Promise.all([loadPublicBase(mode), ...jobs]);
+    const pub = results[0];
     if (pub.notFound) return pub.base;
 
     const result = {
@@ -323,33 +362,12 @@ async function handleGetAppData(payload, sessionToken) {
       pengumuman: pub.pengumuman,
     };
 
-    // Mode admin/kandidat: validasi sesi. TIDAK valid -> kirim data publik
-    // + sessionInvalid:true (persis perilaku live — frontend lalu membersihkan
-    // sesi & reload ke layar login).
-    let t = null;
-    if (mode === 'admin' || mode === 'kandidat') {
-      const role = mode === 'admin' ? 'admin' : 'kandidat';
-      t = session.verifyToken(sessionToken);
-      const waPayload = String((payload && payload[1]) || '').replace(/\D/g, '');
-      const valid =
-        t &&
-        t.role === role &&
-        (mode !== 'kandidat' || (t.wa || '') === waPayload || waPayload === '');
-      if (!valid) {
-        result.sessionInvalid = true;
-        return result;
-      }
-    }
-
     if (mode === 'admin') {
       // Satu kandidat = satu baris: WA ganda (duplikat warisan) di-dedupe
       // GLOBAL dulu, baru ambil halaman 1 (50). Total = jumlah UNIK supaya
       // pagination frontend (Muat Lebih) tetap konsisten. Jalur cepat: baris
       // ringan untuk dedupe+sort, baris penuh hanya untuk halaman ini.
-      const { rows: candRows, total: candidatesTotal } = await loadCandidatesUnik('', {
-        page: 1,
-        pageSize: 50,
-      });
+      const { rows: candRows, total: candidatesTotal } = results[1]; // paralel (di atas)
       result.dbJobs = pub.jobs;
       result.candidates = stripRaw(candRows.map(mapCandidate));
       // Lampirkan berkas (pemberkasan_checklist) & bio (master) ke tiap
@@ -379,9 +397,10 @@ async function handleGetAppData(payload, sessionToken) {
 
     if (mode === 'kandidat') {
       // Data kandidat miliknya sendiri — query server-side (filter WA),
-      // bukan tarik 300 baris lalu cari di JS.
-      const w = normalizeWa(t.wa || '');
-      let row = await findCandidateByWaFiltered(w);
+      // bukan tarik 300 baris lalu cari di JS. Sudah ditarik PARALEL dengan
+      // data publik di atas (results[1]); fallback scan bila kolom WA tidak
+      // dikenal (results[1] === undefined).
+      let row = results[1];
       if (row === undefined) {
         // Fallback: scan penuh (skema kolom WA tidak dikenal).
         const foundCand = await findCandidates();
@@ -401,8 +420,8 @@ async function handleGetAppData(payload, sessionToken) {
       const myCands = row ? stripRaw([mapCandidate(row)]) : [];
       await attachBerkasBio(myCands);
       // Dashboard kandidat menampilkan semua job yang dilamar dari mail.
-      // Jalur cepat: tarik hanya lamaran WA-nya sendiri, bukan scan 500 baris.
-      let myForms = await findFormsByWa(w);
+      // Jalur cepat: sudah ditarik paralel di atas (results[2]).
+      let myForms = results[2];
       if (myForms === undefined) myForms = await findForms();
       attachApplications(myCands, myForms);
       result.candidates = myCands;
@@ -417,7 +436,7 @@ async function handleGetAppData(payload, sessionToken) {
       // Sebelumnya `mySchedules` tidak pernah dibangun backend → box jadwal
       // kandidat selalu kosong walau admin sudah membuat jadwal.
       try {
-        const allSched = await loadSchedules();
+        const allSched = results[3]; // jadwal — sudah ditarik paralel di atas
         const myJobCodes = new Set(
           (Array.isArray(myForms) ? myForms : [])
             .map((f) => String(pick(f, ['code_job', 'code']) || '').toUpperCase())

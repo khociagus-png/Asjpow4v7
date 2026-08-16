@@ -82,12 +82,17 @@ async function handleGetCandidatesPage(payload, sessionToken) {
       pageSize,
     });
     const cands = stripRaw(candRows.map(mapCandidate));
-    await attachBerkasBio(cands);
-    // Halaman tambahan juga butuh daftar lamaran per kandidat (multi-apply).
-    // Jalur cepat: tarik lamaran hanya untuk WA kandidat di halaman ini
-    // (in-filter), bukan scan 500 baris inbox.
+    // Fase 3.18: berkas/bio kandidat & lamaran per-WA ditarik PARALEL
+    // (independen) — dulu berurutan (2 roundtrip serial). Keduanya sudah
+    // catch internal → aman di-Promise.all.
     const waList = cands.map((c) => normalizeWa(String(c.wa || ''))).filter(Boolean);
-    let allForms = await findFormsByWaList(waList);
+    let allForms;
+    await Promise.all([
+      attachBerkasBio(cands),
+      findFormsByWaList(waList).then((r) => {
+        allForms = r;
+      }),
+    ]);
     if (allForms === undefined) allForms = await findForms();
     attachApplications(cands, allForms);
     return { success: true, candidates: cands, total };

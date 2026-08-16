@@ -166,19 +166,26 @@ const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
 // undefined (kolom tidak cocok — caller pakai fallback scan).
 async function findCandidateByWaFiltered(wa) {
   const want = normalizeWa(wa);
-  let anySucceed = false;
-  for (const col of CAND_WA_COLS.slice(0, 3)) {
-    try {
-      const rows = await supabaseJson('GET', 'database_candidate', {
+  // Fase 3.18: probe 3 kolom WA (no_wa / wa / whatsapp) dijalankan PARALEL —
+  // dulu berurutan (sampai 3 roundtrip serial bila kolom pertama tidak cocok
+  // skema). Prioritas hasil tetap no_wa → wa → whatsapp (urutan CAND_WA_COLS).
+  const cols = CAND_WA_COLS.slice(0, 3);
+  const settled = await Promise.allSettled(
+    cols.map((col) =>
+      supabaseJson('GET', 'database_candidate', {
         query: { select: '*', limit: '5', [col]: 'eq.' + want },
-      });
-      anySucceed = true;
-      if (!Array.isArray(rows) || rows.length === 0) continue;
-      const hit = rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want);
-      if (hit) return hit;
-    } catch {
-      /* kolom ini tidak ada di skema — coba kolom berikutnya */
-    }
+      }),
+    ),
+  );
+  let anySucceed = false;
+  for (let i = 0; i < cols.length; i++) {
+    const r = settled[i];
+    if (r.status === 'rejected') continue; // kolom ini tidak ada di skema
+    anySucceed = true;
+    const rows = r.value;
+    if (!Array.isArray(rows) || rows.length === 0) continue;
+    const hit = rows.find((x) => normalizeWa(pick(x, CAND_WA_COLS) || '') === want);
+    if (hit) return hit;
   }
   return anySucceed ? null : undefined;
 }
