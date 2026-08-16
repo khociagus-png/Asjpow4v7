@@ -4,11 +4,42 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 3: `js/03_engine.js` dipecah jadi `js/engine/{pipeline,dashboard,guards,init}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4a: `js/02_init.js` dipecah jadi `js/init/{state,theme,util,preview,nav,boot}.js`.
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 4a — `js/02_init.js` (852 baris) → `js/init/*` — commit `e76f885`
+
+- **Baru** `js/init/state.js` — semua var global (ALL_*/ASSETS/CURRENT_THEME/
+  DROPDOWNS/isAdmin/limit*/mailFilterStatus/PREV_MAIL_COUNT/AUTO_REFRESH_TIMER
+  + state pemberkasan).
+- **Baru** `js/init/theme.js` — THEMES/DEFAULT_ASSETS, renderThemeToggle,
+  toggleTheme, partikel sakura (buatPartikelSakura/setSakuraParticles),
+  applyInterMilanVibe, applyTheme.
+- **Baru** `js/init/util.js` — thumbnailUrl, safeSetVal/normalizePhone/showToast,
+  safeSet/setImg/setBg, getHighResImage/getDirectDownloadUrl,
+  formatPendidikanTingkat, isPreviewableFile/previewFinalUrl,
+  populate/rePopulateDropdowns/populateCheckboxes, formatInputWA/hapusRingWA,
+  salinTeksDecode, toggleMinimize.
+- **Baru** `js/init/preview.js` — VENDOR_V/_vendorPromises, muatVendorLib,
+  renderExcelKeFrame, _pasangTimerPreviewFallback, previewFileInFrame,
+  pesanLoadingPreview/pesanPreviewTidakTersedia.
+- **Baru** `js/init/nav.js` — changePage, closeMobileMenu, toggleMobileMenu,
+  logoutApp.
+- **Baru** `js/init/boot.js` — DOMContentLoaded (tema awal + refreshDataDinamis
+  + gerbang login admin) + listener click-outside.
+- Body 71 deklarasi + 2 listener DOM dipindah **byte-identik** (verifikasi
+  brace-matching — semua OK).
+- `scripts/build-js.mjs` STACK: `/js/02_init.js` → 6 entri `js/init/*`.
+- `js/02_init.js` **DIHAPUS** — module-map frontend 32 → **37 file / 353
+  simbol** (total simbol TIDAK berubah). Bundel: `app-aa4fb559d5.js` →
+  `app-7c1aea6337.js`, ukuran tetap **421.022 byte** (sama persis).
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 3 — `js/03_engine.js` (856 baris) → `js/engine/*` — commit `ff6e947`
 
