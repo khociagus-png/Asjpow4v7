@@ -10,7 +10,7 @@
 // admin KHOCI (easter egg internal), tidak muncul sebagai tombol.
 // Sakura = gradien pink REDUP (kustom muted, bukan rose-100 yang pekat)
 // supaya tidak menyilaukan dan teks tetap kontras.
-var THEMES = {
+export var THEMES = {
   SAKURA: {
     bg: 'bg-gradient-to-b from-[#bda8ae] via-[#cbb4bb] to-[#cbb4bb] text-stone-900',
     border: 'border-rose-400/60',
@@ -31,7 +31,7 @@ var THEMES = {
 // Aset banner/footer DEFAULT (host Supabase Storage) — dipakai saat backend
 // belum kirim ASSETS (mis. data gagal dimuat / preview tanpa backend), supaya
 // banner & footer SELALU tampil dan tidak menunggu data.
-var DEFAULT_ASSETS = {
+export var DEFAULT_ASSETS = {
   BANNER: {
     TOKYO:
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/tokyo_banner.jpg',
@@ -48,10 +48,10 @@ var DEFAULT_ASSETS = {
 
 // SATU tombol theme: menampilkan theme aktif (Dark/Light), ditekan = ganti
 // otomatis ke theme lainnya. Gaya pill mirip tombol ID-JP.
-function renderThemeToggle() {
+export function renderThemeToggle() {
   var btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
-  var light = CURRENT_THEME === 'SAKURA';
+  var light = window.CURRENT_THEME === 'SAKURA';
   btn.className =
     'px-3 py-2 rounded-full text-[10px] font-bold transition-colors shadow-lg flex items-center gap-1.5 border ' +
     (light
@@ -72,8 +72,8 @@ function renderThemeToggle() {
 
 // Tekan 1 tombol = ganti theme (Dark ↔ Light), pilihan disimpan di
 // localStorage supaya diingat saat pengunjung buka halaman lagi.
-function toggleTheme() {
-  applyTheme(CURRENT_THEME === 'TOKYO' ? 'SAKURA' : 'TOKYO');
+export function toggleTheme() {
+  applyTheme(window.CURRENT_THEME === 'TOKYO' ? 'SAKURA' : 'TOKYO');
 }
 
 // ========== PARTIKEL SAKURA (hanya theme Light) ==========
@@ -82,7 +82,7 @@ function toggleTheme() {
 // Tiga lapisan biar hidup: jauh (kecil + blur, pelan), normal, dan hero
 // (besar, lebih pekat, cepat) — plus dua jalur jatuh yang berbeda.
 var SAKURA_PETALS_CREATED = false;
-function buatPartikelSakura() {
+export function buatPartikelSakura() {
   var box = document.getElementById('sakura-particles');
   if (!box || SAKURA_PETALS_CREATED) return;
   SAKURA_PETALS_CREATED = true;
@@ -114,7 +114,7 @@ function buatPartikelSakura() {
     box.appendChild(p);
   }
 }
-function setSakuraParticles(visible) {
+export function setSakuraParticles(visible) {
   var box = document.getElementById('sakura-particles');
   if (!box) return;
   if (visible) {
@@ -125,16 +125,16 @@ function setSakuraParticles(visible) {
   }
 }
 
-function applyInterMilanVibe() {
+export function applyInterMilanVibe() {
   applyTheme('INTER_VIP');
   var bannerInter = 'https://i.imgflip.com/53px0j.gif';
   var footerInter = 'https://i.imgflip.com/53px0j.gif';
-  setBg('asj-header', bannerInter);
-  setBg('asj-footer', footerInter);
+  window.setBg('asj-header', bannerInter);
+  window.setBg('asj-footer', footerInter);
 }
 
-function applyTheme(theme) {
-  CURRENT_THEME = theme;
+export function applyTheme(theme) {
+  window.CURRENT_THEME = theme;
   var cfg = THEMES[theme];
   if (!cfg) return;
   var light = theme === 'SAKURA';
@@ -146,7 +146,7 @@ function applyTheme(theme) {
       (light ? ' theme-light' : ' theme-dark');
   var wrap = document.getElementById('public-table-wrap');
   // Theme Light (SAKURA): kartu tabel jadi TERANG (putih) — baris tabel
-  // ikut dirender terang oleh renderPublicFiltered (teks gelap, badge terang).
+  // ikut dirender terang oleh window.renderPublicFiltered (teks gelap, badge terang).
   if (wrap)
     wrap.className =
       'overflow-x-auto rounded-xl border shadow-xl transition-colors ' +
@@ -218,13 +218,27 @@ function applyTheme(theme) {
   setSakuraParticles(theme === 'SAKURA');
   // Banner & Footer: pakai aset backend kalau tersedia, fallback ke default
   // supaya selalu tampil & sinkron dengan theme walau backend gagal/lambat.
-  setBg('asj-header', (ASSETS.BANNER && ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
-  setBg('asj-footer', (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
+  window.setBg('asj-header', (window.ASSETS.BANNER && window.ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
+  window.setBg('asj-footer', (window.ASSETS.FOOTER && window.ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
   // Simpan pilihan theme pengunjung.
   try {
     localStorage.setItem('asj_theme', theme);
   } catch (e) {}
   renderThemeToggle();
-  if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
-  if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
+  if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
+  if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (index/admin toggleTheme, engine/init.js
+// window.applyTheme & window.applyInterMilanVibe, 04_auth.js
+// window.applyInterMilanVibe).
+window.THEMES = THEMES;
+window.DEFAULT_ASSETS = DEFAULT_ASSETS;
+window.renderThemeToggle = renderThemeToggle;
+window.toggleTheme = toggleTheme;
+window.buatPartikelSakura = buatPartikelSakura;
+window.setSakuraParticles = setSakuraParticles;
+window.applyInterMilanVibe = applyInterMilanVibe;
+window.applyTheme = applyTheme;

@@ -134,6 +134,11 @@ const ESM_CORE = new Set([
   '/js/ai_copilot/interview.js',
   '/js/ai_copilot/parse.js',
   '/js/ai_copilot/results.js',
+  // Fase 3 langkah 11: init sisanya (theme/preview/nav/boot — theme & partikel sakura, preview file, navigasi/logout, boot DOM).
+  '/js/init/theme.js',
+  '/js/init/preview.js',
+  '/js/init/nav.js',
+  '/js/init/boot.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

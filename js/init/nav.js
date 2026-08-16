@@ -6,7 +6,7 @@
 // dan logout (cabut sesi server + bersihkan state)
 // ==========================================
 
-function changePage(page) {
+export function changePage(page) {
   var pPub = document.getElementById('page-public');
   if (pPub) pPub.classList.toggle('hidden', page !== 'public');
   var pAdm = document.getElementById('page-admin');
@@ -17,8 +17,8 @@ function changePage(page) {
   // Re-render tabel publik setiap kali halaman publik dibuka
   // agar tabel tidak kosong saat admin/kandidat berpindah halaman.
   if (page === 'public') {
-    if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
-    if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
+    if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
+    if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
   }
 
   // Close mobile nav when changing page
@@ -43,7 +43,7 @@ function changePage(page) {
   }
 }
 
-function closeMobileMenu() {
+export function closeMobileMenu() {
   var menu = document.getElementById('mobile-nav-menu');
   var overlay = document.getElementById('mobile-nav-overlay');
   if (!menu) return;
@@ -55,7 +55,7 @@ function closeMobileMenu() {
   if (overlay) overlay.classList.add('hidden');
 }
 
-function toggleMobileMenu() {
+export function toggleMobileMenu() {
   var menu = document.getElementById('mobile-nav-menu');
   var overlay = document.getElementById('mobile-nav-overlay');
   if (!menu) return;
@@ -76,11 +76,11 @@ function toggleMobileMenu() {
   }
 }
 
-function logoutApp() {
+export function logoutApp() {
   // Cabut session di SERVER (hapus row user_sessions) - best-effort, tidak
   // menunda logout: callAPI membaca localStorage secara sinkron saat
   // membangun body, jadi token sudah terambil sebelum clear di bawah.
-  callAPI('logout', []).catch(function () {});
+  window.callAPI('logout', []).catch(function () {});
   localStorage.clear();
   var nAdm = document.getElementById('nav-admin-mode');
   if (nAdm) nAdm.classList.add('hidden');
@@ -98,17 +98,17 @@ function logoutApp() {
   if (mAd) mAd.classList.add('hidden');
   var mKa = document.getElementById('mobile-nav-kandidat');
   if (mKa) mKa.classList.add('hidden');
-  isAdmin = false;
-  isKandidat = false;
-  currentAdminName = '';
-  currentKandidatName = '';
-  currentKandidatWa = '';
-  currentKandidatId = '';
+  window.isAdmin = false;
+  window.isKandidat = false;
+  window.currentAdminName = '';
+  window.currentKandidatName = '';
+  window.currentKandidatWa = '';
+  window.currentKandidatId = '';
 
-  if (AUTO_REFRESH_TIMER) {
-    clearInterval(AUTO_REFRESH_TIMER);
-    AUTO_REFRESH_TIMER = null;
-    PREV_MAIL_COUNT = null;
+  if (window.AUTO_REFRESH_TIMER) {
+    clearInterval(window.AUTO_REFRESH_TIMER);
+    window.AUTO_REFRESH_TIMER = null;
+    window.PREV_MAIL_COUNT = null;
   }
 
   // Close mobile nav
@@ -116,3 +116,12 @@ function logoutApp() {
 
   changePage('public');
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (index/admin changePage/toggleMobileMenu/logoutApp,
+// 04_auth.js & engine/init.js window.changePage).
+window.changePage = changePage;
+window.closeMobileMenu = closeMobileMenu;
+window.toggleMobileMenu = toggleMobileMenu;
+window.logoutApp = logoutApp;

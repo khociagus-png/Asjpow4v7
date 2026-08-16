@@ -20,7 +20,7 @@
 // -> return false -> pesan error + tombol unduh.
 var VENDOR_V = { xlsx: '7f749f81a4' }; // diisi bump-cache-versions.cjs
 var _vendorPromises = {};
-function muatVendorLib(nama) {
+export function muatVendorLib(nama) {
   var src = '/vendor/' + { xlsx: 'xlsx.full.min.js' }[nama] + '?v=' + (VENDOR_V[nama] || '');
   if (!_vendorPromises[nama]) {
     _vendorPromises[nama] = new Promise(function (resolve, reject) {
@@ -37,24 +37,24 @@ function muatVendorLib(nama) {
   return _vendorPromises[nama];
 }
 
-async function renderExcelKeFrame(frame, url) {
-  if (typeof XLSX === 'undefined') {
+export async function renderExcelKeFrame(frame, url) {
+  if (typeof window.XLSX === 'undefined') {
     try {
       await muatVendorLib('xlsx');
     } catch (e) {
       return false;
     }
   }
-  if (typeof XLSX === 'undefined') return false;
+  if (typeof window.XLSX === 'undefined') return false;
   try {
     var res = await fetch(url);
     if (!res || !res.ok) return false;
     var buf = await res.arrayBuffer();
-    var wb = XLSX.read(buf, { type: 'array' });
+    var wb = window.XLSX.read(buf, { type: 'array' });
     if (!wb || !wb.SheetNames || !wb.SheetNames.length) return false;
     var sheet = wb.Sheets[wb.SheetNames[0]];
     if (!sheet) return false;
-    var html = XLSX.utils.sheet_to_html(sheet);
+    var html = window.XLSX.utils.sheet_to_html(sheet);
     var nama = decodeURIComponent(String(url).split('/').pop() || 'spreadsheet');
     var doc =
       '<!doctype html><html><head><meta charset="utf-8"><title>' +
@@ -77,7 +77,7 @@ async function renderExcelKeFrame(frame, url) {
 
 // Timer fallback preview: jika iframe gagal load dalam 8 detik, tampilkan
 // pesan error + tombol unduh (bukan mengandalkan viewer eksternal).
-function _pasangTimerPreviewFallback(frame, url) {
+export function _pasangTimerPreviewFallback(frame, url) {
   if (!frame) return;
   var t = setTimeout(function () {
     var lo =
@@ -109,9 +109,9 @@ function _pasangTimerPreviewFallback(frame, url) {
 //
 // FIX 2026-08-12: param pptxHost & tampilkanPptxHost DIHAPUS — render
 // lokal docx/pptx sudah dibuang (dead code); semua Office via viewer.
-async function previewFileInFrame(frame, url) {
+export async function previewFileInFrame(frame, url) {
   if (!frame || !url || url === '-') return;
-  if (!isPreviewableFile(url)) {
+  if (!window.isPreviewableFile(url)) {
     frame.srcdoc = pesanPreviewTidakTersedia(url);
     return;
   }
@@ -131,7 +131,7 @@ async function previewFileInFrame(frame, url) {
   var isOffice = /[.](doc|docx|xls|xlsx|ppt|pptx)([?#].*)?$/i.test(lower);
   if (isOffice) {
     frame.removeAttribute('srcdoc');
-    frame.src = previewFinalUrl(u);
+    frame.src = window.previewFinalUrl(u);
     _pasangTimerPreviewFallback(frame, u);
     return;
   }
@@ -145,20 +145,20 @@ async function previewFileInFrame(frame, url) {
     if (!ok) {
       console.warn('[Preview] Render lokal gagal, fallback viewer:', u);
       frame.removeAttribute('srcdoc');
-      frame.src = previewFinalUrl(u);
+      frame.src = window.previewFinalUrl(u);
       _pasangTimerPreviewFallback(frame, u);
     }
     return;
   }
 
   frame.removeAttribute('srcdoc');
-  frame.src = previewFinalUrl(u);
+  frame.src = window.previewFinalUrl(u);
 }
 
 // HTML pesan loading untuk iframe saat vendor renderer (lazy) sedang dimuat
 // pertama kali — user harus tahu ada proses berjalan (bukan layar diam).
-function pesanLoadingPreview() {
-  var judul = tr('ui.preview_loading');
+export function pesanLoadingPreview() {
+  var judul = window.tr('ui.preview_loading');
   return (
     '<div style="font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:28px;box-sizing:border-box">' +
     '<div style="font-size:22px">⏳</div>' +
@@ -170,11 +170,11 @@ function pesanLoadingPreview() {
 }
 
 // HTML pesan untuk iframe saat file tidak bisa dipratinjau (anti auto-download).
-function pesanPreviewTidakTersedia(url) {
+export function pesanPreviewTidakTersedia(url) {
   var ext = (String(url).match(/[.]([a-z0-9]+)([?#].*)?$/i) || [])[1] || '';
-  var judul = tr('ui.preview_unavailable');
-  var hint = tr('ui.preview_unavailable_hint');
-  var unduh = tr('ui.download');
+  var judul = window.tr('ui.preview_unavailable');
+  var hint = window.tr('ui.preview_unavailable_hint');
+  var unduh = window.tr('ui.download');
   return (
     '<div style="font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:28px;box-sizing:border-box">' +
     '<div style="font-size:22px">📄</div>' +
@@ -193,3 +193,15 @@ function pesanPreviewTidakTersedia(url) {
     '</div>'
   );
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// (03_candidate.js & admin_modal/cv.js window.previewFileInFrame,
+// 03_candidate.js & pages/share.js pesanPreviewTidakTersedia; VENDOR_V /
+// _vendorPromises tetap PRIVATE modul — tidak ada pemakai eksternal).
+window.muatVendorLib = muatVendorLib;
+window.renderExcelKeFrame = renderExcelKeFrame;
+window._pasangTimerPreviewFallback = _pasangTimerPreviewFallback;
+window.previewFileInFrame = previewFileInFrame;
+window.pesanLoadingPreview = pesanLoadingPreview;
+window.pesanPreviewTidakTersedia = pesanPreviewTidakTersedia;

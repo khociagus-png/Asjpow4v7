@@ -6,7 +6,7 @@
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', function () {
-  injectModalWaPintar();
+  window.injectModalWaPintar();
   // Terapkan tema SEKARANG (banner/footer/panel sinkron sejak awal, tidak
   // menunggu respons backend yang bisa lambat/gagal). initApp akan
   // memanggil applyTheme lagi dengan data backend kalau berhasil dimuat.
@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
   try {
     savedTheme = localStorage.getItem('asj_theme');
   } catch (e) {}
-  applyTheme(savedTheme || 'TOKYO');
-  refreshDataDinamis(false);
+  window.applyTheme(savedTheme || 'TOKYO');
+  window.refreshDataDinamis(false);
 
   // admin.html (window.IS_ADMIN_PORTAL) = portal admin khusus.
   // Kalau belum login admin, langsung buka modal login admin supaya
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // sudah login, initApp() sudah otomatis masuk mode admin.
   if (window.IS_ADMIN_PORTAL && localStorage.getItem('asj_admin_login') !== 'sukses') {
     setTimeout(function () {
-      if (typeof showLoginAdminMaster === 'function') showLoginAdminMaster();
+      if (typeof window.showLoginAdminMaster === 'function') window.showLoginAdminMaster();
     }, 500);
   }
 });
