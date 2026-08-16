@@ -4,18 +4,18 @@
 // ==========================================
 // FILTER & SORT TABEL DB JOB ADMIN — chip bidang/tahapan + urutan
 // ==========================================
-function setFilterBidang(v) {
-  dbFilterBidang = v;
+export function setFilterBidang(v) {
+  window.dbFilterBidang = v;
   renderDbFilters();
-  filterDbJob();
+  window.filterDbJob();
 }
-function setFilterTahapan(v) {
-  dbFilterTahapan = v;
+export function setFilterTahapan(v) {
+  window.dbFilterTahapan = v;
   renderDbFilters();
-  filterDbJob();
+  window.filterDbJob();
 }
-function setSortDb(t) {
-  dbSortType = t;
+export function setSortDb(t) {
+  window.dbSortType = t;
   ['terbaru', 'terlama', 'terbanyak'].forEach((x) => {
     var b = document.getElementById('btn-sort-' + x);
     if (b)
@@ -25,54 +25,63 @@ function setSortDb(t) {
           ? 'bg-purple-600 text-white shadow-lg'
           : 'bg-slate-700 text-slate-300 hover:bg-slate-600');
   });
-  filterDbJob();
+  window.filterDbJob();
 }
 
-function renderDbFilters() {
+export function renderDbFilters() {
   var bContainer = document.getElementById('filter-bidang-container');
   var tContainer = document.getElementById('filter-tahapan-container');
-  if (DROPDOWNS.kategori && bContainer) {
+  if (window.DROPDOWNS.kategori && bContainer) {
     var bHtml =
       '<button onclick="setFilterBidang(\'ALL\')" class="px-3 py-1 rounded-full ' +
-      (dbFilterBidang === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
+      (window.dbFilterBidang === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
       '">' +
-      tr('public.all') +
+      window.tr('public.all') +
       '</button>';
     // Label chip dwi bahasa (trOption); onclick tetap ID asli (trOptionId)
     // supaya filter cocok dengan data yang tersimpan.
-    DROPDOWNS.kategori.forEach((kat) => {
+    window.DROPDOWNS.kategori.forEach((kat) => {
       bHtml +=
         '<button onclick="setFilterBidang(\'' +
-        escJs(trOptionId(kat)) +
+        window.escJs(window.trOptionId(kat)) +
         '\')" class="px-3 py-1 rounded-full ' +
-        (dbFilterBidang === trOptionId(kat)
+        (window.dbFilterBidang === window.trOptionId(kat)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +
-        esc(trOption(kat)) +
+        window.esc(window.trOption(kat)) +
         '</button>';
     });
     bContainer.innerHTML = bHtml;
   }
-  if (DROPDOWNS.tahapan && tContainer) {
+  if (window.DROPDOWNS.tahapan && tContainer) {
     var tHtml =
       '<button onclick="setFilterTahapan(\'ALL\')" class="px-3 py-1 rounded-full ' +
-      (dbFilterTahapan === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
+      (window.dbFilterTahapan === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
       '">' +
-      tr('public.all') +
+      window.tr('public.all') +
       '</button>';
-    DROPDOWNS.tahapan.forEach((thp) => {
+    window.DROPDOWNS.tahapan.forEach((thp) => {
       tHtml +=
         '<button onclick="setFilterTahapan(\'' +
-        escJs(trOptionId(thp)) +
+        window.escJs(window.trOptionId(thp)) +
         '\')" class="px-3 py-1 rounded-full ' +
-        (dbFilterTahapan === trOptionId(thp)
+        (window.dbFilterTahapan === window.trOptionId(thp)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +
-        esc(trOption(thp)) +
+        window.esc(window.trOption(thp)) +
         '</button>';
     });
     tContainer.innerHTML = tHtml;
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (chip filter renderDbFilters sendiri + admin/index
+// setSortDb, render/admin.js window.renderDbFilters).
+window.setFilterBidang = setFilterBidang;
+window.setFilterTahapan = setFilterTahapan;
+window.setSortDb = setSortDb;
+window.renderDbFilters = renderDbFilters;

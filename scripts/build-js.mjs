@@ -118,6 +118,10 @@ const ESM_CORE = new Set([
   '/js/api/jobs.js',
   '/js/api/candidates.js',
   '/js/api/wa.js',
+  // Fase 3 langkah 8: admin_modal (dbfilter/cv/job — modal CV digital, filter DB job, aksi lamar).
+  '/js/admin_modal/dbfilter.js',
+  '/js/admin_modal/cv.js',
+  '/js/admin_modal/job.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

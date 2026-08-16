@@ -6,16 +6,16 @@
 // simpan catatan admin
 // ==========================================
 
-async function bukaDigitalCV(id) {
+export async function bukaDigitalCV(id) {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
       await window.ensureAllCandidates();
     } catch (e) {}
   }
   try {
-    var c = ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
+    var c = window.ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
     if (!c) {
-      showToast(tr('ui.toast_profile_not_found2'), 'error');
+      window.showToast(window.tr('ui.toast_profile_not_found2'), 'error');
       return;
     }
     // Simpan kandidat aktif untuk form Edit Data Cepat (tanpa buka CV AI).
@@ -23,9 +23,9 @@ async function bukaDigitalCV(id) {
     isiEditCepatCv(c);
 
     let logoCv = document.getElementById('cv-logo-asj');
-    if (logoCv && ASSETS.LOGO) logoCv.src = ASSETS.LOGO;
+    if (logoCv && window.ASSETS.LOGO) logoCv.src = window.ASSETS.LOGO;
 
-    safeSet('cv-id', c.idKandidat || '-');
+    window.safeSet('cv-id', c.idKandidat || '-');
 
     let htmlNama = (c.nama || '-').toUpperCase();
 
@@ -46,29 +46,29 @@ async function bukaDigitalCV(id) {
     let cvBadges = '<span class="inline-flex items-center gap-1.5 ml-3 align-middle">';
     cvBadges +=
       '<i class="fas fa-medal text-orange-500 text-lg drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" title="' +
-      tr('ui.badge_bronze') +
+      window.tr('ui.badge_bronze') +
       '"></i>';
     if (pMini === 100)
       cvBadges +=
         '<i class="fas fa-award text-slate-300 text-lg drop-shadow-[0_0_8px_rgba(203,213,225,0.8)]" title="' +
-        tr('ui.badge_silver') +
+        window.tr('ui.badge_silver') +
         '"></i>';
     if (pMaster === 100)
       cvBadges +=
         '<i class="fas fa-crown text-yellow-400 text-xl drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" title="' +
-        tr('ui.badge_gold') +
+        window.tr('ui.badge_gold') +
         '"></i>';
 
     let catatanIntStr = c.catatanInt || '';
     if (catatanIntStr.includes('[VIP]')) {
       let logoSrc =
-        ASSETS.LOGO ||
+        window.ASSETS.LOGO ||
         'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
       cvBadges +=
         '<img src="' +
         logoSrc +
         '" class="w-6 h-6 object-contain drop-shadow-[0_0_10px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' +
-        tr('ui.badge_official') +
+        window.tr('ui.badge_official') +
         '">';
     }
 
@@ -81,9 +81,9 @@ async function bukaDigitalCV(id) {
     }
     cvBadges += '</span>';
 
-    safeSet('cv-nama', htmlNama + cvBadges);
-    safeSet('cv-wa', c.wa || '-');
-    safeSet('cv-gender', c.gender || '-');
+    window.safeSet('cv-nama', htmlNama + cvBadges);
+    window.safeSet('cv-wa', c.wa || '-');
+    window.safeSet('cv-gender', c.gender || '-');
 
     let umurLive = '-';
     if (c.tglLahir && c.tglLahir !== '-' && c.tglLahir.trim() !== '') {
@@ -95,28 +95,28 @@ async function bukaDigitalCV(id) {
         if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
           age--;
         }
-        umurLive = age + tr('ui.age_years_suffix');
+        umurLive = age + window.tr('ui.age_years_suffix');
       }
     }
-    if (umurLive === '-' && c.usia && c.usia !== '-') umurLive = c.usia + tr('ui.age_years_suffix');
-    safeSet('cv-usia', umurLive);
+    if (umurLive === '-' && c.usia && c.usia !== '-') umurLive = c.usia + window.tr('ui.age_years_suffix');
+    window.safeSet('cv-usia', umurLive);
 
     // TB/BB & TTL digabung di backend (mapCandidate: field tbBb/ttl) supaya
     // modal CV selalu menampilkan data fisik meski baris lamaran kosong
     // (data sebenarnya ada di master_database_candidate).
-    safeSet('cv-tbbb', c.tbBb || c.tb_bb || '-');
+    window.safeSet('cv-tbbb', c.tbBb || c.tb_bb || '-');
     // riwayatpendidikan kini JSON array 5-baris — tampilkan tingkat terakhir terbaca
-    safeSet('cv-pendidikan', formatPendidikanTingkat(c.pendidikan) || '-');
-    safeSet('cv-jft-nilai', c.jftText && c.jftText !== '-' ? c.jftText : '-');
-    safeSet('cv-ssw', c.sswText && c.sswText !== '-' ? c.sswText : '-');
+    window.safeSet('cv-pendidikan', window.formatPendidikanTingkat(c.pendidikan) || '-');
+    window.safeSet('cv-jft-nilai', c.jftText && c.jftText !== '-' ? c.jftText : '-');
+    window.safeSet('cv-ssw', c.sswText && c.sswText !== '-' ? c.sswText : '-');
 
-    safeSet('cv-ttl-lengkap', c.ttl || '-');
-    safeSet('cv-email', c.email || '-');
-    safeSet('cv-alamat', c.alamat || '-');
+    window.safeSet('cv-ttl-lengkap', c.ttl || '-');
+    window.safeSet('cv-email', c.email || '-');
+    window.safeSet('cv-alamat', c.alamat || '-');
 
     let statusText =
-      esc(trOption(c.tahapan || 'Baru')) + ' \n(' + esc(trOption(c.status || 'Aktif')) + ')';
-    safeSet('cv-status', statusText);
+      window.esc(window.trOption(c.tahapan || 'Baru')) + ' \n(' + window.esc(window.trOption(c.status || 'Aktif')) + ')';
+    window.safeSet('cv-status', statusText);
 
     var waLink = document.getElementById('cv-wa-link');
     if (waLink) waLink.href = 'https://wa.me/' + String(c.wa).replace(/\D/g, '');
@@ -128,16 +128,16 @@ async function bukaDigitalCV(id) {
     var passRow = document.getElementById('cv-pass-row');
     var passEl = document.getElementById('cv-pass');
     if (passRow && passEl) {
-      if (isAdmin) {
+      if (window.isAdmin) {
         if (c.passwordDiubah) {
-          passEl.textContent = tr('ui.pass_changed_admin') + ' — ' + tr('ui.pass_changed_hint');
+          passEl.textContent = window.tr('ui.pass_changed_admin') + ' — ' + window.tr('ui.pass_changed_hint');
           passRow.classList.remove('hidden');
         } else {
           var pass4 = String(c.wa || '')
             .replace(/\D/g, '')
             .slice(-4);
           if (pass4) {
-            passEl.textContent = pass4 + ' (' + tr('ui.cand_pass_hint') + ')';
+            passEl.textContent = pass4 + ' (' + window.tr('ui.cand_pass_hint') + ')';
             passRow.classList.remove('hidden');
           } else {
             passRow.classList.add('hidden');
@@ -167,13 +167,13 @@ async function bukaDigitalCV(id) {
                 : 'bg-sky-900/50 text-sky-300 border-sky-700/60';
           jobHtml +=
             '<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm" title="' +
-            esc(st) +
+            window.esc(st) +
             '"><i class="fas fa-briefcase mr-1"></i>' +
-            esc(a.code) +
+            window.esc(a.code) +
             '<span class="px-1.5 py-0.5 rounded-md text-[9px] border ' +
             stColor +
             '">' +
-            esc(st) +
+            window.esc(st) +
             '</span></span>';
         });
       } else {
@@ -185,7 +185,7 @@ async function bukaDigitalCV(id) {
               let cleanJob = job.trim();
               return cleanJob
                 ? '<span class="px-3 py-1 bg-pink-900/30 text-pink-300 border border-pink-700/50 rounded-lg text-[10px] font-bold shadow-sm"><i class="fas fa-briefcase mr-1"></i> ' +
-                    esc(cleanJob) +
+                    window.esc(cleanJob) +
                     '</span>'
                 : '';
             })
@@ -193,7 +193,7 @@ async function bukaDigitalCV(id) {
         } else {
           jobHtml =
             '<span class="text-xs text-slate-500 italic">' +
-            tr('ui.not_applied_general') +
+            window.tr('ui.not_applied_general') +
             '</span>';
         }
       }
@@ -206,7 +206,7 @@ async function bukaDigitalCV(id) {
       img.classList.add('hidden');
       icn.classList.remove('hidden');
       if (c.pasPhoto && c.pasPhoto !== '-' && c.pasPhoto.length > 5) {
-        var finalUrl = getHighResImage(c.pasPhoto);
+        var finalUrl = window.getHighResImage(c.pasPhoto);
         img.onload = function () {
           img.classList.remove('hidden');
           icn.classList.add('hidden');
@@ -215,7 +215,7 @@ async function bukaDigitalCV(id) {
         // tidak boleh diam-diam menampilkan foto kosong: coba unduhan
         // alternatif (Drive), lalu tampilkan ikon no-foto.
         img.onerror = function () {
-          var alt = getDirectDownloadUrl(c.pasPhoto);
+          var alt = window.getDirectDownloadUrl(c.pasPhoto);
           if (alt && alt !== finalUrl && !img._fotoRetry) {
             img._fotoRetry = true;
             img.src = alt;
@@ -232,7 +232,7 @@ async function bukaDigitalCV(id) {
     var btnSsw = document.getElementById('btn-cv-ssw');
     var btnCv = document.getElementById('btn-cv-dokumen');
 
-    if (isAdmin) {
+    if (window.isAdmin) {
       if (c.jftUrl && c.jftUrl !== '-' && c.jftUrl.toLowerCase().startsWith('http')) {
         btnJft.onclick = function () {
           bukaInlinePreview(c.jftUrl);
@@ -265,7 +265,7 @@ async function bukaDigitalCV(id) {
 
     let notesArea = document.getElementById('cv-admin-notes-area');
     if (notesArea) {
-      if (isAdmin) {
+      if (window.isAdmin) {
         notesArea.classList.remove('hidden');
         // Biar kalau disave ulang, tulisan Kelasnya tidak terhapus berantakan
         document.getElementById('cv-catatan-int').value = catatanIntStr
@@ -292,12 +292,12 @@ async function bukaDigitalCV(id) {
     let btnFolder = document.getElementById('btn-cv-folder');
 
     if (areaBerkas) {
-      if (isAdmin && isLolos) {
+      if (window.isAdmin && isLolos) {
         areaBerkas.classList.remove('hidden');
 
         var bFolder = document.getElementById('btn-cv-folder');
         if (bFolder) {
-          var jd = ALL_DB_JOBS.find((j) => j.code === c.idLoker);
+          var jd = window.ALL_DB_JOBS.find((j) => j.code === c.idLoker);
           var jobFolder = jd && jd.folderUrl && jd.folderUrl !== '-' ? jd.folderUrl : c.folderUrl;
           if (jobFolder && jobFolder !== '-') {
             bFolder.href = jobFolder;
@@ -311,7 +311,7 @@ async function bukaDigitalCV(id) {
         if (bCv) {
           if (c.cvUrl && c.cvUrl !== '-') {
             bCv.onclick = function () {
-              bukaPreviewDokumen(c.cvUrl);
+              window.bukaPreviewDokumen(c.cvUrl);
             };
             bCv.classList.remove('hidden');
           } else bCv.classList.add('hidden');
@@ -321,7 +321,7 @@ async function bukaDigitalCV(id) {
         if (bJft) {
           if (c.jftUrl && c.jftUrl !== '-') {
             bJft.onclick = function () {
-              bukaPreviewDokumen(c.jftUrl);
+              window.bukaPreviewDokumen(c.jftUrl);
             };
             bJft.classList.remove('hidden');
           } else bJft.classList.add('hidden');
@@ -331,7 +331,7 @@ async function bukaDigitalCV(id) {
         if (bSsw) {
           if (c.sswUrl && c.sswUrl !== '-') {
             bSsw.onclick = function () {
-              bukaPreviewDokumen(c.sswUrl);
+              window.bukaPreviewDokumen(c.sswUrl);
             };
             bSsw.classList.remove('hidden');
           } else bSsw.classList.add('hidden');
@@ -341,7 +341,7 @@ async function bukaDigitalCV(id) {
         if (bPhoto) {
           if (c.pasPhoto && c.pasPhoto !== '-') {
             bPhoto.onclick = function () {
-              bukaPreviewDokumen(c.pasPhoto);
+              window.bukaPreviewDokumen(c.pasPhoto);
             };
             bPhoto.classList.remove('hidden');
           } else bPhoto.classList.add('hidden');
@@ -353,7 +353,7 @@ async function bukaDigitalCV(id) {
 
     document.getElementById('modal-cv').classList.remove('hidden');
   } catch (err) {
-    showToast(tr('ui.toast_load_profile_failed'), 'error');
+    window.showToast(window.tr('ui.toast_load_profile_failed'), 'error');
   }
 }
 
@@ -361,11 +361,11 @@ async function bukaDigitalCV(id) {
 // EDIT DATA CEPAT di Modal CV (dossier) — gender/usia/TTL/TB/JFT/SSW
 // tanpa harus buka CV AI. Hanya untuk admin.
 // ==========================================
-function isiEditCepatCv(c) {
+export function isiEditCepatCv(c) {
   var btn = document.getElementById('btn-cv-edit-cepat');
   var form = document.getElementById('cv-edit-cepat-form');
   if (!btn || !form) return;
-  if (!isAdmin) {
+  if (!window.isAdmin) {
     btn.classList.add('hidden');
     form.classList.add('hidden');
     return;
@@ -375,7 +375,7 @@ function isiEditCepatCv(c) {
   // menghapus ketikan admin saat modal dibuka ulang)
   var gen = document.getElementById('cv-edit-gender');
   // Normalisasi gender (DB campur kapital) supaya select Edit Cepat terisi.
-  if (gen && !gen.dataset.touched) gen.value = normalizeGenderValue(c.gender);
+  if (gen && !gen.dataset.touched) gen.value = window.normalizeGenderValue(c.gender);
   var usia = document.getElementById('cv-edit-usia');
   if (usia && !usia.dataset.touched)
     usia.value = c.usia && c.usia !== '-' && c.usia !== '' ? c.usia : '';
@@ -429,7 +429,7 @@ function isiEditCepatCv(c) {
       })
     ) {
       opts +=
-        '<option value="' + esc(curCodes[0]) + '" selected>' + esc(curCodes[0]) + '</option>';
+        '<option value="' + window.esc(curCodes[0]) + '" selected>' + window.esc(curCodes[0]) + '</option>';
     }
     jobs.forEach(function (j) {
       var code = j && j.code ? String(j.code) : '';
@@ -437,11 +437,11 @@ function isiEditCepatCv(c) {
       var sel = curCodes.indexOf(code) !== -1 ? ' selected' : '';
       opts +=
         '<option value="' +
-        esc(code) +
+        window.esc(code) +
         '"' +
         sel +
         '>' +
-        esc(code + (j.pekerjaan ? ' — ' + j.pekerjaan : '')) +
+        window.esc(code + (j.pekerjaan ? ' — ' + j.pekerjaan : '')) +
         '</option>';
     });
     loker.innerHTML = opts;
@@ -457,23 +457,23 @@ function isiEditCepatCv(c) {
         .map(function (a) {
           return (
             '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-900/40 text-sky-300 border border-sky-700/60 text-[9px] font-bold">' +
-            esc(a.code) +
+            window.esc(a.code) +
             ' · ' +
-            esc(String(a.status || 'MENUNGGU').toUpperCase()) +
+            window.esc(String(a.status || 'MENUNGGU').toUpperCase()) +
             '</span>'
           );
         })
         .join(' ');
     } else {
       appsEl.innerHTML =
-        '<span class="text-slate-500 italic">' + tr('ui.not_applied_general') + '</span>';
+        '<span class="text-slate-500 italic">' + window.tr('ui.not_applied_general') + '</span>';
     }
   }
   // tutup form setiap buka modal (biar bersih)
   form.classList.add('hidden');
 }
 
-function toDateInputValue(tgl) {
+export function toDateInputValue(tgl) {
   if (!tgl || tgl === '-' || String(tgl).trim() === '') return '';
   var d = new Date(tgl);
   if (isNaN(d)) return '';
@@ -482,27 +482,27 @@ function toDateInputValue(tgl) {
   return d.getFullYear() + '-' + mm + '-' + dd;
 }
 
-function toggleEditCepatCv() {
+export function toggleEditCepatCv() {
   var form = document.getElementById('cv-edit-cepat-form');
   if (form) form.classList.toggle('hidden');
 }
 
-async function simpanEditCepatCv() {
+export async function simpanEditCepatCv() {
   var c = window.__cvKandidatAktif;
   if (!c) {
-    showToast(tr('ui.toast_data_not_found'), 'error');
+    window.showToast(window.tr('ui.toast_data_not_found'), 'error');
     return;
   }
-  var wa = normalizePhone(c.wa);
+  var wa = window.normalizePhone(c.wa);
   if (!wa) {
-    showToast(tr('ui.toast_data_not_found'), 'error');
+    window.showToast(window.tr('ui.toast_data_not_found'), 'error');
     return;
   }
   var payload = {
     wa: wa,
-    admin: currentAdminName,
+    admin: window.currentAdminName,
     // Normalisasi ke format kanonikal supaya DB konvergen.
-    gender: normalizeGenderValue(document.getElementById('cv-edit-gender').value),
+    gender: window.normalizeGenderValue(document.getElementById('cv-edit-gender').value),
     usia: document.getElementById('cv-edit-usia').value,
     tempatLahir: document.getElementById('cv-edit-tempat-lahir').value.trim(),
     tglLahir: document.getElementById('cv-edit-tgl-lahir').value,
@@ -514,9 +514,9 @@ async function simpanEditCepatCv() {
   };
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await callAPI('updateKandidatSuper', [payload]);
+    const res = await window.callAPI('updateKandidatSuper', [payload]);
     if (res && res.success) {
-      showToast(tr('ui.toast_sync3_success'), 'success');
+      window.showToast(window.tr('ui.toast_sync3_success'), 'success');
       // reset flag touched biar form terisi ulang data baru
       [
         'cv-edit-gender',
@@ -532,18 +532,18 @@ async function simpanEditCepatCv() {
         var el = document.getElementById(id);
         if (el) delete el.dataset.touched;
       });
-      refreshDataDinamis('pelamar');
+      window.refreshDataDinamis('pelamar');
     } else {
-      showToast(tr('ui.toast_error_prefix') + (res && res.error ? res.error : ''), 'error');
+      window.showToast(window.tr('ui.toast_error_prefix') + (res && res.error ? res.error : ''), 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-function bukaInlinePreview(url) {
+export function bukaInlinePreview(url) {
   if (!url || url === '-') return;
   var previewContainer = document.getElementById('cv-inline-preview');
   var frame = document.getElementById('cv-inline-iframe');
@@ -552,7 +552,7 @@ function bukaInlinePreview(url) {
   if (previewContainer && frame) {
     // Satu pintu preview: gambar/PDF native, CSV -> render lokal,
     // Office (docx/pptx) -> MS Office Viewer, lain -> URL asli.
-    previewFileInFrame(frame, url);
+    window.previewFileInFrame(frame, url);
     if (btnExt) btnExt.href = url;
     previewContainer.classList.remove('hidden');
   } else {
@@ -561,13 +561,13 @@ function bukaInlinePreview(url) {
   }
 }
 
-function bukaPdfPreview(url) {
+export function bukaPdfPreview(url) {
   if (!url || url === '-') return;
   var frame = document.getElementById('pdf-frame');
   var btnExt = document.getElementById('btn-pdf-external');
 
   if (frame) {
-    previewFileInFrame(frame, url);
+    window.previewFileInFrame(frame, url);
   }
   if (btnExt) btnExt.href = url;
 
@@ -575,7 +575,7 @@ function bukaPdfPreview(url) {
   if (modal) modal.classList.remove('hidden');
 }
 
-async function simpanCatatanCv() {
+export async function simpanCatatanCv() {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
       await window.ensureAllCandidates();
@@ -587,7 +587,7 @@ async function simpanCatatanCv() {
 
   if (!id || id === '-') return;
 
-  var c = ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
+  var c = window.ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
   // FIX VIP: tulis ulang [VIP] kalau checkbox aktif (mirip penanganan KELAS di
   // bawah). Kalau dicentang maka [VIP] pasti tersimpan; kalau tidak dicentang
   // tag dihapus secara eksplisit oleh admin.
@@ -609,17 +609,32 @@ async function simpanCatatanCv() {
 
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await callAPI('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
+    const res = await window.callAPI('updateCatatanKandidat', [id, intNote, extNote, window.currentAdminName]);
     if (res.success) {
-      showToast(tr('ui.toast_eval_note_saved'), 'success');
+      window.showToast(window.tr('ui.toast_eval_note_saved'), 'success');
       document.getElementById('modal-cv').classList.add('hidden');
-      refreshDataDinamis('pelamar');
+      window.refreshDataDinamis('pelamar');
     } else {
-      showToast(tr('ui.toast_save_failed') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_save_failed') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_conn_failed') + err.message, 'error');
+    window.showToast(window.tr('ui.toast_conn_failed') + err.message, 'error');
   } finally {
     document.getElementById('global-loader').style.display = 'none';
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (partials/modals-shared.html toggleEditCepatCv /
+// simpanEditCepatCv / simpanCatatanCv), render/mail.js & render/candidate.js
+// (onclick bukaPdfPreview), engine/init.js (window.bukaDigitalCV),
+// api/candidates.js (window.toDateInputValue).
+window.bukaDigitalCV = bukaDigitalCV;
+window.isiEditCepatCv = isiEditCepatCv;
+window.toDateInputValue = toDateInputValue;
+window.toggleEditCepatCv = toggleEditCepatCv;
+window.simpanEditCepatCv = simpanEditCepatCv;
+window.bukaInlinePreview = bukaInlinePreview;
+window.bukaPdfPreview = bukaPdfPreview;
+window.simpanCatatanCv = simpanCatatanCv;
