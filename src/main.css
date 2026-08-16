@@ -1013,3 +1013,72 @@ button:not(:disabled),
     animation-iteration-count: infinite !important;
   }
 }
+
+/* ============================================================
+   PRINT — CV Rirekisho: FIT 1 HALAMAN A4 (fit onepage)
+   Dicetak dari modal-preview-cv (admin). Sembunyikan seluruh
+   halaman kecuali lembar CV, lalu rapikan isi tabel (font +
+   padding lebih kecil) supaya muat dalam 297mm — tidak lagi
+   pecah jadi 2-3 lembar.
+   ============================================================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Hanya modal CV yang tampil saat print; sisanya disembunyikan */
+  body > *:not(#modal-root):not(script):not(style) {
+    display: none !important;
+  }
+  #modal-root > *:not(#modal-preview-cv) {
+    display: none !important;
+  }
+
+  #modal-preview-cv {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    display: block !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    z-index: 9999 !important;
+  }
+  #modal-preview-cv > div {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  #cv-kertas-a4 {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 7mm 7mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #cv-kertas-a4 table {
+    width: 100% !important;
+    font-size: 9px !important;
+    page-break-inside: avoid;
+  }
+  #cv-kertas-a4 td,
+  #cv-kertas-a4 th {
+    padding: 1.5px 3px !important;
+    page-break-inside: avoid;
+  }
+  #cv-kertas-a4 img {
+    max-height: 62mm !important;
+  }
+}
