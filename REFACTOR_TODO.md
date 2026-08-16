@@ -176,14 +176,68 @@ Global scope **tetap** di fase ini — tujuannya cuma mengecilkan unit patch. Ko
 
 ## ✅ FASE 3 — Konversi ES Modules (win terbesar, risiko tertinggi) 🚀
 
-Ubah bundel dari *concat 21 file* menjadi **bundle graph modul** (esbuild `bundle` mode + entry).
+Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundle` mode + entry).
 
-- [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()`.
-- [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife' })` (hasil sama-sama 1 file, tetap tanpa runtime ESM di browser).
-- [ ] Tandai batas modul per domain: `export` fungsi yang dipakai lintas file; `import` eksplisit — **hapus ketergantungan global scope** (kecuali yang benar-benar global seperti `window.ASJ`).
-- [ ] Objek global publik (mis. `callAPI`, `tr`) diekspor dari `core/api-client.js` & `core/i18n.js` — halaman standalone tetap bisa pakai via `window` alias (uji kompat).
-- [ ] Halaman standalone: buat entry per halaman kalau perlu (`js/pages/apply-full.js`, dll) atau biarkan classic jika lebih kecil risikonya — **keputusan dicatat di PROGRESS.md**.
-- [ ] Verifikasi: bundel idempoten, ukuran ≤ +10% dari baseline, `bun run lint` bersih (no-undef terdeteksi lebih dini — manfaat utama ESM), E2E penuh lulus.
+> ⚠️ **TEMUAN EMPIRIS (Fase 3 langkah 1, 2026-08-16)** — esbuild `bundle` mode
+> TIDAK aman dipakai selama masih ada referensi global implisit lintas file:
+> 1. esbuild **men-rename** deklarasi top-level modul saat scope digabung — bahkan
+>    TANPA kolisi nama, selama modul lain mereferensikan simbol itu sebagai
+>    global (eksperimen: `sharedFn` → `sharedFn2`, referensi dari modul lain
+>    TIDAK ikut di-rename → `ReferenceError` diam-diam).
+> 2. esbuild **tree-shake** modul yang cuma berisi deklarasi murni (tanpa side
+>    effect) — deklarasi global hilang dari output.
+> 3. Rename terjadi tak konsisten saat ada kolisi nama (bisa meng-rename SEMUA
+>    simbol satu modul → merusak semua referensi lintas modul).
+> Kesimpulan: bundle mode baru bisa diaktifkan SETELAH semua referensi lintas
+> file menjadi `import` eksplisit (nol referensi global implisit). Build saat ini
+> (concat + transform per file) tetap dipakai sampai konversi tuntas.
+
+- [x] **Langkah 1 — fondasi**: resolusi kolisi global + guard otomatis. — commit menyusul
+      Audit STACK (45 file): **1 kolisi** — `tr` dideklarasikan di `i18n.js` DAN
+      `js/01_public.js` (duplikat; isi setara, i18n lebih defensif `String(path)`).
+      Duplikat dihapus dari `01_public.js` (24 call-site `tr(` di file itu kini
+      pakai global dari i18n.js yang dimuat lebih awal — perilaku sama).
+      Guard baru `scripts/check-globals.mjs` (`bun run check:globals`, otomatis
+      di awal `bun run build`): GAGAL kalau ada deklarasi top-level yang
+      muncul di 2+ file STACK + warning kalau nama STACK dipakai `js/pages/*`.
+      Hasil: 45 file · **389 simbol unik · nol kolisi ✓** · lint 0 error/12 warn
+      ✓ · test 81/81 ✓.
+- [x] **Langkah 2 — core layer ESM: `i18n.js` + `api-client.js` + bridge `window.PortalBridge`** — commit menyusul
+      Audit global lengkap (`scripts/audit-globals.mjs` baru, hasil di
+      `.freebuff/audit-globals.json`): 52 file · **394 simbol** · HIGH=0
+      (nol shadowing API browser, nol kolisi) · MEDIUM=24 (kontrak lintas
+      file — daftar di `ESM_BRIDGE.md` §1.2) · LOW=370.
+      Konversi: 8 deklarasi i18n + 4 API publik api-client jadi `export`
+      (alias `window.*` dipertahankan); **6 internal api-client jadi PRIVATE
+      modul** (NETLIFY_API_BASE/CANDIDATE_ACTIONS/ADMIN_ACTIONS/
+      NETLIFY_FUNCTIONS/getApiUrl/callNetlify — tidak lagi global).
+      Referensi global implisit di modul di-window-kan eksplisit
+      (`window.tr`, `window.showToast`, `window.render*` — scan no-undef
+      bersih) karena modul ESM tidak fallback ke global scope.
+      **Bridge** `js/core/bridge.js`: `window.PortalBridge` namespace tunggal
+      (callAPI/tr/LANG/… + `safeCallAPI` dengan fallback) untuk pemakai legacy.
+      Build: STACK concat tetap classic — `build-js.mjs` meng-IIFE-kan
+      api-client/i18n per file (export di-strip, alias jalan; bukti bundel:
+      8 alias `window.*` hadir, 0 export bocor). Halaman standalone load core
+      sebagai `<script type="module">` (ai_form & master-full via bridge;
+      apply-full & siswa-baru api-client saja; share i18n saja).
+      Verifikasi: node --check ESM ✓ · scan no-undef 0 error ✓ · lint 0/12 ✓ ·
+      test **81/81** ✓ · build idempoten `app-7f821ddf7c.js` (410.6 KB) ✓ ·
+      uji import ESM di Node (PortalBridge + alias + tr + toggle bahasa +
+      internal privat) ✓ · E2E menyusul saat preview jalan.
+      Detail & roadmap: **`ESM_BRIDGE.md`**.
+- [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
+- [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
+- [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
+      (langkah 1 core layer ✅ sudah selesai di langkah 2):
+      1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
+      2. `init/{state,util}.js` (helper DOM/WA paling banyak dipakai lintas file),
+      3. domain per domain (auth → engine → render → api → admin_* → ai_copilot → sisanya),
+      tiap langkah: `export` simbol + `import` di pemakainya, `bun run check:globals`
+      tetap hijau, lint/test hijau, bundel tetap sama ukurannya.
+- [ ] Objek global publik (`callAPI`, `tr`, `LANG`, `CURRENT_LANG`) — ✅ sudah diekspor dari `api-client.js` & `i18n.js` (langkah 2); pemakai classic tetap dapat via `window` alias (uji kompat); hapus alias satu per satu setelah semua pemakainya di-import.
+- [ ] Halaman standalone: buat entry per halaman (`js/pages/` → entry ESM) ATAU biarkan classic — **keputusan dicatat di PROGRESS.md**; jangan sampai nama `js/pages/*` bentrok dengan bundel (guard sudah warning).
+- [ ] Verifikasi akhir: bundel idempoten, ukuran ≤ +10% dari baseline (421.030 byte), lint bersih + **aktifkan `no-undef` per file yang sudah ESM** (deteksi referensi yang terlewat — manfaat utama ESM; saat ini nonaktif global di eslint.config.js karena classic), E2E penuh lulus.
 
 ---
 

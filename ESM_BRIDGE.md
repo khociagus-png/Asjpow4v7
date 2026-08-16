@@ -1,0 +1,314 @@
+# ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
+
+> **Status:** Fase 3 langkah 2 — **core layer (i18n.js + api-client.js) sudah ESM**.
+> Dokumen ini = hasil **audit global pollution** + pola **bridge** yang dipakai
+> supaya konversi bertahap TANPA regresi. Update di sini setiap kali modul baru
+> di-ESM-kan (lihat urutan konversi di bagian 6).
+>
+> Baseline audit otomatis: `.freebuff/audit-globals.json` (dihasilkan
+> `node scripts/audit-globals.mjs --json`) · `.freebuff/module-map-frontend.json`
+> (`node scripts/module-map.mjs --json`).
+
+---
+
+## 1. Audit Global Pollution & Collision Risk
+
+### 1.1 Angka besar (baseline 2026-08-16, setelah core di-ESM)
+
+| Metrik | Nilai |
+| --- | --- |
+| File frontend diaudit | **52** (js/** rekursif + api-client.js + i18n.js + pwa.js) |
+| Simbol global (deklarasi top-level + `window.*`) | **394** |
+| Kolisi (1 nama dideklarasikan 2+ file) | **0** ✓ (guard `check:globals` juga memastikan 0 per build) |
+| Shadowing API bawaan browser (`window.name`, `window.status`, `window.open`, …) | **0** ✓ |
+| Risk HIGH | **0** |
+| Risk MEDIUM (kontrak lintas-file berat) | **24** |
+| Risk LOW (spesifik / privat-able) | **370** |
+
+### 1.2 Inventaris risk MEDIUM (kontrak global yang WAJIB diekspor saat ESM)
+
+Nama-nama ini dipakai lintas file — ketika modulnya di-ESM-kan, identifier ini
+harus `export` + alias `window.*` (lihat bagian 5), kalau tidak pemakai classic
+langsung patah (ReferenceError).
+
+| Simbol | Pemakai (file) | Modul asal | Catatan |
+| --- | --- | --- | --- |
+| `tr` | 42 | i18n.js | ✅ sudah ESM |
+| `callAPI` | 28 | api-client.js | ✅ sudah ESM |
+| `esc` | 26 | api-client.js | ✅ sudah ESM |
+| `showToast` | 24 | js/init/util.js | langkah 2 berikutnya |
+| `escJs` | 12 | api-client.js | ✅ sudah ESM |
+| `trOption` | 12 | i18n.js | ✅ sudah ESM |
+| `ALL_CANDIDATES` | 12 | js/init/state.js | var global state |
+| `isAdmin` | 12 | js/init/state.js | var global state |
+| `currentAdminName` | 12 | js/init/state.js | var global state |
+| `refreshDataDinamis` | 10 | js/engine/init.js | |
+| `ALL_JOBS` | 9 | js/init/state.js | |
+| `currentKandidatWa` | 9 | js/init/state.js | |
+| `normalizePhone` | 8 | js/init/util.js | |
+| `ensureAllCandidates` | 7 | js/api/candidates.js | |
+| `safeSet` | 7 | js/init/util.js | |
+| `CURRENT_LANG` | 6 | i18n.js | ✅ sudah ESM |
+| `initApp` | 6 | js/engine/init.js | |
+| `ALL_DB_JOBS` | 6 | js/init/state.js | |
+| `ASSETS` | 6 | js/init/state.js | |
+| `currentKandidatName` | 6 | js/init/state.js | |
+| `DROPDOWNS` | 5 | js/init/state.js | |
+| `isKandidat` | 5 | js/init/state.js | |
+| `AUTO_REFRESH_TIMER` | 5 | js/init/state.js | |
+| `renderAdminFull` | 5 | js/render/admin.js | |
+
+Daftar LENGKAP (394 simbol + file asal + pemakai): `node scripts/audit-globals.mjs`
+atau `.freebuff/audit-globals.json`.
+
+### 1.3 Shadowing & bentrok API browser — METODOLOGI
+
+`scripts/audit-globals.mjs` memeriksa setiap deklarasi top-level terhadap
+**~110 property `window` bawaan** (`name`, `status`, `close`, `open`, `length`,
+`top`, `parent`, `frames`, `self`, `location`, `navigator`, `screen`,
+`localStorage`, `fetch`, `alert`, `confirm`, `print`, `find`, `stop`, …).
+Hasil saat ini: **tidak ada** deklarasi yang menimpa API browser — semua nama
+sudah ber-prefiks domain (`ALL_*`, `render*`, `current*`, `buka*`, …), jadi
+risiko bentrok dengan library pihak ketiga **rendah** dan tidak ada identifier
+yang butuh rename darurat.
+
+> ⚠️ Yang perlu dijaga: file baru (modul ESM maupun classic) JANGAN membuat
+> deklarasi top-level bernama `tr`, `callAPI`, `LANG`, `showToast`, dsb —
+> nanti kena guard `bun run check:globals` (kolisi) + risk audit.
+
+---
+
+## 2. Refactored Module — core layer (ESM murni)
+
+### 2.1 `i18n.js` (2.631 baris → ESM)
+
+Deklarasi publik kini `export`; **window alias dipertahankan** di bagian bawah
+(bridge untuk pemakai classic). Internal tetap satu sumber kebenaran.
+
+```js
+export var CURRENT_LANG = localStorage.getItem('asj_lang') || 'id';
+export const LANG = { ... };                    // kamus id + jp
+export const OPTION_TRANSLATIONS = { ... };     // kamus nilai DB → label
+export function trOption(value) { ... }
+export function trOptionId(value) { ... }
+export function tr(path) { ... }                // fallback ke path kalau key hilang
+export function renderLanguageLight() { ... }
+export function toggleFormLanguage() { ... }
+// --- bridge (tetap ada) ---
+window.tr = tr;  window.LANG = LANG;  window.CURRENT_LANG = CURRENT_LANG;
+window.OPTION_TRANSLATIONS = OPTION_TRANSLATIONS;
+window.trOption = trOption;  window.trOptionId = trOptionId;
+window.renderLanguageLight = renderLanguageLight;  window.toggleFormLanguage = toggleFormLanguage;
+```
+
+### 2.2 `api-client.js` (→ ESM) — PLUS isolasi scope yang ketat
+
+Hanya **API publik** yang diekspor; **6 internal jadi PRIVATE modul** (sebelumnya
+bocor jadi global di bundel concat):
+
+```js
+export async function callAPI(action, payload) { ... }   // + window.callAPI = callAPI
+export function esc(x) { ... }                            // + window.esc = esc
+export function escJs(x) { ... }                          // + window.escJs = escJs
+export function resolveSelfUrl(url) { ... }               // + window.resolveSelfUrl = resolveSelfUrl
+
+// PRIVATE sekarang (TIDAK lagi global):
+const NETLIFY_API_BASE = '/.netlify/functions';
+const CANDIDATE_ACTIONS = new Set([...]);
+const ADMIN_ACTIONS = new Set([...]);
+const NETLIFY_FUNCTIONS = { ... };   // legacy table (tidak dipakai runtime)
+function getApiUrl(action) { ... }   // dead code (warisan GAS)
+function callNetlify(action, payload) { ... } // dead code (warisan GAS)
+```
+
+### 2.3 Isolasi scope — yang berubah & yang dijamin SAMA
+
+| Aspek | Sebelum (classic) | Sesudah (ESM + build IIFE per file) |
+| --- | --- | --- |
+| `callAPI`, `tr`, `LANG`, `esc`, … | global `window.*` | `export` + alias `window.*` (sama) |
+| `NETLIFY_API_BASE`, `CANDIDATE_ACTIONS`, `ADMIN_ACTIONS`, `getApiUrl`, `callNetlify`, `NETLIFY_FUNCTIONS` | global (bocor) | **private modul** (tidak bocor) ✓ |
+| Perilaku runtime | — | byte-identik (uji: node import, lint, test 81/81, build) |
+| Strict mode | sloppy (bundel) | modul = strict — referensi global tersisa **diubah ke `window.*` eksplisit** (bagian 2.4) |
+
+### 2.4 Fix yang WAJIB saat file jadi ESM (ditemukan oleh scan `no-undef`)
+
+Modul ESM **tidak** fallback ke global scope untuk identifier tak dikenal
+(berbeda dari script sloppy). Referensi global implisit di dalam modul harus
+ditulis `window.*` eksplisit. Yang diperbaiki di turn ini:
+
+- `api-client.js` (jalur error sesi basi): `tr(...)` → `window.tr(...)`,
+  `showToast(...)` → `window.showToast(...)` (guard `typeof` ikut di-window-kan).
+- `i18n.js` (`toggleFormLanguage`): `renderLanguage()`, `renderSysConfig()`,
+  `rePopulateDropdowns()` → `window.render*` (guard `typeof` ikut).
+
+Cara scan (jangan dilewati setelah konversi file baru):
+
+```bash
+bunx eslint --no-warn-ignored --rule 'no-undef: error' --rule 'no-unused-vars: off' <file>.js
+```
+
+---
+
+## 3. Hybrid Interop / Bridge Layer — `window.PortalBridge`
+
+File **`js/core/bridge.js`** (modul ESM) memuat i18n + api-client via `import`
+lalu mengekspos **satu namespace** untuk kode legacy:
+
+```js
+import * as api from '../../api-client.js';
+import * as i18n from '../../i18n.js';
+
+export const PortalBridge = {
+  // API backend
+  callAPI: api.callAPI,
+  esc: api.esc,
+  escJs: api.escJs,
+  resolveSelfUrl: api.resolveSelfUrl,
+  // i18n
+  LANG: i18n.LANG,
+  get CURRENT_LANG() { return i18n.CURRENT_LANG; },  // getter LIVE (tidak basi)
+  tr: i18n.tr,
+  trOption: i18n.trOption,
+  trOptionId: i18n.trOptionId,
+  renderLanguageLight: i18n.renderLanguageLight,
+  toggleFormLanguage: i18n.toggleFormLanguage,
+  safeCallAPI(action, payload) { /* fallback window.callAPI + guard */ },
+};
+window.PortalBridge = PortalBridge;
+export default PortalBridge;
+```
+
+Efek samping `import` di bridge: i18n & api-client **mengeksekusi alias
+`window.*` klasiknya sendiri** — jadi pemakai lama (`js/*.js`, inline
+`onclick="callAPI(...)"`) tetap jalan tanpa disentuh.
+
+### 3.1 Pemanggilan aman dari kode legacy
+
+Urutan muat antara modul (deferred) dan script classic tidak selalu dijamin —
+pakai helper ini di kode legacy yang dipanggil saat parse:
+
+```js
+// Pola aman #1 — lewat bridge (kalau halaman memuat bridge.js):
+function callApiAman(action, payload) {
+  const fn = (window.PortalBridge && window.PortalBridge.callAPI) || window.callAPI;
+  if (typeof fn !== 'function') {
+    console.error('[portal] core belum dimuat');
+    return Promise.reject(new Error('PortalBridge belum siap'));
+  }
+  return fn(action, payload);
+}
+
+// Pola aman #2 — guard jenis fungsi untuk akses langsung ke window alias:
+if (typeof window.tr === 'function') el.textContent = window.tr('ui.key');
+```
+
+Kode ESM baru yang butuh core cukup `import { callAPI } from '/api-client.js'`
+atau `import { tr } from '/i18n.js'` — tidak perlu window sama sekali.
+
+---
+
+## 4. Petunjuk Integrasi (HTML Load)
+
+### 4.1 Halaman standalone (ai_form, apply-full, master-full, share, siswa-baru)
+
+Tag `i18n.js`/`api-client.js` yang dulu classic (`<script src>`) diganti
+**`<script type="module">`** — satu tag per halaman, di posisi yang sama:
+
+```html
+<!-- ai_form.html & master-full.html: core lengkap lewat bridge -->
+<script type="module" src="/js/core/bridge.js?v=esm1"></script>
+
+<!-- apply-full.html & siswa-baru.html: hanya api-client (tidak butuh i18n) -->
+<script type="module" src="/api-client.js?v=esm1"></script>
+
+<!-- share.html: hanya i18n -->
+<script type="module" src="/i18n.js?v=esm1"></script>
+```
+
+**Aturan urutan (penting, karena modul SELALU deferred):**
+
+```html
+<script type="module" src="...core..."></script>   <!-- 1. ESM core (deferred) -->
+<script src="/js/upload-guard.js"></script>        <!-- 2. classic: jalan saat parse -->
+<script src="/js/pages/xxx.js"></script>           <!-- 3. classic: jalan saat parse -->
+<script src="/pwa.js"></script>
+```
+
+1. Script **classic** dieksekusi saat parsing dokumen (sebelum modul).
+2. Script **module** dieksekusi setelah parse selesai, **sebelum
+   `DOMContentLoaded`**.
+3. Syarat aman: kode top-level classic di `js/pages/*.js`, `upload-guard.js`,
+   `apply-docs.js` **tidak boleh memanggil `callAPI`/`tr`/`LANG` saat parse**
+   (sudah diaudit — semua pemakaian ada di fungsi/event runtime).
+4. Inline `onclick="callAPI(...)"` aman: pasti terjadi setelah modul jalan.
+
+### 4.2 admin.html & index.html (bundel)
+
+Tidak berubah — bundel tetap `<script src="/assets/app-*.js">` (classic).
+`scripts/build-js.mjs` sekarang memproses file ESM di STACK per-file dengan
+esbuild `format:'iife'` (export di-strip, alias `window.*` jalan), file classic
+lain tetap concat apa adanya. Bukti di bundel `assets/app-7f821ddf7c.js`:
+`window.callAPI`, `window.tr`, `window.LANG` ada; **0 statement `export`** bocor.
+
+### 4.3 Cache-busting
+
+`?v=` di tag module dibump ke `esm1` saat konten file berubah (i18n.js,
+api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
+`/api-client.js`, `/js/**` (lihat SHELL sw.js) — halaman standalone selalu fresh.
+
+---
+
+## 5. Kontrak untuk modul ESM berikutnya (WAJIB baca sebelum konversi)
+
+1. **Export API publik** + **`window.<nama> = <nama>`** untuk tiap simbol yang
+   masih dipakai lintas file (lihat tabel MEDIUM di bagian 1.2).
+2. **Jangan export internal** — kesempatan memperkecil jejak global
+   (contoh: api-client.js, 6 internal jadi privat).
+3. **Ganti referensi global implisit ke `window.*` eksplisit** di dalam modul
+   (scan `no-undef`, bagian 2.4).
+4. **Jangan sentuh urutan STACK** build-js.mjs kalau hanya menambah `export` —
+   per-file IIFE otomatis menangani; kalau file keluar dari STACK, perbarui juga
+   tag halaman standalone yang memuatnya langsung.
+5. **Verifikasi minimum:** `node --check --input-type=module < file` →
+   `bunx eslint ... --rule 'no-undef: error'` → `bun run lint` → `bun run test`
+   → `bun run build` (check:globals wajib hijau).
+
+---
+
+## 6. Urutan konversi berikutnya (roadmap Fase 3)
+
+1. ✅ **Core: `i18n.js` + `api-client.js`** — SELESAI turn ini.
+2. ⏭️ **`js/init/state.js` + `js/init/util.js`** — helper/state paling banyak
+   dipakai (`showToast` 24, `safeSet` 7, `normalizePhone` 8, `ALL_*` 5-12).
+   Catatan: `js/init/*` tidak dimuat halaman standalone → hanya perlu alias
+   window untuk pemakai bundel.
+3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
+   sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
+   semua pemakai di-import.
+4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
+   semua referensi lintas file jadi `import` eksplisit (nol referensi global
+   implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
+   simbol dan mematahkan referensi global (lihat PROGRESS.md Fase 3 langkah 1).
+5. ⏭️ Halaman standalone jadi entry ESM per halaman ATAU tetap classic —
+   keputusan dicatat di PROGRESS.md.
+6. ⏭️ Aktifkan `no-undef` per file yang sudah ESM (deteksi referensi terlewat —
+   manfaat utama ESM).
+
+---
+
+## 7. Verifikasi turn ini (2026-08-16)
+
+- `node --check --input-type=module` api-client.js / i18n.js / js/core/bridge.js ✓
+- Scan `no-undef` strict: **0 error** (referensi global implisit sudah di-window-kan) ✓
+- `bun run lint`: 0 error / 12 warn (baseline) ✓
+- `bun run test`: **81/81** ✓
+- `bun run build`: check:globals **nol kolisi** (45 file / 389 simbol) ·
+  bundel `app-7f821ddf7c.js` (410.6 KB) · build idempoten (hash sama saat
+  diulang) ✓
+- Bundel: 8 alias `window.*` core hadir, **0 export bocor** ✓
+- Uji impor ESM di Node (shim browser): `PortalBridge` + semua alias + `tr()`
+  + `toggleFormLanguage` (live CURRENT_LANG) + internal privat — **13/14 OK**
+  (1 gagal karena key test salah, bukan bug — `tr('public.filter')` = 'Filter') ✓
+- E2E Playwright: **belum dijalankan** (preview belum di-start dari UI) —
+  jalankan `BASE_URL=... node e2e/login-check.mjs` + upload/biodata sebelum
+  rilis.

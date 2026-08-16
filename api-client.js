@@ -1,6 +1,11 @@
 // ============================================================
 // api-client.js — Bridge ke Netlify Functions + Supabase
 // ============================================================
+// ESM (Fase 3): file ini adalah modul ES. API publik (callAPI, esc, escJs,
+// resolveSelfUrl) memakai `export` + alias window.* di bawah untuk pemakai
+// classic. Internal (NETLIFY_API_BASE, CANDIDATE_ACTIONS, ADMIN_ACTIONS,
+// NETLIFY_FUNCTIONS, getApiUrl, callNetlify) kini PRIVATE modul — tidak bocor
+// ke global scope (dulu jadi global di bundel concat).
 // Seluruh backend sudah dipindah dari Google Apps Script ke Netlify Functions
 // + Supabase. Semua action di bawah ini punya implementasi Netlify sendiri;
 // tidak ada jalur GAS sama sekali (callAPI murni POST ke /.netlify/functions).
@@ -181,7 +186,7 @@ function getApiUrl(action) {
   return NETLIFY_API_BASE + '/' + (funcName || action);
 }
 
-async function callAPI(action, payload) {
+export async function callAPI(action, payload) {
   const funcName = NETLIFY_FUNCTIONS[action];
   if (!funcName) {
     console.error('[api-client] Tidak ada function Netlify terdaftar untuk action:', action);
@@ -238,11 +243,11 @@ async function callAPI(action, payload) {
         const adminLogged = localStorage.getItem('asj_admin_login') === 'sukses';
         const kandidatLogged = localStorage.getItem('asj_kandidat_login') === 'sukses';
         const msg = adminLogged
-          ? tr('ui.toast_admin_session_expired')
+          ? window.tr('ui.toast_admin_session_expired')
           : kandidatLogged
-            ? tr('ui.toast_kandidat_session_expired')
+            ? window.tr('ui.toast_kandidat_session_expired')
             : 'Sesi berakhir, silakan login ulang.';
-        if (typeof showToast === 'function') showToast(msg, 'error');
+        if (typeof window.showToast === 'function') window.showToast(msg, 'error');
         else if (typeof alert === 'function') alert(msg);
       } catch (e) {
         /* toast opsional — jangan sampai memblokir reload */
@@ -274,7 +279,7 @@ function callNetlify(action, payload) {
 // argumen onclick. esc() untuk teks & atribut; escJs() untuk nilai
 // yang disisipkan ke string JS di dalam onclick (escape \ dan kutip).
 // ============================================================
-function esc(x) {
+export function esc(x) {
   return String(x == null ? '' : x)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -283,7 +288,7 @@ function esc(x) {
     .replace(/'/g, '&#39;');
 }
 
-function escJs(x) {
+export function escJs(x) {
   // Nilai disisipkan ke string JS DI DALAM atribut HTML ber-tanda kutip
   // ganda: onclick="fn('...')". Dua lapis yang harus dijaga:
   //   1) JS: \\ -> \\\\ dulu, lalu ' -> \\' (urutan ini wajib supaya
@@ -316,7 +321,7 @@ window.escJs = escJs;
 // window.location.origin, ganti origin-nya (path/query tetap) supaya
 // form terbuka di aplikasi yang sedang dipakai. URL relatif dibiarkan.
 // ============================================================
-function resolveSelfUrl(url) {
+export function resolveSelfUrl(url) {
   if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return url;
   try {
     const u = new URL(url);
@@ -330,6 +335,11 @@ function resolveSelfUrl(url) {
 }
 
 window.resolveSelfUrl = resolveSelfUrl;
+
+// callAPI() adalah kontrak global utama — dipakai ~40 file frontend (js/*,
+// js/pages/*, upload-guard) sebagai bare global. Alias window.* wajib supaya
+// pemakai classic tetap jalan setelah file ini jadi modul ES (IIFE di bundel).
+window.callAPI = callAPI;
 
 // Semua pemanggilan di frontend memakai callAPI() langsung ke Netlify Functions
 // + Supabase — tidak ada lagi jalur Google Apps Script / callGAS.

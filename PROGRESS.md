@@ -4,7 +4,51 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 5: inline script 5 halaman standalone → `js/pages/*` + `js/00_dictionary.js` dihapus (**Fase 2 tuntas**).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 2: core layer ESM (i18n.js + api-client.js) + bridge `window.PortalBridge` + audit global (commit menyusul).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 2 — core layer ESM + bridge PortalBridge + audit global (commit menyusul)
+
+- **Audit global pollution** — `scripts/audit-globals.mjs` baru (risk
+  HIGH/MEDIUM/LOW + shadowing window API), hasil di
+  `.freebuff/audit-globals.json`: **52 file · 394 simbol · HIGH=0 ·
+  MEDIUM=24 · LOW=370 · 0 kolisi · 0 shadowing API browser**. Daftar
+  MEDIUM (kontrak lintas-file yang wajib export saat ESM) ada di
+  `ESM_BRIDGE.md` §1.2.
+- **`i18n.js` → ESM**: 8 deklarasi publik (CURRENT_LANG, LANG,
+  OPTION_TRANSLATIONS, trOption, trOptionId, tr, renderLanguageLight,
+  toggleFormLanguage) kini `export`; alias `window.*` dipertahankan.
+- **`api-client.js` → ESM**: export callAPI/esc/escJs/resolveSelfUrl +
+  `window.callAPI` alias BARU (dulu bare global di concat); **6 internal
+  jadi private modul** (NETLIFY_API_BASE, CANDIDATE_ACTIONS,
+  ADMIN_ACTIONS, NETLIFY_FUNCTIONS, getApiUrl, callNetlify — tidak bocor
+  lagi).
+- **Referensi global implisit di-window-kan** (modul strict tidak fallback
+  ke global): `tr`/`showToast` (api-client, jalur sesi basi) +
+  `renderLanguage`/`renderSysConfig`/`rePopulateDropdowns` (i18n,
+  toggleFormLanguage) → `window.*` eksplisit; scan `no-undef` **0 error**.
+- **Bridge** `js/core/bridge.js`: `window.PortalBridge` (callAPI, esc,
+  escJs, resolveSelfUrl, LANG, CURRENT_LANG live-getter, tr, trOption,
+  trOptionId, renderLanguageLight, toggleFormLanguage, safeCallAPI).
+- **Build**: `build-js.mjs` meng-IIFE-kan api-client/i18n per file
+  (format:'iife' → export di-strip, alias jalan); bundel tetap classic
+  `assets/app-7f821ddf7c.js` (410.6 KB, 45 file, **0 export bocor**, 8
+  alias window.* hadir); `check-globals` DECL_RE + `module-map`
+  RE_FUNC_DECL didukung prefix `export`.
+- **Halaman standalone**: i18n/api-client diganti `<script type="module">`
+  (ai_form & master-full → `js/core/bridge.js`; apply-full & siswa-baru →
+  api-client; share → i18n). Aman: modul deferred jalan sebelum
+  DOMContentLoaded, dan tidak ada kode top-level classic yang memanggil
+  callAPI/tr saat parse (diaudit).
+- **Verifikasi**: node --check ESM ✓ · scan no-undef 0 error ✓ · lint
+  0 error/12 warn ✓ · test **81/81** ✓ · build idempoten ✓ · uji impor
+  ESM di Node (PortalBridge + alias + tr + toggle bahasa live + internal
+  privat) ✓ · **E2E Playwright belum dijalankan** (preview belum di-start
+  dari UI — jalankan e2e/login-check + upload/biodata sebelum rilis).
+- Detail lengkap + roadmap: **`ESM_BRIDGE.md`**.
 
 ---
 
@@ -40,6 +84,37 @@
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 1 — fondasi ESM: resolusi kolisi `tr` + guard `check:globals` + temuan empiris esbuild — commit menyusul
+
+- **Kolisi global terakhir dihilangkan**: `tr` dideklarasikan ganda di
+  `i18n.js` & `js/01_public.js`. Duplikat dihapus dari `01_public.js`
+  (24 call-site `tr(` di file itu kini pakai global i18n.js yang dimuat
+  lebih awal — isi setara, i18n lebih defensif `String(path)`).
+- **Guard baru** `scripts/check-globals.mjs` → `bun run check:globals`
+  (otomatis di awal `bun run build`): gagal kalau ada deklarasi top-level
+  di 2+ file STACK, warning kalau nama STACK dipakai `js/pages/*`.
+  Hasil: 45 file · 389 simbol unik · **nol kolisi ✓**.
+- **🔬 Temuan empiris krusial** (eksperimen esbuild bundle mode):
+  - esbuild **men-rename** deklarasi top-level modul saat scope digabung,
+    bahkan tanpa kolisi, selama modul lain mereferensikannya sebagai global
+    → referensi implisit patah (ReferenceError diam-diam).
+  - esbuild **tree-shake** modul berisi deklarasi murni (tanpa side effect).
+  - Rename tidak konsisten saat ada kolisi (bisa meng-rename SEMUA simbol
+    satu modul → merusak semua referensi lintas file).
+  → **Bundle mode baru bisa diaktifkan setelah SEMUA referensi lintas file
+  menjadi import eksplisit**. Build concat + transform tetap dipakai sampai
+  konversi tuntas (konversi bertahap per domain, urutan: core → util →
+  domain; alias `window` utk pemakai classic; aktifkan `no-undef` per file
+  yang sudah ESM).
+
+**Verifikasi:** check:globals nol kolisi ✓ · lint 0 error/12 warn ✓ ·
+test **81/81** ✓ · build OK (bundel baru `app-19e6249673.js`, 421.030 byte
+— berubah wajar karena duplikat tr hilang).
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 5 — inline script 5 halaman standalone → `js/pages/*` + `00_dictionary` dihapus — commit `30b79c7`
 

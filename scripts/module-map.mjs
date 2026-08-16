@@ -74,7 +74,7 @@ function backendFiles() {
 // ---------------------------------------------------------------------------
 // Ekstraksi simbol global (heuristik)
 // ---------------------------------------------------------------------------
-const RE_FUNC_DECL = /^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/gm;
+const RE_FUNC_DECL = /^\s*(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/gm;
 const RE_CONST_ARROW =
   /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*(?:=>|\{)/gm;
 const RE_CONST_FUNC =

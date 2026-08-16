@@ -1,6 +1,9 @@
-var CURRENT_LANG = localStorage.getItem('asj_lang') || 'id';
+// ESM (Fase 3): i18n.js adalah modul ES — deklarasi memakai `export` agar
+// bisa di-import oleh modul lain, dan tetap menempel window.* di bawah untuk
+// pemakai classic (bundel admin/index + halaman standalone).
+export var CURRENT_LANG = localStorage.getItem('asj_lang') || 'id';
 
-const LANG = {
+export const LANG = {
   id: {
     loader: { title: 'MEMUAT ASJ OS V7…', subtitle: 'Mempersiapkan UI Modern' },
     a11y: { skip_to_content: 'Lewati ke konten utama' },
@@ -1708,7 +1711,7 @@ const LANG = {
 // di database — hanya label tampilan yang diterjemahkan sesuai bahasa terpilih).
 // Nilai baru bisa ditulis sebagai "ID|JP" oleh admin; kalau tidak ada di kamus
 // dan tidak memakai format ID|JP, tampil apa adanya.
-const OPTION_TRANSLATIONS = {
+export const OPTION_TRANSLATIONS = {
   // Tahapan pipeline (list_tahapan)
   'CHECK KAIWA': { id: 'CHECK KAIWA', jp: 'チェック会話' },
   MENDAN: { id: 'MENDAN', jp: '面談' },
@@ -1832,7 +1835,7 @@ window.OPTION_TRANSLATIONS = OPTION_TRANSLATIONS;
 // 2. Nilai di kamus OPTION_TRANSLATIONS — tampil versi bahasa terpilih.
 // 3. Fallback — nilai asli (aman: nilai lama / nama orang / bebas terjemahan).
 // Nilai yang DISIMPAN & DIBANDINGKAN tetap ID asli (lihat trOptionId).
-function trOption(value) {
+export function trOption(value) {
   if (value === null || value === undefined) return '';
   var s = String(value);
   var bar = s.indexOf('|');
@@ -1861,7 +1864,7 @@ function trOption(value) {
   return s;
 }
 // Bagian ID dari nilai (untuk simpan/banding): "ID|JP" -> ID; lainnya -> asli.
-function trOptionId(value) {
+export function trOptionId(value) {
   if (value === null || value === undefined) return '';
   var s = String(value);
   var bar = s.indexOf('|');
@@ -2570,9 +2573,9 @@ LANG.jp.form = {
 };
 
 // tr() ringan untuk halaman mandiri (master-full/ai_form) yang tidak memuat
-// 01_public.js. Di index/admin, 01_public.js memuat definisi tr() yang sama
-// (dimuat belakangan → menimpa yang ini, hasil identik).
-function tr(path) {
+// 01_public.js. Sejak Fase 3.1 duplikat tr() dihapus dari 01_public.js —
+// definisi SATU-SATUNYA tr() ada di sini (i18n.js = sumber kebenaran).
+export function tr(path) {
   try {
     let obj = LANG[CURRENT_LANG];
     for (const p of String(path).split('.')) {
@@ -2587,7 +2590,7 @@ function tr(path) {
 
 // Render data-lang / data-lang-placeholder / data-lang-title untuk halaman
 // mandiri (tanpa header lang-current & tanpa re-render tabel admin).
-function renderLanguageLight() {
+export function renderLanguageLight() {
   document.querySelectorAll('[data-lang]').forEach((el) => {
     const key = el.dataset.lang;
     const text = tr(key);
@@ -2611,17 +2614,17 @@ function renderLanguageLight() {
 }
 
 // Tombol ganti bahasa untuk halaman mandiri (ID ↔ JP).
-function toggleFormLanguage() {
+export function toggleFormLanguage() {
   CURRENT_LANG = CURRENT_LANG === 'id' ? 'jp' : 'id';
   window.CURRENT_LANG = CURRENT_LANG;
   try {
     localStorage.setItem('asj_lang', CURRENT_LANG);
   } catch (e) {}
   if (typeof renderLanguageLight === 'function') renderLanguageLight();
-  if (typeof renderLanguage === 'function') renderLanguage();
-  if (typeof renderSysConfig === 'function' && document.getElementById('config-container'))
-    renderSysConfig();
-  if (typeof rePopulateDropdowns === 'function') rePopulateDropdowns();
+  if (typeof window.renderLanguage === 'function') window.renderLanguage();
+  if (typeof window.renderSysConfig === 'function' && document.getElementById('config-container'))
+    window.renderSysConfig();
+  if (typeof window.rePopulateDropdowns === 'function') window.rePopulateDropdowns();
 }
 window.tr = tr;
 window.renderLanguageLight = renderLanguageLight;

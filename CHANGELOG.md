@@ -1,6 +1,21 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `f6dc1bb`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 2 — commit menyusul).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 2: core layer ESM + bridge PortalBridge (refactor)
+
+### Refactor: i18n.js & api-client.js jadi ES Modules + `window.PortalBridge`
+
+- **Tidak ada perubahan perilaku** — konversi murni (zero regression; test 81/81, bundel idempoten).
+- `i18n.js`: 8 deklarasi publik kini `export` (CURRENT_LANG, LANG, OPTION_TRANSLATIONS, trOption, trOptionId, tr, renderLanguageLight, toggleFormLanguage) + alias `window.*` tetap.
+- `api-client.js`: export callAPI/esc/escJs/resolveSelfUrl + alias `window.callAPI` baru; **6 internal jadi private modul** (NETLIFY_API_BASE, CANDIDATE_ACTIONS, ADMIN_ACTIONS, NETLIFY_FUNCTIONS, getApiUrl, callNetlify) — tidak bocor ke global scope lagi.
+- Referensi global implisit dalam modul di-window-kan eksplisit (`window.tr`, `window.showToast`, `window.render*`) karena modul strict tidak fallback ke global.
+- `js/core/bridge.js`: namespace tunggal `window.PortalBridge` + `safeCallAPI` untuk kode legacy.
+- Build `build-js.mjs`: file ESM di STACK concat di-IIFE-kan per file (export di-strip, alias jalan) — bundel admin/index tetap classic (`assets/app-7f821ddf7c.js`).
+- Halaman standalone memuat core via `<script type="module">` (ai_form/master-full via bridge; apply-full/siswa-baru api-client; share i18n).
+- Baru: `scripts/audit-globals.mjs` (audit global pollution & collision risk; 52 file · 394 simbol · HIGH=0) + dokumen `ESM_BRIDGE.md`.
 
 ---
 

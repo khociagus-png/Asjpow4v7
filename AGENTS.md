@@ -28,8 +28,10 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 root/
 ├── index.html, admin.html, apply-full.html, master-full.html,
 │   share.html, siswa-baru.html, ai_form.html   # SPA statis (vanilla JS, no framework)
-├── js/00_dictionary.js … js/12_esign_match.js  # logika frontend (sumber)
-├── api-client.js, i18n.js, pwa.js              # client API, terjemahan, service worker
+├── js/*.js, js/{init,engine,render,api,admin_modal,admin_ops,ai_copilot,pages,core}/  # logika frontend (sumber)
+├── api-client.js, i18n.js   # client API + terjemahan — **sudah ESM (Fase 3)**: export + alias window.*
+├── js/core/bridge.js        # bridge ESM→legacy: window.PortalBridge (lihat ESM_BRIDGE.md)
+├── pwa.js                   # service worker helper (classic)
 ├── partials/modals-shared.html                 # SATU-SATUNYA sumber semua modal (~30 modal)
 ├── src/main.css                                # input Tailwind v4
 ├── netlify/functions/_lib/
@@ -51,6 +53,7 @@ root/
 | Yang diubah | Sumber | Build wajib | Artifact ter-generate |
 | --- | --- | --- | --- |
 | Logika frontend | `js/*.js`, `api-client.js`, `i18n.js`, `pwa.js` | `bun run build:js` | `assets/app-<hash>.js` + ref di `index.html`/`admin.html` + `sw.js` |
+| ESM core (`api-client.js`, `i18n.js`, `js/core/*`) | **export + alias `window.*`** | build otomatis di-strip export (IIFE per file) utk bundel | halaman standalone load via `<script type="module">` |
 | Modal | `partials/modals-shared.html` | `bun run build:html` (+ `build:css` kalau kelas baru) | `assets/modals-shared.html` |
 | Styling | `src/main.css` + kelas Tailwind di HTML/JS | `bun run build:css` | `assets/main.css` |
 | Backend | `netlify/functions/_lib/*.js` | **tidak perlu build** | — (preview baca langsung, wajib **restart preview**) |
@@ -96,7 +99,11 @@ Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 
 **Frontend:**
 - Panggilan backend: `callAPI('namaAction', [arg1, arg2])` (lihat `api-client.js`).
-  Nama action = nama handler di backend.
+  Nama action = nama handler di backend. `callAPI`/`tr`/`LANG` adalah modul ESM
+  + alias `window.*` — pemakai classic tetap pakai bare global; modul ESM baru
+  pakai `import`. Kalau nambah file ESM: ikuti aturan di `ESM_BRIDGE.md` §5
+  (export publik + alias window, referensi global → `window.*` eksplisit,
+  scan `bunx eslint --rule 'no-undef: error' <file>`).
 - i18n: semua teks UI lewat `tr('ui.key')` — key di `i18n.js` (`LANG.id` + `LANG.jp`).
   `tr()` sudah fallback ke `id` kalau key belum diterjemahkan. Key duplikat = error lint.
 - Jangan menulis ulang async/await jadi callback `.then()`.
@@ -116,6 +123,15 @@ Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 ```bash
 # Verifikasi syntax JS
 node --check js/04_auth.js && node --check netlify/functions/_lib/handlers.js
+
+# Verifikasi syntax file ESM (api-client.js, i18n.js, js/core/*):
+node --check --input-type=module < api-client.js
+
+# Audit global pollution & collision (setelah ubah deklarasi top-level):
+node scripts/audit-globals.mjs --high
+
+# Scan referensi global terlewat di file ESM (wajib 0 error):
+bunx eslint --no-warn-ignored --rule 'no-undef: error' --rule 'no-unused-vars: off' api-client.js i18n.js js/core/bridge.js
 
 # Build lengkap (setelah ubah frontend/partial/css)
 bun run build

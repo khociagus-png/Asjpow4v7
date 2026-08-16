@@ -32,7 +32,8 @@ if (!stackMatch) {
 const STACK = [...stackMatch[1].matchAll(/'(\/[^']+)'/g)].map((x) => x[1]);
 
 // Deklarasi top-level (kolom 0): function/async function/class/const/let/var.
-const DECL_RE = /^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b|^class\s+([A-Za-z_$][\w$]*)/gm;
+// Fase 3: prefix `export` di file ESM (api-client.js/i18n.js) diabaikan.
+const DECL_RE = /^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b|^(?:export\s+)?class\s+([A-Za-z_$][\w$]*)/gm;
 
 function topLevelDecls(filePath) {
   const text = readFileSync(filePath, 'utf8');

@@ -89,6 +89,12 @@ const STACK = [
 ];
 
 // 1. Gabung + minify + hash.
+// Fase 3: api-client.js & i18n.js kini modul ES (export + alias window.*).
+// Bundel admin/index tetap CLASSIC (<script> biasa) — export di-strip
+// per-file via esbuild format:'iife' (isi identik, alias window.* jalan).
+// File lain classic: JANGAN dibungkus IIFE (deklarasi top-level harus tetap
+// global utk inline onclick & panggilan lintas file).
+const ESM_CORE = new Set(['/api-client.js', '/i18n.js']);
 const sources = STACK.map((src) => {
   const path = ROOT + src;
   if (!existsSync(path)) {
@@ -97,7 +103,16 @@ const sources = STACK.map((src) => {
   }
   return readFileSync(path, 'utf8');
 });
-const min = await transform(sources.join('\n'), { minify: true });
+const processed = [];
+for (let i = 0; i < sources.length; i++) {
+  if (ESM_CORE.has(STACK[i])) {
+    const out = await transform(sources[i], { format: 'iife' });
+    processed.push(out.code);
+  } else {
+    processed.push(sources[i]);
+  }
+}
+const min = await transform(processed.join('\n'), { minify: true });
 const hash = createHash('sha1').update(min.code).digest('hex').slice(0, 10);
 const bundleName = `app-${hash}.js`;
 const bundlePath = `${ROOT}/assets/${bundleName}`;

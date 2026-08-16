@@ -344,9 +344,8 @@
     </div>
   </div>
 
-  <script src="/i18n.js?v=3ff6b871a5"></script>
-
-  <script src="/api-client.js?v=4fbd0619d2"></script>
+  <!-- Fase 3: core ESM — bridge memuat i18n + api-client sebagai module (deferred) -->
+  <script type="module" src="/js/core/bridge.js?v=esm1"></script>
   <script src="/js/upload-guard.js?v=1"></script>
     <!-- Fase 2: inline script utama dipindah ke js/pages/master_full.js (isi byte-identik) -->
   <script src="/js/pages/master_full.js?v=1"></script>
