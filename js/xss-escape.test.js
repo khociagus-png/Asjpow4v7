@@ -36,7 +36,11 @@ function escJs(x) {
     .replace(/[\r\n\u2028\u2029]/g, ' ');
 }
 
-const renderSrc = readFileSync(new URL('./05_render.js', import.meta.url), 'utf8');
+// Fase 2: js/05_render.js dipecah menjadi 5 modul per domain — gabungkan
+// semuanya supaya assertion sink render di bawah tetap mencakup seluruh
+// jalur render (mail, kandidat, admin, loker publik).
+const RENDER_FILES = ['render/mail.js', 'render/candidate.js', 'render/admin.js', 'render/public.js', 'render/share.js'];
+const renderSrc = RENDER_FILES.map((f) => readFileSync(new URL('./' + f, import.meta.url), 'utf8')).join('\n');
 
 // Simulasi parser HTML: entity diubah kembali ke karakter asli (parser
 // HTML melakukan ini sebelum nilai atribut sampai ke engine JS).
@@ -130,7 +134,7 @@ describe('escJs() — nilai di dalam string JS onclick', () => {
   });
 });
 
-describe('Sink render js/05_render.js (S1 coverage)', () => {
+describe('Sink render js/render/* (S1 coverage)', () => {
   // Setiap nilai user-supplied yang dirender ke innerHTML tabel harus
   // dibungkus esc(...) / escJs(...). Kalau pola "mentah" di bawah muncul,
   // artinya ada regresi escape di jalur render tersebut.
