@@ -56,3 +56,27 @@ describe('stemAliases', () => {
     expect(stemAliases('KTP')).toEqual([]);
   });
 });
+
+describe('buildRingkasData (konteks AI chat)', () => {
+  const { buildRingkasData } = require('./actions-ai.js');
+
+  it('memuat TB/BB & ukuran yang terisi, tanpa data kosong', () => {
+    const out = buildRingkasData({
+      identitas: { nama_lengkap: 'AGUS KHOCI', ktp: '', paspor: '' },
+      fisik: { tb: '165', bb: '57', topi: '', baju: 'L' },
+      sertifikasi: { jft: 'A2' },
+      pendidikan: [{ tingkat: 'SMK', sekolah: 'SMAN 1', tahun_lulus: '2015' }],
+    });
+    expect(out).toContain('Tinggi badan: 165 cm');
+    expect(out).toContain('Berat badan: 57 kg');
+    expect(out).toContain('Ukuran baju: L');
+    expect(out).toContain('Bahasa Jepang (JLPT/JFT): A2');
+    expect(out).not.toContain('NIK KTP'); // kosong -> tidak dilist sebagai terisi
+    expect(out).not.toContain('Ukuran topi'); // kosong -> tidak dilist
+  });
+
+  it('menangani input kosong/tanpa data', () => {
+    expect(buildRingkasData(undefined)).toBe('');
+    expect(buildRingkasData({})).toBe('');
+  });
+});

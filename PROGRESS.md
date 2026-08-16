@@ -10,6 +10,25 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `<next>` — Fix: Chat Jeklin tanya TB/BB yang sudah ada di DB
+
+- **Laporan user (screenshot live ai_form):** user tanya ukuran baju/sepatu/topi
+  berdasarkan TB/BB → Jeklin malah bertanya "TB & BB berapa?" padahal di master
+  sudah terisi (TB 165, BB 57).
+- **Akar masalah:** `handleProcessAIChat` (actions-ai.js) menerima
+  `payload.currentData` (dari auto-fill `getDrafCvMaster`) tapi **tidak pernah
+  membacanya** — prompt AI hanya instruksi generik, jadi Jeklin buta terhadap
+  data yang sudah terisi dan menanyakan ulang.
+- Fix: helper `buildRingkasData(cur)` → ringkasan data terisi (identitas, fisik
+  TB/BB/ukuran, medis, sertifikasi, pendidikan, pekerjaan, keluarga, wawancara)
+  disuntik ke system prompt + aturan "JANGAN tanya ulang data yang sudah terisi".
+  Data kosong (NIK/Paspor dll.) tetap tidak dilist sehingga Jeklin tetap bisa
+  menanyakannya.
+- Bonus: sapaan awal (`generateSmartWelcomeMessage` di ai_form.html) kini juga
+  mendeteksi TB/BB kosong; key i18n `form.chat_missing_tb`/`_bb` (ID + JP).
+- Verifikasi: unit test baru `buildRingkasData` (51/51 pass), `node --check`
+  bersih, `bun run build:js` OK (bundle `app-d80b6b5088.js`).
+
 ### Commit `d0c1a71` — Fix: AI form gagal simpan ke Supabase + verifikasi auto-fill
 
 - **Permintaan user:** "Ai form dan CV ai check apakah semua data bisa

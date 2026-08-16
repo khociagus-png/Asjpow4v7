@@ -1,6 +1,16 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `d0c1a71`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `<next>`.
+
+---
+
+## 2026-08-16 — Chat Jeklin tahu data kandidat (tidak tanya TB/BB yang sudah ada)
+
+### Fix: processAIChat suntik ringkasan data kandidat ke prompt AI
+- **BUG (screenshot live):** di ai_form.html, Jeklin bertanya "berapa TB & BB" padahal data sudah ada di master (TB 165, BB 57). Akar masalah: `handleProcessAIChat` menerima `payload.currentData` (hasil auto-fill `getDrafCvMaster`) tapi **tidak pernah membacanya** — system prompt hanya instruksi generik, jadi AI buta terhadap data yang sudah terisi.
+- Fix: helper `buildRingkasData(cur)` merangkum data terisi (identitas, fisik TB/BB/ukuran, medis, sertifikasi, pendidikan, pekerjaan, keluarga, wawancara) → disuntik ke system prompt + aturan "JANGAN tanyakan ulang data yang sudah terisi / jangan mengaku data itu kosong". Data kosong tidak dilist.
+- Bonus: sapaan awal (generateSmartWelcomeMessage) kini juga mendeteksi TB/BB kosong (key i18n `form.chat_missing_tb`/`_bb`, ID + JP) supaya konsisten.
+- Verifikasi: unit test baru `buildRingkasData` (51/51), node --check bersih, build:js OK (bundle `app-d80b6b5088.js`).
 
 ---
 

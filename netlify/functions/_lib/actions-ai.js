@@ -263,20 +263,114 @@ async function geminiGenerate(systemPrompt, history) {
   throw lastErr || new Error('Gemini tidak tersedia');
 }
 
+// Ringkasan data kandidat (bentuk nested dari buildMasterNested) yang disuntikkan
+// ke system prompt processAIChat — supaya Jeklin TAHU data yang sudah terisi
+// (TB/BB, NIK, paspor, dll) dan tidak menanyakan ulang data yang ada di database.
+function buildRingkasData(cur) {
+  const id = (cur && cur.identitas) || {};
+  const fs = (cur && cur.fisik) || {};
+  const md = (cur && cur.medis) || {};
+  const st = (cur && cur.sertifikasi) || {};
+  const ww = (cur && cur.wawancara) || {};
+  const lines = [];
+  const add = (label, val) => {
+    const s = val === undefined || val === null ? '' : String(val).trim();
+    if (s && s !== '' && s !== '-') lines.push(label + ': ' + s);
+  };
+  add('Nama lengkap', id.nama_lengkap);
+  add('Nama panggilan', id.panggilan);
+  add('Katakana', id.katakana);
+  add('Tempat lahir', id.tempat_lahir);
+  add('Tanggal lahir', id.tgl_lahir);
+  add('Umur', id.umur);
+  add('Gender', id.gender);
+  add('Agama', id.agama);
+  add('Golongan darah', id.golongan_darah);
+  add('Status pernikahan', id.status_nikah);
+  add('No HP', id.hp);
+  add('No HP darurat', id.hp_darurat);
+  add('Alamat', id.alamat);
+  add('Email', id.email);
+  add('Tinggi badan', fs.tb ? fs.tb + ' cm' : '');
+  add('Berat badan', fs.bb ? fs.bb + ' kg' : '');
+  add('Ukuran topi', fs.topi);
+  add('Ukuran baju', fs.baju);
+  add('Ukuran sepatu', fs.sepatu);
+  add('Tangan dominan', fs.tangan_dominan);
+  add('Tahan AC', fs.tahan_ac);
+  add('Kacamata', md.kacamata);
+  add('Buta warna', md.buta_warna);
+  add('Tato', md.tato);
+  add('Tindik', md.tindik);
+  add('Rokok', md.rokok);
+  add('Alkohol', md.alkohol);
+  add('Alergi', md.alergi_id);
+  add('Riwayat penyakit', md.riwayat_medis_id);
+  add('Riwayat kecelakaan', md.riwayat_kecelakaan_id);
+  add('NIK KTP', id.ktp);
+  add('No. Paspor', id.paspor);
+  add('SIM', id.sim);
+  add('Pernah ke Jepang', id.status_eks_jepang);
+  add('Bahasa Jepang (JLPT/JFT)', st.bahasa_jepang || st.jft || st.bahasa);
+  add('SSW/Lisensi', st.lisensi || st.ssw);
+  add('Bidang SSW', st.bidang);
+  add('Hobi', ww.hobi_id);
+  add('Kelebihan', ww.kelebihan_id);
+  add('Kekurangan', ww.kekurangan_id);
+  add('Motivasi ke Jepang', ww.motivasi_ke_jepang || ww.tujuan_ke_jepang);
+  const pend = Array.isArray(cur && cur.pendidikan) ? cur.pendidikan : [];
+  if (pend.length) {
+    add(
+      'Pendidikan',
+      pend
+        .map((p) =>
+          [p.tingkat, p.sekolah || p.nama_sekolah, p.jurusan_id || p.jurusan, p.tahun_lulus ? p.tahun_lulus + ' lulus' : ''].filter(Boolean).join(' - '),
+        )
+        .join('; '),
+    );
+  }
+  const pek = Array.isArray(cur && cur.pekerjaan) ? cur.pekerjaan : [];
+  if (pek.length) {
+    add(
+      'Pengalaman kerja',
+      pek
+        .map((p) =>
+          [p.perusahaan || p.nama_perusahaan, p.jabatan, p.tahun_masuk ? p.tahun_masuk + '-' + (p.tahun_keluar || 'sekarang') : ''].filter(Boolean).join(' - '),
+        )
+        .join('; '),
+    );
+  }
+  const klg = Array.isArray(cur && cur.keluarga) ? cur.keluarga : [];
+  if (klg.length) {
+    add(
+      'Keluarga',
+      klg.map((k) => [k.hubungan, k.nama, k.usia ? k.usia + ' th' : '', k.pekerjaan].filter(Boolean).join(' - ')).join('; '),
+    );
+  }
+  return lines.join('\n');
+}
+
 async function handleProcessAIChat(payload) {
   const p = payload || {};
   const flow = String(p.flow || 'master');
   const history = Array.isArray(p.history) ? p.history : [];
   const lang = String(p.lang || 'id');
+  const ringkas = buildRingkasData(p.currentData);
   const system =
     'Kamu adalah Qween Jeklin, HRD Virtual LPK ASJ (PT Amanah Sakura Japan), perusahaan penyalur kerja ke Jepang. ' +
     'Tugasmu membantu kandidat melengkapi data Master (identitas, fisik, medis, pendidikan, pekerjaan, keluarga, ' +
     'sertifikasi, wawancara) untuk CV kerja Jepang. Balas ramah & singkat dalam bahasa ' +
     (lang === 'jp' ? 'Jepang' : 'Indonesia') +
-    '. Jika kandidat memberi data baru, konfirmasi dan minta data berikutnya yang kurang. ' +
-    'Jangan meminta data yang sudah lengkap. Flow aktif: ' +
+    '. Jika kandidat memberi data baru, konfirmasi dan minta data berikutnya yang kurang. Flow aktif: ' +
     flow +
-    '.';
+    '.' +
+    (ringkas
+      ? '\n\nDATA KANDIDAT SAAT INI (sudah terisi di database):\n' +
+        ringkas +
+        '\n\nAturan: JANGAN menanyakan ulang data yang sudah terisi di atas, dan jangan mengaku data itu kosong. ' +
+        'Kalau kandidat bertanya tentang data yang sudah ada, jawab pakai data tersebut. ' +
+        'Tanyakan hanya data yang TIDAK tercantum di atas.'
+      : '');
   try {
     return await geminiGenerate(system, history);
   } catch (e) {
@@ -1082,6 +1176,7 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
 }
 
 module.exports = {
+  buildRingkasData,
   handleProcessAIChat,
   handleProcessAdminAIChat,
   handleProcessSiswaAIChat,

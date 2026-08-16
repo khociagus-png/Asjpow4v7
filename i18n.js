@@ -2197,6 +2197,8 @@ LANG.id.form = {
   chat_missing_jiko: 'Terjemahan Bahasa Jepang untuk Jiko PR',
   chat_missing_topi: 'Ukuran Topi',
   chat_missing_ac: 'Kesiapan Kerja Tanpa AC',
+  chat_missing_tb: 'Tinggi Badan (TB)',
+  chat_missing_bb: 'Berat Badan (BB)',
   chat_missing_pendidikan: 'Riwayat Pendidikan',
   chat_missing_pekerjaan: 'Riwayat Pekerjaan',
   // --- teks admin/toast/confirm (07_api, 11_admin_ops, 05_render) ---
@@ -2540,6 +2542,8 @@ LANG.jp.form = {
   chat_missing_jiko: '自己PRの日本語訳',
   chat_missing_topi: '帽子のサイズ',
   chat_missing_ac: 'エアコンなし勤務可否',
+  chat_missing_tb: '身長',
+  chat_missing_bb: '体重',
   chat_missing_pendidikan: '学歴',
   chat_missing_pekerjaan: '職歴',
   txt_review_confirm: 'この応募を確認中（REVIEW ADMIN）にしますか？',
