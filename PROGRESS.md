@@ -4,11 +4,42 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4c: `js/11_admin_ops.js` dipecah jadi `js/admin_ops/*`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4d: `js/09_ai_copilot.js` dipecah jadi `js/ai_copilot/*` (Fase 2.4 tuntas).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 4d — `js/09_ai_copilot.js` (785 baris) → `js/ai_copilot/*` — commit `d51cceb`
+
+- **Baru** `js/ai_copilot/admin.js` (10 deklarasi) — adminAiHistory,
+  currentAiCandidateId, urlFotoJeklin, bukaAdminAiCopilot, tutupAdminAi,
+  kirimPesanAdminAi, autoFillFormDariAi, simpanKandidatDariAi,
+  tambahPesanAdminAi, tampilkanSaranAdminAi.
+- **Baru** `js/ai_copilot/interview.js` (10) — interviewHistory,
+  bukaSimulatorInterview (gate VIP), pastikanTombolSelesaiInterview,
+  selesaikanWawancaraInterview, mulaiWawancaraInterview, appendInterviewChat,
+  sendInterviewMessage (+ marker ===HASIL===), cobaParseJsonLoose,
+  kirimHasilWawancaraKeAdmin + `window.bukaSimulatorInterview`.
+- **Baru** `js/ai_copilot/parse.js` (3) — pastikanBarParseAdminAi (inject
+  bar upload), bacaFileBase64Front, uploadDokumenBiodataAdmin
+  (parseDokumenBiodata → submitMasterForm).
+- **Baru** `js/ai_copilot/results.js` (4) — generateWawancaraModelAdmin,
+  lastAdminHasil, lihatHasilWawancaraAdmin, updateBiodataDariHasilAdmin.
+- Body 27 deklarasi + 1 window assignment dipindah **byte-identik**
+  (verifikasi brace-matching — semua OK).
+- `scripts/build-js.mjs` STACK: `/js/09_ai_copilot.js` → 4 entri
+  `js/ai_copilot/*`.
+- `js/09_ai_copilot.js` **DIHAPUS** — module-map frontend 44 → **47 file /
+  353 simbol** (total simbol TIDAK berubah). Bundel: `app-582d85d016.js` →
+  `app-2c3caf0224.js`, ukuran tetap **421.022 byte**.
+
+> 🎉 **Fase 2 langkah 4 TUNTAS** — semua god-object besar sudah dipecah
+> (02_init 852, 06_admin_modal 729, 11_admin_ops 769, 09_ai_copilot 785).
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 4c — `js/11_admin_ops.js` (769 baris) → `js/admin_ops/*` — commit `0007312`
 
