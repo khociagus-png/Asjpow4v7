@@ -94,8 +94,22 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 - [x] `supabase.js` lama → **re-export agregat** (spread 7 modul db) — semua 18 pemakai (actions-*, storage.js, e2e) jalan tanpa perubahan. Ekstraksi **byte-identik** via skrip Node (`.freebuff/split-supabase.mjs`, bracket-matched + assertion baris). `scripts/module-map.mjs` diperluas agar memindai `_lib` rekursif (db/ ikut terhitung: 25 → **32 file / 204 simbol** — total simbol TIDAK berubah).
 - [x] **Langkah lanjutan SELESAI (commit `1893d9c`)** — migrasi SEMUA pemakai → import `db/*` langsung: 17 file `_lib` (actions-*, candidate-helpers, storage) + 2 e2e + 6 scripts (dedupe, sync-idloker, audit-pasphoto, cleanup-job-misc, migrate-filecv-drive, scan-orphan-files). Agregat `supabase.js` **DIHAPUS** — file tidak ada lagi (backend 32 → **31 file / 204 simbol**). Dedupe dry-run tetap jalan (0 duplikat). Catatan: `dedupe-duplicates.mjs` pakai alias `normalizeWa: normWa` karena punya wrapper lokal sendiri. 🐛 Bonus fix: deklarasi ganda `findCandidateByWaFiltered` di `db/candidates.js` (parsing error lint) dihapus.
 
-### 1.4 AI (1193 baris)
-- [ ] `actions-ai.js` → pecah: `ai/cv.js` (master/CV auto-fill), `ai/chat.js` (copilot/chat), `ai/classify.js` (docTypeOf/klasifikasi berkas). Provider call (Gemini/Groq) dipisah `ai/providers.js` dengan fallback.
+### 1.4 AI (1193 baris) — **SELESAI** (commit `76de288`)
+- [x] `actions-ai.js` (1194 baris) **DIHAPUS** → pecah 4 modul `_lib/ai/*`:
+      **`providers.js`** (lapisan Gemini: geminiGenerate, geminiParseFile, parseJsonLoose,
+      fallback model flash-latest → 3.5 → 2.5) · **`cv.js`** (master/CV auto-fill:
+      buildMasterNested, buildRingkasData, findMasterByWa + APPLY_WA_COLS, konteks admin
+      copilot, submitDataAsj, simpanDataTtdNaitei) · **`chat.js`** (Qween Jeklin chat
+      kandidat + Jeklin copilot admin + Dede Jeklin siswa baru + klaster wawancara SSW:
+      BIDANG_INTERVIEW/normalizeBidang/resolveProfilKandidat/buildInterviewSystem + 5
+      handler wawancara) · **`classify.js`** (parse dokumen biodata admin: PARSE_MAX_BYTES/
+      PARSE_ALLOWED_MIME/PARSE_SYSTEM_PROMPT + handleParseDokumenBiodata). Body fungsi
+      dipindah **byte-identik** (verifikasi per-deklarasi via skrip Node); `requireRole`
+      kini import dari `actions-auth` (salinan lokal dihapus — dipusatkan). `handlers.js`
+      route ke `aiChat/aiCv/aiClassify`; `storage.test.js` import `buildRingkasData` dari
+      `ai/cv`. Backend 31 → **34 file / 204 simbol** (total tidak berubah). Verifikasi:
+      node --check ✓ · lint 0 error/12 warn ✓ · test 51/51 ✓ · smoke guard admin/kandidat
+      + fallback AI (tanpa key) ✓.
 
 ### 1.5 Test backend per modul
 - [ ] Tambah `*.test.js` (Vitest) per modul baru: auth (PIN + WA gate), mail (status transisi), kandidat (merge/dedupe rule), job (tutup lamar), supabase normalisasi WA.

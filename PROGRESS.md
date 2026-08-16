@@ -4,7 +4,37 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.3 lanjutan: agregat `supabase.js` dihapus, semua pemakai import `_lib/db/*` langsung.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.4: `actions-ai.js` dipecah jadi `_lib/ai/{providers,cv,chat,classify}.js`.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.4 — `actions-ai.js` (1194 baris) → `_lib/ai/*` — commit `76de288`
+
+- **Baru** `_lib/ai/providers.js` — lapisan provider Gemini + fallback model
+  (`geminiGenerate`, `geminiParseFile`, `parseJsonLoose`).
+- **Baru** `_lib/ai/cv.js` — master/CV auto-fill: `buildMasterNested`,
+  `buildRingkasData`, `findMasterByWa` + `APPLY_WA_COLS`, konteks admin AI
+  copilot (`getAdminAiContext`, `buildAdminAiCandidateSummary`), simpan data
+  AI form (`submitDataAsj`) & tanda tangan (`simpanDataTtdNaitei`).
+- **Baru** `_lib/ai/chat.js` — chat/copilot (Qween Jeklin, Jeklin admin, Dede
+  Jeklin) + klaster wawancara SSW (`BIDANG_INTERVIEW`, `normalizeBidang`,
+  `resolveProfilKandidat`, `buildInterviewSystem`, process/generate/selesaikan/
+  simpan/get hasil wawancara).
+- **Baru** `_lib/ai/classify.js` — parse dokumen biodata admin
+  (`PARSE_MAX_BYTES`/`PARSE_ALLOWED_MIME`/`PARSE_SYSTEM_PROMPT` +
+  `handleParseDokumenBiodata`).
+- Body fungsi dipindah **byte-identik** — verifikasi per-deklarasi via skrip
+  Node (27 deklarasi: semua OK di tepat satu modul; blok konstanta parse
+  byte-identik). `requireRole` kini di-import dari `actions-auth` (dipusatkan,
+  salinan lokal dihapus). `actions-ai.js` **DIHAPUS**; `handlers.js` route ke
+  `aiChat`/`aiCv`/`aiClassify`; `storage.test.js` import `buildRingkasData`
+  dari `ai/cv`.
+- Verifikasi: node --check ✓ · lint 0 error/12 warn (baseline) ✓ · test 51/51
+  ✓ · module-map backend **34 file / 204 simbol** (total tidak berubah) ✓ ·
+  smoke: guard admin/kandidat sessionInvalid ✓, fallback AI tanpa key
+  (pesan ramah, bukan crash) ✓.
 
 ---
 
