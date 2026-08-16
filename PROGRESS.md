@@ -4,7 +4,19 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 17: **optimasi query backend** — file migrasi index SQL (Supabase/PostgreSQL) + **cache server-side loadCandidatesUnik (TTL 25 dtk)** + invalidasi cache di SEMUA jalur mutasi kandidat.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **verifikasi Fase 3.17**: migrasi index SQL 8/8 terpasang di Supabase + script ukur performa `scripts/verify-index-perf.mjs` + E2E penuh SEMUA LULUS.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Verifikasi Fase 3.17: migrasi index 8/8 terpasang + script ukur performa + E2E penuh
+
+- **Migrasi index SQL 8/8 TERPASANG di Supabase** — konfirmasi dari `pg_indexes` (SQL Editor): `idx_asj_form_timestamp/no_wa/code_job`, `idx_cand_updated_at/no_wa`, `idx_cand_loker_trgm` (GIN pg_trgm), `idx_berkas_wa`, `idx_master_no_wa`. Extension `pg_trgm` terbukti terpasang: fungsi `show_trgm` dipanggil via REST mengembalikan trigram "TG9ASJ" → `[" tg","tg9","g9a","9as","asj","sj "]`.
+- **`scripts/verify-index-perf.mjs` (BARU)** — verifikasi READ-ONLY: (A) koneksi Supabase + bukti pg_trgm, (B) timing query REST persis backend (inbox sort, kandidat light full paginasi, ILIKE trigram panjang vs pola 2-char sebagai proksi tanpa-index, lookup WA, batch berkas/master, form per WA) 3 ronde, (C) timing SEMUA tarikan data via handler dingin → cache server-side, (D) integritas hitung handler vs DB count. Jalankan: `node scripts/verify-index-perf.mjs`.
+- **Hasil ukur**: semua query ±260–290 ms (batas latensi jaringan ke Supabase; tabel masih kecil — 223 kandidat, 12 inbox, 132 loker — jadi PostgreSQL belum memakai index baru, manfaatnya terasa saat tabel tumbuh; TIDAK ada regresi). Cache server-side terukur: getAppData admin **1.690 → 1.096 ms** (dingin → cache), kandidat 2.482 → 2.154 ms. Integritas SEMUA COCOK: kandidat 223 (halaman 1 = 50), inbox 12, loker 132, tugas 2, template WA 2, master 225, berkas 5.
+- **E2E penuh SEMUA LULUS** (preview lokal): login-check 19/19 ✓, upload-check (kandidat tes terisolasi + cleanup) ✓, biodata-check (nilai dipulihkan) ✓, modal-runtime 8/8 ✓, photo-check 3/3 ✓, probe-cleanup 0 GAS / 0 request Google ✓, share-view (22 kandidat render) ✓, backend-fast-path 12/12 ✓. Unit test **81/81** ✓ · lint 0 error ✓ · `node --check` ✓.
+- Catatan (bukan blocker): (1) index lama `idx_dc_no_wa_loker` (komposit) berpotensi redundan dengan `idx_cand_no_wa` — kalau ingin rapikan biaya write, cek dulu definisi kolomnya; (2) `getAppData kandidat` & `getCandidatesPage` masih banyak roundtrip berurutan (probe kolom WA, attachBerkasBio, findFormsByWa, loadSchedules) — kandidat paralelisasi kalau terasa lambat.
 
 ---
 

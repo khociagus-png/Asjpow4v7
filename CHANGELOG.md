@@ -1,6 +1,33 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 17 — commit `5f15987`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (verifikasi Fase 3.17 — script `verify-index-perf.mjs`).
+
+---
+
+## 2026-08-16 — Verifikasi Fase 3.17: migrasi index + script ukur performa + E2E penuh (test)
+
+### Script verifikasi read-only
+
+- `scripts/verify-index-perf.mjs` (BARU): cek koneksi Supabase + bukti
+  pg_trgm (rpc/show_trgm), timing query REST persis backend (3 ronde),
+  timing semua tarikan data handler (dingin → cache), integritas hitung
+  handler vs DB count. Jalankan: `node scripts/verify-index-perf.mjs`.
+
+### Migrasi index — konfirmasi terpasang
+
+- 8/8 index dari `2026-08-16-index-perf.sql` terkonfirmasi di `pg_indexes`
+  (termasuk `idx_cand_loker_trgm` GIN pg_trgm); extension pg_trgm terbukti
+  terpasang via `rpc/show_trgm`.
+
+### Hasil ukur & verifikasi
+
+- Query REST ±260–290 ms (batas latensi; tabel kecil → index belum dipakai,
+  tidak ada regresi); cache server-side: getAppData admin 1.690 → 1.096 ms.
+- Integritas handler = DB (kandidat 223, inbox 12, loker 132, tugas 2,
+  template WA 2, master 225, berkas 5).
+- E2E penuh SEMUA LULUS: login 19/19, upload, biodata, modal 8/8, photo 3/3,
+  probe-cleanup bersih, share-view, backend-fast-path 12/12 · test 81/81 ·
+  lint 0 error.
 
 ---
 
