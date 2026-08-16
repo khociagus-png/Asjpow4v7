@@ -4,7 +4,46 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 2: core layer ESM (i18n.js + api-client.js) + bridge `window.PortalBridge` + audit global (commit `967a178`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 3: `js/init/state.js` + `js/init/util.js` ESM (accessor bridge) (commit menyusul).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 3 — state.js + util.js ESM + accessor bridge + E2E penuh (commit menyusul)
+
+- **`js/init/state.js` → ESM**: 33 var state (`ALL_*`, `ASSETS`,
+  `CURRENT_THEME`, `DROPDOWNS`, `isAdmin/isKandidat`, `current*`,
+  `limit*`, `dbSortType/dbFilter*`, `mailFilterStatus`, `AUTO_REFRESH_*`,
+  `ACTIVE_PEMBERKASAN_*`) jadi `export`. Karena pemakai classic
+  **mereassign bare** (`ALL_JOBS = res.jobs` di engine/init,
+  `isAdmin = true` di auth, `CURRENT_THEME = theme` di theme), bridge
+  window.* memakai **ACCESSOR get/set** (`Object.defineProperty`
+  mendelegasikan ke binding modul) — alias biasa akan membuat binding
+  modul basi bagi import ESM berikutnya. Pola baru §3.2 `ESM_BRIDGE.md`.
+- **`js/init/util.js` → ESM**: 19 fungsi (`thumbnailUrl`, `safeSetVal`,
+  `normalizePhone`, `showToast`, `safeSet/setImg/setBg`,
+  `getHighResImage/getDirectDownloadUrl`, `formatPendidikanTingkat`,
+  `isPreviewableFile/previewFinalUrl`, `populate/populateCheckboxes`,
+  `rePopulateDropdowns`, `formatInputWA/hapusRingWA`, `salinTeksDecode`,
+  `toggleMinimize`) jadi `export` + 19 alias window. Referensi global
+  implisit di-window-kan eksplisit: `window.tr`, `window.trOption`,
+  `window.trOptionId`, `window.esc`, `window.DROPDOWNS`,
+  `window.toastWaFormat` (no-undef scan **0 error**).
+- **Build**: `build-js.mjs` ESM_CORE + 2 entri → bundel
+  `app-c06313605c.js` (411.8 KB, 45 file, 0 export bocor, accessor
+  defineProperty utuh). check:globals nol kolisi (**390 simbol**).
+- **Audit**: 52 file · **395 simbol** · HIGH=0 · MEDIUM=24 · LOW=371
+  (`.freebuff/audit-globals.json` + module-map diperbarui).
+- **Verifikasi**: node --check ESM ✓ · no-undef 0 error ✓ · lint 0/12 ✓ ·
+  test **81/81** ✓ · uji round-trip accessor di Node (tulis via window →
+  binding modul ikut; getter baca binding; CURRENT_THEME & export let
+  ACTIVE_PEMBERKASAN_WA live; populate/rePopulateDropdowns/salinTeksDecode
+  pakai window.*) ✓ · **E2E SEMUA LULUS**: login-check, upload-check,
+  biodata-check (bundle classic tetap jalan dengan state/util ESM).
+- Catatan preview: proses background (`nohup`) tidak bertahan antar
+  perintah di sandbox — preview dinyalakan sementara dalam 1 perintah
+  bersama test (`PORT=3000 nohup node serve-static.mjs & … ; kill $!`).
 
 ---
 

@@ -36,18 +36,18 @@ langsung patah (ReferenceError).
 | `tr` | 42 | i18n.js | ✅ sudah ESM |
 | `callAPI` | 28 | api-client.js | ✅ sudah ESM |
 | `esc` | 26 | api-client.js | ✅ sudah ESM |
-| `showToast` | 24 | js/init/util.js | langkah 2 berikutnya |
+| `showToast` | 24 | js/init/util.js | ✅ sudah ESM (langkah 3) |
 | `escJs` | 12 | api-client.js | ✅ sudah ESM |
 | `trOption` | 12 | i18n.js | ✅ sudah ESM |
-| `ALL_CANDIDATES` | 12 | js/init/state.js | var global state |
+| `ALL_CANDIDATES` | 12 | js/init/state.js | ✅ sudah ESM (langkah 3, accessor bridge) |
 | `isAdmin` | 12 | js/init/state.js | var global state |
 | `currentAdminName` | 12 | js/init/state.js | var global state |
 | `refreshDataDinamis` | 10 | js/engine/init.js | |
 | `ALL_JOBS` | 9 | js/init/state.js | |
 | `currentKandidatWa` | 9 | js/init/state.js | |
-| `normalizePhone` | 8 | js/init/util.js | |
+| `normalizePhone` | 8 | js/init/util.js | ✅ sudah ESM (langkah 3) |
 | `ensureAllCandidates` | 7 | js/api/candidates.js | |
-| `safeSet` | 7 | js/init/util.js | |
+| `safeSet` | 7 | js/init/util.js | ✅ sudah ESM (langkah 3) |
 | `CURRENT_LANG` | 6 | i18n.js | ✅ sudah ESM |
 | `initApp` | 6 | js/engine/init.js | |
 | `ALL_DB_JOBS` | 6 | js/init/state.js | |
@@ -205,6 +205,38 @@ if (typeof window.tr === 'function') el.textContent = window.tr('ui.key');
 Kode ESM baru yang butuh core cukup `import { callAPI } from '/api-client.js'`
 atau `import { tr } from '/i18n.js'` — tidak perlu window sama sekali.
 
+### 3.2 Pola khusus untuk STATE global yang di-REASSIGN (accessor bridge)
+
+Fungsi tidak pernah di-reassign → alias `window.X = X` biasa cukup. Tapi state
+MUTABLE (`ALL_JOBS`, `isAdmin`, `CURRENT_THEME`, …) SERING di-reassign oleh
+pemakai classic dengan bare assignment:
+
+```js
+// classic (bundel, sloppy):
+ALL_JOBS = res.jobs || [];
+isAdmin = true;
+CURRENT_THEME = theme;
+```
+
+Alias data property biasa hanya meng-update `window.X` — binding modul jadi
+BASI, dan `import { ALL_JOBS } from './state.js'` di modul lain membaca nilai
+lama. Solusi (dipakai di `js/init/state.js`): **accessor get/set di window**
+yang mendelegasikan langsung ke binding modul — satu sumber kebenaran:
+
+```js
+export var ALL_JOBS = [];
+// ...
+function bridgeState(name, get, set) {
+  Object.defineProperty(window, name, { configurable: true, get, set });
+}
+bridgeState('ALL_JOBS', () => ALL_JOBS, (v) => { ALL_JOBS = v; });
+```
+
+Bare `ALL_JOBS = [...]` di classic → setter → binding modul ikut berubah;
+bare baca `ALL_JOBS` → getter → nilai modul. Tidak ada jalur yang bisa basi.
+Catatan: import namespace bersifat read-only — modul ESM lain yang mau
+MENULIS state harus lewat fungsi setter/action (belum ada), bukan assignment.
+
 ---
 
 ## 4. Petunjuk Integrasi (HTML Load)
@@ -277,11 +309,14 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 
 ## 6. Urutan konversi berikutnya (roadmap Fase 3)
 
-1. ✅ **Core: `i18n.js` + `api-client.js`** — SELESAI turn ini.
-2. ⏭️ **`js/init/state.js` + `js/init/util.js`** — helper/state paling banyak
-   dipakai (`showToast` 24, `safeSet` 7, `normalizePhone` 8, `ALL_*` 5-12).
-   Catatan: `js/init/*` tidak dimuat halaman standalone → hanya perlu alias
-   window untuk pemakai bundel.
+1. ✅ **Core: `i18n.js` + `api-client.js`** — SELESAI (langkah 2, turn lalu).
+2. ✅ **`js/init/state.js` + `js/init/util.js`** — SELESAI (langkah 3, turn ini).
+   State global (33 var, termasuk yang di-REASSIGN oleh classic) memakai
+   **accessor get/set bridge** (bukan alias biasa) supaya binding modul selalu
+   sinkron — lihat §3.2. Util (19 fungsi) memakai alias window biasa + referensi
+   global eksplisit `window.*` (`tr`, `trOption`, `trOptionId`, `esc`,
+   `DROPDOWNS`, `toastWaFormat`). `js/init/*` tidak dimuat halaman standalone →
+   bridge hanya untuk pemakai bundel.
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import.
@@ -315,3 +350,22 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
   (simpanBiodataLengkap + cleanup), plus smoke 5 halaman standalone
   (ai_form/master-full via bridge; apply-full/siswa-baru api-client; share
   i18n) — core ESM load via `<script type="module">` **0 JS error**.
+
+### Langkah 3 — state.js + util.js ESM (turn ini, commit menyusul)
+
+- `node --check --input-type=module` js/init/state.js + js/init/util.js ✓
+- Scan `no-undef` strict: **0 error** ✓ (referensi eksplisit `window.*`:
+  `tr`, `trOption`, `trOptionId`, `esc`, `DROPDOWNS`, `toastWaFormat`)
+- `bun run lint`: 0 error / 12 warn ✓ · `bun run test`: **81/81** ✓
+- `bun run build`: check:globals **nol kolisi** (45 file / **390 simbol**) ·
+  bundel `app-c06313605c.js` (411.8 KB) · 0 export bocor · accessor
+  `defineProperty(window, name, {get,set})` ter-minify utuh di bundel ✓
+- Uji impor ESM di Node (shim browser): round-trip accessor `window.ALL_JOBS
+  = [...]` → binding modul ikut; getter baca binding; `CURRENT_THEME` setter
+  (pola theme.js); `ACTIVE_PEMBERKASAN_WA` (export let) live; 19 alias util
+  + export konsisten; `populate`/`rePopulateDropdowns`/`salinTeksDecode`
+  jalan pakai `window.*` ✓
+- E2E Playwright: `login-check`, `upload-check`, `biodata-check` **SEMUA
+  LULUS** (bundle classic tetap jalan dengan state/util ESM via accessor) ✓
+- Audit diperbarui: 52 file · **395 simbol** · HIGH=0 · MEDIUM=24 · LOW=371
+  (`.freebuff/audit-globals.json` + `module-map-frontend.json`).

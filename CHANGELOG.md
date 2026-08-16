@@ -1,6 +1,19 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 2 — commit `967a178`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 3 — commit menyusul).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 3: state.js & util.js ESM + accessor bridge (refactor)
+
+### Refactor: `js/init/state.js` + `js/init/util.js` jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- `state.js`: 33 var state jadi `export`; bridge window.* memakai **accessor get/set** yang mendelegasikan ke binding modul — bare reassignment classic (`ALL_JOBS = ...`, `isAdmin = true`, `CURRENT_THEME = theme`) tetap sinkron dengan import ESM berikutnya.
+- `util.js`: 19 fungsi jadi `export` + alias window; referensi global implisit di-window-kan (`tr`, `trOption`, `trOptionId`, `esc`, `DROPDOWNS`, `toastWaFormat`) — scan no-undef 0 error.
+- Build `build-js.mjs`: ESM_CORE + 2 entri (bundel `app-c06313605c.js`, 411.8 KB, 0 export bocor).
+- Audit: 52 file · 395 simbol · HIGH=0 · MEDIUM=24 · LOW=371.
+- Pola accessor bridge didokumentasikan di `ESM_BRIDGE.md` §3.2.
 
 ---
 

@@ -224,14 +224,33 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       Verifikasi: node --check ESM ✓ · scan no-undef 0 error ✓ · lint 0/12 ✓ ·
       test **81/81** ✓ · build idempoten `app-7f821ddf7c.js` (410.6 KB) ✓ ·
       uji import ESM di Node (PortalBridge + alias + tr + toggle bahasa +
-      internal privat) ✓ · E2E menyusul saat preview jalan.
+      internal privat) ✓ · E2E login/upload/biodata + smoke standalone
+      **SEMUA LULUS** (commit `af49b82`).
       Detail & roadmap: **`ESM_BRIDGE.md`**.
+- [x] **Langkah 3 — `js/init/state.js` + `js/init/util.js` ESM** — commit menyusul
+      State global (33 var, termasuk yang di-REASSIGN oleh classic seperti
+      `ALL_JOBS = ...` di engine/init, `isAdmin = true` di auth, `CURRENT_THEME
+      = theme` di theme) memakai **accessor get/set bridge** di window
+      (`Object.defineProperty(window, name, {get, set})` mendelegasikan ke
+      binding modul) — alias biasa akan membuat binding modul BASI untuk
+      import ESM berikutnya. Pola ini didokumentasikan di `ESM_BRIDGE.md`
+      §3.2. Util (19 fungsi: showToast/safeSet/normalizePhone/populate/dll)
+      memakai alias window biasa + referensi global eksplisit `window.*`
+      (`tr`, `trOption`, `trOptionId`, `esc`, `DROPDOWNS`, `toastWaFormat`).
+      Build: `ESM_CORE` di build-js.mjs + 2 entri. `js/init/*` tidak dimuat
+      halaman standalone → tidak ada perubahan HTML.
+      Verifikasi: node --check ESM ✓ · scan no-undef 0 error ✓ · lint 0/12 ✓ ·
+      test **81/81** ✓ · build `app-c06313605c.js` (411.8 KB) nol kolisi
+      (390 simbol) · uji round-trip accessor di Node (tulis window → binding
+      modul ikut; getter baca binding; CURRENT_THEME/ACTIVE_PEMBERKASAN_WA
+      live) ✓ · E2E login/upload/biodata **SEMUA LULUS** ✓ · audit 52 file /
+      **395 simbol** HIGH=0.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
-      (langkah 1 core layer ✅ sudah selesai di langkah 2):
+      (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
-      2. `init/{state,util}.js` (helper DOM/WA paling banyak dipakai lintas file),
+      2. ✅ `init/{state,util}.js` (state: accessor bridge; util: alias window),
       3. domain per domain (auth → engine → render → api → admin_* → ai_copilot → sisanya),
       tiap langkah: `export` simbol + `import` di pemakainya, `bun run check:globals`
       tetap hijau, lint/test hijau, bundel tetap sama ukurannya.

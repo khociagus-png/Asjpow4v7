@@ -11,19 +11,19 @@
 // data: dikembalikan utuh. Param ini diaktifkan setelah "Image Transformations"
 // dinyalakan di dashboard Supabase (gratis); TANPA toggle itu param diabaikan
 // server & URL asli tetap valid (aman dipakai sekarang — tidak ada regresi).
-function thumbnailUrl(url, width) {
+export function thumbnailUrl(url, width) {
   if (!url || typeof url !== 'string') return url;
   if (!/^https?:\/\/[^/]+\/storage\/v1\/object\/public\//i.test(url)) return url;
   var sep = url.indexOf('?') >= 0 ? '&' : '?';
   return url + sep + 'width=' + (width || 300) + '&quality=80';
 }
 
-function safeSetVal(id, value) {
+export function safeSetVal(id, value) {
   var el = document.getElementById(id);
   if (el) el.value = value || '';
 }
 
-function normalizePhone(wa) {
+export function normalizePhone(wa) {
   if (!wa) return '';
   let s = String(wa).replace(/\D/g, '');
   if (s.startsWith('0')) {
@@ -34,7 +34,7 @@ function normalizePhone(wa) {
   return s;
 }
 
-function showToast(message, type = 'success') {
+export function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
   const toast = document.createElement('div');
@@ -64,29 +64,29 @@ function showToast(message, type = 'success') {
   }, 3500);
 }
 
-function safeSet(id, value) {
+export function safeSet(id, value) {
   var el = document.getElementById(id);
   if (el) {
     el.innerHTML = value;
   }
 }
-function setImg(id, url) {
+export function setImg(id, url) {
   var el = document.getElementById(id);
   if (el && url) el.src = url;
 }
-function setBg(id, url) {
+export function setBg(id, url) {
   var el = document.getElementById(id);
   if (el && url) el.style.backgroundImage = "url('" + url + "')";
 }
 
 // Berkas kini selalu di Supabase Storage — URL langsung dipakai apa adanya.
 // (Dulu di sini ada konversi link Google Drive; sudah dihapus.)
-function getHighResImage(url) {
+export function getHighResImage(url) {
   if (!url || url === '-') return '';
   return url;
 }
 
-function getDirectDownloadUrl(url) {
+export function getDirectDownloadUrl(url) {
   if (!url || url === '-' || url.trim() === '') return '';
   return url;
 }
@@ -94,7 +94,7 @@ function getDirectDownloadUrl(url) {
 // Pendidikan dari DB bisa berupa JSON array 5-baris ('[{"tingkat":"SMA/SMK"}]')
 // ATAU teks polos lama ('SMK'). Ambil tingkat pendidikan TERAKHIR yang terbaca
 // untuk tampilan ringkas (CV Mini / select). Kalau tidak ada -> ''.
-function formatPendidikanTingkat(p) {
+export function formatPendidikanTingkat(p) {
   if (p === undefined || p === null || p === '-' || p === '[]' || p === '{}') return '';
   var arr = null;
   if (typeof p === 'string') {
@@ -121,7 +121,7 @@ function formatPendidikanTingkat(p) {
 // (xls/xlsx/doc/docx/ppt/pptx) — dirender client-side (SheetJS/mammoth)
 // atau MS Office Viewer. Yang TIDAK bisa (zip, rar, 7z, dll) → pesan +
 // tombol Unduh.
-function isPreviewableFile(url) {
+export function isPreviewableFile(url) {
   var u = String(url || '').toLowerCase();
   if (/[.](jpe?g|png|gif|webp|bmp|svg|pdf)([?#].*)?$/i.test(u)) return true;
   if (/[.](xls|xlsx|xlsm|doc|docx|ppt|pptx|odt|ods|odp|txt|rtf|csv)([?#].*)?$/i.test(u))
@@ -134,7 +134,7 @@ function isPreviewableFile(url) {
 //  - Office       -> render client-side (SheetJS/mammoth di 02_init) atau
 //                    MS Office Viewer sebagai fallback
 //  - lainnya      -> URL asli (browser unduh)
-function previewFinalUrl(url) {
+export function previewFinalUrl(url) {
   var u = String(url || '');
   var lower = u.toLowerCase();
   var isImage =
@@ -148,7 +148,7 @@ function previewFinalUrl(url) {
   return u;
 }
 
-function populate(id, list) {
+export function populate(id, list) {
   var el = document.getElementById(id);
   if (!el) return;
   var html = '<option value="">-</option>';
@@ -158,9 +158,9 @@ function populate(id, list) {
     for (var i = 0; i < list.length; i++)
       html +=
         '<option value="' +
-        esc(trOptionId(list[i])) +
+        window.esc(window.trOptionId(list[i])) +
         '">' +
-        esc(trOption(list[i])) +
+        window.esc(window.trOption(list[i])) +
         '</option>';
   }
   el.innerHTML = html;
@@ -168,21 +168,21 @@ function populate(id, list) {
 
 // Re-populate semua dropdown/checkbox yang nilainya dari sys config saat
 // bahasa diganti — label ikut bahasa baru, value terpilih tetap dipertahankan.
-function rePopulateDropdowns() {
+export function rePopulateDropdowns() {
   var defs = [
-    ['input-kategori', DROPDOWNS.kategori, null],
-    ['input-gender', DROPDOWNS.gender, null],
-    ['edit-k-tahapan', DROPDOWNS.tahapan, null],
-    ['edit-k-status', DROPDOWNS.tahapan, null],
-    ['input-tsk', DROPDOWNS.tsk, null],
-    ['j-tsk', DROPDOWNS.tsk, null],
-    ['input-tahapan-db', DROPDOWNS.tahapan, null],
-    ['edit-db-tahapan', DROPDOWNS.tahapan, null],
-    ['checkbox-lokasi', DROPDOWNS.lokasi, 'lokasi_cb'],
-    ['checkbox-syarat', DROPDOWNS.syarat, 'syarat_cb'],
-    ['ef-kategori', DROPDOWNS.kategori, null],
-    ['ef-tsk', DROPDOWNS.tsk, null],
-    ['ef-gender', DROPDOWNS.gender, null],
+    ['input-kategori', window.DROPDOWNS.kategori, null],
+    ['input-gender', window.DROPDOWNS.gender, null],
+    ['edit-k-tahapan', window.DROPDOWNS.tahapan, null],
+    ['edit-k-status', window.DROPDOWNS.tahapan, null],
+    ['input-tsk', window.DROPDOWNS.tsk, null],
+    ['j-tsk', window.DROPDOWNS.tsk, null],
+    ['input-tahapan-db', window.DROPDOWNS.tahapan, null],
+    ['edit-db-tahapan', window.DROPDOWNS.tahapan, null],
+    ['checkbox-lokasi', window.DROPDOWNS.lokasi, 'lokasi_cb'],
+    ['checkbox-syarat', window.DROPDOWNS.syarat, 'syarat_cb'],
+    ['ef-kategori', window.DROPDOWNS.kategori, null],
+    ['ef-tsk', window.DROPDOWNS.tsk, null],
+    ['ef-gender', window.DROPDOWNS.gender, null],
   ];
   for (var i = 0; i < defs.length; i++) {
     var el = document.getElementById(defs[i][0]);
@@ -194,7 +194,7 @@ function rePopulateDropdowns() {
   }
 }
 
-function populateCheckboxes(id, list, nameAttr) {
+export function populateCheckboxes(id, list, nameAttr) {
   var el = document.getElementById(id);
   if (!el) return;
   var html = '';
@@ -205,16 +205,16 @@ function populateCheckboxes(id, list, nameAttr) {
         '<label class="flex items-center gap-2 cursor-pointer p-1 hover:bg-white/10 rounded text-slate-300"><input type="checkbox" name="' +
         nameAttr +
         '" value="' +
-        esc(trOptionId(list[i])) +
+        window.esc(window.trOptionId(list[i])) +
         '" class="accent-red-500"> ' +
-        esc(trOption(list[i])) +
+        window.esc(window.trOption(list[i])) +
         '</label>';
     }
   }
   el.innerHTML = html;
 }
 
-function formatInputWA(el) {
+export function formatInputWA(el) {
   let val = el.value.replace(/\D/g, '');
   if (val.startsWith('0')) {
     val = '62' + val.substring(1);
@@ -228,7 +228,7 @@ function formatInputWA(el) {
   el.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-500');
   if (val.length > 0 && !valid) {
     el.classList.add('ring-2', 'ring-red-500');
-    el.title = toastWaFormat();
+    el.title = window.toastWaFormat();
   } else if (valid) {
     el.classList.add('ring-2', 'ring-emerald-500');
     el.title = '';
@@ -238,26 +238,53 @@ function formatInputWA(el) {
 }
 
 // Bersihkan ring validasi saat user mengetik ulang nomor WA.
-function hapusRingWA(el) {
+export function hapusRingWA(el) {
   el.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-500');
   el.title = '';
 }
 
-function salinTeksDecode(encodedText) {
+export function salinTeksDecode(encodedText) {
   var el = document.createElement('textarea');
   el.value = decodeURIComponent(encodedText);
   document.body.appendChild(el);
   el.select();
   try {
     document.execCommand('copy');
-    showToast(tr('alert.success'), 'success');
+    showToast(window.tr('alert.success'), 'success');
   } catch (err) {}
   document.body.removeChild(el);
 }
 
-function toggleMinimize(id, btnEl) {
+export function toggleMinimize(id, btnEl) {
   const el = document.getElementById(id);
   const icon = btnEl.querySelector('i.fa-chevron-down');
   if (el) el.classList.toggle('hidden');
   if (icon) icon.classList.toggle('rotate-180');
 }
+
+// ---------------------------------------------------------------------------
+// BRIDGE ESM → classic (bundel admin/index): alias window.* untuk SEMUA
+// helper di atas. Pemakai classic memanggil bare global (`showToast(...)`,
+// `safeSet(...)`, `normalizePhone(...)`, …) — alias ini satu-satunya jalur
+// masuk. Fungsi tidak pernah di-reassign, jadi data property cukup (beda
+// dengan state.js yang butuh accessor get/set).
+// ---------------------------------------------------------------------------
+window.thumbnailUrl = thumbnailUrl;
+window.safeSetVal = safeSetVal;
+window.normalizePhone = normalizePhone;
+window.showToast = showToast;
+window.safeSet = safeSet;
+window.setImg = setImg;
+window.setBg = setBg;
+window.getHighResImage = getHighResImage;
+window.getDirectDownloadUrl = getDirectDownloadUrl;
+window.formatPendidikanTingkat = formatPendidikanTingkat;
+window.isPreviewableFile = isPreviewableFile;
+window.previewFinalUrl = previewFinalUrl;
+window.populate = populate;
+window.rePopulateDropdowns = rePopulateDropdowns;
+window.populateCheckboxes = populateCheckboxes;
+window.formatInputWA = formatInputWA;
+window.hapusRingWA = hapusRingWA;
+window.salinTeksDecode = salinTeksDecode;
+window.toggleMinimize = toggleMinimize;

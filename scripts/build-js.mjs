@@ -94,7 +94,13 @@ const STACK = [
 // per-file via esbuild format:'iife' (isi identik, alias window.* jalan).
 // File lain classic: JANGAN dibungkus IIFE (deklarasi top-level harus tetap
 // global utk inline onclick & panggilan lintas file).
-const ESM_CORE = new Set(['/api-client.js', '/i18n.js']);
+const ESM_CORE = new Set([
+  '/api-client.js',
+  '/i18n.js',
+  // Fase 3 langkah 3: state global (accessor get/set) + util DOM/WA/toast.
+  '/js/init/state.js',
+  '/js/init/util.js',
+]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;
   if (!existsSync(path)) {
