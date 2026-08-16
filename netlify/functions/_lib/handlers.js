@@ -15,6 +15,7 @@ const schedule = require('./actions-schedule');
 const wa = require('./actions-wa');
 const config = require('./actions-config');
 const register = require('./actions-register');
+const master = require('./actions-master');
 const ai = require('./actions-ai');
 const rateLimit = require('./rate-limit');
 const publicData = require('./actions-public');
@@ -244,14 +245,14 @@ async function dispatchAction(action, payload, sessionToken) {
       return extra.handleGetExistingCandidateJsonByWa(payload, sessionToken);
     // Master data (master-full.html, CV)
     case 'getMasterDataByWa':
-      return extra.handleGetMasterDataByWa(payload, sessionToken);
+      return master.handleGetMasterDataByWa(payload, sessionToken);
     case 'getDrafCvMaster':
-      return extra.handleGetDrafCvMaster(payload, sessionToken);
+      return master.handleGetDrafCvMaster(payload, sessionToken);
     case 'submitMasterForm':
     case 'simpanBiodataLengkap':
-      return extra.handleSubmitMasterForm(payload, sessionToken);
+      return master.handleSubmitMasterForm(payload, sessionToken);
     case 'simpanUpdateMaster':
-      return extra.handleSimpanUpdateMaster(payload, sessionToken);
+      return master.handleSimpanUpdateMaster(payload, sessionToken);
     case 'simpanKandidatDanUpload':
       return extra.handleSimpanKandidatDanUpload(payload, sessionToken);
     case 'simpanBerkasTahapan':

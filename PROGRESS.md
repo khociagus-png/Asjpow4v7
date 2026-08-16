@@ -4,7 +4,32 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 3 (siswa baru + bridge dipisah dari actions-extra).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 4 (master biodata/CV dipisah dari actions-extra).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.2 langkah 4 — modul `actions-master.js` — commit *(isi hash)*
+
+- **Baru** `_lib/actions-master.js` — domain master biodata/CV
+  (`master_database_candidate`) utuh dari `actions-extra.js`: konstanta map
+  kolom (`MASTER_FILE_COLUMNS`, `MASTER_COLUMN_MAP`, `SNAKE_TO_CAMEL`),
+  helper nested/riwayat (`cleanKey`, `entryHasAny`, `mergeRiwayatArrays`,
+  `buildMasterNested`), `findMasterByWa`, dan 4 handler (getMasterDataByWa,
+  getDrafCvMaster, submitMasterForm, simpanUpdateMaster).
+- Diekstrak **byte-identik** via Node (header baru + module.exports), perilaku
+  tidak berubah. `findMasterByWa` tetap di-export untuk upload/drive di
+  `actions-extra.js` (dipakai 4 titik).
+- `isOwnerOrAdmin` (PII guard REVIEW.md M2) dipusatkan ke `actions-auth.js`
+  (dulu definisi lokal di extra) — dipakai master + upload/apply.
+- `actions-extra.js` 1956 → **±1560 baris**; 4 handler dilepas dari exports;
+  dispatcher route ke `master.*`.
+- Verifikasi: node --check ✓, test 51/51 ✓, smoke getDrafCvMaster (sesi
+  kandidat → limited utk WA non-pemilik) + getMasterDataByWa (token invalid
+  ditolak) + getAppData OK ✓, E2E login-check SEMUA LULUS ✓, backend
+  module-map 22 → **23 file**, 204 simbol, cross-file `actions-extra` 14 → 12,
+  `actions-master` modul bersih (crossFile 3).
 
 ---
 

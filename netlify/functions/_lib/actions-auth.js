@@ -265,9 +265,23 @@ function requireAdmin(sessionToken) {
   return requireRole(sessionToken, 'admin');
 }
 
+// PII guard (REVIEW.md M2): data penuh hanya untuk pemilik WA (kandidat)
+// atau admin. Dipusatkan di sini (Fase 1.2) — dulu diduplikasi di
+// actions-extra.js; dipakai master + upload/apply.
+function isOwnerOrAdmin(sessionToken, wa) {
+  const t = session.verifyToken(sessionToken);
+  if (!t) return false;
+  if (t.role === 'admin') return true;
+  if (t.role === 'kandidat' && supabase.normalizeWa(t.wa || '') === supabase.normalizeWa(wa)) {
+    return true;
+  }
+  return false;
+}
+
 module.exports = {
   masterPins,
   requireAdmin,
+  isOwnerOrAdmin,
   requireRole,
   isValidWaFormat,
   handleCheckAdminMaster,
