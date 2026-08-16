@@ -72,6 +72,7 @@ GEMINI_API_KEY, FONNTE_TOKEN, NETLIFY_SITE_URL
 | --- | --- | --- | --- |
 | 2026-08-15 | khoci89 (user, token diberikan via chat) | `asjportal-379` | Deploy CLI pertama (`--prod --dir .`); 237 file + 19 functions; 12 env var; visibility di-set Public; verifikasi OK (homepage 200, PIN admin, getAppData 132 jobs) |
 | 2026-08-15 | khoci89 (user: "Redeploy") | `asjportal-379` | Redeploy fix `ecc1828` (export fetchMasterByWa) `--skip-functions-cache`; verifikasi ulang live: upload-check & biodata-check **full lulus**, getDrafCvMaster AGUS KHOCI lengkap (auto-fill CV AI terisi) |
+| 2026-08-16 | khoci89 (user: "Tolong deploy ke netlify terus update github") | `asjportal-379` | Deploy `14c2661` (fix simpan AI form CHECK constraint `d0c1a71` + assets build) `--skip-functions-cache`; verifikasi live OK: homepage 200, checkAdminMaster `success:true`, getAppData jobs ada; 23 file + 19 functions |
 
 > Isi baris baru SETIAP kali deploy Netlify dilakukan. Tanpa baris di tabel ini,
 > deploy Netlify dianggap tidak sah.
