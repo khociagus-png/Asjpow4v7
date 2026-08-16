@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.1b — modul auth + candidate-helpers — commit `(menyusul)`
+### Fase 1.1b — modul auth + candidate-helpers — commit `74c6c8a`
 
 - **Baru** `netlify/functions/_lib/actions-auth.js` — kluster auth dipindah dari
   `handlers.js`: `masterPins`, `requireAdmin`, `isValidWaFormat`,
