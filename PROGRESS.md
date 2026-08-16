@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.1 (sebagian) + Optimasi performa getAppData — `handlers.js` dipecah
+### Fase 1.1 (sebagian) + Optimasi performa getAppData — `handlers.js` dipecah — commit `b52cd50`
 
 **Masalah (laporan user):** aplikasi mulai terasa lambat padahal baru 2-3 job uji coba.
 
