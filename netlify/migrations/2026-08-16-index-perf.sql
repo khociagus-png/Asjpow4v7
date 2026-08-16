@@ -14,6 +14,12 @@
 --
 -- Tidak ada perubahan perilaku aplikasi — murni performa. Bisa dijalankan
 -- kapan pun tanpa downtime (PostgreSQL membuat index paralel).
+--
+-- REVISI 2026-08-16 (sesi lanjutan): idx_cand_no_wa & idx_master_no_wa
+-- dihapus dari daftar CREATE — redundan dengan index lama yang sudah ada
+-- (idx_dc_no_wa_loker & constraint unik no_wa). File ini kini idempotent
+-- penuh: CREATE yang diperlukan + DROP cleanup di section 4, jadi aman
+-- ditempel ulang utuh kapan pun (tidak membuat ulang index redundan).
 -- =============================================================================
 
 -- 1) Inbox form (database_asj_form)
@@ -37,9 +43,10 @@ CREATE INDEX IF NOT EXISTS idx_asj_form_code_job
 CREATE INDEX IF NOT EXISTS idx_cand_updated_at
   ON database_candidate (updated_at DESC);
 
---    Lookup per WA (findCandidateByWaFiltered, attachBerkasBio IN filter)
-CREATE INDEX IF NOT EXISTS idx_cand_no_wa
-  ON database_candidate (no_wa);
+--    Lookup per WA (findCandidateByWaFiltered) — REVISI 2026-08-16: index
+--    idx_cand_no_wa TIDAK dibuat lagi. Sudah dilayani index lama
+--    idx_dc_no_wa_loker (btree (no_wa, id_loker_pilihan) — no_wa di posisi
+--    pertama, prefix btree melayani query no_wa = ? / IN). Lihat section 4.
 
 --    Q4: kandidat per job — id_loker_pilihan di-query pakai ILIKE '%kode%'
 --        (wildcard KIRI). Index btree TIDAK bisa dipakai; trigram (pg_trgm)
@@ -52,8 +59,23 @@ CREATE INDEX IF NOT EXISTS idx_cand_loker_trgm
 CREATE INDEX IF NOT EXISTS idx_berkas_wa
   ON pemberkasan_checklist (wa);
 
-CREATE INDEX IF NOT EXISTS idx_master_no_wa
-  ON master_database_candidate (no_wa);
+--    REVISI 2026-08-16: idx_master_no_wa TIDAK dibuat lagi — redundan dengan
+--    constraint unik master_database_candidate_no_wa_key (UNIQUE btree no_wa;
+--    index constraint juga melayani lookup no_wa = ? / IN). Lihat section 4.
+
+-- 4) PEMBERSIHAN index redundan (revisi 2026-08-16)
+--    Dihapus dari daftar CREATE di atas karena sudah dilayani index lama.
+--    DROP IF EXISTS = idempotent; aman dijalankan ulang kapan pun.
+--    a) idx_cand_no_wa  → redundan dgn idx_dc_no_wa_loker ((no_wa, id_loker_pilihan))
+--    b) idx_master_no_wa → redundan dgn master_database_candidate_no_wa_key (UNIQUE no_wa)
+DROP INDEX IF EXISTS idx_cand_no_wa;
+DROP INDEX IF EXISTS idx_master_no_wa;
+
+--    (opsional) idx_berkas_wa (pemberkasan_checklist) kemungkinan juga
+--    redundan dgn idx_pemberkasan_wa_tahap bila kolom pertama index lama = wa.
+--    Tabel kecil (±5 baris) → dampak ~nol; cek dulu sebelum drop:
+--      SELECT indexdef FROM pg_indexes WHERE indexname = 'idx_pemberkasan_wa_tahap';
+--    Kalau definisinya (wa, ...) → jalankan: DROP INDEX IF EXISTS idx_berkas_wa;
 
 -- =============================================================================
 -- VERIFIKASI (jalankan setelah index dibuat)
