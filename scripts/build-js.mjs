@@ -38,7 +38,13 @@ const STACK = [
   '/js/upload-guard.js',
   '/js/00_dictionary.js',
   '/js/01_public.js',
-  '/js/02_init.js',
+  // Fase 2: js/02_init.js dipecah per domain (state/theme/util/preview/nav/boot).
+  '/js/init/state.js',
+  '/js/init/theme.js',
+  '/js/init/util.js',
+  '/js/init/preview.js',
+  '/js/init/nav.js',
+  '/js/init/boot.js',
   '/js/03_candidate.js',
   // Fase 2: js/03_engine.js dipecah per domain (pipeline/dashboard/guards/init).
   '/js/engine/pipeline.js',

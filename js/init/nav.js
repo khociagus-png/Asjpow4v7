@@ -1,0 +1,118 @@
+// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
+// js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
+// 02_init.js — perilaku tidak berubah.
+// ==========================================
+// NAVIGASI & SESI — pindah halaman (public/admin/kandidat), menu mobile,
+// dan logout (cabut sesi server + bersihkan state)
+// ==========================================
+
+function changePage(page) {
+  var pPub = document.getElementById('page-public');
+  if (pPub) pPub.classList.toggle('hidden', page !== 'public');
+  var pAdm = document.getElementById('page-admin');
+  if (pAdm) pAdm.classList.toggle('hidden', page !== 'admin');
+  var pKan = document.getElementById('page-kandidat');
+  if (pKan) pKan.classList.toggle('hidden', page !== 'kandidat');
+
+  // Re-render tabel publik setiap kali halaman publik dibuka
+  // agar tabel tidak kosong saat admin/kandidat berpindah halaman.
+  if (page === 'public') {
+    if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
+    if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
+  }
+
+  // Close mobile nav when changing page
+  closeMobileMenu();
+
+  // Logika memunculkan Bottom Nav di HP
+  // (ID bottom-nav-* = bar bawah; mobile-nav-* di menu hamburger dipakai
+  // login/logout flow, jangan di-toggle di sini — dulu ID duplikat bikin
+  // changePage men-toggle seksi menu hamburger sehingga menu jadi kosong
+  // saat admin/kandidat melihat halaman publik.)
+  var navAdm = document.getElementById('bottom-nav-admin');
+  var navKan = document.getElementById('bottom-nav-kandidat');
+
+  if (navAdm) navAdm.classList.toggle('hidden', page !== 'admin');
+  if (navKan) navKan.classList.toggle('hidden', page !== 'kandidat');
+
+  // Tambahkan padding bawah ke body agar konten tidak tertutup menu bawah
+  if (page === 'admin' || page === 'kandidat') {
+    document.body.style.paddingBottom = '70px';
+  } else {
+    document.body.style.paddingBottom = '0px';
+  }
+}
+
+function closeMobileMenu() {
+  var menu = document.getElementById('mobile-nav-menu');
+  var overlay = document.getElementById('mobile-nav-overlay');
+  if (!menu) return;
+  if (!menu.classList.contains('translate-x-full')) {
+    menu.classList.remove('translate-x-0');
+    menu.classList.add('translate-x-full');
+  }
+  menu.classList.add('hidden');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+function toggleMobileMenu() {
+  var menu = document.getElementById('mobile-nav-menu');
+  var overlay = document.getElementById('mobile-nav-overlay');
+  if (!menu) return;
+  if (menu.classList.contains('translate-x-full')) {
+    menu.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(function () {
+      menu.classList.remove('translate-x-full');
+      menu.classList.add('translate-x-0');
+    });
+  } else {
+    menu.classList.remove('translate-x-0');
+    menu.classList.add('translate-x-full');
+    setTimeout(function () {
+      menu.classList.add('hidden');
+    }, 300);
+    overlay.classList.add('hidden');
+  }
+}
+
+function logoutApp() {
+  // Cabut session di SERVER (hapus row user_sessions) - best-effort, tidak
+  // menunda logout: callAPI membaca localStorage secara sinkron saat
+  // membangun body, jadi token sudah terambil sebelum clear di bawah.
+  callAPI('logout', []).catch(function () {});
+  localStorage.clear();
+  var nAdm = document.getElementById('nav-admin-mode');
+  if (nAdm) nAdm.classList.add('hidden');
+  var nKan = document.getElementById('nav-kandidat-mode');
+  if (nKan) nKan.classList.add('hidden');
+  var nMod = document.getElementById('nav-mode');
+  if (nMod) nMod.classList.remove('hidden');
+  // Sync menu hamburger: kembalikan ke seksi logged-out (Login/Daftar/Admin Login).
+  // Dulu di sini seksi mobile-nav tidak di-reset, jadi setelah logout menu
+  // hamburger masih menampilkan seksi admin/kandidat (Dashboard/Keluar) padahal
+  // sudah tidak login.
+  var mLg = document.getElementById('mobile-nav-logged-out');
+  if (mLg) mLg.classList.remove('hidden');
+  var mAd = document.getElementById('mobile-nav-admin');
+  if (mAd) mAd.classList.add('hidden');
+  var mKa = document.getElementById('mobile-nav-kandidat');
+  if (mKa) mKa.classList.add('hidden');
+  isAdmin = false;
+  isKandidat = false;
+  currentAdminName = '';
+  currentKandidatName = '';
+  currentKandidatWa = '';
+  currentKandidatId = '';
+
+  if (AUTO_REFRESH_TIMER) {
+    clearInterval(AUTO_REFRESH_TIMER);
+    AUTO_REFRESH_TIMER = null;
+    PREV_MAIL_COUNT = null;
+  }
+
+  // Close mobile nav
+  closeMobileMenu();
+
+  changePage('public');
+}
