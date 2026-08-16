@@ -165,9 +165,12 @@ Global scope **tetap** di fase ini — tujuannya cuma mengecilkan unit patch. Ko
       Pecah per fitur: admin = chat AI HR Copilot (Jeklin) + auto-fill/simpan kandidat + saran aksi, interview = simulator wawancara VIP (buka/mulai/selesai/append/kirim pesan + cobaParseJsonLoose + kirim hasil ke admin + window.bukaSimulatorInterview), parse = bar upload & parse dokumen biodata (pastikanBarParseAdminAi/bacaFileBase64Front/uploadDokumenBiodataAdmin), results = generateWawancaraModelAdmin + lastAdminHasil + lihatHasilWawancaraAdmin + updateBiodataDariHasilAdmin. Body 27 deklarasi + 1 window assignment dipindah **byte-identik** (verifikasi brace-matching — semua OK). STACK build-js: `/js/09_ai_copilot.js` → 4 entri. Module-map 44 → **47 file / 353 simbol** (total simbol TIDAK berubah); bundel tetap **421.022 byte**. Verifikasi: node --check ✓ · lint 0 error/12 warn ✓ · test **81/81** ✓ · build idempotent ✓.
 
   **✅ Fase 2 langkah 4 SELESAI** — semua file god-object besar sudah dipecah: 02_init (852), 06_admin_modal (729), 11_admin_ops (769), 09_ai_copilot (785).
-- [ ] Pindahkan **inline script** besar di `ai_form.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html` ke `js/pages/*.js` (diload dengan `<script>` biasa, urutan tetap).
-- [ ] Setiap pecahan: verifikasi stack urutan (`scripts/build-js.mjs` STACK) tidak berubah untuk admin/index; halaman standalone tetap load file yang sama.
-- [ ] Hapus `js/00_dictionary.js` (11 baris) → gabung ke konfigurasi yang memakainya.
+- [x] Pindahkan **inline script** besar di `ai_form.html`, `master-full.html`, `apply-full.html`, `share.html`, `siswa-baru.html` ke `js/pages/*.js` (diload dengan `<script>` biasa, urutan tetap). — `30b79c7` (2026-08-16)
+      Blok inline 5 halaman standalone (±2.600 baris total) dipindah **byte-identik** ke `js/pages/`: `ai_form.js` (2 blok: konteks URL + utama — 805 baris), `master_full.js` (2 blok: lang-btn + utama — 536), `apply_full.js` (429), `share.js` (515), `siswa_baru.js` (337). Theme one-liner di `<head>` (anti-FOUC) TETAP inline di semua halaman. Verifikasi: `verify-pages-split.mjs` (setiap blok asli muncul verbatim di file halaman) + ekstraksi script byte-exact (isi blok == isi `js/pages/*.js` sebelum ditulis). Halaman sekarang: `i18n/api-client/upload-guard` → `js/pages/*.js` → `pwa.js` (urutan sama persis).
+- [x] Setiap pecahan: verifikasi stack urutan (`scripts/build-js.mjs` STACK) tidak berubah untuk admin/index; halaman standalone tetap load file yang sama. — `30b79c7` (2026-08-16)
+      STACK hanya berubah 1 entri: `/js/00_dictionary.js` dihapus (murni komentar 11 baris). Bundel **TIDAK berubah** (hash sama `app-2c3caf0224.js`, 421.022 byte — esbuild buang komentar). Module-map 47 → **51 file / 430 simbol** (naik wajar: 5 file halaman baru punya deklarasi sendiri; TIDAK masuk bundel). `node --check` ✓ · lint 0 error/12 warn ✓ · test **81/81** ✓.
+- [x] Hapus `js/00_dictionary.js` (11 baris) → gabung ke konfigurasi yang memakainya. — `30b79c7` (2026-08-16)
+      Isi 100% komentar (kamus lawas migrasi GAS) — dihapus total; tidak ada kode yang dirujuk.
 
 ---
 

@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4d: `js/09_ai_copilot.js` dipecah jadi `js/ai_copilot/*` (Fase 2.4 tuntas).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 5: inline script 5 halaman standalone → `js/pages/*` + `js/00_dictionary.js` dihapus (**Fase 2 tuntas**).
 
 ---
 
@@ -36,6 +36,51 @@
 
 > 🎉 **Fase 2 langkah 4 TUNTAS** — semua god-object besar sudah dipecah
 > (02_init 852, 06_admin_modal 729, 11_admin_ops 769, 09_ai_copilot 785).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 5 — inline script 5 halaman standalone → `js/pages/*` + `00_dictionary` dihapus — commit `30b79c7`
+
+- **Baru** `js/pages/ai_form.js` (805 baris) — 2 blok inline ai_form.html
+  digabung: konteks URL (AI_FORM_CONTEXT dari query string) + logika
+  chat/autofill/upload CV Qween (berjalan urutan sama: konteks dulu,
+  lalu body).
+- **Baru** `js/pages/master_full.js` (536) — blok lang-btn (listener
+  DOMContentLoaded — posisi-independen, aman pindah setelah api-client)
+  + blok utama form master 5 langkah (SSW_LIST/PEKERJAAN_LIST,
+  gerbang login kandidat, auto-fill, submitMasterForm).
+- **Baru** `js/pages/apply_full.js` (429) — form lamaran 3 langkah
+  (cekRiwayat + peringatan multi-apply LULUS, upload + downscale,
+  submitApply).
+- **Baru** `js/pages/share.js` (515) — viewer kandidat share
+  (SHARE_LANG lokal, filter gender/usia/JFT, seleksi → kirim WA,
+  preview dokumen lokal SheetJS/mammoth/pptx).
+- **Baru** `js/pages/siswa_baru.js` (337) — chat pendaftaran siswa baru
+  (draft auto-save, upload KTP/KK/ijazah, submitDaftarSiswa).
+- Theme one-liner di `<head>` (anti-FOUC) **tetap inline** di semua
+  halaman — bukan bagian refactor.
+- Halaman sekarang: `i18n/api-client/upload-guard` → `js/pages/*.js` →
+  `pwa.js` (urutan muat sama persis dengan sebelumnya).
+- `js/00_dictionary.js` **DIHAPUS** — isi 100% komentar (kamus lawas
+  migrasi GAS); 1 entri dihapus dari STACK build-js. Bundel **TIDAK
+  berubah** (hash sama `app-2c3caf0224.js`, 421.022 byte). Module-map
+  47 → **51 file / 430 simbol** (5 file halaman baru — TIDAK masuk bundel).
+
+**Verifikasi:** setiap blok inline asli dipindah **byte-identik**
+(verify-pages-split verbatim + ekstraksi script byte-exact terhadap
+`js/pages/*` sebelum ditulis; ai_form/master-full punya trailing-space
+di banyak baris — pakai script mekanis, bukan salin manual). `node --check`
+✓ · lint 0 error/12 warn ✓ · test **81/81** ✓ · build idempotent ✓
+(bundel hash sama = isi identik).
+
+> 🎉 **FASE 2 TUNTAS 100%** — semua god-object frontend dipecah
+> (07_api 1696 → js/api/*, 05_render 1371 → js/render/*, 03_engine 856 →
+> js/engine/*, 02_init 852 → js/init/*, 06_admin_modal 729 →
+> js/admin_modal/*, 11_admin_ops 769 → js/admin_ops/*, 09_ai_copilot 785 →
+> js/ai_copilot/*, inline 5 halaman ±2.600 baris → js/pages/*,
+> 00_dictionary dihapus).
 
 ---
 
