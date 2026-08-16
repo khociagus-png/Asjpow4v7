@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.2 langkah 3 — modul `actions-register.js` — commit *(isi hash)*
+### Fase 1.2 langkah 3 — modul `actions-register.js` — commit `b5073d7`
 
 - **Baru** `_lib/actions-register.js` (6 export) — siswa baru
   (`respon_siswa_baru`: `getDaftarSiswaBaru` publik tanpa PII, `submitDaftarSiswa`)
