@@ -1,6 +1,23 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `5081693`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `59c6fed`.
+
+---
+
+## 2026-08-15 — Model wawancara AI per bidang SSW
+
+### `59c6fed` — Feat: model wawancara AI per bidang SSW (14 pertanyaan gaya dokumen isian)
+- Contoh dokumen user: jawaban wawancara kaigo HERLINA (14 pertanyaan: ID +
+  romaji + panduan jawaban ID/romaji/kanji + instruksi isi di Drive).
+- `processAiInterview` kini SSW-aware: resolve bidang dari master/kandidat
+  (kaigo, shokuhin, nougyou, kensetsu, jidousha, binbou, sougou + default),
+  14 pertanyaan berurutan, pertanyaan khusus bidang, evaluasi + skor akhir.
+- Action admin `generateWawancaraModel`: dokumen model wawancara lengkap per
+  kandidat (dukung kandidat belum terdaftar via override bidang) siap disalin.
+- UI: simulator auto-start tanya Q1; tombol **Model Wawancara** + kolom
+  Bidang di bar AI copilot admin.
+- Verifikasi: Q1 format model OK; model Kaigo/Osaka 14 pertanyaan + romaji +
+  kanji; unit test 49/49; build:js bersih (bundle `app-02d4835cb1.js`).
 
 ---
 

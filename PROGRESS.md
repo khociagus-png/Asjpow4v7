@@ -10,6 +10,35 @@
 
 ## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `59c6fed` — Model wawancara AI per bidang SSW (14 pertanyaan gaya dokumen isian)
+
+- **Permintaan user:** "Bikin model wawancara AI seperti ini tergantung SSW nya
+  dia ambil apa" — contoh dokumen jawaban wawancara kaigo HERLINA (14
+  pertanyaan: ID + romaji + panduan jawaban ID/romaji/kanji).
+- **Backend** (`actions-ai.js`): `processAiInterview` kini resolve bidang SSW
+  kandidat dari master/kandidat via WA (`resolveProfilKandidat`) lalu memakai
+  model wawancara per bidang (`BIDANG_INTERVIEW`: kaigo/shokuhin/nougyou/
+  kensetsu/jidousha/binbou/sougou + default) — 14 pertanyaan berurutan dengan
+  romaji, pertanyaan khusus bidang, evaluasi per jawaban, skor akhir 1-10.
+- **Backend** (`actions-ai.js`): action admin baru `generateWawancaraModel`
+  (rate limit AI) — hasilkan DOKUMEN model wawancara lengkap per kandidat
+  (WA/candidateId, bidang bisa di-override untuk kandidat yang belum
+  terdaftar) siap disalin ke Google Sheet kandidat.
+- **Frontend** (`js/09_ai_copilot.js`): simulator wawancara VIP auto-start
+  (langsung tanya Q1 sesuai bidang, kirim `wa` sebagai konteks); bar AI
+  copilot admin dapat tombol **Model Wawancara** + kolom **Bidang** (mis.
+  Kaigo) — hasil model tampil di chat untuk disalin.
+- **Verifikasi in-process** (preview sandbox sedang turun): Q1 simulasi
+  "Hobi kamu apa? (Shumi wa nan desu ka?)" dengan catatan sensei; model
+  Kaigo/Osaka lengkap 9,8 KB — 14 pertanyaan bernomor, romaji, kanji,
+  instruksi "SILAHKAN ISI DI DRIVE INI". Unit test **49/49**.
+- Catatan: HERLINA belum terdaftar di DB (222 kandidat, 0 nama Herlina) —
+  model bisa dibuat dulu via kolom Bidang sebelum kandidat daftar.
+
+---
+
+## 🆕 Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 ### Commit `5081693` — Admin parse dokumen biodata (upload CV/Excel/PDF → Gemini → update master)
 
 - **Permintaan user:** "Khusus CV AI untuk panel admin kasih file attachment buat
