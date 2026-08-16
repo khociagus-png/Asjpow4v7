@@ -194,28 +194,28 @@
             // RENDER EDU (MONTH)
             let eduHtml = '';
             for(let i=1; i<=5; i++) {
-                let boxTitle = (i === 5) ? 'LPK Bahasa Jepang (日本語学校)' : (tr('form.mf_pendidikan_n') + ' ' + i);
+                let boxTitle = (i === 5) ? 'LPK Bahasa Jepang (日本語学校)' : (window.tr('form.mf_pendidikan_n') + ' ' + i);
                 let lpkSel = (i === 5) ? ' selected' : '';
                 eduHtml += `<div class="dynamic-box"><div class="box-title">${boxTitle}</div>
-                    <div class="row mb-3"><div><label class="label">${tr('form.mf_tingkat')}</label><select id="edu_tk_${i}" class="input py-2"><option value="">Pilih / 選択</option><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA/SMK">SMA/SMK</option><option value="D3/S1">D3/S1</option><option value="LPK BAHASA"${lpkSel}>LPK BAHASA (日本語学校)</option></select></div>
-                    <div><label class="label">${tr('form.mf_nama_sekolah')}</label><input id="edu_nm_${i}" class="input py-2"></div></div>
-                    <div class="form-group mb-3"><label class="label">${tr('form.mf_jurusan')}</label><input id="edu_jur_${i}" class="input py-2" placeholder="${tr('form.mf_ph_jurusan')}"></div>
-                    <div class="row"><div><label class="label">${tr('form.mf_masuk_bulan')}</label><input id="edu_in_${i}" type="month" class="input py-2"></div>
-                    <div><label class="label">${tr('form.mf_lulus')}</label><input id="edu_out_${i}" type="month" class="input py-2"></div></div></div>`;
+                    <div class="row mb-3"><div><label class="label">${window.tr('form.mf_tingkat')}</label><select id="edu_tk_${i}" class="input py-2"><option value="">Pilih / 選択</option><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA/SMK">SMA/SMK</option><option value="D3/S1">D3/S1</option><option value="LPK BAHASA"${lpkSel}>LPK BAHASA (日本語学校)</option></select></div>
+                    <div><label class="label">${window.tr('form.mf_nama_sekolah')}</label><input id="edu_nm_${i}" class="input py-2"></div></div>
+                    <div class="form-group mb-3"><label class="label">${window.tr('form.mf_jurusan')}</label><input id="edu_jur_${i}" class="input py-2" placeholder="${window.tr('form.mf_ph_jurusan')}"></div>
+                    <div class="row"><div><label class="label">${window.tr('form.mf_masuk_bulan')}</label><input id="edu_in_${i}" type="month" class="input py-2"></div>
+                    <div><label class="label">${window.tr('form.mf_lulus')}</label><input id="edu_out_${i}" type="month" class="input py-2"></div></div></div>`;
             }
             if(getEl("edu-container")) getEl("edu-container").innerHTML = eduHtml;
 
             // RENDER JOB (MONTH + IMA MADE)
             let jobHtml = '';
             for(let i=1; i<=3; i++) {
-                jobHtml += `<div class="dynamic-box"><div class="box-title">${tr('form.mf_pekerjaan_n')} ${i}</div>
-                    <div class="form-group mb-3"><label class="label">${tr('form.mf_perusahaan')}</label><input id="job_nm_${i}" class="input py-2"></div>
-                    <div class="row mb-3"><div><label class="label">${tr('form.mf_masuk_bulan')}</label><input id="job_in_${i}" type="month" class="input py-2"></div>
-                    <div><label class="label">${tr('form.mf_keluar')}</label><input id="job_out_${i}" type="month" class="input py-2">
-                    <div class="mt-2"><label class="text-[11px] text-sky-400 font-bold flex items-center gap-1 cursor-pointer"><input type="checkbox" id="job_now_${i}" onchange="toggleImaMade(${i})" class="w-4 h-4 accent-sky-500"> ${tr('form.mf_ima_made')}</label></div></div></div>
+                jobHtml += `<div class="dynamic-box"><div class="box-title">${window.tr('form.mf_pekerjaan_n')} ${i}</div>
+                    <div class="form-group mb-3"><label class="label">${window.tr('form.mf_perusahaan')}</label><input id="job_nm_${i}" class="input py-2"></div>
+                    <div class="row mb-3"><div><label class="label">${window.tr('form.mf_masuk_bulan')}</label><input id="job_in_${i}" type="month" class="input py-2"></div>
+                    <div><label class="label">${window.tr('form.mf_keluar')}</label><input id="job_out_${i}" type="month" class="input py-2">
+                    <div class="mt-2"><label class="text-[11px] text-sky-400 font-bold flex items-center gap-1 cursor-pointer"><input type="checkbox" id="job_now_${i}" onchange="toggleImaMade(${i})" class="w-4 h-4 accent-sky-500"> ${window.tr('form.mf_ima_made')}</label></div></div></div>
                     <div class="row">
-                        <div class="form-group"><label class="label">${tr('form.mf_jabatan')}</label><select id="job_pos_${i}" class="input py-2" onchange="onPekerjaanSelect(${i})"></select><input id="job_pos_manual_${i}" class="input py-2 hidden mt-2" placeholder="${tr('form.mf_ph_jabatan_lain')}"></div>
-                        <div class="form-group"><label class="label">${tr('form.mf_gaji_terakhir')}</label><input id="job_sal_${i}" type="number" class="input py-2" placeholder="${tr('form.mf_ph_sal')}"></div>
+                        <div class="form-group"><label class="label">${window.tr('form.mf_jabatan')}</label><select id="job_pos_${i}" class="input py-2" onchange="onPekerjaanSelect(${i})"></select><input id="job_pos_manual_${i}" class="input py-2 hidden mt-2" placeholder="${window.tr('form.mf_ph_jabatan_lain')}"></div>
+                        <div class="form-group"><label class="label">${window.tr('form.mf_gaji_terakhir')}</label><input id="job_sal_${i}" type="number" class="input py-2" placeholder="${window.tr('form.mf_ph_sal')}"></div>
                     </div></div>`;
             }
             if(getEl("job-container")) getEl("job-container").innerHTML = jobHtml;
@@ -224,14 +224,14 @@
             // RENDER FAM
             let famHtml = '';
             for(let i=1; i<=5; i++) {
-                famHtml += `<div class="dynamic-box"><div class="box-title">${tr('form.mf_keluarga_n')} ${i}</div>
-                    <div class="row mb-3"><div><label class="label">${tr('form.mf_hubungan')}</label><select id="fam_hub_${i}" class="input py-2"><option value="">Pilih</option><option value="AYAH">AYAH</option><option value="IBU">IBU</option><option value="SUAMI">SUAMI</option><option value="ISTRI">ISTRI</option><option value="ANAK">ANAK</option><option value="KAKAK">KAKAK</option><option value="ADIK">ADIK</option></select></div>
-                    <div><label class="label">${tr('form.mf_nama_keluarga')}</label><input id="fam_nm_${i}" class="input py-2" placeholder="Otomatis ke katakana saat disimpan"></div></div>
+                famHtml += `<div class="dynamic-box"><div class="box-title">${window.tr('form.mf_keluarga_n')} ${i}</div>
+                    <div class="row mb-3"><div><label class="label">${window.tr('form.mf_hubungan')}</label><select id="fam_hub_${i}" class="input py-2"><option value="">Pilih</option><option value="AYAH">AYAH</option><option value="IBU">IBU</option><option value="SUAMI">SUAMI</option><option value="ISTRI">ISTRI</option><option value="ANAK">ANAK</option><option value="KAKAK">KAKAK</option><option value="ADIK">ADIK</option></select></div>
+                    <div><label class="label">${window.tr('form.mf_nama_keluarga')}</label><input id="fam_nm_${i}" class="input py-2" placeholder="Otomatis ke katakana saat disimpan"></div></div>
                     <div class="row mb-3">
-                        <div><label class="label">${tr('form.mf_kenalan_usia')}</label><input id="fam_age_${i}" type="number" class="input py-2"></div>
-                        <div><label class="label">${tr('form.mf_pekerjaan')}</label><select id="fam_job_${i}" class="input py-2" onchange="onFamPekerjaanSelect(${i})"></select><input id="fam_job_manual_${i}" class="input py-2 hidden mt-2" placeholder="${tr('form.mf_ph_pekerjaan_lain')}"></div>
+                        <div><label class="label">${window.tr('form.mf_kenalan_usia')}</label><input id="fam_age_${i}" type="number" class="input py-2"></div>
+                        <div><label class="label">${window.tr('form.mf_pekerjaan')}</label><select id="fam_job_${i}" class="input py-2" onchange="onFamPekerjaanSelect(${i})"></select><input id="fam_job_manual_${i}" class="input py-2 hidden mt-2" placeholder="${window.tr('form.mf_ph_pekerjaan_lain')}"></div>
                     </div>
-                    <div class="form-group"><label class="label">${tr('form.mf_gaji')}</label><input id="fam_sal_${i}" type="number" class="input py-2"></div></div>`;
+                    <div class="form-group"><label class="label">${window.tr('form.mf_gaji')}</label><input id="fam_sal_${i}" type="number" class="input py-2"></div></div>`;
             }
             if(getEl("fam-container")) getEl("fam-container").innerHTML = famHtml;
             for(let i=1; i<=5; i++) { if(getEl(`fam_job_${i}`)) getEl(`fam_job_${i}`).innerHTML = pekerjaanOptionsHtml(); }
@@ -247,13 +247,13 @@
             }
             // Keamanan: wajib session kandidat asli (login dulu) - nomor WA dari
             // URL/QR saja tidak cukup untuk membaca data pribadi kandidat.
-            if(!getCandidateSession()) { showLoginGate(tr('form.mf_gate_desc')); return; }
+            if(!getCandidateSession()) { showLoginGate(window.tr('form.mf_gate_desc')); return; }
             let loadingBox = getEl("loading");
             if(loadingBox) loadingBox.classList.remove("hidden");
             
-            callAPI('getMasterDataByWa', [waVal]).then(data => {
+            window.callAPI('getMasterDataByWa', [waVal]).then(data => {
                     if(loadingBox) loadingBox.classList.add("hidden");
-                    if(data && data.sessionInvalid) { showLoginGate(tr('form.mf_sesi_berakhir')); return; }
+                    if(data && data.sessionInvalid) { showLoginGate(window.tr('form.mf_sesi_berakhir')); return; }
                     if(data) {
                         setVal("nama", data["NAMA_LENGKAP"]);
                         setVal("furigana", data["FURIGANA"]);
@@ -383,12 +383,12 @@
       return out.length ? out : null;
     }
 
-    function handleFile(input, infoId) {
+    export function handleFile(input, infoId) {
       const file = input.files[0];
       let infoEl = getEl(infoId);
       if (file && infoEl) {
         // Guard seragam: format (accept) + ukuran maks 2 MB — alert jelas + reset input.
-        if (!cekUploadFile(input, { maxMb: 2 })) { infoEl.innerHTML = ""; return; }
+        if (!window.cekUploadFile(input, { maxMb: 2 })) { infoEl.innerHTML = ""; return; }
         infoEl.innerHTML = `<span style='color:#38bdf8'>✅ ${file.name}</span>`;
       }
     }
@@ -401,7 +401,7 @@
       });
     }
 
-    function changeStep(dir) {
+    export function changeStep(dir) {
         try {
             let curStepEl = getEl(`step-${currentStep}`);
             if(curStepEl) curStepEl.classList.remove('active');
@@ -439,15 +439,15 @@
         } catch (error) { alert("Navigasi Error: " + error.message); }
     }
 
-    async function submitMaster(isDraft) {
+    export async function submitMaster(isDraft) {
         try {
-            if(!getCandidateSession()) { showLoginGate(tr('form.mf_alert_login_dulu')); return; }
+            if(!getCandidateSession()) { showLoginGate(window.tr('form.mf_alert_login_dulu')); return; }
             let namaVal = getEl("nama") ? getEl("nama").value : "";
-            if(!isDraft && !namaVal.trim()) { alert(tr('form.mf_alert_nama_wajib')); changeStep(1 - currentStep); return; }
+            if(!isDraft && !namaVal.trim()) { alert(window.tr('form.mf_alert_nama_wajib')); changeStep(1 - currentStep); return; }
 
             let loadingBox = getEl("loading");
             if(loadingBox) {
-                getEl("loadingText").innerText = isDraft ? tr('form.mf_save_draft') : tr('form.mf_save_final');
+                getEl("loadingText").innerText = isDraft ? window.tr('form.mf_save_draft') : window.tr('form.mf_save_final');
                 loadingBox.classList.remove("hidden");
             }
             
@@ -520,21 +520,35 @@
                 ktpFile: fileKtp, kkFile: fileKk
             };
 
-            callAPI('submitMasterForm', [payload]).then(res => {
+            window.callAPI('submitMasterForm', [payload]).then(res => {
                     if(loadingBox) loadingBox.classList.add("hidden");
-                    if(res && res.sessionInvalid) { showLoginGate(tr('form.mf_sesi_simpan')); return; }
+                    if(res && res.sessionInvalid) { showLoginGate(window.tr('form.mf_sesi_simpan')); return; }
                     if(res.success) { 
-                        var msg = isDraft ? tr('form.mf_alert_draft') : tr('form.mf_alert_final');
-                        if(res.translationSkipped) msg += tr('form.mf_alert_translate');
+                        var msg = isDraft ? window.tr('form.mf_alert_draft') : window.tr('form.mf_alert_final');
+                        if(res.translationSkipped) msg += window.tr('form.mf_alert_translate');
                         alert(msg); 
-                    } else { alert(tr('form.mf_alert_gagal') + res.message); }
+                    } else { alert(window.tr('form.mf_alert_gagal') + res.message); }
                 }).catch(err => {
                     if(loadingBox) loadingBox.classList.add("hidden"); 
-                    alert(tr('form.mf_alert_koneksi') + err.message);
+                    alert(window.tr('form.mf_alert_koneksi') + err.message);
                 });
         } catch (e) {
             let loadingBox = getEl("loading");
             if(loadingBox) loadingBox.classList.add("hidden");
-            alert(tr('form.mf_alert_sistem') + e.message);
+            alert(window.tr('form.mf_alert_sistem') + e.message);
         }
     }
+
+    // Bridge ESM→legacy (Fase 3 langkah 15): HTML onclick/onchange/onkeydown
+    // master-full.html + string onchange dinamis (toggleImaMade/onPekerjaanSelect/
+    // onFamPekerjaanSelect) butuh global — bridge ini SEMPAT HILANG saat
+    // konversi langkah 13, ketahuan lewat aktivasi no-undef + smoke (klik
+    // Langkah/Batal/Simpan bakal ReferenceError).
+    window.toggleImaMade = toggleImaMade;
+    window.gateLogin = gateLogin;
+    window.onSswSelect = onSswSelect;
+    window.onPekerjaanSelect = onPekerjaanSelect;
+    window.onFamPekerjaanSelect = onFamPekerjaanSelect;
+    window.handleFile = handleFile;
+    window.changeStep = changeStep;
+    window.submitMaster = submitMaster;
