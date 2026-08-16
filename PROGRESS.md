@@ -4,7 +4,25 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🔍 Debug sistematis semua area belum dites: fix reload-loop ai_form + anti-duplikat lamaran (database_asj_form) + dedupe warisan bersih 0.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🛠️ L/P siswa baru, auto-fill AI form (JSON {reply,data}), biaya magang 5,5 Jt, lock naitei by LULUS.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff) — commit `f10c98a`
+
+### 🛠️ L/P siswa baru, auto-fill AI form, biaya magang 5,5 Jt, lock naitei by LULUS
+
+**Fokus user:** L/P di modal siswa baru tidak keluar; AI form tidak auto-fill setelah chat; biaya magang pendidikan 5→5,5 Jt; banyak lock status (naitei dll) terlalu terbuka; tulis aturannya biar AI tidak bingung.
+
+**Perbaikan (semua terverifikasi):**
+1. **L/P '-'** — root cause: data `respon_siswa_baru.jenis_kelamin` null karena AI chat siswa (`processSiswaAIChat`) cuma balas teks, tidak pernah ekstrak data. Kini balas **JSON `{reply, data}`** (gender dinormalisasi LAKI-LAKI/PEREMPUAN) → form siswa auto-fill → L/P tampil. Verifikasi live: submit `gender:'laki-laki'` → `jenis_kelamin:'L'` (getDaftarSiswaBaru), cleanup OK.
+2. **Normalisasi gender disatukan** — `normalizeGender` di `db/client.js` → kanonikal `LAKI-LAKI`/`PEREMPUAN` (konvensi situs lama `normalizeGenderValue`); mapping `getDaftarSiswaBaru` → `L`/`P`; varian inline di render modal siswa (`js/admin_ops/candidates.js`) dihapus. Unit test diperbarui.
+3. **AI form auto-fill** — `processAIChat` kini balas **JSON `{reply, data}`** dengan kunci persis `fieldPaths` ai_form (identitas/fisik/medis/sertifikasi/wawancara/kenalan_jepang/pendidikan/pekerjaan/keluarga). Frontend sudah punya jalur `res.data` → merge → `updateFormUI`; sekarang data benar-benar datang. Verifikasi live: chat "Siti Aminah, perempuan, 160/50" → `data.identitas.nama_lengkap`, `gender:PEREMPUAN`, `fisik.tb:160`.
+4. **Biaya magang pendidikan 5 Jt → 5,5 Jt** — `i18n.js` (id `5,5 Jt` + jp `550万ルピア`) + fallback `index.html`/`admin.html`.
+5. **Lock E-Sign & Data Naitei** (`bukaModalTtd`) — dulu regex tahapan (LOLOS..NAITEI) terlalu longgar; sekarang hanya untuk kandidat yang **SUDAH LULUS** (lamaran `LULUS`/`LOLOS`/`APPROVED`/`APPROVE`), admin bebas. Verifikasi browser dua arah: AGUS (MENUNGGU) → ditolak + toast; ANGGUN (LULUS) → modal terbuka.
+6. **Aturan lock ditulis di `AGENTS.md` §6** (baru): tabel lock naitei/CV AI/interview + aturan satu normalisasi gender — biar sesi AI berikutnya tidak bingung.
+
+**Verifikasi:** `node --check` semua file JS diubah · unit test **91/91** · `bun run build` sukses (`app-0464d48a8c.js`) · E2E: standalone-smoke 15/15, login-check, modal-runtime-check, upload-check, biodata-check semua lulus · diag `.freebuff/diag-lock-form.mjs` semua lulus.
 
 ---
 

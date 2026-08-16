@@ -1,6 +1,38 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`89a1f03` — reload-loop ai_form + anti-duplikat lamaran).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`f10c98a` — L/P siswa, auto-fill AI form, biaya 5,5jt, lock naitei).
+
+---
+
+## 2026-08-16 — `f10c98a` 🛠️ L/P siswa baru, auto-fill AI form, biaya magang 5,5 Jt, lock naitei by LULUS
+
+### Gejala
+
+- Kolom **L/P** di modal "Pendaftaran Siswa Baru" selalu `-`.
+- **AI form lamar**: setelah chat nama lengkap dijawab benar, tabel/form tidak terisi langsung.
+- Biaya magang pendidikan tampil **5 Jt** (harus 5,5 Jt).
+- **E-Sign & Data Naitei** terbuka padahal kandidat belum lulus (lock terlalu longgar).
+
+### Akar masalah
+
+- `processSiswaAIChat` & `processAIChat` cuma mengembalikan **teks balasan** — tidak pernah `data` terstruktur, padahal frontend (`siswa_baru.js`/`ai_form.js`) sudah punya jalur `res.data` → `updateFormUI()`. Akibatnya `respon_siswa_baru.jenis_kelamin` null → L/P `-`, dan form AI tidak pernah terisi otomatis.
+- Normalisasi gender ada banyak varian (backend `PRIA/WANITA`, frontend inline, situs lama `LAKI-LAKI/PEREMPUAN`).
+- `bukaModalTtd` memakai regex tahapan (LOLOS..NAITEI) yang terlalu longgar — kebuka sebelum kandidat LULUS.
+
+### Perbaikan
+
+- `ai/chat.js`: `processAIChat` + `processSiswaAIChat` kini meminta Gemini balas **JSON `{reply, data}`** (parse `parseJsonLoose`, fallback teks). Skema data persis `fieldPaths` ai_form / key form siswa; gender dinormalisasi `LAKI-LAKI`/`PEREMPUAN`. `res.data` → form auto-fill langsung.
+- `db/client.js` `normalizeGender` → satu-satunya normalisasi, kanonikal `LAKI-LAKI`/`PEREMPUAN`; `actions-register.js` mapping → `L`/`P`; render modal siswa pakai nilai kanonikal (varian inline dihapus); `client.test.js` diperbarui.
+- `i18n.js` (id `5,5 Jt`, jp `550万ルピア`) + fallback `index.html`/`admin.html` — biaya magang pendidikan 5 → 5,5 Jt.
+- `js/12_esign_match.js` `bukaModalTtd`: lock naitei hanya untuk kandidat **SUDAH LULUS** (`LULUS`/`LOLOS`/`APPROVED`/`APPROVE`), admin bebas.
+- `AGENTS.md` §6 baru: aturan lock fitur kandidat + satu normalisasi gender (biar AI tidak bingung).
+
+### Verifikasi
+
+- Unit test **91/91**; `bun run build` sukses (`app-0464d48a8c.js`).
+- Diag live: submit siswa `laki-laki` → L; AI siswa → `{data:{gender:'LAKI-LAKI', nama:'Budi Santoso'}}`; AI master → `{data:{identitas:{nama_lengkap:'Siti Aminah', gender:'PEREMPUAN'}, fisik:{tb:'160'}}}`.
+- E2E: standalone-smoke 15/15, login-check, modal-runtime-check, upload-check, biodata-check — semua lulus.
+- Lock naitei browser: AGUS (MENUNGGU) ditolak + toast; ANGGUN (LULUS) modal terbuka.
 
 ---
 
