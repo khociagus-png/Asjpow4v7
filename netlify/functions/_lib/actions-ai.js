@@ -455,29 +455,29 @@ function buildInterviewSystem(profil, kota) {
     'Kamu adalah Jeklin Sensei, pewawancara kerja (mensetsu) Jepang untuk LPK ASJ (PT Amanah Sakura Japan).',
     'Kandidat: ' + (profil.nama || 'Kandidat') + '-san. Bidang SSW: ' + b.label + '.',
     'Kota penempatan: ' + (kota || 'belum ditentukan') + '.',
-    'Ikuti MODEL WAWANCARA 14 pertanyaan berikut SECARA BERURUTAN (jangan lompat-lompat):',
-    '1. Hobi kamu apa? Harus aktifitas fisik. (shumi wa nandesu ka?)',
-    '2. Siapakah tokoh Jepang terkenal yang kamu kagumi? (nihon no yuumei na hito o shitte imasu ka?)',
-    '3. Ingin bekerja di Jepang berapa lama? Target 5 tahun+, sebutkan target sertifikat/bahasa. (nihon de nan nen gurai hatarakitaidesu ka?)',
-    '4. Apa yang kamu ketahui tentang kota/tempat penempatanmu?',
-    '5. Apa tujuan/alasanmu ingin bekerja di Jepang? (naze nihon de hatarakitaidesu ka?)',
-    '6. Apa kelebihanmu? (chousho wa nandesu ka?)',
-    '7. Apa kekuranganmu? (tansho wa nandesu ka?)',
-    '8. Setelah pulang dari Jepang ingin melakukan apa?',
-    '9. Apakah kamu punya pengalaman kerja di bidang SSW ini? Ceritakan secara detail. (keiken wa arimasu ka?)',
-    '10. Jepang itu negara seperti apa menurutmu? (nihon wa donna kuni desu ka?)',
-    '11. Apa yang kamu ketahui tentang pekerjaan SSW / bidang ini? (... wa donna shigoto desu ka?)',
-    '12. Kenapa kamu memilih bidang pekerjaan ini? (doushite kono shigoto o shitai desu ka?)',
-    '13. Menurutmu apa yang paling berat dari bidang ini? Jelaskan. (kono shigoto de ichiban taihen na koto wa nandesu ka?)',
-    '14. Apakah ada pertanyaan untuk perusahaan? (shitsumon wa arimasu ka?) — lalu tutup dengan doumo arigatou gozaimasu + ojigi.',
-    'Pertanyaan khusus bidang ' + b.label + ' — sisipkan di nomor yang sesuai:',
+    'LAKUKAN WAWANCARA SEPERTI PEWAWANCARA ASLI (bukan kuesioner, bukan dokumen isian):',
+    '- Buka dengan sapaan hangat singkat, lalu minta perkenalan singkat (jikoshoukai).',
+    '- Tanyakan SATU pertanyaan per pesan dengan bahasa alami; untuk kalimat kunci, tambahkan romaji singkat dalam kurung (mis. "Hobi kamu apa? (shumi wa nandesu ka?)").',
+    '- DENGARKAN jawaban kandidat, beri reaksi natural (puji/klarifikasi), lalu follow-up untuk menggali lebih dalam bila perlu.',
+    '- JANGAN PERNAH menampilkan nomor pertanyaan, daftar/urutan, atau format "1. 2. 3.".',
+    '- Wajib gali topik berikut secara alami bila belum terjawab (dalam urutan wajar seperti pewawancara sungguhan):',
+    '  • Perkenalan & alasan melamar (kenapa bidang ' + b.label + ').',
+    '  • Hobi / aktivitas fisik.',
+    '  • Pengalaman kerja terkait bidang (detail!).',
+    '  • Kelebihan & kekurangan.',
+    '  • Motivasi ke Jepang, berapa lama ingin bekerja (target 5 tahun+, sertifikat/bahasa).',
+    '  • Pengetahuan tentang kota penempatan.',
+    '  • Pengetahuan tentang pekerjaan ' + b.label + ' dan hal terberatnya.',
+    '  • Rencana setelah pulang ke Indonesia.',
+    '  • Pertanyaan balik untuk perusahaan.',
+    'Topik khas bidang ' + b.label + ' (tanyakan dengan santai):',
   ];
   lines.push.apply(lines, b.extra.map((q, i) => '  • ' + (i + 1) + ') ' + q));
   lines.push(
-    'CARA MENANYAKAN: tampilkan nomor pertanyaan, lalu pertanyaan dalam Bahasa Indonesia DENGAN romaji dalam kurung (contoh: "Hobi kamu apa? (shumi wa nandesu ka?)").',
-    'SETELAH kandidat menjawab: beri evaluasi singkat (1-2 kalimat) + saran perbaikan + contoh jawaban yang baik (Bahasa Indonesia + romaji singkat), lalu LANJUT ke pertanyaan berikutnya.',
-    'Di akhir (setelah nomor 14 & penutup): beri SKOR keseluruhan 1-10 + rekomendasi + saran latihan.',
-    'Balas dalam Bahasa Indonesia, ramah dan profesional seperti sensei.',
+    'TUTUP wawancara dengan sopan (doumo arigatou gozaimasu + semangat) ketika semua topik inti sudah terjawab ATAU kandidat menutup pembicaraan.',
+    'Di pesan PENUTUP, setelah teks terima kasih, tambahkan baris persis "===HASIL===" lalu JSON TUNGGAL tanpa teks lain:',
+    '{ "score": 0-10, "nilai": "A/B/C", "rekomendasi": "...", "biodata": { kunci camelCase — hanya field yang KANDIDAT sebutkan: nama, furigana, tempatLahir, tglLahir, alamat, email, gender, hobi, kelebihan, kekurangan, motivasiJepang, tujuanJepang, keinginan, rencanaPulang, promosi, keahlianKhusus, eksJepang, gajiYen, tabungan, bhsJepang, nilai, lisensi, ssw, noPaspor, noCoe, daruratNama, daruratWa, pendidikan: [{tingkat, namaSekolah, jurusan, tahunMasuk, tahunLulus}], pekerjaan: [{namaPerusahaan, jabatan, tahunMasuk, tahunKeluar}] }, "catatan": "..." }',
+    'Balas dalam Bahasa Indonesia, ramah dan profesional seperti sensei asli.',
   );
   return lines.join('\n');
 }
@@ -552,6 +552,155 @@ async function handleGenerateWawancaraModel(payload, sessionToken) {
   } catch (e) {
     console.error('[AI] generateWawancaraModel error:', e && e.message ? e.message : e);
     return { success: false, error: 'Gagal membuat model wawancara: ' + (e && e.message ? e.message : 'AI sibuk') };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// selesaikanWawancara — kandidat: dari TRANSCRIPT wawancara yang sudah jalan,
+// buat JSON hasil wawancara {score, nilai, rekomendasi, biodata, catatan}.
+// Dipanggil saat kandidat klik "Selesai & Kirim Hasil" (deterministik, tidak
+// bergantung AI menulis marker di tengah chat).
+// ---------------------------------------------------------------------------
+async function handleSelesaikanWawancara(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'kandidat');
+  if (guard.error) return guard.error;
+  const d = (payload && payload[0]) || {};
+  const profil = await resolveProfilKandidat(d.wa || '');
+  const b = (profil && profil.bidang) || BIDANG_DEFAULT;
+  const history = Array.isArray(d.history) ? d.history : [];
+  const transkrip = history
+    .map((h) => {
+      const role = h && h.role === 'assistant' ? 'Jeklin' : 'Kandidat';
+      return role + ': ' + String((h && h.content) || '');
+    })
+    .join('\n');
+  const system =
+    'Kamu adalah Jeklin Sensei, pewawancara kerja Jepang untuk LPK ASJ. Kandidat: ' +
+    (profil && profil.nama ? profil.nama + '-san' : 'kandidat') +
+    ', bidang SSW: ' +
+    b.label +
+    '.\nDi bawah ini TRANSCRIPT wawancara:\n---\n' +
+    (transkrip || '(kandidat belum menjawab apa pun)') +
+    '\n---\nBuat RINGKASAN HASIL WAWANCARA dalam JSON TUNGGAL (tanpa teks lain):\n' +
+    '{ "score": 0-10, "nilai": "A/B/C", "rekomendasi": "saran perbaikan singkat", "biodata": { kunci camelCase — HANYA data yang kandidat SEBUTKAN: nama, furigana, tempatLahir, tglLahir, alamat, email, gender, hobi, kelebihan, kekurangan, motivasiJepang, tujuanJepang, keinginan, rencanaPulang, promosi, keahlianKhusus, eksJepang, gajiYen, tabungan, bhsJepang, nilai, lisensi, ssw, noPaspor, noCoe, daruratNama, daruratWa, pendidikan: [{tingkat, namaSekolah, jurusan, tahunMasuk, tahunLulus}], pekerjaan: [{namaPerusahaan, jabatan, tahunMasuk, tahunKeluar}] }, "catatan": "hal yang perlu diperbaiki kandidat" }';
+  try {
+    const r = await geminiGenerate(system, []);
+    const hasil = parseJsonLoose(r.reply);
+    if (!hasil || typeof hasil !== 'object' || Array.isArray(hasil)) {
+      return { success: false, error: 'AI gagal merangkum hasil wawancara. Coba lagi.' };
+    }
+    return { success: true, hasil };
+  } catch (e) {
+    console.error('[AI] selesaikanWawancara error:', e && e.message ? e.message : e);
+    return { success: false, error: 'Gagal merangkum hasil: ' + (e && e.message ? e.message : 'AI sibuk') };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// simpanHasilWawancara — kandidat: simpan hasil wawancara AI (JSON dari
+// penutup wawancara, format {score, nilai, rekomendasi, biodata, catatan})
+// ke ai_form_submissions (submitted_via='interview') supaya admin bisa lihat
+// & update biodata dari hasil wawancara.
+// ---------------------------------------------------------------------------
+async function handleSimpanHasilWawancara(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'kandidat');
+  if (guard.error) return guard.error;
+  const d = (payload && payload[0]) || {};
+  const wa = supabase.normalizeWa(String(d.wa || ''));
+  if (!wa) return { success: false, error: 'Nomor WA tidak ditemukan.' };
+  const hasil = d.hasil || {};
+  if (!hasil || typeof hasil !== 'object' || Array.isArray(hasil)) {
+    return { success: false, error: 'Hasil wawancara kosong/tidak valid.' };
+  }
+  try {
+    const rows = await supabase.supabaseJson('GET', 'ai_form_submissions', {
+      query: { select: '*', limit: 100 },
+    });
+    // Discriminator: submitted_via='interview' (mode/status tabel ini punya
+    // CHECK constraint — pakai nilai yang diizinkan: AI_MASTER/MENUNGGU).
+    const existing = (Array.isArray(rows) ? rows : []).find(
+      (r) =>
+        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        String(r.submitted_via || '') === 'interview',
+    );
+    const bio = (hasil.biodata || {}).nama || '';
+    const body = {
+      wa,
+      mode: 'AI_MASTER',
+      job_code: 'UMUM',
+      bidang: '-',
+      status: 'MENUNGGU',
+      submitted_via: 'interview',
+      ai_data_json: JSON.stringify(hasil),
+      nama_lengkap: bio,
+      updated_at: new Date().toISOString(),
+    };
+    if (existing && existing.id !== undefined) {
+      await supabase.supabaseJson('PATCH', 'ai_form_submissions', {
+        query: { id: 'eq.' + existing.id },
+        body,
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'ai_form_submissions', {
+        body: Object.assign({ created_at: new Date().toISOString() }, body),
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: 'Gagal simpan hasil wawancara: ' + e.message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// getHasilWawancara — admin: ambil hasil wawancara terakhir kandidat
+// (mode='wawancara' di ai_form_submissions) untuk dilihat / update biodata.
+// ---------------------------------------------------------------------------
+async function handleGetHasilWawancara(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'admin');
+  if (guard.error) return guard.error;
+  const d = (payload && payload[0]) || {};
+  let wa = supabase.normalizeWa(String(d.wa || ''));
+  if (!wa && d.candidateId) {
+    let cand = await supabase.findCandidateByIdFiltered(String(d.candidateId));
+    if (cand === undefined) {
+      const found = await supabase.findCandidates();
+      cand =
+        (found.rows || []).find((r) =>
+          String(supabase.pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        ) || null;
+    }
+    if (cand) wa = supabase.normalizeWa(String(cand.no_wa || ''));
+  }
+  if (!wa) {
+    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+  }
+  try {
+    const rows = await supabase.supabaseJson('GET', 'ai_form_submissions', {
+      query: { select: '*', limit: 100 },
+    });
+    const row = (Array.isArray(rows) ? rows : []).find(
+      (r) =>
+        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        String(r.submitted_via || '') === 'interview',
+    );
+    if (!row) return { success: true, hasil: null };
+    let hasil = {};
+    try {
+      hasil = JSON.parse(row.ai_data_json || '{}');
+    } catch (e) {
+      hasil = { catatan: String(row.ai_data_json || '').slice(0, 2000) };
+    }
+    return {
+      success: true,
+      hasil,
+      wa,
+      updatedAt: String(row.updated_at || ''),
+      nama: String(row.nama_lengkap || (hasil.biodata && hasil.biodata.nama) || ''),
+    };
+  } catch (e) {
+    return { success: false, error: e.message };
   }
 }
 
@@ -938,6 +1087,9 @@ module.exports = {
   handleBuildAdminAiCandidateSummary,
   handleParseDokumenBiodata,
   handleGenerateWawancaraModel,
+  handleSelesaikanWawancara,
+  handleSimpanHasilWawancara,
+  handleGetHasilWawancara,
   handleSubmitDataAsj,
   handleSimpanDataTtdNaitei,
 };

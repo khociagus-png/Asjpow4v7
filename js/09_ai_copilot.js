@@ -231,13 +231,71 @@ async function bukaSimulatorInterview() {
 
   // Jika VIP, buka modal
   document.getElementById('modal-interview').classList.remove('hidden');
+  pastikanTombolSelesaiInterview();
 
   // Reset chat & langsung mulai: AI menanyakan pertanyaan pertama sesuai
-  // bidang SSW kandidat (model wawancara 14 pertanyaan, gaya dokumen isian).
+  // bidang SSW kandidat (wawancara natural seperti manusia, bukan kuesioner).
   let chatBox = document.getElementById('interview-chat-box');
   chatBox.innerHTML = '';
   interviewHistory = [];
   await mulaiWawancaraInterview();
+}
+
+function pastikanTombolSelesaiInterview() {
+  if (document.getElementById('btn-done-interview')) return;
+  const sendBtn = document.getElementById('btn-send-interview');
+  if (!sendBtn || !sendBtn.parentElement) return;
+  const btn = document.createElement('button');
+  btn.id = 'btn-done-interview';
+  btn.type = 'button';
+  btn.onclick = selesaikanWawancaraInterview;
+  btn.className =
+    'w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex flex-col items-center justify-center shadow-lg transition active:scale-95 flex-shrink-0';
+  btn.title = 'Selesai & Kirim Hasil ke Admin';
+  btn.innerHTML = '<i class="fas fa-check-double text-lg"></i><span class="text-[7px] font-black leading-none mt-0.5">SELESAI</span>';
+  sendBtn.parentElement.appendChild(btn);
+}
+
+// Kandidat selesai → rangkum hasil wawancara (Gemini dari transcript) →
+// simpan ke admin (ai_form_submissions submitted_via=interview) → admin bisa
+// lihat & update biodata dari hasil.
+async function selesaikanWawancaraInterview() {
+  const inputEl = document.getElementById('interview-input');
+  const btnEl = document.getElementById('btn-send-interview');
+  const doneBtn = document.getElementById('btn-done-interview');
+  const typingEl = document.getElementById('interview-typing');
+  if (interviewHistory.length === 0) {
+    showToast('Wawancara belum dimulai — jawab dulu beberapa pertanyaan ya', 'info');
+    return;
+  }
+  if (doneBtn) doneBtn.disabled = true;
+  if (btnEl) btnEl.disabled = true;
+  if (inputEl) inputEl.disabled = true;
+  if (typingEl) {
+    typingEl.classList.remove('hidden');
+    typingEl.textContent = '📝 Jeklin merangkum hasil wawancara…';
+  }
+  try {
+    const res = await callAPI('selesaikanWawancara', [
+      { wa: currentKandidatWa, history: interviewHistory },
+    ]);
+    if (!res || res.success === false) {
+      throw new Error((res && res.error) || 'Gagal merangkum hasil');
+    }
+    await kirimHasilWawancaraKeAdmin(res.hasil);
+    if (typeof showToast === 'function') {
+      showToast('Hasil wawancara terkirim ke admin ✅', 'success');
+    }
+  } catch (err) {
+    console.error('[AI] selesaikan wawancara:', err);
+    appendInterviewChat('ai', '⚠️ Gagal merangkum hasil: ' + esc(err && err.message ? err.message : 'AI sibuk'));
+  } finally {
+    if (doneBtn) doneBtn.disabled = false;
+    if (btnEl) btnEl.disabled = false;
+    if (inputEl) inputEl.disabled = false;
+    if (typingEl) typingEl.classList.add('hidden');
+    if (inputEl) inputEl.focus();
+  }
 }
 
 async function mulaiWawancaraInterview() {
@@ -342,9 +400,25 @@ async function sendInterviewMessage() {
 
   try {
     const res = await callAPI('processAiInterview', payload);
-    if (res.reply) {
-      appendInterviewChat('ai', res.reply);
-      interviewHistory.push({ role: 'ai', content: res.reply });
+    if (res && res.reply) {
+      const reply = String(res.reply);
+      const marker = reply.indexOf('===HASIL===');
+      if (marker >= 0) {
+        // Wawancara selesai: pisahkan ucapan penutup & JSON hasil.
+        const chatPart = reply.slice(0, marker).trim();
+        const hasilTxt = reply.slice(marker + '===HASIL==='.length).trim();
+        if (chatPart) appendInterviewChat('ai', chatPart);
+        const hasil = cobaParseJsonLoose(hasilTxt);
+        if (hasil) {
+          await kirimHasilWawancaraKeAdmin(hasil);
+        } else {
+          appendInterviewChat('ai', hasilTxt);
+        }
+        interviewHistory.push({ role: 'assistant', content: chatPart || reply });
+      } else {
+        appendInterviewChat('ai', reply);
+        interviewHistory.push({ role: 'assistant', content: reply });
+      }
     }
   } catch (err) {
     appendInterviewChat('ai', '<i>Koneksi terputus. Silakan kirim ulang jawabanmu.</i>');
@@ -354,6 +428,49 @@ async function sendInterviewMessage() {
     inputEl.focus();
     typingEl.classList.add('hidden');
   }
+}
+
+function cobaParseJsonLoose(text) {
+  let t = String(text || '').trim();
+  t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  try {
+    return JSON.parse(t);
+  } catch (e) {
+    const s = t.indexOf('{');
+    const e2 = t.lastIndexOf('}');
+    if (s >= 0 && e2 > s) {
+      try {
+        return JSON.parse(t.slice(s, e2 + 1));
+      } catch (e3) {
+        /* gagal */
+      }
+    }
+    return null;
+  }
+}
+
+// Simpan hasil wawancara (dari penutup AI) → ai_form_submissions (mode
+// 'wawancara') supaya admin bisa lihat & update biodata dari hasil wawancara.
+async function kirimHasilWawancaraKeAdmin(hasil) {
+  let res = null;
+  try {
+    res = await callAPI('simpanHasilWawancara', [{ wa: currentKandidatWa, hasil }]);
+  } catch (err) {
+    console.error('[AI] simpan hasil wawancara:', err);
+  }
+  const score = hasil.score !== undefined ? hasil.score + '/10' : '-';
+  const nilai = hasil.nilai ? ' (' + String(hasil.nilai) + ')' : '';
+  const nField = hasil.biodata ? Object.keys(hasil.biodata).length : 0;
+  let msg =
+    '📊 **Hasil Wawancara**\n⭐ Skor: ' +
+    score +
+    nilai +
+    '\n🧬 Data biodata terekam: ' +
+    nField +
+    ' field';
+  if (hasil.rekomendasi) msg += '\n💡 Rekomendasi: ' + String(hasil.rekomendasi);
+  msg += res && res.success ? '\n✅ **Hasil terkirim ke admin** — siap di-update ke biodata.' : '\n⚠️ Gagal kirim hasil ke admin.';
+  appendInterviewChat('ai', msg);
 }
 
 // ==========================================
@@ -384,7 +501,15 @@ function pastikanBarParseAdminAi() {
     '<input type="tel" id="admin-ai-wa" placeholder="WA kandidat (08… atau 628…)" class="flex-1 min-w-0 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500">' +
     '<input type="text" id="admin-ai-bidang" placeholder="Bidang (mis. Kaigo)" class="w-24 min-w-0 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500" title="Bidang SSW — isi untuk kandidat yang belum terdaftar">' +
     '<button type="button" onclick="generateWawancaraModelAdmin()" class="flex-shrink-0 px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg shadow-md transition active:scale-95" title="Buat model wawancara sesuai bidang SSW kandidat (copy ke Google Sheet)">' +
-    '<i class="fas fa-clipboard-list mr-1"></i><span class="hidden md:inline">Model Wawancara</span>' +
+    '<i class="fas fa-clipboard-list mr-1"></i><span class="hidden md:inline">Model Doc</span>' +
+    '</button>' +
+    '</div>' +
+    '<div class="flex items-center gap-2 mt-2">' +
+    '<button type="button" onclick="lihatHasilWawancaraAdmin()" class="flex-1 px-2 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-[11px] font-bold rounded-lg transition active:scale-95" title="Lihat hasil wawancara AI kandidat (dari Simulator Wawancara)">' +
+    '<i class="fas fa-file-alt mr-1 text-sky-400"></i>Hasil Wawancara' +
+    '</button>' +
+    '<button type="button" onclick="updateBiodataDariHasilAdmin()" class="flex-1 px-2 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-lg transition active:scale-95" title="Terapkan biodata dari hasil wawancara ke master kandidat">' +
+    '<i class="fas fa-database mr-1"></i>Update Biodata' +
     '</button>' +
     '</div>' +
     '<div id="admin-ai-parse-status" class="hidden mt-2 text-[11px] text-sky-300 bg-sky-900/30 border border-sky-700/50 rounded-lg px-3 py-2"></div>';
@@ -527,6 +652,129 @@ async function generateWawancaraModelAdmin() {
   } catch (err) {
     console.error('[AI] generateWawancaraModel:', err);
     tambahPesanAdminAi('⚠️ Gagal membuat model wawancara: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    if (statusEl) {
+      statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
+      setTimeout(() => statusEl.classList.add('hidden'), 8000);
+    }
+  }
+}
+
+// ==========================================
+// HASIL WAWANCARA (admin): lihat hasil wawancara AI kandidat + update biodata
+// ==========================================
+let lastAdminHasil = null;
+
+async function lihatHasilWawancaraAdmin() {
+  if (!isAdmin) {
+    showToast(tr('ui.toast_admin_login_first'), 'error');
+    return;
+  }
+  const waInput = document.getElementById('admin-ai-wa');
+  const wa = waInput ? waInput.value.trim() : '';
+  if (!wa && !currentAiCandidateId) {
+    showToast('Isi WA kandidat dulu atau pilih kandidatnya', 'error');
+    return;
+  }
+  const statusEl = document.getElementById('admin-ai-parse-status');
+  if (statusEl) {
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = '⏳ Mengambil hasil wawancara…';
+  }
+  try {
+    const res = await callAPI('getHasilWawancara', [
+      { candidateId: currentAiCandidateId || undefined, wa: wa || undefined },
+    ]);
+    if (!res || res.success === false) {
+      throw new Error((res && res.error) || 'Gagal ambil hasil wawancara');
+    }
+    if (!res.hasil) {
+      tambahPesanAdminAi(
+        'ℹ️ Belum ada hasil wawancara untuk kandidat ini — kandidat harus menyelesaikan Simulator Wawancara dulu.',
+        'ai',
+      );
+      if (statusEl) statusEl.classList.add('hidden');
+      return;
+    }
+    lastAdminHasil = {
+      wa: res.wa || wa,
+      hasil: res.hasil,
+      nama: res.nama || (res.hasil.biodata && res.hasil.biodata.nama) || '',
+    };
+    const h = res.hasil;
+    const bioKeys = h.biodata ? Object.keys(h.biodata) : [];
+    tambahPesanAdminAi(
+      '📊 **Hasil Wawancara — ' +
+        esc(lastAdminHasil.nama || res.wa) +
+        '**' +
+        '\n🗓️ ' +
+        esc(res.updatedAt || '-') +
+        '\n⭐ Skor: ' +
+        (h.score !== undefined ? esc(String(h.score)) + '/10' : '-') +
+        (h.nilai ? ' (' + esc(String(h.nilai)) + ')' : '') +
+        '\n💡 Rekomendasi: ' +
+        esc(String(h.rekomendasi || '-')) +
+        '\n🧬 Biodata terekam: ' +
+        bioKeys.length +
+        ' field' +
+        (bioKeys.length ? '\n👉 Klik **Update Biodata** untuk menerapkan ke master.' : ''),
+      'ai',
+    );
+    if (waInput && res.wa) waInput.value = res.wa;
+    if (statusEl) statusEl.classList.add('hidden');
+  } catch (err) {
+    console.error('[AI] lihat hasil wawancara:', err);
+    tambahPesanAdminAi('⚠️ Gagal ambil hasil: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    if (statusEl) {
+      statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
+      setTimeout(() => statusEl.classList.add('hidden'), 8000);
+    }
+  }
+}
+
+async function updateBiodataDariHasilAdmin() {
+  if (!isAdmin) {
+    showToast(tr('ui.toast_admin_login_first'), 'error');
+    return;
+  }
+  const bio =
+    lastAdminHasil && lastAdminHasil.hasil && lastAdminHasil.hasil.biodata
+      ? lastAdminHasil.hasil.biodata
+      : null;
+  if (!bio || Object.keys(bio).length === 0) {
+    showToast('Tidak ada biodata dari hasil wawancara — klik Hasil Wawancara dulu', 'error');
+    return;
+  }
+  const waInput = document.getElementById('admin-ai-wa');
+  const wa = lastAdminHasil.wa || (waInput ? waInput.value.trim() : '');
+  if (!wa) {
+    showToast('Isi WA kandidat dulu', 'error');
+    return;
+  }
+  const statusEl = document.getElementById('admin-ai-parse-status');
+  if (statusEl) {
+    statusEl.classList.remove('hidden');
+    statusEl.textContent = '⏳ Meng-update biodata dari hasil wawancara…';
+  }
+  try {
+    const res = await callAPI('submitMasterForm', [Object.assign({ wa }, bio)]);
+    if (!res || res.success === false) {
+      throw new Error((res && res.message) || 'Gagal simpan biodata');
+    }
+    tambahPesanAdminAi(
+      '✅ **Biodata ' +
+        esc(lastAdminHasil.nama || wa) +
+        ' ter-update dari hasil wawancara** (' +
+        Object.keys(bio).length +
+        ' field).',
+      'ai',
+    );
+    if (typeof showToast === 'function') {
+      showToast('Biodata ter-update dari hasil wawancara', 'success');
+    }
+    if (statusEl) statusEl.classList.add('hidden');
+  } catch (err) {
+    console.error('[AI] update biodata dari hasil:', err);
+    tambahPesanAdminAi('⚠️ Gagal update biodata: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);

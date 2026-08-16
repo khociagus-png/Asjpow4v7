@@ -23,6 +23,10 @@ const CANDIDATE_ACTIONS = new Set([
   'simpanBerkasTahapan',
   'simpanDataTtdNaitei',
   'gantiPasswordKandidat',
+  // Simulator wawancara (VIP) — wajib token kandidat (backend requireRole).
+  'processAiInterview',
+  'selesaikanWawancara',
+  'simpanHasilWawancara',
   // AI CV (ai_form, flow=master) dipakai KANDIDAT (VIP) DAN ADMIN (tombol AI CV
   // di tabel admin → bridge window berbagi localStorage). Kirim token yang
   // sedang aktif: utamakan admin supaya server bisa izinkan admin membuka AI CV
@@ -75,6 +79,7 @@ const ADMIN_ACTIONS = new Set([
   'buildAdminAiCandidateSummary',
   'parseDokumenBiodata',
   'generateWawancaraModel',
+  'getHasilWawancara',
   // Signed upload URL ke Storage (files.ts) - sekarang wajib sesi admin.
   'getUploadUrls',
 ]);
@@ -85,6 +90,8 @@ const NETLIFY_FUNCTIONS = {
   processAdminAIChat: 'ai-chat',
   processSiswaAIChat: 'ai-chat',
   processAiInterview: 'ai-chat',
+  selesaikanWawancara: 'ai-chat',
+  simpanHasilWawancara: 'ai-chat',
   // Form AI + upload berkas
   submitDataAsj: 'ai-form-submit',
   submitDaftarSiswa: 'ai-form-submit',
@@ -94,6 +101,7 @@ const NETLIFY_FUNCTIONS = {
   buildAdminAiCandidateSummary: 'admin-ai-context',
   parseDokumenBiodata: 'admin-ai-context',
   generateWawancaraModel: 'admin-ai-context',
+  getHasilWawancara: 'admin-ai-context',
   // Jadwal & tugas
   checkAndSendAgendaReminders: 'schedule-reminders',
   simpanJadwalBaru: 'schedule-reminders',

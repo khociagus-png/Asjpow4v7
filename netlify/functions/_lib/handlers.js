@@ -1405,6 +1405,12 @@ async function dispatchAction(action, payload, sessionToken) {
       return ai.handleParseDokumenBiodata(payload, sessionToken);
     case 'generateWawancaraModel':
       return ai.handleGenerateWawancaraModel(payload, sessionToken);
+    case 'simpanHasilWawancara':
+      return ai.handleSimpanHasilWawancara(payload, sessionToken);
+    case 'selesaikanWawancara':
+      return ai.handleSelesaikanWawancara(payload, sessionToken);
+    case 'getHasilWawancara':
+      return ai.handleGetHasilWawancara(payload, sessionToken);
     case 'ubahStatusJob':
       return handleUbahStatusJob(payload, sessionToken);
     case 'hapusJobData':
