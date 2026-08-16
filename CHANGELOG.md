@@ -1,6 +1,38 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (🐛 Fix CV Master — simpan gagal PGRST204 + kenalan/auto-fill kosong + simpan AI hapus kenalan).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`89a1f03` — reload-loop ai_form + anti-duplikat lamaran).
+
+---
+
+## 2026-08-16 — `89a1f03` 🔍 Reload-loop ai_form + anti-duplikat lamaran (database_asj_form)
+
+### Gejala
+
+- Halaman **ai_form** (AI form / CV AI) reload berulang tak berujung (14× load/detik), chatBox kosong.
+- Duplikat lamaran di mail inbox: WA `6285692313050` + job `UMUM` ada 2 baris (#143 LULUS + #229 MENUNGGU) — "lamar loker dobel".
+
+### Akar masalah
+
+- `ai_form`: guard VIP memanggil `getAppData('kandidat')` tanpa sesi kandidat → backend `sessionInvalid` → `callAPI` reload halaman → loop.
+- `database_asj_form` **tanpa constraint unik `(no_wa, code_job)`** + semua jalur simpan GET-then-POST → race paralel bisa bikin baris dobel. Baris #229 dibuat situs lama (`asjportal.netlify.app`, DB sama) — `timestamp` null, bukan lewat `submitApply` baru.
+
+### Perbaikan
+
+- `js/pages/ai_form.js`: tanpa sesi kandidat, dibiarkan masuk (keputusan final di server).
+- `db/forms.js`: helper `upsertFormRow` — POST `on_conflict=(no_wa,code_job)` + `Prefer: resolution=merge-duplicates`, fallback INSERT bila constraint belum ada (42P10). Dipakai `submitApply`, `simpanKandidatDanUpload`, `syncFormMailDariUpload`.
+- Dedupe data: `bun run dedupe:apply` → gabung ke #143 (LULUS, deep-merge `ai_data_json`), hapus #229; koreksi `tgl_lahir` kembali ISO `2001-08-01` + trim `tempat_lahir`. Dry-run kini 0.
+- `e2e/standalone-smoke.mjs` baru (15 cek standalone).
+
+### ⚠️ Perlu aksi di Supabase (jaminan anti-dobel permanen)
+
+```sql
+ALTER TABLE database_asj_form
+ADD CONSTRAINT database_asj_form_no_wa_code_job_key UNIQUE (no_wa, code_job);
+```
+
+### Verifikasi
+
+Test 91/91 · lint 0 error · `node --check` ✓ · dedupe dry-run 0 ✓ · live: 3× submitApply WA+job sama → 1 baris (usia terbaru menang) · E2E 8 suite lulus (saat preview hidup).
 
 ---
 

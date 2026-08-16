@@ -4,7 +4,38 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🐛 Fix besar CV Master: simpan master-full yang SELALU gagal (PGRST204 kolom tak ada) + kenalan/auto-fill kosong (merge ai_data_json) + simpan AI tidak menghapus kenalan.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🔍 Debug sistematis semua area belum dites: fix reload-loop ai_form + anti-duplikat lamaran (database_asj_form) + dedupe warisan bersih 0.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff) — commit `89a1f03`
+
+### 🔍 Debug sistematis (semua yang belum dites) + fix reload-loop ai_form & anti-duplikat lamaran
+
+**Fokus user:** review apakah setelah semua difix masih ada data dobel (update kandidat & lamar loker). **Larangan: jangan tes Fonnte** (review kode saja, tidak ada send WA ke siapa pun).
+
+**Yang diuji (semua lulus):**
+- Fase statis: `node --check` semua JS · lint 0 error · unit test **91/91** · `check:globals` 0 kolisi · audit-globals HIGH=0 · build idempotent.
+- E2E regresi **8 suite** (login-check, upload-check, biodata-check, share-view, modal-runtime, backend-fast-path, probe) — semua lulus.
+- Diag handler langsung ke Supabase asli: CRUD jadwal/tugas round-trip + cleanup, AI chat fungsional, getAppData mode admin.
+- Smoke standalone BARU (`e2e/standalone-smoke.mjs`, ditrack): 15 cek — ai_form stabil + chatBox terisi, apply-full, master-full, siswa-baru.
+
+**Bug nyata ditemukan & difix:**
+1. **Reload-loop ai_form** — guard VIP `verifikasiAksesAiCv` memanggil `getAppData('kandidat')` tanpa sesi kandidat → backend balas `sessionInvalid` → `callAPI` reload halaman → loop tak berujung (14× load/detik, chatBox kosong). Fix di `js/pages/ai_form.js`: tanpa sesi kandidat dibiarkan masuk (keputusan final di server, sesuai komentar kode). Halaman standalone, tidak masuk bundel → tanpa build.
+2. **Duplikat lamaran `database_asj_form`** (WA `6285692313050` + job `UMUM`: #143 LULUS & #229 MENUNGGU) — akar: DB **tidak punya constraint unik `(no_wa, code_job)`** + semua jalur simpan GET-then-POST (race paralel bisa dobel). Baris #229 `timestamp` null → dibuat situs lama (`asjportal.netlify.app`, DB sama, masih dipakai user), bukan `submitApply` baru.
+   - **Resolusi data:** `bun run dedupe:apply` (backup `.freebuff/dedupe-backup-2026-08-16T18-05-52-546Z.json`) → gabung ke #143 (LULUS, deep-merge `ai_data_json`), hapus #229; koreksi pasca-merge: `tgl_lahir` kembali ISO `2001-08-01` (merge newest-wins sempat menimpa jadi `01-08-2001`), `tempat_lahir` di-trim. Dedupe dry-run kini **0 grup / 0 baris**.
+   - **Fix kode:** helper `upsertFormRow` di `db/forms.js` — POST `on_conflict=no_wa,code_job` + `Prefer: resolution=merge-duplicates`, fallback INSERT biasa kalau constraint belum ada (HTTP 400 42P10). Dipakai di `submitApply`, `simpanKandidatDanUpload`, `syncFormMailDariUpload` (upload paralel KTP+KK tidak bikin mail dobel).
+   - **Verifikasi live:** 3× `submitApply` WA+job sama → tetap **1 baris**, data terbaru menang (usia 27), cleanup OK.
+3. **Audit jalur update kandidat** (`database_candidate`/`master_database_candidate`): semua jalur update PATCH by id/WA (tidak pernah INSERT baru) — POST hanya saat baris belum ada (baru pertama). Tidak ada jalur dobel untuk update.
+
+**⚠️ Aksi user (wajib untuk jaminan anti-dobel permanen):** jalankan di SQL Editor Supabase:
+```sql
+ALTER TABLE database_asj_form
+ADD CONSTRAINT database_asj_form_no_wa_code_job_key UNIQUE (no_wa, code_job);
+```
+Tanpa constraint ini, `upsertFormRow` otomatis fallback ke INSERT biasa (perilaku lama). Setelah constraint ada, race paralel mustahil menghasilkan baris dobel — `submitApply` ganda juga dijamin 1 baris.
+
+**Catatan:** preview sandbox sempat down (`freebuff-preview` tidak ditemukan — infra Freebuff). Semua verifikasi di atas tanpa browser kecuali E2E yang sudah dijalankan saat preview hidup. Kalau preview sudah pulih dari UI: `BASE_URL="http://localhost:3000" node e2e/standalone-smoke.mjs` untuk regresi cepat.
 
 ---
 
