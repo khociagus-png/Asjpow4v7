@@ -1,6 +1,25 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3.18 — optimasi paralel tarikan data backend).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3.18 lanjutan — pembersihan index redundan).
+
+---
+
+## 2026-08-16 — Fase 3.18 lanjutan: pembersihan index redundan (perf)
+
+### Index redundan dibuktikan dari pg_indexes
+
+- `idx_cand_no_wa` redundant dengan `idx_dc_no_wa_loker`
+  (btree (no_wa, id_loker_pilihan) — prefix no_wa melayani lookup WA).
+- `idx_master_no_wa` redundant dengan constraint unik
+  `master_database_candidate_no_wa_key` (UNIQUE btree no_wa).
+
+### Revisi file migrasi
+
+- `2026-08-16-index-perf.sql`: CREATE idx_cand_no_wa & idx_master_no_wa
+  dihapus; section 4 baru berisi DROP INDEX IF EXISTS keduanya (idempotent)
+  + catatan opsional verifikasi idx_berkas_wa. File aman ditempel ulang utuh.
+- Aksi DB (user, SQL Editor): tempel ulang seluruh file → index redundan
+  ter-drop, sisanya tetap. Tanpa perubahan kode backend/frontend.
 
 ---
 

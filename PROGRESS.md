@@ -4,7 +4,21 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **Fase 3.18**: optimasi paralel tarikan data backend (getAppData kandidat −45%, getCandidatesPage −57%, getAppData admin −18%) — terukur dengan `scripts/verify-index-perf.mjs`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — **Fase 3.18 lanjutan**: pembersihan index redundan (`idx_cand_no_wa`, `idx_master_no_wa`) — dibuktikan dari definisi `pg_indexes` + revisi file migrasi.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3.18 lanjutan — pembersihan index redundan (bukti dari pg_indexes)
+
+Dari `indexdef` yang user paste (SQL Editor): `idx_cand_no_wa` & `idx_master_no_wa` (dibuat di migrasi Fase 3.17) **redundan dengan index lama yang sudah ada** → dihapus dari rencana; file migrasi direvisi.
+
+- **`idx_cand_no_wa` (btree no_wa) redundant** dengan `idx_dc_no_wa_loker` = btree **(no_wa, id_loker_pilihan)** — kolom `no_wa` di posisi pertama, jadi semua query `no_wa = ?` / `IN` (findCandidateByWaFiltered, fetchMasterByWa, fetchMasterLightByWa) sudah terlayani prefix btree index lama.
+- **`idx_master_no_wa` (btree no_wa) redundant** dengan constraint unik `master_database_candidate_no_wa_key` (UNIQUE btree no_wa) — index constraint juga melayani lookup.
+- **Yang TETAP dipertahankan**: `idx_asj_form_timestamp/no_wa/code_job` (tidak ada padanan lama), `idx_cand_updated_at`, `idx_cand_loker_trgm` (GIN ILIKE — `idx_candidate_id_loker` btree hanya eq eksak, beda fungsi), `idx_berkas_wa` (vs `idx_pemberkasan_wa_tahap` belum terverifikasi — tabel 5 baris, dampak ~nol, dibiarkan dulu), plus semua index/constraint lama.
+- **`netlify/migrations/2026-08-16-index-perf.sql` (REVISI)**: CREATE `idx_cand_no_wa` & `idx_master_no_wa` dihapus dari daftar + section 4 baru berisi `DROP INDEX IF EXISTS idx_cand_no_wa; DROP INDEX IF EXISTS idx_master_no_wa;` (idempotent) + catatan verifikasi opsional `idx_berkas_wa`. File kini aman ditempel ulang utuh — tidak membuat ulang index redundan.
+- **Aksi di DB (oleh user, SQL Editor)**: jalankan ulang seluruh isi file yang sudah direvisi → index redundan ter-drop, sisanya tetap. Tidak ada perubahan kode backend/frontend — murni pembersihan index.
 
 ---
 
