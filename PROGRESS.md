@@ -4,7 +4,22 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 8: admin_modal (`js/admin_modal/*`) jadi ESM (commit `720e28e`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 9: admin_ops (`js/admin_ops/*`) jadi ESM (commit `eee8f5f`).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 9 — admin_ops: js/admin_ops/* (6 file) ESM
+
+- **`js/admin_ops/loading.js` → ESM** (2): setSkeletonLoading/jalankanSemuaSkeleton — `export` + 2 alias (engine/init.js `window.jalankanSemuaSkeleton`); `window.isAdmin/isKandidat` (accessor).
+- **`js/admin_ops/schedule.js` → ESM** (3): getStatusWaktu/renderDashboardAgenda/renderJadwal — `export` + 3 alias (render/admin.js + api/wa.js via window); `window.ALL_SCHEDULES` (accessor), `window.limitJad` (accessor, di-reassign bare di inline onclick `limitJad+=10`).
+- **`js/admin_ops/candidates.js` → ESM** (4): bukaModalListKandidat/keluarkanKandidatDariJob/mulaiKirimUndanganGrup/bukaModalCekDataSiswa — `export` + 4 alias; `window.currentCopyListTxt` (accessor state.js), `window.upsertCandidateMemory/patchFormMail` (api/forms.js ESM), `window.renderAdminFull`.
+- **`js/admin_ops/sysconfig.js` → ESM** (7 + `CONFIG_CATEGORIES` const): renderSysConfig/tambahConfigItem/hapusConfigItem/pindahConfigItem/simpanConfigKeServer/simpanPengumuman — `export` + 6 alias; `window.DROPDOWNS` (accessor, mutasi array via referensi), `window.CURRENT_LANG` (i18n ESM, disinkron ulang saat toggle bahasa), `event.currentTarget` → **`window.event.currentTarget`** (strict mode ESM + no-undef).
+- **`js/admin_ops/migration.js` → ESM** (3): jalankanMigrasi/renderMigrasiResults/salinSqlMigrasi — `export` + 3 alias.
+- **`js/admin_ops/drive.js` → ESM** (8 + `DRIVE_CANDIDATES`): muatMigrasiDrive/bukaModalMigrasiDrive/tutupModalMigrasiDrive/renderMigrasiDriveList/migrasiDriveFieldHtml/driveSetStatus/driveBacaFileBase64/uploadDriveField — `export` + 8 alias; `DRIVE_CANDIDATES` var internal (reassign lokal, tanpa pemakai eksternal → tidak di-alias); `window.cekEkstensiFile` (03_candidate classic).
+- Referensi global implisit di-window-kan eksplisit (scan no-undef **0 error**). Build: ESM_CORE + 6 entri → bundel `app-079a607684.js` (418.5 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 394 simbol). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372 · module-map 461 simbol.
+- Verifikasi: node --check ESM 6 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login, upload, biodata ✓ + **cek admin_ops terarah**: tab Pengaturan render (11 kategori dropdown via accessor), tabel Jadwal render, modal list kandidat terbuka + terisi, 0 error JS ✓.
 
 ---
 

@@ -1,11 +1,12 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 8 — core (i18n/api-client) + init (state/util) +
-> auth + engine + render + api (`js/api/*`) + **admin_modal (`js/admin_modal/*`)
-> sudah ESM**. Sisa classic: `init/{theme,preview,nav,boot}`, `admin_ops/*`,
-> `ai_copilot/*`, `01_public`, `03_candidate`, `08_wa_pintar`,
-> `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`,
-> `apply-docs`, `upload-guard`, `helpers_cv`, `pwa` (lihat urutan §6).
+> **Status:** Fase 3 langkah 9 — core (i18n/api-client) + init (state/util) +
+> auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
+> + **admin_ops (`js/admin_ops/*`) sudah ESM**. Sisa classic:
+> `init/{theme,preview,nav,boot}`, `ai_copilot/*`, `01_public`,
+> `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`,
+> `12_esign_match`, `13_rincian_builder`, `apply-docs`, `upload-guard`,
+> `helpers_cv`, `pwa` (lihat urutan §6).
 > Dokumen ini = hasil **audit global pollution** + pola **bridge** yang dipakai
 > supaya konversi bertahap TANPA regresi. Update di sini setiap kali modul baru
 > di-ESM-kan (lihat urutan konversi di bagian 6).
@@ -337,16 +338,18 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
    (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
-   `js/admin_modal/*` ✅ (langkah 8, turn ini)** — catatan: fungsi yang
-   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
-   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
-   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
-   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
-   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
-   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
-   harus dicek self-reference alias (`window.x = window.x`) DAN literal
-   template (`<tr` → `<window.tr` — ketahuan langkah 7, diperbaiki di
-   render/public-admin-candidate-mail) setelah jalan.
+   `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9, turn
+   ini)** — catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat
+   alias window; referensi global implisit di dalam modul di-window-kan
+   eksplisit; **antar-file ESM belum boleh `import` (build masih concat +
+   IIFE per file) — panggilan lintas modul ESM memakai `window.*` eksplisit
+   sampai bundle jadi ESM (lihat §3.3)**. `render/mail.js` punya `var esc`
+   LOKAL (hoisting mencakup renderFormInbox) — jangan di-window-kan; blanket
+   replace lintas file harus dicek self-reference alias (`window.x =
+   window.x`) DAN literal template (`<tr` → `<window.tr` — ketahuan langkah
+   7, diperbaiki di render/public-admin-candidate-mail) setelah jalan.
+   Catatan langkah 9: `event.currentTarget` (implicit global window.event)
+   → `window.event.currentTarget` biar lolos no-undef + strict mode.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -357,6 +360,25 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 9 — admin_ops/* ESM (commit `eee8f5f`, turn ini)
+
+- `node --check --input-type=module` 6 file js/admin_ops/* ✓ · scan `no-undef`
+  **0 error** ✓ (state via accessor isAdmin/isKandidat/ALL_SCHEDULES/limitJad/
+  currentCopyListTxt/DROPDOWNS; api/forms.js ESM upsertCandidateMemory/
+  patchFormMail; render ESM renderAdminFull; helper classic cekEkstensiFile;
+  `event` → `window.event`) · `bun run lint` 0/12 ✓ · `bun run test` **81/81**
+  ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **394 simbol**) ·
+  bundel `app-079a607684.js` (418.5 KB) · 0 export bocor ✓ · idempoten ✓.
+- 26 alias window.* total (6 file). `DRIVE_CANDIDATES` var internal tanpa
+  pemakai eksternal → di-export tapi tidak di-alias. Audit: 52 file ·
+  **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372 (`.freebuff/audit-globals.json`
+  + module-map 461 simbol diperbarui).
+- **E2E SEMUA LULUS**: login-check, upload-check, biodata-check ✓ + cek
+  admin_ops terarah: tab Pengaturan render (11 kategori dropdown via
+  accessor), tabel Jadwal render, modal list kandidat terbuka + terisi,
+  0 error JS ✓.
 
 ### Langkah 8 — admin_modal/* ESM (commit `720e28e`, turn ini)
 

@@ -1,6 +1,18 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 8 — commit `720e28e`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 9 — commit `eee8f5f`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 9: admin_ops js/admin_ops/* ESM (refactor)
+
+### Refactor: schedule, candidates, sysconfig, loading, migration, drive jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 6 file (27 deklarasi) → export + 26 alias window.*; `DRIVE_CANDIDATES` di-export tanpa alias (internal, tanpa pemakai eksternal).
+- Referensi global implisit di-window-kan eksplisit (no-undef 0 error): state via accessor (isAdmin/isKandidat/ALL_SCHEDULES/limitJad/currentCopyListTxt/DROPDOWNS), core/util via window, api/forms.js ESM (upsertCandidateMemory/patchFormMail), helper classic (cekEkstensiFile), `event` → `window.event` (strict mode).
+- Bundel `app-079a607684.js` (418.5 KB, 0 export bocor, nol kolisi, idempoten). Audit 52 file / 396 simbol, HIGH=0.
+- Verifikasi tambahan di browser: tab Pengaturan render (11 kategori dropdown), tabel Jadwal, modal list kandidat terbuka + terisi, 0 error JS.
 
 ---
 

@@ -354,6 +354,26 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E login/upload/biodata
       **SEMUA LULUS** ✓ · cek modal CV terarah (bukaDigitalCV → modal render,
       Edit Cepat tampil, 0 error JS) ✓.
+- [x] **Langkah 9 — `js/admin_ops/*` ESM (6 file: schedule, candidates, sysconfig, loading, migration, drive)** — commit `eee8f5f`
+      Domain admin ops (pecahan 11_admin_ops.js): `loading.js` (2: skeleton
+      anti layar hitam), `schedule.js` (3: status waktu + agenda dashboard +
+      tabel jadwal), `candidates.js` (4: list kandidat per job + keluarkan dari
+      job + undangan grup massal + cek data siswa), `sysconfig.js` (7 +
+      CONFIG_CATEGORIES: kelola dropdown/pipeline dari web + pengumuman),
+      `migration.js` (3: jalankan migrasi + render hasil + salin SQL),
+      `drive.js` (8 + DRIVE_CANDIDATES: migrasi berkas Drive → Storage) →
+      `export` + 26 alias window.*. Referensi global implisit di-window-kan
+      eksplisit (no-undef 0 error): state via accessor (isAdmin/isKandidat/
+      ALL_SCHEDULES/limitJad/currentCopyListTxt/DROPDOWNS), core/util via
+      window, api/forms.js ESM (upsertCandidateMemory/patchFormMail), render
+      ESM (renderAdminFull), helper classic (cekEkstensiFile),
+      `event` → `window.event` (strict mode). Build: ESM_CORE + 6 entri →
+      `app-079a607684.js` (418.5 KB, 0 export bocor, idempoten).
+      check:globals nol kolisi (45 file / 394 simbol). Audit 52 file /
+      **396 simbol** HIGH=0. Verifikasi: node --check ESM 6 file ✓ · no-undef
+      0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E login/upload/biodata
+      **SEMUA LULUS** ✓ · cek admin_ops terarah (tab Pengaturan 11 kategori,
+      tabel Jadwal, modal list kandidat, 0 error JS) ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
