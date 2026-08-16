@@ -1,8 +1,29 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `8874164`.
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: `<next>`.
 
 ---
+
+## 2026-08-16 — Fix simpan AI form (CHECK constraint) + verifikasi auto-fill
+
+### Commit `<next>` — Fix: AI form gagal simpan (mode/status ditolak DB)
+- **BUG:** `handleSubmitDataAsj` (alur `ai_form.html`) menulis
+  `mode:'ai'` + `status:'SUBMITTED'` ke `ai_form_submissions` — tetapi
+  tabel itu punya CHECK constraint yang hanya mengizinkan
+  `mode='AI_MASTER'` + `status='MENUNGGU'` (HTTP 400, kode 23514).
+  Akibatnya **semua simpan dari AI form gagal diam-diam** (toast error,
+  tidak ada baris di Supabase) — kandidat bisa mengisi & chat selesai tapi
+  datanya tidak pernah tersimpan.
+- Fix: mode → `AI_MASTER`, status → `MENUNGGU`, discriminator tetap
+  `submitted_via='ai_form'` (konsisten dengan `submitted_via='interview'`
+  dari hasil wawancara). Dedup existing juga kini menyaring
+  `submitted_via='ai_form'` supaya baris interview tidak tertimpa.
+- Verifikasi: round-trip WA tes — 8 seksi (identitas/fisik/medis/wawancara/
+  sertifikasi/pendidikan/pekerjaan/keluarga) **semua masuk** ke
+  `ai_form_submissions` + `ai_data_json` master ikut ter-update; auto-fill
+  browser dengan sesi kandidat asli mengisi semua field (nama, katakana,
+  TTL, TB/BB, alamat, HP, email) — tanpa sesi hanya subset identitas
+  (by design REVIEW M2); `getMasterDataByWa` (master-full) 140 kolom ✅.
 
 ## 2026-08-16 — Sesi: pesan jelas + auto-login kokoh
 

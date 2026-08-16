@@ -10,6 +10,25 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
 
+### Commit `<next>` — Fix: AI form gagal simpan ke Supabase + verifikasi auto-fill
+
+- **Permintaan user:** "Ai form dan CV ai check apakah semua data bisa
+  masuk dan save di superbase dan auto fill sudah benar ambil semua".
+- **Temuan BUG:** `submitDataAsj` (ai_form.html) menulis
+  `mode:'ai'` + `status:'SUBMITTED'` ke `ai_form_submissions` — ditolak
+  CHECK constraint DB (hanya `AI_MASTER`/`MENUNGGU` diizinkan, HTTP 400
+  23514) → **simpan AI form selalu gagal** walau chat/isi sukses.
+  Dikonfirmasi lewat probe nilai constraint & round-trip sebelum fix.
+- Fix di `netlify/functions/_lib/actions-ai.js`: `handleSubmitDataAsj`
+  pakai `mode='AI_MASTER'`, `status='MENUNGGU'`, dedup existing disaring
+  `submitted_via='ai_form'` (tidak menimpa baris interview).
+- Verifikasi: round-trip WA tes → 8 seksi semua masuk ke Supabase +
+  master `ai_data_json` ikut update; auto-fill browser dengan sesi
+  kandidat asli → semua field terisi (nama/katakana/TTL/TB/BB/alamat/HP/
+  email); tanpa sesi → subset identitas saja (by design REVIEW M2);
+  `getMasterDataByWa` (master-full) → 140 kolom lengkap. Unit test 49/49,
+  `node --check` bersih.
+
 ### Commit `8874164` — Sesi: pesan jelas + auto-login kokoh
 
 - **Permintaan user:** "kok bermasalah terus sih kandidat sesi apa admin

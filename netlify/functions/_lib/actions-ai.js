@@ -778,14 +778,15 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       wawancara: d.wawancara || {},
     };
     const nama = String(identitas.nama_lengkap || '').trim();
-    const mode = String(ctx.flow || 'ai').toLowerCase();
     const jobCode = String(ctx.job || ctx.jobCode || '');
+    // CHECK constraint tabel ini hanya izinkan mode='AI_MASTER' + status='MENUNGGU'
+    // (discriminator sesi: submitted_via='ai_form' vs 'interview').
     const body = {
       wa,
       nama_lengkap: nama,
-      mode,
+      mode: 'AI_MASTER',
       job_code: jobCode,
-      status: 'SUBMITTED',
+      status: 'MENUNGGU',
       ai_data_json: JSON.stringify(aiData),
       ai_updated_at: new Date().toISOString(),
       photo_url: d.fotoFile || '',
@@ -798,7 +799,9 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       query: { select: '*', limit: 100 },
     });
     const existing = (Array.isArray(existingRows) ? existingRows : []).find(
-      (r) => supabase.normalizeWa(String(r.wa || '')) === wa,
+      (r) =>
+        supabase.normalizeWa(String(r.wa || '')) === wa &&
+        String(r.submitted_via || '') === 'ai_form',
     );
     if (existing && existing.id !== undefined) {
       await supabase.supabaseJson('PATCH', 'ai_form_submissions', {
