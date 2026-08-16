@@ -26,12 +26,13 @@ async function handleGetDaftarSiswaBaru(payload, sessionToken) {
       },
     });
     const data = (Array.isArray(rows) ? rows : []).map((r) => {
+      // Satu-satunya normalisasi gender: normalizeGender → LAKI-LAKI/PEREMPUAN.
       const g = normalizeGender(r.jenis_kelamin || r.gender);
       return {
         id: r.id,
         nama_lengkap: r.nama_lengkap || '',
         alamat_lengkap: r.alamat_lengkap || '',
-        jenis_kelamin: g === 'PRIA' ? 'L' : g === 'WANITA' ? 'P' : '',
+        jenis_kelamin: g === 'LAKI-LAKI' ? 'L' : g === 'PEREMPUAN' ? 'P' : '',
       };
     });
     return { success: true, data };

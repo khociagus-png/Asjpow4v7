@@ -156,7 +156,23 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 
 ---
 
-## 6. Checklist wajib sebelum selesai
+## 6. Aturan lock fitur kandidat (jangan longgarkan tanpa persetujuan pemilik) 🔒
+
+> Dibuat atas permintaan pemilik (2026-08-16): "tulis biar setiap AI gak binggung".
+> Setiap fitur/lock di bawah MEMILIKI SATU sumber kebenaran — jangan menambah
+> varian normalisasi/lock baru di jalur lain; jangan longgarkan lock ini.
+
+| Fitur | Entry point | Terbuka untuk | Lock kalau |
+| --- | --- | --- | --- |
+| **E-Sign & Data Naitei** | `bukaModalTtd` (`js/12_esign_match.js`) | Admin ATAU kandidat yang SUDAH LULUS (ada lamaran berstatus `LULUS`/`LOLOS`/`APPROVED`/`APPROVE` — bucket sama dengan `MAIL_BUCKET` di `js/render/mail.js`) | Kandidat belum lulus → toast `toast_naitei_locked` |
+| **AI CV Master Assistant** | `bukaMasterEksternal` (`js/03_candidate.js`) + guard `verifikasiAksesAiCv` (`ai_form.html`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan` di `js/03_candidate.js`, catatan internal `[VIP]`/`[KELAS …]`) | Non-VIP → toast `toast_ai_cv_locked`; keputusan final di server (`processAIChat`: `isAiCvAllowed` ATAU sesi admin) |
+| **Latihan Interview** | `bukaSimulatorInterview` (`js/ai_copilot/interview.js`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan`) | Non-VIP → toast `toast_feature_locked` |
+
+- **Normalisasi gender** hanya satu: `normalizeGender` di `netlify/functions/_lib/db/client.js`
+  → kanonikal `LAKI-LAKI`/`PEREMPUAN` (konvensi situs lama). Render L/P di UI
+  (mis. modal siswa baru) pakai nilai kanonikal itu — JANGAN bikin varian baru.
+
+## 7. Checklist wajib sebelum selesai
 
 1. ✅ `node --check` semua file JS yang diubah
 2. ✅ `bun run build` kalau menyentuh frontend/partial/css
@@ -169,7 +185,7 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 
 ---
 
-## 7. Larangan mutlak
+## 8. Larangan mutlak
 
 - ❌ Edit `.env*` — minta user isi di Keys/API keys.
 - ❌ Deploy ke Netlify **tanpa izin eksplisit pemilik** (aturan & riwayat izin di `DEPLOY.md`).

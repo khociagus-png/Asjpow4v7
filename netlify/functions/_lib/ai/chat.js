@@ -10,6 +10,26 @@ const { requireRole } = require('../actions-auth');
 const { buildRingkasData, findMasterByWa, APPLY_WA_COLS } = require('./cv');
 const { geminiGenerate, parseJsonLoose } = require('./providers');
 
+// Skema data yang DIISI OTOMATIS ke form ai_form (kunci persis fieldPaths di
+// js/pages/ai_form.js). AI diminta mengembalikan JSON {reply, data} — tanpa ini
+// form tidak pernah terisi (dulu AI cuma balas teks).
+const AI_FORM_DATA_INSTRUCTION =
+  '\n\nPENTING — jawab SELALU dalam SATU objek JSON valid (tanpa teks lain, tanpa ```):\n' +
+  '{"reply": "<balasan ramah untuk kandidat, dalam bahasa percakapan>", "data": <objek data di bawah>}\n' +
+  'data harus berisi SEMUA data kandidat yang diketahui dari SELURUH percakapan, dengan kunci persis:\n' +
+  '{"identitas": {"nama_lengkap","katakana","panggilan","panggilan_katakana","tempat_lahir","tgl_lahir","umur","gender","agama","golongan_darah","status_nikah","anak","email","alamat","hp","hp_darurat","ktp","paspor","sim"}, ' +
+  '"fisik": {"tb","bb","topi","baju","sepatu","tangan_dominan","tahan_ac"}, ' +
+  '"medis": {"mata_kiri","mata_kanan","kacamata","buta_warna","tato","rokok","alkohol","alergi_id","alergi_jp","riwayat_medis_id","riwayat_medis_jp","riwayat_kecelakaan_id","riwayat_kecelakaan_jp"}, ' +
+  '"sertifikasi": {"bahasa_jepang","nilai","lisensi"}, ' +
+  '"wawancara": {"keinginan_id","keinginan_jp","tujuan_ke_jepang","tujuan_ke_jepang_jp","riwayat_jepang","promosi_id","promosi_jp","kelebihan_id","kelebihan_jp","kekurangan_id","kekurangan_jp","hobi_id","hobi_jp","keahlian_id","keahlian_jp","motivasi_id","motivasi_jp","alasan_bidang_id","alasan_bidang_jp","rencana_pulang_id","rencana_pulang_jp","lama_di_jepang","harapan_gaji","harapan_tabungan"}, ' +
+  '"kenalan_jepang": {"nama_id","nama_jp","hubungan_id","hubungan_jp","pekerjaan_id","pekerjaan_jp","usia","alamat_id","alamat_jp"}, ' +
+  '"pendidikan": [{"tingkat","sekolah_id","sekolah_jp","jurusan_id","jurusan_jp","masuk","lulus"}], ' +
+  '"pekerjaan": [{"perusahaan_id","perusahaan_jp","jabatan_id","jabatan_jp","masuk","keluar","gaji"}], ' +
+  '"keluarga": [{"hubungan_id","hubungan_jp","nama","katakana","umur","pekerjaan_id","pekerjaan_jp","gaji"}]}\n' +
+  'Aturan data: isi hanya field yang benar-benar diketahui dari percakapan (nilai bukan null, string kosong "" untuk yang belum); ' +
+  'gender SELALU dinormalisasi ke "LAKI-LAKI" atau "PEREMPUAN"; ' +
+  'JANGAN menebak/mengarang data yang tidak disebut kandidat; sertakan juga data yang sudah ada di DATA KANDIDAT SAAT INI.\n';
+
 async function handleProcessAIChat(payload) {
   const p = payload || {};
   const flow = String(p.flow || 'master');
@@ -30,9 +50,26 @@ async function handleProcessAIChat(payload) {
         '\n\nAturan: JANGAN menanyakan ulang data yang sudah terisi di atas, dan jangan mengaku data itu kosong. ' +
         'Kalau kandidat bertanya tentang data yang sudah ada, jawab pakai data tersebut. ' +
         'Tanyakan hanya data yang TIDAK tercantum di atas.'
-      : '');
+      : '') +
+    AI_FORM_DATA_INSTRUCTION;
   try {
-    return await geminiGenerate(system, history);
+    const r = await geminiGenerate(system, history);
+    const text = String(r && r.reply ? r.reply : '').trim();
+    if (text) {
+      try {
+        const parsed = parseJsonLoose(text);
+        if (parsed && typeof parsed === 'object' && parsed.reply) {
+          return {
+            reply: String(parsed.reply),
+            data: parsed.data && typeof parsed.data === 'object' ? parsed.data : undefined,
+          };
+        }
+      } catch (e) {
+        /* bukan JSON — fallback balas teks biasa */
+      }
+      return { reply: text };
+    }
+    return r;
   } catch (e) {
     // Jangan bocorkan detail error mentah ke user — log detailnya di server saja.
     console.error('[AI] processAIChat error:', e && e.message ? e.message : e);
@@ -67,9 +104,29 @@ async function handleProcessSiswaAIChat(payload) {
   const p = payload || {};
   const system =
     'Kamu adalah Dede Jeklin, asisten pendaftaran siswa baru LPK ASJ. Bantu siswa/orang tua melengkapi form ' +
-    '(nama, TTL, gender, agama, alamat, email, pendidikan, WA siswa, WA ortu). Balas ramah dan singkat dalam Bahasa Indonesia.';
+    '(nama, TTL, gender, agama, alamat, email, pendidikan, WA siswa, WA ortu). Balas ramah dan singkat dalam Bahasa Indonesia.\n' +
+    'PENTING — jawab SELALU dalam SATU objek JSON valid (tanpa teks lain, tanpa ```):\n' +
+    '{"reply": "<balasan ramah>", "data": {"nama": "...", "ttl": "...", "gender": "LAKI-LAKI atau PEREMPUAN", "agama": "...", "alamat": "...", "email": "...", "pendidikan": "...", "wa_siswa": "...", "wa_ortu": "..."}}\n' +
+    'Isi hanya field yang diketahui dari percakapan; yang belum diketahui biarkan "" (string kosong). ' +
+    'Normalisasi gender SELALU ke "LAKI-LAKI" atau "PEREMPUAN" (jangan L/P).';
   try {
-    return await geminiGenerate(system, Array.isArray(p.history) ? p.history : []);
+    const r = await geminiGenerate(system, Array.isArray(p.history) ? p.history : []);
+    const text = String(r && r.reply ? r.reply : '').trim();
+    if (text) {
+      try {
+        const parsed = parseJsonLoose(text);
+        if (parsed && typeof parsed === 'object' && parsed.reply) {
+          return {
+            reply: String(parsed.reply),
+            data: parsed.data && typeof parsed.data === 'object' ? parsed.data : undefined,
+          };
+        }
+      } catch (e) {
+        /* bukan JSON — fallback balas teks biasa */
+      }
+      return { reply: text };
+    }
+    return r;
   } catch (e) {
     return { reply: 'Maaf, jaringan AI sedang sibuk. Coba lagi ya!' };
   }

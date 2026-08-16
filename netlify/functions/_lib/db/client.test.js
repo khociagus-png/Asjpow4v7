@@ -56,21 +56,22 @@ describe('normalizeStatus — status lowongan (OPEN/CLOSE/URGENT)', () => {
   });
 });
 
-describe('normalizeGender — PRIA/WANITA', () => {
+describe('normalizeGender — kanonikal LAKI-LAKI/PEREMPUAN (konvensi situs lama)', () => {
   it('berbagai varian laki-laki (termasuk L — konvensi L/P)', () => {
-    for (const v of ['LAKI-LAKI', 'laki', 'L', 'M', 'MALE', 'PRIA', 'Laki-laki']) {
-      expect(normalizeGender(v)).toBe('PRIA');
+    for (const v of ['LAKI-LAKI', 'laki', 'L', 'LK', 'M', 'MALE', 'PRIA', 'Laki-laki']) {
+      expect(normalizeGender(v)).toBe('LAKI-LAKI');
     }
   });
 
   it('berbagai varian perempuan (termasuk P — konvensi L/P)', () => {
-    for (const v of ['PEREMPUAN', 'perempuan', 'P', 'W', 'F', 'FEMALE', 'WANITA']) {
-      expect(normalizeGender(v)).toBe('WANITA');
+    for (const v of ['PEREMPUAN', 'perempuan', 'P', 'PR', 'W', 'F', 'FEMALE', 'WANITA', 'CEWEK', '女']) {
+      expect(normalizeGender(v)).toBe('PEREMPUAN');
     }
   });
 
-  it('nilai tak dikenal / kosong → L/P (fallback baku kode lama)', () => {
-    expect(normalizeGender('')).toBe('L/P');
-    expect(normalizeGender('n/a')).toBe('L/P');
+  it('nilai tak dikenal / kosong → kosong (bukan L/P)', () => {
+    expect(normalizeGender('')).toBe('');
+    expect(normalizeGender('-')).toBe('');
+    expect(normalizeGender('n/a')).toBe('');
   });
 });

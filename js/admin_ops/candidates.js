@@ -125,19 +125,15 @@ export async function bukaModalCekDataSiswa() {
           '</td></tr>';
       } else {
         res.data.forEach((s, i) => {
-          const gRaw = String(s.jenis_kelamin || s.gender || '')
-            .trim()
-            .toUpperCase();
+          // Backend sudah kirim kanonikal 'L'/'P'/'' (normalisasi tunggal di
+          // normalizeGender → LAKI-LAKI/PEREMPUAN → L/P). Jangan tambah
+          // normalisasi varian lain di sini.
+          const g = String(s.jenis_kelamin || '');
           let gBadge;
-          if (gRaw === 'L' || gRaw.includes('LAKI') || gRaw === 'PRIA' || gRaw === 'MALE') {
+          if (g === 'L') {
             gBadge =
               '<span class="w-6 h-6 rounded-full bg-blue-900/50 text-blue-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-blue-500/30">L</span>';
-          } else if (
-            gRaw === 'P' ||
-            gRaw.includes('PEREMPUAN') ||
-            gRaw === 'WANITA' ||
-            gRaw === 'FEMALE'
-          ) {
+          } else if (g === 'P') {
             gBadge =
               '<span class="w-6 h-6 rounded-full bg-pink-900/50 text-pink-400 flex items-center justify-center font-bold text-[10px] mx-auto border border-pink-500/30">P</span>';
           } else {

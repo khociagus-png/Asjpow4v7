@@ -96,18 +96,18 @@ function normalizeStatus(v) {
 }
 
 
+// SATU-SATUNYA normalisasi gender backend — disamakan dengan kanonikal situs
+// lama (normalizeGenderValue di js/03_candidate.js): LAKI-LAKI / PEREMPUAN.
+// CV AI dan render L/P mengecek format ini (includes('PEREMPUAN') dsb), jadi
+// jangan tambah varian normalisasi lain di jalur mana pun.
 function normalizeGender(v) {
-  const s = toText(v).toUpperCase();
-  // BUG FIX (Fase 1.5, ketahuan unit test): dulu 'L' → L/P (tidak dikenal),
-  // 'P' → PRIA, dan 'FEMALE' → PRIA (substring 'MALE' kena duluan) — semua
-  // TERBALIK dari konvensi aplikasi (L = Laki-laki, P = Perempuan, lihat
-  // PARSE_SYSTEM_PROMPT di ai/classify.js). Dipakai cuma di actions-register
-  // (display siswa baru) — tidak ada pemakai yang bergantung perilaku lama.
-  if (s.includes('LAKI') || s === 'L' || s === 'M' || s === 'PRIA' || s === 'MALE')
-    return 'PRIA';
-  if (s.includes('PEREMPUAN') || s === 'P' || s === 'W' || s === 'F' || s === 'FEMALE' || s === 'WANITA')
-    return 'WANITA';
-  return 'L/P';
+  const s = toText(v).trim().toUpperCase();
+  if (!s || s === '-') return '';
+  if (s === 'L' || s === 'LK' || s === 'M' || s === 'PRIA' || s === 'MALE' || s.includes('LAKI'))
+    return 'LAKI-LAKI';
+  if (s === 'P' || s === 'PR' || s === 'F' || s === 'W' || s === 'FEMALE' || s === 'WANITA' || s === 'CEWEK' || s.includes('PEREMPUAN') || s.includes('女'))
+    return 'PEREMPUAN';
+  return '';
 }
 
 

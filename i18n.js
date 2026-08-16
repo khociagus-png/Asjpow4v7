@@ -32,7 +32,7 @@ export const LANG = {
         'Pendidikan: <span class="text-white font-bold">6 Jt</span><br>Keberangkatan: 15-25 Jt',
       layanan_magang: 'Program Magang',
       layanan_magang_desc:
-        'Pendidikan: <span class="text-white font-bold">5 Jt</span><br>Keberangkatan: 45-50 Jt',
+        'Pendidikan: <span class="text-white font-bold">5,5 Jt</span><br>Keberangkatan: 45-50 Jt',
     },
     status: { open: 'OPEN', urgent: 'URGENT', close: 'CLOSE' },
     table: {
@@ -885,7 +885,7 @@ export const LANG = {
         '教育費：<span class="text-white font-bold">600万ルピア</span><br>渡航費：1500〜2500万ルピア',
       layanan_magang: '技能実習プログラム',
       layanan_magang_desc:
-        '教育費：<span class="text-white font-bold">500万ルピア</span><br>渡航費：4500〜5000万ルピア',
+        '教育費：<span class="text-white font-bold">550万ルピア</span><br>渡航費：4500〜5000万ルピア',
     },
     status: { open: '募集中', urgent: '急募', close: '募集終了' },
     table: {
