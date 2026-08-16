@@ -4,11 +4,41 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 1: `js/07_api.js` dipecah jadi `js/api/{forms,jobs,candidates,wa}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 2: `js/05_render.js` dipecah jadi `js/render/{public,admin,candidate,share,mail}.js`.
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 2 — `js/05_render.js` (1371 baris) → `js/render/*` — commit `e8445a7`
+
+- **Baru** `js/render/public.js` (13 deklarasi) — filter/tab publik
+  (renderPublicFiltered/UI, filterPublicData) + filter kelola loker
+  (filterKelolaLoker, badge/jobDilamar publik).
+- **Baru** `js/render/admin.js` (6) — adminSwitchTab, renderAdminFull,
+  renderAdmin, filterDbJob, renderDbJobTable, badgeTahapanDb.
+- **Baru** `js/render/candidate.js` (3) — tabel daftar kandidat admin:
+  renderKandidatTable, filterKandidat, jobDilamarCell.
+- **Baru** `js/render/share.js` (15) — seluruh modal Share Loker:
+  shareLinkFor/bukaModalShare/toggleSharePreview/templateShareWa/
+  updateSharePreview/copasShareWa/simpanDokumenShare dll + konstanta
+  `SHARE_DOC_CHIPS` (SUMBER KEBENARAN chip share).
+- **Baru** `js/render/mail.js` (10) — seleksi massal `MAIL_SELECTED`,
+  konstanta MAIL_STATUS_KEYS/LABEL/STATE_OF/MAIL_BUCKET, renderMailFilterUI,
+  renderFormInbox.
+- Body 34 deklarasi dipindah **byte-identik** (verifikasi per-deklarasi via
+  brace-matching — semua OK di tepat satu modul).
+- `scripts/build-js.mjs` STACK: `/js/05_render.js` → 5 entri `js/render/*`.
+- `js/xss-escape.test.js` (regresi XSS S1) di-update: membaca 5 modul render
+  (dikonkatenasi) sebagai ganti file tunggal — assertion pola esc() tetap
+  mencakup seluruh sink render (mail, kandidat, admin, loker publik).
+- `js/05_render.js` **DIHAPUS** — module-map frontend 25 → **29 file / 353
+  simbol** (total simbol TIDAK berubah). Bundel: `app-6113c31781.js` →
+  `app-6a5a3721c6.js` (24 file), ukuran tetap **411.1 KB** (sama persis).
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 1 — `js/07_api.js` (1696 baris) → `js/api/*` — commit `b7e6bd8`
 

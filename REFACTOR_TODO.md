@@ -151,7 +151,8 @@ Global scope **tetap** di fase ini — tujuannya cuma mengecilkan unit patch. Ko
       (js/api ikut diaudit). Module-map 22 → **25 file / 353 simbol** (total
       simbol TIDAK berubah); bundel 21 → 24 file, 411.1 KB (sama). Verifikasi:
       lint 0 error/12 warn ✓ · test 81/81 ✓ · build idempotent ✓.
-- [ ] `js/05_render.js` (1371) → `js/render/public.js`, `js/render/admin.js`, `js/render/candidate.js`, `js/render/cv.js`.
+- [x] `js/05_render.js` (1371) → `js/render/public.js`, `js/render/admin.js`, `js/render/candidate.js`, `js/render/share.js`, `js/render/mail.js`. — `e8445a7` (2026-08-16)
+      Pecah per domain aktual file-nya: public = filter/tab publik + filter kelola loker, admin = renderAdmin/switchTab/table db-job/badgeTahapanDb, candidate = tabel daftar kandidat + jobDilamarCell, share = seluruh modal share loker + template WA, mail = seleksi massal MAIL_SELECTED + status/bucket + filter UI + renderFormInbox. Body 34 deklarasi dipindah **byte-identik** (verifikasi per-deklarasi via brace-matching — semua OK). STACK build-js: `/js/05_render.js` → 5 entri; module-map sudah rekursif untuk js/. Module-map 25 → **29 file / 353 simbol** (total simbol TIDAK berubah); bundel tetap **411.1 KB** (sama persis = isi identik). `js/xss-escape.test.js` (S1 coverage) di-update ke 5 modul. Verifikasi: node --check ✓ · lint 0 error/12 warn ✓ · test **81/81** ✓ · build idempotent ✓.
 - [ ] `js/03_engine.js` (856) → `js/engine/init.js`, `js/engine/badge.js`, `js/engine/session.js` (pola `updateMailBadge`, refresh).
 - [ ] `js/02_init.js` (852) → pisahkan boot (parse URL, restore sesi) vs helper utilitas → `js/init/boot.js`, `js/init/util.js`.
 - [ ] `js/06_admin_modal.js` (729) → per kelompok modal (kandidat, loker, mail, pemberkasan, esign).
