@@ -4,7 +4,18 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 14: entry `js/main.js` + **esbuild bundle mode** (ganti concat + IIFE per file) untuk bundel admin/index — roadmap optimasi pertama jalan.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 15: **`no-undef` diaktifkan permanen utk semua file frontend ESM** + 🐛 2 bug latent ketahuan & diperbaiki (`tr/callAPI/cekUploadFile` bare + bridge alias hilang di `master_full.js`).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 15 — aktifkan no-undef permanen (frontend ESM) + 🐛 fix 2 bug latent
+
+- **`eslint.config.js`**: `no-undef: error` diaktifkan utk `js/**/*.js` + `api-client.js` + `i18n.js` + `pwa.js` (semua sudah ESM sejak langkah 13; referensi global implisit sudah di-window-kan). `.mjs` (scripts/e2e) & netlify functions (CommonJS `require`) tetap tanpa no-undef. Scan awal menemukan **39 pelanggaran di `js/pages/master_full.js`** saja — file lain sudah bersih (0 error).
+- 🐛 **Bugfix 1 — bare global di master_full.js (latent, nyata)**: 30× `tr(`, 2× `callAPI(`, 1× `cekUploadFile(` bare → di ESM bakal ReferenceError saat render box pendidikan/pekerjaan/keluarga (langkah 3-5) & simpan/upload. Semua di-window-kan (`window.tr` dll). **Diverifikasi di browser**: navigasi step 1→5 render semua dynamic box, kembali ke step 1, 0 error JS.
+- 🐛 **Bugfix 2 — bridge alias hilang total di master_full.js**: `changeStep`/`submitMaster`/`handleFile` tidak di-export & TIDAK ada satu pun `window.*` alias → HTML `onclick="changeStep(1)"` / `submitMaster(true)` / `onchange="handleFile(...)"` bakal ReferenceError (bridge sempat hilang saat konversi langkah 13). Fix: 3 fungsi di-export + bridge 8 alias (`toggleImaMade`/`gateLogin`/`onSswSelect`/`onPekerjaanSelect`/`onFamPekerjaanSelect`/`handleFile`/`changeStep`/`submitMaster`). Pelajaran dicatat di ESM_BRIDGE §6: **saat konversi, wajib cek `window.X` ter-expose untuk SEMUA handler HTML page itu** — cek dengan membuka halaman & klik, bukan cuma no-undef (no-undef tidak menangkap alias yang hilang).
+- Verifikasi: lint 0/12 ✓ (no-undef aktif) · test **81/81** ✓ · build idempoten (`app-f90fc61af6.js`) · check:globals nol kolisi (405 simbol) · audit HIGH=0 · **E2E SEMUA LULUS**: login, upload, biodata + **smoke master-full**: nama dari URL, alias onclick ada, step 1→5 render (edu_tk_1/job_nm_1/fam_nm_1), 0 error JS ✓.
 
 ---
 

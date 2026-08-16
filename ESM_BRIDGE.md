@@ -1,6 +1,7 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status: Fase 3 TUNTAS (langkah 13) + bundel bundle-mode (langkah 14)** —
+> **Status: Fase 3 TUNTAS (langkah 13) + bundel bundle-mode (langkah 14) +
+> no-undef aktif (langkah 15)** —
 > SEMUA file frontend kini ES Modules: core (i18n/api-client) + init (state/util + theme/preview/nav/boot)
 > + auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
 > + admin_ops (`js/admin_ops/*`) + ai_copilot (`js/ai_copilot/*`) + sisa
@@ -396,8 +397,17 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    array / `--splitting`) ATAU tetap `<script type="module">` per halaman —
    keputusan dicatat di PROGRESS.md. Sekarang tidak mendesak: halaman
    standalone tetap jalan tanpa bundel.
-6. ⏭️ Aktifkan `no-undef` per file yang sudah ESM (deteksi referensi terlewat —
-   manfaat utama ESM).
+6. ✅ **Aktifkan `no-undef` per file ESM** — SELESAI (langkah 15, turn ini).
+   `eslint.config.js` memakai `no-undef: error` utk `js/**/*.js` +
+   `api-client.js` + `i18n.js` + `pwa.js`. Scan awal: **39 pelanggaran di
+   `js/pages/master_full.js`** (file lain 0) — (a) `tr`/`callAPI`/
+   `cekUploadFile` bare → window-ified; (b) **bridge alias HILANG TOTAL**
+   (`changeStep`/`submitMaster`/`handleFile` tidak di-export, 0 alias window)
+   → HTML onclick/onchange page itu bakal ReferenceError. Pelajaran: **no-undef
+   tidak menangkap alias yang hilang** — verifikasi tiap halaman standalone
+   dengan mengklik handler HTML-nya (smoke langkah 15 membuktikan).
+   `no-unused-vars` sengaja tetap nonaktif (banyak export utk alias window.*
+   yang dipakai lintas halaman).
 
 ---
 

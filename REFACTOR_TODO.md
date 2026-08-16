@@ -484,7 +484,18 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       tetap hijau, lint/test hijau, bundel tetap sama ukurannya.
 - [ ] Objek global publik (`callAPI`, `tr`, `LANG`, `CURRENT_LANG`) — ✅ sudah diekspor dari `api-client.js` & `i18n.js` (langkah 2); pemakai classic tetap dapat via `window` alias (uji kompat); hapus alias satu per satu setelah semua pemakainya di-import.
 - [ ] Halaman standalone: buat entry per halaman (`js/pages/` → entry ESM) ATAU biarkan classic — **keputusan dicatat di PROGRESS.md**; jangan sampai nama `js/pages/*` bentrok dengan bundel (guard sudah warning).
-- [ ] Verifikasi akhir: bundel idempoten, ukuran ≤ +10% dari baseline (421.030 byte), lint bersih + **aktifkan `no-undef` per file yang sudah ESM** (deteksi referensi yang terlewat — manfaat utama ESM; saat ini nonaktif global di eslint.config.js karena classic), E2E penuh lulus.
+- [x] **Langkah 15 — aktifkan `no-undef` per file ESM + fix 2 bug latent** — commit `f39a34f`
+      `no-undef: error` aktif di eslint.config.js utk js/** + api-client +
+      i18n + pwa (semua ESM). Scan menemukan 39 pelanggaran di
+      js/pages/master_full.js: (a) `tr`/`callAPI`/`cekUploadFile` bare →
+      ReferenceError saat render langkah 3-5 & simpan; (b) bridge alias hilang
+      total — changeStep/submitMaster/handleFile tidak di-export & tidak ada
+      window.* alias (HTML onclick/onchange bakal ReferenceError). Fix:
+      window-ify semua bare global + export 3 fungsi + bridge 8 alias.
+      Verifikasi: lint 0/12 (no-undef aktif) · test 81/81 · build idempoten ·
+      E2E + smoke master-full step 1→5 SEMUA LULUS ✓. Item verifikasi akhir
+      (ukuran bundel ≤ +10% baseline, E2E penuh) dijalankan tiap sesi —
+      bundel 429.9 KB vs baseline 421.0 KB (+2.1% ≤ +10% ✓).
 
 ---
 

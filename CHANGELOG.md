@@ -1,6 +1,33 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 14 — commit `006eadd`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 15 — commit `f39a34f`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 15: aktifkan no-undef permanen + fix 2 bug latent master-full (refactor & bugfix)
+
+### Refactor: no-undef aktif untuk frontend ESM
+
+- `eslint.config.js`: `no-undef: error` utk `js/**/*.js` + `api-client.js` +
+  `i18n.js` + `pwa.js` (semua ESM sejak langkah 13). .mjs & netlify functions
+  (CommonJS) tetap tanpa no-undef.
+
+### 🐛 Bugfix: 2 bug latent di js/pages/master_full.js (ketahuan scan no-undef)
+
+- 30× `tr(` + 2× `callAPI(` + 1× `cekUploadFile(` bare → di-window-kan
+  (sebelumnya ReferenceError saat render box pendidikan/pekerjaan/keluarga
+  langkah 3-5 & simpan/upload).
+- Bridge alias hilang total (konversi langkah 13): `changeStep`/
+  `submitMaster`/`handleFile` tidak di-export & 0 alias window → HTML
+  onclick/onchange bakal ReferenceError. Fix: export 3 fungsi + bridge 8
+  alias (toggleImaMade/gateLogin/onSswSelect/onPekerjaanSelect/
+  onFamPekerjaanSelect/handleFile/changeStep/submitMaster).
+
+### Verifikasi
+
+- lint 0/12 (no-undef aktif) · test 81/81 · build idempoten (app-f90fc61af6.js)
+  · E2E login/upload/biodata SEMUA LULUS ✓ + smoke master-full step 1→5
+  (edu_tk_1/job_nm_1/fam_nm_1 render, 0 error JS) ✓.
 
 ---
 
