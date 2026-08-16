@@ -4,11 +4,40 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4b: `js/06_admin_modal.js` dipecah jadi `js/admin_modal/{dbfilter,cv,job}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 4c: `js/11_admin_ops.js` dipecah jadi `js/admin_ops/*`.
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 4c — `js/11_admin_ops.js` (769 baris) → `js/admin_ops/*` — commit `0007312`
+
+- **Baru** `js/admin_ops/schedule.js` (3 fn) — getStatusWaktu (ONGOING/
+  SEGERA/HARI INI/H-1/H-n), renderDashboardAgenda, renderJadwal.
+- **Baru** `js/admin_ops/candidates.js` (4 fn) — bukaModalListKandidat
+  (+ salin list ke WA), keluarkanKandidatDariJob (patch-in-place),
+  mulaiKirimUndanganGrup (kirimTawaranMassal), bukaModalCekDataSiswa.
+- **Baru** `js/admin_ops/sysconfig.js` (7 deklarasi) — CONFIG_CATEGORIES,
+  renderSysConfig, tambahConfigItem (dedupe by ID), hapusConfigItem,
+  pindahConfigItem, simpanConfigKeServer, simpanPengumuman.
+- **Baru** `js/admin_ops/loading.js` (2 fn) — setSkeletonLoading,
+  jalankanSemuaSkeleton (anti layar hitam).
+- **Baru** `js/admin_ops/migration.js` (3 fn) — jalankanMigrasi,
+  renderMigrasiResults, salinSqlMigrasi.
+- **Baru** `js/admin_ops/drive.js` (10 deklarasi) — DRIVE_CANDIDATES +
+  muatMigrasiDrive/banner, modal daftar + render, field HTML, status,
+  baca base64, uploadDriveReplacement.
+- Body 28 deklarasi dipindah **byte-identik** (verifikasi brace-matching —
+  semua OK).
+- `scripts/build-js.mjs` STACK: `/js/11_admin_ops.js` → 6 entri
+  `js/admin_ops/*`.
+- `js/11_admin_ops.js` **DIHAPUS** — module-map frontend 39 → **44 file /
+  353 simbol** (total simbol TIDAK berubah). Bundel: `app-7c1aea6337.js` →
+  `app-582d85d016.js`, ukuran tetap **421.022 byte**.
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 4b — `js/06_admin_modal.js` (729 baris) → `js/admin_modal/*` — commit `78f01f0`
 
