@@ -5,7 +5,7 @@
 
 const bcrypt = require('bcryptjs');
 const { normalizeWa, pick, supabaseJson } = require('./db/client');
-const { findFormByIndexFiltered, findForms, findFormsByWa, mapForm } = require('./db/forms');
+const { findFormByIndexFiltered, findForms, findFormsByWa, mapForm, upsertFormRow } = require('./db/forms');
 const { mapCandidate } = require('./db/candidates');
 const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
@@ -369,10 +369,10 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabaseJson('POST', 'database_asj_form', {
-        body,
-        headers: { Prefer: 'return=minimal' },
-      });
+      // Upsert anti-duplikat (no_wa, code_job) — upload paralel (mis. KTP+KK
+      // lewat Promise.allSettled) tidak bikin baris mail dobel untuk WA yang
+      // belum punya lamaran.
+      await upsertFormRow(body);
     }
   }
 }

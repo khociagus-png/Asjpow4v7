@@ -6,7 +6,7 @@
 const bcrypt = require('bcryptjs');
 const { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } = require('./db/client');
 const { findJobByCodeFiltered, findJobs } = require('./db/jobs');
-const { findForms, findFormsByWa } = require('./db/forms');
+const { findForms, findFormsByWa, upsertFormRow } = require('./db/forms');
 const { findCandidateByWaFiltered, findCandidates, mapCandidate } = require('./db/candidates');
 const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
@@ -269,10 +269,9 @@ async function handleSubmitApply(payload) {
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabaseJson('POST', 'database_asj_form', {
-        body,
-        headers: { Prefer: 'return=minimal' },
-      });
+      // Upsert anti-duplikat (no_wa, code_job) — aman dari race GET-then-POST
+      // (dua lamaran paralel untuk WA+job sama tidak bikin baris dobel).
+      await upsertFormRow(body);
     }
     return { success: true, message: 'Lamaran berhasil dikirim.' };
   } catch (e) {
@@ -508,10 +507,9 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabaseJson('POST', 'database_asj_form', {
-        body: Object.assign({ created_at: now, updated_at: now }, formBody),
-        headers: { Prefer: 'return=minimal' },
-      });
+      // Upsert anti-duplikat — dua tambah kandidat paralel untuk WA yang
+      // belum punya baris mail tidak bikin baris dobel.
+      await upsertFormRow(Object.assign({ created_at: now, updated_at: now }, formBody));
     }
     return { success: true, uploaded };
   } catch (e) {

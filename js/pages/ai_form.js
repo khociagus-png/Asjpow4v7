@@ -234,6 +234,16 @@
       if (localStorage.getItem('asj_admin_login') === 'sukses') {
         return Promise.resolve(true);
       }
+      // FIX (loop reload tak berujung): tanpa sesi kandidat yang VALID, JANGAN
+      // panggil getAppData('kandidat'). callAPI GLOBAL akan menghapus semua sesi
+      // + reload saat respons sessionInvalid — guard ini dipanggil lagi setelah
+      // reload (masih tanpa sesi) → halaman reload terus-menerus. Biarkan masuk;
+      // keputusan final tetap di server (processAIChat: isAiCvAllowed ATAU sesi
+      // admin). Kasus sesi kandidat basi (login flag ada, token kedaluwarsa)
+      // tetap lewat jalur normal: reload sekali, flag dibersihkan, loop berhenti.
+      if (localStorage.getItem('asj_kandidat_login') !== 'sukses') {
+        return Promise.resolve(true);
+      }
       return window.callAPI('getAppData', ['kandidat', targetWa]).then(function(res) {
         if (res && res.sessionInvalid) return true; // tidak bisa diverifikasi → jangan redirect
         // Respons backend rebuild menaruh data kandidat di res.candidates[0]

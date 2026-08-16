@@ -119,6 +119,31 @@ async function findFormsByWa(wa) {
 }
 
 
+// Insert baris mail dengan anti-duplikat (no_wa, code_job): upsert
+// on_conflict kalau constraint unik sudah ada di DB; kalau belum (HTTP 400
+// 42P10), fallback INSERT biasa. Race GET-then-POST (dua request paralel
+// sama-sama tidak menemukan baris) tidak lagi bikin baris dobel begitu
+// constraint dibuat via:
+//   ALTER TABLE database_asj_form
+//   ADD CONSTRAINT database_asj_form_no_wa_code_job_key UNIQUE (no_wa, code_job);
+async function upsertFormRow(body) {
+  try {
+    await supabaseJson('POST', 'database_asj_form', {
+      query: { on_conflict: 'no_wa,code_job' },
+      body,
+      headers: { Prefer: 'return=minimal,resolution=merge-duplicates' },
+    });
+  } catch (e) {
+    // Constraint belum ada → INSERT biasa (perilaku lama). Error lain diteruskan.
+    if (!String(e.message || '').includes('42P10')) throw e;
+    await supabaseJson('POST', 'database_asj_form', {
+      body,
+      headers: { Prefer: 'return=minimal' },
+    });
+  }
+}
+
+
 // Baris mail pada posisi index urutan timestamp.desc — pengganti scan 500
 // baris untuk aksi admin yang menerima rowIndex dari frontend (review/approve/
 // reject/hapus/tandai dibaca).
@@ -176,4 +201,5 @@ module.exports = {
   findFormsByWa,
   findFormByIndexFiltered,
   findFormsByWaList,
+  upsertFormRow,
 };
