@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.2 langkah 4 — modul `actions-master.js` — commit *(isi hash)*
+### Fase 1.2 langkah 4 — modul `actions-master.js` — commit `adadb30`
 
 - **Baru** `_lib/actions-master.js` — domain master biodata/CV
   (`master_database_candidate`) utuh dari `actions-extra.js`: konstanta map
