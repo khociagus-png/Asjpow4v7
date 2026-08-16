@@ -140,7 +140,17 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 
 Global scope **tetap** di fase ini — tujuannya cuma mengecilkan unit patch. Konversi ESM di Fase 3.
 
-- [ ] `js/07_api.js` (1696) → `js/api/forms.js`, `js/api/jobs.js`, `js/api/candidates.js`, `js/api/wa.js` (pola `callAPI('action', [...])` dipusatkan per domain).
+- [x] **`js/07_api.js` (1696 baris) DIHAPUS → `js/api/{forms,jobs,candidates,wa}.js`**
+      (commit `b7e6bd8`). Domain: forms = mail inbox (review/approve/reject/
+      delete/tandai dibaca) · jobs = kelola loker (simpan/edit/status/hapus/
+      tahapan DB + upload pamflet/template) · candidates = modal kandidat
+      manual, upload + dokumen lain dinamis, super edit, revisi, QR, pagination
+      · wa = papan tugas & jadwal admin. Body fungsi dipindah **byte-identik**
+      (verifikasi per-deklarasi: 66 fungsi + 3 `window.*` — semua OK). STACK
+      build-js: `/js/07_api.js` → 4 entri; module-map frontend kini rekursif
+      (js/api ikut diaudit). Module-map 22 → **25 file / 353 simbol** (total
+      simbol TIDAK berubah); bundel 21 → 24 file, 411.1 KB (sama). Verifikasi:
+      lint 0 error/12 warn ✓ · test 81/81 ✓ · build idempotent ✓.
 - [ ] `js/05_render.js` (1371) → `js/render/public.js`, `js/render/admin.js`, `js/render/candidate.js`, `js/render/cv.js`.
 - [ ] `js/03_engine.js` (856) → `js/engine/init.js`, `js/engine/badge.js`, `js/engine/session.js` (pola `updateMailBadge`, refresh).
 - [ ] `js/02_init.js` (852) → pisahkan boot (parse URL, restore sesi) vs helper utilitas → `js/init/boot.js`, `js/init/util.js`.

@@ -4,7 +4,42 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.5: unit test backend (81/81) + bug fix normalizeGender.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 1: `js/07_api.js` dipecah jadi `js/api/{forms,jobs,candidates,wa}.js`.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 1 — `js/07_api.js` (1696 baris) → `js/api/*` — commit `b7e6bd8`
+
+- **Baru** `js/api/forms.js` (12 fungsi) — aksi mail inbox: reviewForm/
+  approveForm/rejectForm/tandaiDibacaForm/deleteForm + patch-in-place
+  `ALL_FORM`/`ALL_CANDIDATES`/`MAIL_SELECTED`.
+- **Baru** `js/api/jobs.js` (12) — kelola loker: simpanJobBaru,
+  editLokerFull, ubahStatusJob, hapusJobData, updateTahapanDbJob +
+  upload pamflet/template (downscaleImageFile + uploadFilesDirectly) +
+  `upsertJobMemory`/`removeJobMemory`.
+- **Baru** `js/api/candidates.js` (32) — modal Input Kandidat Manual
+  (cariKandidatManual/pilihKandidatManual/cekKandidatOtomatis), upload
+  kandidat + baris dokumen lain dinamis (LAIN_JENIS_OPTIONS,
+  renderLainRow, collectLainRows, guard ukuran/ekstensi), Super Edit
+  Kandidat, upload revisi CV, QR loker lokal (buatQrDataUrl/aksiGenerateQr),
+  filterCbx, pagination (fetchCandidatesPage/appendCandidates/
+  ensureAllCandidates/muatLebihKandidat).
+- **Baru** `js/api/wa.js` (10) — papan tugas & jadwal admin (tambahTugasAdmin,
+  updateStatusTugas, hapusTugasAdmin, submitJadwal, prosesHapusJadwal) +
+  memori `ALL_TUGAS`/`ALL_SCHEDULES`.
+- Body fungsi dipindah **byte-identik** — verifikasi per-deklarasi via skrip
+  Node (66 fungsi + 3 `window.*` assignment: semua OK di tepat satu modul).
+- `scripts/build-js.mjs` STACK: `/js/07_api.js` → 4 entri `js/api/*`
+  (global scope tetap di Fase 2 — urutan bebas, fungsi di-hoist).
+- `scripts/module-map.mjs`: pemindaian frontend jadi **rekursif** (js/api/
+  ikut diaudit — pola sama seperti backend `_lib` sejak Fase 1.3).
+- `js/07_api.js` **DIHAPUS** — module-map frontend 22 → **25 file / 353
+  simbol** (total simbol TIDAK berubah). Bundel: `app-d80b6b5088.js`
+  (21 file) → `app-6113c31781.js` (24 file), ukuran 411.1 KB (sama).
+- Verifikasi: node --check ✓ · lint 0 error/12 warn (baseline) ✓ · test
+  81/81 ✓ · build idempotent ✓.
 
 ---
 
