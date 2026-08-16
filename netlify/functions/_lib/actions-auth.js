@@ -248,18 +248,27 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
   }
 }
 
-// Guard admin untuk aksi admin lain (dipakai banyak handler di handlers.js).
-function requireAdmin(sessionToken) {
+// Guard role (dipakai banyak handler: admin/kandidat). requireAdmin hanyalah
+// requireRole(sessionToken, 'admin') — Fase 1.2, dipusatkan di sini supaya
+// tidak ada dobel definisi (dulu ada di actions-extra.js juga).
+function requireRole(sessionToken, role) {
   const t = session.verifyToken(sessionToken);
-  if (!t || t.role !== 'admin') {
-    return { error: { success: false, sessionInvalid: true, message: 'Sesi admin tidak valid' } };
+  if (!t || t.role !== role) {
+    return {
+      error: { success: false, sessionInvalid: true, message: 'Sesi ' + role + ' tidak valid' },
+    };
   }
   return { token: t };
+}
+
+function requireAdmin(sessionToken) {
+  return requireRole(sessionToken, 'admin');
 }
 
 module.exports = {
   masterPins,
   requireAdmin,
+  requireRole,
   isValidWaFormat,
   handleCheckAdminMaster,
   handleCheckAdminPersonal,

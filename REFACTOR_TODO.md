@@ -74,8 +74,9 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       (343 — sisa bisa dirapikan kapan saja, opsional).
 - [ ] Pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah).
 
-### 1.2 Pecah `actions-extra.js` (2549 baris)
-- [ ] Identifikasi domain dengan `module-map.mjs` (jadwal, tugas, WA pintar, config/sys_config, share, log, dll) → pecah jadi `actions-schedule.js`, `actions-task.js`, `actions-wa.js`, `actions-config.js`, `actions-share.js`.
+### 1.2 Pecah `actions-extra.js` (2549 baris) — langkah 1 SELESAI (jadwal & tugas)
+- [x] **`actions-schedule.js` baru (165 baris)** — jadwal `database_schedule` + tugas `database_tugas` (5 handler) dipindah dari `actions-extra.js`; `requireRole` dipusatkan di `actions-auth.js`. `actions-extra.js` 2549 → **2370 baris**, cross-file calls 33 → 28. Dispatcher `handlers.js` kini route ke `schedule.*`. Verifikasi: test 51/51, E2E login SEMUA LULUS, backend **19 file / 204 simbol**. Commit: *(isi hash)*.
+- [ ] Identifikasi domain dengan `module-map.mjs` (WA pintar, config/sys_config, siswa-baru, upload/master) → pecah jadi `actions-wa.js`, `actions-config.js`, `actions-upload.js`, dst.
 - [ ] Ekspor per fitur (bukan satu objek raksasa) supaya dispatcher hanya impor yang dipakai.
 
 ### 1.3 Pecah `supabase.js` (1073 baris) → client + repositori

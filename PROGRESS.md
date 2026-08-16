@@ -4,7 +4,28 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.1d (backend modular SELESAI).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 1 (jadwal & tugas dipisah dari actions-extra).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.2 langkah 1 — modul `actions-schedule.js` (jadwal & tugas) — commit *(isi hash)*
+
+- **Baru** `_lib/actions-schedule.js` (165 baris) — `handleSimpanJadwalBaru`,
+  `handleHapusJadwal`, `handleTambahTugasBaru`, `handleSetTugasStatus`,
+  `handleHapusTugas` (jadwal `database_schedule` + tugas `database_tugas`),
+  dipindah utuh dari `actions-extra.js` (perilaku identik, FIX legacy id tetap).
+- `requireRole` dipusatkan di `actions-auth.js` (dulu diduplikasi di
+  `actions-extra.js`); `actions-extra.js` kini import dari sana.
+- `actions-extra.js` 2549 → **2370 baris**; 5 handler jadwal/tugas dilepas dari
+  `module.exports`-nya; dispatcher `handlers.js` route ke `schedule.*`.
+- Catatan tooling: `str_replace` gagal match di region tengah-akhir file 98 KB
+  (batas ±baris 1000) — pemindahan blok dilakukan via edit bedah Node
+  (terverifikasi tersimpan via read_files).
+- Verifikasi: node --check ✓, test 51/51 ✓, smoke guard admin (jadwal/tugas
+  ditolak tanpa sesi admin) ✓, E2E login-check SEMUA LULUS ✓, backend
+  module-map 18 → **19 file**, 204 simbol, cross-file `actions-extra` 33 → 28.
 
 ---
 

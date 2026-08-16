@@ -11,6 +11,7 @@
 
 const session = require('./session');
 const extra = require('./actions-extra');
+const schedule = require('./actions-schedule');
 const ai = require('./actions-ai');
 const rateLimit = require('./rate-limit');
 const publicData = require('./actions-public');
@@ -256,15 +257,15 @@ async function dispatchAction(action, payload, sessionToken) {
       return extra.handleSimpanRevisiKandidat(payload, sessionToken);
     // Jadwal & tugas
     case 'simpanJadwalBaru':
-      return extra.handleSimpanJadwalBaru(payload, sessionToken);
+      return schedule.handleSimpanJadwalBaru(payload, sessionToken);
     case 'hapusJadwal':
-      return extra.handleHapusJadwal(payload, sessionToken);
+      return schedule.handleHapusJadwal(payload, sessionToken);
     case 'tambahTugasBaru':
-      return extra.handleTambahTugasBaru(payload, sessionToken);
+      return schedule.handleTambahTugasBaru(payload, sessionToken);
     case 'setTugasStatus':
-      return extra.handleSetTugasStatus(payload, sessionToken);
+      return schedule.handleSetTugasStatus(payload, sessionToken);
     case 'hapusTugas':
-      return extra.handleHapusTugas(payload, sessionToken);
+      return schedule.handleHapusTugas(payload, sessionToken);
     case 'checkAndSendAgendaReminders':
       return { success: true, sent: 0 };
     // Template & kirim WA (Fonnte)
