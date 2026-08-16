@@ -4,7 +4,24 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.3 (supabase.js 1.073 baris dipecah jadi `_lib/db/*`, agregat 44 export identik).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.3 lanjutan: agregat `supabase.js` dihapus, semua pemakai import `_lib/db/*` langsung.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.3 lanjutan — agregat `supabase.js` DIHAPUS, migrasi semua pemakai ke `db/*` — commit `1893d9c`
+
+- 17 file `_lib` (actions-*, candidate-helpers, storage) + 2 e2e + 6 scripts
+  (dedupe, sync-idloker, audit-pasphoto, cleanup-job-misc, migrate-filecv-drive,
+  scan-orphan-files) migrasi dari re-export agregat ke import `_lib/db/*`
+  langsung (50 import terverifikasi).
+- `netlify/functions/_lib/supabase.js` **dihapus** — backend 32 → **31 file /
+  204 simbol** (total simbol tidak berubah).
+- 🐛 Fix bug ekstraksi: `db/candidates.js` memiliki deklarasi **ganda**
+  `findCandidateByWaFiltered` (parsing error lint) — duplikat dihapus.
+- Verifikasi: node --check bersih · lint 0 error/12 warn (baseline) · test
+  51/51 · module-map backend 31 file/204 simbol · dedupe dry-run 0 duplikat.
 
 ---
 
