@@ -4,11 +4,36 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 2: `js/05_render.js` dipecah jadi `js/render/{public,admin,candidate,share,mail}.js`.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 2 langkah 3: `js/03_engine.js` dipecah jadi `js/engine/{pipeline,dashboard,guards,init}.js`.
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 2 langkah 3 — `js/03_engine.js` (856 baris) → `js/engine/*` — commit `ff6e947`
+
+- **Baru** `js/engine/pipeline.js` (4 fn) — pipeline tahapan kandidat:
+  tahapanPipeline (config dinamis + fallback 9 langkah), tahapanMatchIdx,
+  getTahapanProgress, tahapanStepIndex.
+- **Baru** `js/engine/dashboard.js` (6 deklarasi) — dashboard kandidat:
+  evaluasiTahapanKandidat (tombol pemberkasan), renderJobDilamar (chip
+  lamaran), konstanta `BERKAS_17`/`BIO_FIELDS_19`, renderProgresPemberkasan,
+  kalkulasiProgress (bar progres + badge bronze/silver/gold/VIP/KELAS).
+- **Baru** `js/engine/guards.js` (3 fn) — guard auto-refresh: adaModalTerbuka,
+  sedangDiscrollTabel + updateMailBadge (semua badge mail + toast mail baru).
+- **Baru** `js/engine/init.js` (2 fn) — mesin utama: refreshDataDinamis
+  (tarik data super kilat, retry 1x, deteksi sesi basi) + initApp (boot
+  dashboard admin/kandidat/publik, auto-refresh 60 dtk, theme & i18n).
+- Body 15 deklarasi dipindah **byte-identik** (verifikasi brace-matching —
+  semua OK di tepat satu modul).
+- `scripts/build-js.mjs` STACK: `/js/03_engine.js` → 4 entri `js/engine/*`.
+- `js/03_engine.js` **DIHAPUS** — module-map frontend 29 → **32 file / 353
+  simbol** (total simbol TIDAK berubah). Bundel: `app-6a5a3721c6.js` →
+  `app-aa4fb559d5.js`, ukuran tetap **421.022 byte** (sama persis).
+
+---
+
+## Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
 ### Fase 2 langkah 2 — `js/05_render.js` (1371 baris) → `js/render/*` — commit `e8445a7`
 
