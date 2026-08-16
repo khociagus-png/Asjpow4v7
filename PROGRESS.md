@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 15: **`no-undef` diaktifkan permanen utk semua file frontend ESM** + 🐛 2 bug latent ketahuan & diperbaiki (`tr/callAPI/cekUploadFile` bare + bridge alias hilang di `master_full.js`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 16: **performa tarikan data** — auto-refresh 60→120 dtk + skip tab hidden, dan **SWR-lite cache** getAppData/getAppConfig di api-client (render instan dari cache, validasi background).
 
 ---
 
@@ -16,6 +16,18 @@
 - 🐛 **Bugfix 1 — bare global di master_full.js (latent, nyata)**: 30× `tr(`, 2× `callAPI(`, 1× `cekUploadFile(` bare → di ESM bakal ReferenceError saat render box pendidikan/pekerjaan/keluarga (langkah 3-5) & simpan/upload. Semua di-window-kan (`window.tr` dll). **Diverifikasi di browser**: navigasi step 1→5 render semua dynamic box, kembali ke step 1, 0 error JS.
 - 🐛 **Bugfix 2 — bridge alias hilang total di master_full.js**: `changeStep`/`submitMaster`/`handleFile` tidak di-export & TIDAK ada satu pun `window.*` alias → HTML `onclick="changeStep(1)"` / `submitMaster(true)` / `onchange="handleFile(...)"` bakal ReferenceError (bridge sempat hilang saat konversi langkah 13). Fix: 3 fungsi di-export + bridge 8 alias (`toggleImaMade`/`gateLogin`/`onSswSelect`/`onPekerjaanSelect`/`onFamPekerjaanSelect`/`handleFile`/`changeStep`/`submitMaster`). Pelajaran dicatat di ESM_BRIDGE §6: **saat konversi, wajib cek `window.X` ter-expose untuk SEMUA handler HTML page itu** — cek dengan membuka halaman & klik, bukan cuma no-undef (no-undef tidak menangkap alias yang hilang).
 - Verifikasi: lint 0/12 ✓ (no-undef aktif) · test **81/81** ✓ · build idempoten (`app-f90fc61af6.js`) · check:globals nol kolisi (405 simbol) · audit HIGH=0 · **E2E SEMUA LULUS**: login, upload, biodata + **smoke master-full**: nama dari URL, alias onclick ada, step 1→5 render (edu_tk_1/job_nm_1/fam_nm_1), 0 error JS ✓.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 16 — performa tarikan data: auto-refresh pintar + SWR-lite cache
+
+- **Auto-refresh 60 → 120 detik + skip tab hidden** (`js/engine/init.js`): interval refresh `setInterval` jadi 120.000 ms; kalau `document.hidden` (user buka tab lain) refresh di-skip total — tarikan sia-sia berkurang setengah + tidak berjalan di background. Saat tab kembali terlihat (`visibilitychange`), refresh dijalankan SEKALI segera (data tidak basi, tanpa menunggu siklus berikutnya). Guard lama tetap: skip kalau ada modal terbuka + guard scroll di refreshDataDinamis.
+- **SWR-lite cache di `api-client.js`**: `getAppData` + `getAppConfig` (tarikan data utama — jobs/kandidat/forms/config) di-cache **in-memory** TTL 10 detik. Navigasi antar-tab SPA langsung render dari cache (0 ms, tanpa jaringan); siklus auto-refresh 120 dtk memvalidasi ulang di background (stale-while-revalidate sederhana). Semua action BUKAN pembaca (mutasi/login/logout) meng-invalidate cache → data tidak pernah basi setelah perubahan. `sessionInvalid` tidak ikut di-cache. Cache in-memory SAJA (response getAppData ratusan KB — tidak aman untuk kuota localStorage 5 MB).
+- **Dampak**: tarikan berulang dalam 10 dtk (ganti tab admin, refresh otomatis) tidak lagi hit backend — request get-app-data berkurang drastis; kombinasi interval 120 dtk + hidden skip menurunkan tarikan periodik 50%+.
+- Verifikasi: node --check ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · build: bundel `app-18222bfae2.js` (420.2 KB, 45 file, idempoten) · check:globals nol kolisi (408 simbol) · audit HIGH=0 · **E2E SEMUA LULUS** (login, upload, biodata) + **smoke cache**: getAppData 2× dalam TTL → delta 1 request jaringan (kedua dari cache); action non-pembaca → invalidate → fetch ulang; 0 error JS ✓.
+- ⏭️ Roadmap performa tersisa (opsional): cache admin TTL pendek di backend, cek region Supabase (dokumentasi), atau lanjut refactor lain (i18n split, partials HTML, backend actions-upload).
 
 ---
 

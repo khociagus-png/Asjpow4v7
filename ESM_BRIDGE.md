@@ -1,7 +1,8 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
 > **Status: Fase 3 TUNTAS (langkah 13) + bundel bundle-mode (langkah 14) +
-> no-undef aktif (langkah 15)** —
+> no-undef aktif (langkah 15) + SWR-lite cache & auto-refresh pintar
+> (langkah 16)** —
 > SEMUA file frontend kini ES Modules: core (i18n/api-client) + init (state/util + theme/preview/nav/boot)
 > + auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
 > + admin_ops (`js/admin_ops/*`) + ai_copilot (`js/ai_copilot/*`) + sisa
@@ -32,7 +33,7 @@
 | Shadowing API bawaan browser (`window.name`, `window.status`, `window.open`, …) | **0** ✓ |
 | Risk HIGH | **0** |
 | Risk MEDIUM (kontrak lintas-file berat) | **25** |
-| Risk LOW (spesifik / privat-able) | **382** |
+| Risk LOW (spesifik / privat-able) | **385** |
 
 ### 1.2 Inventaris risk MEDIUM (kontrak global yang WAJIB diekspor saat ESM)
 

@@ -530,8 +530,19 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
 ## ⚡ Optimasi performa (lanjutan — backend sudah, frontend menyusul)
 
 - [x] **Backend: cache TTL + paralel** (`_lib/cache.js` + `_lib/actions-public.js`) — publik 1.518 → 0 ms warm (2026-08-16).
-- [ ] **Frontend: SWR cache di `api-client.js`** (IndexedDB/in-memory) — tampilkan data terakhir instan, validasi di background; kandidat HP tidak nunggu loading tiap buka.
-- [ ] **Auto-refresh 60 dtk → 120 dtk + skip saat tab hidden** (`js/03_engine.js` / `02_init.js`) — kurangi tarikan sia-sia.
+- [x] **Langkah 16 — SWR-lite cache di `api-client.js` + auto-refresh 120 dtk + skip tab hidden** — commit `c21e0d4`
+      `api-client.js`: cache in-memory `getAppData`/`getAppConfig` TTL 10 dtk
+      (render instan antar-tab SPA, validasi ulang via auto-refresh background);
+      semua action non-pembaca meng-invalidate; sessionInvalid tidak di-cache.
+      `js/engine/init.js`: interval 60→120 dtk + skip `document.hidden` +
+      refresh sekali saat `visibilitychange` kembali terlihat. Cache in-memory
+      saja (response getAppData ratusan KB, tidak aman utk localStorage).
+      Verifikasi: lint 0/12 · test 81/81 · E2E SEMUA LULUS + smoke cache
+      (delta 1 request utk 2 panggilan dalam TTL; invalidate jalan) ✓.
+      Catatan: cache IndexedDB penuh (persist lintas reload) ditunda — butuh
+      strategi ukuran/eviction; TTL in-memory + interval 120 dtk sudah
+      menutup keluhan tarikan berulang.
+
 - [ ] **(Opsional) cache admin TTL pendek** — admin warm masih ±1,6 dtk karena query berkas/forms; prioritas rendah (dipakai sedikit orang).
 - [ ] **Cek region Supabase** di dashboard (Settings → Region) — kalau jauh dari Netlify, latensi per-request tetap tinggi; caching sudah menutup, ini dokumentasi saja.
 

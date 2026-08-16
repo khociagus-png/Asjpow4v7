@@ -1,6 +1,32 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 15 — commit `f39a34f`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 16 — commit `c21e0d4`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 16: performa tarikan data — SWR-lite cache + auto-refresh pintar (perf)
+
+### SWR-lite cache di api-client.js
+
+- `getAppData` + `getAppConfig` (tarikan data utama) di-cache in-memory TTL
+  10 dtk → navigasi antar-tab SPA render instan tanpa jaringan; siklus
+  auto-refresh memvalidasi ulang di background (stale-while-revalidate
+  sederhana). Semua action non-pembaca (mutasi/login/logout) meng-invalidate
+  cache; sessionInvalid tidak di-cache. Cache in-memory saja (response
+  getAppData ratusan KB — tidak aman utk kuota localStorage 5 MB).
+
+### Auto-refresh pintar (js/engine/init.js)
+
+- Interval 60 → 120 dtk; skip total saat `document.hidden` (tab dibuka
+  user lain); refresh sekali segera saat tab kembali terlihat
+  (`visibilitychange`). Guard lama (modal terbuka / scroll aktif) tetap.
+
+### Verifikasi
+
+- lint 0/12 · test 81/81 · build idempoten (`app-18222bfae2.js`, 420.2 KB)
+  · check:globals nol kolisi (408 simbol) · E2E login/upload/biodata SEMUA
+  LULUS ✓ + smoke cache: 2× getAppData dalam TTL → delta 1 request (kedua
+  dari cache); action non-pembaca → invalidate → fetch ulang; 0 error JS ✓.
 
 ---
 
