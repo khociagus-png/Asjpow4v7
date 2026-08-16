@@ -1,6 +1,11 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 2 — **core layer (i18n.js + api-client.js) sudah ESM**.
+> **Status:** Fase 3 langkah 7 — core (i18n/api-client) + init (state/util) +
+> auth + engine + render + **api (`js/api/*`) sudah ESM**. Sisa classic:
+> `init/{theme,preview,nav,boot}`, `admin_modal/*`, `admin_ops/*`,
+> `ai_copilot/*`, `01_public`, `03_candidate`, `08_wa_pintar`,
+> `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`,
+> `apply-docs`, `upload-guard`, `helpers_cv`, `pwa` (lihat urutan §6).
 > Dokumen ini = hasil **audit global pollution** + pola **bridge** yang dipakai
 > supaya konversi bertahap TANPA regresi. Update di sini setiap kali modul baru
 > di-ESM-kan (lihat urutan konversi di bagian 6).
@@ -18,7 +23,7 @@
 | Metrik | Nilai |
 | --- | --- |
 | File frontend diaudit | **52** (js/** rekursif + api-client.js + i18n.js + pwa.js) |
-| Simbol global (deklarasi top-level + `window.*`) | **394** |
+| Simbol global (deklarasi top-level + `window.*`) | **396** |
 | Kolisi (1 nama dideklarasikan 2+ file) | **0** ✓ (guard `check:globals` juga memastikan 0 per build) |
 | Shadowing API bawaan browser (`window.name`, `window.status`, `window.open`, …) | **0** ✓ |
 | Risk HIGH | **0** |
@@ -331,14 +336,16 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
 3. ⏭️ Domain per domain (auth → engine → render → api → admin_* → ai_copilot →
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
-   (langkah 5) + `render/*` ✅ (langkah 6, turn ini)** — catatan: fungsi yang
-   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
-   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
-   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
-   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
-   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
-   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
-   harus dicek self-reference alias (`window.x = window.x`) setelah jalan.
+   (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7, turn
+   ini)** — catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat
+   alias window; referensi global implisit di dalam modul di-window-kan
+   eksplisit; **antar-file ESM belum boleh `import` (build masih concat +
+   IIFE per file) — panggilan lintas modul ESM memakai `window.*` eksplisit
+   sampai bundle jadi ESM (lihat §3.3)**. `render/mail.js` punya `var esc`
+   LOKAL (hoisting mencakup renderFormInbox) — jangan di-window-kan; blanket
+   replace lintas file harus dicek self-reference alias (`window.x =
+   window.x`) DAN literal template (`<tr` → `<window.tr` — ketahuan langkah
+   7, diperbaiki di render/public-admin-candidate-mail) setelah jalan.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -349,6 +356,29 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 7 — api/* ESM (commit `fca83b6`, turn ini)
+
+- `node --check --input-type=module` 4 file js/api/* ✓ · scan `no-undef` **0
+  error** ✓ (state via accessor, MAIL_SELECTED via accessor, core/util/render/
+  engine, helper classic cekUkuranFile/bacaFileBase64/normalizeGenderValue/
+  toDateInputValue, vendor window.qrcode) · `bun run lint` 0/12 ✓ · `bun run
+  test` **81/81** ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **394 simbol**) ·
+  bundel `app-ee4db83e37.js` (416.8 KB) · 0 export bocor ✓ · idempoten ✓.
+- `window.X = async function(){}` → `export async function` + alias
+  (submitRejectForm, ensureAllCandidates, muatLebihKandidat). 59 alias window.*
+  total (4 file). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 ·
+  LOW=372 (`.freebuff/audit-globals.json` + module-map diperbarui).
+- ⚠️ Blanket `ALL_CANDIDATES` merusak `window.ALL_CANDIDATES_TOTAL` (jadi
+  `window.window...`) → ganti pola terarah. Cek ini di langkah selanjutnya
+  yang punya prefix kolisi serupa.
+- 🐛 **Fix artefak langkah 6**: `<window.tr` → `<tr` di render/{public,admin,
+  candidate,mail}.js (blanket `tr(` ikut mengubah literal `<tr` template
+  tabel). Diverifikasi DOM di browser: tab Mail & DB Job (admin) + landing
+  publik render `tr.rt-row` asli, **0 elemen `window.tr`**, 0 error JS ✓.
+- **E2E SEMUA LULUS**: login-check, upload-check, biodata-check,
+  backend-fast-path ✓.
 
 ### Langkah 6 — render/* ESM (turn ini, commit `5afe39b`)
 

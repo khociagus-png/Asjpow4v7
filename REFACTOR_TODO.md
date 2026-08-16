@@ -311,6 +311,30 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       nyata ASJ00226). `maxCandidateIdNumber()` + fallback scan KEDUA tabel
       (`db/candidates.js` + `candidate-helpers.js`); 2 baris leftover E2E
       dibersihkan. E2E login/upload/biodata **SEMUA LULUS** ✓.
+- [x] **Langkah 7 — `js/api/*` ESM (4 file: forms, jobs, candidates, wa)** — commit `fca83b6`
+      Domain interaksi backend (pecahan 07_api.js): `forms.js` (12: mail inbox
+      review/approve/reject/delete/tandai dibaca + patchFormMail/upsertCandidateMemory),
+      `jobs.js` (11: kelola loker + downscale/upload pamflet/template + memori
+      ALL_DB_JOBS/ALL_JOBS), `candidates.js` (32: modal Input Manual, upload +
+      baris dokumen lain, Super Edit, revisi CV, QR lokal, filterCbx, pagination
+      ensureAllCandidates/muatLebihKandidat), `wa.js` (10: papan tugas/jadwal +
+      memori ALL_TUGAS/ALL_SCHEDULES) → `export` + alias window.* (59 total).
+      `window.X = async function(){}` (submitRejectForm/ensureAllCandidates/
+      muatLebihKandidat) diubah jadi `export async function` + alias. Referensi
+      global implisit di-window-kan eksplisit (no-undef 0 error): state via
+      accessor, MAIL_SELECTED via accessor, core/util/render/engine/helper
+      classic (cekUkuranFile/bacaFileBase64/normalizeGenderValue/toDateInputValue)
+      + vendor window.qrcode. ⚠️ Pelajaran blanket: `ALL_CANDIDATES` blanket
+      merusak `window.ALL_CANDIDATES_TOTAL` → pakai pola terarah `(ALL_CANDIDATES`
+      + `ALL_CANDIDATES.find`. Build: ESM_CORE + 4 entri → `app-ee4db83e37.js`
+      (416.8 KB, 0 export bocor, idempoten). check:globals nol kolisi (45 file /
+      394 simbol). Audit 52 file / **396 simbol** HIGH=0. Verifikasi: node --check
+      ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E
+      login/upload/biodata + backend-fast-path **SEMUA LULUS** ✓.
+      🐛 Bonus fix artefak langkah 6: `<window.tr>` → `<tr>` di render/public,
+      admin, candidate, mail (blanket replace `tr(` ikut mengubah literal `<tr`
+      template tabel) — diverifikasi di browser (tabel mail/DB Job/landing render
+      `tr.rt-row` asli, 0 elemen `window.tr`).
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**

@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 6 — commit `5afe39b`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 7 — commit `fca83b6`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 7: api js/api/* ESM + fix artefak `<window.tr>` (refactor & bugfix)
+
+### Refactor: forms, jobs, candidates, wa jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata + backend-fast-path SEMUA LULUS).
+- 4 file api (65 deklarasi) → export + 59 alias window.*; `window.X = async function(){}` → `export async function` + alias (submitRejectForm, ensureAllCandidates, muatLebihKandidat).
+- Referensi global implisit di-window-kan eksplisit (no-undef 0 error): state via accessor, `window.MAIL_SELECTED` via accessor, helper classic (cekUkuranFile/bacaFileBase64/normalizeGenderValue/toDateInputValue), vendor `window.qrcode`.
+- Bundel `app-ee4db83e37.js` (416.8 KB, 0 export bocor, nol kolisi, idempoten). Audit 52 file / 396 simbol, HIGH=0.
+
+### 🐛 Bugfix: tabel render memakai elemen `<window.tr>` (artefak blanket replace langkah 6)
+
+- 4 file render (public/admin/candidate/mail) punya `'<window.tr class="rt-row...'` + `'</window.tr>'` — blanket `tr(` → `window.tr(` ikut mengubah literal `<tr` di template tabel → style baris (rt-row/border) hilang.
+- `<window.tr` → `<tr`, `</window.tr>` → `</tr>` (14 titik). Verifikasi DOM di browser: tabel Mail & DB Job (admin) + landing publik render `tr.rt-row` asli, 0 elemen `window.tr`, 0 error JS.
 
 ---
 

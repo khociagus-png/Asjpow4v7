@@ -4,7 +4,27 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 6: render (`js/render/*`) jadi ESM (commit `5afe39b`) + 🐛 fix backend `nextCandidateId()` (409 simpan biodata).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 7: api (`js/api/*`) jadi ESM (commit `fca83b6`) + 🐛 fix artefak `<window.tr>` di tabel render.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 7 — api: js/api/* (forms, jobs, candidates, wa) ESM
+
+- **`js/api/forms.js` → ESM** (12 deklarasi): patchFormMail/upsertCandidateMemory/removeFormMail, prosesReviewForm/Approve/RejectForm, submitRejectForm, tandaiDibacaForm, toggleMailSelect, mailSelectAll, hapusFormMailTerpilih, hapusFormMail — `export` + 12 alias window.*. `window.submitRejectForm = async function(){}` diubah jadi `export async function submitRejectForm()` + alias (HTML partials/modals-shared.html onclick).
+- **`js/api/jobs.js` → ESM** (11): upsertJobMemory/removeJobMemory, aksiAdmin, hapusLoker, downscaleImageFile, uploadFilesDirectly, submitFormAdmin, bukaEditFullLoker, submitEditFullLoker, bukaModalEditDbJob, simpanUpdateDbJob — `export` + 11 alias window.* (pemakai: render/admin.js + HTML onclick).
+- **`js/api/candidates.js` → ESM** (32 deklarasi: modal Input Manual, upload kandidat + baris dokumen lain, Super Edit, revisi CV, QR lokal, filterCbx, pagination) — `export` + 30 alias window.*. `window.ensureAllCandidates`/`window.muatLebihKandidat` jadi `export async function` + alias (7 pemakai lintas file tetap jalan).
+- **`js/api/wa.js` → ESM** (10): renderTugas + helper memori ALL_TUGAS/ALL_SCHEDULES + tambahTugasAdmin/updateStatusTugas/hapusTugasAdmin/prosesHapusJadwal/submitJadwal — `export` + 6 alias window.* (HTML onclick papan tugas/jadwal).
+- Referensi global implisit di-window-kan eksplisit (scan no-undef **0 error**): state via accessor (`window.ALL_FORM/ALL_CANDIDATES/ALL_JOBS/ALL_DB_JOBS/ALL_TUGAS/ALL_SCHEDULES`), `window.MAIL_SELECTED` (accessor bridge render/mail.js), core (`window.tr/callAPI/esc/escJs`), util (`window.showToast/safeSet/setImg/getDirectDownloadUrl/normalizePhone`), render lintas domain (`window.renderFormInbox/updateMailBadge/renderAdminFull/renderLanguage`), helper classic (`window.cekUkuranFile/cekEkstensiFile/bacaFileBase64/normalizeGenderValue/toDateInputValue`), vendor (`window.qrcode`), engine (`window.refreshDataDinamis`).
+- ⚠️ Blanket replace `ALL_CANDIDATES` berbahaya: `window.ALL_CANDIDATES_TOTAL` (sudah ber-prefiks) akan jadi `window.window...` — dipakai pola terarah `(ALL_CANDIDATES` + `ALL_CANDIDATES.find`, bukan blanket. Dicatat untuk langkah berikutnya.
+- Build: ESM_CORE + 4 entri → bundel `app-ee4db83e37.js` (416.8 KB, 45 file, **0 export bocor**, idempoten). check:globals **nol kolisi** (45 file / 394 simbol top-level). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.
+- Verifikasi: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login-check, upload-check, biodata-check + backend-fast-path ✓.
+
+### 🐛 Fix artefak `<window.tr>` (blanket replace langkah 6, ketahuan saat cek tabel)
+
+- **Gejala**: 4 file render (public/admin/candidate/mail) punya string HTML `'<window.tr class="rt-row...'` + `'</window.tr>'` — blanket replace `tr(` → `window.tr(` di langkah 6 ikut mengubah literal `<tr` di template tabel → tabel admin/publik render elemen unknown `<window.tr>` (style `rt-row`/border hilang, render tetap "jalan" karena td dibiarkan browser).
+- **Fix**: `js/render/{public,admin,candidate,mail}.js` — `<window.tr` → `<tr`, `</window.tr>` → `</tr>` (14 titik). **Verifikasi DOM di browser** (script Playwright sekali pakai): login admin → tab Mail (baris `tr.rt-row` ada, 0 elemen `window.tr`) ✓ · tab DB Job ✓ · landing publik ✓ · 0 error JS ✓.
 
 ---
 
