@@ -374,6 +374,28 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · E2E login/upload/biodata
       **SEMUA LULUS** ✓ · cek admin_ops terarah (tab Pengaturan 11 kategori,
       tabel Jadwal, modal list kandidat, 0 error JS) ✓.
+- [x] **Langkah 10 — `js/ai_copilot/*` ESM (4 file: admin, interview, parse, results)** — commit `01e3f81`
+      Domain AI copilot (pecahan 09_ai_copilot.js): `admin.js` (7 fn + state
+      adminAiHistory/currentAiCandidateId/urlFotoJeklin — chat HR copilot Jeklin +
+      auto-fill/simpan kandidat + saran), `interview.js` (8 fn + interviewHistory
+      — simulator wawancara VIP + cobaParseJsonLoose + kirim hasil ke admin),
+      `parse.js` (3 fn — bar upload & parse dokumen biodata admin),
+      `results.js` (3 fn + lastAdminHasil — model wawancara per bidang, lihat
+      hasil, update biodata dari hasil) → `export` + 14 alias window.*.
+      **`currentAiCandidateId` pakai ACCESSOR bridge** (di-reassign admin.js,
+      dibaca parse/results — alias biasa basi); `urlFotoJeklin` const alias
+      biasa (dibaca interview.js); panggilan lintas modul via `window.*`
+      (§3.3: window.pastikanBarParseAdminAi/window.tambahPesanAdminAi/
+      window.currentAiCandidateId). Referensi global implisit di-window-kan
+      eksplisit (no-undef 0 error): state accessor (ALL_CANDIDATES/
+      currentKandidatWa/Name), classic isVipCatatan (03_candidate), core/util
+      via window. Build: ESM_CORE + 4 entri → `app-5b7f5a3192.js` (418.4 KB,
+      0 export bocor, idempoten). check:globals nol kolisi (45 file / 394
+      simbol). Audit 52 file / **396 simbol** HIGH=0. Verifikasi: node --check
+      ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ ·
+      E2E login/upload/biodata **SEMUA LULUS** ✓ · cek ai_copilot terarah
+      (modal AI copilot + bar parse + saran + accessor live + klik Hasil
+      Wawancara tanpa error JS) ✓.
 - [ ] Buat entry `js/main.js` (admin/index) yang `import` semua modul domain dan memicu `initApp()` — **baru setelah konversi eksplisit tuntas**.
 - [ ] Ubah `scripts/build-js.mjs`: concat → `esbuild.build({ entryPoints: ['js/main.js'], bundle: true, format: 'iife', treeShaking: false })` — hasil 1 file IIFE; tambahkan plugin exposure `window.<simbol> = <simbol>` per modul untuk kompat HTML `onclick`/`onload` (atau alias `window` eksplisit di tiap modul).
 - [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**

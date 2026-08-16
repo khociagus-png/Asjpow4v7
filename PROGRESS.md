@@ -4,7 +4,20 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 9: admin_ops (`js/admin_ops/*`) jadi ESM (commit `eee8f5f`).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 10: ai_copilot (`js/ai_copilot/*`) jadi ESM (commit `01e3f81`).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 10 — ai_copilot: js/ai_copilot/* (4 file) ESM
+
+- **`js/ai_copilot/admin.js` → ESM** (7 + 3 state): bukaAdminAiCopilot/tutupAdminAi/kirimPesanAdminAi/autoFillFormDariAi/simpanKandidatDariAi/tambahPesanAdminAi/tampilkanSaranAdminAi + `adminAiHistory`/`currentAiCandidateId`/`urlFotoJeklin` — `export` + 6 alias. **`currentAiCandidateId` memakai ACCESSOR bridge** (di-reassign bare di bukaAdminAiCopilot; dibaca parse.js & results.js — alias biasa akan basi, pola state.js §3.2). `urlFotoJeklin` const → alias biasa (dibaca interview.js). `pastikanBarParseAdminAi()` → `window.pastikanBarParseAdminAi()` (lintas modul, §3.3).
+- **`js/ai_copilot/interview.js` → ESM** (8 + `interviewHistory`): bukaSimulatorInterview (window assignment lama jadi `export` + alias), pastikanTombolSelesaiInterview, selesaikanWawancaraInterview, mulaiWawancaraInterview, appendInterviewChat, sendInterviewMessage, cobaParseJsonLoose, kirimHasilWawancaraKeAdmin — `export` + 2 alias (bukaSimulatorInterview + sendInterviewMessage utk HTML). `window.urlFotoJeklin`, `window.isVipCatatan` (03_candidate classic), `window.ALL_CANDIDATES/normalizePhone/currentKandidatWa/currentKandidatName` (accessor).
+- **`js/ai_copilot/parse.js` → ESM** (3): pastikanBarParseAdminAi/bacaFileBase64Front/uploadDokumenBiodataAdmin — `export` + 3 alias (onclick HTML di bar yang di-inject + admin.js). `window.tambahPesanAdminAi`, `window.currentAiCandidateId` (accessor).
+- **`js/ai_copilot/results.js` → ESM** (3 + `lastAdminHasil`): generateWawancaraModelAdmin/lihatHasilWawancaraAdmin/updateBiodataDariHasilAdmin — `export` + 3 alias (onclick HTML di bar parse). `window.tambahPesanAdminAi`, `window.currentAiCandidateId` (accessor).
+- Referensi global implisit di-window-kan eksplisit (scan no-undef **0 error**); 4 double-prefix `window.window` dari blanket order diperbaiki. Build: ESM_CORE + 4 entri → bundel `app-5b7f5a3192.js` (418.4 KB, 45 file, **0 export bocor**, accessor utuh, idempoten). check:globals **nol kolisi** (45 file / 394 simbol). Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372.
+- Verifikasi: node --check ESM 4 file ✓ · no-undef 0 error ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS**: login, upload, biodata ✓ + **cek ai_copilot terarah**: modal AI copilot terbuka (admin.js), bar parse ter-inject (parse.js), saran AI tampil, `window.currentAiCandidateId` accessor live, klik tombol Hasil Wawancara (results.js) tanpa error JS ✓.
 
 ---
 

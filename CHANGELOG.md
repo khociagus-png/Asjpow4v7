@@ -1,6 +1,18 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 9 — commit `eee8f5f`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 10 — commit `01e3f81`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 10: ai_copilot js/ai_copilot/* ESM (refactor)
+
+### Refactor: admin, interview, parse, results jadi ES Modules
+
+- **Tidak ada perubahan perilaku** — zero regression (test 81/81, E2E login/upload/biodata SEMUA LULUS).
+- 4 file (21 deklarasi + 4 state) → export + 14 alias window.*; `currentAiCandidateId` pakai **accessor bridge** (di-reassign admin.js, dibaca parse/results — alias biasa basi); `urlFotoJeklin` alias biasa.
+- Panggilan lintas modul di-window-kan eksplisit (§3.3): `window.pastikanBarParseAdminAi`, `window.tambahPesanAdminAi`, `window.currentAiCandidateId`; referensi global implisit lain (no-undef 0 error): state accessor + classic `isVipCatatan`.
+- Bundel `app-5b7f5a3192.js` (418.4 KB, 0 export bocor, nol kolisi, idempoten). Audit 52 file / 396 simbol, HIGH=0.
+- Verifikasi tambahan di browser: modal AI copilot terbuka, bar parse ter-inject, saran AI tampil, accessor live, klik Hasil Wawancara tanpa error JS.
 
 ---
 

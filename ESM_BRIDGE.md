@@ -1,9 +1,9 @@
 # ESM_BRIDGE.md — Migrasi Global Script → ES Modules (Hybrid Coexistence)
 
-> **Status:** Fase 3 langkah 9 — core (i18n/api-client) + init (state/util) +
+> **Status:** Fase 3 langkah 10 — core (i18n/api-client) + init (state/util) +
 > auth + engine + render + api (`js/api/*`) + admin_modal (`js/admin_modal/*`)
-> + **admin_ops (`js/admin_ops/*`) sudah ESM**. Sisa classic:
-> `init/{theme,preview,nav,boot}`, `ai_copilot/*`, `01_public`,
+> + admin_ops (`js/admin_ops/*`) + **ai_copilot (`js/ai_copilot/*`) sudah
+> ESM**. Sisa classic: `init/{theme,preview,nav,boot}`, `01_public`,
 > `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`,
 > `12_esign_match`, `13_rincian_builder`, `apply-docs`, `upload-guard`,
 > `helpers_cv`, `pwa` (lihat urutan §6).
@@ -338,18 +338,20 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    sisanya) — tiap langkah: export + import di pemakainya + alias window sampai
    semua pemakai di-import. **`04_auth.js` ✅ (langkah 4) + `engine/*` ✅
    (langkah 5) + `render/*` ✅ (langkah 6) + `js/api/*` ✅ (langkah 7) +
-   `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9, turn
-   ini)** — catatan: fungsi yang dipanggil HTML inline `onclick` WAJIB dapat
-   alias window; referensi global implisit di dalam modul di-window-kan
-   eksplisit; **antar-file ESM belum boleh `import` (build masih concat +
-   IIFE per file) — panggilan lintas modul ESM memakai `window.*` eksplisit
-   sampai bundle jadi ESM (lihat §3.3)**. `render/mail.js` punya `var esc`
-   LOKAL (hoisting mencakup renderFormInbox) — jangan di-window-kan; blanket
-   replace lintas file harus dicek self-reference alias (`window.x =
-   window.x`) DAN literal template (`<tr` → `<window.tr` — ketahuan langkah
-   7, diperbaiki di render/public-admin-candidate-mail) setelah jalan.
-   Catatan langkah 9: `event.currentTarget` (implicit global window.event)
-   → `window.event.currentTarget` biar lolos no-undef + strict mode.
+   `js/admin_modal/*` ✅ (langkah 8) + `js/admin_ops/*` ✅ (langkah 9) +
+   `js/ai_copilot/*` ✅ (langkah 10, turn ini)** — catatan: fungsi yang
+   dipanggil HTML inline `onclick` WAJIB dapat alias window; referensi global
+   implisit di dalam modul di-window-kan eksplisit; **antar-file ESM belum
+   boleh `import` (build masih concat + IIFE per file) — panggilan lintas
+   modul ESM memakai `window.*` eksplisit sampai bundle jadi ESM (lihat
+   §3.3)**. `render/mail.js` punya `var esc` LOKAL (hoisting mencakup
+   renderFormInbox) — jangan di-window-kan; blanket replace lintas file
+   harus dicek self-reference alias (`window.x = window.x`) DAN literal
+   template (`<tr` → `<window.tr` — ketahuan langkah 7, diperbaiki di
+   render/public-admin-candidate-mail) setelah jalan. Catatan langkah 9:
+   `event.currentTarget` → `window.event.currentTarget`; catatan langkah 10:
+   state lintas-modul yang di-reassign (`currentAiCandidateId`) pakai
+   accessor bridge, bukan alias biasa.
 4. ⏭️ Entry `js/main.js` + `esbuild bundle` (ganti concat) — **baru** setelah
    semua referensi lintas file jadi `import` eksplisit (nol referensi global
    implisit). Pengalaman empiris: bundle mode sebelum itu RENAME/tree-shake
@@ -360,6 +362,25 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    manfaat utama ESM).
 
 ---
+
+### Langkah 10 — ai_copilot/* ESM (commit `01e3f81`, turn ini)
+
+- `node --check --input-type=module` 4 file js/ai_copilot/* ✓ · scan `no-undef`
+  **0 error** ✓ (state accessor ALL_CANDIDATES/currentKandidatWa/Name;
+  classic isVipCatatan; core/util via window; lintas modul via window.*
+  §3.3) · `bun run lint` 0/12 ✓ · `bun run test` **81/81** ✓.
+- `bun run build`: check:globals **nol kolisi** (45 file / **394 simbol**) ·
+  bundel `app-5b7f5a3192.js` (418.4 KB) · 0 export bocor ✓ · accessor
+  `currentAiCandidateId` utuh ✓ · idempoten ✓.
+- **`currentAiCandidateId` = accessor bridge** (di-reassign bare di
+  bukaAdminAiCopilot, dibaca parse.js/results.js); `urlFotoJeklin` const
+  alias biasa (dibaca interview.js). 14 alias window.* total (4 file).
+  Audit: 52 file · **396 simbol** · HIGH=0 · MEDIUM=24 · LOW=372
+  (`.freebuff/audit-globals.json` diperbarui).
+- **E2E SEMUA LULUS**: login-check, upload-check, biodata-check ✓ + cek
+  ai_copilot terarah: modal AI copilot terbuka (admin.js ESM), bar parse
+  ter-inject (parse.js ESM), saran AI tampil, `window.currentAiCandidateId`
+  live, klik tombol Hasil Wawancara (results.js ESM) tanpa error JS ✓.
 
 ### Langkah 9 — admin_ops/* ESM (commit `eee8f5f`, turn ini)
 
