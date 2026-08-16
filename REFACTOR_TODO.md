@@ -75,8 +75,9 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 - [ ] Pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah).
 
 ### 1.2 Pecah `actions-extra.js` (2549 baris) — langkah 1 SELESAI (jadwal & tugas)
-- [x] **`actions-schedule.js` baru (165 baris)** — jadwal `database_schedule` + tugas `database_tugas` (5 handler) dipindah dari `actions-extra.js`; `requireRole` dipusatkan di `actions-auth.js`. `actions-extra.js` 2549 → **2370 baris**, cross-file calls 33 → 28. Dispatcher `handlers.js` kini route ke `schedule.*`. Verifikasi: test 51/51, E2E login SEMUA LULUS, backend **19 file / 204 simbol**. Commit: *(isi hash)*.
-- [ ] Identifikasi domain dengan `module-map.mjs` (WA pintar, config/sys_config, siswa-baru, upload/master) → pecah jadi `actions-wa.js`, `actions-config.js`, `actions-upload.js`, dst.
+- [x] **`actions-schedule.js` baru (165 baris)** — jadwal `database_schedule` + tugas `database_tugas` (5 handler) dipindah dari `actions-extra.js`; `requireRole` dipusatkan di `actions-auth.js`. `actions-extra.js` 2549 → **2370 baris**, cross-file calls 33 → 28. Dispatcher `handlers.js` kini route ke `schedule.*`. Verifikasi: test 51/51, E2E login SEMUA LULUS, backend **19 file / 204 simbol**. Commit: `aec1e9f`.
+- [x] **`actions-wa.js` + `actions-config.js` baru** — WA/Fonnte (4 handler + `fonnteSend`) dan config (sys_config + rincian_presets, 4 handler + `CONFIG_TYPE_MAP`) dipindah dari `actions-extra.js`. `actions-extra.js` 2370 → **2100 baris**, cross-file calls 28 → 20. Dispatcher route ke `wa.*`/`config.*`. Verifikasi: test 51/51, smoke guard admin 7 action + getRincianPresets (4 kategori), E2E login SEMUA LULUS, backend **21 file / 204 simbol**. Commit: *(isi hash)*.
+- [ ] Identifikasi domain dengan `module-map.mjs` (siswa-baru + bridge, drive & migrasi, upload/master inti) → pecah jadi `actions-register.js`, `actions-upload.js`, dst.
 - [ ] Ekspor per fitur (bukan satu objek raksasa) supaya dispatcher hanya impor yang dipakai.
 
 ### 1.3 Pecah `supabase.js` (1073 baris) → client + repositori

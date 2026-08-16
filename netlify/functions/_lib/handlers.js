@@ -12,6 +12,8 @@
 const session = require('./session');
 const extra = require('./actions-extra');
 const schedule = require('./actions-schedule');
+const wa = require('./actions-wa');
+const config = require('./actions-config');
 const ai = require('./actions-ai');
 const rateLimit = require('./rate-limit');
 const publicData = require('./actions-public');
@@ -270,23 +272,23 @@ async function dispatchAction(action, payload, sessionToken) {
       return { success: true, sent: 0 };
     // Template & kirim WA (Fonnte)
     case 'simpanWaTemplate':
-      return extra.handleSimpanWaTemplate(payload, sessionToken);
+      return wa.handleSimpanWaTemplate(payload, sessionToken);
     case 'hapusWaTemplate':
-      return extra.handleHapusWaTemplate(payload, sessionToken);
+      return wa.handleHapusWaTemplate(payload, sessionToken);
     case 'kirimSatuPesanFonnte':
-      return extra.handleKirimSatuPesanFonnte(payload, sessionToken);
+      return wa.handleKirimSatuPesanFonnte(payload, sessionToken);
     case 'kirimTawaranMassal':
-      return extra.handleKirimTawaranMassal(payload, sessionToken);
+      return wa.handleKirimTawaranMassal(payload, sessionToken);
     // Konfigurasi sistem
     case 'updateSysConfig':
-      return extra.handleUpdateSysConfig(payload, sessionToken);
+      return config.handleUpdateSysConfig(payload, sessionToken);
     // Preset rincian biaya
     case 'getRincianPresets':
-      return extra.handleGetRincianPresets(payload, sessionToken);
+      return config.handleGetRincianPresets(payload, sessionToken);
     case 'saveRincianPreset':
-      return extra.handleSaveRincianPreset(payload, sessionToken);
+      return config.handleSaveRincianPreset(payload, sessionToken);
     case 'deleteRincianPreset':
-      return extra.handleDeleteRincianPreset(payload, sessionToken);
+      return config.handleDeleteRincianPreset(payload, sessionToken);
     // Siswa baru
     case 'getDaftarSiswaBaru':
       return extra.handleGetDaftarSiswaBaru(payload, sessionToken);

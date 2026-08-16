@@ -4,7 +4,31 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 1 (jadwal & tugas dipisah dari actions-extra).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 2 (WA/Fonnte + config dipisah dari actions-extra).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.2 langkah 2 — modul `actions-wa.js` + `actions-config.js` — commit *(isi hash)*
+
+- **Baru** `_lib/actions-wa.js` (5 export) — template WA (`wa_templates`),
+  `fonnteSend` (Fonnte API, pakai `FONNTE_TOKEN`), kirim satu pesan,
+  tawaran massal. Dipindah utuh dari `actions-extra.js` (perilaku identik).
+- **Baru** `_lib/actions-config.js` (4 export) — `CONFIG_TYPE_MAP` +
+  `handleUpdateSysConfig` (sys_config) + preset rincian biaya
+  (`rincian_presets`). Dipindah utuh.
+- `actions-extra.js` 2370 → **2100 baris**; 8 handler dilepas dari
+  `module.exports`; dispatcher `handlers.js` route ke `wa.*`/`config.*`.
+- Catatan: smoke test pertama menggunakan bentuk argumen salah
+  (`{action, payload}` sebagai arg-1 padahal handleAction(action,
+  payload, token)) → hasilnya NOT_IMPLEMENTED yang juga `success:false`
+  (false positive). Diulang dengan bentuk benar → guard admin terverifikasi
+  (7 action ditolak `sessionInvalid`), `getRincianPresets` OK (4 kategori),
+  `getAppData` OK.
+- Verifikasi: node --check ✓, test 51/51 ✓, E2E login-check SEMUA LULUS ✓,
+  backend module-map 19 → **21 file**, 204 simbol, cross-file `actions-extra`
+  28 → 20.
 
 ---
 
