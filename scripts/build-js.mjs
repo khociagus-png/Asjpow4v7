@@ -129,6 +129,11 @@ const ESM_CORE = new Set([
   '/js/admin_ops/loading.js',
   '/js/admin_ops/migration.js',
   '/js/admin_ops/drive.js',
+  // Fase 3 langkah 10: ai_copilot (admin/interview/parse/results — AI HR copilot, simulator wawancara, parse dokumen, hasil).
+  '/js/ai_copilot/admin.js',
+  '/js/ai_copilot/interview.js',
+  '/js/ai_copilot/parse.js',
+  '/js/ai_copilot/results.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

@@ -4,38 +4,38 @@
 // ==========================================
 // AI HR COPILOT (QWEEN JEKLIN) — chat admin + auto-fill form kandidat
 // ==========================================
-let adminAiHistory = [];
-let currentAiCandidateId = null;
-const urlFotoJeklin =
+export let adminAiHistory = [];
+export let currentAiCandidateId = null;
+export const urlFotoJeklin =
   'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png';
 
-function bukaAdminAiCopilot(candidateId) {
-  if (!isAdmin) {
-    showToast(tr('ui.toast_admin_login_first'), 'error');
+export function bukaAdminAiCopilot(candidateId) {
+  if (!window.isAdmin) {
+    window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
   currentAiCandidateId = candidateId || null;
   document.getElementById('modal-admin-ai').classList.remove('hidden');
-  pastikanBarParseAdminAi();
+  window.pastikanBarParseAdminAi();
   const chatBox = document.getElementById('admin-ai-chat');
 
   chatBox.innerHTML = `
         <div class="flex items-start gap-3 mt-4">
             <img src="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png" class="w-8 h-8 rounded-full object-cover shadow-sm border border-amber-400 flex-shrink-0" alt="Jeklin">
             <div class="bg-slate-800 text-slate-200 text-sm p-3.5 rounded-2xl rounded-tl-none shadow-md border border-amber-500/20" style="max-width: 85%; width: fit-content;">
-                <p class="whitespace-pre-wrap m-0 leading-relaxed">${tr('ui.ai_welcome')}</p>
+                <p class="whitespace-pre-wrap m-0 leading-relaxed">${window.tr('ui.ai_welcome')}</p>
             </div>
         </div>`;
 
   adminAiHistory = [];
-  tampilkanSaranAdminAi([tr('ui.ai_sug1'), tr('ui.ai_sug2'), tr('ui.ai_sug3')]);
+  tampilkanSaranAdminAi([window.tr('ui.ai_sug1'), window.tr('ui.ai_sug2'), window.tr('ui.ai_sug3')]);
 }
 
-function tutupAdminAi() {
+export function tutupAdminAi() {
   document.getElementById('modal-admin-ai').classList.add('hidden');
 }
 
-async function kirimPesanAdminAi(event) {
+export async function kirimPesanAdminAi(event) {
   if (event && event.type === 'keypress' && event.key !== 'Enter') return;
   const input = document.getElementById('admin-ai-input');
   const msg = input.value.trim();
@@ -66,9 +66,9 @@ async function kirimPesanAdminAi(event) {
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const res = await callAPI('processAdminAIChat', [
+    const res = await window.callAPI('processAdminAIChat', [
       {
-        adminName: currentAdminName,
+        adminName: window.currentAdminName,
         message: msg,
         history: adminAiHistory,
         candidateId: currentAiCandidateId,
@@ -103,7 +103,7 @@ async function kirimPesanAdminAi(event) {
   }
 }
 
-function autoFillFormDariAi(data) {
+export function autoFillFormDariAi(data) {
   if (!data) return;
 
   // Fill text fields
@@ -137,13 +137,13 @@ function autoFillFormDariAi(data) {
   }
 }
 
-function simpanKandidatDariAi() {
+export function simpanKandidatDariAi() {
   const nama = document.getElementById('ai-k-nama').value;
   const wa = document.getElementById('ai-k-wa').value;
   const loker = document.getElementById('ai-k-loker').value;
 
   if (!nama || !wa) {
-    if (typeof showToast !== 'undefined') showToast(tr('ui.toast_name_wa_required'), 'error');
+    if (typeof window.showToast !== 'undefined') window.showToast(window.tr('ui.toast_name_wa_required'), 'error');
     return;
   }
 
@@ -154,14 +154,14 @@ function simpanKandidatDariAi() {
 
   tutupAdminAi();
   document.getElementById('modal-tambah-kandidat').classList.remove('hidden');
-  if (typeof showToast !== 'undefined') showToast(tr('ui.toast_data_transferred'), 'success');
+  if (typeof window.showToast !== 'undefined') window.showToast(window.tr('ui.toast_data_transferred'), 'success');
 }
 
-function tambahPesanAdminAi(text, sender) {
+export function tambahPesanAdminAi(text, sender) {
   const chatBox = document.getElementById('admin-ai-chat');
   const isUser = sender === 'user';
 
-  let cleanText = esc(text);
+  let cleanText = window.esc(text);
   cleanText = cleanText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
   let htmlStr = '';
@@ -192,7 +192,7 @@ function tambahPesanAdminAi(text, sender) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function tampilkanSaranAdminAi(actions) {
+export function tampilkanSaranAdminAi(actions) {
   const cont = document.getElementById('admin-ai-suggestions');
   cont.innerHTML = '';
   actions.forEach((act) => {
@@ -207,3 +207,23 @@ function tampilkanSaranAdminAi(actions) {
     cont.appendChild(btn);
   });
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (admin/index bukaAdminAiCopilot, partials tutupAdminAi /
+// kirimPesanAdminAi / simpanKandidatDariAi). currentAiCandidateId memakai
+// ACCESSOR get/set (di-reassign bare di bukaAdminAiCopilot; dibaca
+// parse.js & results.js) — pola state.js §3.2. urlFotoJeklin const → alias
+// biasa (dibaca interview.js). tambahPesanAdminAi dipakai parse.js & results.js.
+Object.defineProperty(window, 'currentAiCandidateId', {
+  configurable: true,
+  get() { return currentAiCandidateId; },
+  set(v) { currentAiCandidateId = v; },
+});
+window.bukaAdminAiCopilot = bukaAdminAiCopilot;
+window.tutupAdminAi = tutupAdminAi;
+window.kirimPesanAdminAi = kirimPesanAdminAi;
+window.simpanKandidatDariAi = simpanKandidatDariAi;
+window.tambahPesanAdminAi = tambahPesanAdminAi;
+window.tampilkanSaranAdminAi = tampilkanSaranAdminAi;
+window.urlFotoJeklin = urlFotoJeklin;

@@ -6,7 +6,7 @@
 // Bar upload di-inject ke modal-admin-ai (partial tidak disentuh supaya
 // tetap satu sumber). Alur: pilih file → parse otomatis → update biodata.
 // ==========================================
-function pastikanBarParseAdminAi() {
+export function pastikanBarParseAdminAi() {
   if (document.getElementById('admin-ai-parse-bar')) return;
   const chatBox = document.getElementById('admin-ai-chat');
   if (!chatBox || !chatBox.parentElement) return;
@@ -44,7 +44,7 @@ function pastikanBarParseAdminAi() {
   chatBox.parentElement.insertBefore(div, chatBox.nextSibling);
 }
 
-function bacaFileBase64Front(file) {
+export function bacaFileBase64Front(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(String(r.result || '').split(',')[1] || '');
@@ -53,9 +53,9 @@ function bacaFileBase64Front(file) {
   });
 }
 
-async function uploadDokumenBiodataAdmin(input) {
-  if (!isAdmin) {
-    showToast(tr('ui.toast_admin_login_first'), 'error');
+export async function uploadDokumenBiodataAdmin(input) {
+  if (!window.isAdmin) {
+    window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
   let el = input && input.files && input.files[0] ? input : null;
@@ -64,7 +64,7 @@ async function uploadDokumenBiodataAdmin(input) {
     if (fi && fi.files && fi.files[0]) el = fi;
   }
   if (!el) {
-    showToast('Pilih file dulu (PDF/Excel/Word/CSV/TXT/gambar)', 'error');
+    window.showToast('Pilih file dulu (PDF/Excel/Word/CSV/TXT/gambar)', 'error');
     return;
   }
   const file = el.files[0];
@@ -79,9 +79,9 @@ async function uploadDokumenBiodataAdmin(input) {
     const data = await bacaFileBase64Front(file);
     const waInput = document.getElementById('admin-ai-wa');
     const waTarget = waInput ? waInput.value.trim() : '';
-    const res = await callAPI('parseDokumenBiodata', [
+    const res = await window.callAPI('parseDokumenBiodata', [
       {
-        candidateId: currentAiCandidateId || undefined,
+        candidateId: window.currentAiCandidateId || undefined,
         wa: waTarget || undefined,
         file: { name: file.name, mimeType: file.type || 'application/octet-stream', data },
       },
@@ -90,16 +90,16 @@ async function uploadDokumenBiodataAdmin(input) {
       throw new Error((res && res.error) || 'Gagal parse dokumen');
     }
     // Simpan ke biodata master (backend sudah izinkan admin panggil submitMasterForm).
-    const simpan = await callAPI('submitMasterForm', [Object.assign({ wa: res.wa }, res.data)]);
+    const simpan = await window.callAPI('submitMasterForm', [Object.assign({ wa: res.wa }, res.data)]);
     if (!simpan || simpan.success === false) {
       throw new Error((simpan && simpan.message) || 'Gagal simpan biodata');
     }
     const rw = res.riwayat || {};
-    tambahPesanAdminAi(
+    window.tambahPesanAdminAi(
       '📄 **Parse berhasil:** ' +
-        esc(res.fileName) +
+        window.esc(res.fileName) +
         '\n👤 Kandidat: ' +
-        esc(res.namaSekarang || res.wa) +
+        window.esc(res.namaSekarang || res.wa) +
         '\n📊 ' +
         res.fieldCount +
         ' field biodata · 🎓 Pendidikan: ' +
@@ -112,7 +112,7 @@ async function uploadDokumenBiodataAdmin(input) {
       'ai',
     );
     if (typeof showToast === 'function') {
-      showToast('Biodata ' + (res.namaSekarang || res.wa) + ' ter-update dari ' + res.fileName, 'success');
+      window.showToast('Biodata ' + (res.namaSekarang || res.wa) + ' ter-update dari ' + res.fileName, 'success');
     }
     if (res.wa) {
       const waEl = document.getElementById('admin-ai-wa');
@@ -123,10 +123,18 @@ async function uploadDokumenBiodataAdmin(input) {
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
     console.error('[AI] parseDokumenBiodata error:', err);
-    tambahPesanAdminAi('⚠️ Gagal parse dokumen: ' + esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    window.tambahPesanAdminAi('⚠️ Gagal parse dokumen: ' + window.esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);
     }
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (pastikanBarParseAdminAi di-inject ke modal-admin-ai:
+// uploadDokumenBiodataAdmin) + admin.js window.pastikanBarParseAdminAi.
+window.pastikanBarParseAdminAi = pastikanBarParseAdminAi;
+window.bacaFileBase64Front = bacaFileBase64Front;
+window.uploadDokumenBiodataAdmin = uploadDokumenBiodataAdmin;
