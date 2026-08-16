@@ -4,7 +4,7 @@
 // ==========================================
 // SKELETON LOADING (ANTI LAYAR HITAM) — bayangan tabel saat tarik data
 // ==========================================
-function setSkeletonLoading(elementId, cols) {
+export function setSkeletonLoading(elementId, cols) {
   var tb = document.getElementById(elementId);
   if (!tb) return;
   var html = '';
@@ -25,11 +25,11 @@ function setSkeletonLoading(elementId, cols) {
   tb.innerHTML = html;
 }
 
-function jalankanSemuaSkeleton() {
+export function jalankanSemuaSkeleton() {
   // Publik
   if (document.getElementById('public-table-body')) setSkeletonLoading('public-table-body', 5);
   // Admin
-  if (isAdmin) {
+  if (window.isAdmin) {
     if (document.getElementById('admin-table-body')) setSkeletonLoading('admin-table-body', 5);
     if (document.getElementById('admin-dbjob-body')) setSkeletonLoading('admin-dbjob-body', 6);
     if (document.getElementById('admin-kandidat-body'))
@@ -39,9 +39,15 @@ function jalankanSemuaSkeleton() {
   }
   // Kandidat (Riwayat)
   var kRiwayat = document.getElementById('k-dash-riwayat');
-  if (isKandidat && kRiwayat) {
+  if (window.isKandidat && kRiwayat) {
     kRiwayat.innerHTML =
       '<div class="p-3.5 rounded-xl border border-slate-700/50 bg-black/40 mb-2 animate-pulse"><div class="h-4 bg-slate-700/60 rounded w-1/2 mb-2"></div><div class="h-3 bg-slate-700/60 rounded w-1/3"></div></div>' +
       '<div class="p-3.5 rounded-xl border border-slate-700/50 bg-black/40 animate-pulse"><div class="h-4 bg-slate-700/60 rounded w-2/3 mb-2"></div><div class="h-3 bg-slate-700/60 rounded w-1/4"></div></div>';
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
+// (engine/init.js window.jalankanSemuaSkeleton).
+window.setSkeletonLoading = setSkeletonLoading;
+window.jalankanSemuaSkeleton = jalankanSemuaSkeleton;

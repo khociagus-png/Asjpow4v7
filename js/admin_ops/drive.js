@@ -10,12 +10,12 @@
 //  - modal daftar kandidat + upload ulang per berkas (foto/CV/JFT/SSW)
 //  - backend uploadDriveReplacement sinkronkan master + database_candidate
 
-var DRIVE_CANDIDATES = [];
+export var DRIVE_CANDIDATES = [];
 
-async function muatMigrasiDrive() {
+export async function muatMigrasiDrive() {
   if (typeof callAPI !== 'function') return;
   try {
-    const res = await callAPI('getDriveLinkCandidates', []);
+    const res = await window.callAPI('getDriveLinkCandidates', []);
     if (!res || !res.success) return;
     // Handler backend mengembalikan `data`; dulu frontend baca `list` yang
     // tidak pernah ada → fitur selalu kosong & banner tak pernah muncul.
@@ -35,7 +35,7 @@ async function muatMigrasiDrive() {
   }
 }
 
-function bukaModalMigrasiDrive() {
+export function bukaModalMigrasiDrive() {
   var modal = document.getElementById('modal-migrasi-drive');
   if (!modal) return;
   modal.classList.remove('hidden');
@@ -44,20 +44,20 @@ function bukaModalMigrasiDrive() {
   renderMigrasiDriveList();
 }
 
-function tutupModalMigrasiDrive() {
+export function tutupModalMigrasiDrive() {
   var modal = document.getElementById('modal-migrasi-drive');
   if (modal) modal.classList.add('hidden');
 }
 
-function renderMigrasiDriveList() {
+export function renderMigrasiDriveList() {
   var box = document.getElementById('migrasi-drive-list');
   if (!box) return;
   if (!DRIVE_CANDIDATES.length) {
     box.innerHTML =
       '<div class="bg-emerald-900/20 border border-emerald-500/40 rounded-xl p-6 text-center"><p class="text-emerald-400 font-black text-sm mb-1"><i class="fas fa-check-circle mr-1"></i> ' +
-      tr('ui.all_on_storage') +
+      window.tr('ui.all_on_storage') +
       '</p><p class="text-[10px] text-slate-400">' +
-      tr('ui.no_drive_links') +
+      window.tr('ui.no_drive_links') +
       '</p></div>';
     return;
   }
@@ -75,7 +75,7 @@ function renderMigrasiDriveList() {
           '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-900/40 text-amber-300 border border-amber-500/40 rounded-full text-[9px] font-bold"><i class="fas fa-' +
           info[1] +
           ' text-[8px]"></i> ' +
-          esc(info[0]) +
+          window.esc(info[0]) +
           '</span>'
         );
       })
@@ -84,12 +84,12 @@ function renderMigrasiDriveList() {
       '<div class="bg-black/40 border border-slate-700 rounded-xl p-3">' +
       '<div class="flex items-center justify-between gap-2 flex-wrap mb-2">' +
       '<div class="min-w-0"><p class="text-xs font-black text-white truncate">' +
-      esc(c.nama) +
+      window.esc(c.nama) +
       '</p>' +
       '<p class="text-[9px] text-slate-500 font-mono">' +
-      esc(c.idKandidat) +
+      window.esc(c.idKandidat) +
       ' · ' +
-      esc(c.wa) +
+      window.esc(c.wa) +
       '</p></div>' +
       '<div class="flex flex-wrap gap-1">' +
       chips +
@@ -107,7 +107,7 @@ function renderMigrasiDriveList() {
   box.innerHTML = html;
 }
 
-function migrasiDriveFieldHtml(c, field) {
+export function migrasiDriveFieldHtml(c, field) {
   var info = {
     PAS_PHOTO: ['PAS PHOTO', 'PAS_PHOTO'],
     CV: ['CV', 'CV'],
@@ -119,7 +119,7 @@ function migrasiDriveFieldHtml(c, field) {
     '<div class="bg-slate-900/60 border border-slate-700 rounded-lg p-2.5">' +
     '<div class="flex items-center justify-between mb-1.5">' +
     '<label class="text-[9px] font-bold text-slate-300 uppercase"><i class="fas fa-link text-rose-400 mr-1"></i> ' +
-    esc(info[0]) +
+    window.esc(info[0]) +
     ' (Drive)</label>' +
     '<span id="dl-st-' +
     safeId +
@@ -130,40 +130,40 @@ function migrasiDriveFieldHtml(c, field) {
     safeId +
     '" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" class="flex-1 text-[9px] text-slate-300 file:mr-2 file:px-2 file:py-1 file:rounded-md file:border-0 file:bg-slate-700 file:text-white file:text-[9px] file:font-bold">' +
     '<button type="button" onclick="uploadDriveField(\'' +
-    escJs(c.idKandidat) +
+    window.escJs(c.idKandidat) +
     "', '" +
-    escJs(c.nama) +
+    window.escJs(c.nama) +
     "', '" +
-    escJs(field) +
+    window.escJs(field) +
     '\')" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[9px] font-black transition flex-shrink-0"><i class="fas fa-upload mr-1"></i> Upload</button>' +
     '</div>' +
     '</div>'
   );
 }
 
-function driveSetStatus(id, label, state, msg) {
+export function driveSetStatus(id, label, state, msg) {
   var el = document.getElementById('dl-st-' + id);
   if (!el) return;
   if (state === 'uploading')
     el.innerHTML =
       '<span class="text-sky-300"><i class="fas fa-spinner fa-spin mr-0.5"></i> ' +
-      tr('ui.file_uploading') +
+      window.tr('ui.file_uploading') +
       '</span>';
   else if (state === 'ok')
     el.innerHTML =
       '<span class="text-emerald-400"><i class="fas fa-check-circle mr-0.5"></i> ' +
       label +
       ' ' +
-      tr('ui.file_uploaded') +
+      window.tr('ui.file_uploaded') +
       '</span>';
   else if (state === 'fail')
     el.innerHTML =
       '<span class="text-rose-400"><i class="fas fa-times-circle mr-0.5"></i> ' +
-      tr('ui.file_failed') +
+      window.tr('ui.file_failed') +
       '</span>';
 }
 
-function driveBacaFileBase64(input) {
+export function driveBacaFileBase64(input) {
   return new Promise(function (resolve) {
     if (!input || !input.files || !input.files[0]) return resolve(null);
     var f = input.files[0];
@@ -181,30 +181,30 @@ function driveBacaFileBase64(input) {
   });
 }
 
-async function uploadDriveField(idKandidat, nama, field) {
+export async function uploadDriveField(idKandidat, nama, field) {
   var safeId = (idKandidat + '_' + field).replace(/[^A-Z0-9_]/gi, '');
   var input = document.getElementById('dl-file-' + safeId);
   // Guard ekstensi: tolak SEBELUM baca base64 (format tak dikenal pasti
   // ditolak backend juga — user dapat toast lebih cepat).
-  var extErr = cekEkstensiFile(input);
+  var extErr = window.cekEkstensiFile(input);
   if (extErr) {
-    showToast(extErr, 'error');
+    window.showToast(extErr, 'error');
     return;
   }
   var fileData = await driveBacaFileBase64(input);
   if (!fileData) {
-    showToast(tr('ui.toast_pick_file_first'), 'error');
+    window.showToast(window.tr('ui.toast_pick_file_first'), 'error');
     return;
   }
   driveSetStatus(safeId, field, 'uploading');
   var labelNama = { PAS_PHOTO: 'PAS PHOTO', CV: 'CV', JFT: 'JFT', SSW: 'SSW' }[field] || field;
   try {
-    const res = await callAPI('uploadDriveReplacement', [
+    const res = await window.callAPI('uploadDriveReplacement', [
       { idKandidat: idKandidat, nama: nama, label: field, fileData: fileData },
     ]);
     if (res && res.success) {
       driveSetStatus(safeId, labelNama, 'ok');
-      showToast(res.field + ' ' + idKandidat + ' terupload ke Storage ✓', 'success');
+      window.showToast(res.field + ' ' + idKandidat + ' terupload ke Storage ✓', 'success');
       // Hapus field dari daftar kandidat (sudah termigrasi)
       var c = DRIVE_CANDIDATES.find(function (x) {
         return x.idKandidat === idKandidat;
@@ -224,10 +224,24 @@ async function uploadDriveField(idKandidat, nama, field) {
       }, 1200);
     } else {
       driveSetStatus(safeId, labelNama, 'fail');
-      showToast((res && res.error) || 'Gagal upload', 'error');
+      window.showToast((res && res.error) || 'Gagal upload', 'error');
     }
   } catch (err) {
     driveSetStatus(safeId, labelNama, 'fail');
-    showToast(tr('ui.toast_network_upload_error'), 'error');
+    window.showToast(window.tr('ui.toast_network_upload_error'), 'error');
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (index.html & engine/init.js window.muatMigrasiDrive,
+// admin/index buka/tutupModalMigrasiDrive, tombol uploadDriveField di
+// migrasiDriveFieldHtml).
+window.muatMigrasiDrive = muatMigrasiDrive;
+window.bukaModalMigrasiDrive = bukaModalMigrasiDrive;
+window.tutupModalMigrasiDrive = tutupModalMigrasiDrive;
+window.renderMigrasiDriveList = renderMigrasiDriveList;
+window.migrasiDriveFieldHtml = migrasiDriveFieldHtml;
+window.driveSetStatus = driveSetStatus;
+window.driveBacaFileBase64 = driveBacaFileBase64;
+window.uploadDriveField = uploadDriveField;

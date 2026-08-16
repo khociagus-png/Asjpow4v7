@@ -9,7 +9,7 @@
 
 // Konfigurasi kategori apa saja yang boleh diedit dari web — dipisah rapi:
 // tahapan pipeline kandidat, status lamaran, status loker publik, dll.
-const CONFIG_CATEGORIES = [
+export const CONFIG_CATEGORIES = [
   {
     key: 'tahapan',
     label: 'Tahapan Seleksi (Pipeline)',
@@ -39,13 +39,13 @@ const CONFIG_CATEGORIES = [
   return a.order - b.order;
 });
 
-function renderSysConfig() {
+export function renderSysConfig() {
   var container = document.getElementById('config-container');
   if (!container) return;
   var html = '';
 
   CONFIG_CATEGORIES.forEach((cat) => {
-    let items = DROPDOWNS[cat.key] || [];
+    let items = window.DROPDOWNS[cat.key] || [];
     let chipHtml = '';
 
     if (items.length === 0) {
@@ -60,10 +60,10 @@ function renderSysConfig() {
             ? '<span class="mr-1 text-slate-500 font-black">' + (index + 1) + '.</span>'
             : '';
         chipHtml += `<span class="inline-flex items-center px-3 py-1 bg-${cat.color}-900/30 text-${cat.color}-300 border border-${cat.color}-500/30 rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap">
-                        ${num}${esc(trOption(item))}
-                        <button onclick="pindahConfigItem('${cat.key}', ${index}, -1)" aria-label="${tr('ui.move_up')}" title="${tr('ui.move_up')}" class="ml-1.5 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === 0 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-up" style="font-size: 7px;"></i></button>
-                        <button onclick="pindahConfigItem('${cat.key}', ${index}, 1)" aria-label="${tr('ui.move_down')}" title="${tr('ui.move_down')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === items.length - 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-down" style="font-size: 7px;"></i></button>
-                        <button onclick="hapusConfigItem('${cat.key}', ${index})" aria-label="${tr('table.delete')}" title="${tr('table.delete')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/50 text-${cat.color}-300 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-colors"><i class="fas fa-times" style="font-size: 8px;"></i></button>
+                        ${num}${window.esc(window.trOption(item))}
+                        <button onclick="pindahConfigItem('${cat.key}', ${index}, -1)" aria-label="${window.tr('ui.move_up')}" title="${window.tr('ui.move_up')}" class="ml-1.5 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === 0 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-up" style="font-size: 7px;"></i></button>
+                        <button onclick="pindahConfigItem('${cat.key}', ${index}, 1)" aria-label="${window.tr('ui.move_down')}" title="${window.tr('ui.move_down')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === items.length - 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-down" style="font-size: 7px;"></i></button>
+                        <button onclick="hapusConfigItem('${cat.key}', ${index})" aria-label="${window.tr('table.delete')}" title="${window.tr('table.delete')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/50 text-${cat.color}-300 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-colors"><i class="fas fa-times" style="font-size: 8px;"></i></button>
                     </span>`;
       });
     }
@@ -76,48 +76,48 @@ function renderSysConfig() {
                     ${chipHtml}
                 </div>
                 <div class="flex gap-2 mt-auto">
-                    <input type="text" id="input-cfg-${cat.key}" placeholder="${tr('ui.add_new')}${CURRENT_LANG === 'jp' ? '（ID|日本語）' : ' (ID|JP)'}" class="flex-1 bg-slate-800 border border-slate-600 rounded text-xs px-3 py-1.5 text-white outline-none focus:border-${cat.color}-500">
-                    <button onclick="tambahConfigItem('${cat.key}')" aria-label="${tr('button.add')}" class="bg-${cat.color}-600 hover:bg-${cat.color}-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-md"><i class="fas fa-plus"></i></button>
+                    <input type="text" id="input-cfg-${cat.key}" placeholder="${window.tr('ui.add_new')}${window.CURRENT_LANG === 'jp' ? '（ID|日本語）' : ' (ID|JP)'}" class="flex-1 bg-slate-800 border border-slate-600 rounded text-xs px-3 py-1.5 text-white outline-none focus:border-${cat.color}-500">
+                    <button onclick="tambahConfigItem('${cat.key}')" aria-label="${window.tr('button.add')}" class="bg-${cat.color}-600 hover:bg-${cat.color}-500 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-md"><i class="fas fa-plus"></i></button>
                 </div>
             </div>`;
   });
   container.innerHTML = html;
 }
 
-function tambahConfigItem(key) {
+export function tambahConfigItem(key) {
   let input = document.getElementById('input-cfg-' + key);
   let val = input.value.trim();
   if (!val) return;
 
-  if (!DROPDOWNS[key]) DROPDOWNS[key] = [];
+  if (!window.DROPDOWNS[key]) window.DROPDOWNS[key] = [];
   // Cek duplikat berdasarkan ID (bagian sebelum '|') — jadi "CHECK KAIWA"
   // dan "CHECK KAIWA|チェック会話" dianggap sama (tidak dobel).
-  let valId = trOptionId(val);
-  let ada = DROPDOWNS[key].some(function (ex) {
-    return trOptionId(ex) === valId;
+  let valId = window.trOptionId(val);
+  let ada = window.DROPDOWNS[key].some(function (ex) {
+    return window.trOptionId(ex) === valId;
   });
   if (ada) {
-    showToast(tr('ui.toast_item_exists'), 'error');
+    window.showToast(window.tr('ui.toast_item_exists'), 'error');
     return;
   }
 
-  DROPDOWNS[key].push(val);
+  window.DROPDOWNS[key].push(val);
   input.value = '';
   renderSysConfig(); // Render lokal dulu agar UI cepat berubah
-  simpanConfigKeServer(key, DROPDOWNS[key]);
+  simpanConfigKeServer(key, window.DROPDOWNS[key]);
 }
 
-function hapusConfigItem(key, index) {
-  if (!confirm(tr('form.txt_hapus_confirm'))) return;
-  DROPDOWNS[key].splice(index, 1);
+export function hapusConfigItem(key, index) {
+  if (!confirm(window.tr('form.txt_hapus_confirm'))) return;
+  window.DROPDOWNS[key].splice(index, 1);
   renderSysConfig(); // Render lokal
-  simpanConfigKeServer(key, DROPDOWNS[key]);
+  simpanConfigKeServer(key, window.DROPDOWNS[key]);
 }
 
 // Pindahkan posisi chip (urutan dropdown penting, mis. pipeline tahapan
 // yang bernomor). -1 = naik, +1 = turun; simpan langsung ke server.
-function pindahConfigItem(key, index, delta) {
-  var arr = DROPDOWNS[key];
+export function pindahConfigItem(key, index, delta) {
+  var arr = window.DROPDOWNS[key];
   if (!Array.isArray(arr) || arr.length < 2) return;
   var target = index + delta;
   if (target < 0 || target >= arr.length) return;
@@ -125,34 +125,34 @@ function pindahConfigItem(key, index, delta) {
   arr[index] = arr[target];
   arr[target] = tmp;
   renderSysConfig(); // Render lokal
-  simpanConfigKeServer(key, DROPDOWNS[key]);
+  simpanConfigKeServer(key, window.DROPDOWNS[key]);
 }
 
-async function simpanConfigKeServer(key, arrayData) {
+export async function simpanConfigKeServer(key, arrayData) {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
 
   try {
-    const res = await callAPI('updateSysConfig', [key, arrayData, currentAdminName]);
-    if (!res.success) showToast(tr('ui.toast_save_server_failed') + res.error, 'error');
+    const res = await window.callAPI('updateSysConfig', [key, arrayData, window.currentAdminName]);
+    if (!res.success) window.showToast(window.tr('ui.toast_save_server_failed') + res.error, 'error');
   } catch (err) {
-    showToast(tr('ui.toast_network_error'), 'error');
+    window.showToast(window.tr('ui.toast_network_error'), 'error');
   } finally {
     if (loader) loader.style.display = 'none';
   }
 }
 
 // === FUNGSI SIMPAN PENGUMUMAN BERJALAN ===
-async function simpanPengumuman() {
+export async function simpanPengumuman() {
   let teks = document.getElementById('input-pengumuman').value;
-  let btn = event.currentTarget;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.saving') + '';
+  let btn = window.event.currentTarget;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
 
   try {
-    const res = await callAPI('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
+    const res = await window.callAPI('updateSysConfig', ['pengumuman', [teks], window.currentAdminName]);
     if (res.success) {
-      showToast(tr('ui.toast_marquee_updated'), 'success');
+      window.showToast(window.tr('ui.toast_marquee_updated'), 'success');
       // Update langsung di layar Admin
       if (teks.trim()) {
         document.getElementById('marquee-text').innerText = teks;
@@ -161,12 +161,24 @@ async function simpanPengumuman() {
         document.getElementById('global-announcement').classList.add('hidden');
       }
     } else {
-      showToast(tr('ui.toast_failed_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_network_error'), 'error');
+    window.showToast(window.tr('ui.toast_network_error'), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_publish') + '';
+    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_publish') + '';
     btn.disabled = false;
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (render/admin.js & i18n.js window.renderSysConfig,
+// 01_public.js renderSysConfig, admin/index simpanPengumuman, tombol chip
+// tambahConfigItem/hapusConfigItem/pindahConfigItem).
+window.renderSysConfig = renderSysConfig;
+window.tambahConfigItem = tambahConfigItem;
+window.hapusConfigItem = hapusConfigItem;
+window.pindahConfigItem = pindahConfigItem;
+window.simpanConfigKeServer = simpanConfigKeServer;
+window.simpanPengumuman = simpanPengumuman;

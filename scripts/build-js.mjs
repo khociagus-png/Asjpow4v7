@@ -122,6 +122,13 @@ const ESM_CORE = new Set([
   '/js/admin_modal/dbfilter.js',
   '/js/admin_modal/cv.js',
   '/js/admin_modal/job.js',
+  // Fase 3 langkah 9: admin_ops (schedule/candidates/sysconfig/loading/migration/drive — agenda, list kandidat, config, skeleton, migrasi).
+  '/js/admin_ops/schedule.js',
+  '/js/admin_ops/candidates.js',
+  '/js/admin_ops/sysconfig.js',
+  '/js/admin_ops/loading.js',
+  '/js/admin_ops/migration.js',
+  '/js/admin_ops/drive.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

@@ -7,30 +7,30 @@
 // ==========================================
 
 // === MIGRASI DATABASE (tombol di tab Pengaturan) ===
-async function jalankanMigrasi() {
+export async function jalankanMigrasi() {
   var btn = document.getElementById('btn-jalankan-migrasi');
   var statusEl = document.getElementById('migrasi-status');
   var resultsEl = document.getElementById('migrasi-results');
   var pendingEl = document.getElementById('migrasi-pending');
   if (!btn) return;
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.running') + '';
-  if (statusEl) statusEl.textContent = tr('ui.migration_wait');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.running') + '';
+  if (statusEl) statusEl.textContent = window.tr('ui.migration_wait');
   if (resultsEl) resultsEl.classList.add('hidden');
   if (pendingEl) pendingEl.classList.add('hidden');
 
   try {
-    const res = await callAPI('runMigration', {});
+    const res = await window.callAPI('runMigration', {});
     if (!res || !res.success) {
       if (statusEl) statusEl.textContent = '';
-      showToast(
-        tr('ui.toast_migrate_failed') + (res && res.error ? res.error : 'respon tidak valid'),
+      window.showToast(
+        window.tr('ui.toast_migrate_failed') + (res && res.error ? res.error : 'respon tidak valid'),
         'error',
       );
       if (res && res.results && res.results.length) renderMigrasiResults(res.results);
       return;
     }
-    if (statusEl) statusEl.textContent = tr('ui.done') + new Date().toLocaleTimeString('id-ID');
+    if (statusEl) statusEl.textContent = window.tr('ui.done') + new Date().toLocaleTimeString('id-ID');
     renderMigrasiResults(res.results || []);
     if (res.pendingSql && res.pendingSql.length) {
       var pre = document.getElementById('migrasi-pending-sql');
@@ -39,14 +39,14 @@ async function jalankanMigrasi() {
     }
   } catch (err) {
     if (statusEl) statusEl.textContent = '';
-    showToast(tr('ui.toast_migrate_failed') + err.message, 'error');
+    window.showToast(window.tr('ui.toast_migrate_failed') + err.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-play mr-1"></i> ' + tr('ui.run_migration') + '';
+    btn.innerHTML = '<i class="fas fa-play mr-1"></i> ' + window.tr('ui.run_migration') + '';
   }
 }
 
-function renderMigrasiResults(list) {
+export function renderMigrasiResults(list) {
   var box = document.getElementById('migrasi-results');
   if (!box) return;
   var icons = {
@@ -71,9 +71,9 @@ function renderMigrasiResults(list) {
         (icons[r.status] || icons.skip) +
         '</span>' +
         '<span><b>' +
-        esc(r.step) +
+        window.esc(r.step) +
         ':</b> ' +
-        esc(r.detail) +
+        window.esc(r.detail) +
         '</span></div>'
       );
     })
@@ -81,13 +81,20 @@ function renderMigrasiResults(list) {
   box.classList.remove('hidden');
 }
 
-async function salinSqlMigrasi() {
+export async function salinSqlMigrasi() {
   var pre = document.getElementById('migrasi-pending-sql');
   if (!pre || !pre.textContent) return;
   try {
     await navigator.clipboard.writeText(pre.textContent);
-    showToast(tr('ui.toast_sql_copied'), 'success');
+    window.showToast(window.tr('ui.toast_sql_copied'), 'success');
   } catch (err) {
-    showToast(tr('ui.toast_copy_sql_failed'), 'error');
+    window.showToast(window.tr('ui.toast_copy_sql_failed'), 'error');
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (admin/index jalankanMigrasi / salinSqlMigrasi).
+window.jalankanMigrasi = jalankanMigrasi;
+window.renderMigrasiResults = renderMigrasiResults;
+window.salinSqlMigrasi = salinSqlMigrasi;
