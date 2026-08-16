@@ -58,7 +58,7 @@ describe('stemAliases', () => {
 });
 
 describe('buildRingkasData (konteks AI chat)', () => {
-  const { buildRingkasData } = require('./actions-ai.js');
+  const { buildRingkasData } = require('./ai/cv.js');
 
   it('memuat TB/BB & ukuran yang terisi, tanpa data kosong', () => {
     const out = buildRingkasData({

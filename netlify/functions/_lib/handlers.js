@@ -17,7 +17,11 @@ const wa = require('./actions-wa');
 const config = require('./actions-config');
 const register = require('./actions-register');
 const master = require('./actions-master');
-const ai = require('./actions-ai');
+// Modul AI (Fase 1.4): chat/wawancara, konteks CV/master, parse dokumen,
+// provider Gemini — actions-ai.js dipecah jadi ai/{chat,cv,classify,providers}.js.
+const aiChat = require('./ai/chat');
+const aiCv = require('./ai/cv');
+const aiClassify = require('./ai/classify');
 const rateLimit = require('./rate-limit');
 const publicData = require('./actions-public');
 const auth = require('./actions-auth');
@@ -195,15 +199,15 @@ async function dispatchAction(action, payload, sessionToken) {
     case 'editLokerFull':
       return jobActions.handleEditLokerFull(payload, sessionToken);
     case 'parseDokumenBiodata':
-      return ai.handleParseDokumenBiodata(payload, sessionToken);
+      return aiClassify.handleParseDokumenBiodata(payload, sessionToken);
     case 'generateWawancaraModel':
-      return ai.handleGenerateWawancaraModel(payload, sessionToken);
+      return aiChat.handleGenerateWawancaraModel(payload, sessionToken);
     case 'simpanHasilWawancara':
-      return ai.handleSimpanHasilWawancara(payload, sessionToken);
+      return aiChat.handleSimpanHasilWawancara(payload, sessionToken);
     case 'selesaikanWawancara':
-      return ai.handleSelesaikanWawancara(payload, sessionToken);
+      return aiChat.handleSelesaikanWawancara(payload, sessionToken);
     case 'getHasilWawancara':
-      return ai.handleGetHasilWawancara(payload, sessionToken);
+      return aiChat.handleGetHasilWawancara(payload, sessionToken);
     case 'ubahStatusJob':
       return jobActions.handleUbahStatusJob(payload, sessionToken);
     case 'hapusJobData':
@@ -315,21 +319,21 @@ async function dispatchAction(action, payload, sessionToken) {
       return drive.handleRunMigration(payload, sessionToken);
     // AI (Gemini) & submit AI form
     case 'processAIChat':
-      return ai.handleProcessAIChat(payload);
+      return aiChat.handleProcessAIChat(payload);
     case 'processAdminAIChat':
-      return ai.handleProcessAdminAIChat(payload, sessionToken);
+      return aiChat.handleProcessAdminAIChat(payload, sessionToken);
     case 'processSiswaAIChat':
-      return ai.handleProcessSiswaAIChat(payload);
+      return aiChat.handleProcessSiswaAIChat(payload);
     case 'processAiInterview':
-      return ai.handleProcessAiInterview(payload, sessionToken);
+      return aiChat.handleProcessAiInterview(payload, sessionToken);
     case 'getAdminAiContext':
-      return ai.handleGetAdminAiContext(payload, sessionToken);
+      return aiCv.handleGetAdminAiContext(payload, sessionToken);
     case 'buildAdminAiCandidateSummary':
-      return ai.handleBuildAdminAiCandidateSummary(payload, sessionToken);
+      return aiCv.handleBuildAdminAiCandidateSummary(payload, sessionToken);
     case 'submitDataAsj':
-      return ai.handleSubmitDataAsj(payload, sessionToken);
+      return aiCv.handleSubmitDataAsj(payload, sessionToken);
     case 'simpanDataTtdNaitei':
-      return ai.handleSimpanDataTtdNaitei(payload, sessionToken);
+      return aiCv.handleSimpanDataTtdNaitei(payload, sessionToken);
     default:
       return { success: false, message: NOT_IMPLEMENTED + ' (action: ' + action + ')' };
   }
