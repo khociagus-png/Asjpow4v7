@@ -98,9 +98,14 @@ function normalizeStatus(v) {
 
 function normalizeGender(v) {
   const s = toText(v).toUpperCase();
-  if (s.includes('LAKI') || s.includes('MALE') || s === 'P' || s === 'M' || s === 'PRIA')
+  // BUG FIX (Fase 1.5, ketahuan unit test): dulu 'L' → L/P (tidak dikenal),
+  // 'P' → PRIA, dan 'FEMALE' → PRIA (substring 'MALE' kena duluan) — semua
+  // TERBALIK dari konvensi aplikasi (L = Laki-laki, P = Perempuan, lihat
+  // PARSE_SYSTEM_PROMPT di ai/classify.js). Dipakai cuma di actions-register
+  // (display siswa baru) — tidak ada pemakai yang bergantung perilaku lama.
+  if (s.includes('LAKI') || s === 'L' || s === 'M' || s === 'PRIA' || s === 'MALE')
     return 'PRIA';
-  if (s.includes('PEREMPUAN') || s.includes('FEMALE') || s === 'W' || s === 'F' || s === 'WANITA')
+  if (s.includes('PEREMPUAN') || s === 'P' || s === 'W' || s === 'F' || s === 'FEMALE' || s === 'WANITA')
     return 'WANITA';
   return 'L/P';
 }

@@ -378,6 +378,8 @@ module.exports = {
   handleRejectForm,
   handleDeleteForm,
   handleTandaiDibacaForm,
+  mailStatusUntukUpdate,
+  appendFeedback,
   syncBiodataKeMail,
   syncFormMailDariUpload,
 };
