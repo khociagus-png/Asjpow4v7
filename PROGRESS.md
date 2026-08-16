@@ -10,7 +10,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 1.1c — modul job, candidate, mail — commit `(menyusul)`
+### Fase 1.1c — modul job, candidate, mail — commit `da0ad38`
 
 - **Baru** `_lib/actions-job.js` (274) — kelola lowongan: simpan/edit/status/
   hapus/tahapan/dokumen share/tandai gagal + JOB_COLUMNS/mapJobPayloadToRow/
