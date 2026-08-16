@@ -192,7 +192,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
 > file menjadi `import` eksplisit (nol referensi global implisit). Build saat ini
 > (concat + transform per file) tetap dipakai sampai konversi tuntas.
 
-- [x] **Langkah 1 — fondasi**: resolusi kolisi global + guard otomatis. — commit menyusul
+- [x] **Langkah 1 — fondasi**: resolusi kolisi global + guard otomatis. — commit `da210b9`
       Audit STACK (45 file): **1 kolisi** — `tr` dideklarasikan di `i18n.js` DAN
       `js/01_public.js` (duplikat; isi setara, i18n lebih defensif `String(path)`).
       Duplikat dihapus dari `01_public.js` (24 call-site `tr(` di file itu kini
@@ -202,7 +202,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       muncul di 2+ file STACK + warning kalau nama STACK dipakai `js/pages/*`.
       Hasil: 45 file · **389 simbol unik · nol kolisi ✓** · lint 0 error/12 warn
       ✓ · test 81/81 ✓.
-- [x] **Langkah 2 — core layer ESM: `i18n.js` + `api-client.js` + bridge `window.PortalBridge`** — commit menyusul
+- [x] **Langkah 2 — core layer ESM: `i18n.js` + `api-client.js` + bridge `window.PortalBridge`** — commit `967a178`
       Audit global lengkap (`scripts/audit-globals.mjs` baru, hasil di
       `.freebuff/audit-globals.json`): 52 file · **394 simbol** · HIGH=0
       (nol shadowing API browser, nol kolisi) · MEDIUM=24 (kontrak lintas

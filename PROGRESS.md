@@ -4,13 +4,13 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 2: core layer ESM (i18n.js + api-client.js) + bridge `window.PortalBridge` + audit global (commit menyusul).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 2: core layer ESM (i18n.js + api-client.js) + bridge `window.PortalBridge` + audit global (commit `967a178`).
 
 ---
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 2 — core layer ESM + bridge PortalBridge + audit global (commit menyusul)
+### Fase 3 langkah 2 — core layer ESM + bridge PortalBridge + audit global (commit `967a178`)
 
 - **Audit global pollution** — `scripts/audit-globals.mjs` baru (risk
   HIGH/MEDIUM/LOW + shadowing window API), hasil di
@@ -85,7 +85,7 @@
 
 ## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
 
-### Fase 3 langkah 1 — fondasi ESM: resolusi kolisi `tr` + guard `check:globals` + temuan empiris esbuild — commit menyusul
+### Fase 3 langkah 1 — fondasi ESM: resolusi kolisi `tr` + guard `check:globals` + temuan empiris esbuild — commit `da210b9`
 
 - **Kolisi global terakhir dihilangkan**: `tr` dideklarasikan ganda di
   `i18n.js` & `js/01_public.js`. Duplikat dihapus dari `01_public.js`
