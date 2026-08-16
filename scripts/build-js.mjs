@@ -113,6 +113,11 @@ const ESM_CORE = new Set([
   '/js/render/candidate.js',
   '/js/render/share.js',
   '/js/render/mail.js',
+  // Fase 3 langkah 7: api domain (forms/jobs/candidates/wa — patch-in-place mail, loker, kandidat, tugas/jadwal).
+  '/js/api/forms.js',
+  '/js/api/jobs.js',
+  '/js/api/candidates.js',
+  '/js/api/wa.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

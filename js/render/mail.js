@@ -258,7 +258,7 @@ export function renderFormInbox() {
     // (rowIndex) supaya deleteForm tetap benar walau daftar ter-filter.
     var ck = MAIL_SELECTED[f.rowIndex] ? ' checked' : '';
     html +=
-      '<window.tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td class="p-4 text-center"><input type="checkbox" class="mail-check" data-idx="' +
       f.rowIndex +
       '" onclick="toggleMailSelect(this)" ' +
@@ -325,7 +325,7 @@ export function renderFormInbox() {
       '" class="rt-full p-4 text-center">' +
       actionCell +
       '</td>' +
-      '</window.tr>';
+      '</tr>';
   }
   if (arr.length === 0) {
     var emptyMsg =
@@ -334,9 +334,9 @@ export function renderFormInbox() {
         : 'TIDAK ADA DATA MAIL DENGAN STATUS ' +
           (MAIL_STATUS_LABEL[window.mailFilterStatus] || window.mailFilterStatus);
     html =
-      '<window.tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold">' +
+      '<tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold">' +
       emptyMsg +
-      '</td></window.tr>';
+      '</td></tr>';
   }
   tb.innerHTML = html;
 }

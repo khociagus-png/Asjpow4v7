@@ -130,7 +130,7 @@ export function renderKandidatTable(arr) {
       : window.esc(c.nama);
 
     html +=
-      '<window.tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
       window.tr('table.candidate_id') +
       '" class="p-4 font-mono text-sky-300 font-bold">' +
@@ -198,13 +198,13 @@ export function renderKandidatTable(arr) {
       '" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] shadow transition" title="' +
       window.tr('ui.send_wa_call') +
       '"><i class="fab fa-whatsapp"></i></button>' +
-      '</td></window.tr>';
+      '</td></tr>';
   }
   if (arr.length > window.limitKan) {
     html +=
-      '<window.tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       window.tr('form.txt_lebih_banyak') +
-      '</button></td></window.tr>';
+      '</button></td></tr>';
   }
   tb.innerHTML = html;
 }

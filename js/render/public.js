@@ -213,7 +213,7 @@ export function renderPublicFiltered() {
     let rowHover = light ? 'hover:bg-rose-900/5' : 'hover:bg-black/10';
 
     html +=
-      '<window.tr class="rt-row border-b ' +
+      '<tr class="rt-row border-b ' +
       (window.THEMES[window.CURRENT_THEME] ? window.THEMES[window.CURRENT_THEME].border : 'border-slate-800') +
       ' ' +
       rowHover +
@@ -269,19 +269,19 @@ export function renderPublicFiltered() {
       '" class="rt-full p-4 align-top w-48">' +
       actionBtns +
       '</td>' +
-      '</window.tr>';
+      '</tr>';
   }
 
   if (arr.length === 0) {
     html =
-      '<window.tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
+      '<tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
       window.tr('public.empty') +
-      '</td></window.tr>';
+      '</td></tr>';
   } else if (arr.length > window.limitPub) {
     html +=
-      '<window.tr><td colspan="5" class="p-5 text-center"><button onclick="window.limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
+      '<tr><td colspan="5" class="p-5 text-center"><button onclick="window.limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
       window.tr('button.more') +
-      ' <i class="fas fa-chevron-down ml-2"></i></button></td></window.tr>';
+      ' <i class="fas fa-chevron-down ml-2"></i></button></td></tr>';
   }
   tb.innerHTML = html;
 }

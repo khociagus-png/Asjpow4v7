@@ -3,16 +3,16 @@
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
 // js/api/{forms,jobs,candidates,wa}.js (global scope TETAP di fase ini).
 // File ini: kelola loker (simpan/edit/status/hapus/tahapan DB), upload
-// pamflet/template (downscale + signed URL), & helper memori ALL_DB_JOBS/
-// ALL_JOBS. Body fungsi byte-identik dari 07_api.js — perilaku tidak berubah.
+// pamflet/template (downscale + signed URL), & helper memori window.ALL_DB_JOBS/
+// window.ALL_JOBS. Body fungsi byte-identik dari 07_api.js — perilaku tidak berubah.
 // ===== PATCH-IN-PLACE: KELOLA LOKER =====
 // Sama seperti mail: backend mengembalikan baris yang berubah, frontend
-// menimpa di memori + render ulang dari memori (renderAdminFull = murni DOM,
+// menimpa di memori + render ulang dari memori (window.renderAdminFull = murni DOM,
 // tanpa network/skeleton). Tarikan penuh tetap jalan diam-diam lewat
 // AUTO_REFRESH_TIMER (60 dtk) untuk menangkap perubahan admin lain.
-function upsertJobMemory(job) {
+export function upsertJobMemory(job) {
   if (!job || !job.code) return;
-  [ALL_DB_JOBS, ALL_JOBS].forEach(function (arr) {
+  [window.ALL_DB_JOBS, window.ALL_JOBS].forEach(function (arr) {
     if (!arr) return;
     var found = -1;
     for (var k = 0; k < arr.length; k++) {
@@ -25,38 +25,38 @@ function upsertJobMemory(job) {
     else arr.push(job);
   });
 }
-function removeJobMemory(code) {
+export function removeJobMemory(code) {
   if (!code) return;
-  [ALL_DB_JOBS, ALL_JOBS].forEach(function (arr) {
+  [window.ALL_DB_JOBS, window.ALL_JOBS].forEach(function (arr) {
     if (!arr) return;
     for (var k = arr.length - 1; k >= 0; k--) {
       if (arr[k] && arr[k].code === code) arr.splice(k, 1);
     }
   });
 }
-async function aksiAdmin(st, r) {
+export async function aksiAdmin(st, r) {
   if (!confirm('Ubah status Loker?')) return;
   try {
-    const res = await callAPI('ubahStatusJob', [r, st, currentAdminName]);
+    const res = await window.callAPI('ubahStatusJob', [r, st, window.currentAdminName]);
     if (res.success) {
       upsertJobMemory(res.job);
-      if (typeof renderAdminFull === 'function') renderAdminFull();
-    } else showToast(res.error || 'Gagal ubah status', 'error');
+      if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
+    } else window.showToast(res.error || 'Gagal ubah status', 'error');
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
 }
-async function hapusLoker(r) {
+export async function hapusLoker(r) {
   if (!confirm('Hapus Loker?')) return;
   try {
-    const res = await callAPI('hapusJobData', [r, currentAdminName]);
+    const res = await window.callAPI('hapusJobData', [r, window.currentAdminName]);
     if (res.success) {
       removeJobMemory(r);
-      if (typeof renderAdminFull === 'function') renderAdminFull();
+      if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
     } else
-      showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error');
+      window.showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error');
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
 }
 
@@ -65,7 +65,7 @@ async function hapusLoker(r) {
 // Supabase Image Transformations (Free plan tidak menyediakan resize).
 // Non-gambar (pdf/docx template CV) & gambar gagal-decode (HEIC/korup)
 // dikembalikan apa adanya supaya alur upload tidak berubah/macet.
-async function downscaleImageFile(file, maxWidth, quality) {
+export async function downscaleImageFile(file, maxWidth, quality) {
   if (!file || !file.type || !file.type.startsWith('image/')) return file;
   if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
   try {
@@ -103,7 +103,7 @@ async function downscaleImageFile(file, maxWidth, quality) {
   }
 }
 
-async function uploadFilesDirectly(filesObj, folder) {
+export async function uploadFilesDirectly(filesObj, folder) {
   // Downscale dulu (foto/pamflet → max 800px jpeg) supaya byte di Storage
   // kecil; non-gambar dibiarkan utuh oleh downscaleImageFile.
   const files = {};
@@ -115,7 +115,7 @@ async function uploadFilesDirectly(filesObj, folder) {
     const file = files[k];
     return { key: k, prefix: k.toUpperCase(), ext: file.name.split('.').pop() || 'bin' };
   });
-  const res = await callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
+  const res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
   if (!res.success) throw new Error('Gagal mendapatkan link upload');
   const uploadedUrls = {};
   for (const key of toUpload) {
@@ -132,11 +132,11 @@ async function uploadFilesDirectly(filesObj, folder) {
   return uploadedUrls;
 }
 
-async function submitFormAdmin(e) {
+export async function submitFormAdmin(e) {
   e.preventDefault();
   var btn = document.getElementById('btn-submit-admin');
   if (!btn) return;
-  btn.innerHTML = tr('ui.uploading');
+  btn.innerHTML = window.tr('ui.uploading');
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -181,7 +181,7 @@ async function submitFormAdmin(e) {
     var uploadedUrls = await uploadFilesDirectly(filesToUpload, folderName);
 
     var data = {
-      admin: currentAdminName,
+      admin: window.currentAdminName,
       tsk: document.getElementById('input-tsk').value || '-',
       kategori: document.getElementById('input-kategori').value,
       pekerjaan: jobName,
@@ -199,24 +199,24 @@ async function submitFormAdmin(e) {
       rincianBiaya: document.getElementById('input-rincian-biaya').value || '',
       dokumenShare: arrReq.join(','),
     };
-    const res = await callAPI('simpanJobBaru', [data]);
+    const res = await window.callAPI('simpanJobBaru', [data]);
     if (res.success) {
       document.getElementById('form-tambah-job').reset();
-      refreshDataDinamis('kelola');
-    } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+      window.refreshDataDinamis('kelola');
+    } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+    window.showToast(window.tr('ui.toast_upload_failed') + err.message, 'error');
   } finally {
-    btn.innerHTML = tr('button.upload_job');
+    btn.innerHTML = window.tr('button.upload_job');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-function bukaEditFullLoker(c) {
+export function bukaEditFullLoker(c) {
   try {
-    var jp = ALL_JOBS.find((j) => j.code === c);
-    var jd = ALL_DB_JOBS.find((j) => j.code === c);
+    var jp = window.ALL_JOBS.find((j) => j.code === c);
+    var jd = window.ALL_DB_JOBS.find((j) => j.code === c);
     if (!jp) return;
     document.getElementById('ef-code').value = c;
     document.getElementById('ef-pekerjaan').value = jp.pekerjaan || '';
@@ -265,15 +265,15 @@ function bukaEditFullLoker(c) {
     }
     document.getElementById('modal-edit-full-loker').classList.remove('hidden');
   } catch (e) {
-    showToast(tr('ui.toast_modal_error'), 'error');
+    window.showToast(window.tr('ui.toast_modal_error'), 'error');
   }
 }
 
-async function submitEditFullLoker(e) {
+export async function submitEditFullLoker(e) {
   e.preventDefault();
   var btn = document.getElementById('btn-submit-ef');
   if (!btn) return;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -305,12 +305,12 @@ async function submitEditFullLoker(e) {
       uploadedUrls = await uploadFilesDirectly(filesToUpload, folderName);
     }
 
-    var jd = ALL_DB_JOBS.find((j) => j.code === jobCode);
+    var jd = window.ALL_DB_JOBS.find((j) => j.code === jobCode);
     var finalTemplate = uploadedUrls.formatCv || (jd ? jd.templateCv : '-');
     var finalPamflet = uploadedUrls.pamflet || (jd ? jd.pamflet : '-');
 
     var data = {
-      admin: currentAdminName,
+      admin: window.currentAdminName,
       code: jobCode,
       pekerjaan: document.getElementById('ef-pekerjaan').value,
       kategori: document.getElementById('ef-kategori').value,
@@ -328,21 +328,21 @@ async function submitEditFullLoker(e) {
       // memutuskan: kosong = pertahankan nilai lama, isi = timpa.
       dokumenShare: arrReq.join(','),
     };
-    const res = await callAPI('editLokerFull', [data]);
+    const res = await window.callAPI('editLokerFull', [data]);
     if (res.success) {
       document.getElementById('modal-edit-full-loker').classList.add('hidden');
-      refreshDataDinamis('kelola');
-    } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+      window.refreshDataDinamis('kelola');
+    } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    showToast(tr('ui.toast_upload_failed') + err.message, 'error');
+    window.showToast(window.tr('ui.toast_upload_failed') + err.message, 'error');
   } finally {
-    btn.innerText = tr('button.save_changes');
+    btn.innerText = window.tr('button.save_changes');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-function bukaModalEditDbJob(r, th, st) {
+export function bukaModalEditDbJob(r, th, st) {
   const edr = document.getElementById('edit-db-row');
   if (edr) edr.value = r;
   const edt = document.getElementById('edit-db-tahapan');
@@ -352,28 +352,44 @@ function bukaModalEditDbJob(r, th, st) {
   document.getElementById('modal-edit-dbjob').classList.remove('hidden');
 }
 
-async function simpanUpdateDbJob() {
+export async function simpanUpdateDbJob() {
   const btn = document.getElementById('btn-save-dbjob');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await callAPI('updateTahapanDbJob', [
+    const res = await window.callAPI('updateTahapanDbJob', [
       document.getElementById('edit-db-row').value,
       document.getElementById('edit-db-tahapan').value,
       document.getElementById('edit-db-status').value, // probe2
-      currentAdminName,
+      window.currentAdminName,
     ]); // probe
     if (res.success) {
       document.getElementById('modal-edit-dbjob').classList.add('hidden');
       upsertJobMemory(res.job);
-      if (typeof renderAdminFull === 'function') renderAdminFull();
-    } else showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
+      if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
+    } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerText = tr('button.update_db');
+    btn.innerText = window.tr('button.update_db');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick (submitFormAdmin/submitEditFullLoker/simpanUpdateDbJob)
+// + render/admin.js (aksiAdmin/hapusLoker/bukaEditFullLoker/bukaModalEditDbJob).
+window.upsertJobMemory = upsertJobMemory;
+window.removeJobMemory = removeJobMemory;
+window.aksiAdmin = aksiAdmin;
+window.hapusLoker = hapusLoker;
+window.downscaleImageFile = downscaleImageFile;
+window.uploadFilesDirectly = uploadFilesDirectly;
+window.submitFormAdmin = submitFormAdmin;
+window.bukaEditFullLoker = bukaEditFullLoker;
+window.submitEditFullLoker = submitEditFullLoker;
+window.bukaModalEditDbJob = bukaModalEditDbJob;
+window.simpanUpdateDbJob = simpanUpdateDbJob;

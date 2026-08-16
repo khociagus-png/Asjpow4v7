@@ -6,7 +6,7 @@
 // kandidat (simpanKandidatDanUpload + baris dokumen lain dinamis), Super
 // Edit Kandidat, upload revisi CV, QR loker lokal, filter checkbox, &
 // pagination daftar kandidat admin. Body fungsi byte-identik dari 07_api.js.
-function bukaModalTambahKandidat() {
+export function bukaModalTambahKandidat() {
   document.getElementById('modal-tambah-kandidat').classList.remove('hidden');
   var searchEl = document.getElementById('search-kandidat-manual');
   var ddEl = document.getElementById('dropdown-kandidat-manual');
@@ -26,7 +26,7 @@ function bukaModalTambahKandidat() {
 // dibuat - jadi setiap ketik langsung error di console dan dropdown tidak
 // pernah muncul. Pola di bawah ini mengikuti auto-fill kandidat lama yang
 // sudah ada, tapi sebagai dropdown live-search (bukan <datalist>).
-function cariKandidatManual(query) {
+export function cariKandidatManual(query) {
   var ddEl = document.getElementById('dropdown-kandidat-manual');
   if (!ddEl) return;
   query = (query || '').trim().toLowerCase();
@@ -37,7 +37,7 @@ function cariKandidatManual(query) {
   }
 
   var seenWa = {};
-  var hasil = (ALL_CANDIDATES || [])
+  var hasil = (window.ALL_CANDIDATES || [])
     .filter(function (c) {
       if (!c.wa || seenWa[c.wa]) return false;
       var match =
@@ -51,19 +51,19 @@ function cariKandidatManual(query) {
     .slice(0, 8);
 
   if (hasil.length === 0) {
-    ddEl.innerHTML = '<div class="p-2.5 text-sm text-slate-400">' + tr('ui.not_found') + '</div>';
+    ddEl.innerHTML = '<div class="p-2.5 text-sm text-slate-400">' + window.tr('ui.not_found') + '</div>';
   } else {
     ddEl.innerHTML = hasil
       .map(function (c) {
         return (
           '<div class="p-2.5 text-sm text-white hover:bg-sky-600/30 cursor-pointer border-b border-slate-700 last:border-0" onclick="pilihKandidatManual(\'' +
-          escJs(c.wa) +
+          window.escJs(c.wa) +
           '\') ">' +
           '<div class="font-semibold">' +
-          esc(c.nama || '-') +
+          window.esc(c.nama || '-') +
           '</div>' +
           '<div class="text-xs text-slate-400">' +
-          esc(c.wa || '-') +
+          window.esc(c.wa || '-') +
           '</div>' +
           '</div>'
         );
@@ -73,8 +73,8 @@ function cariKandidatManual(query) {
   ddEl.classList.remove('hidden');
 }
 
-function pilihKandidatManual(wa) {
-  var found = (ALL_CANDIDATES || []).find(function (c) {
+export function pilihKandidatManual(wa) {
+  var found = (window.ALL_CANDIDATES || []).find(function (c) {
     return c.wa === wa;
   });
   if (!found) return;
@@ -114,9 +114,9 @@ function pilihKandidatManual(wa) {
 // ===== AUTO-DETECT DOKUMEN SEBELUMNYA (modal Input Kandidat) =====
 // Kalau kandidat sudah pernah upload JFT/SSW, field upload-nya di-gelapkan
 // (disabled) — cukup CV yang perlu diupload untuk lamaran baru.
-function cekDokumenSebelumnya(wa) {
-  var c = (ALL_CANDIDATES || []).find(function (x) {
-    return normalizePhone(String(x.wa || '')) === normalizePhone(String(wa || ''));
+export function cekDokumenSebelumnya(wa) {
+  var c = (window.ALL_CANDIDATES || []).find(function (x) {
+    return window.normalizePhone(String(x.wa || '')) === window.normalizePhone(String(wa || ''));
   });
   var setDok = function (inputId, statusId, label, punya) {
     var input = document.getElementById(inputId);
@@ -129,7 +129,7 @@ function cekDokumenSebelumnya(wa) {
           '<span class="text-emerald-400"><i class="fas fa-check-circle mr-0.5"></i>' +
           label +
           ' ' +
-          tr('ui.doc_already_uploaded') +
+          window.tr('ui.doc_already_uploaded') +
           '</span>';
     } else {
       if (input) {
@@ -145,12 +145,12 @@ function cekDokumenSebelumnya(wa) {
 
 // Dipanggil saat WA di-blur di modal Input Kandidat: kalau nama/WA cocok
 // dengan kandidat terdaftar, auto-fill data + auto-gelapkan JFT/SSW.
-function cekKandidatOtomatis() {
+export function cekKandidatOtomatis() {
   var waEl = document.getElementById('k-wa');
   var wa = waEl ? String(waEl.value || '').replace(/\D/g, '') : '';
   if (!wa) return;
-  var c = (ALL_CANDIDATES || []).find(function (x) {
-    return normalizePhone(String(x.wa || '')) === normalizePhone(wa);
+  var c = (window.ALL_CANDIDATES || []).find(function (x) {
+    return window.normalizePhone(String(x.wa || '')) === window.normalizePhone(wa);
   });
   if (!c) {
     cekDokumenSebelumnya('');
@@ -183,7 +183,7 @@ function cekKandidatOtomatis() {
 
 // ===== INDIKATOR STATUS UPLOAD (modal Input Manual) =====
 // Saat file dipilih di <input type=file> -> tampilkan "terpilih"
-function tandaiFileDipilih(inputId, statusId, label) {
+export function tandaiFileDipilih(inputId, statusId, label) {
   var el = document.getElementById(statusId);
   var input = document.getElementById(inputId);
   if (!el) return;
@@ -192,7 +192,7 @@ function tandaiFileDipilih(inputId, statusId, label) {
       '<span class="text-amber-300"><i class="fas fa-paperclip mr-0.5"></i>' +
       label +
       ' ' +
-      tr('ui.file_selected') +
+      window.tr('ui.file_selected') +
       '</span>';
   } else {
     el.innerHTML = '';
@@ -200,7 +200,7 @@ function tandaiFileDipilih(inputId, statusId, label) {
 }
 
 // Status per file: uploading / ok / fail / none
-function setUploadStatus(statusId, label, state) {
+export function setUploadStatus(statusId, label, state) {
   var el = document.getElementById(statusId);
   if (!el) return;
   if (state === 'uploading')
@@ -208,32 +208,32 @@ function setUploadStatus(statusId, label, state) {
       '<span class="text-sky-300"><i class="fas fa-spinner fa-spin mr-0.5"></i>' +
       label +
       ' ' +
-      tr('ui.file_uploading') +
+      window.tr('ui.file_uploading') +
       '</span>';
   else if (state === 'ok')
     el.innerHTML =
       '<span class="text-emerald-400"><i class="fas fa-check-circle mr-0.5"></i>' +
       label +
       ' ' +
-      tr('ui.file_uploaded') +
+      window.tr('ui.file_uploaded') +
       '</span>';
   else if (state === 'fail')
     el.innerHTML =
       '<span class="text-rose-400"><i class="fas fa-times-circle mr-0.5"></i>' +
       label +
       ' ' +
-      tr('ui.file_failed') +
+      window.tr('ui.file_failed') +
       '</span>';
   else if (state === 'none')
     el.innerHTML =
       '<span class="text-slate-500"><i class="fas fa-minus-circle mr-0.5"></i>' +
       label +
       ' ' +
-      tr('ui.file_none') +
+      window.tr('ui.file_none') +
       '</span>';
 }
 
-function markUploadResults(labels, okList) {
+export function markUploadResults(labels, okList) {
   var all = [
     ['st-photo', 'PAS_PHOTO', 'PAS PHOTO'],
     ['st-cv', 'CV', 'CV'],
@@ -247,7 +247,7 @@ function markUploadResults(labels, okList) {
   });
 }
 
-function resetUploadStatus() {
+export function resetUploadStatus() {
   [
     'st-photo',
     'st-cv',
@@ -271,10 +271,10 @@ function resetUploadStatus() {
 // Admin bisa upload >1 dokumen lain sekaligus: tombol + menambah baris,
 // tombol − menghapus (minimal 1 baris tersisa). Prefix: 'k' (Input Manual)
 // atau 'edit-k' (Super Edit Kandidat).
-var LAIN_JENIS_OPTIONS =
+export var LAIN_JENIS_OPTIONS =
   '<option value="KTP">KTP</option><option value="KK">KK</option><option value="IJAZAH SD">IJAZAH SD</option><option value="IJAZAH SMP">IJAZAH SMP</option><option value="IJAZAH SMA">IJAZAH SMA</option><option value="UNIVERSITAS">UNIVERSITAS</option><option value="PASPORT">PASPORT</option><option value="MCU">MCU</option><option value="KONTRAK KERJA">KONTRAK KERJA</option><option value="CERTIFICATE JAPAN">CERTIFICATE JAPAN</option><option value="LAINNYA">LAINNYA</option>';
 
-function renderLainRow(prefix, idx) {
+export function renderLainRow(prefix, idx) {
   return (
     '<div class="grid grid-cols-2 gap-2" data-lain-row>' +
     '<div><label class="block text-[10px] font-bold text-slate-400 mb-1" data-lang="admin.form_other_docs_type">JENIS DOKUMEN</label>' +
@@ -310,33 +310,33 @@ function renderLainRow(prefix, idx) {
     '<button type="button" onclick="tambahBarisLain(\'' +
     prefix +
     '\')" class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg leading-none transition" aria-label="' +
-    tr('admin.add_doc') +
+    window.tr('admin.add_doc') +
     '" title="' +
-    tr('admin.add_doc') +
+    window.tr('admin.add_doc') +
     '"><i class="fas fa-plus"></i></button>' +
     '<button type="button" onclick="hapusBarisLain(this,\'' +
     prefix +
     '\')" class="w-8 h-8 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-lg leading-none transition" aria-label="' +
-    tr('admin.remove_doc') +
+    window.tr('admin.remove_doc') +
     '" title="' +
-    tr('admin.remove_doc') +
+    window.tr('admin.remove_doc') +
     '"><i class="fas fa-minus"></i></button>' +
     '</div></div></div>'
   );
 }
 
-function initLainRows(prefix) {
+export function initLainRows(prefix) {
   var container = document.getElementById(prefix + '-lain-rows');
   if (!container) return;
   container.innerHTML = renderLainRow(prefix, 0);
-  if (typeof renderLanguage === 'function') renderLanguage();
+  if (typeof window.renderLanguage === 'function') window.renderLanguage();
 }
 
 // ===== BERKAS TERSIMPAN (Super Edit Kandidat) =====
 // Tampilkan daftar berkas pemberkasan yang SUDAH ada (c.berkas dari
 // pemberkasan_checklist) sebagai chip read-only dengan link buka, supaya
 // admin langsung lihat "dokumen lengkap" kandidat sebelum menambah.
-var BERKAS_TAMPIL_LABEL = {
+export var BERKAS_TAMPIL_LABEL = {
   kk: 'KK',
   akte: 'AKTE',
   sd: 'IJAZAH SD',
@@ -356,7 +356,7 @@ var BERKAS_TAMPIL_LABEL = {
   bpjs: 'BPJS KETENAGAKERJAAN',
   psikotes: 'HASIL PSIKOTES',
 };
-function renderBerkasTersimpan(berkas) {
+export function renderBerkasTersimpan(berkas) {
   var box = document.getElementById('edit-k-berkas-ada');
   if (!box) return;
   if (!berkas || Object.keys(berkas).length === 0) {
@@ -389,18 +389,18 @@ function renderBerkasTersimpan(berkas) {
     '<p class="text-[10px] font-bold text-emerald-400 mb-1.5"><i class="fas fa-check-circle mr-1"></i><span data-lang="ui.berkas_tersimpan">Berkas Sudah Tersimpan</span>:</p><div class="flex flex-wrap gap-1.5">' +
     chips +
     '</div>';
-  if (typeof renderLanguage === 'function') renderLanguage();
+  if (typeof window.renderLanguage === 'function') window.renderLanguage();
 }
 
-function tambahBarisLain(prefix) {
+export function tambahBarisLain(prefix) {
   var container = document.getElementById(prefix + '-lain-rows');
   if (!container) return;
   var idx = container.children.length;
   container.insertAdjacentHTML('beforeend', renderLainRow(prefix, idx));
-  if (typeof renderLanguage === 'function') renderLanguage();
+  if (typeof window.renderLanguage === 'function') window.renderLanguage();
 }
 
-function hapusBarisLain(btn, prefix) {
+export function hapusBarisLain(btn, prefix) {
   var container = document.getElementById(prefix + '-lain-rows');
   if (!container || container.children.length <= 1) return;
   var row = btn.closest('[data-lain-row]');
@@ -408,7 +408,7 @@ function hapusBarisLain(btn, prefix) {
 }
 
 // Kumpulkan semua baris dokumen lain yang punya file terpilih.
-function collectLainRows(prefix) {
+export function collectLainRows(prefix) {
   var out = [];
   var container = document.getElementById(prefix + '-lain-rows');
   if (!container) return out;
@@ -428,19 +428,19 @@ function collectLainRows(prefix) {
 // untuk semua jalur upload. Di sini wrapper untuk cek semua input modal admin.
 // Periksa SEMUA file (foto/CV/JFT/SSW + semua baris dokumen lain): ukuran
 // dulu, lalu ekstensi — user langsung dapat toast tanpa nunggu server.
-function cekSemuaUkuranFile(lainPrefix) {
+export function cekSemuaUkuranFile(lainPrefix) {
   var errs = [
-    cekUkuranFile(document.getElementById(lainPrefix + '-photo')),
-    cekUkuranFile(document.getElementById(lainPrefix + '-cv')),
-    cekUkuranFile(
+    window.cekUkuranFile(document.getElementById(lainPrefix + '-photo')),
+    window.cekUkuranFile(document.getElementById(lainPrefix + '-cv')),
+    window.cekUkuranFile(
       document.getElementById(lainPrefix === 'edit-k' ? 'edit-k-file-jft' : lainPrefix + '-jft'),
     ),
-    cekUkuranFile(
+    window.cekUkuranFile(
       document.getElementById(lainPrefix === 'edit-k' ? 'edit-k-file-ssw' : lainPrefix + '-ssw'),
     ),
   ];
   collectLainRows(lainPrefix).forEach(function (r) {
-    errs.push(cekUkuranFile(r.input));
+    errs.push(window.cekUkuranFile(r.input));
   });
   for (var i = 0; i < errs.length; i++) {
     if (errs[i]) return errs[i];
@@ -450,19 +450,19 @@ function cekSemuaUkuranFile(lainPrefix) {
 
 // Sama seperti cekSemuaUkuranFile tapi untuk EKSTENSI: return pesan error
 // pertama (urutan: foto, CV, JFT, SSW, lalu baris dokumen lain).
-function cekSemuaEkstensiFile(lainPrefix) {
+export function cekSemuaEkstensiFile(lainPrefix) {
   var errs = [
-    cekEkstensiFile(document.getElementById(lainPrefix + '-photo')),
-    cekEkstensiFile(document.getElementById(lainPrefix + '-cv')),
-    cekEkstensiFile(
+    window.cekEkstensiFile(document.getElementById(lainPrefix + '-photo')),
+    window.cekEkstensiFile(document.getElementById(lainPrefix + '-cv')),
+    window.cekEkstensiFile(
       document.getElementById(lainPrefix === 'edit-k' ? 'edit-k-file-jft' : lainPrefix + '-jft'),
     ),
-    cekEkstensiFile(
+    window.cekEkstensiFile(
       document.getElementById(lainPrefix === 'edit-k' ? 'edit-k-file-ssw' : lainPrefix + '-ssw'),
     ),
   ];
   collectLainRows(lainPrefix).forEach(function (r) {
-    errs.push(cekEkstensiFile(r.input));
+    errs.push(window.cekEkstensiFile(r.input));
   });
   for (var i = 0; i < errs.length; i++) {
     if (errs[i]) return errs[i];
@@ -472,13 +472,13 @@ function cekSemuaEkstensiFile(lainPrefix) {
 
 // Guard gabungan (ukuran dulu, lalu ekstensi) untuk dipanggil di awal
 // submit — satu titik yang menjamin SEMUA jalur modal admin lolos dua-duanya.
-function cekSemuaFileModal(lainPrefix) {
+export function cekSemuaFileModal(lainPrefix) {
   var u = cekSemuaUkuranFile(lainPrefix);
   if (u) return u;
   return cekSemuaEkstensiFile(lainPrefix);
 }
 
-async function prosesUploadKandidat() {
+export async function prosesUploadKandidat() {
   var btn = document.getElementById('btn-submit-kandidat');
   var nama = document.getElementById('k-nama').value;
   var wa = document.getElementById('k-wa').value;
@@ -490,19 +490,19 @@ async function prosesUploadKandidat() {
   // waktu & tidak kena 413/limit server untuk file yang pasti gagal.
   var ukuranErr = cekSemuaFileModal('k');
   if (ukuranErr) {
-    showToast(ukuranErr, 'error');
+    window.showToast(ukuranErr, 'error');
     return;
   }
-  btn.innerHTML = tr('ui.processing');
+  btn.innerHTML = window.tr('ui.processing');
   btn.disabled = true;
   let fd = [];
-  let ph = await bacaFileBase64(document.getElementById('k-photo'), 'PAS_PHOTO');
+  let ph = await window.bacaFileBase64(document.getElementById('k-photo'), 'PAS_PHOTO');
   if (ph) fd.push(ph);
-  let pc = await bacaFileBase64(document.getElementById('k-cv'), 'CV');
+  let pc = await window.bacaFileBase64(document.getElementById('k-cv'), 'CV');
   if (pc) fd.push(pc);
-  let pj = await bacaFileBase64(document.getElementById('k-jft'), 'JFT');
+  let pj = await window.bacaFileBase64(document.getElementById('k-jft'), 'JFT');
   if (pj) fd.push(pj);
-  let ps = await bacaFileBase64(document.getElementById('k-ssw'), 'SSW');
+  let ps = await window.bacaFileBase64(document.getElementById('k-ssw'), 'SSW');
   if (ps) fd.push(ps);
 
   // Indikator: semua file yang dipilih -> mengupload (yang kosong -> tidak dipilih)
@@ -537,7 +537,7 @@ async function prosesUploadKandidat() {
     files: fd,
   };
   try {
-    const res = await callAPI('simpanKandidatDanUpload', [data]);
+    const res = await window.callAPI('simpanKandidatDanUpload', [data]);
     if (res.success) {
       const okList = res.uploaded || [];
       markUploadResults(labels, okList);
@@ -547,11 +547,11 @@ async function prosesUploadKandidat() {
       // - ditampilkan supaya admin langsung tahu, tidak ada yang tertutup.
       const passInfo =
         ' · ' +
-        tr('ui.cand_pass_label') +
+        window.tr('ui.cand_pass_label') +
         ': ' +
         String(wa).replace(/\D/g, '').slice(-4) +
         ' (' +
-        tr('ui.cand_pass_hint') +
+        window.tr('ui.cand_pass_hint') +
         ')';
 
       // Upload dokumen lain (opsional, seperti form + Job) lewat jalur
@@ -561,10 +561,10 @@ async function prosesUploadKandidat() {
       for (const r of lainRows) {
         const jenisLabel = String(r.jenis || 'DOKUMEN');
         setUploadStatus(r.stId, jenisLabel, 'uploading');
-        const lainFile = await bacaFileBase64(r.input, 'DOKUMEN');
+        const lainFile = await window.bacaFileBase64(r.input, 'DOKUMEN');
         if (lainFile) {
           try {
-            const lr = await callAPI('simpanBerkasTahapan', [
+            const lr = await window.callAPI('simpanBerkasTahapan', [
               { wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile },
             ]);
             setUploadStatus(r.stId, jenisLabel, lr && lr.success ? 'ok' : 'fail');
@@ -573,35 +573,35 @@ async function prosesUploadKandidat() {
           }
         }
       }
-      showToast(tr('ui.toast_cand_saved') + ringkas + '.' + passInfo, 'success');
+      window.showToast(window.tr('ui.toast_cand_saved') + ringkas + '.' + passInfo, 'success');
       // Tampilkan centang beberapa saat supaya admin langsung melihat hasil, lalu tutup
       setTimeout(function () {
         document.getElementById('form-tambah-kandidat').reset();
         document.getElementById('modal-tambah-kandidat').classList.add('hidden');
         resetUploadStatus();
-        refreshDataDinamis('pelamar');
+        window.refreshDataDinamis('pelamar');
       }, 1400);
     } else {
       markUploadResults(labels, []); // semua yang dipilih -> gagal
-      showToast(res.error, 'error');
+      window.showToast(res.error, 'error');
     }
   } catch (err) {
     markUploadResults(labels, []);
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerHTML = tr('button.save_upload');
+    btn.innerHTML = window.tr('button.save_upload');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-function bukaSuperEditKandidat(idKan) {
-  var c = ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
-  if (!c) return showToast(tr('ui.toast_data_not_found'), 'error');
+export function bukaSuperEditKandidat(idKan) {
+  var c = window.ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
+  if (!c) return window.showToast(window.tr('ui.toast_data_not_found'), 'error');
 
-  safeSet('super-nama-kandidat', c.nama);
+  window.safeSet('super-nama-kandidat', c.nama);
   document.getElementById('edit-k-row').value = c.rowIndex;
-  document.getElementById('edit-k-wa').value = normalizePhone(c.wa);
+  document.getElementById('edit-k-wa').value = window.normalizePhone(c.wa);
 
   document.getElementById('edit-k-tahapan').value = c.tahapan || '';
   document.getElementById('edit-k-status').value = c.status || 'Aktif';
@@ -614,11 +614,11 @@ function bukaSuperEditKandidat(idKan) {
 
   // Normalisasi gender (DB campur kapital: perempuan/PEREMPUAN/Perempuan/Laki-laki)
   // supaya select yang opsi-nya hanya LAKI-LAKI/PEREMPUAN selalu terisi benar.
-  document.getElementById('edit-k-gender').value = normalizeGenderValue(c.gender);
+  document.getElementById('edit-k-gender').value = window.normalizeGenderValue(c.gender);
   document.getElementById('edit-k-tempat-lahir').value =
     c.tempatLahir && c.tempatLahir !== '-' ? c.tempatLahir : '';
   var editTgl = document.getElementById('edit-k-tgl-lahir');
-  if (editTgl) editTgl.value = toDateInputValue(c.tglLahir);
+  if (editTgl) editTgl.value = window.toDateInputValue(c.tglLahir);
   document.getElementById('edit-k-tb').value =
     c.tb && c.tb !== '-' ? String(c.tb).replace(/\D/g, '') : '';
   document.getElementById('edit-k-bb').value =
@@ -660,28 +660,28 @@ function bukaSuperEditKandidat(idKan) {
   document.getElementById('modal-edit-kandidat').classList.remove('hidden');
 }
 
-async function simpanSuperEditKandidat() {
+export async function simpanSuperEditKandidat() {
   const btn = document.getElementById('btn-save-super');
   // Guard ukuran: cek dokumen lain di modal edit sebelum baca base64.
   const ukuranErr = cekSemuaFileModal('edit-k');
   if (ukuranErr) {
-    showToast(ukuranErr, 'error');
+    window.showToast(ukuranErr, 'error');
     return;
   }
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving_upper') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving_upper') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
   const payload = {
     rowIndex: document.getElementById('edit-k-row').value,
-    wa: normalizePhone(document.getElementById('edit-k-wa').value),
-    admin: currentAdminName,
+    wa: window.normalizePhone(document.getElementById('edit-k-wa').value),
+    admin: window.currentAdminName,
     tahapan: document.getElementById('edit-k-tahapan').value,
     status: document.getElementById('edit-k-status').value,
     catatanExt: document.getElementById('edit-k-catatan').value,
     // Normalisasi ke format kanonikal supaya DB konvergen (dan CV AI
     // yang mengecek includes('PEREMPUAN') tidak salah render Laki-laki).
-    gender: normalizeGenderValue(document.getElementById('edit-k-gender').value),
+    gender: window.normalizeGenderValue(document.getElementById('edit-k-gender').value),
     tempatLahir: document.getElementById('edit-k-tempat-lahir').value.trim(),
     tglLahir: document.getElementById('edit-k-tgl-lahir').value,
     tb: document.getElementById('edit-k-tb').value,
@@ -694,7 +694,7 @@ async function simpanSuperEditKandidat() {
   };
 
   try {
-    const res = await callAPI('updateKandidatSuper', [payload]);
+    const res = await window.callAPI('updateKandidatSuper', [payload]);
     if (res.success) {
       // Upload dokumen lain (opsional, seperti modal Input Kandidat):
       // admin boleh lampirkan berkas pemberkasan tambahan saat edit.
@@ -733,17 +733,17 @@ async function simpanSuperEditKandidat() {
       for (const er of eLainRows) {
         const eJenisLabel = String(er.jenis || 'DOKUMEN');
         setUploadStatus(er.stId, eJenisLabel, 'uploading');
-        const eLainFile = await bacaFileBase64(er.input, 'DOKUMEN');
+        const eLainFile = await window.bacaFileBase64(er.input, 'DOKUMEN');
         if (eLainFile) {
           try {
             // Nama kandidat untuk folder storage diambil dari data
             // (payload tidak membawa nama) — folder harus cocok dengan
             // master kandidat supaya berkas bisa dipreview.
-            const eCand = (ALL_CANDIDATES || []).find(function (x) {
-              return normalizePhone(String(x.wa || '')) === payload.wa;
+            const eCand = (window.ALL_CANDIDATES || []).find(function (x) {
+              return window.normalizePhone(String(x.wa || '')) === payload.wa;
             });
             const eNama = eCand && eCand.nama ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
-            const lr2 = await callAPI('simpanBerkasTahapan', [
+            const lr2 = await window.callAPI('simpanBerkasTahapan', [
               { wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile },
             ]);
             setUploadStatus(er.stId, eJenisLabel, lr2 && lr2.success ? 'ok' : 'fail');
@@ -753,43 +753,43 @@ async function simpanSuperEditKandidat() {
         }
       }
       document.getElementById('modal-edit-kandidat').classList.add('hidden');
-      showToast(tr('ui.toast_sync3_success'), 'success');
-      refreshDataDinamis('pelamar');
+      window.showToast(window.tr('ui.toast_sync3_success'), 'success');
+      window.refreshDataDinamis('pelamar');
     } else {
-      showToast(tr('ui.toast_error_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + tr('ui.sync_3way') + '';
+    btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + window.tr('ui.sync_3way') + '';
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-async function prosesUploadRevisi() {
+export async function prosesUploadRevisi() {
   let input = document.getElementById('file-revisi');
   if (!input.files[0]) {
-    showToast(tr('ui.toast_pick_revisi'), 'error');
+    window.showToast(window.tr('ui.toast_pick_revisi'), 'error');
     return;
   }
   let btn = document.getElementById('btn-revisi');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.uploading_short') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.uploading_short') + '';
   btn.disabled = true;
-  let fileData = await bacaFileBase64(input, 'CV_REVISI');
+  let fileData = await window.bacaFileBase64(input, 'CV_REVISI');
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await callAPI('simpanRevisiKandidat', [currentKandidatWa, fileData]);
+    const res = await window.callAPI('simpanRevisiKandidat', [window.currentKandidatWa, fileData]);
     if (res.success) {
-      showToast(tr('ui.toast_revisi_uploaded'), 'success');
-      refreshDataDinamis();
+      window.showToast(window.tr('ui.toast_revisi_uploaded'), 'success');
+      window.refreshDataDinamis();
     } else {
-      showToast(tr('ui.toast_failed_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerHTML = tr('button.upload_revise');
+    btn.innerHTML = window.tr('button.upload_revise');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
@@ -798,10 +798,10 @@ async function prosesUploadRevisi() {
 // QR di-generate LOKAL (vendor/qrcode-generator.min.js) — tanpa layanan eksternal
 // (api.qrserver.com) supaya offline/PWA tetap jalan dan 100% mandiri.
 // Kembalikan data URL gambar QR dari teks; '' bila lib tidak termuat.
-function buatQrDataUrl(text, targetPx) {
-  if (typeof qrcode !== 'function' || !text) return '';
+export function buatQrDataUrl(text, targetPx) {
+  if (typeof window.qrcode !== 'function' || !text) return '';
   try {
-    var qr = qrcode(0, 'M');
+    var qr = window.qrcode(0, 'M');
     qr.addData(String(text));
     qr.make();
     var count = qr.getModuleCount();
@@ -812,21 +812,21 @@ function buatQrDataUrl(text, targetPx) {
   }
 }
 
-async function aksiGenerateQr(c, k) {
+export async function aksiGenerateQr(c, k) {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
 
-  var job = ALL_JOBS.find((j) => j.code === c);
+  var job = window.ALL_JOBS.find((j) => j.code === c);
   var jobTitle = job ? c + ' - ' + job.pekerjaan : c;
   var templateCv = job ? job.templateCv : '';
 
   try {
-    const b = await callAPI('generateFormBridge', [c, k]);
+    const b = await window.callAPI('generateFormBridge', [c, k]);
     if (b && b.formUrl) {
       var qrData = buatQrDataUrl(b.formUrl);
       if (!qrData) throw new Error('QR lib tidak termuat');
-      safeSet('qr-job-title', jobTitle);
-      setImg('qr-image', qrData);
+      window.safeSet('qr-job-title', jobTitle);
+      window.setImg('qr-image', qrData);
 
       var btnDownload = document.getElementById('btn-download-qr');
       btnDownload.href = qrData;
@@ -835,27 +835,27 @@ async function aksiGenerateQr(c, k) {
       document.getElementById('qr-link-form').value = b.formUrl;
       var tplContainer = document.getElementById('qr-template-container');
       if (templateCv && templateCv !== '-' && templateCv.length > 5) {
-        document.getElementById('qr-link-template').value = getDirectDownloadUrl(templateCv);
+        document.getElementById('qr-link-template').value = window.getDirectDownloadUrl(templateCv);
         tplContainer.classList.remove('hidden');
       } else {
         tplContainer.classList.add('hidden');
       }
       document.getElementById('modal-qr').classList.remove('hidden');
     } else {
-      showToast(tr('ui.toast_qr_failed'), 'error');
+      window.showToast(window.tr('ui.toast_qr_failed'), 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
     if (loader) loader.style.display = 'none';
   }
 }
 
-function tutupModalQr() {
+export function tutupModalQr() {
   document.getElementById('modal-qr').classList.add('hidden');
 }
 
-function filterCbx(containerId, val) {
+export function filterCbx(containerId, val) {
   var container = document.getElementById(containerId);
   if (!container) return;
   var labels = container.getElementsByTagName('label');
@@ -876,12 +876,12 @@ function filterCbx(containerId, val) {
 // ensureAllCandidates() menarik sisanya untuk fitur yang butuh daftar penuh
 // (blast WA, esign match, modal, dll). No-op bila total <= yang sudah dimuat
 // (mode kandidat: candidatesTotal tidak ada -> langsung kembali).
-async function fetchCandidatesPage(page, pageSize, q) {
-  const res = await callAPI('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
+export async function fetchCandidatesPage(page, pageSize, q) {
+  const res = await window.callAPI('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
   if (!res || res.success !== true) throw new Error((res && res.error) || 'Gagal memuat kandidat');
   return res;
 }
-function appendCandidates(list) {
+export function appendCandidates(list) {
   var existing = new Set(
     (window.ALL_CANDIDATES || []).map(function (c) {
       return c.wa;
@@ -894,7 +894,7 @@ function appendCandidates(list) {
     }
   });
 }
-window.ensureAllCandidates = async function () {
+export async function ensureAllCandidates() {
   var loaded = (window.ALL_CANDIDATES || []).length;
   var total = window.ALL_CANDIDATES_TOTAL || loaded;
   if (loaded >= total) return;
@@ -924,20 +924,56 @@ window.ensureAllCandidates = async function () {
   } catch (err) {
     /* gagal: lanjut dengan data yang sudah dimuat */
   }
-};
-window.muatLebihKandidat = async function () {
+}
+export async function muatLebihKandidat() {
   var loaded = (window.ALL_CANDIDATES || []).length;
   var page = Math.floor(loaded / 50) + 1;
   try {
     const res = await fetchCandidatesPage(page, 50, '');
     appendCandidates(res.candidates);
     window.ALL_CANDIDATES_TOTAL = res.total;
-    if (typeof renderAdminFull === 'function') renderAdminFull();
-    showToast(
-      tr('ui.toast_cand_label') + window.ALL_CANDIDATES.length + tr('ui.toast_of_sep') + res.total,
+    if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
+    window.showToast(
+      window.tr('ui.toast_cand_label') + window.ALL_CANDIDATES.length + window.tr('ui.toast_of_sep') + res.total,
       'success',
     );
   } catch (err) {
-    showToast(tr('alert.failed') + ' ' + (err.message || err), 'error');
+    window.showToast(window.tr('alert.failed') + ' ' + (err.message || err), 'error');
   }
-};
+}
+
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick/onchange (partials/modals-shared.html + admin/index) +
+// render/*, 03_candidate.js, 08_wa_pintar.js, 10_cv_rirekisho.js,
+// 12_esign_match.js, admin_ops/candidates.js (window.ensureAllCandidates).
+window.bukaModalTambahKandidat = bukaModalTambahKandidat;
+window.cariKandidatManual = cariKandidatManual;
+window.pilihKandidatManual = pilihKandidatManual;
+window.cekDokumenSebelumnya = cekDokumenSebelumnya;
+window.cekKandidatOtomatis = cekKandidatOtomatis;
+window.tandaiFileDipilih = tandaiFileDipilih;
+window.setUploadStatus = setUploadStatus;
+window.markUploadResults = markUploadResults;
+window.resetUploadStatus = resetUploadStatus;
+window.renderLainRow = renderLainRow;
+window.initLainRows = initLainRows;
+window.renderBerkasTersimpan = renderBerkasTersimpan;
+window.tambahBarisLain = tambahBarisLain;
+window.hapusBarisLain = hapusBarisLain;
+window.collectLainRows = collectLainRows;
+window.cekSemuaUkuranFile = cekSemuaUkuranFile;
+window.cekSemuaEkstensiFile = cekSemuaEkstensiFile;
+window.cekSemuaFileModal = cekSemuaFileModal;
+window.prosesUploadKandidat = prosesUploadKandidat;
+window.bukaSuperEditKandidat = bukaSuperEditKandidat;
+window.simpanSuperEditKandidat = simpanSuperEditKandidat;
+window.prosesUploadRevisi = prosesUploadRevisi;
+window.buatQrDataUrl = buatQrDataUrl;
+window.aksiGenerateQr = aksiGenerateQr;
+window.tutupModalQr = tutupModalQr;
+window.filterCbx = filterCbx;
+window.fetchCandidatesPage = fetchCandidatesPage;
+window.appendCandidates = appendCandidates;
+window.ensureAllCandidates = ensureAllCandidates;
+window.muatLebihKandidat = muatLebihKandidat;

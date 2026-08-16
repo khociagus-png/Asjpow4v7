@@ -74,7 +74,7 @@ export function renderAdmin(filteredJobs) {
   for (var i = 0; i < Math.min(sourceArray.length, window.limitAdm); i++) {
     var j = sourceArray[i];
     html +=
-      '<window.tr class="rt-row border-b border-slate-800 hover:bg-white/5 transition-all">' +
+      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5 transition-all">' +
       '<td data-label="' +
       window.tr('table.code') +
       '" class="p-4 font-mono text-red-300 font-bold">' +
@@ -132,13 +132,13 @@ export function renderAdmin(filteredJobs) {
       '\')" aria-label="' +
       window.tr('table.delete') +
       '" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"><i class="fas fa-trash"></i></button></td>' +
-      '</window.tr>';
+      '</tr>';
   }
   if (sourceArray.length > window.limitAdm) {
     html +=
-      '<window.tr><td colspan="5" class="p-4 text-center"><button onclick="window.limitAdm+=10; window.renderAdmin();" class="text-xs text-red-400">' +
+      '<tr><td colspan="5" class="p-4 text-center"><button onclick="window.limitAdm+=10; window.renderAdmin();" class="text-xs text-red-400">' +
       window.tr('button.more') +
-      '</button></td></window.tr>';
+      '</button></td></tr>';
   }
   tb.innerHTML = html;
 }
@@ -231,7 +231,7 @@ export function renderDbJobTable(arr) {
     var db = arr[i];
     var cands = window.ALL_CANDIDATES.filter((c) => c.idLoker === db.code);
     html +=
-      '<window.tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
       window.tr('table.job_code') +
       '" class="p-4 font-mono text-purple-300 font-bold">' +
@@ -286,13 +286,13 @@ export function renderDbJobTable(arr) {
       window.tr('ui.share_toggle') +
       '</button>' +
       '</td>' +
-      '</window.tr>';
+      '</tr>';
   }
   if (arr.length > window.limitDb) {
     html +=
-      '<window.tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitDb+=10; filterDbJob();" class="text-xs text-purple-400 font-bold">' +
+      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitDb+=10; filterDbJob();" class="text-xs text-purple-400 font-bold">' +
       window.tr('form.txt_lebih_banyak') +
-      '</button></td></window.tr>';
+      '</button></td></tr>';
   }
   tb.innerHTML = html;
 }
