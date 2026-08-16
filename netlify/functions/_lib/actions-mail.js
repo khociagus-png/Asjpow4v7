@@ -6,7 +6,7 @@
 const bcrypt = require('bcryptjs');
 const supabase = require('./supabase');
 const { requireAdmin } = require('./actions-auth');
-const { findCandidateByWa } = require('./candidate-helpers');
+const { findCandidateByWa, nextCandidateId } = require('./candidate-helpers');
 const { stripRaw } = require('./actions-public');
 
 // Frontend mengirim rowIndex (posisi di array formInbox). Urutan harus sama
@@ -68,21 +68,6 @@ async function handleFormStatus(rowIndex, status, reason) {
   } catch (e) {
     return { success: false, error: 'Gagal proses form: ' + e.message };
   }
-}
-
-// nextCandidateId — ID kandidat baru ASJ<max+1> (salinan dari actions-extra).
-async function nextCandidateId() {
-  // Jalur cepat: ambil id_kandidat tertinggi via query server-side.
-  const fastMax = await supabase.maxCandidateIdNumber();
-  if (fastMax !== undefined) return 'ASJ' + String(fastMax + 1).padStart(5, '0');
-  // Fallback: scan penuh.
-  const found = await supabase.findCandidates();
-  let max = 0;
-  for (const r of found.rows) {
-    const m = String(supabase.pick(r, ['id_kandidat', 'id']) || '').match(/ASJ(\d+)/i);
-    if (m) max = Math.max(max, parseInt(m[1], 10));
-  }
-  return 'ASJ' + String(max + 1).padStart(5, '0');
 }
 
 // Approve (LULUS) → buat/perbarui database_candidate dengan id_loker_pilihan =
@@ -225,10 +210,172 @@ async function handleTandaiDibacaForm(payload, sessionToken) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Mail sync — status UPDATE + ringkasan aktivitas (feedback_berkas)
+// ---------------------------------------------------------------------------
+// Status lamaran (database_asj_form.status):
+//   MENUNGGU = lamaran baru / belum diproses admin
+//   UPDATE   = kandidat MENGUBAH data (biodata/berkas) setelah barisnya sudah
+//              pernah diproses admin — progres LULUS/GAGAL tidak di-reset,
+//              admin cukup melihat badge UPDATE + ringkasan apa yang berubah.
+const MAIL_PENDING_STATUS = ['MENUNGGU', 'MAIL', 'BARU', 'PENDING'];
+
+function mailStatusUntukUpdate(currentStatus) {
+  const cur = String(currentStatus || '').toUpperCase();
+  if (!cur || MAIL_PENDING_STATUS.includes(cur)) return 'MENUNGGU';
+  return 'UPDATE';
+}
+
+// Catat aktivitas terakhir (maks 3 entri) di feedback_berkas, mis.:
+//   "[BIODATA] email & alamat diubah · [UPLOAD KTP] · [UPLOAD CV]"
+function appendFeedback(prev, entry) {
+  const items = String(prev || '')
+    .split('·')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  items.unshift(String(entry || '').trim());
+  return items.slice(0, 3).join(' · ');
+}
+
+// Biodata diubah → tandai baris mail kandidat (SEMUA lamarannya) dengan
+// status UPDATE (kalau sudah pernah diproses admin) + ringkasan apa yang
+// berubah, supaya admin tidak bingung "email baru, tapi apa yang di-update?".
+async function syncBiodataKeMail(wa, nama, labels) {
+  const want = supabase.normalizeWa(wa);
+  // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
+  let rows = await supabase.findFormsByWa(wa);
+  if (rows === undefined) rows = await supabase.findForms();
+  const mine = rows.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+  if (!mine.length) return;
+  for (const r of mine) {
+    if (r.id === undefined || r.id === null) continue;
+    // [[PREV:xxx]] menyimpan status sebelum UPDATE supaya tombol "Tandai
+    // Dibaca" bisa mengembalikannya (LULUS/GAGAL/REVIEW tidak hilang).
+    const isUpdate = mailStatusUntukUpdate(r.status) === 'UPDATE';
+    const entry =
+      (isUpdate ? '[[PREV:' + String(r.status || '').toUpperCase() + ']] ' : '') +
+      '[BIODATA] ' +
+      (labels.length ? labels.join(', ') : 'data diperbarui');
+    const body = {
+      timestamp: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      feedback_berkas: appendFeedback(r.feedback_berkas, entry),
+    };
+    if (isUpdate) body.status = 'UPDATE';
+    await supabase.supabaseJson('PATCH', 'database_asj_form', {
+      query: { id: 'eq.' + r.id },
+      body,
+      headers: { Prefer: 'return=minimal' },
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MAIL = UPLOAD-DRIVEN (kebijakan). Hanya perubahan dokumen/upload yang masuk
+// mail inbox (database_asj_form). Update data lain (status kandidat, CV mini,
+// CV AI, auto approve) TIDAK menyentuh mail.
+// ---------------------------------------------------------------------------
+// Sinkronkan/muat baris mail kandidat dengan satu upload dokumen terbaru.
+// - Target baris: CV = dokumen PER LOKER → hanya baris lamaran itu (fallback
+//   WA saja); dokumen lain (KTP/KK/foto/JFT/SSW/dll) = dokumen KANDIDAT →
+//   SEMUA lamaran WA ikut ter-update (dulu hanya baris pertama).
+// - Status: lamaran masih MENUNGGU → tetap MENUNGGU; yang sudah pernah
+//   diproses admin (LULUS/GAGAL/REVIEW) → UPDATE (progres TIDAK di-reset,
+//   admin melihat badge UPDATE "kandidat ubah data").
+// - Keterangan = daftar dokumen "NAMA:URL;..." (mail menampilkan SEMUA
+//   dokumen + preview); feedback_berkas = catatan aktivitas terakhir
+//   ("[UPLOAD KTP]") supaya admin tahu apa yang baru di-upload.
+async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
+  const want = supabase.normalizeWa(wa);
+  // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
+  let rows = await supabase.findFormsByWa(wa);
+  if (rows === undefined) {
+    rows = await supabase.supabaseJson('GET', 'database_asj_form', {
+      query: { select: '*', limit: 500 },
+    });
+  }
+  const all = Array.isArray(rows) ? rows : [];
+  const label = String(docLabel || 'DOKUMEN')
+    .trim()
+    .toUpperCase();
+  const code = String(jobCode || '').trim();
+
+  let targets = [];
+  if (label === 'CV' || label === 'CV_REVISI') {
+    if (code) {
+      targets = all.filter(
+        (r) =>
+          supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want &&
+          String(r.code_job || '').trim() === code,
+      );
+    }
+    if (!targets.length) {
+      targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+    }
+  } else {
+    targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
+  }
+  if (!targets.length) targets = [null];
+
+  for (const existing of targets) {
+    // Baca dokumen lama dari keterangan baris ini, lalu gabung dengan yang baru.
+    const docs = {};
+    const raw = String((existing && existing.keterangan) || '');
+    raw.split(';').forEach((chunk) => {
+      const i = chunk.indexOf(':');
+      if (i > 0) docs[chunk.slice(0, i).trim().toUpperCase()] = chunk.slice(i + 1).trim();
+    });
+    docs[label] = String(url || '');
+    // [[PREV:xxx]] = status sebelum UPDATE (dipulihkan tombol Tandai Dibaca).
+    const nextStatus = mailStatusUntukUpdate(existing && existing.status);
+    const entry =
+      (nextStatus === 'UPDATE' && existing && existing.status
+        ? '[[PREV:' + String(existing.status).toUpperCase() + ']] '
+        : '') +
+      '[UPLOAD ' +
+      label +
+      ']';
+    const keterangan = Object.entries(docs)
+      .filter(([, v]) => v)
+      .map(([k, v]) => k + ':' + v)
+      .join(';');
+    const body = {
+      timestamp: new Date().toISOString(),
+      code_job: String((existing && existing.code_job) || code || ''),
+      nama_lengkap: String(nama || (existing && existing.nama_lengkap) || 'KANDIDAT').toUpperCase(),
+      no_wa: want,
+      keterangan,
+      status: nextStatus,
+      feedback_berkas: appendFeedback(existing && existing.feedback_berkas, entry),
+      updated_at: new Date().toISOString(),
+    };
+    // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
+    if (label === 'PAS_PHOTO' || label === 'PHOTO') body.pas_photo = String(url || '');
+    if (label === 'CV' || label === 'CV_REVISI') body.file_cv = String(url || '');
+    if (label === 'JFT') body.jft = String(url || '');
+    if (label === 'SSW') body.ssw = String(url || '');
+    if (existing && existing.id !== undefined) {
+      await supabase.supabaseJson('PATCH', 'database_asj_form', {
+        query: { id: 'eq.' + existing.id },
+        body,
+        headers: { Prefer: 'return=minimal' },
+      });
+    } else {
+      await supabase.supabaseJson('POST', 'database_asj_form', {
+        body,
+        headers: { Prefer: 'return=minimal' },
+      });
+    }
+  }
+}
+
 module.exports = {
   handleReviewForm,
   handleApproveForm,
   handleRejectForm,
   handleDeleteForm,
   handleTandaiDibacaForm,
+  syncBiodataKeMail,
+  syncFormMailDariUpload,
 };
+

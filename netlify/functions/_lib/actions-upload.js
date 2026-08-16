@@ -1,26 +1,23 @@
-// actions-extra.js — handler backend rebuild untuk action yang belum ada di
-// handlers.js. Semua aksi ini membaca/menulis Supabase asli (skema sudah
-// diintrospeksi) dan mengikuti kontrak payload/respons frontend (lihat
-// master-full.html, apply-full.html, ai_form.html, js/07_api.js, dll).
+// actions-upload.js — upload & apply (apply-full.html, admin pemberkasan,
+// upload langsung). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah
+// dari actions-extra.js, perilaku TIDAK berubah.
 'use strict';
 
 const bcrypt = require('bcryptjs');
 const supabase = require('./supabase');
 const session = require('./session');
-const { env } = require('./env');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { findMasterByWa } = require('./actions-master');
+const {
+  bucket,
+  storageRequest,
+  publicUrl,
+  hapusJenisVarian,
+  uploadBase64,
+} = require('./storage');
+const { syncFormMailDariUpload } = require('./actions-mail');
+const { nextCandidateId } = require('./candidate-helpers');
 
-// ---------------------------------------------------------------------------
-// Helper dasar
-// ---------------------------------------------------------------------------
-// requireRole (Fase 1.2) dipusatkan di actions-auth.js — tidak ada definisi
-// dobel lagi. Handler di file ini memakainya seperti biasa.
-
-// ---------------------------------------------------------------------------
-// REVIEW.md M2 — proteksi PII: data penuh hanya untuk pemilik WA (kandidat)
-// atau admin; pemanggil tanpa sesi valid hanya mendapat field prefill.
-// ---------------------------------------------------------------------------
 const PUBLIC_PREFILL_FIELDS = new Set([
   'idKandidat',
   'id',
@@ -56,153 +53,6 @@ function pickPrefill(data) {
     if (PUBLIC_PREFILL_FIELDS.has(k)) safe[k] = data[k];
   }
   return safe;
-}
-
-function bucket() {
-  return env('SUPABASE_STORAGE_BUCKET') || 'asj-files';
-}
-
-// Request ke Supabase Storage (di luar /rest/v1).
-async function storageRequest(method, pathname, opts = {}) {
-  const url = supabase.supabaseUrl();
-  const key = supabase.supabaseKey();
-  if (!url || !key) throw new Error('Supabase belum dikonfigurasi');
-  const res = await fetch(url.replace(/\/$/, '') + '/storage/v1/' + pathname, {
-    method,
-    headers: {
-      apikey: key,
-      Authorization: 'Bearer ' + key,
-      ...(opts.headers || {}),
-    },
-    body: opts.body,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('storage/' + pathname + ' → HTTP ' + res.status + ' ' + text.slice(0, 200));
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-function publicUrl(path) {
-  return (
-    supabase.supabaseUrl().replace(/\/$/, '') + '/storage/v1/object/public/' + bucket() + '/' + path
-  );
-}
-
-// Terima base64 (boleh dengan prefix data:*) → kembalikan Buffer.
-function b64ToBuffer(data) {
-  let s = String(data || '');
-  const comma = s.indexOf(',');
-  if (comma >= 0 && /^data:/i.test(s.slice(0, comma + 1))) s = s.slice(comma + 1);
-  return Buffer.from(s, 'base64');
-}
-
-function mimeFromName(name, fallback) {
-  const ext = String(name || '')
-    .split('.')
-    .pop()
-    .toLowerCase();
-  const map = {
-    pdf: 'application/pdf',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    webp: 'image/webp',
-    gif: 'image/gif',
-    svg: 'image/svg+xml',
-    bmp: 'image/bmp',
-    doc: 'application/msword',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    xls: 'application/vnd.ms-excel',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ppt: 'application/vnd.ms-powerpoint',
-    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    txt: 'text/plain',
-    csv: 'text/csv',
-    rtf: 'application/rtf',
-    odt: 'application/vnd.oasis.opendocument.text',
-  };
-  return map[ext] || fallback || 'application/octet-stream';
-}
-
-// Alias nama file per jenis — semua jalur upload (apply-full, dashboard,
-// master form, admin) dijamin memakai stem yang sama, sehingga file lama
-// ikut terhapus & tidak ada dokumen dobel (mis. KTP 2 / KK 2 di share view).
-function stemAliases(stem) {
-  const u = String(stem || '').toUpperCase();
-  const m = {
-    PAS_PHOTO: ['PHOTOFILE', 'PASPHOTO', 'FOTO'],
-    PHOTOFILE: ['PAS_PHOTO', 'PASPHOTO', 'FOTO'],
-    PASPHOTO: ['PAS_PHOTO', 'PHOTOFILE', 'FOTO'],
-    CV: ['CVFILE', 'FILE_CV', 'CV_REVISI'],
-    CVFILE: ['CV', 'FILE_CV', 'CV_REVISI'],
-    CV_REVISI: ['CV', 'CVFILE', 'FILE_CV'],
-    JFT: ['JFTFILE'],
-    JFTFILE: ['JFT'],
-    SSW: ['SSWFILE'],
-    SSWFILE: ['SSW'],
-    KK: ['KARTU_KELUARGA'],
-    KARTU_KELUARGA: ['KK'],
-  };
-  return m[u] || [];
-}
-
-// Hapus semua varian lama satu jenis file di folder (mis. KTP.jpg, KTP.png,
-// KK_1786….pdf — termasuk varian bertimestamp dari backend lama — plus
-// alias-nya). Dipanggil SEBELUM upload supaya selalu menimpa file lama.
-// Catatan API: object/list mengembalikan nama RELATIF terhadap prefix, jadi
-// filter + delete harus pakai path lengkap (folder + "/" + nama).
-function isVarianOf(name, stem) {
-  const n = String(name || '');
-  if (!n || !stem) return false;
-  // KTP.ext / KTP.png — varian tanpa timestamp.
-  if (n.startsWith(stem + '.')) return true;
-  // KTP_1786683311216.pdf — varian bertimestamp (backend lama menamai
-  // file dengan timestamp sehingga upload kedua tidak menimpa).
-  return n.startsWith(stem + '_');
-}
-
-async function hapusJenisVarian(folder, stem) {
-  const f = String(folder).replace(/^\/+|\/+$/g, '');
-  const stems = [String(stem || '')].concat(stemAliases(stem)).filter(Boolean);
-  try {
-    const list = await storageRequest('POST', 'object/list/' + bucket(), {
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prefix: f + '/', limit: 300, offset: 0 }),
-    });
-    const items = Array.isArray(list) ? list : [];
-    const victims = items
-      .map((o) => (o && o.name ? String(o.name) : ''))
-      .filter((n) => n && stems.some((s) => isVarianOf(n, s)));
-    if (victims.length) {
-      await storageRequest('DELETE', 'object/' + bucket(), {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: victims.map((n) => f + '/' + n) }),
-      });
-    }
-  } catch (e) {
-    // List/hapus gagal tidak memblokir upload — x-upsert tetap menimpa nama sama.
-  }
-}
-
-// Upload file base64 ke Storage, kembalikan public URL.
-async function uploadBase64(data, folder, fileName) {
-  if (!data) return null;
-  const buf = b64ToBuffer(data);
-  const cleanName = String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_');
-  const stem = cleanName.split('.')[0];
-  // FIX anti-duplikat: hapus varian lama (KTP.jpg / KTP.png / alias) dulu.
-  await hapusJenisVarian(folder, stem);
-  const path = String(folder).replace(/^\/+|\/+$/g, '') + '/' + cleanName;
-  await storageRequest('POST', 'object/' + bucket() + '/' + path, {
-    headers: {
-      'Content-Type': mimeFromName(cleanName),
-      'x-upsert': 'true',
-    },
-    body: buf,
-  });
-  return publicUrl(path);
 }
 
 // ---------------------------------------------------------------------------
@@ -277,89 +127,6 @@ async function findFormByWaJob(wa, code) {
         String(r.code_job || '').trim() === String(code || '').trim(),
     ) || null
   );
-}
-
-// ---------------------------------------------------------------------------
-// Mail sync — status UPDATE + ringkasan aktivitas (feedback_berkas)
-// ---------------------------------------------------------------------------
-// Status lamaran (database_asj_form.status):
-//   MENUNGGU = lamaran baru / belum diproses admin
-//   UPDATE   = kandidat MENGUBAH data (biodata/berkas) setelah barisnya sudah
-//              pernah diproses admin — progres LULUS/GAGAL tidak di-reset,
-//              admin cukup melihat badge UPDATE + ringkasan apa yang berubah.
-const MAIL_PENDING_STATUS = ['MENUNGGU', 'MAIL', 'BARU', 'PENDING'];
-
-function mailStatusUntukUpdate(currentStatus) {
-  const cur = String(currentStatus || '').toUpperCase();
-  if (!cur || MAIL_PENDING_STATUS.includes(cur)) return 'MENUNGGU';
-  return 'UPDATE';
-}
-
-// Catat aktivitas terakhir (maks 3 entri) di feedback_berkas, mis.:
-//   "[BIODATA] email & alamat diubah · [UPLOAD KTP] · [UPLOAD CV]"
-function appendFeedback(prev, entry) {
-  const items = String(prev || '')
-    .split('·')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  items.unshift(String(entry || '').trim());
-  return items.slice(0, 3).join(' · ');
-}
-
-// Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
-const MASTER_FIELD_LABEL = {
-  nama_lengkap: 'nama',
-  furigana: 'furigana',
-  namapanggilan: 'panggilan',
-  panggilan_katakana: 'panggilan katakana',
-  gender: 'gender',
-  tempat_lahir: 'tempat lahir',
-  tgl_lahir: 'tgl lahir',
-  usia: 'usia',
-  agama: 'agama',
-  status_pernikahan: 'status nikah',
-  jumlah_anak: 'anak',
-  nik: 'KTP/NIK',
-  driver_license: 'SIM',
-  alamat_lengkap: 'alamat',
-  email: 'email',
-  tb: 'tinggi',
-  bb: 'berat',
-  no_pasport: 'paspor',
-  no_coe: 'nomor COE',
-};
-
-// Biodata diubah → tandai baris mail kandidat (SEMUA lamarannya) dengan
-// status UPDATE (kalau sudah pernah diproses admin) + ringkasan apa yang
-// berubah, supaya admin tidak bingung "email baru, tapi apa yang di-update?".
-async function syncBiodataKeMail(wa, nama, labels) {
-  const want = supabase.normalizeWa(wa);
-  // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
-  let rows = await supabase.findFormsByWa(wa);
-  if (rows === undefined) rows = await supabase.findForms();
-  const mine = rows.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
-  if (!mine.length) return;
-  for (const r of mine) {
-    if (r.id === undefined || r.id === null) continue;
-    // [[PREV:xxx]] menyimpan status sebelum UPDATE supaya tombol "Tandai
-    // Dibaca" bisa mengembalikannya (LULUS/GAGAL/REVIEW tidak hilang).
-    const isUpdate = mailStatusUntukUpdate(r.status) === 'UPDATE';
-    const entry =
-      (isUpdate ? '[[PREV:' + String(r.status || '').toUpperCase() + ']] ' : '') +
-      '[BIODATA] ' +
-      (labels.length ? labels.join(', ') : 'data diperbarui');
-    const body = {
-      timestamp: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      feedback_berkas: appendFeedback(r.feedback_berkas, entry),
-    };
-    if (isUpdate) body.status = 'UPDATE';
-    await supabase.supabaseJson('PATCH', 'database_asj_form', {
-      query: { id: 'eq.' + r.id },
-      body,
-      headers: { Prefer: 'return=minimal' },
-    });
-  }
 }
 
 // cekDataPelamar([wa]) → { found, nama, gender, usia, tb, bb, pasPhoto,
@@ -533,24 +300,9 @@ async function handleGetExistingCandidateJsonByWa(payload, sessionToken) {
   }
 }
 
-
-
 // ---------------------------------------------------------------------------
 // Admin: tambah kandidat manual + upload berkas + revisi
 // ---------------------------------------------------------------------------
-async function nextCandidateId() {
-  // Jalur cepat: id_kandidat tertinggi via query server-side.
-  const fastMax = await supabase.maxCandidateIdNumber();
-  if (fastMax !== undefined) return 'ASJ' + String(fastMax + 1).padStart(5, '0');
-  // Fallback: scan penuh (perilaku lama).
-  const found = await supabase.findCandidates();
-  let max = 0;
-  for (const r of found.rows) {
-    const m = String(supabase.pick(r, ['id_kandidat', 'id']) || '').match(/ASJ(\d+)/i);
-    if (m) max = Math.max(max, parseInt(m[1], 10));
-  }
-  return 'ASJ' + String(max + 1).padStart(5, '0');
-}
 
 const FILE_LABEL_COLUMNS = {
   PAS_PHOTO: { cand: 'pas_photo', master: 'pas_photo', pemberkasan: null },
@@ -761,105 +513,6 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// MAIL = UPLOAD-DRIVEN (kebijakan). Hanya perubahan dokumen/upload yang masuk
-// mail inbox (database_asj_form). Update data lain (status kandidat, CV mini,
-// CV AI, auto approve) TIDAK menyentuh mail.
-// ---------------------------------------------------------------------------
-// Sinkronkan/muat baris mail kandidat dengan satu upload dokumen terbaru.
-// - Target baris: CV = dokumen PER LOKER → hanya baris lamaran itu (fallback
-//   WA saja); dokumen lain (KTP/KK/foto/JFT/SSW/dll) = dokumen KANDIDAT →
-//   SEMUA lamaran WA ikut ter-update (dulu hanya baris pertama).
-// - Status: lamaran masih MENUNGGU → tetap MENUNGGU; yang sudah pernah
-//   diproses admin (LULUS/GAGAL/REVIEW) → UPDATE (progres TIDAK di-reset,
-//   admin melihat badge UPDATE "kandidat ubah data").
-// - Keterangan = daftar dokumen "NAMA:URL;..." (mail menampilkan SEMUA
-//   dokumen + preview); feedback_berkas = catatan aktivitas terakhir
-//   ("[UPLOAD KTP]") supaya admin tahu apa yang baru di-upload.
-async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
-  const want = supabase.normalizeWa(wa);
-  // Jalur cepat: tarik hanya lamaran WA ini, bukan scan 500 baris inbox.
-  let rows = await supabase.findFormsByWa(wa);
-  if (rows === undefined) {
-    rows = await supabase.supabaseJson('GET', 'database_asj_form', {
-      query: { select: '*', limit: 500 },
-    });
-  }
-  const all = Array.isArray(rows) ? rows : [];
-  const label = String(docLabel || 'DOKUMEN')
-    .trim()
-    .toUpperCase();
-  const code = String(jobCode || '').trim();
-
-  let targets = [];
-  if (label === 'CV' || label === 'CV_REVISI') {
-    if (code) {
-      targets = all.filter(
-        (r) =>
-          supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want &&
-          String(r.code_job || '').trim() === code,
-      );
-    }
-    if (!targets.length) {
-      targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
-    }
-  } else {
-    targets = all.filter((r) => supabase.normalizeWa(String(r.no_wa || r.wa || '')) === want);
-  }
-  if (!targets.length) targets = [null];
-
-  for (const existing of targets) {
-    // Baca dokumen lama dari keterangan baris ini, lalu gabung dengan yang baru.
-    const docs = {};
-    const raw = String((existing && existing.keterangan) || '');
-    raw.split(';').forEach((chunk) => {
-      const i = chunk.indexOf(':');
-      if (i > 0) docs[chunk.slice(0, i).trim().toUpperCase()] = chunk.slice(i + 1).trim();
-    });
-    docs[label] = String(url || '');
-    // [[PREV:xxx]] = status sebelum UPDATE (dipulihkan tombol Tandai Dibaca).
-    const nextStatus = mailStatusUntukUpdate(existing && existing.status);
-    const entry =
-      (nextStatus === 'UPDATE' && existing && existing.status
-        ? '[[PREV:' + String(existing.status).toUpperCase() + ']] '
-        : '') +
-      '[UPLOAD ' +
-      label +
-      ']';
-    const keterangan = Object.entries(docs)
-      .filter(([, v]) => v)
-      .map(([k, v]) => k + ':' + v)
-      .join(';');
-    const body = {
-      timestamp: new Date().toISOString(),
-      code_job: String((existing && existing.code_job) || code || ''),
-      nama_lengkap: String(nama || (existing && existing.nama_lengkap) || 'KANDIDAT').toUpperCase(),
-      no_wa: want,
-      keterangan,
-      status: nextStatus,
-      feedback_berkas: appendFeedback(existing && existing.feedback_berkas, entry),
-      updated_at: new Date().toISOString(),
-    };
-    // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
-    if (label === 'PAS_PHOTO' || label === 'PHOTO') body.pas_photo = String(url || '');
-    if (label === 'CV' || label === 'CV_REVISI') body.file_cv = String(url || '');
-    if (label === 'JFT') body.jft = String(url || '');
-    if (label === 'SSW') body.ssw = String(url || '');
-    if (existing && existing.id !== undefined) {
-      await supabase.supabaseJson('PATCH', 'database_asj_form', {
-        query: { id: 'eq.' + existing.id },
-        body,
-        headers: { Prefer: 'return=minimal' },
-      });
-    } else {
-      await supabase.supabaseJson('POST', 'database_asj_form', {
-        body,
-        headers: { Prefer: 'return=minimal' },
-      });
-    }
-  }
-}
-
 // simpanBerkasTahapan([{wa, nama, jenisBerkas, file}]) — upload dokumen
 // pemberkasan / file utama kandidat. Dipakai admin (modal edit/pemberkasan)
 // DAN kandidat (upload berkas sendiri dari dashboard).
@@ -1058,115 +711,15 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
   }
 }
 
-// Ekspor semua handler (fungsi deklarasi hoisted — letaknya boleh di tengah).
 module.exports = {
-  // Helper murni diekspor untuk unit test (pencocokan varian upload).
-  isVarianOf,
-  stemAliases,
   handleGetUploadUrls,
   handleCekDataPelamar,
   handleIsJobRequiresCv,
   handleSubmitApply,
   handleGetExistingCandidateJsonByWa,
-          handleSimpanKandidatDanUpload,
+  handleSimpanKandidatDanUpload,
   handleSimpanBerkasTahapan,
   handleSimpanRevisiKandidat,
-                              handleGetDriveLinkCandidates,
-  handleUploadDriveReplacement,
-  handleRunMigration,
+  FILE_LABEL_COLUMNS,
+  fileLabelKey,
 };
-
-// ---------------------------------------------------------------------------
-// Drive links & migrasi
-// ---------------------------------------------------------------------------
-async function handleGetDriveLinkCandidates(payload, sessionToken) {
-  const guard = requireRole(sessionToken, 'admin');
-  if (guard.error) return guard.error;
-  try {
-    const found = await supabase.findCandidates();
-    const data = found.rows
-      .filter((r) =>
-        /drive\.google/i.test(
-          String(supabase.pick(r, ['folder_url', 'folderUrl', 'folder_id']) || ''),
-        ),
-      )
-      .map(supabase.mapCandidate);
-    return { success: true, data };
-  } catch (e) {
-    return { success: false, error: e.message };
-  }
-}
-
-async function handleUploadDriveReplacement(payload, sessionToken) {
-  const guard = requireRole(sessionToken, 'admin');
-  if (guard.error) return guard.error;
-  const d = (payload && payload[0]) || {};
-  const idKand = String(d.idKandidat || '');
-  const label = String(d.label || '')
-    .trim()
-    .toUpperCase();
-  const f = d.fileData || {};
-  if (!idKand || !f.data) return { success: false, error: 'Data tidak lengkap.' };
-  try {
-    const nama = String(d.nama || 'KANDIDAT').toUpperCase();
-    const folder = 'master/' + nama.replace(/[^A-Z0-9_-]/g, '_');
-    const ext =
-      String(f.name || 'file')
-        .split('.')
-        .pop() || 'jpg';
-    const url = await uploadBase64(f.data, folder, (label || 'FILE') + '.' + ext);
-    const labelKey = fileLabelKey(label);
-    const map = labelKey ? FILE_LABEL_COLUMNS[labelKey] : null;
-    // Jalur cepat: cari baris kandidat via query server-side (filter id_kandidat).
-    let c = await supabase.findCandidateByIdFiltered(idKand);
-    if (c === undefined) {
-      const found = await supabase.findCandidates();
-      c =
-        found.rows.find((r) => String(supabase.pick(r, ['id_kandidat', 'id']) || '') === idKand) ||
-        null;
-    }
-    if (c && c.id !== undefined && map && map.cand) {
-      await supabase.supabaseJson('PATCH', 'database_candidate', {
-        query: { id: 'eq.' + c.id },
-        body: { [map.cand]: url },
-        headers: { Prefer: 'return=minimal' },
-      });
-    }
-    const m = await findMasterByWa(String(c && c.no_wa ? c.no_wa : ''));
-    if (m && m.id !== undefined && map && map.master) {
-      await supabase.supabaseJson('PATCH', 'master_database_candidate', {
-        query: { id: 'eq.' + m.id },
-        body: { [map.master]: url },
-        headers: { Prefer: 'return=minimal' },
-      });
-    }
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e.message };
-  }
-}
-
-async function handleRunMigration(payload, sessionToken) {
-  const guard = requireRole(sessionToken, 'admin');
-  if (guard.error) return guard.error;
-  try {
-    const rows = await supabase.supabaseJson('GET', 'meta_rev', {
-      query: { select: '*', limit: 10 },
-    });
-    const cur =
-      (Array.isArray(rows) ? rows : []).find((r) => String(r.domain || '') === 'migration') || null;
-    await supabase.supabaseJson('POST', 'meta_rev', {
-      body: {
-        domain: 'migration',
-        rev: cur ? Number(cur.rev || 0) + 1 : 1,
-        updated_at: new Date().toISOString(),
-      },
-      headers: { Prefer: 'return=minimal' },
-    });
-    return { success: true, results: [{ id: 'migration', status: 'OK' }], pendingSql: [] };
-  } catch (e) {
-    return { success: false, error: e.message, results: [], pendingSql: [] };
-  }
-}
-
-// __PART3__

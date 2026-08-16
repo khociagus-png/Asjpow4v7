@@ -1,5 +1,5 @@
 // ==========================================
-// TESTS: isVarianOf & stemAliases (actions-extra.js)
+// TESTS: isVarianOf & stemAliases (storage.js — helper Supabase Storage).
 // Alur upload harus MENIMPA file lama per tipe dokumen: varian bertimestamp
 // (KK_1786683312223.pdf) maupun polos (KK.jpg) ikut dihapus sebelum upload
 // baru, supaya tombol KK/KTP/CV di share view tidak pernah dobel.
@@ -7,7 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { isVarianOf, stemAliases } = require('./actions-extra.js');
+const { isVarianOf, stemAliases } = require('./storage.js');
 
 describe('isVarianOf', () => {
   it('varian bertimestamp terdeteksi (KK_1786….pdf milik stem KK)', () => {

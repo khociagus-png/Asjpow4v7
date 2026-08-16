@@ -4,7 +4,45 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 4 (master biodata/CV dipisah dari actions-extra).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 1.2 langkah 5 (actions-extra.js dihapus; storage/upload/drive modular + fix bug findMasterByWa).
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 1.2 langkah 5 (TERAKHIR) — `actions-extra.js` DIHAPUS — modul storage/upload/drive — commit *(isi hash)*
+
+- **Baru** `_lib/storage.js` (166 baris) — helper Supabase Storage murni:
+  `bucket`, `storageRequest`, `publicUrl`, `b64ToBuffer`, `mimeFromName`,
+  `stemAliases`, `isVarianOf`, `hapusJenisVarian`, `uploadBase64`.
+- **Baru** `_lib/actions-upload.js` (725 baris) — inti upload/apply:
+  getUploadUrls, cekDataPelamar, isJobRequiresCv, submitApply,
+  getExistingCandidateJsonByWa, simpanKandidatDanUpload,
+  simpanBerkasTahapan, simpanRevisiKandidat + `FILE_LABEL_COLUMNS`/
+  `fileLabelKey` + PII guard (`PUBLIC_PREFILL_FIELDS`/`pickPrefill`).
+- **Baru** `_lib/actions-drive.js` (105 baris) — drive links & migrasi
+  (getDriveLinkCandidates, uploadDriveReplacement, runMigration).
+- `nextCandidateId` dipusatkan di `candidate-helpers.js` (dulu 3 salinan:
+  extra/mail/master → kini 1); blok mail-sync (`MAIL_PENDING_STATUS`,
+  `mailStatusUntukUpdate`, `appendFeedback`, `syncBiodataKeMail`,
+  `syncFormMailDariUpload`) pindah ke `actions-mail.js` (domain mail).
+- Body fungsi dipindah **byte-identik** via skrip Node (`.freebuff/`, aset +
+  assertion batas); `actions-extra.js` **dihapus**; test lama di-rename
+  `actions-extra.test.js` → `storage.test.js` (import ke `./storage.js`).
+- **🐛 BUG FIX penting — ketahuan oleh E2E `upload-check`:** sejak langkah 4
+  (`adadb30`) `actions-master.js` lupa mengexport `findMasterByWa` →
+  `simpanBerkasTahapan` (upload pemberkasan kandidat), `submitApply`,
+  `simpanRevisiKandidat`, `uploadDriveReplacement` semua dapat `undefined`
+  dan gagal diam-diam. Dua bug senyap lain dari ekstraksi master juga
+  diperbaiki: `syncBiodataKeMail` + `nextCandidateId` dipakai tanpa import
+  (ReferenceError ditelan `try/catch` → update biodata master tidak pernah
+  sinkron ke mail, insert master tanpa id_kandidat).
+- Verifikasi: node --check ✓ · test 51/51 ✓ (storage.test.js 10 test) ·
+  smoke guard 6 action + dispatcher upload.* (data asli read-only) ✓ ·
+  **E2E SEMUA LULUS**: login-check, share-view, backend-fast-path,
+  **upload-check full** (Storage + checklist + master + UI), biodata-check,
+  photo-check ✓ · backend module-map **25 file / 204 simbol**,
+  `actions-extra` tidak ada lagi.
 
 ---
 

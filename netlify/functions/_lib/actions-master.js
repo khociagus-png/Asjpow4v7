@@ -6,6 +6,33 @@
 const supabase = require('./supabase');
 const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
+const { syncBiodataKeMail } = require('./actions-mail');
+const { nextCandidateId } = require('./candidate-helpers');
+
+// Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
+// Dipakai handleSimpanUpdateMaster untuk mencatat "[BIODATA] … diubah" ke mail
+// inbox (dulu ikut actions-extra, tapi konsumennya hanya modul ini).
+const MASTER_FIELD_LABEL = {
+  nama_lengkap: 'nama',
+  furigana: 'furigana',
+  namapanggilan: 'panggilan',
+  panggilan_katakana: 'panggilan katakana',
+  gender: 'gender',
+  tempat_lahir: 'tempat lahir',
+  tgl_lahir: 'tgl lahir',
+  usia: 'usia',
+  agama: 'agama',
+  status_pernikahan: 'status nikah',
+  jumlah_anak: 'anak',
+  nik: 'KTP/NIK',
+  driver_license: 'SIM',
+  alamat_lengkap: 'alamat',
+  email: 'email',
+  tb: 'tinggi',
+  bb: 'berat',
+  no_pasport: 'paspor',
+  no_coe: 'nomor COE',
+};
 
 // ---------------------------------------------------------------------------
 // Master data (master-full.html + preview CV)
@@ -781,6 +808,7 @@ async function handleSimpanUpdateMaster(payload, sessionToken) {
 }
 
 module.exports = {
+  findMasterByWa,
   handleGetMasterDataByWa,
   handleGetDrafCvMaster,
   handleSubmitMasterForm,

@@ -10,7 +10,8 @@
 'use strict';
 
 const session = require('./session');
-const extra = require('./actions-extra');
+const upload = require('./actions-upload');
+const drive = require('./actions-drive');
 const schedule = require('./actions-schedule');
 const wa = require('./actions-wa');
 const config = require('./actions-config');
@@ -233,16 +234,16 @@ async function dispatchAction(action, payload, sessionToken) {
       return mailActions.handleTandaiDibacaForm(payload, sessionToken);
     // Upload & file
     case 'getUploadUrls':
-      return extra.handleGetUploadUrls(payload, sessionToken);
+      return upload.handleGetUploadUrls(payload, sessionToken);
     // Lamaran publik (apply-full.html)
     case 'cekDataPelamar':
-      return extra.handleCekDataPelamar(payload);
+      return upload.handleCekDataPelamar(payload);
     case 'isJobRequiresCv':
-      return extra.handleIsJobRequiresCv(payload);
+      return upload.handleIsJobRequiresCv(payload);
     case 'submitApply':
-      return extra.handleSubmitApply(payload);
+      return upload.handleSubmitApply(payload);
     case 'getExistingCandidateJsonByWa':
-      return extra.handleGetExistingCandidateJsonByWa(payload, sessionToken);
+      return upload.handleGetExistingCandidateJsonByWa(payload, sessionToken);
     // Master data (master-full.html, CV)
     case 'getMasterDataByWa':
       return master.handleGetMasterDataByWa(payload, sessionToken);
@@ -254,11 +255,11 @@ async function dispatchAction(action, payload, sessionToken) {
     case 'simpanUpdateMaster':
       return master.handleSimpanUpdateMaster(payload, sessionToken);
     case 'simpanKandidatDanUpload':
-      return extra.handleSimpanKandidatDanUpload(payload, sessionToken);
+      return upload.handleSimpanKandidatDanUpload(payload, sessionToken);
     case 'simpanBerkasTahapan':
-      return extra.handleSimpanBerkasTahapan(payload, sessionToken);
+      return upload.handleSimpanBerkasTahapan(payload, sessionToken);
     case 'simpanRevisiKandidat':
-      return extra.handleSimpanRevisiKandidat(payload, sessionToken);
+      return upload.handleSimpanRevisiKandidat(payload, sessionToken);
     // Jadwal & tugas
     case 'simpanJadwalBaru':
       return schedule.handleSimpanJadwalBaru(payload, sessionToken);
@@ -307,11 +308,11 @@ async function dispatchAction(action, payload, sessionToken) {
       return register.handleGenerateAiFormBridge(payload);
     // Drive links & migrasi
     case 'getDriveLinkCandidates':
-      return extra.handleGetDriveLinkCandidates(payload, sessionToken);
+      return drive.handleGetDriveLinkCandidates(payload, sessionToken);
     case 'uploadDriveReplacement':
-      return extra.handleUploadDriveReplacement(payload, sessionToken);
+      return drive.handleUploadDriveReplacement(payload, sessionToken);
     case 'runMigration':
-      return extra.handleRunMigration(payload, sessionToken);
+      return drive.handleRunMigration(payload, sessionToken);
     // AI (Gemini) & submit AI form
     case 'processAIChat':
       return ai.handleProcessAIChat(payload);

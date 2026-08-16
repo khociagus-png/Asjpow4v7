@@ -74,13 +74,14 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       (343 — sisa bisa dirapikan kapan saja, opsional).
 - [ ] Pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah).
 
-### 1.2 Pecah `actions-extra.js` (2549 baris) — langkah 1 SELESAI (jadwal & tugas)
+### 1.2 Pecah `actions-extra.js` (2549 baris) — **SELESAI** (file dihapus)
 - [x] **`actions-schedule.js` baru (165 baris)** — jadwal `database_schedule` + tugas `database_tugas` (5 handler) dipindah dari `actions-extra.js`; `requireRole` dipusatkan di `actions-auth.js`. `actions-extra.js` 2549 → **2370 baris**, cross-file calls 33 → 28. Dispatcher `handlers.js` kini route ke `schedule.*`. Verifikasi: test 51/51, E2E login SEMUA LULUS, backend **19 file / 204 simbol**. Commit: `aec1e9f`.
 - [x] **`actions-wa.js` + `actions-config.js` baru** — WA/Fonnte (4 handler + `fonnteSend`) dan config (sys_config + rincian_presets, 4 handler + `CONFIG_TYPE_MAP`) dipindah dari `actions-extra.js`. `actions-extra.js` 2370 → **2100 baris**, cross-file calls 28 → 20. Dispatcher route ke `wa.*`/`config.*`. Verifikasi: test 51/51, smoke guard admin 7 action + getRincianPresets (4 kategori), E2E login SEMUA LULUS, backend **21 file / 204 simbol**. Commit: `c611a60`.
 - [x] **`actions-register.js` baru** — siswa baru `respon_siswa_baru` (get publik + submit) + link & bridge form (siswa-baru/apply-full/master-full/ai_form, `siteBase`). Dipindah dari `actions-extra.js`. `actions-extra.js` 2100 → **1956 baris**, cross-file calls 20 → 14. Verifikasi: test 51/51, smoke getDaftarSiswaBaru (3 baris) + getLinkSiswaBaru + generateFormBridge + getAppData OK, E2E login SEMUA LULUS, backend **22 file / 204 simbol**. Commit: `b5073d7`.
 - [x] **`actions-master.js` baru** — master biodata/CV (`master_database_candidate`): `MASTER_FILE_COLUMNS`/`MASTER_COLUMN_MAP`/`SNAKE_TO_CAMEL`/`cleanKey`/`entryHasAny`/`mergeRiwayatArrays`/`buildMasterNested`/`findMasterByWa` + 4 handler (getMasterDataByWa, getDrafCvMaster, submitMasterForm, simpanUpdateMaster). Diekstrak byte-identik via Node. `isOwnerOrAdmin` (PII guard REVIEW M2) dipusatkan ke `actions-auth.js`. `actions-extra.js` 1956 → **±1560 baris**, cross-file 14 → 12. Verifikasi: test 51/51, smoke getDrafCvMaster (limited utk non-owner) + getMasterDataByWa (token invalid ditolak) + getAppData OK, E2E login SEMUA LULUS, backend **23 file / 204 simbol**. Commit: `adadb30`.
-- [ ] Identifikasi domain dengan `module-map.mjs` (drive & migrasi, upload/master inti) → pecah jadi `actions-upload.js` (+ shared helper storage) dst. Catatan: `handleUploadDriveReplacement` butuh `uploadBase64`/`FILE_LABEL_COLUMNS`/`findMasterByWa` — baru bisa dipisah bersamaan dengan ekstraksi helper storage.
-- [ ] Ekspor per fitur (bukan satu objek raksasa) supaya dispatcher hanya impor yang dipakai.
+- [x] **langkah 5 (terakhir): `storage.js` + `actions-upload.js` + `actions-drive.js` baru — `actions-extra.js` DIHAPUS** 🎉. `_lib/storage.js` (166 baris) = helper Supabase Storage murni (`bucket`/`storageRequest`/`publicUrl`/`b64ToBuffer`/`mimeFromName`/`stemAliases`/`isVarianOf`/`hapusJenisVarian`/`uploadBase64`). `actions-upload.js` (725 baris) = inti upload/apply: getUploadUrls, cekDataPelamar, isJobRequiresCv, submitApply, getExistingCandidateJsonByWa, simpanKandidatDanUpload, simpanBerkasTahapan, simpanRevisiKandidat + `FILE_LABEL_COLUMNS`/`fileLabelKey` + `PUBLIC_PREFILL_FIELDS`/`pickPrefill` (PII REVIEW M2). `actions-drive.js` (105 baris) = getDriveLinkCandidates + uploadDriveReplacement + runMigration. Body fungsi dipindah **byte-identik** via Node (skrip di `.freebuff/`, aset + assertion batas). `nextCandidateId` dipusatkan di `candidate-helpers.js` (dulu 3 salinan: extra/mail/master); blok mail-sync (`MAIL_PENDING_STATUS`/`mailStatusUntukUpdate`/`appendFeedback`/`syncBiodataKeMail`/`syncFormMailDariUpload`) pindah ke `actions-mail.js` (domain mail). Test lama di-rename `actions-extra.test.js` → `storage.test.js`.
+- [x] **BUG FIX (bukan refactor) — ketahuan oleh E2E `upload-check`**: sejak langkah 4 (`adadb30`), `actions-master.js` TIDAK mengexport `findMasterByWa` → semua pemakainya (`simpanBerkasTahapan`, `submitApply`, `simpanRevisiKandidat`, `uploadDriveReplacement`) dapat `undefined` dan gagal diam-diam. Ditambah 2 bug senyap lain dari ekstraksi master: `syncBiodataKeMail` + `nextCandidateId` dipakai tanpa import (ReferenceError ditelan `try/catch`). Ketiganya diperbaiki di langkah ini.
+- [x] Ekspor per fitur (bukan satu objek raksasa) supaya dispatcher hanya impor yang dipakai.
 
 ### 1.3 Pecah `supabase.js` (1073 baris) → client + repositori
 - [ ] `_lib/db/client.js`: client PostgREST + `normalizeWa` + `toText`/`pick`/`supabaseJson` (fondasi).
@@ -97,7 +98,7 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
 
 ### 1.5 Test backend per modul
 - [ ] Tambah `*.test.js` (Vitest) per modul baru: auth (PIN + WA gate), mail (status transisi), kandidat (merge/dedupe rule), job (tutup lamar), supabase normalisasi WA.
-- [ ] Contoh target: `actions-auth.test.js`, `db/candidates.test.js` — pola dari `handlers.test.js`/`actions-extra.test.js` yang sudah ada.
+- [ ] Contoh target: `actions-auth.test.js`, `db/candidates.test.js` — pola dari `handlers.test.js`/`storage.test.js` yang sudah ada.
 
 ---
 
