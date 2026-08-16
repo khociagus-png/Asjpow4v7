@@ -1,14 +1,19 @@
+// ESM (Fase 3 langkah 12): modul ES — alias window.* sudah ada di bawah
+// (openRincianBuilder/rbSimpan/dll utk HTML onclick & api/jobs.js
+// rbSummaryFromData). Referensi bare callAPI/tr/showToast/parseRincianBiaya
+// di-window-kan eksplisit (modul scope terisolasi). State RB_* PRIVAT modul.
+
 // 13. RINCIAN BIAYA BUILDER (Admin) — modal klik-klik untuk isi biaya loker
 // ==========================================
 // Hasilnya disimpan ke kolom total_biaya (input) + rincian_biaya (textarea
 // tersembunyi) dengan format teks WA yang sama persis yang dipahami
 // parseRincianBiaya() di 01_public.js untuk popup Detail loker.
 
-var RB_TARGET = ''; // 'tambah' | 'edit'
+export var RB_TARGET = ''; // 'tambah' | 'edit'
 
 // Preset DEFAULT (fallback) — dipakai hanya kalau koleksi DB kosong/gagal
 // dimuat. Begitu admin menyimpan/hapus item, koleksi DB jadi sumber utama.
-var RB_PRESETS = {
+export var RB_PRESETS = {
   include: [
     'TIKET PESAWAT',
     'VISA (SUBSIDI 1JT)',
@@ -40,21 +45,21 @@ var RB_PRESETS = {
 };
 
 // Koleksi dari DB (rincian_presets): { include: [{id, item}], ... }
-var RB_DB_PRESETS = { include: [], exclude: [], benefit: [], persyaratan: [] };
-var RB_DB_LOADED = false; // true = koleksi DB sudah pernah dimuat & dipakai
+export var RB_DB_PRESETS = { include: [], exclude: [], benefit: [], persyaratan: [] };
+export var RB_DB_LOADED = false; // true = koleksi DB sudah pernah dimuat & dipakai
 
 // Tahapan & catatan DEFAULT (permanent) — otomatis terisi setiap buka builder
 // supaya admin cukup isi harga saja (tidak perlu copas tiap kali). Bisa
 // dihapus/ditambah per loker (kasus khusus) lewat tombol + dan ikon X.
-var RB_DEFAULT_TAHAPAN = [
+export var RB_DEFAULT_TAHAPAN = [
   { nama: 'TTD KONTRAK', nominal: '' },
   { nama: 'COE (CERTIFICATE OF ELIGIBILITY) TERBIT', nominal: '' },
 ];
-var RB_DEFAULT_CATATAN =
+export var RB_DEFAULT_CATATAN =
   'APABILA PERUSAHAAN (KAISHA) MEMBATALKAN PROSES KEBERANGKATAN, BIAYA YANG TELAH DIBAYARKAN AKAN DIKEMBALIKAN SESUAI KETENTUAN YANG BERLAKU.';
 
 // Kembalikan daftar tahapan ke default permanent (2 baris, nominal kosong).
-function rbResetTahapan() {
+export function rbResetTahapan() {
   var list = rbEl('rb-tahapan-list');
   if (list) list.innerHTML = '';
   RB_DEFAULT_TAHAPAN.forEach(function (t) {
@@ -63,19 +68,19 @@ function rbResetTahapan() {
   rbRenderPreview();
 }
 
-function rbEl(id) {
+export function rbEl(id) {
   return document.getElementById(id);
 }
-function rbQsa(sel) {
+export function rbQsa(sel) {
   return Array.prototype.slice.call(document.querySelectorAll(sel));
 }
 
-function rbToggleChip(btn) {
+export function rbToggleChip(btn) {
   btn.classList.toggle('rb-on');
   rbRenderPreview();
 }
 
-function rbChipEl(sec, val, dbId) {
+export function rbChipEl(sec, val, dbId) {
   var chip = document.createElement('button');
   chip.type = 'button';
   chip.className = 'rb-chip rb-on';
@@ -99,7 +104,7 @@ function rbChipEl(sec, val, dbId) {
   return chip;
 }
 
-function rbAddChip(sec, inputId) {
+export function rbAddChip(sec, inputId) {
   var input = rbEl(inputId);
   if (!input) return;
   var val = (input.value || '').trim().toUpperCase();
@@ -113,13 +118,13 @@ function rbAddChip(sec, inputId) {
 
 // ===== Koleksi preset berbasis DB (rincian_presets) =====
 
-async function rbLoadPresetsFromDb(cb) {
-  if (typeof callAPI !== 'function') {
+export async function rbLoadPresetsFromDb(cb) {
+  if (typeof window.callAPI !== 'function') {
     if (cb) cb(false);
     return;
   }
   try {
-    const res = await callAPI('getRincianPresets', []);
+    const res = await window.callAPI('getRincianPresets', []);
     if (res && res.success && res.presets) {
       ['include', 'exclude', 'benefit', 'persyaratan'].forEach(function (sec) {
         RB_DB_PRESETS[sec] = (res.presets[sec] || []).slice();
@@ -135,7 +140,7 @@ async function rbLoadPresetsFromDb(cb) {
 // Tandai chip custom yang ternyata sudah ada di koleksi DB (mis. setelah
 // reload koleksi, item yang sama sudah tersimpan) - supaya tidak ada bintang
 // ☆ ganda untuk item yang sama.
-function rbSyncChipStars(sec) {
+export function rbSyncChipStars(sec) {
   var box = rbEl('rb-' + sec);
   if (!box) return;
   rbQsa('#rb-' + sec + ' .rb-chip').forEach(function (chip) {
@@ -158,38 +163,40 @@ function rbSyncChipStars(sec) {
     if (found) {
       star.classList.add('rb-star-saved');
       star.innerHTML = '<i class="fas fa-star"></i>';
-      star.title = tr('ui.remove_fav');
+      star.title = window.tr('ui.remove_fav');
     } else {
       star.classList.remove('rb-star-saved');
       star.innerHTML = '<i class="far fa-star"></i>';
-      star.title = tr('ui.add_fav');
+      star.title = window.tr('ui.add_fav');
     }
   });
 }
 
-async function rbSavePreset(sec, val, chip, star) {
-  if (typeof callAPI !== 'function') return;
+export async function rbSavePreset(sec, val, chip, star) {
+  if (typeof window.callAPI !== 'function') return;
   try {
-    const res = await callAPI('saveRincianPreset', [{ kategori: sec, item: val }]);
+    const res = await window.callAPI('saveRincianPreset', [{ kategori: sec, item: val }]);
     if (res && res.success) {
       chip.setAttribute('data-rb-db-id', String(res.id || ''));
       RB_DB_PRESETS[sec].push({ id: res.id, item: val });
       star.classList.add('rb-star-saved');
       star.innerHTML = '<i class="fas fa-star"></i>';
-      star.title = tr('ui.remove_fav');
-      if (typeof showToast === 'function') showToast(tr('ui.toast_fav_added'), 'success');
-    } else if (typeof showToast === 'function') {
-      showToast((res && res.error) || 'Gagal simpan ke koleksi', 'error');
+      star.title = window.tr('ui.remove_fav');
+      if (typeof window.showToast === 'function')
+        window.showToast(window.tr('ui.toast_fav_added'), 'success');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast((res && res.error) || 'Gagal simpan ke koleksi', 'error');
     }
   } catch (err) {
-    if (typeof showToast === 'function') showToast(tr('ui.toast_fav_save_failed'), 'error');
+    if (typeof window.showToast === 'function')
+      window.showToast(window.tr('ui.toast_fav_save_failed'), 'error');
   }
 }
 
-async function rbUnsavePreset(sec, dbId, chip, star) {
-  if (typeof callAPI !== 'function') return;
+export async function rbUnsavePreset(sec, dbId, chip, star) {
+  if (typeof window.callAPI !== 'function') return;
   try {
-    const res = await callAPI('deleteRincianPreset', [{ id: dbId }]);
+    const res = await window.callAPI('deleteRincianPreset', [{ id: dbId }]);
     if (res && res.success) {
       RB_DB_PRESETS[sec] = RB_DB_PRESETS[sec].filter(function (p) {
         return String(p.id) !== String(dbId);
@@ -197,17 +204,19 @@ async function rbUnsavePreset(sec, dbId, chip, star) {
       chip.removeAttribute('data-rb-db-id');
       star.classList.remove('rb-star-saved');
       star.innerHTML = '<i class="far fa-star"></i>';
-      star.title = tr('ui.add_fav');
-      if (typeof showToast === 'function') showToast(tr('ui.toast_fav_removed'), 'success');
-    } else if (typeof showToast === 'function') {
-      showToast((res && res.error) || 'Gagal hapus dari koleksi', 'error');
+      star.title = window.tr('ui.add_fav');
+      if (typeof window.showToast === 'function')
+        window.showToast(window.tr('ui.toast_fav_removed'), 'success');
+    } else if (typeof window.showToast === 'function') {
+      window.showToast((res && res.error) || 'Gagal hapus dari koleksi', 'error');
     }
   } catch (err) {
-    if (typeof showToast === 'function') showToast(tr('ui.toast_fav_remove_failed'), 'error');
+    if (typeof window.showToast === 'function')
+      window.showToast(window.tr('ui.toast_fav_remove_failed'), 'error');
   }
 }
 
-function rbAttr(s) {
+export function rbAttr(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -215,32 +224,32 @@ function rbAttr(s) {
     .replace(/>/g, '&gt;');
 }
 
-function rbAddTahapan(nama, nominal) {
+export function rbAddTahapan(nama, nominal) {
   var list = rbEl('rb-tahapan-list');
   if (!list) return;
   var row = document.createElement('div');
   row.className = 'rb-tahapan-row flex gap-2 mb-1.5 items-center';
   row.innerHTML =
     '<input type="text" class="rb-tahapan-nama flex-1 p-2 rounded-lg bg-black/60 border border-slate-700 text-white text-xs outline-none focus:border-amber-500 transition" placeholder="' +
-    tr('ui.stage_name_ph') +
+    window.tr('ui.stage_name_ph') +
     '" value="' +
     rbAttr(nama) +
     '">' +
     '<input type="text" class="rb-tahapan-nominal w-20 p-2 rounded-lg bg-black/60 border border-slate-700 text-emerald-300 text-xs font-bold outline-none focus:border-amber-500 transition" placeholder="' +
-    tr('ui.stage_nominal_ph') +
+    window.tr('ui.stage_nominal_ph') +
     '" value="' +
     rbAttr(nominal) +
     '">' +
-    '<button type="button" onclick="rbRemoveTahapan(this)" aria-label="' +
-    tr('ui.delete_stage') +
+    '<button type="button" onclick="window.rbRemoveTahapan(this)" aria-label="' +
+    window.tr('ui.delete_stage') +
     '" class="w-8 h-8 flex items-center justify-center bg-red-900/40 hover:bg-red-600 text-red-300 hover:text-white rounded-lg text-xs font-bold transition flex-shrink-0" title="' +
-    tr('ui.delete_stage') +
+    window.tr('ui.delete_stage') +
     '"><i class="fas fa-times"></i></button>';
   list.appendChild(row);
   rbRenderPreview();
 }
 
-function rbRemoveTahapan(btn) {
+export function rbRemoveTahapan(btn) {
   var row = btn.closest ? btn.closest('.rb-tahapan-row') : btn.parentNode;
   if (row) {
     row.remove();
@@ -248,7 +257,7 @@ function rbRemoveTahapan(btn) {
   }
 }
 
-function rbSerialize() {
+export function rbSerialize() {
   var out = [];
   var total = (rbEl('rb-total').value || '').trim();
   if (total) out.push('TOTAL BIAYA: ' + total);
@@ -297,21 +306,21 @@ function rbSerialize() {
     .trim();
 }
 
-function rbRenderPreview() {
+export function rbRenderPreview() {
   var pre = rbEl('rb-preview');
   if (!pre) return;
   var txt = rbSerialize();
   pre.textContent = txt || 'Belum ada rincian.';
 }
 
-function rbSectionItems(sections, type) {
+export function rbSectionItems(sections, type) {
   for (var i = 0; i < sections.length; i++) {
     if (sections[i].type === type) return sections[i].items || [];
   }
   return [];
 }
 
-function rbRenderPresets() {
+export function rbRenderPresets() {
   ['include', 'exclude', 'benefit', 'persyaratan'].forEach(function (sec) {
     var box = rbEl('rb-' + sec);
     if (!box) return;
@@ -350,10 +359,10 @@ function rbRenderPresets() {
   });
 }
 
-function rbSeedFromText(text) {
+export function rbSeedFromText(text) {
   var parsed =
-    typeof parseRincianBiaya === 'function'
-      ? parseRincianBiaya(text || '')
+    typeof window.parseRincianBiaya === 'function'
+      ? window.parseRincianBiaya(text || '')
       : { total: '', sections: [] };
   var p = parsed || { total: '', sections: [] };
   rbEl('rb-total').value = p.total || '';
@@ -408,10 +417,10 @@ function rbSeedFromText(text) {
   rbRenderPreview();
 }
 
-function rbSummaryFromData(total, rincian) {
+export function rbSummaryFromData(total, rincian) {
   var parsed =
-    typeof parseRincianBiaya === 'function'
-      ? parseRincianBiaya(rincian || '')
+    typeof window.parseRincianBiaya === 'function'
+      ? window.parseRincianBiaya(rincian || '')
       : { total: '', sections: [] };
   var p = parsed || { total: '', sections: [] };
   var t = total || p.total || '';
@@ -429,7 +438,7 @@ function rbSummaryFromData(total, rincian) {
   return parts.length ? '✅ ' + parts.join(' • ') : '';
 }
 
-function openRincianBuilder(target) {
+export function openRincianBuilder(target) {
   RB_TARGET = target;
   var prefix = target === 'edit' ? 'ef' : 'input';
   rbEl('rb-total').value = '';
@@ -461,7 +470,7 @@ function openRincianBuilder(target) {
   setTimeout(finalize, 2500);
 }
 
-function rbSummaryHtml() {
+export function rbSummaryHtml() {
   var t = (rbEl('rb-total').value || '').trim();
   var steps = rbQsa('#rb-tahapan-list .rb-tahapan-row').filter(function (r) {
     return (r.querySelector('.rb-tahapan-nama').value || '').trim();
@@ -480,7 +489,7 @@ function rbSummaryHtml() {
   return parts.length ? '✅ ' + parts.join(' • ') : 'Klik untuk isi rincian biaya';
 }
 
-function rbSimpan() {
+export function rbSimpan() {
   var prefix = RB_TARGET === 'edit' ? 'ef' : 'input';
   rbEl(prefix + '-total-biaya').value = (rbEl('rb-total').value || '').trim();
   rbEl(prefix + '-rincian-biaya').value = rbSerialize();
@@ -489,7 +498,7 @@ function rbSimpan() {
   rbEl('modal-rincian-builder').classList.add('hidden');
 }
 
-function rbBatal() {
+export function rbBatal() {
   var m = rbEl('modal-rincian-builder');
   if (m) m.classList.add('hidden');
 }

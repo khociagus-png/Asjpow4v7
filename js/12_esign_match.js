@@ -1,3 +1,10 @@
+// ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
+// HTML onclick (bukaModalTtd, bukaLayarCanvas, clearFsCanvas, saveFsCanvas,
+// submitDataEsignFull, jalankanMatchmaking, kirimTawaranMassal), onclick
+// string render/admin.js (bukaMatchmaking) & engine/init.js
+// (renderStudentCard). State fsCanvas/activeDrawingType/signData/… sengaja
+// PRIVAT modul (tak ada pemakai luar).
+
 // 12. E-SIGN CANVAS, DIGITAL STUDENT CARD & MATCHMAKING
 // Dipisah dari 09_ai_copilot.js saat god-object refactor.
 // ==========================================
@@ -13,14 +20,16 @@ let isLandscapeMode = false; // Penanda mode putar
 // Objek untuk menampung data base64 sebelum dikirim ke server
 let signData = { ttd1: null, nama1: null, ttd2: null, nama2: null };
 
-async function bukaModalTtd() {
+export async function bukaModalTtd() {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
       await window.ensureAllCandidates();
     } catch (e) {}
   }
-  let cleanWa = normalizePhone(currentKandidatWa);
-  let c = ALL_CANDIDATES.find((kan) => normalizePhone(kan.wa) === normalizePhone(cleanWa));
+  let cleanWa = window.normalizePhone(window.currentKandidatWa);
+  let c = window.ALL_CANDIDATES.find(
+    (kan) => window.normalizePhone(kan.wa) === window.normalizePhone(cleanWa),
+  );
   if (!c) return;
   let thp = String(c.tahapan).toUpperCase();
   let isValid =
@@ -28,14 +37,14 @@ async function bukaModalTtd() {
       thp,
     );
 
-  if (!isValid && !isAdmin) {
-    showToast(tr('ui.toast_naitei_locked'), 'error');
+  if (!isValid && !window.isAdmin) {
+    window.showToast(window.tr('ui.toast_naitei_locked'), 'error');
     return;
   }
   document.getElementById('modal-ttd').classList.remove('hidden');
 }
 
-function initFsCanvas() {
+export function initFsCanvas() {
   if (!fsCanvas) {
     fsCanvas = document.getElementById('fs-canvas');
     fsCtx = fsCanvas.getContext('2d');
@@ -67,7 +76,7 @@ function initFsCanvas() {
   }
 }
 
-function bukaLayarCanvas(type, title) {
+export function bukaLayarCanvas(type, title) {
   activeDrawingType = type;
   document.getElementById('fs-canvas-title').innerText = title;
   document.getElementById('modal-fs-canvas').classList.remove('hidden');
@@ -80,9 +89,9 @@ function bukaLayarCanvas(type, title) {
     isLandscapeMode = true;
     document.getElementById('fs-canvas-hint').innerHTML =
       '<span class="text-amber-400">' +
-      tr('ui.rotate_phone') +
+      window.tr('ui.rotate_phone') +
       '</span> ' +
-      tr('ui.rotate_phone_rest') +
+      window.tr('ui.rotate_phone_rest') +
       '';
 
     // Resolusi memanjang (Lebar > Tinggi)
@@ -116,7 +125,7 @@ function bukaLayarCanvas(type, title) {
   fsCtx.strokeStyle = '#0f172a'; // Tinta biru gelap
 }
 
-function getFsPointerPos(e) {
+export function getFsPointerPos(e) {
   let rect = fsCanvas.getBoundingClientRect();
 
   // Kalkulasi posisi jika Canvas diputar (Landscape Mode)
@@ -141,40 +150,40 @@ function getFsPointerPos(e) {
   }
 }
 
-function startDrawFs(e) {
+export function startDrawFs(e) {
   isDrawing = true;
   let pos = getFsPointerPos(e);
   fsCtx.beginPath();
   fsCtx.moveTo(pos.x, pos.y);
 }
 
-function drawFs(e) {
+export function drawFs(e) {
   if (!isDrawing) return;
   let pos = getFsPointerPos(e);
   fsCtx.lineTo(pos.x, pos.y);
   fsCtx.stroke();
 }
 
-function stopDrawFs() {
+export function stopDrawFs() {
   isDrawing = false;
 }
 
-function clearFsCanvas() {
+export function clearFsCanvas() {
   if (fsCtx) {
     fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
   }
 }
 
-function isCanvasBlank(canvasObj) {
+export function isCanvasBlank(canvasObj) {
   return !canvasObj
     .getContext('2d')
     .getImageData(0, 0, canvasObj.width, canvasObj.height)
     .data.some((channel) => channel !== 0);
 }
 
-function saveFsCanvas() {
+export function saveFsCanvas() {
   if (isCanvasBlank(fsCanvas)) {
-    showToast(tr('ui.toast_area_empty'), 'error');
+    window.showToast(window.tr('ui.toast_area_empty'), 'error');
     return;
   }
 
@@ -185,19 +194,19 @@ function saveFsCanvas() {
   document.getElementById('preview-' + activeDrawingType).src = b64;
   document.getElementById('preview-' + activeDrawingType).classList.remove('hidden');
   document.getElementById('btn-' + activeDrawingType).innerHTML =
-    '<i class="fas fa-edit mr-1"></i> ' + tr('ui.redo_sign') + '';
+    '<i class="fas fa-edit mr-1"></i> ' + window.tr('ui.redo_sign') + '';
 
   document.getElementById('modal-fs-canvas').classList.add('hidden');
 }
 
-async function submitDataEsignFull() {
+export async function submitDataEsignFull() {
   if (!signData.ttd1 && !signData.nama1 && !signData.ttd2 && !signData.nama2) {
-    showToast(tr('ui.toast_sign_area_required'), 'error');
+    window.showToast(window.tr('ui.toast_sign_area_required'), 'error');
     return;
   }
 
   let btn = document.getElementById('btn-submit-esign');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.uploading_server') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.uploading_server') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -209,18 +218,22 @@ async function submitDataEsignFull() {
   };
 
   try {
-    const res = await callAPI('simpanDataTtdNaitei', { wa: currentKandidatWa, ...payload });
+    const res = await window.callAPI('simpanDataTtdNaitei', {
+      wa: window.currentKandidatWa,
+      ...payload,
+    });
     if (res.success) {
-      showToast(tr('ui.toast_saved_server'), 'success');
+      window.showToast(window.tr('ui.toast_saved_server'), 'success');
       document.getElementById('modal-ttd').classList.add('hidden');
-      refreshDataDinamis();
+      window.refreshDataDinamis();
     } else {
-      showToast(tr('ui.toast_failed_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_network_error'), 'error');
+    window.showToast(window.tr('ui.toast_network_error'), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + tr('ui.save_all_docs') + '';
+    btn.innerHTML =
+      '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.save_all_docs') + '';
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
@@ -231,10 +244,10 @@ async function submitDataEsignFull() {
 // ==========================================
 
 // Panggil fungsi ini saat data selesai di-load (disisipkan di fungsi initApp)
-async function renderStudentCard() {
-  if (!isKandidat) return;
-  let myData = ALL_CANDIDATES.find(
-    (c) => normalizePhone(c.wa) === normalizePhone(currentKandidatWa),
+export async function renderStudentCard() {
+  if (!window.isKandidat) return;
+  let myData = window.ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
   );
   if (!myData) return;
 
@@ -288,7 +301,7 @@ async function renderStudentCard() {
     try {
       let base = typeof location !== 'undefined' && location.origin ? location.origin : '';
       let verifyUrl = base + '/?cv=' + encodeURIComponent(myData.idKandidat);
-      var qrData = typeof buatQrDataUrl === 'function' ? buatQrDataUrl(verifyUrl) : '';
+      var qrData = typeof window.buatQrDataUrl === 'function' ? window.buatQrDataUrl(verifyUrl) : '';
       document.getElementById('sc-qr').src =
         qrData ||
         'data:image/svg+xml;utf8,' +
@@ -310,7 +323,7 @@ let matchedCandidates = [];
 let currentMatchJobCode = '';
 
 // Fungsi Pembantu: Mengubah teks pendidikan jadi bobot angka
-function getPendidikanScore(str) {
+export function getPendidikanScore(str) {
   let p = String(str).toUpperCase();
   if (p.includes('S1') || p.includes('SARJANA')) return 5;
   if (p.includes('D3') || p.includes('D4') || p.includes('DIPLOMA')) return 4;
@@ -319,7 +332,7 @@ function getPendidikanScore(str) {
   return 0; // Tidak terdeteksi
 }
 
-function bukaMatchmaking(jobCode, jobName, reqGender) {
+export function bukaMatchmaking(jobCode, jobName, reqGender) {
   document.getElementById('modal-matchmaking').classList.remove('hidden');
   document.getElementById('match-job-title').innerText = jobCode + ' - ' + jobName;
   currentMatchJobCode = jobCode;
@@ -327,7 +340,7 @@ function bukaMatchmaking(jobCode, jobName, reqGender) {
   // Reset Layar Hasil & Tombol
   document.getElementById('match-result-list').innerHTML =
     '<div class="text-center p-6 text-slate-500 text-xs italic"><i class="fas fa-robot text-3xl mb-3 text-slate-600"></i><br>' +
-    tr('ui.match_hint') +
+    window.tr('ui.match_hint') +
     '</div>';
   document.getElementById('match-count-badge').innerText = '0 Kandidat';
   document.getElementById('btn-blast-match').disabled = true;
@@ -354,11 +367,11 @@ function bukaMatchmaking(jobCode, jobName, reqGender) {
   document.getElementById('match-filter-ssw').checked = false;
 }
 
-function jalankanMatchmaking() {
+export function jalankanMatchmaking() {
   let resultList = document.getElementById('match-result-list');
   resultList.innerHTML =
     '<div class="text-center p-6"><i class="fas fa-spinner fa-spin text-violet-500 text-3xl"></i><p class="text-xs text-slate-400 mt-3 font-bold tracking-widest">' +
-    tr('ui.sifting_db') +
+    window.tr('ui.sifting_db') +
     '</p></div>';
 
   // Ambil Nilai dari Form Filter
@@ -378,7 +391,7 @@ function jalankanMatchmaking() {
         await window.ensureAllCandidates();
       } catch (e) {}
     }
-    matchedCandidates = ALL_CANDIDATES.filter((c) => {
+    matchedCandidates = window.ALL_CANDIDATES.filter((c) => {
       // RULE 1: WAJIB Status Aktif & Belum Terdaftar di Job ini
       if (c.status.toUpperCase() !== 'AKTIF') return false;
       if ((c.idLoker || '').includes(currentMatchJobCode)) return false;
@@ -453,14 +466,14 @@ function jalankanMatchmaking() {
     if (matchedCandidates.length === 0) {
       resultList.innerHTML =
         '<div class="text-center p-6 text-slate-400 text-xs italic bg-red-900/20 rounded-xl border border-red-500/30"><i class="fas fa-search-minus text-3xl text-red-500 mb-3"></i><br>' +
-        tr('ui.no_match') +
+        window.tr('ui.no_match') +
         '</div>';
       btnBlast.disabled = true;
     } else {
       let html = '';
       matchedCandidates.slice(0, 30).forEach((c, idx) => {
         // Batasi tampil 30 di layar agar tidak lag
-        let umur = c.usia !== '-' ? esc(c.usia) + ' Thn' : '? Thn';
+        let umur = c.usia !== '-' ? window.esc(c.usia) + ' Thn' : '? Thn';
         let tb_bb =
           c.tb !== '-' || c.bb !== '-'
             ? `TB:${c.tb.replace(/\D/g, '')} BB:${c.bb.replace(/\D/g, '')}`
@@ -483,7 +496,7 @@ function jalankanMatchmaking() {
                                 <i class="fas fa-user text-slate-400"></i>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold text-white">${esc(c.nama)}</h4>
+                                <h4 class="text-xs font-bold text-white">${window.esc(c.nama)}</h4>
                                 <p class="text-[9px] text-slate-400 mt-0.5">${g} <span class="mx-1">|</span> ${umur} <span class="mx-1">|</span> ${tb_bb}</p>
                             </div>
                         </div>
@@ -499,13 +512,14 @@ function jalankanMatchmaking() {
   }, 1000); // 1 detik loading animasi biar dramatis
 }
 
-async function kirimTawaranMassal() {
-  if (matchedCandidates.length === 0) return showToast(tr('ui.toast_no_cand_offer'), 'error');
+export async function kirimTawaranMassal() {
+  if (matchedCandidates.length === 0)
+    return window.showToast(window.tr('ui.toast_no_cand_offer'), 'error');
 
-  if (!confirm(`Kirim penawaran via WhatsApp ke ${matchedCandidates.length} kandidat ini?`)) return;
+  if (!window.confirm(`Kirim penawaran via WhatsApp ke ${matchedCandidates.length} kandidat ini?`)) return;
 
   let btn = document.getElementById('btn-blast-match');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.sending') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.sending') + '';
   btn.disabled = true;
 
   // FIX 2026-08-12: getBaseUrl_() TIDAK pernah didefinisikan di proyek (sisa era GAS) —
@@ -518,7 +532,7 @@ async function kirimTawaranMassal() {
   let msg = `Halo Kak {nama} 👋\n\nBerdasarkan kecocokan data Anda di sistem ASJ, kami ingin menawarkan *Lowongan Kerja Baru* yang sangat sesuai untuk Anda!\n\nKode Job: *{job_code}*\n\nJika Kakak tertarik, silakan segera login ke Dashboard dan lamar pekerjaan ini di:\n🔗 {link_grup}\n\nSemangat! 🇯🇵`;
 
   try {
-    const res = await callAPI('kirimTawaranMassal', [
+    const res = await window.callAPI('kirimTawaranMassal', [
       {
         candidates: matchedCandidates,
         jobCode: currentMatchJobCode,
@@ -528,12 +542,39 @@ async function kirimTawaranMassal() {
     ]);
     const results = (res && res.results) || [];
     const successCount = results.filter((r) => r.success).length;
-    showToast(tr('ui.toast_offer_sent_n').replace('{n}', successCount), 'success');
+    window.showToast(window.tr('ui.toast_offer_sent_n').replace('{n}', successCount), 'success');
   } catch (e) {
-    showToast(tr('ui.toast_offer_send_failed') + (e && e.message ? e.message : e), 'error');
+    window.showToast(
+      window.tr('ui.toast_offer_send_failed') + (e && e.message ? e.message : e),
+      'error',
+    );
   }
 
-  btn.innerHTML = tr('ui.send_offer_all');
+  btn.innerHTML = window.tr('ui.send_offer_all');
   btn.disabled = false;
   document.getElementById('modal-matchmaking').classList.add('hidden');
 }
+
+// BRIDGE ESM → classic (bundel): alias window.* utk HTML onclick
+// (modals-shared: bukaModalTtd/bukaLayarCanvas/clearFsCanvas/saveFsCanvas/
+// submitDataEsignFull/jalankanMatchmaking/kirimTawaranMassal), onclick
+// string render/admin.js (bukaMatchmaking) & engine/init.js
+// (renderStudentCard). initFsCanvas/getFsPointerPos/drawFs/dll tetap
+// internal — dipanggil file ini saja (addEventListener & helper).
+window.bukaModalTtd = bukaModalTtd;
+window.initFsCanvas = initFsCanvas;
+window.bukaLayarCanvas = bukaLayarCanvas;
+window.getFsPointerPos = getFsPointerPos;
+window.startDrawFs = startDrawFs;
+window.drawFs = drawFs;
+window.stopDrawFs = stopDrawFs;
+window.clearFsCanvas = clearFsCanvas;
+window.isCanvasBlank = isCanvasBlank;
+window.saveFsCanvas = saveFsCanvas;
+window.submitDataEsignFull = submitDataEsignFull;
+window.renderStudentCard = renderStudentCard;
+window.getPendidikanScore = getPendidikanScore;
+window.bukaMatchmaking = bukaMatchmaking;
+window.jalankanMatchmaking = jalankanMatchmaking;
+window.kirimTawaranMassal = kirimTawaranMassal;
+

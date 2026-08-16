@@ -1,94 +1,109 @@
+// ESM (Fase 3 langkah 12): modul ES — pemakai classic/bundel via window.*
+// (render/candidate.js onclick "bukaPreviewCV_Admin", HTML onclick
+// "bukaPreviewCV", onclick "cetakCVRirekisho"). Helper dari helpers_cv.js &
+// 10b_cv_builders.js (modul ES) dipanggil eksplisit window.*.
+
 // === FUNGSI BUKA PREVIEW DRAF CV RIREKISHO ===
 // FUNGSI 1: Dipanggil saat Admin mengklik tombol "CV" di tabel
-async function bukaPreviewCV_Admin(waTarget) {
+export async function bukaPreviewCV_Admin(waTarget) {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
       await window.ensureAllCandidates();
     } catch (e) {}
   }
-  if (!waTarget) return showToast(tr('ui.toast_wa_invalid'), 'error');
+  if (!waTarget) return window.showToast(window.tr('ui.toast_wa_invalid'), 'error');
 
   document.getElementById('global-loader').style.display = 'flex';
 
   try {
-    const fullData = await callAPI('getDrafCvMaster', [waTarget]);
+    const fullData = await window.callAPI('getDrafCvMaster', [waTarget]);
     if (!fullData || fullData.error) {
       // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
       // agar admin/kandidat tahu persis kenapa preview gagal.
-      showToast((fullData && fullData.error) || tr('ui.toast_master_incomplete'), 'error');
+      window.showToast(
+        (fullData && fullData.error) || window.tr('ui.toast_master_incomplete'),
+        'error',
+      );
       return;
     }
 
-    let c = ALL_CANDIDATES.find((k) => normalizePhone(k.wa) === normalizePhone(waTarget));
+    let c = window.ALL_CANDIDATES.find(
+      (k) => window.normalizePhone(k.wa) === window.normalizePhone(waTarget),
+    );
     // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
     // bisa basi/menunjuk file yang sudah tidak ada (mis. PAS_PHOTO.jpg terhapus).
     let photoUrl =
       fullData && fullData.uploads && fullData.uploads.photo
-        ? getHighResImage(fullData.uploads.photo)
+        ? window.getHighResImage(fullData.uploads.photo)
         : '';
     // Fallback: pas_photo di daftar kandidat
     if (!photoUrl && c && c.pasPhoto !== '-') {
-      photoUrl = getHighResImage(c.pasPhoto);
+      photoUrl = window.getHighResImage(c.pasPhoto);
     }
 
     try {
       renderCVAjaib(fullData, photoUrl, waTarget);
     } catch (e) {
-      showToast(tr('ui.toast_cv_build_failed') + e.message, 'error');
+      window.showToast(window.tr('ui.toast_cv_build_failed') + e.message, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_server_conn_failed'), 'error');
+    window.showToast(window.tr('ui.toast_server_conn_failed'), 'error');
   } finally {
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
 // FUNGSI 2: Dipanggil saat Kandidat mengklik "Preview Desain CV" di dashboardnya
-function bukaPreviewCV() {
-  let waTarget = currentKandidatWa;
-  if (!waTarget) return showToast(tr('ui.toast_session_invalid'), 'error');
+export function bukaPreviewCV() {
+  let waTarget = window.currentKandidatWa;
+  if (!waTarget) return window.showToast(window.tr('ui.toast_session_invalid'), 'error');
   prosesBukaRirekisho(waTarget);
 }
 
 // MESIN UTAMA PENARIK DATA KE SERVER
-async function prosesBukaRirekisho(waTarget) {
+export async function prosesBukaRirekisho(waTarget) {
   document.getElementById('global-loader').style.display = 'flex';
 
   try {
-    const fullData = await callAPI('getDrafCvMaster', [waTarget]);
+    const fullData = await window.callAPI('getDrafCvMaster', [waTarget]);
     if (!fullData || fullData.error) {
       // Tampilkan pesan asli dari backend (mis. "Data Master belum ada untuk …")
       // agar admin/kandidat tahu persis kenapa preview gagal.
-      showToast((fullData && fullData.error) || tr('ui.toast_master_incomplete'), 'error');
+      window.showToast(
+        (fullData && fullData.error) || window.tr('ui.toast_master_incomplete'),
+        'error',
+      );
       return;
     }
 
-    let c = ALL_CANDIDATES.find((k) => normalizePhone(k.wa) === normalizePhone(waTarget));
+    let c = window.ALL_CANDIDATES.find(
+      (k) => window.normalizePhone(k.wa) === window.normalizePhone(waTarget),
+    );
     // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
     // bisa basi/menunjuk file yang sudah tidak ada (mis. PAS_PHOTO.jpg terhapus).
     let photoUrl =
       fullData && fullData.uploads && fullData.uploads.photo
-        ? getHighResImage(fullData.uploads.photo)
+        ? window.getHighResImage(fullData.uploads.photo)
         : '';
     // Fallback: pas_photo di daftar kandidat
     if (!photoUrl && c && c.pasPhoto !== '-') {
-      photoUrl = getHighResImage(c.pasPhoto);
+      photoUrl = window.getHighResImage(c.pasPhoto);
     }
 
     try {
       // Panggil fungsi renderCVAjaib yang sudah Kakak pasang sebelumnya
       renderCVAjaib(fullData, photoUrl, waTarget);
     } catch (e) {
-      showToast(tr('ui.toast_cv_build_failed') + e.message, 'error');
+      window.showToast(window.tr('ui.toast_cv_build_failed') + e.message, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_server_conn_failed'), 'error');
+    window.showToast(window.tr('ui.toast_server_conn_failed'), 'error');
   } finally {
     document.getElementById('global-loader').style.display = 'none';
   } // Panggil fungsi server getDrafCvMaster()
 }
 
-function renderCVAjaib(d, fotoUrl, waTarget) {
+export function renderCVAjaib(d, fotoUrl, waTarget) {
   // 1. TARIK MEMORI JSON AI JEKLIN
   let ai = {};
   try {
@@ -99,10 +114,10 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
   // Prioritas: (a) d nested hasil getDrafCvMaster (identitas.nama_lengkap,
   // wawancara.kelebihan_jp, dst), (b) ai_data_json (AIDATAJSON), (c) key flat
   // uppercase lama (NAMALENGKAP, GENDER, dst) agar kompatibel data legacy.
-  const vRaw = makeV(d, ai);
+  const vRaw = window.makeV(d, ai);
   // S1 (XSS): semua nilai dari v() di-escape HTML sebelum masuk template A4 —
   // data kandidat (nama, sekolah, alamat, dst) bisa mengandung <, >, &, kutip.
-  const v = (...keys) => esc(vRaw(...keys));
+  const v = (...keys) => window.esc(vRaw(...keys));
   // Baca array riwayat dari d (hasil getDrafCvMaster) + ai (AIDATAJSON) dan
   // GABUNG keduanya (union + dedupe) — helper pure mergeArrRiwayat di
   // helpers_cv.js. Backend sudah menggabungkan kolom master dengan isi CV AI
@@ -112,6 +127,7 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
   // punya 3-4 anggota → preview CV tampak "dikit". Kolom flat legacy tidak
   // dipakai lagi karena backend sudah menormalkan ke array.
   const keyOf = {
+
     pendidikan: (e) =>
       String((e.tingkat || '') + (e.sekolah || e.sekolah_id || e.nama_sekolah || ''))
         .toLowerCase()
@@ -128,7 +144,8 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
         .toLowerCase()
         .replace(/[^a-z0-9]/g, ''),
   };
-  const getArr = (key) => mergeArrRiwayat(getPath(d, key), getPath(ai, key), keyOf[key]);
+  const getArr = (key) =>
+    window.mergeArrRiwayat(window.getPath(d, key), window.getPath(ai, key), keyOf[key]);
   let eduList = getArr('pendidikan');
   let jobList = getArr('pekerjaan');
   let famList = getArr('keluarga');
@@ -156,7 +173,7 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
     ? `<img src="${fotoUrl}" style="width: 100%; height: 100%; min-height: 195px; object-fit: cover; object-position: top center; display: block; margin: 0; padding: 0;">`
     : `<div style="width: 100%; min-height: 195px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">FOTO</div>`;
 
-  let btnPrintHtml = isAdmin
+  let btnPrintHtml = window.isAdmin
     ? `
             <div class="flex flex-wrap items-center gap-2 mb-3 print:hidden z-50 relative">
                 <button onclick="cetakCVRirekisho()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg flex items-center font-sans text-sm transition-all hover:scale-105 border border-emerald-500">
@@ -176,13 +193,13 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
         `;
 
   // Bangun tiap blok lewat builder murni (10b_cv_builders.js)
-  let eduHtml = buildEduRows(eduList, v);
-  let jobHtml = buildJobRows(jobList, v);
-  let famHtml = buildFamRows(famList, v);
-  let idn = buildCvIdentitas(v);
+  let eduHtml = window.buildEduRows(eduList, v);
+  let jobHtml = window.buildJobRows(jobList, v);
+  let famHtml = window.buildFamRows(famList, v);
+  let idn = window.buildCvIdentitas(v);
 
   // Rakit template A4 (10b_cv_builders.js)
-  let html = buildCvKertasA4({
+  let html = window.buildCvKertasA4({
     v,
     fotoHtml,
     btnPrintHtml,
@@ -198,12 +215,22 @@ function renderCVAjaib(d, fotoUrl, waTarget) {
   document.getElementById('modal-preview-cv').classList.remove('hidden');
 }
 
+// BRIDGE ESM → classic (bundel): HTML onclick (bukaPreviewCV), onclick string
+// render/candidate.js (bukaPreviewCV_Admin) & onclick "cetakCVRirekisho" di
+// btnPrintHtml (dibuat renderCVAjaib) butuh global — alias data property.
+window.bukaPreviewCV_Admin = bukaPreviewCV_Admin;
+window.bukaPreviewCV = bukaPreviewCV;
+window.prosesBukaRirekisho = prosesBukaRirekisho;
+window.renderCVAjaib = renderCVAjaib;
+window.cetakCVRirekisho = cetakCVRirekisho;
+
+
 // Cetak / Simpan PDF Rirekisho: hanya tersedia untuk Admin (tombolnya tidak
 // dirender untuk kandidat). "Simpan PDF" membuka dialog print yang sama,
 // browser menyediakan opsi "Save as PDF".
-function cetakCVRirekisho() {
-  if (!isAdmin) {
-    showToast(tr('ui.toast_rireki_admin_only'), 'error');
+export function cetakCVRirekisho() {
+  if (!window.isAdmin) {
+    window.showToast(window.tr('ui.toast_rireki_admin_only'), 'error');
     return;
   }
   window.print();

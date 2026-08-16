@@ -2631,4 +2631,16 @@ window.renderLanguageLight = renderLanguageLight;
 window.toggleFormLanguage = toggleFormLanguage;
 
 window.LANG = LANG;
-window.CURRENT_LANG = CURRENT_LANG;
+// FIX Fase 3 langkah 12: CURRENT_LANG jadi ACCESSOR (bukan alias data
+// property). Pemakai luar (01_public.setLanguage, pages/share.js) menulis
+// `window.CURRENT_LANG = lang` — accessor men-delegate ke binding modul
+// sehingga tr()/trOption() (yang membaca binding modul) tidak pernah basi.
+// Sebelumnya alias data property: penulis hanya mengubah window property,
+// binding modul tetap bahasa lama, toggle bahasa diam-diam tidak bekerja.
+Object.defineProperty(window, 'CURRENT_LANG', {
+  configurable: true,
+  get: () => CURRENT_LANG,
+  set: (v) => {
+    CURRENT_LANG = v;
+  },
+});

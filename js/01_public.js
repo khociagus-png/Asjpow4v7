@@ -7,14 +7,20 @@
 // ------------------------------------------------------------
 // TAB PUBLIK (dari View_Public.html)
 // ------------------------------------------------------------
+// ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk HTML
+// onclick (switchPublicTab/setLanguage), render/public.js + admin_modal/job.js
+// (bukaDetailLoker/jobTutupUntukLamar), engine/api/i18n (renderLanguage),
+// 13_rincian_builder (parseRincianBiaya). State & helper lain via window.*
+// eksplisit (CURRENT_LANG accessor i18n, tr, trOption, esc, dll).
+
 // Fungsi pindah tab langsung ditanam di sini agar tidak perlu sentuh Script.html (Anti Bentrok)
-function switchPublicTab(tab) {
+export function switchPublicTab(tab) {
   var secLoker = document.getElementById('public-loker-section');
   var secLayanan = document.getElementById('public-layanan-section');
   var btnLoker = document.getElementById('tab-pub-loker');
   var btnLayanan = document.getElementById('tab-pub-layanan');
 
-  var light = typeof CURRENT_THEME !== 'undefined' && CURRENT_THEME === 'SAKURA';
+  var light = typeof window.CURRENT_THEME !== 'undefined' && window.CURRENT_THEME === 'SAKURA';
   var inactive =
     'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent ' +
     (light ? 'text-stone-600 hover:bg-rose-900/10 hover:text-stone-900' : 'text-slate-400 hover:bg-white/10 hover:text-white');
@@ -43,28 +49,28 @@ function switchPublicTab(tab) {
 // ada duplikat; Fase 3 konversi ESM butuh nol kolisi global lintas file).
 // i18n.js: function tr(path) { LANG[CURRENT_LANG] lookup + fallback path }
 
-function renderLanguage() {
+export function renderLanguage() {
   // Header (desktop) + menu hamburger (mobile) — keduanya update.
   ['lang-current', 'lang-current-menu'].forEach((id) => {
     const langCurrent = document.getElementById(id);
-    if (langCurrent) langCurrent.textContent = CURRENT_LANG === 'jp' ? 'JP' : 'ID';
+    if (langCurrent) langCurrent.textContent = window.CURRENT_LANG === 'jp' ? 'JP' : 'ID';
   });
 
   document.querySelectorAll('[data-lang]').forEach((el) => {
     const key = el.dataset.lang;
-    const text = tr(key);
+    const text = window.tr(key);
     if (text !== key) el.innerHTML = text;
   });
 
   document.querySelectorAll('[data-lang-placeholder]').forEach((el) => {
     const key = el.dataset.langPlaceholder;
-    const text = tr(key);
+    const text = window.tr(key);
     if (text !== key) el.placeholder = text;
   });
 
   document.querySelectorAll('[data-lang-title]').forEach((el) => {
     const key = el.dataset.langTitle;
-    const text = tr(key);
+    const text = window.tr(key);
     if (text !== key) el.title = text;
   });
 
@@ -72,16 +78,17 @@ function renderLanguage() {
   // label AT ikut bahasa (ID/JP), sama seperti data-lang-title.
   document.querySelectorAll('[data-lang-aria]').forEach((el) => {
     const key = el.dataset.langAria;
-    const text = tr(key);
+    const text = window.tr(key);
     if (text !== key) el.setAttribute('aria-label', text);
   });
 }
 
-function setLanguage(lang) {
-  if (!LANG[lang]) return;
-  CURRENT_LANG = lang;
-  // Sinkron ke variabel global di i18n.js (keduanya harus sama).
-  if (typeof window !== 'undefined') window.CURRENT_LANG = lang;
+export function setLanguage(lang) {
+  if (!window.LANG[lang]) return;
+  // FIX Fase 3 langkah 12: CURRENT_LANG kini accessor bridge di i18n.js —
+  // tulis via window.* supaya binding modul i18n ikut berubah (sebelumnya
+  // hanya window.CURRENT_LANG yang berubah → tr() baca bahasa LAMA).
+  window.CURRENT_LANG = lang;
   localStorage.setItem('asj_lang', lang);
   renderLanguage();
   // Re-render komponen yang punya teks dinamis (dibuat via JS, bukan data-lang)
@@ -89,20 +96,24 @@ function setLanguage(lang) {
     document.getElementById('page-public') &&
     !document.getElementById('page-public').classList.contains('hidden')
   ) {
-    if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
-    if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
+    if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
+    if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
   }
   // Re-render tabel admin jika sedang mode admin
-  if (typeof isAdmin !== 'undefined' && isAdmin && typeof renderAdminFull === 'function') {
-    renderAdminFull();
+  if (
+    typeof window.isAdmin !== 'undefined' &&
+    window.isAdmin &&
+    typeof window.renderAdminFull === 'function'
+  ) {
+    window.renderAdminFull();
   }
   // Re-render chip Pengaturan Sistem (label dropdown sesuai bahasa)
-  if (typeof renderSysConfig === 'function' && document.getElementById('config-container')) {
-    renderSysConfig();
+  if (typeof window.renderSysConfig === 'function' && document.getElementById('config-container')) {
+    window.renderSysConfig();
   }
   // Re-populate dropdown/checkbox form yang nilainya dari sys config
   // (label ikut bahasa; value tetap ID asli).
-  if (typeof rePopulateDropdowns === 'function') rePopulateDropdowns();
+  if (typeof window.rePopulateDropdowns === 'function') window.rePopulateDropdowns();
   var langMenu = document.getElementById('language-menu');
   if (langMenu) langMenu.classList.add('hidden');
 }
@@ -111,7 +122,7 @@ function setLanguage(lang) {
 // POPUP DETAIL LOKER (Tab Publik) — pamflet + rincian biaya + syarat
 // dalam 1 popup, tanpa pindah halaman.
 // ==========================================
-function parseRincianBiaya(text) {
+export function parseRincianBiaya(text) {
   var out = { total: '', sections: [] };
   if (!text || typeof text !== 'string') return out;
   var current = null;
@@ -152,7 +163,7 @@ function parseRincianBiaya(text) {
   return out;
 }
 
-function renderRincianSections(sections) {
+export function renderRincianSections(sections) {
   if (!sections || !sections.length) return '';
   // Kelompokkan section: TAHAPAN full-width, lalu INCLUDE+EXCLUDE dan
   // BENEFIT+PERSYARATAN saling berdampingan (grid 2 kolom) supaya tampilan
@@ -190,7 +201,7 @@ function renderRincianSections(sections) {
     var steps = [].concat(Array.isArray(tahap) ? tahap : [tahap]);
     html +=
       '<div class="mb-6"><h4 class="text-xs font-black text-white uppercase tracking-widest mb-4"><i class="fas fa-stairs mr-1.5 text-amber-400"></i> ' +
-      tr('ui.payment_stage') +
+      window.tr('ui.payment_stage') +
       '</h4><div class="space-y-0">';
     var stepAll = [];
     for (var si = 0; si < steps.length; si++) {
@@ -238,7 +249,7 @@ function renderRincianSections(sections) {
       html +=
         '<div class="bg-emerald-900/15 border border-emerald-500/30 rounded-2xl p-4">' +
         '<h5 class="text-emerald-400 font-black text-[11px] uppercase tracking-widest mb-3"><i class="fas fa-check-circle mr-1"></i> ' +
-        tr('ui.include') +
+        window.tr('ui.include') +
         '</h5>' +
         '<div class="flex flex-wrap gap-2">' +
         incList
@@ -257,7 +268,7 @@ function renderRincianSections(sections) {
       html +=
         '<div class="bg-rose-900/15 border border-rose-500/30 rounded-2xl p-4">' +
         '<h5 class="text-rose-400 font-black text-[11px] uppercase tracking-widest mb-3"><i class="fas fa-times-circle mr-1"></i> ' +
-        tr('ui.exclude') +
+        window.tr('ui.exclude') +
         '</h5>' +
         '<div class="flex flex-wrap gap-2">' +
         excList
@@ -282,7 +293,7 @@ function renderRincianSections(sections) {
     if (ben) {
       html +=
         '<div class="bg-amber-900/15 border border-amber-500/30 rounded-2xl p-4"><h4 class="text-xs font-black text-amber-400 uppercase tracking-widest mb-3"><i class="fas fa-star mr-1.5"></i> ' +
-        tr('ui.benefit') +
+        window.tr('ui.benefit') +
         '</h4><ul class="space-y-2">' +
         itemsOf(ben)
           .map(function (x) {
@@ -298,7 +309,7 @@ function renderRincianSections(sections) {
     if (per) {
       html +=
         '<div class="bg-slate-900/60 border border-slate-700 rounded-2xl p-4"><h4 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-3"><i class="fas fa-clipboard-check mr-1.5"></i> ' +
-        tr('ui.requirements') +
+        window.tr('ui.requirements') +
         '</h4><ul class="space-y-2">' +
         itemsOf(per)
           .map(function (x) {
@@ -319,7 +330,7 @@ function renderRincianSections(sections) {
   if (cat) {
     html +=
       '<div class="bg-sky-900/15 border border-sky-500/30 rounded-2xl p-4 mb-6"><h4 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-1.5"></i> ' +
-      tr('ui.note') +
+      window.tr('ui.note') +
       '</h4><p class="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">' +
       itemsOf(cat).map(esc).join('\n') +
       '</p></div>';
@@ -328,7 +339,7 @@ function renderRincianSections(sections) {
   if (info) {
     html +=
       '<div class="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 mb-6"><h4 class="text-xs font-black text-slate-300 uppercase tracking-widest mb-2"><i class="fas fa-info mr-1.5"></i> ' +
-      tr('ui.info_lain') +
+      window.tr('ui.info_lain') +
       '</h4><p class="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">' +
       itemsOf(info).map(esc).join('\n') +
       '</p></div>';
@@ -336,9 +347,9 @@ function renderRincianSections(sections) {
   return html;
 }
 
-function lokerGenderBadge(g) {
+export function lokerGenderBadge(g) {
   var gText = String(g || '').toUpperCase();
-  var gLabel = trOption(g);
+  var gLabel = window.trOption(g);
   if (gText.includes('PRIA') || gText.includes('LAKI')) {
     return (
       '<span class="px-2.5 py-1 bg-blue-900/50 text-blue-300 border border-blue-500/50 rounded font-bold"><i class="fas fa-mars mr-1"></i> ' +
@@ -363,7 +374,7 @@ function lokerGenderBadge(g) {
 // sudah berjalan (CHECK KAIWA → MENDAN → … → FLIGHT). Aturan lapangan:
 // begitu proses jalan, pendaftaran baru ditutup — tombol Lamar harus CLOSED
 // walau kolom status belum diubah admin.
-function jobTutupUntukLamar(j) {
+export function jobTutupUntukLamar(j) {
   if (!j) return true;
   if (String(j.status || '').includes('CLOSE')) return true;
   var t = String(j.tahapan || '')
@@ -388,7 +399,7 @@ function jobTutupUntukLamar(j) {
   );
 }
 
-function bukaDetailLoker(code) {
+export function bukaDetailLoker(code) {
   var j = (window.ALL_JOBS || []).find(function (x) {
     return x.code === code;
   });
@@ -402,7 +413,7 @@ function bukaDetailLoker(code) {
   if (j.pamflet && j.pamflet !== '-' && j.pamflet.length > 5) {
     // Pamflet disimpan di Supabase Storage. Thumbnail (w-20 = ~80px):
     // versi kecil + lazy; full hanya saat zoom.
-    thumbUrl = thumbnailUrl(j.pamflet, 200);
+    thumbUrl = window.thumbnailUrl(j.pamflet, 200);
     pamfletUrl = j.pamflet;
   }
 
@@ -411,7 +422,7 @@ function bukaDetailLoker(code) {
   var stUp = (j.status || '').toUpperCase();
   var isOpen = stUp.indexOf('OPEN') >= 0 || stUp.indexOf('URGENT') >= 0;
   // Status loker publik: OPEN hijau, URGENT amber pulse, CLOSE merah.
-  var statusLabel = esc(trOption(j.status));
+  var statusLabel = window.esc(window.trOption(j.status));
   var statusBadge =
     stUp.indexOf('URGENT') >= 0
       ? '<span class="px-2.5 py-1 bg-amber-500 text-white rounded-full text-[10px] font-black animate-pulse"><i class="fas fa-bolt mr-1"></i>' +
@@ -425,42 +436,41 @@ function bukaDetailLoker(code) {
           statusLabel +
           '</span>';
 
-  var html = '';
-  html +=
-    '<div class="flex items-start gap-4 mb-6">' +
+  var html = '';    html +=
+      '<div class="flex items-start gap-4 mb-6">' +
     (pamfletUrl
-      ? '<img src="' +        esc(thumbUrl) +
-        '" loading="lazy" decoding="async" onclick="bukaPamflet(\'' +
-        escJs(pamfletUrl) +
+      ? '<img src="' +        window.esc(thumbUrl) +
+        '" loading="lazy" decoding="async" onclick="window.bukaPamflet(\'' +
+        window.escJs(pamfletUrl) +
         '\') " class="w-20 h-28 object-cover rounded-xl border border-slate-600 shadow-lg cursor-pointer hover:scale-105 transition flex-shrink-0" title="' +
-        tr('ui.click_zoom') +
+        window.tr('ui.click_zoom') +
         '" alt="Pamflet">'
       : '') +
     '<div class="flex-1 min-w-0">' +
     '<div class="flex flex-wrap items-center gap-2">' +
     '<span class="text-sky-400 font-mono text-xs font-bold">' +
-    esc(j.code) +
+    window.esc(j.code) +
     '</span>' +
     statusBadge +
     (j.kuota && j.kuota !== '-'
       ? '<span class="px-2 py-0.5 bg-slate-800 text-slate-300 border border-slate-600 rounded-full text-[9px] font-bold"><i class="fas fa-users mr-1"></i> ' +
-        tr('ui.quota') +
+        window.tr('ui.quota') +
         ': ' +
-        esc(j.kuota) +
+        window.esc(j.kuota) +
         '</span>'
       : '') +
     '</div>' +
     '<h3 class="text-xl md:text-2xl font-black text-white mt-1.5 leading-tight">' +
-    esc(j.pekerjaan) +
+    window.esc(j.pekerjaan) +
     '</h3>' +
     '<div class="flex flex-wrap items-center gap-2 mt-3 text-[11px]">' +
-    lokerGenderBadge(j.gender) +
+    window.lokerGenderBadge(j.gender) +
     '<span class="px-2.5 py-1 bg-slate-800 text-slate-300 border border-slate-600 rounded font-bold"><i class="fas fa-map-marker-alt mr-1 text-red-400"></i> ' +
-    esc(trOption(j.lokasi)) +
+    window.esc(window.trOption(j.lokasi)) +
     '</span></div>' +
     (j.kategori
       ? '<div class="text-[10px] text-slate-500 mt-2"><i class="fas fa-tag mr-1 text-sky-500/70"></i> ' +
-        esc(trOption(j.kategori)) +
+        window.esc(window.trOption(j.kategori)) +
         '</div>'
       : '') +
     '</div>' +
@@ -470,13 +480,13 @@ function bukaDetailLoker(code) {
     html +=
       '<div class="bg-gradient-to-r from-emerald-900/40 to-sky-900/30 border border-emerald-500/40 rounded-2xl p-5 mb-6 text-center">' +
       '<p class="text-[10px] font-bold uppercase tracking-[4px] text-emerald-400 mb-1"><i class="fas fa-wallet mr-1"></i> ' +
-      tr('ui.detail_total_title') +
+      window.tr('ui.detail_total_title') +
       '</p>' +
       '<p class="text-4xl font-black text-white tracking-wide">' +
       total +
       '</p>' +
       '<p class="text-[10px] text-slate-400 mt-1">' +
-      tr('ui.detail_total_sub') +
+      window.tr('ui.detail_total_sub') +
       '</p>' +
       '</div>';
   }
@@ -496,14 +506,14 @@ function bukaDetailLoker(code) {
     html +=
       '<div class="bg-slate-900/60 border border-slate-700 rounded-2xl p-5 mb-6">' +
       '<h4 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-4"><i class="fas fa-clipboard-check mr-1.5"></i> ' +
-      tr('ui.detail_syarat') +
+      window.tr('ui.detail_syarat') +
       '</h4>' +
       '<ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">' +
       syaratList
         .map(function (s) {
           return (
             '<li class="flex items-start text-xs text-slate-300"><i class="fas fa-check text-emerald-500 mt-0.5 mr-2 text-[10px]"></i>' +
-            esc(trOption(s)) +
+            window.esc(window.trOption(s)) +
             '</li>'
           );
         })
@@ -515,16 +525,16 @@ function bukaDetailLoker(code) {
     html +=
       '<div class="bg-sky-900/15 border border-sky-500/30 rounded-2xl p-5 mb-6">' +
       '<h4 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-2"><i class="fas fa-info-circle mr-1.5"></i> ' +
-      tr('ui.detail_keterangan') +
+      window.tr('ui.detail_keterangan') +
       '</h4>' +
       '<p class="text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">' +
-      esc(j.keterangan) +
+      window.esc(j.keterangan) +
       '</p></div>';
   }
 
   var waNum =
-    window.ASSETS && ASSETS.SOCIAL && ASSETS.SOCIAL.whatsapp
-      ? String(ASSETS.SOCIAL.whatsapp).replace(/\D/g, '')
+    window.ASSETS && window.ASSETS.SOCIAL && window.ASSETS.SOCIAL.whatsapp
+      ? String(window.ASSETS.SOCIAL.whatsapp).replace(/\D/g, '')
       : '';
   var waMsg =
     'Halo Admin ASJ, saya tertarik lowongan ' +
@@ -532,30 +542,30 @@ function bukaDetailLoker(code) {
     ' (' +
     j.pekerjaan +
     '). Mohon info lebih lanjut.';
-  var directUrl = getDirectDownloadUrl(j.templateCv);
-  var katEsc = escJs(j.kategori || '');
-  var reqEsc = escJs(j.dokumenShare || '');
-  var tutupLamar = jobTutupUntukLamar(j);
+  var directUrl = window.getDirectDownloadUrl(j.templateCv);
+  var katEsc = window.escJs(j.kategori || '');
+  var reqEsc = window.escJs(j.dokumenShare || '');
+  var tutupLamar = window.jobTutupUntukLamar(j);
   var btnLamar = tutupLamar
     ? '<button disabled class="flex-1 px-5 py-3.5 bg-slate-600 text-white text-sm font-black text-center rounded-xl shadow-inner opacity-60 cursor-not-allowed"><i class="fas fa-door-closed mr-1.5"></i> ' +
-      tr('button.closed') +
+      window.tr('button.closed') +
       '</button>'
-    : '<button onclick="lamarJob(\'' +
-      escJs(j.code) +
+    : '<button onclick="window.lamarJob(\'' +
+      window.escJs(j.code) +
       "', '" +
       katEsc +
       "', '" +
       reqEsc +
-      '\'); tutupDetailLoker();" class="flex-1 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black text-center rounded-xl shadow-[0_4px_15px_rgba(5,150,105,0.45)] transition"><i class="fas fa-paper-plane mr-1.5"></i> ' +
-      tr('button.apply_now') +
+      '\'); window.tutupDetailLoker();" class="flex-1 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black text-center rounded-xl shadow-[0_4px_15px_rgba(5,150,105,0.45)] transition"><i class="fas fa-paper-plane mr-1.5"></i> ' +
+      window.tr('button.apply_now') +
       '</button>';
   html +=
     '<div class="flex flex-col sm:flex-row gap-3">' +
     (directUrl
       ? '<a href="' +
-        esc(directUrl) +
+        window.esc(directUrl) +
         '" target="_blank" download class="flex-1 px-5 py-3.5 bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold text-center rounded-xl shadow-[0_4px_15px_rgba(2,132,199,0.4)] transition"><i class="fas fa-download mr-1.5"></i> ' +
-        tr('button.format') +
+        window.tr('button.format') +
         '</a>'
       : '') +
     btnLamar +
@@ -565,7 +575,7 @@ function bukaDetailLoker(code) {
         '?text=' +
         encodeURIComponent(waMsg) +
         '" target="_blank" class="flex-1 px-5 py-3.5 bg-[#25D366] hover:bg-[#1fbd5b] text-white text-sm font-bold text-center rounded-xl shadow-[0_4px_15px_rgba(37,211,102,0.4)] transition"><i class="fab fa-whatsapp mr-1.5"></i> ' +
-        tr('button.chat_wa') +
+        window.tr('button.chat_wa') +
         '</a>'
       : '') +
     '</div>';
@@ -574,9 +584,27 @@ function bukaDetailLoker(code) {
   modal.classList.remove('hidden');
 }
 
-function tutupDetailLoker() {
+export function tutupDetailLoker() {
   var modal = document.getElementById('modal-detail-loker');
   if (modal) modal.classList.add('hidden');
 }
+
+// BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
+// HTML inline onclick. switchPublicTab/setLanguage → HTML onclick;
+// renderLanguage → engine/init + api/candidates + i18n toggleFormLanguage;
+// bukaDetailLoker → onclick string render/public.js; jobTutupUntukLamar →
+// render/public.js + admin_modal/job.js; parseRincianBiaya →
+// 13_rincian_builder (rbSeedFromText/rbSummaryFromData); tutupDetailLoker →
+// onclick string di bukaDetailLoker sendiri (string dieval global).
+window.switchPublicTab = switchPublicTab;
+window.renderLanguage = renderLanguage;
+window.setLanguage = setLanguage;
+window.parseRincianBiaya = parseRincianBiaya;
+window.renderRincianSections = renderRincianSections;
+window.lokerGenderBadge = lokerGenderBadge;
+window.jobTutupUntukLamar = jobTutupUntukLamar;
+window.bukaDetailLoker = bukaDetailLoker;
+window.tutupDetailLoker = tutupDetailLoker;
+
 
 // ==========================================

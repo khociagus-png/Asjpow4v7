@@ -1,9 +1,17 @@
+// ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
+// HTML onclick (bukaModalCvMini, bukaMasterEksternal, bukaMasterLengkapPortal,
+// bukaFormSiswa, bukaModalPemberkasan, prosesUploadPemberkasan, tutupPreviewDokumen),
+// onclick string render/candidate.js (bukaMasterEksternalAdmin) & pemakai ESM
+// lain (bukaFormBridge→admin_modal/job, isVipCatatan→ai_copilot/interview,
+// cekUkuranFile/cekEkstensiFile/bacaFileBase64/normalizeGenderValue→
+// api/candidates, bukaPreviewDokumen→admin_modal/cv).
+
 // 4. KANDIDAT: AKSI (CV MINI, PORTAL FORM MASTER, PEMBERKASAN)
 // Render/engine dipindah ke 03_engine.js saat god-object refactor.
 // ==========================================
-function bukaModalCvMini() {
-  let myData = ALL_CANDIDATES.find(
-    (c) => normalizePhone(c.wa) === normalizePhone(currentKandidatWa),
+export function bukaModalCvMini() {
+  let myData = window.ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
   );
   if (myData) {
     let cleanGender =
@@ -13,35 +21,34 @@ function bukaModalCvMini() {
     if (cleanGender.includes('PRIA') || cleanGender === 'L') cleanGender = 'LAKI-LAKI';
     if (cleanGender.includes('WANITA') || cleanGender === 'P') cleanGender = 'PEREMPUAN';
 
-    safeSetVal('um-gender', cleanGender);
-    safeSetVal(
-      'um-usia',
+    window.safeSetVal('um-gender', cleanGender);
+    window.    window.safeSetVal('um-usia',
       myData.usia && myData.usia !== '-' ? String(myData.usia).replace(/\D/g, '') : '',
     );
-    safeSetVal('um-tb', myData.tb && myData.tb !== '-' ? String(myData.tb).replace(/\D/g, '') : '');
-    safeSetVal('um-bb', myData.bb && myData.bb !== '-' ? String(myData.bb).replace(/\D/g, '') : '');
+    window.safeSetVal('um-tb', myData.tb && myData.tb !== '-' ? String(myData.tb).replace(/\D/g, '') : '');
+    window.safeSetVal('um-bb', myData.bb && myData.bb !== '-' ? String(myData.bb).replace(/\D/g, '') : '');
     // riwayatpendidikan kini JSON array 5-baris — ambil tingkat terakhir terbaca
-    safeSetVal('um-pendidikan', formatPendidikanTingkat(myData.pendidikan) || '-');
-    safeSetVal('um-jft-text', myData.jftText && myData.jftText !== '-' ? myData.jftText : '');
-    safeSetVal('um-ssw-text', myData.sswText && myData.sswText !== '-' ? myData.sswText : '');
+    window.safeSetVal('um-pendidikan', window.formatPendidikanTingkat(myData.pendidikan) || '-');
+    window.safeSetVal('um-jft-text', myData.jftText && myData.jftText !== '-' ? myData.jftText : '');
+    window.safeSetVal('um-ssw-text', myData.sswText && myData.sswText !== '-' ? myData.sswText : '');
 
     document.getElementById('um-photo').value = '';
     document.getElementById('modal-cv-mini').classList.remove('hidden');
   } else {
-    showToast(tr('ui.toast_profile_not_found'), 'error');
+    window.showToast(window.tr('ui.toast_profile_not_found'), 'error');
   }
 }
 
-async function prosesSimpanCvMini() {
+export async function prosesSimpanCvMini() {
   let btn = document.getElementById('btn-submit-cv-mini');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.saving') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
 
   let pPhoto = await bacaFileBase64(document.getElementById('um-photo'), 'PHOTO');
 
   let payload = {
-    wa: normalizePhone(currentKandidatWa),
-    nama: currentKandidatName,
+    wa: window.normalizePhone(window.currentKandidatWa),
+    nama: window.currentKandidatName,
     gender: document.getElementById('um-gender').value,
     usia: document.getElementById('um-usia').value,
     tb: document.getElementById('um-tb').value,
@@ -54,42 +61,42 @@ async function prosesSimpanCvMini() {
 
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await callAPI('simpanUpdateMaster', [payload]);
+    const res = await window.callAPI('simpanUpdateMaster', [payload]);
     if (res.success) {
-      showToast(tr('ui.toast_cvmini_updated'), 'success');
+      window.showToast(window.tr('ui.toast_cvmini_updated'), 'success');
       document.getElementById('modal-cv-mini').classList.add('hidden');
-      refreshDataDinamis();
+      window.refreshDataDinamis();
     } else {
-      showToast(tr('ui.toast_failed_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_cv_mini') + '';
+    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_cv_mini') + '';
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
 // Helper tunggal: penentu status VIP/KELAS (sumber kebenaran untuk semua entry point)
-function isVipCatatan(catatan) {
+export function isVipCatatan(catatan) {
   var c = catatan || '';
   return c.includes('[VIP]') || !!c.match(/\[(?:KELAS\s*[A-Z0-9]+|[A-Z0-9]+)\]/i);
 }
 
-function bukaMasterEksternal() {
-  if (!currentKandidatWa) {
-    showToast(tr('ui.toast_session_invalid_relogin'), 'error');
+export function bukaMasterEksternal() {
+  if (!window.currentKandidatWa) {
+    window.showToast(window.tr('ui.toast_session_invalid_relogin'), 'error');
     return;
   }
-  let myData = ALL_CANDIDATES.find(
-    (c) => normalizePhone(c.wa) === normalizePhone(currentKandidatWa),
+  let myData = window.ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
   );
   let catatan = myData ? myData.catatanInt || '' : '';
   if (isVipCatatan(catatan)) {
-    bukaAiFormPortal('master', '', '', currentKandidatWa, currentKandidatName);
+    bukaAiFormPortal('master', '', '', window.currentKandidatWa, window.currentKandidatName);
   } else {
-    showToast(tr('ui.toast_ai_cv_locked'), 'info');
+    window.showToast(window.tr('ui.toast_ai_cv_locked'), 'info');
   }
 }
 
@@ -99,22 +106,22 @@ function bukaMasterEksternal() {
 // ke tab browser biasa (ASJ DOSSIER / Form Master / AI master keluar dari
 // PWA). Halaman form (master-full/ai_form/apply-full) semuanya di dalam
 // scope PWA, jadi tetap tampil sebagai halaman aplikasi.
-async function bukaFormBridge(endpoint, params, toastUrlMissing) {
+export async function bukaFormBridge(endpoint, params, toastUrlMissing) {
   var loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
   try {
-    const res = await callAPI(endpoint, params);
+    const res = await window.callAPI(endpoint, params);
     if (res && res.formUrl) {
       // FIX: backend memakai NETLIFY_SITE_URL (bisa basi / menunjuk situs
       // lain). Di preview lokal / Netlify aktif yang berbeda, paksa form
       // terbuka di aplikasi yang sedang dipakai (origin sendiri).
-      window.location.href = resolveSelfUrl(res.formUrl);
+      window.location.href = window.resolveSelfUrl(res.formUrl);
     } else {
-      showToast(toastUrlMissing, 'error');
+      window.showToast(toastUrlMissing, 'error');
     }
   } catch (err) {
-    showToast(
-      tr('ui.toast_open_master_failed') + (err && err.message ? err.message : err),
+    window.showToast(
+      window.tr('ui.toast_open_master_failed') + (err && err.message ? err.message : err),
       'error',
     );
   } finally {
@@ -122,51 +129,54 @@ async function bukaFormBridge(endpoint, params, toastUrlMissing) {
   }
 }
 
-function bukaMasterEksternalAdmin(waRaw, nama) {
-  var cleanWa = normalizePhone(waRaw);
-  if (!cleanWa) return showToast(tr('ui.toast_wa_invalid_cand'), 'error');
+export function bukaMasterEksternalAdmin(waRaw, nama) {
+  var cleanWa = window.normalizePhone(waRaw);
+  if (!cleanWa) return window.showToast(window.tr('ui.toast_wa_invalid_cand'), 'error');
   bukaFormBridge(
     'generateAiFormBridge',
     ['ai', '', '', cleanWa, nama],
-    tr('ui.toast_master_form_url_missing'),
+    window.tr('ui.toast_master_form_url_missing'),
   );
 }
 
-function bukaMasterLengkapPortal() {
-  if (!currentKandidatWa) {
-    showToast(tr('ui.toast_session_invalid_relogin'), 'error');
+export function bukaMasterLengkapPortal() {
+  if (!window.currentKandidatWa) {
+    window.showToast(window.tr('ui.toast_session_invalid_relogin'), 'error');
     return;
   }
   bukaFormBridge(
     'generateLegacyMasterBridge',
-    [currentKandidatWa, currentKandidatName],
-    tr('ui.toast_master_form_url_missing'),
+    [window.currentKandidatWa, window.currentKandidatName],
+    window.tr('ui.toast_master_form_url_missing'),
   );
 }
 
-function bukaAiFormPortal(flow, job, bidang, wa, nama) {
+export function bukaAiFormPortal(flow, job, bidang, wa, nama) {
   bukaFormBridge(
     'generateAiFormBridge',
     [flow, job, bidang, wa, nama],
-    tr('ui.toast_ai_form_url_missing'),
+    window.tr('ui.toast_ai_form_url_missing'),
   );
 }
 
-async function bukaFormSiswa() {
+export async function bukaFormSiswa() {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
 
   try {
-    const url = await callAPI('getLinkSiswaBaru', []);
+    const url = await window.callAPI('getLinkSiswaBaru', []);
     if (url) {
       // FIX: tetap di dalam PWA (tab sama), bukan tab browser — dan paksa
       // ke origin sendiri (lihat resolveSelfUrl).
-      window.location.href = resolveSelfUrl(url.url || url.formUrl || url);
+      window.location.href = window.resolveSelfUrl(url.url || url.formUrl || url);
     } else {
-      showToast(tr('ui.toast_siswa_form_url_missing'), 'error');
+      window.showToast(window.tr('ui.toast_siswa_form_url_missing'), 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_open_form_failed') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('ui.toast_open_form_failed') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     if (loader) loader.style.display = 'none';
   }
@@ -180,12 +190,12 @@ async function bukaFormSiswa() {
 // PASTI ditolak server, jadi cegah di frontend dengan toast. Definisi DI
 // SINI (file dimuat paling awal) supaya semua jalur upload — pemberkasan
 // kandidat (file ini) & modal admin (07_api.js) — memakai satu nilai.
-var MAX_FILE_MB = 4;
-var MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+export var MAX_FILE_MB = 4;
+export var MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
 // Ekstensi file yang diizinkan — SINKRON dengan allowlist backend
 // (storage-helper.ts) & preview (isPreviewableFile): gambar + PDF + Office.
-var ALLOWED_FILE_EXT = [
+export var ALLOWED_FILE_EXT = [
   'pdf',
   'jpg',
   'jpeg',
@@ -210,11 +220,11 @@ var ALLOWED_FILE_EXT = [
 ];
 
 // Return pesan error kalau file melebihi batas, '' kalau aman/tidak ada.
-function cekUkuranFile(inputEl) {
+export function cekUkuranFile(inputEl) {
   if (!inputEl || !inputEl.files || inputEl.files.length === 0) return '';
   var file = inputEl.files[0];
   if (file.size > MAX_FILE_BYTES) {
-    return tr('ui.toast_file_too_big')
+    return window.tr('ui.toast_file_too_big')
       .replace('{nama}', file.name || 'File')
       .replace('{mb}', String(MAX_FILE_MB));
   }
@@ -225,7 +235,7 @@ function cekUkuranFile(inputEl) {
 // "image/*") — HTML jadi sumber kebenaran format baku per jenis dokumen
 // (foto JPG/PNG, CV PDF/Word/Excel, dokumen lain PDF). Return null kalau
 // accept kosong -> jatuh ke allowlist umum ALLOWED_FILE_EXT.
-function ekstensiDariAccept(acceptAttr) {
+export function ekstensiDariAccept(acceptAttr) {
   var acc = String(acceptAttr || '').toLowerCase();
   if (acc.indexOf('image/*') !== -1) return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
   var out = [];
@@ -240,7 +250,7 @@ function ekstensiDariAccept(acceptAttr) {
 // Dipanggil SEBELUM upload supaya user langsung tahu (tanpa nunggu server).
 // Validasi mengikuti accept input (format baku per jenis dokumen); input
 // tanpa accept tetap dicek ke allowlist umum backend.
-function cekEkstensiFile(inputEl) {
+export function cekEkstensiFile(inputEl) {
   if (!inputEl || !inputEl.files || inputEl.files.length === 0) return '';
   var file = inputEl.files[0];
   var ext = String(file.name || '')
@@ -249,7 +259,7 @@ function cekEkstensiFile(inputEl) {
     .toLowerCase();
   var allowed = ekstensiDariAccept(inputEl.getAttribute('accept')) || ALLOWED_FILE_EXT;
   if (allowed.indexOf(ext) === -1) {
-    return tr('ui.toast_file_ext_bad').replace('{nama}', file.name || 'File');
+    return window.tr('ui.toast_file_ext_bad').replace('{nama}', file.name || 'File');
   }
   return '';
 }
@@ -263,7 +273,7 @@ function cekEkstensiFile(inputEl) {
 // mengembalikan format KANONIKAL: 'LAKI-LAKI' | 'PEREMPUAN' | '' (kosong
 // untuk yang tidak jelas), dipakai BOTH saat mengisi select (read) dan
 // saat menyimpan (write) supaya data DB konvergen ke satu format.
-function normalizeGenderValue(v) {
+export function normalizeGenderValue(v) {
   if (!v) return '';
   var s = String(v).trim().toLowerCase();
   if (s === '-' || s === '') return '';
@@ -284,7 +294,7 @@ function normalizeGenderValue(v) {
 
 // 5. KANDIDAT: MULTI UPLOAD & PEMBERKASAN
 // ==========================================
-function compressImage(file, callback) {
+export function compressImage(file, callback) {
   const reader = new FileReader();
   reader.onload = function (e) {
     const dataUrl = e.target.result;
@@ -318,7 +328,7 @@ function compressImage(file, callback) {
   reader.readAsDataURL(file);
 }
 
-function bacaFileBase64(inputEl, label) {
+export function bacaFileBase64(inputEl, label) {
   return new Promise((resolve) => {
     let settled = false;
     const done = (v) => {
@@ -363,7 +373,7 @@ function bacaFileBase64(inputEl, label) {
 }
 
 // Fungsi Checklist Berkas
-function setStatusBerkas(idSpan, val) {
+export function setStatusBerkas(idSpan, val) {
   let el = document.getElementById(idSpan);
   if (!el) return;
   if (val && val !== '-') {
@@ -371,14 +381,14 @@ function setStatusBerkas(idSpan, val) {
     // lihat dokumennya langsung tanpa pindah halaman. URL di-escape
     // (quot) supaya aman walau path mengandung tanda kutip.
     let escUrl = String(val).replace(/'/g, "\\'");
-    el.innerHTML = `<button type="button" onclick="bukaPreviewDokumen('${escUrl}')" class="text-emerald-400 hover:text-emerald-300 underline"><i class="fas fa-check-circle"></i> ${tr('ui.uploaded_view')}</button>`;
+    el.innerHTML = `<button type="button" onclick="window.bukaPreviewDokumen('${escUrl}')" class="text-emerald-400 hover:text-emerald-300 underline"><i class="fas fa-check-circle"></i> ${window.tr('ui.uploaded_view')}</button>`;
   } else {
-    el.innerHTML = `<span class="text-rose-400"><i class="fas fa-times-circle"></i> ${tr('ui.not_yet')}</span>`;
+    el.innerHTML = `<span class="text-rose-400"><i class="fas fa-times-circle"></i> ${window.tr('ui.not_yet')}</span>`;
   }
 }
 
 // Buka preview dokumen (gambar/PDF) di modal inline — bukan tab baru.
-function bukaPreviewDokumen(url) {
+export function bukaPreviewDokumen(url) {
   if (!url || url === '-') return;
   let modal = document.getElementById('modal-preview-dokumen');
   let frame = document.getElementById('preview-dokumen-frame');
@@ -393,10 +403,10 @@ function bukaPreviewDokumen(url) {
 
   // Satu pintu preview (02_init.js): gambar/PDF native, CSV -> render lokal,
   // Office (docx/pptx) -> MS Office Viewer, zip/dll -> pesan + tombol Unduh.
-  if (typeof previewFileInFrame === 'function') {
-    previewFileInFrame(frame, url);
-  } else if (!isPreviewableFile(url)) {
-    frame.srcdoc = pesanPreviewTidakTersedia(url);
+  if (typeof window.previewFileInFrame === 'function') {
+    window.previewFileInFrame(frame, url);
+  } else if (!window.isPreviewableFile(url)) {
+    frame.srcdoc = window.pesanPreviewTidakTersedia(url);
   } else {
     frame.removeAttribute('srcdoc');
     frame.src = url;
@@ -404,12 +414,12 @@ function bukaPreviewDokumen(url) {
   if (unduh) unduh.href = url;
   if (judul) {
     let nama = decodeURIComponent(url.split('/').pop() || 'Dokumen');
-    judul.innerHTML = `<i class="fas fa-file-alt mr-1.5 text-sky-400"></i> ${tr('ui.preview_label')}${esc(nama)}`;
+    judul.innerHTML = `<i class="fas fa-file-alt mr-1.5 text-sky-400"></i> ${window.tr('ui.preview_label')}${window.esc(nama)}`;
   }
   modal.classList.remove('hidden');
 }
 
-function tutupPreviewDokumen() {
+export function tutupPreviewDokumen() {
   let modal = document.getElementById('modal-preview-dokumen');
   let frame = document.getElementById('preview-dokumen-frame');
   if (modal) modal.classList.add('hidden');
@@ -417,25 +427,26 @@ function tutupPreviewDokumen() {
 }
 
 // Buka Modal Pemberkasan Sentral
-function bukaModalPemberkasan(waTarget) {
-  let cleanWa = normalizePhone(waTarget);
-  let c = ALL_CANDIDATES.find((kan) => normalizePhone(kan.wa) === cleanWa);
+export function bukaModalPemberkasan(waTarget) {
+  let cleanWa = window.normalizePhone(waTarget);
+  let c = window.ALL_CANDIDATES.find((kan) => window.normalizePhone(kan.wa) === cleanWa);
   if (!c) {
-    showToast(tr('ui.toast_applicant_not_found'), 'error');
+    window.showToast(window.tr('ui.toast_applicant_not_found'), 'error');
     return;
   }
 
-  ACTIVE_PEMBERKASAN_WA = c.wa;
-  ACTIVE_PEMBERKASAN_NAMA = c.nama;
-  safeSet('nama-pemilik-berkas', c.nama.toUpperCase());
+  // Tulis via accessor bridge (state.js) — binding modul state ikut di-update.
+  window.ACTIVE_PEMBERKASAN_WA = c.wa;
+  window.ACTIVE_PEMBERKASAN_NAMA = c.nama;
+  window.safeSet('nama-pemilik-berkas', c.nama.toUpperCase());
 
   let thp = String(c.tahapan).toUpperCase();
   let isTahap1 =
     /LOLOS|PEMBERKASAN|MCU|MEDICAL|MEDIKAL|PARPOR|PASPOR|PASPORT|MATCH|TERIMA|SIAP/i.test(thp);
   let isTahap2 = /TTD|KONTRAK|VISA|COE|KTKLN|SISKOP|FLIGHT|BERANGKAT|TERBANG|TIKET|E-ID/i.test(thp);
 
-  if (!isTahap1 && !isTahap2 && !isAdmin) {
-    showToast(tr('ui.toast_upload_locked'), 'error');
+  if (!isTahap1 && !isTahap2 && !window.isAdmin) {
+    window.showToast(window.tr('ui.toast_upload_locked'), 'error');
     return;
   }
 
@@ -452,11 +463,11 @@ function bukaModalPemberkasan(waTarget) {
     if (pT1) pT1.classList.remove('hidden');
     if (pT2) pT2.classList.remove('hidden');
     if (pBio) pBio.classList.remove('hidden');
-  } else if (isTahap1 || isAdmin) {
+  } else if (isTahap1 || window.isAdmin) {
     // Jika admin, biarkan terbuka semua untuk antisipasi
     if (pT1) pT1.classList.remove('hidden');
     if (pBio) pBio.classList.remove('hidden');
-    if (isAdmin) if (pT2) pT2.classList.remove('hidden');
+    if (window.isAdmin) if (pT2) pT2.classList.remove('hidden');
   }
 
   // Terapkan Checklist Dokumen (Sudah/Belum)
@@ -482,35 +493,36 @@ function bukaModalPemberkasan(waTarget) {
 
   // Terapkan Auto-Fill Biodata Lama
   if (c.bio) {
-    safeSetVal('bio-email', c.bio.email);
-    safeSetVal('bio-tmplahir', c.bio.tmplahir);
+    window.safeSetVal('bio-email', c.bio.email);
+    window.safeSetVal('bio-tmplahir', c.bio.tmplahir);
     // Format lama DD/MM/YYYY → ISO (YYYY-MM-DD) supaya cocok dengan input type=date & format kanonik DB
     var bioTglLahir = c.bio.tgllahir || '';
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(bioTglLahir))
       bioTglLahir = bioTglLahir.split('/').reverse().join('-');
-    safeSetVal('bio-tgllahir', bioTglLahir);
-    safeSetVal('bio-alamat', c.bio.alamat);
-    safeSetVal('bio-ayah', c.bio.ayah);
-    safeSetVal('bio-ttlayah', c.bio.ttlayah);
-    safeSetVal('bio-ibu', c.bio.ibu);
-    safeSetVal('bio-ttlibu', c.bio.ttlibu);
-    safeSetVal('bio-pasport', c.bio.pasport);
-    safeSetVal('bio-coe', c.bio.coe);
-    safeSetVal('bio-kotapasport', c.bio.kotapasport);
-    safeSetVal('bio-tglpasport', c.bio.tglpasport);
-    safeSetVal('bio-exppasport', c.bio.exppasport);
-    safeSetVal('bio-pt', c.bio.pt);
-    safeSetVal('bio-shacou', c.bio.shacou);
-    safeSetVal('bio-telppt', c.bio.telppt);
-    safeSetVal('bio-webpt', c.bio.webpt);
-    safeSetVal('bio-alamatpt', c.bio.alamatpt);
+    window.safeSetVal('bio-tgllahir', bioTglLahir);
+    window.safeSetVal('bio-alamat', c.bio.alamat);
+    window.safeSetVal('bio-ayah', c.bio.ayah);
+    window.safeSetVal('bio-ttlayah', c.bio.ttlayah);
+    window.safeSetVal('bio-ibu', c.bio.ibu);
+    window.safeSetVal('bio-ttlibu', c.bio.ttlibu);
+    window.safeSetVal('bio-pasport', c.bio.pasport);
+    window.safeSetVal('bio-coe', c.bio.coe);
+    window.safeSetVal('bio-kotapasport', c.bio.kotapasport);
+    window.safeSetVal('bio-tglpasport', c.bio.tglpasport);
+    window.safeSetVal('bio-exppasport', c.bio.exppasport);
+    window.safeSetVal('bio-pt', c.bio.pt);
+    window.safeSetVal('bio-shacou', c.bio.shacou);
+    window.safeSetVal('bio-telppt', c.bio.telppt);
+    window.safeSetVal('bio-webpt', c.bio.webpt);
+    window.safeSetVal('bio-alamatpt', c.bio.alamatpt);
   }
 
   document.getElementById('modal-pemberkasan').classList.remove('hidden');
 }
 
-async function prosesUploadPemberkasan(tahap) {
-  if (!ACTIVE_PEMBERKASAN_WA) return showToast(tr('ui.toast_target_invalid'), 'error');
+export async function prosesUploadPemberkasan(tahap) {
+  if (!window.ACTIVE_PEMBERKASAN_WA)
+    return window.showToast(window.tr('ui.toast_target_invalid'), 'error');
   let btnId = tahap === 1 ? 'btn-upload-t1' : 'btn-upload-t2';
   let btn = document.getElementById(btnId);
   if (!btn) return;
@@ -544,16 +556,16 @@ async function prosesUploadPemberkasan(tahap) {
     let el = document.getElementById(inputs[i].id);
     let err = cekUkuranFile(el);
     if (err) {
-      showToast(err, 'error');
+      window.showToast(err, 'error');
       return;
     }
     err = cekEkstensiFile(el);
     if (err) {
-      showToast(err, 'error');
+      window.showToast(err, 'error');
       return;
     }
   }
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.processing') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.processing') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -573,7 +585,7 @@ async function prosesUploadPemberkasan(tahap) {
   const filesToUpload = hasilBaca.filter(Boolean);
 
   if (filesToUpload.length === 0) {
-    showToast(tr('ui.toast_pick_min_one'), 'error');
+    window.showToast(window.tr('ui.toast_pick_min_one'), 'error');
     btn.innerHTML =
       tahap === 1
         ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1'
@@ -585,19 +597,19 @@ async function prosesUploadPemberkasan(tahap) {
 
   btn.innerHTML =
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' +
-    tr('ui.uploading_files').replace('{n}', filesToUpload.length);
+    window.tr('ui.uploading_files').replace('{n}', filesToUpload.length);
 
   // Upload tiap berkas secara paralel via Promise.allSettled — satu berkas
   // gagal tidak menggagalkan batch, dan hasil dihitung dari yang sukses.
   const results = await Promise.allSettled(
     filesToUpload.map(async (f) => {
       const payload = {
-        wa: ACTIVE_PEMBERKASAN_WA,
-        nama: ACTIVE_PEMBERKASAN_NAMA,
+        wa: window.ACTIVE_PEMBERKASAN_WA,
+        nama: window.ACTIVE_PEMBERKASAN_NAMA,
         file: f.file,
         jenisBerkas: f.jenisBerkas,
       };
-      const res = await callAPI('simpanBerkasTahapan', [payload]);
+      const res = await window.callAPI('simpanBerkasTahapan', [payload]);
       return !!(res && res.success);
     }),
   );
@@ -610,24 +622,26 @@ async function prosesUploadPemberkasan(tahap) {
       : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2';
   btn.disabled = false;
 
-  showToast(
-    tr('ui.toast_uploaded_n').replace('{n}', successCount) + tr('ui.toast_docs_exclaim'),
+  window.showToast(
+    window.tr('ui.toast_uploaded_n').replace('{n}', successCount) +
+      window.tr('ui.toast_docs_exclaim'),
     'success',
   );
   document.getElementById('modal-pemberkasan').classList.add('hidden');
-  refreshDataDinamis();
+  window.refreshDataDinamis();
 }
 
-async function prosesSimpanBiodataLengkap() {
-  if (!ACTIVE_PEMBERKASAN_WA) return showToast(tr('ui.toast_target_invalid'), 'error');
+export async function prosesSimpanBiodataLengkap() {
+  if (!window.ACTIVE_PEMBERKASAN_WA)
+    return window.showToast(window.tr('ui.toast_target_invalid'), 'error');
   let btn = document.getElementById('btn-submit-bio');
   if (!btn) return;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.saving') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
   let payload = {
-    wa: ACTIVE_PEMBERKASAN_WA,
+    wa: window.ACTIVE_PEMBERKASAN_WA,
     email: document.getElementById('bio-email').value,
     tempat_lahir: document.getElementById('bio-tmplahir').value,
     tgl_lahir: document.getElementById('bio-tgllahir').value,
@@ -649,19 +663,43 @@ async function prosesSimpanBiodataLengkap() {
   };
 
   try {
-    const res = await callAPI('simpanBiodataLengkap', [payload]);
+    const res = await window.callAPI('simpanBiodataLengkap', [payload]);
     if (res.success) {
-      showToast(tr('ui.toast_biodata_saved'), 'success');
+      window.showToast(window.tr('ui.toast_biodata_saved'), 'success');
       document.getElementById('modal-pemberkasan').classList.add('hidden');
-      refreshDataDinamis();
+      window.refreshDataDinamis();
     } else {
-      showToast(tr('ui.toast_failed_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('ui.toast_network_error_prefix') + err.message, 'error');
+    window.showToast(window.tr('ui.toast_network_error_prefix') + err.message, 'error');
   } finally {
     document.getElementById('global-loader').style.display = 'none';
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-save mr-2"></i> ' + tr('button.save_biodata') + '';
+    btn.innerHTML = '<i class="fas fa-save mr-2"></i> ' + window.tr('button.save_biodata') + '';
   }
 }
+
+// BRIDGE ESM → classic (bundel): alias window.* utk HTML onclick, onclick
+// string lintas file & pemakai ESM lain. MAX_FILE_BYTES/ALLOWED_FILE_EXT/
+// ekstensiDariAccept/compressImage/setStatusBerkas sengaja tetap internal
+// (dipakai file ini saja — apply_full.js punya salinan lokal sendiri).
+window.bukaModalCvMini = bukaModalCvMini;
+window.prosesSimpanCvMini = prosesSimpanCvMini;
+window.isVipCatatan = isVipCatatan;
+window.bukaMasterEksternal = bukaMasterEksternal;
+window.bukaFormBridge = bukaFormBridge;
+window.bukaMasterEksternalAdmin = bukaMasterEksternalAdmin;
+window.bukaMasterLengkapPortal = bukaMasterLengkapPortal;
+window.bukaAiFormPortal = bukaAiFormPortal;
+window.bukaFormSiswa = bukaFormSiswa;
+window.cekUkuranFile = cekUkuranFile;
+window.cekEkstensiFile = cekEkstensiFile;
+window.normalizeGenderValue = normalizeGenderValue;
+window.bacaFileBase64 = bacaFileBase64;
+window.bukaPreviewDokumen = bukaPreviewDokumen;
+window.tutupPreviewDokumen = tutupPreviewDokumen;
+window.bukaModalPemberkasan = bukaModalPemberkasan;
+window.prosesUploadPemberkasan = prosesUploadPemberkasan;
+window.prosesSimpanBiodataLengkap = prosesSimpanBiodataLengkap;
+

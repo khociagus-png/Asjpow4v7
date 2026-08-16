@@ -1,10 +1,18 @@
+// ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
+// HTML onclick (submitWaTemplate/batalEditWa/tutupPamflet), onclick string
+// render/admin.js + render/candidate.js + render/mail.js (renderWaTemplates,
+// bukaModalWaPintar, bukaFotoPreview, bukaPamflet), init/boot.js
+// (injectModalWaPintar), engine/init.js (renderRiwayatKandidat) & onclick
+// string internal file ini (editWaTemplate, prosesHapusWa, terapkanTemplateWa,
+// kirimWaPintar, pilihLokerRiwayat, tutupFotoPreview).
+
 // 10. FITUR BARU: WA PINTAR & TEMPLATE CRUD
 // ==========================================
-function renderWaTemplates() {
+export function renderWaTemplates() {
   var list = document.getElementById('wa-template-list');
   if (!list) return;
   var html = '';
-  ALL_WA_TEMPLATES.forEach((t) => {
+  window.ALL_WA_TEMPLATES.forEach((t) => {
     html +=
       '<div class="bg-black/40 border border-slate-700 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/50 transition">' +
       '<div>' +
@@ -25,16 +33,16 @@ function renderWaTemplates() {
       '</div>' +
       '</div>';
   });
-  if (ALL_WA_TEMPLATES.length === 0)
+  if (window.ALL_WA_TEMPLATES.length === 0)
     html =
       '<div class="col-span-2 text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Belum ada template. Silakan buat di form sebelah kiri.</div>';
   list.innerHTML = html;
 }
 
-async function submitWaTemplate(e) {
+export async function submitWaTemplate(e) {
   e.preventDefault();
   var btn = document.getElementById('btn-submit-wa');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + tr('ui.saving') + '';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.saving') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -43,25 +51,25 @@ async function submitWaTemplate(e) {
   var isi = document.getElementById('wa-isi').value;
 
   try {
-    const res = await callAPI('simpanWaTemplate', [id, nama, isi, currentAdminName]);
+    const res = await window.callAPI('simpanWaTemplate', [id, nama, isi, window.currentAdminName]);
     if (res.success) {
-      showToast(tr('ui.toast_wa_template_saved'), 'success');
+      window.showToast(window.tr('ui.toast_wa_template_saved'), 'success');
       batalEditWa();
-      refreshDataDinamis('wa');
+      window.refreshDataDinamis('wa');
     } else {
-      showToast(tr('ui.toast_error_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + tr('ui.save_template') + '';
+    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_template') + '';
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
   }
 }
 
-function editWaTemplate(id) {
-  var t = ALL_WA_TEMPLATES.find((x) => x.id === id);
+export function editWaTemplate(id) {
+  var t = window.ALL_WA_TEMPLATES.find((x) => x.id === id);
   if (!t) return;
   document.getElementById('wa-id').value = t.id;
   document.getElementById('wa-nama').value = t.nama;
@@ -70,31 +78,31 @@ function editWaTemplate(id) {
   document.getElementById('wa-nama').focus();
 }
 
-function batalEditWa() {
+export function batalEditWa() {
   var form = document.getElementById('form-wa-template');
   if (form) form.reset();
   document.getElementById('wa-id').value = '';
   document.getElementById('wa-form-title').innerText = 'Buat Template Baru';
 }
 
-async function prosesHapusWa(id) {
-  if (!confirm('Yakin ingin menghapus template ini?')) return;
+export async function prosesHapusWa(id) {
+  if (!window.confirm('Yakin ingin menghapus template ini?')) return;
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
   try {
-    const res = await callAPI('hapusWaTemplate', [id, currentAdminName]);
-    if (res.success) refreshDataDinamis('wa');
+    const res = await window.callAPI('hapusWaTemplate', [id, window.currentAdminName]);
+    if (res.success) window.refreshDataDinamis('wa');
     else {
-      showToast(tr('ui.toast_error_prefix') + res.error, 'error');
+      window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
   } finally {
     if (loader) loader.style.display = 'none';
   }
 }
 
-function injectModalWaPintar() {
+export function injectModalWaPintar() {
   if (document.getElementById('modal-wa-pintar')) return;
   var html =
     '<div id="modal-wa-pintar" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">' +
@@ -111,7 +119,7 @@ function injectModalWaPintar() {
     '<label class="block text-[10px] font-bold text-slate-400 mb-1">PILIH TEMPLATE PESAN</label>' +
     '<select id="wa-pintar-template" onchange="terapkanTemplateWa()" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition">' +
     '<option value="">' +
-    tr('ui.manual_or_template') +
+    window.tr('ui.manual_or_template') +
     '</option>' +
     '</select>' +
     '</div>' +
@@ -126,26 +134,28 @@ function injectModalWaPintar() {
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
-async function bukaModalWaPintar(idKan) {
+export async function bukaModalWaPintar(idKan) {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
       await window.ensureAllCandidates();
     } catch (e) {}
   }
-  var c = ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
-  if (!c) return showToast(tr('ui.toast_cand_not_found'), 'error');
+  var c = window.ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
+  if (!c) return window.showToast(window.tr('ui.toast_cand_not_found'), 'error');
 
-  CURRENT_WA_KANDIDAT = c;
+  // Tulis via accessor bridge (state.js) — CURRENT_WA_KANDIDAT binding modul
+  // state di-update, bukan sekadar window property.
+  window.CURRENT_WA_KANDIDAT = c;
 
   document.getElementById('wa-pintar-nama').value = c.nama + ' (' + (c.idLoker || 'Umum') + ')';
-  document.getElementById('wa-pintar-phone').value = normalizePhone(c.wa);
+  document.getElementById('wa-pintar-phone').value = window.normalizePhone(c.wa);
   document.getElementById('wa-pintar-pesan').value = '';
 
   var sel = document.getElementById('wa-pintar-template');
   // DOM OPT: kumpulkan semua <option> ke satu string, injeksikan sekali
   // (dulu innerHTML += per template = tulis DOM berulang dalam loop).
-  var optHtml = '<option value="">' + tr('ui.manual_or_template') + '</option>';
-  ALL_WA_TEMPLATES.forEach((t) => {
+  var optHtml = '<option value="">' + window.tr('ui.manual_or_template') + '</option>';
+  window.ALL_WA_TEMPLATES.forEach((t) => {
     optHtml += '<option value="' + t.id + '">' + t.nama + '</option>';
   });
   sel.innerHTML = optHtml;
@@ -153,7 +163,7 @@ async function bukaModalWaPintar(idKan) {
   document.getElementById('modal-wa-pintar').classList.remove('hidden');
 }
 
-function terapkanTemplateWa() {
+export function terapkanTemplateWa() {
   var val = document.getElementById('wa-pintar-template').value;
   var ta = document.getElementById('wa-pintar-pesan');
   if (!val) {
@@ -161,22 +171,22 @@ function terapkanTemplateWa() {
     return;
   }
 
-  var t = ALL_WA_TEMPLATES.find((x) => x.id === val);
-  if (!t || !CURRENT_WA_KANDIDAT) return;
+  var t = window.ALL_WA_TEMPLATES.find((x) => x.id === val);
+  if (!t || !window.CURRENT_WA_KANDIDAT) return;
 
   var msg = t.isi;
-  msg = msg.replace(/<<NAMA>>/gi, CURRENT_WA_KANDIDAT.nama);
-  msg = msg.replace(/<<JOB>>/gi, CURRENT_WA_KANDIDAT.idLoker || 'Umum');
+  msg = msg.replace(/<<NAMA>>/gi, window.CURRENT_WA_KANDIDAT.nama);
+  msg = msg.replace(/<<JOB>>/gi, window.CURRENT_WA_KANDIDAT.idLoker || 'Umum');
 
   ta.value = msg;
 }
 
-function kirimWaPintar() {
+export function kirimWaPintar() {
   var phone = document.getElementById('wa-pintar-phone').value;
   var msg = document.getElementById('wa-pintar-pesan').value;
 
-  if (!phone) return showToast(tr('ui.toast_wa_invalid_cand2'), 'error');
-  if (!msg) return showToast(tr('ui.toast_msg_empty'), 'error');
+  if (!phone) return window.showToast(window.tr('ui.toast_wa_invalid_cand2'), 'error');
+  if (!msg) return window.showToast(window.tr('ui.toast_msg_empty'), 'error');
 
   var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg.trim());
   window.open(url, '_blank');
@@ -187,18 +197,18 @@ function kirimWaPintar() {
 // dengan status LULUS/AKTIF, kalau tidak ada ambil yang pertama (terbaru).
 let _riwayatLokerAktif = null;
 
-function pilihLokerRiwayat(code) {
+export function pilihLokerRiwayat(code) {
   _riwayatLokerAktif = code || null;
   renderRiwayatKandidat();
 }
 
-function renderRiwayatKandidat() {
+export function renderRiwayatKandidat() {
   var container = document.getElementById('k-dash-riwayat');
   if (!container) return;
   var html = '';
   var badge = document.getElementById('badge-notif-kandidat');
 
-  if (!ALL_RIWAYAT_KANDIDAT || ALL_RIWAYAT_KANDIDAT.length === 0) {
+  if (!window.ALL_RIWAYAT_KANDIDAT || window.ALL_RIWAYAT_KANDIDAT.length === 0) {
     html =
       '<div class="text-xs text-slate-500 text-center py-6 border border-dashed border-slate-700/50 rounded-xl">Anda belum pernah melamar job apapun.</div>';
     if (badge) badge.classList.add('hidden');
@@ -206,13 +216,13 @@ function renderRiwayatKandidat() {
     // Update Angka Lonceng Notifikasi
     if (badge) {
       badge.classList.remove('hidden');
-      badge.innerText = ALL_RIWAYAT_KANDIDAT.length;
+      badge.innerText = window.ALL_RIWAYAT_KANDIDAT.length;
       badge.classList.add('animate-bounce'); // Efek mental saat load
       setTimeout(() => badge.classList.remove('animate-bounce'), 2000);
     }
 
     // Urutkan dari yang terbaru
-    let sorted = ALL_RIWAYAT_KANDIDAT.slice().sort(
+    let sorted = window.ALL_RIWAYAT_KANDIDAT.slice().sort(
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
     );
 
@@ -237,7 +247,7 @@ function renderRiwayatKandidat() {
     if (lokerList.length > 1) {
       html +=
         '<div class="flex flex-wrap gap-1.5 mb-3"><span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider self-center">' +
-        tr('ui.pilih_loker') +
+        window.tr('ui.pilih_loker') +
         '</span>';
       lokerList.forEach((l) => {
         var aktif = l.code === _riwayatLokerAktif;
@@ -246,11 +256,11 @@ function renderRiwayatKandidat() {
           : 'bg-slate-800 text-slate-300 border-slate-600 hover:border-emerald-500/60 hover:text-white';
         html +=
           '<button onclick="pilihLokerRiwayat(\'' +
-          escJs(l.code) +
+          window.escJs(l.code) +
           '\')" class="px-2.5 py-1 rounded-full border text-[10px] font-black transition ' +
           cls +
           '">' +
-          esc(l.code) +
+          window.esc(l.code) +
           (l.st === 'LULUS' || l.st === 'AKTIF' || l.st === 'LOLOS' ? ' <i class="fas fa-check-circle"></i>' : '') +
           '</button>';
       });
@@ -269,23 +279,23 @@ function renderRiwayatKandidat() {
       if (st === 'MENUNGGU' || st === 'BARU' || st === 'MAIL' || st === 'PENDING') {
         badgeClass = 'bg-amber-900/40 text-amber-400 border-amber-500/30';
         icon = 'fa-clock';
-        statusText = tr('form.txt_menunggu_review');
+        statusText = window.tr('form.txt_menunggu_review');
       } else if (st === 'REVIEW ADMIN' || st === 'DIBACA' || st === 'PROSES') {
         badgeClass = 'bg-sky-900/40 text-sky-400 border-sky-500/30';
         icon = 'fa-user-check';
-        statusText = tr('form.txt_review_admin');
+        statusText = window.tr('form.txt_review_admin');
       } else if (st === 'LULUS' || st === 'APPROVE' || st === 'APPROVED' || st === 'LOLOS') {
         badgeClass = 'bg-emerald-900/40 text-emerald-400 border-emerald-500/30';
         icon = 'fa-check-circle';
-        statusText = tr('form.txt_lamaran_lulus');
+        statusText = window.tr('form.txt_lamaran_lulus');
       } else if (st === 'GAGAL' || st === 'REJECT' || st === 'REJECTED' || st === 'TOLAK') {
         badgeClass = 'bg-red-900/40 text-red-400 border-red-500/30';
         icon = 'fa-times-circle';
-        statusText = tr('form.txt_lamaran_gagal');
+        statusText = window.tr('form.txt_lamaran_gagal');
       } else {
         badgeClass = 'bg-slate-800 text-slate-300 border-slate-600';
         icon = 'fa-info-circle';
-        statusText = trOption(r.status || tr('form.txt_diproses'));
+        statusText = window.trOption(r.status || window.tr('form.txt_diproses'));
       }
 
       let dateStr = r.timestamp && r.timestamp !== '-' ? String(r.timestamp).substring(0, 10) : '';
@@ -293,11 +303,11 @@ function renderRiwayatKandidat() {
       // Step progres DINAMIS dari system config (CHECK KAIWA → FLIGHT).
       // Tahapan yang belum dikenali (MENUNGGU/REVIEW ADMIN) ditandai sebagai
       // langkah 0; GAGAL dihentikan total.
-      let stepIdx = tahapanStepIndex(st);
-      let stepNames = tahapanPipeline();
+      let stepIdx = window.tahapanStepIndex(st);
+      let stepNames = window.tahapanPipeline();
       let isGagal = stepIdx < 0 && /TOLAK|REJECT|GAGAL/.test(st);
       if (stepIdx < 0) stepIdx = 0; // MENUNGGU/REVIEW ADMIN → posisi awal
-      let progressData = getTahapanProgress(st);
+      let progressData = window.getTahapanProgress(st);
       // FIX 2026-08-12: baris step pakai flex-wrap + whitespace-nowrap per
       // step — nama step panjang (CHECK KAIWA/MENDAN dll.) sebelumnya
       // MELUBER keluar kartu (scrollWidth 501 vs 281); kini wrap rapi.
@@ -305,8 +315,8 @@ function renderRiwayatKandidat() {
         `
                     <div class="mt-3">
                         <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fas fa-route mr-1 text-sky-400"></i> ${tr('form.txt_tahapan_saat_ini')}</span>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-black ${isGagal ? 'text-red-400' : 'text-emerald-400'}"><i class="fas ${isGagal ? 'fa-ban' : 'fa-map-pin'}"></i> ${isGagal ? tr('form.txt_proses_dihentikan') : esc(trOption(stepNames[stepIdx]))}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider"><i class="fas fa-route mr-1 text-sky-400"></i> ${window.tr('form.txt_tahapan_saat_ini')}</span>
+                            <span class="inline-flex items-center gap-1 text-[10px] font-black ${isGagal ? 'text-red-400' : 'text-emerald-400'}"><i class="fas ${isGagal ? 'fa-ban' : 'fa-map-pin'}"></i> ${isGagal ? window.tr('form.txt_proses_dihentikan') : window.esc(window.trOption(stepNames[stepIdx]))}</span>
                         </div>
                         <div class="w-full bg-slate-800 rounded-full h-1.5 border border-slate-700/50">
                             <div class="bg-gradient-to-r ${progressData.color} h-1.5 rounded-full transition-all duration-1000 relative" style="width: ${isGagal ? 100 : progressData.percent}%">
@@ -332,7 +342,7 @@ function renderRiwayatKandidat() {
               '"><i class="fas ' +
               dot +
               ' flex-shrink-0"></i> ' +
-              esc(trOption(nm)) +
+              window.esc(window.trOption(nm)) +
               '</span>'
             );
           })
@@ -348,12 +358,12 @@ function renderRiwayatKandidat() {
         '<div class="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-1">' +
         '<div class="min-w-0">' +
         '<div class="text-sm font-black text-white tracking-wide break-words"><i class="fas fa-building text-slate-500 mr-2"></i>' +
-        esc(r.jobCode || r.kode || '-') +
+        window.esc(r.jobCode || r.kode || '-') +
         ' <span class="text-[9px] px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded ml-2 font-normal whitespace-nowrap">' +
         dateStr +
         '</span></div>' +
         '<div class="text-[11px] text-slate-400 mt-1 break-words"><i class="fas fa-tag mr-1 text-sky-500/70"></i> ' +
-        esc(trOption(r.kategori || r.jobCode || r.kode || r.code || '-')) +
+        window.esc(window.trOption(r.kategori || r.jobCode || r.kode || r.code || '-')) +
         '</div>' +
         '</div>' +
         '<div class="text-left sm:text-right min-w-0 max-w-full">' +
@@ -363,13 +373,13 @@ function renderRiwayatKandidat() {
         '<i class="fas ' +
         icon +
         ' mt-0.5 flex-shrink-0"></i> ' +
-        esc(statusText) +
+        window.esc(statusText) +
         '</span>' +
         '</div>' +
         '</div>' +
         ((st === 'REJECT' || st === 'TOLAK') && r.keterangan
           ? '<div class="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg"><div class="text-xs font-bold text-red-400 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Alasan Penolakan:</div><p class="text-[11px] text-slate-300 whitespace-pre-wrap leading-relaxed">' +
-            esc(r.keterangan) +
+            window.esc(r.keterangan) +
             '</p></div>'
           : '') +
         progressHtml +
@@ -382,7 +392,7 @@ function renderRiwayatKandidat() {
 // ==========================================
 // FITUR LIGHTBOX (POP-UP) KHUSUS FOTO
 // ==========================================
-function bukaFotoPreview(url) {
+export function bukaFotoPreview(url) {
   var modal = document.getElementById('foto-preview-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -392,7 +402,7 @@ function bukaFotoPreview(url) {
     modal.innerHTML =
       '<div class="relative w-full max-w-lg mx-4 flex flex-col items-center">' +
       '<button onclick="tutupFotoPreview()" aria-label="' +
-      tr('public.close') +
+      window.tr('public.close') +
       '" class="absolute -top-12 right-0 text-white hover:text-red-500 text-4xl font-black drop-shadow-md transition transform hover:scale-110">&times;</button>' +
       '<div class="p-2 bg-slate-900 rounded-xl shadow-2xl border border-slate-600/50">' +
       '<img id="foto-preview-img" src="" class="max-w-full max-h-[85vh] object-contain rounded-lg min-w-[200px] min-h-[200px]">' +
@@ -410,7 +420,7 @@ function bukaFotoPreview(url) {
   }, 10);
 }
 
-function tutupFotoPreview() {
+export function tutupFotoPreview() {
   var modal = document.getElementById('foto-preview-modal');
   if (modal) {
     modal.classList.add('opacity-0');
@@ -421,7 +431,7 @@ function tutupFotoPreview() {
   }
 }
 
-function bukaPamflet(urlGambar) {
+export function bukaPamflet(urlGambar) {
   if (!urlGambar || urlGambar === '-') return;
   var modal = document.getElementById('pamfletModal');
   var img = document.getElementById('gambarPamfletFull');
@@ -431,12 +441,31 @@ function bukaPamflet(urlGambar) {
   }
 }
 
-function tutupPamflet() {
+export function tutupPamflet() {
   var modal = document.getElementById('pamfletModal');
   if (modal) modal.classList.add('hidden');
   setTimeout(() => {
     document.getElementById('gambarPamfletFull').src = '';
   }, 300);
 }
+
+// BRIDGE ESM → classic (bundel): alias window.* utk HTML onclick, onclick
+// string lintas file & onclick string internal (string dieval global).
+// `_riwayatLokerAktif` sengaja PRIVAT modul (tak ada pemakai luar).
+window.renderWaTemplates = renderWaTemplates;
+window.submitWaTemplate = submitWaTemplate;
+window.editWaTemplate = editWaTemplate;
+window.batalEditWa = batalEditWa;
+window.prosesHapusWa = prosesHapusWa;
+window.injectModalWaPintar = injectModalWaPintar;
+window.bukaModalWaPintar = bukaModalWaPintar;
+window.terapkanTemplateWa = terapkanTemplateWa;
+window.kirimWaPintar = kirimWaPintar;
+window.pilihLokerRiwayat = pilihLokerRiwayat;
+window.renderRiwayatKandidat = renderRiwayatKandidat;
+window.bukaFotoPreview = bukaFotoPreview;
+window.tutupFotoPreview = tutupFotoPreview;
+window.bukaPamflet = bukaPamflet;
+window.tutupPamflet = tutupPamflet;
 
 // ==========================================

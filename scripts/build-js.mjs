@@ -139,6 +139,15 @@ const ESM_CORE = new Set([
   '/js/init/preview.js',
   '/js/init/nav.js',
   '/js/init/boot.js',
+  // Fase 3 langkah 12: sisa file classic bundle-only jadi ESM (public/candidate/wa_pintar/cv/esign/rincian/helpers).
+  '/js/01_public.js',
+  '/js/03_candidate.js',
+  '/js/08_wa_pintar.js',
+  '/js/10_cv_rirekisho.js',
+  '/js/10b_cv_builders.js',
+  '/js/12_esign_match.js',
+  '/js/13_rincian_builder.js',
+  '/js/helpers_cv.js',
 ]);
 const sources = STACK.map((src) => {
   const path = ROOT + src;

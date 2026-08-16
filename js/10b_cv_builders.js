@@ -3,29 +3,37 @@
 // Tiap fungsi murni: terima data + helper v(), kembalikan HTML string.
 // ==========================================
 
+// ESM (Fase 3 langkah 12): modul ES — pemakai classic/bundel memanggil via
+// window.* (10_cv_rirekisho.js renderCVAjaib). isGood/fmtMonthYearJp dari
+// helpers_cv.js dipanggil eksplisit window.* (helpers_cv modul ES juga).
+
 // --- BLOK PENDIDIKAN (maks 5 baris: 1-4 SD s/d universitas, baris 5 = LPK
 // Bahasa). Baris 4-5 hanya dirender kalau ada isinya, jadi CV kandidat yang
 // hanya punya 1-3 pendidikan tetap tampil sama seperti sebelumnya. ---
-function buildEduRows(eduList, v) {
+export function buildEduRows(eduList, v) {
   let eduHtml = '';
   for (let i = 1; i <= 5; i++) {
     let pE = Object.assign({}, eduList[i - 1] || {});
     // Toleransi dua bentuk kunci backend: {masuk,lulus,sekolah,jurusan_id}
     // (bentuk baru) vs {tahun_masuk,tahun_lulus,nama_sekolah,jurusan} (lama).
-    if (!isGood(pE.masuk) && isGood(pE.tahun_masuk)) pE.masuk = pE.tahun_masuk;
-    if (!isGood(pE.lulus) && isGood(pE.tahun_lulus)) pE.lulus = pE.tahun_lulus;
-    if (!isGood(pE.sekolah) && isGood(pE.nama_sekolah)) pE.sekolah = pE.nama_sekolah;
-    if (!isGood(pE.jurusan_id) && isGood(pE.jurusan)) pE.jurusan_id = pE.jurusan;
-    let msk = isGood(pE.masuk) ? pE.masuk : v('PENDIDIKAN' + i + 'TAHUNMASUK');
-    let lls = isGood(pE.lulus) ? pE.lulus : v('PENDIDIKAN' + i + 'TAHUNLULUS');
-    let sek_id = isGood(pE.sekolah)
+    if (!window.isGood(pE.masuk) && window.isGood(pE.tahun_masuk)) pE.masuk = pE.tahun_masuk;
+    if (!window.isGood(pE.lulus) && window.isGood(pE.tahun_lulus)) pE.lulus = pE.tahun_lulus;
+    if (!window.isGood(pE.sekolah) && window.isGood(pE.nama_sekolah)) pE.sekolah = pE.nama_sekolah;
+    if (!window.isGood(pE.jurusan_id) && window.isGood(pE.jurusan)) pE.jurusan_id = pE.jurusan;
+    let msk = window.isGood(pE.masuk) ? pE.masuk : v('PENDIDIKAN' + i + 'TAHUNMASUK');
+    let lls = window.isGood(pE.lulus) ? pE.lulus : v('PENDIDIKAN' + i + 'TAHUNLULUS');
+    let sek_id = window.isGood(pE.sekolah)
       ? pE.sekolah
       : v('PENDIDIKAN' + i + 'NAMASEKOLAH', 'PENDIDIKAN' + i + 'SEKOLAHID');
-    let sek_jp = isGood(pE.sekolah_jp) ? pE.sekolah_jp : v('PENDIDIKAN' + i + 'SEKOLAHJP');
-    let jur_id = isGood(pE.jurusan_id)
+    let sek_jp = window.isGood(pE.sekolah_jp)
+      ? pE.sekolah_jp
+      : v('PENDIDIKAN' + i + 'SEKOLAHJP');
+    let jur_id = window.isGood(pE.jurusan_id)
       ? pE.jurusan_id
       : v('PENDIDIKAN' + i + 'JURUSAN', 'PENDIDIKAN' + i + 'JURUSANID');
-    let jur_jp = isGood(pE.jurusan_jp) ? pE.jurusan_jp : v('PENDIDIKAN' + i + 'JURUSANJP');
+    let jur_jp = window.isGood(pE.jurusan_jp)
+      ? pE.jurusan_jp
+      : v('PENDIDIKAN' + i + 'JURUSANJP');
 
     if (msk === '-') msk = '';
     if (lls === '-') lls = '';
@@ -45,9 +53,9 @@ function buildEduRows(eduList, v) {
       : jur_id;
 
     eduHtml += `<tr>
-              <td class="val-center border-r-none">${fmtMonthYearJp(msk)}</td>
+              <td class="val-center border-r-none">${window.fmtMonthYearJp(msk)}</td>
               <td class="val-center border-lr-none">${msk || lls ? '-' : ''}</td>
-              <td class="val-center border-l-none">${fmtMonthYearJp(lls)}</td>
+              <td class="val-center border-l-none">${window.fmtMonthYearJp(lls)}</td>
               <td colspan="2" class="val-center">${finalSek}</td>
               <td colspan="2" class="val-center">${finalJur}</td>
             </tr>`;
@@ -58,29 +66,34 @@ function buildEduRows(eduList, v) {
 // --- BLOK PEKERJAAN (maks 3 baris: form master punya 3 kolom pekerjaan).
 // Baris ke-3 hanya dirender kalau ada isinya, jadi CV kandidat dengan 1-2
 // pekerjaan tetap tampil sama seperti sebelumnya. ---
-function buildJobRows(jobList, v) {
+export function buildJobRows(jobList, v) {
   let jobHtml = '';
   for (let i = 1; i <= 3; i++) {
     let pJ = Object.assign({}, jobList[i - 1] || {});
     // Toleransi dua bentuk kunci backend: {masuk,keluar,perusahaan} vs {tahun_masuk,tahun_keluar,nama_perusahaan}.
-    if (!isGood(pJ.masuk) && isGood(pJ.tahun_masuk)) pJ.masuk = pJ.tahun_masuk;
-    if (!isGood(pJ.keluar) && isGood(pJ.tahun_keluar)) pJ.keluar = pJ.tahun_keluar;
-    if (!isGood(pJ.perusahaan) && isGood(pJ.nama_perusahaan)) pJ.perusahaan = pJ.nama_perusahaan;
-    let msk = isGood(pJ.masuk) ? pJ.masuk : v('PEKERJAAN' + i + 'TAHUNMASUK');
-    let klr = isGood(pJ.keluar) ? pJ.keluar : v('PEKERJAAN' + i + 'TAHUNKELUAR');
-    let pt_id = isGood(pJ.perusahaan)
+    if (!window.isGood(pJ.masuk) && window.isGood(pJ.tahun_masuk)) pJ.masuk = pJ.tahun_masuk;
+    if (!window.isGood(pJ.keluar) && window.isGood(pJ.tahun_keluar)) pJ.keluar = pJ.tahun_keluar;
+    if (!window.isGood(pJ.perusahaan) && window.isGood(pJ.nama_perusahaan))
+      pJ.perusahaan = pJ.nama_perusahaan;
+    let msk = window.isGood(pJ.masuk) ? pJ.masuk : v('PEKERJAAN' + i + 'TAHUNMASUK');
+    let klr = window.isGood(pJ.keluar) ? pJ.keluar : v('PEKERJAAN' + i + 'TAHUNKELUAR');
+    let pt_id = window.isGood(pJ.perusahaan)
       ? pJ.perusahaan
       : v('PEKERJAAN' + i + 'NAMAPERUSAHAAN', 'PEKERJAAN' + i + 'PERUSAHAANID');
-    let pt_jp = isGood(pJ.perusahaan_jp) ? pJ.perusahaan_jp : v('PEKERJAAN' + i + 'PERUSAHAANJP');
-    let ker_id = isGood(pJ.jabatan)
+    let pt_jp = window.isGood(pJ.perusahaan_jp)
+      ? pJ.perusahaan_jp
+      : v('PEKERJAAN' + i + 'PERUSAHAANJP');
+    let ker_id = window.isGood(pJ.jabatan)
       ? pJ.jabatan
       : v(
           'PEKERJAAN' + i + 'JENISKERJA',
           'PEKERJAAN' + i + 'POSISI',
           'PEKERJAAN' + i + 'JABATANID',
         );
-    let ker_jp = isGood(pJ.jabatan_jp) ? pJ.jabatan_jp : v('PEKERJAAN' + i + 'JABATANJP');
-    let gaji = isGood(pJ.gaji) ? pJ.gaji : v('PEKERJAAN' + i + 'GAJI');
+    let ker_jp = window.isGood(pJ.jabatan_jp)
+      ? pJ.jabatan_jp
+      : v('PEKERJAAN' + i + 'JABATANJP');
+    let gaji = window.isGood(pJ.gaji) ? pJ.gaji : v('PEKERJAAN' + i + 'GAJI');
 
     if (msk === '-') msk = '';
     if (klr === '-') klr = '';
@@ -96,7 +109,7 @@ function buildJobRows(jobList, v) {
     let klrFmt =
       klr.toUpperCase().includes('SEKARANG') || klr.toUpperCase().includes('IMA')
         ? '現在に至る'
-        : fmtMonthYearJp(klr);
+        : window.fmtMonthYearJp(klr);
     let finalPt = pt_jp
       ? pt_id + '<br><span style="font-size:8px; font-weight:normal;">' + pt_jp + '</span>'
       : pt_id;
@@ -105,7 +118,7 @@ function buildJobRows(jobList, v) {
       : ker_id;
 
     jobHtml += `<tr>
-              <td class="val-center border-r-none">${fmtMonthYearJp(msk)}</td>
+              <td class="val-center border-r-none">${window.fmtMonthYearJp(msk)}</td>
               <td class="val-center border-lr-none">${msk || klr ? '-' : ''}</td>
               <td class="val-center border-l-none">${klrFmt}</td>
               <td colspan="2" class="val-center">${finalPt}</td>
@@ -117,23 +130,27 @@ function buildJobRows(jobList, v) {
 }
 
 // --- BLOK KELUARGA (maks 6 baris) ---
-function buildFamRows(famList, v) {
+export function buildFamRows(famList, v) {
   let famHtml = '';
   for (let i = 1; i <= 6; i++) {
     let kF = Object.assign({}, famList[i - 1] || {});
     // Toleransi dua bentuk kunci backend: {umur} vs {usia}.
-    if (!isGood(kF.umur) && isGood(kF.usia)) kF.umur = kF.usia;
-    let hub = isGood(kF.hubungan)
+    if (!window.isGood(kF.umur) && window.isGood(kF.usia)) kF.umur = kF.usia;
+    let hub = window.isGood(kF.hubungan)
       ? kF.hubungan
       : v('KELUARGA' + i + 'HUBUNGANID', 'KELUARGA' + i + 'HUBUNGAN');
-    let hub_jp = isGood(kF.hubungan_jp) ? kF.hubungan_jp : v('KELUARGA' + i + 'HUBUNGANJP');
-    let nm = isGood(kF.nama) ? kF.nama : v('KELUARGA' + i + 'NAMA');
-    let u = isGood(kF.umur) ? kF.umur : v('KELUARGA' + i + 'USIA', 'KELUARGA' + i + 'UMUR');
-    let p = isGood(kF.pekerjaan)
+    let hub_jp = window.isGood(kF.hubungan_jp)
+      ? kF.hubungan_jp
+      : v('KELUARGA' + i + 'HUBUNGANJP');
+    let nm = window.isGood(kF.nama) ? kF.nama : v('KELUARGA' + i + 'NAMA');
+    let u = window.isGood(kF.umur) ? kF.umur : v('KELUARGA' + i + 'USIA', 'KELUARGA' + i + 'UMUR');
+    let p = window.isGood(kF.pekerjaan)
       ? kF.pekerjaan
       : v('KELUARGA' + i + 'PEKERJAANID', 'KELUARGA' + i + 'PEKERJAAN');
-    let p_jp = isGood(kF.pekerjaan_jp) ? kF.pekerjaan_jp : v('KELUARGA' + i + 'PEKERJAANJP');
-    let g = isGood(kF.gaji) ? kF.gaji : v('KELUARGA' + i + 'GAJI');
+    let p_jp = window.isGood(kF.pekerjaan_jp)
+      ? kF.pekerjaan_jp
+      : v('KELUARGA' + i + 'PEKERJAANJP');
+    let g = window.isGood(kF.gaji) ? kF.gaji : v('KELUARGA' + i + 'GAJI');
 
     if (hub === '-') hub = '';
     if (nm === '-') nm = '';
@@ -160,7 +177,7 @@ function buildFamRows(famList, v) {
 }
 
 // --- NILAI IDENTITAS (gender/nikah/jpn/paspor/tangan/goldar/no) ---
-function buildCvIdentitas(v) {
+export function buildCvIdentitas(v) {
   let gen = String(v('GENDER', 'JENISKELAMIN', 'identitas.gender')).toUpperCase();
   // Perempuan: PEREMPUAN/WANITA/CEWEK/W/女; jangan tangkap 'PRIA' (punya huruf P)
   let genderStr =
@@ -225,7 +242,7 @@ function buildCvIdentitas(v) {
 }
 
 // --- TEMPLATE KERTAS A4 (100% IDENTIK GAMBAR) ---
-function buildCvKertasA4(p) {
+export function buildCvKertasA4(p) {
   const {
     v,
     fotoHtml,
@@ -476,3 +493,12 @@ function buildCvKertasA4(p) {
         `;
   return html;
 }
+
+// BRIDGE ESM → classic (bundel): dipanggil 10_cv_rirekisho.js (renderCVAjaib)
+// via window.* — alias data property (builder murni, tidak pernah di-reassign).
+window.buildEduRows = buildEduRows;
+window.buildJobRows = buildJobRows;
+window.buildFamRows = buildFamRows;
+window.buildCvIdentitas = buildCvIdentitas;
+window.buildCvKertasA4 = buildCvKertasA4;
+
