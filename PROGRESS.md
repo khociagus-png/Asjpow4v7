@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 16: **performa tarikan data** — auto-refresh 60→120 dtk + skip tab hidden, dan **SWR-lite cache** getAppData/getAppConfig di api-client (render instan dari cache, validasi background).
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **agus khoci** (via Freebuff) — Fase 3 langkah 17: **optimasi query backend** — file migrasi index SQL (Supabase/PostgreSQL) + **cache server-side loadCandidatesUnik (TTL 25 dtk)** + invalidasi cache di SEMUA jalur mutasi kandidat.
 
 ---
 
@@ -16,6 +16,18 @@
 - 🐛 **Bugfix 1 — bare global di master_full.js (latent, nyata)**: 30× `tr(`, 2× `callAPI(`, 1× `cekUploadFile(` bare → di ESM bakal ReferenceError saat render box pendidikan/pekerjaan/keluarga (langkah 3-5) & simpan/upload. Semua di-window-kan (`window.tr` dll). **Diverifikasi di browser**: navigasi step 1→5 render semua dynamic box, kembali ke step 1, 0 error JS.
 - 🐛 **Bugfix 2 — bridge alias hilang total di master_full.js**: `changeStep`/`submitMaster`/`handleFile` tidak di-export & TIDAK ada satu pun `window.*` alias → HTML `onclick="changeStep(1)"` / `submitMaster(true)` / `onchange="handleFile(...)"` bakal ReferenceError (bridge sempat hilang saat konversi langkah 13). Fix: 3 fungsi di-export + bridge 8 alias (`toggleImaMade`/`gateLogin`/`onSswSelect`/`onPekerjaanSelect`/`onFamPekerjaanSelect`/`handleFile`/`changeStep`/`submitMaster`). Pelajaran dicatat di ESM_BRIDGE §6: **saat konversi, wajib cek `window.X` ter-expose untuk SEMUA handler HTML page itu** — cek dengan membuka halaman & klik, bukan cuma no-undef (no-undef tidak menangkap alias yang hilang).
 - Verifikasi: lint 0/12 ✓ (no-undef aktif) · test **81/81** ✓ · build idempoten (`app-f90fc61af6.js`) · check:globals nol kolisi (405 simbol) · audit HIGH=0 · **E2E SEMUA LULUS**: login, upload, biodata + **smoke master-full**: nama dari URL, alias onclick ada, step 1→5 render (edu_tk_1/job_nm_1/fam_nm_1), 0 error JS ✓.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: agus khoci (via Freebuff)
+
+### Fase 3 langkah 17 — optimasi query backend (index SQL + cache server-side kandidat)
+
+- **`netlify/migrations/2026-08-16-index-perf.sql` (BARU)** — index utk query tersibuk getAppData (semua idempotent, aman dijalankan ulang di Supabase SQL Editor): `database_asj_form(timestamp DESC)` (sort inbox limit 500 tanpa sort penuh), `database_asj_form(no_wa)` + `(code_job)` (lookup WA/job), `database_candidate(updated_at DESC)` (sort dedupe) + `(no_wa)` (lookup WA), `pemberkasan_checklist(wa)` + `master_database_candidate(no_wa)` (IN-filter berkas/bio), `pg_trgm` GIN index `database_candidate(id_loker_pilihan)` (ILIKE '%kode%' — wildcard kiri). Termasuk query verifikasi `pg_stat_user_tables` + `EXPLAIN ANALYZE`.
+- **Cache server-side `loadCandidatesUnik`** (`actions-public.js`): hasil dedupe+filter+sort kandidat (halaman 1 admin) di-cache in-memory TTL **25 dtk** (key `cand:<q>|p<page>|s<pageSize>`) — getAppData berulang (ganti tab, auto-refresh 120 dtk) TIDAK lagi full-scan `database_candidate` tiap kali. Public base (jobs/assets/settings) sudah di-cache sebelumnya (20 dtk).
+- **Invalidasi cache di SEMUA jalur mutasi kandidat** (`cacheClear()`): updateCatatanKandidat, updateKandidatSuper, formStatus (approve/review/reject → PATCH/POST kandidat), deleteForm, submitMasterForm, submitDaftarSiswa, submitApply, simpanKandidatDanUpload, simpanBerkasTahapan, simpanRevisiKandidat, **+ baru ditambahkan di sesi ini**: daftarKandidat (auth), tandaiGagalJob (job), uploadDriveReplacement (drive). Mutasi form-only (inbox tidak di-cache) & PATCH master oleh AI CV (tidak menyentuh kolom light dedupe) sengaja tidak invalidate.
+- Verifikasi: node --check semua file backend ✓ · lint 0/12 ✓ · test **81/81** ✓ · **E2E SEMUA LULUS** (login/upload/biodata — getAppData berulang + mutasi upload→cacheClear) ✓.
+- ⏭️ Berikutnya (opsional): jalankan migrasi SQL di Supabase (perlu akses dashboard — lihat cara pakai di header file), cap scan `findAllCandidatesLight` kalau tabel sudah ribuan, atau lanjut refactor lain (i18n split, partials HTML).
 
 ---
 

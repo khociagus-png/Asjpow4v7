@@ -1,6 +1,34 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 16 — commit `c21e0d4`).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (Fase 3 langkah 17 — commit `5f15987`).
+
+---
+
+## 2026-08-16 — Fase 3 langkah 17: optimasi query backend — index SQL + cache server-side kandidat (perf)
+
+### Migrasi index SQL (Supabase/PostgreSQL)
+
+- `netlify/migrations/2026-08-16-index-perf.sql`: index utk query tersibuk
+  getAppData — `database_asj_form(timestamp DESC / no_wa / code_job)`,
+  `database_candidate(updated_at DESC / no_wa)` + GIN pg_trgm
+  `(id_loker_pilihan)`, `pemberkasan_checklist(wa)`,
+  `master_database_candidate(no_wa)`. Semua idempotent; termasuk query
+  verifikasi (pg_stat_user_tables + EXPLAIN ANALYZE).
+
+### Cache server-side kandidat
+
+- `loadCandidatesUnik` (halaman admin) di-cache in-memory TTL 25 dtk →
+  getAppData berulang tidak lagi full-scan `database_candidate` tiap kali.
+- Invalidasi `cacheClear()` di SEMUA jalur mutasi kandidat: updateCatatan,
+  updateKandidatSuper, formStatus, deleteForm, submitMasterForm,
+  submitDaftarSiswa, submitApply, simpanKandidatDanUpload,
+  simpanBerkasTahapan, simpanRevisiKandidat + (sesi ini) daftarKandidat,
+  tandaiGagalJob, uploadDriveReplacement.
+
+### Verifikasi
+
+- node --check semua file backend ✓ · lint 0/12 ✓ · test 81/81 ✓ ·
+  E2E login/upload/biodata SEMUA LULUS ✓.
 
 ---
 
