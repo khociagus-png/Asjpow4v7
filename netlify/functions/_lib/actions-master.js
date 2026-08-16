@@ -153,6 +153,174 @@ const SNAKE_TO_CAMEL = {
   exp_pasport: 'expPaspor',
 };
 
+// ---------------------------------------------------------------------------
+// Kolom yang TIDAK ADA di tabel master_database_candidate (skema 154 kolom,
+// diverifikasi 2026-08-16 via getSchema). Menulis kolom ini ke body PATCH/POST
+// → HTTP 400 PGRST204 → SELURUH simpan gagal (gejala nyata: "Gagal simpan
+// Master: Could not find the 'keluarga_1_gaji' column"). Nilai kolom yang
+// tidak ada disimpan ke ai_data_json (buildAiOverflow → mergeAiOverflow)
+// supaya tidak hilang dan tetap round-trip di form/CV.
+const MASTER_COLUMN_MISSING = new Set([
+  // jurusan: kolom HANYA ada di slot 3 (pendidikan_3_jurusan_id)
+  'pendidikan_1_jurusan_id',
+  'pendidikan_2_jurusan_id',
+  'pendidikan_4_jurusan_id',
+  'pendidikan_5_jurusan_id',
+  // gaji pekerjaan: kolom HANYA ada di slot 1
+  'pekerjaan_2_gaji',
+  'pekerjaan_3_gaji',
+  // keluarga: kolom HANYA slot 1 & TANPA kolom gaji sama sekali
+  'keluarga_1_gaji',
+  'keluarga_2_gaji',
+  'keluarga_3_gaji',
+  'keluarga_4_gaji',
+  'keluarga_5_gaji',
+  'keluarga_2_hubungan',
+  'keluarga_2_nama',
+  'keluarga_2_usia',
+  'keluarga_2_pekerjaan',
+  'keluarga_3_hubungan',
+  'keluarga_3_nama',
+  'keluarga_3_usia',
+  'keluarga_3_pekerjaan',
+  'keluarga_4_hubungan',
+  'keluarga_4_nama',
+  'keluarga_4_usia',
+  'keluarga_4_pekerjaan',
+  'keluarga_5_hubungan',
+  'keluarga_5_nama',
+  'keluarga_5_usia',
+  'keluarga_5_pekerjaan',
+  // kenalan di Jepang: kolom HANYA nama & hubungan
+  'kenalan_di_jepang_pekerjaan',
+  'kenalan_di_jepang_usia',
+  'kenalan_di_jepang_alamat',
+]);
+
+// Kumpulkan nilai form yang kolomnya TIDAK ADA di tabel → struktur ai_data_json
+// (per-bagian). Hanya nilai non-kosong; return null kalau tidak ada yang perlu.
+function buildAiOverflow(d) {
+  const set = (obj, k, v) => {
+    if (v !== undefined && v !== null && String(v).trim() !== '') obj[k] = String(v).trim();
+  };
+  const out = {};
+  // Kenalan (nama/hubungan punya kolom; pekerjaan/usia/alamat tidak)
+  const ken = {};
+  set(ken, 'nama_id', d.kenalanNama);
+  set(ken, 'hubungan_id', d.kenalanHubungan);
+  set(ken, 'pekerjaan_id', d.kenalanPekerjaan);
+  set(ken, 'usia', d.kenalanUsia);
+  set(ken, 'alamat_id', d.kenalanAlamat);
+  if (Object.keys(ken).length) out.kenalan_jepang = ken;
+  // Pendidikan: jurusan slot 1,2,4,5 (kolom hanya slot 3)
+  const pend = [];
+  if (Array.isArray(d.pendidikan)) {
+    for (let i = 0; i < 5; i++) {
+      if (i === 2) continue; // slot 3 → kolom pendidikan_3_jurusan_id
+      const p = d.pendidikan[i] || {};
+      const jur = p.jurusan !== undefined && p.jurusan !== null ? p.jurusan : p.jurusan_id;
+      if (jur === undefined || jur === null || String(jur).trim() === '') continue;
+      const e = {};
+      set(e, 'tingkat', p.tingkat);
+      set(e, 'sekolah', p.nama_sekolah || p.namaSekolah || p.sekolah);
+      set(e, 'jurusan_id', jur);
+      pend.push({ slot: i, entry: e });
+    }
+  }
+  if (pend.length) out.pendidikan = pend;
+  // Pekerjaan: gaji slot 2-3 (kolom hanya slot 1)
+  const pek = [];
+  if (Array.isArray(d.pekerjaan)) {
+    for (let i = 1; i < 3; i++) {
+      const p = d.pekerjaan[i] || {};
+      const gaji = p.gaji !== undefined && p.gaji !== null ? p.gaji : p.pendapatan;
+      if (gaji === undefined || gaji === null || String(gaji).trim() === '') continue;
+      const e = {};
+      set(e, 'perusahaan', p.nama_perusahaan || p.namaPt || p.perusahaan);
+      set(e, 'gaji', gaji);
+      pek.push({ slot: i, entry: e });
+    }
+  }
+  if (pek.length) out.pekerjaan = pek;
+  // Keluarga: slot 2-5 (kolom hanya slot 1) + gaji semua slot (tanpa kolom)
+  const kel = [];
+  if (Array.isArray(d.keluarga)) {
+    for (let i = 0; i < 5; i++) {
+      const p = d.keluarga[i] || {};
+      const e = {};
+      set(e, 'nama', p.nama);
+      set(e, 'umur', p.usia !== undefined && p.usia !== null ? p.usia : p.umur);
+      set(e, 'usia', p.usia !== undefined && p.usia !== null ? p.usia : p.umur);
+      set(e, 'hubungan', p.hubungan);
+      set(e, 'pekerjaan', p.pekerjaan);
+      set(e, 'gaji', p.gaji !== undefined && p.gaji !== null ? p.gaji : p.pendapatan);
+      if (i === 0) {
+        // slot 1: kolom ada (nama/usia/hubungan/pekerjaan) — hanya gaji yang overflow
+        delete e.nama;
+        delete e.umur;
+        delete e.usia;
+        delete e.hubungan;
+        delete e.pekerjaan;
+      }
+      if (Object.keys(e).length) kel.push({ slot: i, entry: e });
+    }
+  }
+  if (kel.length) out.keluarga = kel;
+  return Object.keys(out).length ? out : null;
+}
+
+// Deep-merge hasil buildAiOverflow ke ai_data_json (newest-wins per field,
+// isi lama yang tidak disentuh TIDAK dihapus). Kembalikan objek ai baru.
+function mergeAiOverflow(ai, overflow) {
+  ai = ai && typeof ai === 'object' ? ai : {};
+  const mergeObj = (base, patch) => {
+    base = base && typeof base === 'object' ? base : {};
+    for (const [k, val] of Object.entries(patch || {})) {
+      if (val !== undefined && val !== null && String(val).trim() !== '') base[k] = val;
+    }
+    return base;
+  };
+  const setSlot = (listKey, patchList, keyOf) => {
+    if (!Array.isArray(patchList) || !patchList.length) return;
+    if (!Array.isArray(ai[listKey])) ai[listKey] = [];
+    const arr = ai[listKey];
+    for (const { slot, entry } of patchList) {
+      const idx = arr.findIndex((e) => e && typeof e === 'object' && keyOf(e) === keyOf(entry));
+      if (idx === -1) {
+        while (arr.length <= slot) arr.push({});
+        mergeObj(arr[slot], entry);
+      } else {
+        mergeObj(arr[idx], entry);
+      }
+    }
+  };
+  if (overflow.kenalan_jepang) {
+    ai.kenalan_jepang = mergeObj(ai.kenalan_jepang, overflow.kenalan_jepang);
+  }
+  if (overflow.pendidikan) {
+    setSlot(
+      'pendidikan',
+      overflow.pendidikan,
+      (e) => String((e.tingkat || '') + (e.sekolah || '')).toLowerCase().replace(/[^a-z0-9]/g, ''),
+    );
+  }
+  if (overflow.pekerjaan) {
+    setSlot(
+      'pekerjaan',
+      overflow.pekerjaan,
+      (e) => String(e.perusahaan || '').toLowerCase().replace(/[^a-z0-9]/g, ''),
+    );
+  }
+  if (overflow.keluarga) {
+    setSlot(
+      'keluarga',
+      overflow.keluarga,
+      (e) => String((e.nama || '') + (e.hubungan || '')).toLowerCase().replace(/[^a-z0-9]/g, ''),
+    );
+  }
+  return ai;
+}
+
 // --- Penggabung riwayat: kolom master (form Master Lengkap) + AIDATAJSON ---
 // (isi CV AI / Jeklin). Dua sumber yang sama-sama sah; SATU sumber tidak boleh
 // menutupi yang lain. Kolom master sering hanya menyimpan baris pertama
@@ -386,17 +554,29 @@ function buildMasterNested(row) {
         (e) => cleanKey(e.nama || ''),
       );
     })(),
-    kenalan_jepang: {
-      nama_id: v('kenalan_di_jepang_nama'),
-      nama_jp: v('kenalan_di_jepang_nama_jp'),
-      hubungan_id: v('kenalan_di_jepang_hubungan'),
-      hubungan_jp: v('kenalan_di_jepang_hubungan_jp'),
-      pekerjaan_id: v('kenalan_di_jepang_pekerjaan'),
-      pekerjaan_jp: v('kenalan_di_jepang_pekerjaan_jp'),
-      usia: v('kenalan_di_jepang_usia'),
-      alamat_id: v('kenalan_di_jepang_alamat'),
-      alamat_jp: v('kenalan_di_jepang_alamat_jp'),
-    },
+    // Kenalan: tabel HANYA punya kolom nama & hubungan — sisanya (pekerjaan,
+    // usia, alamat, versi JP) hanya ada di ai_data_json → digabung fill-if-empty
+    // supaya CV/nested tidak tampil kosong (bug: data terisi tapi preview CV &
+    // auto-fill kosong).
+    kenalan_jepang: (function () {
+      const aiK = (aiParsed && aiParsed.kenalan_jepang) || {};
+      const src = (col, aiKey) => {
+        const c = v(col);
+        const a = aiK[aiKey];
+        return c !== '' ? c : a !== undefined && a !== null ? toText(a) : '';
+      };
+      return {
+        nama_id: src('kenalan_di_jepang_nama', 'nama_id'),
+        nama_jp: src('kenalan_di_jepang_nama_jp', 'nama_jp'),
+        hubungan_id: src('kenalan_di_jepang_hubungan', 'hubungan_id'),
+        hubungan_jp: src('kenalan_di_jepang_hubungan_jp', 'hubungan_jp'),
+        pekerjaan_id: src('kenalan_di_jepang_pekerjaan', 'pekerjaan_id'),
+        pekerjaan_jp: src('kenalan_di_jepang_pekerjaan_jp', 'pekerjaan_jp'),
+        usia: src('kenalan_di_jepang_usia', 'usia'),
+        alamat_id: src('kenalan_di_jepang_alamat', 'alamat_id'),
+        alamat_jp: src('kenalan_di_jepang_alamat_jp', 'alamat_jp'),
+      };
+    })(),
     uploads: {
       photo: row.pas_photo || '',
       cv: row.file_cv || '',
@@ -419,21 +599,41 @@ async function handleGetMasterDataByWa(payload, sessionToken) {
       const x = row[col];
       return x !== undefined && x !== null ? toText(x) : '';
     };
+    // Kenalan di Jepang: kolom tabel hanya nama & hubungan — pekerjaan/usia/
+    // alamat & versi JP hanya ada di ai_data_json (CV AI) → fallback fill-if-
+    // empty supaya auto-fill Form Master tidak tampil kosong (parity dengan
+    // Netlify lama).
+    let aiParsed = null;
+    try {
+      const raw = row.ai_data_json;
+      if (typeof raw === 'string' && raw.trim() && raw !== '-') aiParsed = JSON.parse(raw);
+    } catch (e) {
+      aiParsed = null;
+    }
+    const aiKen = (aiParsed && aiParsed.kenalan_jepang) || {};
+    const aiOf = (k) => {
+      const x = aiKen[k];
+      return x !== undefined && x !== null ? toText(x) : '';
+    };
     const out = {
       NAMA_LENGKAP: v('nama_lengkap'),
       FURIGANA: v('furigana'),
       NAMAPANGGILAN: v('namapanggilan'),
       PANGGILAN_KATAKANA: v('panggilan_katakana'),
       TEMPAT_LAHIR: v('tempat_lahir'),
+      TEMPAT_LAHIR_JP: v('tempatlahirjp'),
       TGL_LAHIR: v('tgl_lahir'),
       GENDER: v('gender'),
       USIA: v('usia'),
       AGAMA: v('agama'),
+      AGAMA_JP: v('agamajp'),
       STATUS_PERNIKAHAN: v('status_pernikahan'),
+      STATUS_NIKAH_JP: v('statusnikahjp'),
       JUMLAH_ANAK: v('jumlah_anak'),
       NIK: v('nik'),
       DRIVER_LICENSE: v('driver_license'),
       ALAMAT_LENGKAP: v('alamat_lengkap'),
+      ALAMAT_JP: v('alamatjp'),
       EMAIL: v('email'),
       TT: v('tb'),
       TB: v('tb'),
@@ -467,6 +667,9 @@ async function handleGetMasterDataByWa(payload, sessionToken) {
       KEKURANGAN: v('kekurangan'),
       KEAHLIAN_KHUSUS: v('keahlian_khusus'),
       'HOBI_&_KETERAMPILAN': v('hobi_dan_keterampilan'),
+      HOBI_AND_KETERAMPILAN: v('hobi_dan_keterampilan'),
+      HOBI_JP: v('hobi_jp'),
+      KEAHLIAN_JP: v('keahlian_khusus_jp'),
       ALASAN_MEMILIH_BIDANG: v('alasan_memilih_bidang'),
       MOTIVASI_KE_JEPANG: v('motivasi_ke_jepang'),
       KEINGINAN_PRIBADI: v('keinginan_pribadi'),
@@ -476,11 +679,15 @@ async function handleGetMasterDataByWa(payload, sessionToken) {
       KONTAK_DARURAT_NAMA: v('kontak_darurat_nama'),
       KONTAK_DARURAT_HUBUNGAN: v('kontak_darurat_hubungan'),
       KONTAK_DARURAT_WA: v('kontak_darurat_wa'),
-      KENALAN_DI_JEPANG_NAMA: v('kenalan_di_jepang_nama'),
-      KENALAN_DI_JEPANG_HUBUNGAN: v('kenalan_di_jepang_hubungan'),
-      KENALAN_DI_JEPANG_PEKERJAAN: v('kenalan_di_jepang_pekerjaan'),
-      KENALAN_DI_JEPANG_USIA: v('kenalan_di_jepang_usia'),
-      KENALAN_DI_JEPANG_ALAMAT: v('kenalan_di_jepang_alamat'),
+      KENALAN_DI_JEPANG_NAMA: v('kenalan_di_jepang_nama') || aiOf('nama_id'),
+      KENALAN_DI_JEPANG_NAMA_JP: aiOf('nama_jp'),
+      KENALAN_DI_JEPANG_HUBUNGAN: v('kenalan_di_jepang_hubungan') || aiOf('hubungan_id'),
+      KENALAN_DI_JEPANG_HUBUNGAN_JP: aiOf('hubungan_jp'),
+      KENALAN_DI_JEPANG_PEKERJAAN: aiOf('pekerjaan_id'),
+      KENALAN_DI_JEPANG_PEKERJAAN_JP: aiOf('pekerjaan_jp'),
+      KENALAN_DI_JEPANG_USIA: aiOf('usia'),
+      KENALAN_DI_JEPANG_ALAMAT: aiOf('alamat_id'),
+      KENALAN_DI_JEPANG_ALAMAT_JP: aiOf('alamat_jp'),
       NO_PASPORT: v('no_paspor'),
       TGL_TERBIT_PASPORT: v('tgl_terbit_pasport'),
       EXP_PASPORT: v('exp_pasport'),
@@ -764,6 +971,15 @@ async function handleSubmitMasterForm(payload, sessionToken) {
       }
     }
 
+    // Kolom yang TIDAK ada di tabel → buang dari body (kalau ditulis, Supabase
+    // balas 400 PGRST204 dan SELURUH simpan gagal — bug nyata: semua simpan
+    // master-full error 'keluarga_1_gaji'). Nilainya disimpan ke ai_data_json
+    // di bawah (buildAiOverflow/mergeAiOverflow) supaya tidak hilang.
+    for (const col of Object.keys(body)) {
+      if (MASTER_COLUMN_MISSING.has(col)) delete body[col];
+    }
+    const aiOverflow = buildAiOverflow(d);
+
     if (row && row.id !== undefined) {
       await supabaseJson('PATCH', 'master_database_candidate', {
         query: { id: 'eq.' + row.id },
@@ -777,6 +993,52 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         body,
         headers: { Prefer: 'return=minimal' },
       });
+    }
+
+    // Simpan nilai kolom yang TIDAK ada di tabel ke ai_data_json (deep-merge
+    // newest-wins) supaya round-trip form/CV tetap utuh. Opsional — kegagalan
+    // di sini tidak menggagalkan simpan utama.
+    try {
+      if (aiOverflow) {
+        let aiBase = null;
+        if (row && row.ai_data_json) {
+          try {
+            const parsed = JSON.parse(row.ai_data_json);
+            if (parsed && typeof parsed === 'object') aiBase = parsed;
+          } catch (e) {
+            aiBase = null;
+          }
+        }
+        const aiNew = mergeAiOverflow(aiBase, aiOverflow);
+        const aiPatch = {
+          ai_data_json: JSON.stringify(aiNew),
+          ai_updated_at: new Date().toISOString(),
+        };
+        if (row && row.id !== undefined) {
+          await supabaseJson('PATCH', 'master_database_candidate', {
+            query: { id: 'eq.' + row.id },
+            body: aiPatch,
+            headers: { Prefer: 'return=minimal' },
+          });
+        } else {
+          // Baris baru: cari id hasil POST, lalu patch ai_data_json.
+          const rows2 = await supabaseJson('GET', 'master_database_candidate', {
+            query: { select: '*', no_wa: 'eq.' + wa, limit: 5 },
+          });
+          const r2 = (Array.isArray(rows2) ? rows2 : []).find(
+            (r) => normalizeWa(String(r.no_wa || '')) === wa,
+          );
+          if (r2 && r2.id !== undefined) {
+            await supabaseJson('PATCH', 'master_database_candidate', {
+              query: { id: 'eq.' + r2.id },
+              body: aiPatch,
+              headers: { Prefer: 'return=minimal' },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      /* ai merge opsional — jangan gagalkan simpan */
     }
 
     // Sinkronisasi ringan ke database_candidate (kolom yang dipakai dashboard).
@@ -843,4 +1105,8 @@ module.exports = {
   handleGetDrafCvMaster,
   handleSubmitMasterForm,
   handleSimpanUpdateMaster,
+  // Helper murni (dipakai test): filter kolom tak-ada + simpan overflow ke ai_data_json.
+  MASTER_COLUMN_MISSING,
+  buildAiOverflow,
+  mergeAiOverflow,
 };

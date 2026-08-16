@@ -1,6 +1,37 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (⚡ AI cepat lagi — model Gemini LITE + timeout + fix history).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (🐛 Fix CV Master — simpan gagal PGRST204 + kenalan/auto-fill kosong + simpan AI hapus kenalan).
+
+---
+
+## 2026-08-16 — 🐛 Fix CV Master: simpan gagal total + kenalan/auto-fill kosong
+
+### Gejala (laporan user)
+
+- "Tadi saya tes CV master, kok data saya ada yang kosong perasaan sudah terisi." (Netlify lama = pembanding; bedanya hanya modular vs global.)
+- Simpan Form Master Lengkap selalu error `Gagal simpan Master: Could not find the 'keluarga_1_gaji' column` (HTTP 400 PGRST204) — **setiap** simpan master-full gagal total.
+- Auto-fill Form Master: kolom "Alamat di Jepang" (kenalan) kosong padahal terisi (TOKYO) di Netlify lama.
+- Simpan CV AI (ai_form) menghapus data kenalan dari master.
+
+### Akar masalah
+
+- `handleSubmitMasterForm` menulis **30 kolom yang tidak ada** di tabel `master_database_candidate` (skema 154 kolom; diverifikasi via `getSchema`): `keluarga_N_gaji` (semua), `keluarga_2..5_*`, `pendidikan_{1,2,4,5}_jurusan_id`, `pekerjaan_{2,3}_gaji`, `kenalan_di_jepang_{pekerjaan,usia,alamat}`. Satu kolom salah → Supabase 400 → seluruh simpan dibatalkan.
+- `getMasterDataByWa`/`buildMasterNested` hanya membaca kolom → kenalan pekerjaan/usia/alamat & versi JP (yang cuma ada di `ai_data_json`) tampil kosong.
+- `submitDataAsj` menimpa `ai_data_json` dengan 8 seksi form AI → `kenalan_jepang`/`context`/file hilang.
+- `ai/cv.js` punya salinan `buildMasterNested` tanpa merge ai_data_json → konteks admin AI copilot tidak lengkap.
+
+### Perbaikan (`netlify/functions/_lib/actions-master.js`, `netlify/functions/_lib/ai/cv.js`)
+
+- `MASTER_COLUMN_MISSING` (30 kolom) → dibuang dari body simpan; nilai non-kosong disimpan ke `ai_data_json` lewat `buildAiOverflow` + `mergeAiOverflow` (deep-merge newest-wins) → simpan berhasil + round-trip utuh.
+- `buildMasterNested.kenalan_jepang` merge `ai_data_json.kenalan_jepang` (fill-if-empty) → preview CV & auto-fill ai_form lengkap.
+- `handleGetMasterDataByWa` fallback kenalan ke ai + key JP parity (parity dengan Netlify lama).
+- `submitDataAsj` pertahankan kunci non-managed (kenalan_jepang, context, fotoFile/jftFile/sswFile).
+- `ai/cv.js` pakai `buildMasterNested` shared dari actions-master.js (satu sumber, tanpa drift).
+
+### Verifikasi
+
+- Test **91/91** (10 baru: `actions-master.test.js` — set kolom tak-ada, buildAiOverflow, mergeAiOverflow) · lint 0 error · `node --check` ✓.
+- Diag live (backup+restore penuh, WA AGUS KHOCI): simpan master-full `success:true` (dulu selalu 400) · round-trip kenalan OK (simpan OSAKA → baca flat+nested terisi, JP dari ai) · submitDataAsj tidak menghapus kenalan_jepang · getDrafCvMaster/getMasterDataByWa vs Netlify lama: sisa perbedaan hanya alias key (nilai sama).
 
 ---
 

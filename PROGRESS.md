@@ -4,7 +4,34 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — ⚡ AI kembali cepat: model Gemini LITE (sama seperti Netlify lama) + timeout + fix history.
+**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🐛 Fix besar CV Master: simpan master-full yang SELALU gagal (PGRST204 kolom tak ada) + kenalan/auto-fill kosong (merge ai_data_json) + simpan AI tidak menghapus kenalan.
+
+---
+
+## 🆕 Sesi 2026-08-16 — dikerjakan oleh: khoci89 (via Freebuff)
+
+### 🐛 Fix CV Master: simpan gagal total + data kenalan/auto-fill kosong (vs Netlify lama)
+
+**Gejala user:** "tes CV master kok data saya ada yang kosong perasaan sudah terisi". Netlify lama dipakai sebagai pembanding (bedanya cuma modular vs global).
+
+**Bukti (dibandingkan langsung: repo vs `asjportal.netlify.app`, env sama, WA AGUS KHOCI `6282130442661`):**
+- **Simpan Form Master Lengkap SELALU gagal** — `submitMasterForm` menulis kolom yang TIDAK ADA di tabel `master_database_candidate` (skema 154 kolom) → Supabase HTTP 400 PGRST204 → `"Gagal simpan Master: Could not find the 'keluarga_1_gaji' column"`. Ditemukan **30 kolom** yang ditulis tapi tidak ada (cek exhaustif vs schema):
+  - `keluarga_N_gaji` (semua slot) & `keluarga_2..5_{hubungan,nama,usia,pekerjaan}` (kolom keluarga HANYA slot 1),
+  - `pendidikan_{1,2,4,5}_jurusan_id` (jurusan HANYA slot 3),
+  - `pekerjaan_{2,3}_gaji` (gaji pekerjaan HANYA slot 1),
+  - `kenalan_di_jepang_{pekerjaan,usia,alamat}` (kenalan HANYA nama & hubungan).
+- **Auto-fill Form Master kosong**: `getMasterDataByWa` cuma baca kolom → `KENALAN_DI_JEPANG_ALAMAT` (TOKYO) & versi JP (ケンジ/友達/東京) kosong, padahal ada di `ai_data_json` (Netlify lama mengembalikannya → form lama tampil terisi).
+- **Nested CV kosong**: `buildMasterNested.kenalan_jepang` baca kolom yang tidak ada → preview CV / auto-fill ai_form tidak dapat kenalan JP & alamat.
+- **Simpan CV AI menghapus kenalan**: `submitDataAsj` menimpa `ai_data_json` master dengan 8 seksi (identitas/fisik/…/wawancara) → `kenalan_jepang`, `context`, `fotoFile/jftFile/sswFile` terhapus tiap kali kandidat save dari ai_form.
+
+**Fix (`netlify/functions/_lib/actions-master.js` + `ai/cv.js`):**
+1. `MASTER_COLUMN_MISSING` (30 kolom) → dibuang dari body PATCH/POST sebelum simpan; nilainya disimpan ke `ai_data_json` via `buildAiOverflow` + `mergeAiOverflow` (deep-merge newest-wins, isi lama utuh) → simpan master-full **berhasil** & round-trip form/CV utuh.
+2. `buildMasterNested.kenalan_jepang` → merge `ai_data_json.kenalan_jepang` (fill-if-empty) → CV preview & auto-fill ai_form lengkap.
+3. `handleGetMasterDataByWa` → kenalan fallback ke ai + key JP parity (NAMA_JP/HUBUNGAN_JP/PEKERJAAN_JP/ALAMAT_JP/TEMPAT_LAHIR_JP/AGAMA_JP/STATUS_NIKAH_JP/ALAMAT_JP/HOBI_JP/KEAHLIAN_JP).
+4. `submitDataAsj` → pertahankan kunci non-managed (kenalan_jepang, context, file) dari `ai_data_json` lama (kunci managed = 8 seksi form AI).
+5. `ai/cv.js` → pakai `buildMasterNested` SHARED dari actions-master (hapus salinan lama) → admin AI copilot dapat data lengkap (kenalan + array riwayat yang dulu cuma di ai_data_json).
+
+**Verifikasi (langsung ke handler + Supabase asli, backup/restore penuh):** simpan master-full payload 5 edu/3 job/5 fam + kenalanAlamat=TOKYO → `success:true` (dulu selalu 400) · round-trip kenalan: simpan OSAKA → flat `KENALAN_DI_JEPANG_ALAMAT=OSAKA` + nested `alamat_id=OSAKA` + JP dari ai (ケンジ/友達/東京) · submitDataAsj → `kenalan_jepang` tetap utuh · test **91/91** (10 baru: filter kolom + merge ai) · lint 0 error · `node --check` ✓ · smoke admin/getAppData (132 jobs) ✓.
 
 ---
 

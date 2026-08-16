@@ -4,9 +4,13 @@
 // REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
 'use strict';
 
-const { normalizeWa, pick, supabaseJson, toText } = require('../db/client');
+const { normalizeWa, pick, supabaseJson } = require('../db/client');
 const { findCandidateByIdFiltered, findCandidateByWaFiltered, findCandidates } = require('../db/candidates');
 const { requireRole } = require('../actions-auth');
+// Satu sumber buildMasterNested (dari actions-master.js) supaya konteks AI
+// admin tidak pakai salinan lama yang belum merge ai_data_json (kenalan JP/
+// alamat & array riwayat tampil kosong di copilot admin).
+const { buildMasterNested } = require('../actions-master');
 
 const APPLY_WA_COLS = ['no_wa', 'wa', 'whatsapp'];
 
@@ -17,185 +21,6 @@ async function findMasterByWa(wa) {
   });
   if (!Array.isArray(rows)) return null;
   return rows.find((r) => normalizeWa(String(r.no_wa || '')) === want) || null;
-}
-
-function buildMasterNested(row) {
-  const v = (col, fallback) => {
-    const x = row[col];
-    return x !== undefined && x !== null && x !== ''
-      ? toText(x)
-      : fallback !== undefined
-        ? fallback
-        : '';
-  };
-  return {
-    identitas: {
-      nama_lengkap: v('nama_lengkap'),
-      katakana: v('furigana'),
-      panggilan: v('namapanggilan'),
-      panggilan_katakana: v('panggilan_katakana'),
-      tempat_lahir: v('tempat_lahir'),
-      tempat_lahir_jp: v('tempatlahirjp'),
-      tgl_lahir: v('tgl_lahir'),
-      umur: v('usia'),
-      gender: v('gender'),
-      agama: v('agama'),
-      agamajp: v('agamajp'),
-      golongan_darah: v('golongan_darah'),
-      status_nikah: v('status_pernikahan'),
-      statusnikahjp: v('statusnikahjp'),
-      anak: v('jumlah_anak'),
-      email: v('email'),
-      alamat: v('alamat_lengkap'),
-      alamatjp: v('alamatjp'),
-      hp: v('no_wa'),
-      hp_darurat: v('kontak_darurat_wa'),
-      ktp: v('nik'),
-      paspor: v('no_paspor'),
-      sim: v('driver_license'),
-      status_eks_jepang: v('status_eks_jepang'),
-    },
-    fisik: {
-      tb: v('tb'),
-      bb: v('bb'),
-      topi: v('ukuran_topi'),
-      baju: v('ukuranbaju'),
-      sepatu: v('ukuransepatu'),
-      tangan_dominan: v('tangandominan'),
-      tahan_ac: v('tahan_ac'),
-    },
-    medis: {
-      mata_kiri: v('mata_kiri'),
-      mata_kanan: v('mata_kanan'),
-      kacamata: v('kacamata'),
-      buta_warna: v('buta_warna'),
-      tato: v('tato'),
-      tindik: v('tindik'),
-      rokok: v('merokok'),
-      alkohol: v('minum_alkohol'),
-      alergi_id: v('alergi'),
-      alergi_jp: v('alergijp'),
-      riwayat_medis_id: v('riwayat_penyakit'),
-      riwayat_medis_jp: v('riwayat_medis_jp'),
-      riwayat_kecelakaan_id: v('riwayat_kecelakaan'),
-      riwayat_kecelakaan_jp: v('riwayat_kecelakaan_jp'),
-    },
-    wawancara: {
-      keinginan_id: v('keinginan_pribadi'),
-      keinginan_jp: v('keinginan_pribadi_jp'),
-      tujuan_ke_jepang: v('tujuan_ke_jepang'),
-      tujuan_ke_jepang_jp: v('tujuan_ke_jepang_jp'),
-      riwayat_jepang: v('status_eks_jepang'),
-      promosi_id: v('promosi_diri'),
-      promosi_jp: v('promosi_diri_jp'),
-      kelebihan_id: v('kelebihan'),
-      kelebihan_jp: v('kelebihan_jp'),
-      kekurangan_id: v('kekurangan'),
-      kekurangan_jp: v('kekurangan_jp'),
-      hobi_id: v('hobi_dan_keterampilan'),
-      hobi_jp: v('hobi_jp'),
-      keahlian_khusus: v('keahlian_khusus'),
-      keahlian_khusus_jp: v('keahlian_khusus_jp'),
-      motivasi_ke_jepang: v('motivasi_ke_jepang'),
-      motivasi_ke_jepang_jp: v('motivasi_ke_jepang_jp'),
-      alasan_memilih_bidang: v('alasan_memilih_bidang'),
-      alasan_memilih_bidang_jp: v('alasan_memilih_bidang_jp'),
-      rencana_setelah_pulang: v('rencana_setelah_pulang'),
-      rencana_setelah_pulang_jp: v('rencana_setelah_pulang_jp'),
-      // Alias yang dibaca builder CV (10b_cv_builders.js).
-      rencana_pulang_id: v('rencana_setelah_pulang'),
-      rencana_pulang_jp: v('rencana_setelah_pulang_jp'),
-      gaji_yen: v('harapan_gaji_yen'),
-      tabungan: v('harapan_tabungan'),
-    },
-    sertifikasi: {
-      bahasa: v('bahasa'),
-      jft: v('jft'),
-      ssw: v('ssw'),
-      bidang: v('bidangssw') || v('bidang'),
-      // Alias yang dibaca builder CV (10b_cv_builders.js): JLPT row & Lain-lain row.
-      bahasa_jepang: v('jft'),
-      nilai: v('jft'),
-      lisensi: v('ssw'),
-    },
-    pendidikan: (function () {
-      const arr = [];
-      for (let i = 1; i <= 5; i++) {
-        const tingkat = row['pendidikan_' + i + '_tingkat'];
-        if (tingkat === undefined || tingkat === null) continue;
-        // Kunci yang dibaca builder CV: sekolah/masuk/lulus/jurusan_id (nama_sekolah/
-        // tahun_masuk/dll dipertahankan sebagai alias untuk kompatibilitas).
-        arr.push({
-          tingkat: toText(tingkat),
-          sekolah: v('pendidikan_' + i + '_nama_sekolah'),
-          nama_sekolah: v('pendidikan_' + i + '_nama_sekolah'),
-          sekolah_jp: v('pendidikan_' + i + '_sekolah_jp'),
-          jurusan_id: v('pendidikan_' + i + '_jurusan_id'),
-          jurusan: v('pendidikan_' + i + '_jurusan_id'),
-          jurusan_jp: v('pendidikan_' + i + '_jurusan_jp'),
-          masuk: v('pendidikan_' + i + '_tahun_masuk'),
-          tahun_masuk: v('pendidikan_' + i + '_tahun_masuk'),
-          lulus: v('pendidikan_' + i + '_tahun_lulus'),
-          tahun_lulus: v('pendidikan_' + i + '_tahun_lulus'),
-        });
-      }
-      return arr;
-    })(),
-    pekerjaan: (function () {
-      const arr = [];
-      for (let i = 1; i <= 3; i++) {
-        const nm = row['pekerjaan_' + i + '_nama_perusahaan'];
-        if (nm === undefined || nm === null) continue;
-        arr.push({
-          perusahaan: toText(nm),
-          nama_perusahaan: toText(nm),
-          perusahaan_jp: v('pekerjaan_' + i + '_perusahaan_jp'),
-          jabatan: v('pekerjaan_' + i + '_jabatan'),
-          jabatan_jp: v('pekerjaan_' + i + '_jabatan_jp'),
-          masuk: v('pekerjaan_' + i + '_tahun_masuk'),
-          tahun_masuk: v('pekerjaan_' + i + '_tahun_masuk'),
-          keluar: v('pekerjaan_' + i + '_tahun_keluar'),
-          tahun_keluar: v('pekerjaan_' + i + '_tahun_keluar'),
-          gaji: v('pekerjaan_' + i + '_gaji'),
-        });
-      }
-      return arr;
-    })(),
-    keluarga: (function () {
-      const arr = [];
-      for (let i = 1; i <= 5; i++) {
-        const nm = row['keluarga_' + i + '_nama'];
-        if (nm === undefined || nm === null) continue;
-        arr.push({
-          nama: toText(nm),
-          umur: v('keluarga_' + i + '_usia'),
-          usia: v('keluarga_' + i + '_usia'),
-          hubungan: v('keluarga_' + i + '_hubungan'),
-          hubungan_jp: v('keluarga_' + i + '_hubungan_jp'),
-          pekerjaan: v('keluarga_' + i + '_pekerjaan'),
-          pekerjaan_jp: v('keluarga_' + i + '_pekerjaan_jp'),
-        });
-      }
-      return arr;
-    })(),
-    kenalan_jepang: {
-      nama_id: v('kenalan_di_jepang_nama'),
-      nama_jp: v('kenalan_di_jepang_nama_jp'),
-      hubungan_id: v('kenalan_di_jepang_hubungan'),
-      hubungan_jp: v('kenalan_di_jepang_hubungan_jp'),
-      pekerjaan_id: v('kenalan_di_jepang_pekerjaan'),
-      pekerjaan_jp: v('kenalan_di_jepang_pekerjaan_jp'),
-      usia: v('kenalan_di_jepang_usia'),
-      alamat_id: v('kenalan_di_jepang_alamat'),
-      alamat_jp: v('kenalan_di_jepang_alamat_jp'),
-    },
-    uploads: {
-      photo: row.pas_photo || '',
-      cv: row.file_cv || '',
-      jft: row.jft_url || '',
-      ssw: row.ssw_url || '',
-    },
-  };
 }
 
 // Ringkasan data kandidat (bentuk nested dari buildMasterNested) yang disuntikkan
@@ -358,6 +183,21 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       keluarga: d.keluarga || {},
       wawancara: d.wawancara || {},
     };
+    // Seksi yang dikelola form AI. Kunci lain (kenalan_jepang, context,
+    // fotoFile/jftFile/sswFile, dll) PERTAHANKAN dari ai_data_json lama —
+    // tanpa ini simpan CV AI menghapus data kenalan & file lama dari
+    // master_database_candidate.ai_data_json (bug: kenalan hilang setelah
+    // save CV AI).
+    const AI_MANAGED_KEYS = new Set([
+      'identitas',
+      'fisik',
+      'medis',
+      'pendidikan',
+      'pekerjaan',
+      'sertifikasi',
+      'keluarga',
+      'wawancara',
+    ]);
     const nama = String(identitas.nama_lengkap || '').trim();
     const jobCode = String(ctx.job || ctx.jobCode || '');
     // CHECK constraint tabel ini hanya izinkan mode='AI_MASTER' + status='MENUNGGU'
@@ -399,9 +239,26 @@ async function handleSubmitDataAsj(payload, sessionToken) {
     try {
       const m = await findMasterByWa(wa);
       if (m && m.id !== undefined) {
+        let aiOut = aiData;
+        try {
+          const prevRaw = m.ai_data_json;
+          const prev =
+            typeof prevRaw === 'string' && prevRaw.trim() && prevRaw !== '-'
+              ? JSON.parse(prevRaw)
+              : null;
+          if (prev && typeof prev === 'object') {
+            aiOut = {};
+            for (const k of Object.keys(prev)) {
+              if (!AI_MANAGED_KEYS.has(k)) aiOut[k] = prev[k];
+            }
+            for (const k of Object.keys(aiData)) aiOut[k] = aiData[k];
+          }
+        } catch (e) {
+          aiOut = aiData;
+        }
         await supabaseJson('PATCH', 'master_database_candidate', {
           query: { id: 'eq.' + m.id },
-          body: { ai_data_json: JSON.stringify(aiData), ai_updated_at: new Date().toISOString() },
+          body: { ai_data_json: JSON.stringify(aiOut), ai_updated_at: new Date().toISOString() },
           headers: { Prefer: 'return=minimal' },
         });
       }
