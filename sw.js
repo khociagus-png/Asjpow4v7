@@ -4,7 +4,7 @@
    - Aset statis: stale-while-revalidate
    - API (.netlify, /api) & domain luar: selalu jaringan, tidak pernah di-cache
 */
-const VERSION = 'asj-portal-app-70c4fbc34d-m886a44dc';
+const VERSION = 'asj-portal-app-2a72296550-m886a44dc';
 const SHELL = [
   '/',
   '/index.html',
@@ -14,7 +14,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-70c4fbc34d.js',
+  '/assets/app-2a72296550.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',
@@ -42,6 +42,15 @@ self.addEventListener('activate', (e) => {
       await self.clients.claim();
     })(),
   );
+});
+
+// Pesan dari halaman (pwa.js): SW baru sudah terpasang -> aktifkan segera
+// (skipWaiting) supaya versi terbaru langsung dipakai tanpa menunggu semua
+// tab ditutup. Cache versi lama otomatis dihapus di activate di atas.
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (e) => {
