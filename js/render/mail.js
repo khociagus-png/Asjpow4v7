@@ -161,7 +161,10 @@ export function renderFormInbox() {
     (Array.isArray(f.docs) ? f.docs : []).forEach(function (dc) {
       var isImg =
         /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(dc.url) || /^data:image\//i.test(dc.url);
-      var escNama = esc(dc.nama || 'DOKUMEN');
+      // Guard defensif: kalau `esc` lokal undefined (mis. deklarasi var
+      // dipindah ke bawah lagi oleh refactor → hoisting bikin undefined),
+      // fallback ke window.esc supaya inbox tidak mati total.
+      var escNama = (typeof esc === 'function' ? esc : window.esc)(dc.nama || 'DOKUMEN');
       var escUrl = window.escJs(dc.url || '');
       extraDocBtns +=
         '<button onclick="' +
