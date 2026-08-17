@@ -1,8 +1,15 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (fix action hapusTugas tidak terdaftar di api-client).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (tombol Undang Grup Kelas dipindah ke panel WA Pintar).
 
 ---
+
+## 2026-08-17 — `94f097f` 🎨 Tombol "Undang Grup Kelas" dipindah ke panel WA Pintar (admin-wa)
+
+### Ringkasan
+
+- Tombol Undang Grup Kelas (undangan WA ke Orang Tua/Wali) sebelumnya ada di card Penerimaan Siswa; kini dipindah ke **tab WA Pintar** (`admin-wa`) sebagai section tersendiri dengan deskripsi + tombol "Mulai Kirim Undangan" — semua alat WhatsApp admin jadi satu tempat.
+- Modal & logika tidak berubah (`bukaModalUndanganKelas` → `kirimTawaranMassal`); verifikasi preview: 1 tombol di panel WA, klik membuka modal, 0 error.
 
 ## 2026-08-17 — `2e9d78a` 🐛 Fix: `Aksi tidak dikenal: hapusTugas` — action hapusTugas tidak terdaftar di api-client.js
 
