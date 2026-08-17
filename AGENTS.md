@@ -164,7 +164,7 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 
 | Fitur | Entry point | Terbuka untuk | Lock kalau |
 | --- | --- | --- | --- |
-| **E-Sign & Data Naitei** | `bukaModalTtd` (`js/12_esign_match.js`) | Admin ATAU kandidat yang SUDAH LULUS (ada lamaran berstatus `LULUS`/`LOLOS`/`APPROVED`/`APPROVE` — bucket sama dengan `MAIL_BUCKET` di `js/render/mail.js`) | Kandidat belum lulus → toast `toast_naitei_locked` |
+| **E-Sign & Data Naitei** | `bukaModalTtd` (`js/12_esign_match.js`) | Admin ATAU kandidat yang **TAHAPAN-nya di loker sudah lolos/pemberkasan** (regex tahapan `LOLOS\|PEMBERKASAN\|MCU\|…\|TTD\|KONTRAK\|VISA\|…\|NAITEI` — sama persis situs lama) | Tahapan belum masuk daftar → toast `toast_naitei_locked`; **BUKAN** status lamaran `LULUS` di mail |
 | **AI CV Master Assistant** | `bukaMasterEksternal` (`js/03_candidate.js`) + guard `verifikasiAksesAiCv` (`ai_form.html`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan` di `js/03_candidate.js`, catatan internal `[VIP]`/`[KELAS …]`) | Non-VIP → toast `toast_ai_cv_locked`; keputusan final di server (`processAIChat`: `isAiCvAllowed` ATAU sesi admin) |
 | **Latihan Interview** | `bukaSimulatorInterview` (`js/ai_copilot/interview.js`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan`) | Non-VIP → toast `toast_feature_locked` |
 

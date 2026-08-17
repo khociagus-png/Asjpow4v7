@@ -273,6 +273,38 @@ async function handleSubmitApply(payload) {
       // (dua lamaran paralel untuk WA+job sama tidak bikin baris dobel).
       await upsertFormRow(body);
     }
+
+    // Carry-over dokumen TSK dari lamaran loker (KTP/KK/ijazah/universitas) ke
+    // kolom master_database_candidate (*_url). Saat kandidat LOLOS ke
+    // pemberkasan, BERKAS_COLUMNS (db/berkas.js) fallback ke kolom master ini
+    // → dokumen sudah terlihat tanpa upload ulang. Kalau admin minta dokumen
+    // baru, kandidat upload di pemberkasan → pemberkasan_checklist MENIMPA
+    // fallback master (urutan kolom di BERKAS_COLUMNS: checklist dulu).
+    // Opsional & non-fatal: gagal di sini tidak menggagalkan lamaran.
+    try {
+      const mRow = await findMasterByWa(wa);
+      if (mRow && mRow.id !== undefined) {
+        const masterPatch = {};
+        (d.extraFiles || []).forEach((x) => {
+          const label = String((x && x.name) || '')
+            .trim()
+            .toUpperCase();
+          const url = String((x && x.url) || '').trim();
+          if (!label || !url) return;
+          const map = fileLabelKey(label) ? FILE_LABEL_COLUMNS[fileLabelKey(label)] : null;
+          if (map && map.master) masterPatch[map.master] = url;
+        });
+        if (Object.keys(masterPatch).length) {
+          await supabaseJson('PATCH', 'master_database_candidate', {
+            query: { id: 'eq.' + mRow.id },
+            body: masterPatch,
+            headers: { Prefer: 'return=minimal' },
+          });
+        }
+      }
+    } catch (e) {
+      /* carry-over opsional — jangan gagalkan lamaran */
+    }
     return { success: true, message: 'Lamaran berhasil dikirim.' };
   } catch (e) {
     return { success: false, message: 'Gagal simpan lamaran: ' + e.message };

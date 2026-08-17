@@ -21,18 +21,10 @@ let isLandscapeMode = false; // Penanda mode putar
 let signData = { ttd1: null, nama1: null, ttd2: null, nama2: null };
 
 // ATURAN LOCK (dokumentasi — lihat juga AGENTS.md "Aturan lock fitur kandidat"):
-// E-Sign & Data Naitei HANYA untuk kandidat yang SUDAH LULUS — ada lamaran
-// berstatus LULUS/LOLOS/APPROVED/APPROVE (bucket sama dengan MAIL_BUCKET di
-// js/render/mail.js). Dulu pakai regex tahapan (LOLOS..NAITEI) yang terlalu
-// longgar sehingga kebuka sebelum kandidat lulus. Admin selalu bisa membuka.
-function kandidatSudahLulus(c) {
-  var apps = (c && c.applications) || [];
-  return apps.some(function (a) {
-    var st = String(a.status || '').toUpperCase();
-    return st === 'LULUS' || st === 'LOLOS' || st === 'APPROVED' || st === 'APPROVE';
-  });
-}
-
+// E-Sign & Data Naitei terbuka kalau TAHAPAN kandidat di loker sudah masuk
+// tahap lolos/pemberkasan (LOLOS..NAITEI — sama persis dengan situs lama
+// asjportal.netlify.app). BUKAN status lamaran LULUS di mail inbox. Admin
+// selalu bisa membuka.
 export async function bukaModalTtd() {
   if (typeof window.ensureAllCandidates === 'function') {
     try {
@@ -44,8 +36,13 @@ export async function bukaModalTtd() {
     (kan) => window.normalizePhone(kan.wa) === window.normalizePhone(cleanWa),
   );
   if (!c) return;
+  let thp = String(c.tahapan).toUpperCase();
+  let isValid =
+    /LOLOS|PEMBERKASAN|MCU|MEDICAL|MEDIKAL|PARPOR|PASPOR|PASPORT|MATCH|TERIMA|SIAP|TTD|KONTRAK|VISA|COE|KTKLN|SISKOP|FLIGHT|BERANGKAT|TERBANG|TIKET|E-ID|NAITEI/i.test(
+      thp,
+    );
 
-  if (!window.isAdmin && !kandidatSudahLulus(c)) {
+  if (!isValid && !window.isAdmin) {
     window.showToast(window.tr('ui.toast_naitei_locked'), 'error');
     return;
   }
