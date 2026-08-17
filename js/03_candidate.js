@@ -334,6 +334,13 @@ export function compressImage(file, callback) {
 export function bacaFileBase64(inputEl, label) {
   return new Promise((resolve) => {
     let settled = false;
+    // Pengaman: JANGAN pernah menggantung selamanya. Kalau file rusak /
+    // tidak bisa dibaca (compressImage/FileReader macet), resolve null
+    // setelah 15 detik supaya upload tetap selesai + toast muncul.
+    // WAJIB di atas `done`: done() memakai timer (clearTimeout) dan bisa
+    // dipanggil sinkron sebelum baris ini — hoisting/TDZ bikin ReferenceError
+    // "Cannot access 'timer' before initialization".
+    const timer = setTimeout(() => done(null), 15000);
     const done = (v) => {
       if (!settled) {
         settled = true;
@@ -341,10 +348,6 @@ export function bacaFileBase64(inputEl, label) {
         resolve(v);
       }
     };
-    // Pengaman: JANGAN pernah menggantung selamanya. Kalau file rusak /
-    // tidak bisa dibaca (compressImage/FileReader macet), resolve null
-    // setelah 15 detik supaya upload tetap selesai + toast muncul.
-    const timer = setTimeout(() => done(null), 15000);
     if (!inputEl.files || inputEl.files.length === 0) {
       done(null);
     } else {
