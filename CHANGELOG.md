@@ -1,8 +1,16 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`4135421` — registry seam lengkap + dispatcher data-action).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit hoisting + unit test renderFormInbox jalur f.docs).
 
 ---
+
+## 2026-08-17 — `ec61aa5` 🛡️ Audit pola hoisting js/render + js/engine + unit test renderFormInbox (jalur f.docs)
+
+### Ringkasan
+
+- **Audit hoisting otomatis** (`.freebuff/audit-hoisting.mjs`, tokenizer char-level yang menangani string/comment/template/regex literal) memindai semua modul `js/render/*`, `js/engine/*`, dan seluruh `js/*` — **0 temuan** pola "fungsi dipanggil sebelum deklarasi `var`" pasca-fix `esc` (tervalidasi: skrip menangkap bug `esc` di versi lama `3c1e493`).
+- **Guard defensif** di `renderFormInbox`: `esc` lokal kini fallback ke `window.esc` bila undefined (mis. deklarasi dipindah lagi oleh refactor) → inbox tidak mati total.
+- **Unit test baru** `js/render/mail.test.js` (3 test): render dengan `f.docs` non-kosong (jalur bug) tidak throw, nama dokumen di-escape (payload HTML dinetralkan), baris tanpa docs normal. Total suite **148/148**.
 
 ## 2026-08-17 — `0b3edbe` 🐛 Fix: Error Render "f is not a function" di Mail Inbox (renderFormInbox)
 
