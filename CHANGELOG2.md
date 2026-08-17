@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-08-17 — `36373f3` ☁️ Migrasi lengkap sisa alur upload ke Cloudinary (master-full, apply-full, ai_form, siswa-baru, loker admin)
+
+### Ringkasan
+
+- **master-full.html** (`submitMaster`): 9 field dokumen tidak lagi base64 → `uploadToCloudinary(file)` → payload berisi URL string; `fileToBase64` dihapus.
+- **apply-full.html & loker admin** (`uploadFilesDirectly`): drop `getUploadUrls`/PUT Supabase Storage → upload langsung ke Cloudinary (prefix `JOB<code>_CV` tidak perlu lagi).
+- **ai_form.html & siswa-baru.html** (`uploadFilesDirectlyBase64`): base64 → `File` → `uploadToCloudinary`; backend `submitDataAsj`/`submitDaftarSiswa` sudah menyimpan URL string.
+- **Backend**: `storage.js` + helper `resolveFileUrl` (URL passthrough, base64 fallback); `handleSubmitMasterForm` pakai `resolveFileUrl` untuk `MASTER_FILE_COLUMNS`.
+- **Verifikasi**: `node --check` OK · ESLint no-undef 0 · 148/148 test lulus · build → `app-4843ad1360.js` · `resolveFileUrl` diuji langsung (URL passthrough + base64 fallback jalan).
+
+### Perlu tindakan pemilik
+- Preset unsigned `asjportal` tetap wajib ada di Cloudinary; deploy Netlify menunggu izin eksplisit pemilik.
+
+---
+
 ## 2026-08-17 — `941b01a` ⚡ Optimasi free-tier: keep-alive `ping` + offloading upload dokumen ke Cloudinary
 
 ### Ringkasan

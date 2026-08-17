@@ -5,7 +5,23 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ⚡ Optimasi free-tier: keep-alive `ping` + offloading upload dokumen ke Cloudinary (direct unsigned upload).
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ☁️ Migrasi lengkap sisa alur upload ke Cloudinary (master-full, apply-full, ai_form, siswa-baru, loker admin).
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `36373f3`
+
+### ☁️ Migrasi LENGKAP sisa alur upload → Cloudinary (lanjutan Task 2)
+
+**Perintah user:** "lanjut master full dll yg berurusan dengan upload".
+
+- `js/pages/master_full.js` (`submitMaster`): 9 field file (`photoFile`, `jftFile`, `sswFile`, `ijazahSdFile`, `ijazahSmpFile`, `ijazahSmaFile`, `univFile`, `ktpFile`, `kkFile`) TIDAK lagi base64 — sekarang `uploadToCloudinary(file)` → payload berisi **URL string**. Fungsi `fileToBase64` dihapus.
+- `js/pages/apply_full.js` & `js/api/jobs.js` (`uploadFilesDirectly`): drop `getUploadUrls` + PUT signed-URL ke Supabase Storage → tiap file di-`uploadToCloudinary`. Prefix `JOB<code>_CV` tidak lagi perlu (Cloudinary memberi public_id unik per upload → tidak saling menimpa).
+- `js/pages/ai_form.js` & `js/pages/siswa_baru.js` (`uploadFilesDirectlyBase64`): base64 hasil downscale → dikembalikan jadi `File` (base64ToBlob) → `uploadToCloudinary`. Backend `submitDataAsj` / `submitDaftarSiswa` memang sudah menyimpan URL string — tidak ada perubahan di sana.
+- `netlify/functions/_lib/storage.js`: helper baru **`resolveFileUrl(value, folder, fileName)`** — nilai URL string (Cloudinary) dipakai apa adanya; base64 (jalur lama) fallback ke `uploadBase64`.
+- `netlify/functions/_lib/actions-master.js` (`handleSubmitMasterForm`): loop `MASTER_FILE_COLUMNS` kini lewat `resolveFileUrl` → menerima URL string dari master-full; base64 lama tetap didukung.
+- `getUploadUrls` TIDAK lagi dipanggil frontend mana pun (handler backend tetap ada sebagai fallback, tidak dihapus).
+- **Verifikasi:** `node --check` OK · ESLint no-undef 0 error · **148/148 test lulus** · `bun run build` → bundel `assets/app-4843ad1360.js` (46 file) · uji langsung `resolveFileUrl`: URL passthrough, base64 fallback tetap jalan (sandbox punya env Supabase).
 
 ---
 
