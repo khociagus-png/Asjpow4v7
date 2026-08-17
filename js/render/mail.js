@@ -351,19 +351,21 @@ export function renderFormInbox() {
   tb.innerHTML = html;
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (window.renderFormInbox, renderMailFilterUI).
 // MAIL_SELECTED memakai ACCESSOR get/set (bukan alias biasa): api/forms.js
 // (classic) melakukan REASSIGNMENT bare `MAIL_SELECTED = {}` — accessor
 // mendelegasikan ke binding modul supaya tidak basi (pola state.js §3.2).
-Object.defineProperty(window, "MAIL_SELECTED", {
+Object.defineProperty(window, 'MAIL_SELECTED', {
   configurable: true,
-  get() { return MAIL_SELECTED; },
-  set(v) { MAIL_SELECTED = v; },
+  get() {
+    return MAIL_SELECTED;
+  },
+  set(v) {
+    MAIL_SELECTED = v;
+  },
 });
 registerSeamAliases({
-    renderMailFilterUI,
-    renderFormInbox,
+  renderMailFilterUI,
+  renderFormInbox,
 });
-

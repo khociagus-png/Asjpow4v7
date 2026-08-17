@@ -1,4 +1,11 @@
-import { ACTIVE_PEMBERKASAN_NAMA, ACTIVE_PEMBERKASAN_WA, ALL_CANDIDATES, currentKandidatName, currentKandidatWa, isAdmin } from './init/state.js';
+import {
+  ACTIVE_PEMBERKASAN_NAMA,
+  ACTIVE_PEMBERKASAN_WA,
+  ALL_CANDIDATES,
+  currentKandidatName,
+  currentKandidatWa,
+  isAdmin,
+} from './init/state.js';
 import { previewFileInFrame } from './init/preview.js';
 import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
@@ -25,15 +32,28 @@ export function bukaModalCvMini() {
     if (cleanGender.includes('WANITA') || cleanGender === 'P') cleanGender = 'PEREMPUAN';
 
     window.safeSetVal('um-gender', cleanGender);
-    window.safeSetVal('um-usia',
+    window.safeSetVal(
+      'um-usia',
       myData.usia && myData.usia !== '-' ? String(myData.usia).replace(/\D/g, '') : '',
     );
-    window.safeSetVal('um-tb', myData.tb && myData.tb !== '-' ? String(myData.tb).replace(/\D/g, '') : '');
-    window.safeSetVal('um-bb', myData.bb && myData.bb !== '-' ? String(myData.bb).replace(/\D/g, '') : '');
+    window.safeSetVal(
+      'um-tb',
+      myData.tb && myData.tb !== '-' ? String(myData.tb).replace(/\D/g, '') : '',
+    );
+    window.safeSetVal(
+      'um-bb',
+      myData.bb && myData.bb !== '-' ? String(myData.bb).replace(/\D/g, '') : '',
+    );
     // riwayatpendidikan kini JSON array 5-baris — ambil tingkat terakhir terbaca
     window.safeSetVal('um-pendidikan', window.formatPendidikanTingkat(myData.pendidikan) || '-');
-    window.safeSetVal('um-jft-text', myData.jftText && myData.jftText !== '-' ? myData.jftText : '');
-    window.safeSetVal('um-ssw-text', myData.sswText && myData.sswText !== '-' ? myData.sswText : '');
+    window.safeSetVal(
+      'um-jft-text',
+      myData.jftText && myData.jftText !== '-' ? myData.jftText : '',
+    );
+    window.safeSetVal(
+      'um-ssw-text',
+      myData.sswText && myData.sswText !== '-' ? myData.sswText : '',
+    );
 
     document.getElementById('um-photo').value = '';
     document.getElementById('modal-cv-mini').classList.remove('hidden');
@@ -73,7 +93,10 @@ export async function prosesSimpanCvMini() {
       window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_cv_mini') + '';
     btn.disabled = false;
@@ -227,7 +250,8 @@ export function cekUkuranFile(inputEl) {
   if (!inputEl || !inputEl.files || inputEl.files.length === 0) return '';
   var file = inputEl.files[0];
   if (file.size > MAX_FILE_BYTES) {
-    return window.tr('ui.toast_file_too_big')
+    return window
+      .tr('ui.toast_file_too_big')
       .replace('{nama}', file.name || 'File')
       .replace('{mb}', String(MAX_FILE_MB));
   }
@@ -611,8 +635,7 @@ export async function prosesUploadPemberkasan(tahap) {
   };
   const cBerkas = (() => {
     const c = ALL_CANDIDATES.find(
-      (kan) =>
-        window.normalizePhone(kan.wa) === window.normalizePhone(ACTIVE_PEMBERKASAN_WA),
+      (kan) => window.normalizePhone(kan.wa) === window.normalizePhone(ACTIVE_PEMBERKASAN_WA),
     );
     return (c && c.berkas) || {};
   })();
@@ -737,22 +760,20 @@ export async function prosesSimpanBiodataLengkap() {
 // ekstensiDariAccept/compressImage/setStatusBerkas sengaja tetap internal
 // (dipakai file ini saja — apply_full.js punya salinan lokal sendiri).
 registerSeamAliases({
-    bukaModalCvMini,
-    prosesSimpanCvMini,
-    isVipCatatan,
-    bukaMasterEksternal,
-    bukaFormBridge,
-    bukaMasterEksternalAdmin,
-    bukaMasterLengkapPortal,
-    bukaFormSiswa,
-    cekUkuranFile,
-    cekEkstensiFile,
-    bacaFileBase64,
-    bukaPreviewDokumen,
-    tutupPreviewDokumen,
-    bukaModalPemberkasan,
-    prosesUploadPemberkasan,
-    prosesSimpanBiodataLengkap,
+  bukaModalCvMini,
+  prosesSimpanCvMini,
+  isVipCatatan,
+  bukaMasterEksternal,
+  bukaFormBridge,
+  bukaMasterEksternalAdmin,
+  bukaMasterLengkapPortal,
+  bukaFormSiswa,
+  cekUkuranFile,
+  cekEkstensiFile,
+  bacaFileBase64,
+  bukaPreviewDokumen,
+  tutupPreviewDokumen,
+  bukaModalPemberkasan,
+  prosesUploadPemberkasan,
+  prosesSimpanBiodataLengkap,
 });
-
-

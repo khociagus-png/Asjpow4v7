@@ -47,7 +47,12 @@ function frontendFiles() {
     }
   };
   walk(jsDir, '');
-  const stack = ['/api-client.js', '/i18n.js', '/pwa.js', ...jsFiles.sort((a, b) => a.localeCompare(b))];
+  const stack = [
+    '/api-client.js',
+    '/i18n.js',
+    '/pwa.js',
+    ...jsFiles.sort((a, b) => a.localeCompare(b)),
+  ];
   return stack
     .map((p) => {
       const abs = join(ROOT, p);
@@ -154,10 +159,7 @@ for (const name of defined.keys()) {
 const nameList = [...defined.keys()].sort();
 // Perbaiki definisi: fungsi yang didefinisikan DI HTML inline (jarang) — abaikan.
 for (const n of nameList) {
-  defined.set(
-    n,
-    new Set([...defined.get(n)].filter((f) => !PAGES.includes(f))),
-  );
+  defined.set(n, new Set([...defined.get(n)].filter((f) => !PAGES.includes(f))));
 }
 const stats = files.map(({ rel }) => {
   const defs = nameList.filter((n) => defined.get(n).has(rel));
@@ -207,16 +209,16 @@ if (WANT_JSON) {
   process.exit(0);
 }
 
-console.log(`=== MODULE MAP [${MODE}] — ${files.length} file, ${nameList.length} simbol global ===\n`);
+console.log(
+  `=== MODULE MAP [${MODE}] — ${files.length} file, ${nameList.length} simbol global ===\n`,
+);
 console.log('--- Per file (terbanyak cross-file dulu) ---');
 for (const f of report.perFile) {
   console.log(
     `${f.file}: ${f.defined} definisi | ${f.crossFile} dipakai lintas file | ${f.localOnly} lokal/dead`,
   );
   if (f.topCallers.length) {
-    console.log(
-      `    dipanggil dari: ${f.topCallers.map(([f2, n]) => `${f2} (${n})`).join(', ')}`,
-    );
+    console.log(`    dipanggil dari: ${f.topCallers.map(([f2, n]) => `${f2} (${n})`).join(', ')}`);
   }
 }
 console.log('\n--- KONTRAK GLOBAL (dipakai ≥3 file lain — wajib di-export saat ESM) ---');
@@ -224,7 +226,9 @@ for (const s of report.sharedApi) {
   console.log(`${s.name}  [def: ${s.definedIn}]`);
   console.log(`    -> dipakai: ${s.calledFrom}`);
 }
-console.log(`\n--- Kandidat DEAD CODE (didefinisikan, tidak pernah dipanggil) — ${report.deadCandidates.length} ---`);
+console.log(
+  `\n--- Kandidat DEAD CODE (didefinisikan, tidak pernah dipanggil) — ${report.deadCandidates.length} ---`,
+);
 if (report.deadCandidates.length) console.log(report.deadCandidates.join(', '));
 else console.log('(tidak ada)');
 console.log('\nCatatan: heuristik regex — verifikasi dengan node --check + lint sebelum refactor.');

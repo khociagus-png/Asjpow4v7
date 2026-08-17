@@ -255,11 +255,9 @@ export function kalkulasiProgress(myData) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, render/candidate.js, dll).
 registerSeamAliases({
-    evaluasiTahapanKandidat,
-    kalkulasiProgress,
-});
-
+  evaluasiTahapanKandidat,
+  kalkulasiProgress,
+});

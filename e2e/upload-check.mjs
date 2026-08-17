@@ -27,8 +27,7 @@ const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/clien
 // Upload butuh waktu lebih lama (base64 + Storage) — default waitFor 40s.
 const waitFor = (c, t, i) => harnessWaitFor(c, t ?? 40000, i);
 const TEST_WA =
-  process.env.E2E_UPLOAD_WA ||
-  '62813' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
+  process.env.E2E_UPLOAD_WA || '62813' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
 const TEST_PIN = process.env.E2E_UPLOAD_PIN || '9911';
 const TEST_NAMA = 'E2E UPLOAD TEST';
 const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'asj-files';
@@ -85,7 +84,9 @@ async function storageDelete(path) {
 }
 
 // ---- File dummy --------------------------------------------------------------
-const PDF_BYTES = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n');
+const PDF_BYTES = Buffer.from(
+  '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n',
+);
 const browser = await launchBrowser();
 console.log(`\nTarget: ${BASE} | Kandidat tes: ${TEST_WA}\n`);
 
@@ -134,7 +135,9 @@ try {
       dialogs.some((m) => /3 MB|terlalu besar/i.test(m)),
       dialogs[0] || '',
     );
-    const resetSize = await page.evaluate(() => document.getElementById('file-revisi').value === '');
+    const resetSize = await page.evaluate(
+      () => document.getElementById('file-revisi').value === '',
+    );
     check('Input di-reset setelah ditolak (ukuran)', resetSize);
 
     // 1c. File valid kecil -> TIDAK ada alert
@@ -227,7 +230,9 @@ try {
 
     // Buka modal pemberkasan (kandidat tsb ada di ALL_CANDIDATES)
     await page.evaluate((wa) => window.bukaModalPemberkasan(wa), TEST_WA);
-    const modalOpen = await waitFor(async () => await page.locator('#modal-pemberkasan').isVisible());
+    const modalOpen = await waitFor(
+      async () => await page.locator('#modal-pemberkasan').isVisible(),
+    );
     check('Modal pemberkasan terbuka', modalOpen);
     // Tahapan = PEMBERKASAN -> panel T1 terbuka; pastikan defensif
     await page.evaluate(() => {
@@ -258,29 +263,34 @@ try {
 
     // refreshDataDinamis berjalan async setelah upload — tunggu berkas
     // benar-benar ter-attach ke data kandidat (bukti tersimpan + fetch ulang).
-    const berkasSynced = await waitFor(
-      async () => {
-        const b = await page.evaluate(() => {
-          const c = (window.ALL_CANDIDATES || [])[0];
-          return c && c.berkas ? c.berkas : null;
-        });
-        return (
-          !!b &&
-          String(b.ktp || '').includes('KTP.pdf') &&
-          String(b.kk || '').includes('KK.pdf')
-        );
-      },
-      30000,
-    );
+    const berkasSynced = await waitFor(async () => {
+      const b = await page.evaluate(() => {
+        const c = (window.ALL_CANDIDATES || [])[0];
+        return c && c.berkas ? c.berkas : null;
+      });
+      return (
+        !!b && String(b.ktp || '').includes('KTP.pdf') && String(b.kk || '').includes('KK.pdf')
+      );
+    }, 30000);
     check('Berkas tersinkron ke data kandidat (DB + fetch ulang)', berkasSynced);
 
     // Verifikasi UI: status KTP & KK jadi "Lihat Dokumen"
     await page.evaluate((wa) => window.bukaModalPemberkasan(wa), TEST_WA);
     const ktpSt = await waitFor(async () =>
-      (await page.locator('#st-ktp').innerHTML().catch(() => '')).includes('bukaPreviewDokumen'),
+      (
+        await page
+          .locator('#st-ktp')
+          .innerHTML()
+          .catch(() => '')
+      ).includes('bukaPreviewDokumen'),
     );
     const kkSt = await waitFor(async () =>
-      (await page.locator('#st-kk').innerHTML().catch(() => '')).includes('bukaPreviewDokumen'),
+      (
+        await page
+          .locator('#st-kk')
+          .innerHTML()
+          .catch(() => '')
+      ).includes('bukaPreviewDokumen'),
     );
     check('Status UI KTP = Lihat Dokumen', ktpSt);
     check('Status UI KK = Lihat Dokumen', kkSt);

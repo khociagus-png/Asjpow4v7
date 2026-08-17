@@ -17,9 +17,7 @@ async function handleGetDriveLinkCandidates(payload, sessionToken) {
     const found = await findCandidates();
     const data = found.rows
       .filter((r) =>
-        /drive\.google/i.test(
-          String(pick(r, ['folder_url', 'folderUrl', 'folder_id']) || ''),
-        ),
+        /drive\.google/i.test(String(pick(r, ['folder_url', 'folderUrl', 'folder_id']) || '')),
       )
       .map(mapCandidate);
     return { success: true, data };
@@ -53,9 +51,7 @@ async function handleUploadDriveReplacement(payload, sessionToken) {
     let c = await findCandidateByIdFiltered(idKand);
     if (c === undefined) {
       const found = await findCandidates();
-      c =
-        found.rows.find((r) => String(pick(r, ['id_kandidat', 'id']) || '') === idKand) ||
-        null;
+      c = found.rows.find((r) => String(pick(r, ['id_kandidat', 'id']) || '') === idKand) || null;
     }
     if (c && c.id !== undefined && map && map.cand) {
       await supabaseJson('PATCH', 'database_candidate', {

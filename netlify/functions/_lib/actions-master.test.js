@@ -62,7 +62,10 @@ describe('buildAiOverflow — nilai form yang kolomnya tidak ada di tabel', () =
       ],
     });
     expect(o.pendidikan).toHaveLength(1);
-    expect(o.pendidikan[0]).toEqual({ slot: 0, entry: { tingkat: 'SD', sekolah: 'SDN A', jurusan_id: 'IPA' } });
+    expect(o.pendidikan[0]).toEqual({
+      slot: 0,
+      entry: { tingkat: 'SD', sekolah: 'SDN A', jurusan_id: 'IPA' },
+    });
   });
 
   it('gaji pekerjaan slot 3 → pekerjaan; keluarga slot 2 → keluarga', () => {
@@ -71,7 +74,9 @@ describe('buildAiOverflow — nilai form yang kolomnya tidak ada di tabel', () =
       keluarga: [
         { hubungan: 'AYAH', nama: 'A', gaji: '' },
         { hubungan: 'IBU', nama: 'B', usia: 50, pekerjaan: 'IRT' },
-        {}, {}, {},
+        {},
+        {},
+        {},
       ],
     });
     expect(o.pekerjaan).toEqual([{ slot: 2, entry: { perusahaan: 'PT X', gaji: '5.000.000' } }]);
@@ -87,7 +92,11 @@ describe('mergeAiOverflow — deep-merge ke ai_data_json (newest-wins, isi lama 
     const out = mergeAiOverflow(ai, {
       kenalan_jepang: { alamat_id: 'TOKYO', nama_jp: 'ケンジ2' },
     });
-    expect(out.kenalan_jepang).toEqual({ nama_id: 'KENJI', nama_jp: 'ケンジ2', alamat_id: 'TOKYO' });
+    expect(out.kenalan_jepang).toEqual({
+      nama_id: 'KENJI',
+      nama_jp: 'ケンジ2',
+      alamat_id: 'TOKYO',
+    });
   });
 
   it('pendidikan dicocokkan per sekolah; data lama (sekolah_jp) dipertahankan', () => {

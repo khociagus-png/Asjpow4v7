@@ -1,6 +1,17 @@
 import { tr } from '../../i18n.js';
 import { safeSet } from '../init/util.js';
-import { ALL_CANDIDATES, ALL_CANDIDATES_TOTAL, ALL_DB_JOBS, ALL_JOBS, currentAdminName, dbFilterBidang, dbFilterTahapan, dbSortType, limitAdm, limitDb } from '../init/state.js';
+import {
+  ALL_CANDIDATES,
+  ALL_CANDIDATES_TOTAL,
+  ALL_DB_JOBS,
+  ALL_JOBS,
+  currentAdminName,
+  dbFilterBidang,
+  dbFilterTahapan,
+  dbSortType,
+  limitAdm,
+  limitDb,
+} from '../init/state.js';
 import { renderFormInbox } from './mail.js';
 import { renderWaTemplates } from '../08_wa_pintar.js';
 import { renderSysConfig } from '../admin_ops/sysconfig.js';
@@ -188,7 +199,10 @@ export function filterDbJob() {
 export function badgeTahapanDb(tahapan) {
   var t = String(tahapan || '-');
   var label = window.esc(window.trOption(t));
-  if (typeof window.tahapanStepIndex === 'function' && typeof window.tahapanPipeline === 'function') {
+  if (
+    typeof window.tahapanStepIndex === 'function' &&
+    typeof window.tahapanPipeline === 'function'
+  ) {
     var idx = window.tahapanStepIndex(t);
     if (idx >= 0) {
       var pipe = window.tahapanPipeline();
@@ -307,13 +321,11 @@ export function renderDbJobTable(arr) {
   tb.innerHTML = html;
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (adminSwitchTab, filterDbJob, window.limitDb+=10;...).
 registerSeamAliases({
-    adminSwitchTab,
-    renderAdmin,
-    filterDbJob,
-    badgeTahapanDb,
-});
-
+  adminSwitchTab,
+  renderAdmin,
+  filterDbJob,
+  badgeTahapanDb,
+});

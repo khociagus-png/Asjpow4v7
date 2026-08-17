@@ -51,7 +51,9 @@ export function jobDilamarCell(c) {
       window.esc(acode) +
       '</button>';
   });
-  return label + (appCvBtns ? '<span class="flex flex-wrap gap-1 mt-1.5">' + appCvBtns + '</span>' : '');
+  return (
+    label + (appCvBtns ? '<span class="flex flex-wrap gap-1 mt-1.5">' + appCvBtns + '</span>' : '')
+  );
 }
 
 export async function filterKandidat() {
@@ -213,10 +215,8 @@ export function renderKandidatTable(arr) {
   tb.innerHTML = html;
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
 registerSeamAliases({
-    filterKandidat,
-});
-
+  filterKandidat,
+});

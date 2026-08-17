@@ -9,7 +9,12 @@ const PIN = process.env.E2E_PIN || '2661';
 
 // 1) Login kandidat
 const login = await handleAction('loginKandidat', [WA, PIN]);
-console.log('login:', login.success, login.error || '', login.sessionToken ? 'token OK' : 'NO TOKEN');
+console.log(
+  'login:',
+  login.success,
+  login.error || '',
+  login.sessionToken ? 'token OK' : 'NO TOKEN',
+);
 if (!login.sessionToken) process.exit(1);
 const waNorm = String(login.wa || WA).replace(/\D/g, '');
 
@@ -29,7 +34,7 @@ const payload = {
 
 const t0 = Date.now();
 const res = await handleAction('simpanUpdateMaster', [payload], login.sessionToken);
-console.log('simpanUpdateMaster:', JSON.stringify(res), (Date.now() - t0) + 'ms');
+console.log('simpanUpdateMaster:', JSON.stringify(res), Date.now() - t0 + 'ms');
 
 // 3) Baca balik untuk verifikasi field tersimpan
 const back = await handleAction('getMasterDataByWa', [waNorm], login.sessionToken);

@@ -10,23 +10,34 @@ const page = await browser.newPage();
 const jsErrors = [];
 const dialogs = [];
 page.on('pageerror', (e) => jsErrors.push(String(e)));
-page.on('dialog', (d) => { dialogs.push(d.message()); d.accept(); });
+page.on('dialog', (d) => {
+  dialogs.push(d.message());
+  d.accept();
+});
 
 async function waitFor(fn, ms = 40000) {
   const t0 = Date.now();
-  while (Date.now() - t0 < ms) { if (await fn()) return true; await new Promise((r) => setTimeout(r, 300)); }
+  while (Date.now() - t0 < ms) {
+    if (await fn()) return true;
+    await new Promise((r) => setTimeout(r, 300));
+  }
   return false;
 }
 
 try {
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
-  await page.evaluate(async () => {
-    if (navigator.serviceWorker) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
-    }
-    if (window.caches) { const ks = await caches.keys(); await Promise.all(ks.map((k) => caches.delete(k))); }
-  }).catch(() => {});
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const ks = await caches.keys();
+        await Promise.all(ks.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
 
   // Login kandidat
   await page.evaluate(() => window.bukaModalKandidat('login'));
@@ -36,7 +47,10 @@ try {
   await page.evaluate(() => document.getElementById('btn-log-kandidat').click());
   const okLogin = await waitFor(async () => await page.locator('#page-kandidat').isVisible());
   console.log('login kandidat:', okLogin ? 'OK' : 'GAGAL');
-  const dataReady = await waitFor(async () => (await page.evaluate(() => (window.ALL_CANDIDATES || []).length)) > 0, 30000);
+  const dataReady = await waitFor(
+    async () => (await page.evaluate(() => (window.ALL_CANDIDATES || []).length)) > 0,
+    30000,
+  );
   console.log('ALL_CANDIDATES terisi:', dataReady);
 
   // Buka modal CV Mini
@@ -44,14 +58,19 @@ try {
   const modalOpen = await waitFor(async () => await page.locator('#modal-cv-mini').isVisible());
   console.log('modal CV Mini terbuka:', modalOpen);
   if (!modalOpen) {
-    console.log('toast terakhir:', await page.evaluate(() => (window.__toastLog || []).join(' | ')));
+    console.log(
+      'toast terakhir:',
+      await page.evaluate(() => (window.__toastLog || []).join(' | ')),
+    );
   }
 
   // Ubah field lalu Simpan
   await page.fill('#um-usia', '25');
   await page.fill('#um-tb', '165');
   const toasts = [];
-  page.on('console', (m) => { if (m.text().includes('toast') || m.text().includes('CV')) toasts.push(m.text()); });
+  page.on('console', (m) => {
+    if (m.text().includes('toast') || m.text().includes('CV')) toasts.push(m.text());
+  });
   await page.evaluate(() => document.getElementById('btn-submit-cv-mini').click());
 
   const saved = await waitFor(async () => {

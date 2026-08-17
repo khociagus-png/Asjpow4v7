@@ -47,7 +47,10 @@ export async function aksiAdmin(st, r) {
       if (typeof renderAdminFull === 'function') renderAdminFull();
     } else window.showToast(res.error || 'Gagal ubah status', 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export async function hapusLoker(r) {
@@ -58,9 +61,15 @@ export async function hapusLoker(r) {
       removeJobMemory(r);
       if (typeof renderAdminFull === 'function') renderAdminFull();
     } else
-      window.showToast(res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.', 'error');
+      window.showToast(
+        res.error || 'Gagal hapus loker. Mungkin masih ada kandidat terkait.',
+        'error',
+      );
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 
@@ -362,7 +371,10 @@ export async function simpanUpdateDbJob() {
       if (typeof renderAdminFull === 'function') renderAdminFull();
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerText = window.tr('button.update_db');
     btn.disabled = false;
@@ -370,17 +382,15 @@ export async function simpanUpdateDbJob() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (submitFormAdmin/submitEditFullLoker/simpanUpdateDbJob)
 // + render/admin.js (aksiAdmin/hapusLoker/bukaEditFullLoker/bukaModalEditDbJob).
 registerSeamAliases({
-    aksiAdmin,
-    hapusLoker,
-    submitFormAdmin,
-    bukaEditFullLoker,
-    submitEditFullLoker,
-    bukaModalEditDbJob,
-    simpanUpdateDbJob,
+  aksiAdmin,
+  hapusLoker,
+  submitFormAdmin,
+  bukaEditFullLoker,
+  submitEditFullLoker,
+  bukaModalEditDbJob,
+  simpanUpdateDbJob,
 });
-

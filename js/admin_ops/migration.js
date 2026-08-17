@@ -25,13 +25,15 @@ export async function jalankanMigrasi() {
     if (!res || !res.success) {
       if (statusEl) statusEl.textContent = '';
       window.showToast(
-        window.tr('ui.toast_migrate_failed') + (res && res.error ? res.error : 'respon tidak valid'),
+        window.tr('ui.toast_migrate_failed') +
+          (res && res.error ? res.error : 'respon tidak valid'),
         'error',
       );
       if (res && res.results && res.results.length) renderMigrasiResults(res.results);
       return;
     }
-    if (statusEl) statusEl.textContent = window.tr('ui.done') + new Date().toLocaleTimeString('id-ID');
+    if (statusEl)
+      statusEl.textContent = window.tr('ui.done') + new Date().toLocaleTimeString('id-ID');
     renderMigrasiResults(res.results || []);
     if (res.pendingSql && res.pendingSql.length) {
       var pre = document.getElementById('migrasi-pending-sql');
@@ -93,11 +95,9 @@ export async function salinSqlMigrasi() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (admin/index jalankanMigrasi / salinSqlMigrasi).
 registerSeamAliases({
-    jalankanMigrasi,
-    salinSqlMigrasi,
-});
-
+  jalankanMigrasi,
+  salinSqlMigrasi,
+});

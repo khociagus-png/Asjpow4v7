@@ -34,26 +34,17 @@ describe('pickKeeper — strategi baris penjaga', () => {
   });
 
   it('status sama → updated_at terbaru', () => {
-    const rows = [
-      row('MENUNGGU', '2026-01-01', 1),
-      row('MENUNGGU', '2026-02-01', 2),
-    ];
+    const rows = [row('MENUNGGU', '2026-01-01', 1), row('MENUNGGU', '2026-02-01', 2)];
     expect(pickKeeper(rows, { prio: formPrio }).id).toBe(2);
   });
 
   it('status & waktu sama → id terbesar', () => {
-    const rows = [
-      row('MENUNGGU', '2026-01-01', 5),
-      row('MENUNGGU', '2026-01-01', 9),
-    ];
+    const rows = [row('MENUNGGU', '2026-01-01', 5), row('MENUNGGU', '2026-01-01', 9)];
     expect(pickKeeper(rows, { prio: formPrio }).id).toBe(9);
   });
 
   it('status tak dikenal dianggap paling rendah (tidak menang)', () => {
-    const rows = [
-      row('ANEKA', '2026-02-01', 1),
-      row('MENUNGGU', '2026-01-01', 2),
-    ];
+    const rows = [row('ANEKA', '2026-02-01', 1), row('MENUNGGU', '2026-01-01', 2)];
     expect(pickKeeper(rows, { prio: formPrio }).id).toBe(2);
   });
 });

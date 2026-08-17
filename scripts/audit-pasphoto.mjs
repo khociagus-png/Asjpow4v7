@@ -94,7 +94,8 @@ async function getTable(name, select, order) {
       `${BASE}/rest/v1/${name}?select=${select}&order=${order}&limit=${LIMIT}&offset=${offset}`,
       { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } },
     );
-    if (!res.ok) throw new Error(name + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+    if (!res.ok)
+      throw new Error(name + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
     const batch = await res.json();
     if (!Array.isArray(batch) || batch.length === 0) break;
     out.push(...batch);
@@ -120,7 +121,8 @@ for (const m of masters) {
 }
 const masterByIdKand = new Map();
 for (const m of masters) {
-  if (m.id_kandidat && !masterByIdKand.has(String(m.id_kandidat))) masterByIdKand.set(String(m.id_kandidat), m);
+  if (m.id_kandidat && !masterByIdKand.has(String(m.id_kandidat)))
+    masterByIdKand.set(String(m.id_kandidat), m);
 }
 
 // ---- 3. Audit ------------------------------------------------------------------
@@ -138,7 +140,10 @@ for (const c of candidates) {
       }
       continue; // kosong / drive link / non-storage — di luar lingkup audit
     }
-    if (existing.has(sp)) { ok.add(c.id + ':' + col.cand); continue; }
+    if (existing.has(sp)) {
+      ok.add(c.id + ':' + col.cand);
+      continue;
+    }
     // Rusak — cari pengganti dari master (kolom sejenis) yang ada di Storage
     let replacement = null;
     if (master) {
@@ -176,11 +181,15 @@ for (const b of broken) {
     `  [${b.id}] ${b.label} — ${b.nama} (${b.wa}) — rusak: ${b.rusak ? b.rusak.slice(0, 85) : '-'}`,
   );
   if (b.pengganti) console.log(`      → ganti: ${b.pengganti.slice(0, 105)}`);
-  else console.log(`      → TANPA PENGGANTI${b.masterPunya ? ' (master ada tapi nilainya juga 404/kosong)' : ' (tidak ada master)'}`);
+  else
+    console.log(
+      `      → TANPA PENGGANTI${b.masterPunya ? ' (master ada tapi nilainya juga 404/kosong)' : ' (tidak ada master)'}`,
+    );
 }
 if (nonStorage.length) {
   console.log('\nNon-storage (tidak disentuh):');
-  for (const n of nonStorage) console.log(`  [${n.id}] ${n.kolom} ${n.nama} — ${String(n.url).slice(0, 85)}`);
+  for (const n of nonStorage)
+    console.log(`  [${n.id}] ${n.kolom} ${n.nama} — ${String(n.url).slice(0, 85)}`);
 }
 
 // ---- 4. Apply ------------------------------------------------------------------
@@ -190,12 +199,22 @@ if (APPLY) {
     process.exit(0);
   }
   const stamp = new Date().toISOString();
-  const backupPath = path.resolve(fileURLToPath(import.meta.url), '../../.freebuff/berkas-fix-backup-' + stamp.replace(/[:.]/g, '-') + '.json');
+  const backupPath = path.resolve(
+    fileURLToPath(import.meta.url),
+    '../../.freebuff/berkas-fix-backup-' + stamp.replace(/[:.]/g, '-') + '.json',
+  );
   fs.mkdirSync(path.dirname(backupPath), { recursive: true });
   fs.writeFileSync(
     backupPath,
     JSON.stringify(
-      withFix.map((b) => ({ id: b.id, nama: b.nama, wa: b.wa, kolom: b.col, lama: b.rusak, baru: b.pengganti })),
+      withFix.map((b) => ({
+        id: b.id,
+        nama: b.nama,
+        wa: b.wa,
+        kolom: b.col,
+        lama: b.rusak,
+        baru: b.pengganti,
+      })),
       null,
       2,
     ),
@@ -206,11 +225,25 @@ if (APPLY) {
   for (const b of withFix) {
     const res = await fetch(`${BASE}/rest/v1/database_candidate?id=eq.${b.id}`, {
       method: 'PATCH',
-      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: {
+        apikey: KEY,
+        Authorization: `Bearer ${KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
       body: JSON.stringify({ [b.col]: b.pengganti }),
     });
     if (!res.ok) {
-      console.error('  GAGAL id=' + b.id + ' ' + b.col + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
+      console.error(
+        '  GAGAL id=' +
+          b.id +
+          ' ' +
+          b.col +
+          ' → HTTP ' +
+          res.status +
+          ' ' +
+          (await res.text()).slice(0, 150),
+      );
       continue;
     }
     n++;
@@ -218,5 +251,7 @@ if (APPLY) {
   }
   console.log('\nDiperbaiki:', n, 'dari', withFix.length);
 } else {
-  console.log('\n(dry-run — jalankan dengan --apply untuk memperbaiki; backup otomatis dibuat dulu)');
+  console.log(
+    '\n(dry-run — jalankan dengan --apply untuk memperbaiki; backup otomatis dibuat dulu)',
+  );
 }

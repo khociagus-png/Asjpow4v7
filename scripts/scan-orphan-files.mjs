@@ -12,7 +12,12 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const { findTable, supabaseKey, supabaseUrl, toText } = require('../netlify/functions/_lib/db/client');
+const {
+  findTable,
+  supabaseKey,
+  supabaseUrl,
+  toText,
+} = require('../netlify/functions/_lib/db/client');
 const { findForms, parseDocs } = require('../netlify/functions/_lib/db/forms');
 const { findCandidates } = require('../netlify/functions/_lib/db/candidates');
 
@@ -44,14 +49,17 @@ async function listPrefix(prefix) {
         Authorization: 'Bearer ' + KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prefix, limit: LIMIT, offset, sortBy: { column: 'name', order: 'asc' } }),
+      body: JSON.stringify({
+        prefix,
+        limit: LIMIT,
+        offset,
+        sortBy: { column: 'name', order: 'asc' },
+      }),
     });
     if (!res.ok) throw new Error('storage list HTTP ' + res.status);
     const j = await res.json();
     const batch = Array.isArray(j)
-      ? j
-          .map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : ''))
-          .filter(Boolean)
+      ? j.map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : '')).filter(Boolean)
       : [];
     if (batch.length === 0) break;
     out.push(...batch);
@@ -86,9 +94,7 @@ function pathsFromUrls(cells) {
   const set = new Set();
   for (const v of cells) {
     if (typeof v !== 'string' || !v) continue;
-    const m = String(v).match(
-      new RegExp('/storage/v1/object/public/' + BUCKET + '/([^?#]+)'),
-    );
+    const m = String(v).match(new RegExp('/storage/v1/object/public/' + BUCKET + '/([^?#]+)'));
     if (!m) continue;
     let rel = m[1];
     try {
@@ -183,7 +189,9 @@ console.log(`\nFile TIDAK direferensikan kolom/keterangan: ${orphans.length}\n`)
 //   P-placeholder  — file .keep (penanda folder kosong) → AMAN dihapus
 //   D-dipakai-folder — unik di folder kandidat hidup → TIDAK aman (share view)
 function stemOf(name) {
-  return String(name).replace(/\.\w+$/, '').replace(/_\d{10,}$/, '');
+  return String(name)
+    .replace(/\.\w+$/, '')
+    .replace(/_\d{10,}$/, '');
 }
 function docAgeOf(name) {
   const m = String(name).match(/_(\d{10,})/);

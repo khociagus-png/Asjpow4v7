@@ -28,8 +28,11 @@ export function switchPublicTab(tab) {
   var light = typeof CURRENT_THEME !== 'undefined' && CURRENT_THEME === 'SAKURA';
   var inactive =
     'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent ' +
-    (light ? 'text-stone-600 hover:bg-rose-900/10 hover:text-stone-900' : 'text-slate-400 hover:bg-white/10 hover:text-white');
-  var active = 'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-sky-600 text-white shadow-md';
+    (light
+      ? 'text-stone-600 hover:bg-rose-900/10 hover:text-stone-900'
+      : 'text-slate-400 hover:bg-white/10 hover:text-white');
+  var active =
+    'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-sky-600 text-white shadow-md';
 
   if (tab === 'loker') {
     secLoker.classList.remove('hidden');
@@ -105,11 +108,7 @@ export function setLanguage(lang) {
     if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
   }
   // Re-render tabel admin jika sedang mode admin
-  if (
-    typeof isAdmin !== 'undefined' &&
-    isAdmin &&
-    typeof renderAdminFull === 'function'
-  ) {
+  if (typeof isAdmin !== 'undefined' && isAdmin && typeof renderAdminFull === 'function') {
     renderAdminFull();
   }
   // Re-render chip Pengaturan Sistem (label dropdown sesuai bahasa)
@@ -441,10 +440,12 @@ export function bukaDetailLoker(code) {
           statusLabel +
           '</span>';
 
-  var html = '';    html +=
-      '<div class="flex items-start gap-4 mb-6">' +
+  var html = '';
+  html +=
+    '<div class="flex items-start gap-4 mb-6">' +
     (pamfletUrl
-      ? '<img src="' +        window.esc(thumbUrl) +
+      ? '<img src="' +
+        window.esc(thumbUrl) +
         '" loading="lazy" decoding="async" onclick="window.bukaPamflet(\'' +
         window.escJs(pamfletUrl) +
         '\') " class="w-20 h-28 object-cover rounded-xl border border-slate-600 shadow-lg cursor-pointer hover:scale-105 transition flex-shrink-0" title="' +
@@ -602,15 +603,13 @@ export function tutupDetailLoker() {
 // 13_rincian_builder (rbSeedFromText/rbSummaryFromData); tutupDetailLoker →
 // onclick string di bukaDetailLoker sendiri (string dieval global).
 registerSeamAliases({
-    switchPublicTab,
-    setLanguage,
-    parseRincianBiaya,
-    lokerGenderBadge,
-    jobTutupUntukLamar,
-    bukaDetailLoker,
-    tutupDetailLoker,
+  switchPublicTab,
+  setLanguage,
+  parseRincianBiaya,
+  lokerGenderBadge,
+  jobTutupUntukLamar,
+  bukaDetailLoker,
+  tutupDetailLoker,
 });
 
-
-// ==========================================
-
+// ==========================================

@@ -27,7 +27,10 @@ import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const SITE_ID = process.env.NETLIFY_SITE_ID || '7e433a31-82cd-4afb-8d1b-f0391cabdd3e';
-const SITE_URL = (process.env.NETLIFY_SITE_URL || 'https://asjportal.netlify.app').replace(/\/$/, '');
+const SITE_URL = (process.env.NETLIFY_SITE_URL || 'https://asjportal.netlify.app').replace(
+  /\/$/,
+  '',
+);
 const TOKEN = process.env.NETLIFY_AUTH_TOKEN || '';
 
 const step = (msg) => console.log(`\n── ${msg} ──`);
@@ -45,7 +48,8 @@ if (!TOKEN) {
 // -------------------------------------------------------------
 if (!process.env.SKIP_INSTALL) {
   step('1/5 Clean install (rm -rf node_modules && bun install)');
-  if (existsSync(resolve(ROOT, 'node_modules'))) rmSync(resolve(ROOT, 'node_modules'), { recursive: true, force: true });
+  if (existsSync(resolve(ROOT, 'node_modules')))
+    rmSync(resolve(ROOT, 'node_modules'), { recursive: true, force: true });
   execSync('bun install', { cwd: ROOT, stdio: 'inherit', shell: true });
 } else {
   console.log('  (SKIP_INSTALL=1 — lewati clean install)');
@@ -73,14 +77,17 @@ if (!process.env.SKIP_BUILD) {
   }
   const src = readFileSync(file, 'utf8');
   const oldLine = 'const { directory } = module.enableCompileCache();';
-  const newLine = 'const compileCache = module.enableCompileCache();\n        const directory = compileCache && compileCache.directory;';
+  const newLine =
+    'const compileCache = module.enableCompileCache();\n        const directory = compileCache && compileCache.directory;';
   if (src.includes(oldLine)) {
     writeFileSync(file, src.replace(oldLine, newLine));
     console.log('  ✅ patch diterapkan');
   } else if (src.includes(newLine)) {
     console.log('  ⏭  sudah ter-patch');
   } else {
-    console.warn('  ⚠ pola compile-cache tidak ditemukan (versi netlify-cli berubah?) — lanjut, deploy mungkin tetap jalan.');
+    console.warn(
+      '  ⚠ pola compile-cache tidak ditemukan (versi netlify-cli berubah?) — lanjut, deploy mungkin tetap jalan.',
+    );
   }
 }
 
@@ -99,7 +106,9 @@ if (!process.env.SKIP_BUILD) {
     });
   } catch (e) {
     // CLI bisa ke-kill oleh timeout padahal upload sudah selesai (lihat deploy 2026-08-17).
-    console.warn('  ⚠ perintah deploy exit non-0. Lanjut verifikasi live — kalau sudah terbaru, deploy sukses.');
+    console.warn(
+      '  ⚠ perintah deploy exit non-0. Lanjut verifikasi live — kalau sudah terbaru, deploy sukses.',
+    );
   }
 }
 
@@ -142,7 +151,8 @@ if (!process.env.SKIP_VERIFY) {
       body: JSON.stringify({ action: 'getAppData', payload: [] }),
     });
     const j = await r.json();
-    if (j.success === true && Array.isArray(j.jobs) && j.jobs.length > 0) ok.push(`getAppData jobs=${j.jobs.length}`);
+    if (j.success === true && Array.isArray(j.jobs) && j.jobs.length > 0)
+      ok.push(`getAppData jobs=${j.jobs.length}`);
     else fail.push('getAppData tidak return jobs');
   } catch (e) {
     fail.push('getAppData: ' + e.message);
@@ -153,7 +163,9 @@ if (!process.env.SKIP_VERIFY) {
   fail.forEach((s) => console.log('  ❌ ' + s));
 
   if (fail.length > 0) {
-    console.error('\n❌ VERIFIKASI GAGAL — deploy mungkin belum sempurna. Cek manual di dashboard Netlify.');
+    console.error(
+      '\n❌ VERIFIKASI GAGAL — deploy mungkin belum sempurna. Cek manual di dashboard Netlify.',
+    );
     process.exit(1);
   }
 } else {

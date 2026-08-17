@@ -4,7 +4,11 @@
 'use strict';
 
 const { normalizeWa, pick, supabaseJson } = require('./db/client');
-const { findCandidateByWaFiltered, findCandidates, maxCandidateIdNumber } = require('./db/candidates');
+const {
+  findCandidateByWaFiltered,
+  findCandidates,
+  maxCandidateIdNumber,
+} = require('./db/candidates');
 
 // Kolom WA yang dikenali di tabel kandidat (urutan prioritas).
 const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];
@@ -46,10 +50,7 @@ async function findCandidateByWa(wa) {
   if (hit !== undefined) return hit;
   // Fallback: scan penuh (skema kolom WA tidak dikenal).
   const found = await findCandidates();
-  return (
-    found.rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want) ||
-    null
-  );
+  return found.rows.find((r) => normalizeWa(pick(r, CAND_WA_COLS) || '') === want) || null;
 }
 
 module.exports = { CAND_WA_COLS, findCandidateByWa, nextCandidateId };

@@ -20,7 +20,9 @@ describe('parseJsonLoose — output AI → objek', () => {
   });
 
   it('teks di sekitar JSON diekstrak via slicing {…}', () => {
-    expect(parseJsonLoose('Hasil wawancara: {"nama":"AGUS","hobi":"badminton"} Terima kasih')).toEqual({
+    expect(
+      parseJsonLoose('Hasil wawancara: {"nama":"AGUS","hobi":"badminton"} Terima kasih'),
+    ).toEqual({
       nama: 'AGUS',
       hobi: 'badminton',
     });

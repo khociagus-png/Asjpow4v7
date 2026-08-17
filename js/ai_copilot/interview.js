@@ -52,7 +52,8 @@ export function pastikanTombolSelesaiInterview() {
   btn.className =
     'w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex flex-col items-center justify-center shadow-lg transition active:scale-95 flex-shrink-0';
   btn.title = 'Selesai & Kirim Hasil ke Admin';
-  btn.innerHTML = '<i class="fas fa-check-double text-lg"></i><span class="text-[7px] font-black leading-none mt-0.5">SELESAI</span>';
+  btn.innerHTML =
+    '<i class="fas fa-check-double text-lg"></i><span class="text-[7px] font-black leading-none mt-0.5">SELESAI</span>';
   sendBtn.parentElement.appendChild(btn);
 }
 
@@ -88,7 +89,10 @@ export async function selesaikanWawancaraInterview() {
     }
   } catch (err) {
     console.error('[AI] selesaikan wawancara:', err);
-    appendInterviewChat('ai', '⚠️ Gagal merangkum hasil: ' + window.esc(err && err.message ? err.message : 'AI sibuk'));
+    appendInterviewChat(
+      'ai',
+      '⚠️ Gagal merangkum hasil: ' + window.esc(err && err.message ? err.message : 'AI sibuk'),
+    );
   } finally {
     if (doneBtn) doneBtn.disabled = false;
     if (btnEl) btnEl.disabled = false;
@@ -125,7 +129,9 @@ export async function mulaiWawancaraInterview() {
     });
     const el = document.getElementById(typingId);
     if (el) el.remove();
-    const reply = (res && res.reply) || 'Konnichiwa ' + currentKandidatName + '-san! Mari mulai wawancara kita.';
+    const reply =
+      (res && res.reply) ||
+      'Konnichiwa ' + currentKandidatName + '-san! Mari mulai wawancara kita.';
     appendInterviewChat('ai', reply);
     interviewHistory.push({ role: 'assistant', content: reply });
   } catch (err) {
@@ -232,7 +238,10 @@ export async function sendInterviewMessage() {
 
 export function cobaParseJsonLoose(text) {
   let t = String(text || '').trim();
-  t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  t = t
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
   try {
     return JSON.parse(t);
   } catch (e) {
@@ -269,12 +278,14 @@ export async function kirimHasilWawancaraKeAdmin(hasil) {
     nField +
     ' field';
   if (hasil.rekomendasi) msg += '\n💡 Rekomendasi: ' + String(hasil.rekomendasi);
-  msg += res && res.success ? '\n✅ **Hasil terkirim ke admin** — siap di-update ke biodata.' : '\n⚠️ Gagal kirim hasil ke admin.';
+  msg +=
+    res && res.success
+      ? '\n✅ **Hasil terkirim ke admin** — siap di-update ke biodata.'
+      : '\n⚠️ Gagal kirim hasil ke admin.';
   appendInterviewChat('ai', msg);
 }
 
 registerSeamAliases({
-    bukaSimulatorInterview,
-    sendInterviewMessage,
+  bukaSimulatorInterview,
+  sendInterviewMessage,
 });
-

@@ -195,13 +195,11 @@ export function pesanPreviewTidakTersedia(url) {
   );
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // (03_candidate.js & admin_modal/cv.js window.previewFileInFrame,
 // 03_candidate.js & pages/share.js pesanPreviewTidakTersedia; VENDOR_V /
 // _vendorPromises tetap PRIVATE modul — tidak ada pemakai eksternal).
 registerSeamAliases({
-    previewFileInFrame,
-    pesanPreviewTidakTersedia,
-});
-
+  previewFileInFrame,
+  pesanPreviewTidakTersedia,
+});

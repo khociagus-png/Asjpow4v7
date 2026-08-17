@@ -9,7 +9,9 @@ const key = env('SUPABASE_SERVICE_ROLE_KEY') || env('SUPABASE_ANON_KEY') || '';
 const headers = { apikey: key, Authorization: 'Bearer ' + key };
 
 const COLS =
-  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,status,updated_at,created_at,tanggal_daftar,gender,usia,tb,bb,pendidikan,tahapan_seleksi,id_loker_pilihan,pas_photo,folder_url,jft,ssw,file_cv'.split(',');
+  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,status,updated_at,created_at,tanggal_daftar,gender,usia,tb,bb,pendidikan,tahapan_seleksi,id_loker_pilihan,pas_photo,folder_url,jft,ssw,file_cv'.split(
+    ',',
+  );
 
 const bad = [];
 for (const col of COLS) {

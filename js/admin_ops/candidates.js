@@ -24,7 +24,8 @@ export async function bukaModalListKandidat(code) {
   var txt = '*LIST KANDIDAT JOB ' + code + '* Total: ' + cands.length + ' Pelamar \n\n';
 
   if (cands.length === 0) {
-    html = '<div class="text-center text-slate-500 py-4">' + window.tr('ui.no_applicants') + '</div>';
+    html =
+      '<div class="text-center text-slate-500 py-4">' + window.tr('ui.no_applicants') + '</div>';
     txt += window.tr('ui.no_candidates_empty');
   } else {
     cands.forEach((c, i) => {
@@ -105,7 +106,10 @@ export async function mulaiKirimUndanganGrup() {
     const successCount = results.filter((r) => r.success).length;
     window.showToast(window.tr('ui.toast_invites_done_n').replace('{n}', successCount), 'success');
   } catch (e) {
-    window.showToast(window.tr('ui.toast_invite_send_failed') + (e && e.message ? e.message : e), 'error');
+    window.showToast(
+      window.tr('ui.toast_invite_send_failed') + (e && e.message ? e.message : e),
+      'error',
+    );
   }
 
   btn.innerHTML = window.tr('ui.start_send_invite');
@@ -157,7 +161,9 @@ export function parseDaftarOrtu(text) {
         nama = m[1].trim();
         waRaw = m[2];
       }
-      const wa = window.normalizeWaInput ? window.normalizeWaInput(waRaw) : waRaw.replace(/\D/g, '');
+      const wa = window.normalizeWaInput
+        ? window.normalizeWaInput(waRaw)
+        : waRaw.replace(/\D/g, '');
       const ok = window.isValidWaInput ? window.isValidWaInput(wa) : /^628\d{9,10}$/.test(wa);
       if (!ok || !wa) {
         invalid += 1;
@@ -209,7 +215,9 @@ export function previewUndanganKelas() {
   const varianEl = document.getElementById('span-kelas-varian');
   if (varianEl) {
     varianEl.textContent =
-      variants.length > 1 ? ' • ' + window.tr('ui.variant_count_n').replace('{n}', String(variants.length)) : '';
+      variants.length > 1
+        ? ' • ' + window.tr('ui.variant_count_n').replace('{n}', String(variants.length))
+        : '';
   }
   const prv = document.getElementById('preview-pesan-kelas');
   if (prv) {
@@ -234,7 +242,10 @@ export async function kirimUndanganKelas() {
     return;
   }
   if (invalid > 0) {
-    window.showToast(window.tr('ui.toast_invalid_rows_n').replace('{n}', String(invalid)), 'warning');
+    window.showToast(
+      window.tr('ui.toast_invalid_rows_n').replace('{n}', String(invalid)),
+      'warning',
+    );
   }
   if (!linkGrup) {
     window.showToast(window.tr('ui.toast_group_link_required'), 'error');
@@ -276,7 +287,10 @@ export async function kirimUndanganKelas() {
     }
     window.showToast(window.tr('ui.toast_invites_done_n').replace('{n}', String(ok)), 'success');
   } catch (e) {
-    window.showToast(window.tr('ui.toast_invite_send_failed') + (e && e.message ? e.message : e), 'error');
+    window.showToast(
+      window.tr('ui.toast_invite_send_failed') + (e && e.message ? e.message : e),
+      'error',
+    );
   } finally {
     btn.innerHTML = window.tr('ui.start_send_invite');
     btn.disabled = false;
@@ -337,20 +351,18 @@ export async function bukaModalCekDataSiswa() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (render/admin.js bukaModalListKandidat, partials
 // mulaiKirimUndanganGrup, admin/index bukaModalCekDataSiswa, tombol
 // keluarkanKandidatDariJob di daftar).
 registerSeamAliases({
-    bukaModalListKandidat,
-    keluarkanKandidatDariJob,
-    mulaiKirimUndanganGrup,
-    bukaModalCekDataSiswa,
-    parseDaftarOrtu,
-    parseVarianPesan,
-    bukaModalUndanganKelas,
-    previewUndanganKelas,
-    kirimUndanganKelas,
+  bukaModalListKandidat,
+  keluarkanKandidatDariJob,
+  mulaiKirimUndanganGrup,
+  bukaModalCekDataSiswa,
+  parseDaftarOrtu,
+  parseVarianPesan,
+  bukaModalUndanganKelas,
+  previewUndanganKelas,
+  kirimUndanganKelas,
 });
-

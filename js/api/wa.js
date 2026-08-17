@@ -124,7 +124,10 @@ export async function tambahTugasAdmin() {
     }
   } catch (err) {
     input.value = text;
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     input.disabled = false;
   }
@@ -137,7 +140,10 @@ export async function updateStatusTugas(id, st) {
       if (typeof renderTugas === 'function') renderTugas();
     } else window.showToast(res.error || 'Gagal update status', 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export async function hapusTugasAdmin(id) {
@@ -149,7 +155,10 @@ export async function hapusTugasAdmin(id) {
       if (typeof renderTugas === 'function') renderTugas();
     } else window.showToast(res.error || 'Gagal hapus tugas', 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export async function prosesHapusJadwal(r) {
@@ -161,7 +170,10 @@ export async function prosesHapusJadwal(r) {
       if (typeof renderJadwal === 'function') renderJadwal();
     } else window.showToast(res.error || 'Gagal hapus jadwal', 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 
@@ -191,7 +203,10 @@ export async function submitJadwal(e) {
       if (typeof renderJadwal === 'function') renderJadwal();
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = window.tr('button.save_schedule');
     btn.disabled = false;
@@ -199,16 +214,14 @@ export async function submitJadwal(e) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (papan tugas & jadwal admin) + render/admin.js
 // (window.renderTugas).
 registerSeamAliases({
-    renderTugas,
-    tambahTugasAdmin,
-    updateStatusTugas,
-    hapusTugasAdmin,
-    prosesHapusJadwal,
-    submitJadwal,
+  renderTugas,
+  tambahTugasAdmin,
+  updateStatusTugas,
+  hapusTugasAdmin,
+  prosesHapusJadwal,
+  submitJadwal,
 });
-

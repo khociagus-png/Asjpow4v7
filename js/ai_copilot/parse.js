@@ -92,7 +92,9 @@ export async function uploadDokumenBiodataAdmin(input) {
       throw new Error((res && res.error) || 'Gagal parse dokumen');
     }
     // Simpan ke biodata master (backend sudah izinkan admin panggil submitMasterForm).
-    const simpan = await window.callAPI('submitMasterForm', [Object.assign({ wa: res.wa }, res.data)]);
+    const simpan = await window.callAPI('submitMasterForm', [
+      Object.assign({ wa: res.wa }, res.data),
+    ]);
     if (!simpan || simpan.success === false) {
       throw new Error((simpan && simpan.message) || 'Gagal simpan biodata');
     }
@@ -114,7 +116,10 @@ export async function uploadDokumenBiodataAdmin(input) {
       'ai',
     );
     if (typeof showToast === 'function') {
-      window.showToast('Biodata ' + (res.namaSekarang || res.wa) + ' ter-update dari ' + res.fileName, 'success');
+      window.showToast(
+        'Biodata ' + (res.namaSekarang || res.wa) + ' ter-update dari ' + res.fileName,
+        'success',
+      );
     }
     if (res.wa) {
       const waEl = document.getElementById('admin-ai-wa');
@@ -125,7 +130,10 @@ export async function uploadDokumenBiodataAdmin(input) {
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
     console.error('[AI] parseDokumenBiodata error:', err);
-    window.tambahPesanAdminAi('⚠️ Gagal parse dokumen: ' + window.esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    window.tambahPesanAdminAi(
+      '⚠️ Gagal parse dokumen: ' + window.esc(err && err.message ? err.message : 'AI sibuk'),
+      'ai',
+    );
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);
@@ -133,12 +141,10 @@ export async function uploadDokumenBiodataAdmin(input) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (pastikanBarParseAdminAi di-inject ke modal-admin-ai:
 // uploadDokumenBiodataAdmin) + admin.js window.pastikanBarParseAdminAi.
 registerSeamAliases({
-    pastikanBarParseAdminAi,
-    uploadDokumenBiodataAdmin,
-});
-
+  pastikanBarParseAdminAi,
+  uploadDokumenBiodataAdmin,
+});

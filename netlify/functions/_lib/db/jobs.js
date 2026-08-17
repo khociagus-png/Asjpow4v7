@@ -4,7 +4,6 @@
 
 const { supabaseJson, pick, toText, findTable } = require('./client');
 
-
 // Kolom asli tabel job_database (hasil introspeksi):
 //   code_job, tsk, kategori, pekerjaan, lokasi, gender, kuota, jumlah_kandidat,
 //   status, syarat, keterangan, tahapan, format_cv, link_pamflet,
@@ -59,7 +58,6 @@ function mapJob(row) {
   };
 }
 
-
 // Nama tabel asli (hasil introspeksi skema Supabase project):
 //   job_database (lowongan), database_candidate + master_database_candidate
 //   (kandidat), sys_config (konfigurasi/assets/pengumuman), database_tugas,
@@ -78,7 +76,6 @@ async function findJobs() {
   ]);
 }
 
-
 // Ada kandidat yang masih terikat ke job code? (cek hapus loker) — server-side.
 async function countCandidatesForJob(code) {
   try {
@@ -90,7 +87,6 @@ async function countCandidatesForJob(code) {
     return undefined;
   }
 }
-
 
 // ===== Server-side targeted queries (lanjutan REVIEW.md S2) =====
 // Semua helper di bawah punya kontrak sama dengan findCandidateByWaFiltered:
@@ -116,7 +112,6 @@ async function findJobByCodeFiltered(code) {
   }
   return anyOk ? null : undefined;
 }
-
 
 // Max nomor kode job TG###ASJ — server-side (desc, ambil 20 teratas).
 async function maxJobCodeNumber() {

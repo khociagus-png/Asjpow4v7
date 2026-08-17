@@ -136,311 +136,1346 @@ body.theme-light #asj-footer {
    ============================================================ */
 
 /* --- Permukaan admin & modal: gelap -> putih/abu terang --- */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-slate-950,
-  .bg-slate-900,
-  .bg-slate-900\/95,
-  .bg-slate-900\/80,
-  .bg-slate-900\/70,
-  .bg-slate-900\/60,
-  .bg-slate-900\/50,
-  .bg-slate-900\/40,
-  .bg-slate-950\/80,
-  .bg-slate-950\/60,
-  .bg-slate-950\/50
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(
+    .bg-slate-950,
+    .bg-slate-900,
+    .bg-slate-900\/95,
+    .bg-slate-900\/80,
+    .bg-slate-900\/70,
+    .bg-slate-900\/60,
+    .bg-slate-900\/50,
+    .bg-slate-900\/40,
+    .bg-slate-950\/80,
+    .bg-slate-950\/60,
+    .bg-slate-950\/50
+  ) {
   background-color: #ffffff;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-slate-800,
-  .bg-slate-800\/80,
-  .bg-slate-800\/50,
-  .bg-slate-800\/40
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-slate-800, .bg-slate-800\/80, .bg-slate-800\/50, .bg-slate-800\/40) {
   background-color: #f1f1f1;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-slate-700, .bg-slate-700\/60, .bg-slate-700\/80) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-slate-700, .bg-slate-700\/60, .bg-slate-700\/80) {
   background-color: #e2e2e2;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-slate-600, .bg-slate-600\/60) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-slate-600, .bg-slate-600\/60) {
   background-color: #d4d4d4;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-black,
-  .bg-black\/20,
-  .bg-black\/30,
-  .bg-black\/40,
-  .bg-black\/50,
-  .bg-black\/60
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-black, .bg-black\/20, .bg-black\/30, .bg-black\/40, .bg-black\/50, .bg-black\/60) {
   background-color: #f5f5f5;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-white\/5,
-  .bg-white\/10,
-  .bg-white\/20,
-  .bg-white\/30
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-white\/5, .bg-white\/10, .bg-white\/20, .bg-white\/30) {
   background-color: #ececec;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .hover\:bg-white\/5:hover,
-  .hover\:bg-white\/10:hover,
-  .hover\:bg-white\/20:hover
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.hover\:bg-white\/5:hover, .hover\:bg-white\/10:hover, .hover\:bg-white\/20:hover) {
   background-color: #e4e4e4;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .hover\:bg-black\/40:hover,
-  .hover\:bg-black\/60:hover
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.hover\:bg-black\/40:hover, .hover\:bg-black\/60:hover) {
   background-color: #e4e4e4;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .hover\:bg-slate-700:hover,
-  .hover\:bg-slate-600:hover
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.hover\:bg-slate-700:hover, .hover\:bg-slate-600:hover) {
   background-color: #d6d6d6;
 }
 /* Badge warna transparan-gelap -> tint terang */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-amber-900\/20,
-  .bg-amber-900\/25
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-amber-900\/20, .bg-amber-900\/25) {
   background-color: #fdf1cf;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-amber-900\/40, .bg-amber-900\/60) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-amber-900\/40, .bg-amber-900\/60) {
   background-color: #fde9b0;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-amber-500\/20, .bg-amber-600\/20) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-amber-500\/20, .bg-amber-600\/20) {
   background-color: rgba(245, 158, 11, 0.15);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .bg-amber-600\/40 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .bg-amber-600\/40 {
   background-color: rgba(217, 119, 6, 0.18);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-emerald-900\/20, .bg-emerald-900\/30) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-emerald-900\/20, .bg-emerald-900\/30) {
   background-color: #e9f5dc;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-emerald-900\/40, .bg-emerald-900\/60) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-emerald-900\/40, .bg-emerald-900\/60) {
   background-color: #e2f1d0;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-pink-900\/40, .bg-pink-900\/50, .bg-pink-900\/80) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-pink-900\/40, .bg-pink-900\/50, .bg-pink-900\/80) {
   background-color: #fce7f3;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .bg-pink-600\/20 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .bg-pink-600\/20 {
   background-color: rgba(219, 39, 119, 0.12);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .bg-purple-900\/40 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .bg-purple-900\/40 {
   background-color: #f3e8ff;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-red-900\/10, .bg-red-900\/20) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-red-900\/10, .bg-red-900\/20) {
   background-color: #feecec;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.bg-red-900\/30, .bg-red-900\/40, .bg-red-900\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-red-900\/30, .bg-red-900\/40, .bg-red-900\/50) {
   background-color: #fee2e2;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-sky-900\/20,
-  .bg-sky-900\/40,
-  .bg-sky-900\/50,
-  .bg-sky-900\/60,
-  .bg-sky-900\/80
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.bg-sky-900\/20, .bg-sky-900\/40, .bg-sky-900\/50, .bg-sky-900\/60, .bg-sky-900\/80) {
   background-color: #dceefd;
 }
 
 /* --- Border & pemisah admin/modal: gelap -> terang --- */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .border-slate-800,
-  .border-slate-700,
-  .border-slate-600,
-  .border-slate-500
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-slate-800, .border-slate-700, .border-slate-600, .border-slate-500) {
   border-color: #dcdcdc;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .border-white\/10,
-  .border-white\/20,
-  .border-white\/30
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-white\/10, .border-white\/20, .border-white\/30) {
   border-color: #e2e2e2;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-slate-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-slate-500\/50 {
   border-color: rgba(117, 117, 117, 0.25);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-slate-700\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-slate-700\/50 {
   border-color: rgba(43, 43, 43, 0.18);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-amber-500\/20 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-amber-500\/20 {
   border-color: rgba(245, 158, 11, 0.12);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-amber-500\/30, .border-amber-500\/40) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-amber-500\/30, .border-amber-500\/40) {
   border-color: rgba(245, 158, 11, 0.22);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-amber-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-amber-500\/50 {
   border-color: rgba(245, 158, 11, 0.32);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-amber-900\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-amber-900\/50 {
   border-color: rgba(180, 83, 9, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-emerald-500\/30, .border-emerald-500\/40) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-emerald-500\/30, .border-emerald-500\/40) {
   border-color: rgba(106, 171, 0, 0.28);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-emerald-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-emerald-500\/50 {
   border-color: rgba(106, 171, 0, 0.35);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-emerald-700\/50, .border-emerald-900\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-emerald-700\/50, .border-emerald-900\/50) {
   border-color: rgba(74, 117, 0, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-pink-500\/30, .border-pink-500\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-pink-500\/30, .border-pink-500\/50) {
   border-color: rgba(236, 72, 153, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-pink-900\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-pink-900\/50 {
   border-color: rgba(190, 24, 93, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-purple-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-purple-500\/50 {
   border-color: rgba(168, 85, 247, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-purple-900\/30, .border-purple-900\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-purple-900\/30, .border-purple-900\/50) {
   border-color: rgba(107, 33, 168, 0.25);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-red-500\/30 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-red-500\/30 {
   border-color: rgba(239, 68, 68, 0.28);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-red-900\/30, .border-red-900\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-red-900\/30, .border-red-900\/50) {
   border-color: rgba(153, 27, 27, 0.28);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-rose-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-rose-500\/50 {
   border-color: rgba(244, 63, 94, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-rose-900\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-rose-900\/50 {
   border-color: rgba(136, 19, 55, 0.28);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-sky-500\/30, .border-sky-500\/40) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-sky-500\/30, .border-sky-500\/40) {
   border-color: rgba(14, 165, 233, 0.28);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .border-sky-500\/50 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .border-sky-500\/50 {
   border-color: rgba(14, 165, 233, 0.35);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.border-sky-700\/50, .border-sky-900\/50) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.border-sky-700\/50, .border-sky-900\/50) {
   border-color: rgba(3, 105, 161, 0.3);
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
-  .divide-slate-700 > :not([hidden]) ~ :not([hidden]),
-  .divide-white\/5 > :not([hidden]) ~ :not([hidden]),
-  .divide-white\/10 > :not([hidden]) ~ :not([hidden])
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(
+    .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
+    .divide-slate-700 > :not([hidden]) ~ :not([hidden]),
+    .divide-white\/5 > :not([hidden]) ~ :not([hidden]),
+    .divide-white\/10 > :not([hidden]) ~ :not([hidden])
+  ) {
   border-color: #e8e8e8;
 }
 
 /* --- Teks admin/modal: terang -> gelap (aksen warna dipertebal) --- */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .text-white,
-  .text-slate-100
-) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-white, .text-slate-100) {
   color: #1c1917;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-slate-200 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-slate-200 {
   color: #292524;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-slate-300 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-slate-300 {
   color: #44403c;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-slate-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-slate-400 {
   color: #57534e;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-slate-500 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-slate-500 {
   color: #78716c;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-amber-200, .text-amber-300, .text-amber-400) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-amber-200, .text-amber-300, .text-amber-400) {
   color: #b45309;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-emerald-200, .text-emerald-300, .text-emerald-400) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-emerald-200, .text-emerald-300, .text-emerald-400) {
   color: #3f6212;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-sky-200, .text-sky-300, .text-sky-100) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-sky-200, .text-sky-300, .text-sky-100) {
   color: #0369a1;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-sky-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-sky-400 {
   color: #0284c7;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-red-200, .text-red-300) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-red-200, .text-red-300) {
   color: #b91c1c;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-red-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-red-400 {
   color: #dc2626;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-purple-200, .text-purple-300, .text-purple-400) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-purple-200, .text-purple-300, .text-purple-400) {
   color: #6b21a8;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-pink-200, .text-pink-300, .text-pink-400) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-pink-200, .text-pink-300, .text-pink-400) {
   color: #be185d;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-rose-200, .text-rose-300) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-rose-200, .text-rose-300) {
   color: #be123c;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-rose-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-rose-400 {
   color: #e11d48;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-indigo-200, .text-indigo-300) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-indigo-200, .text-indigo-300) {
   color: #4338ca;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-blue-200, .text-blue-300, .text-blue-400) {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(.text-blue-200, .text-blue-300, .text-blue-400) {
   color: #1d4ed8;
 }
 /* Aksen 400 yang belum diremap (label upload & judul seksi ai-form/share):
    di atas kartu putih 400-an cerah kontrasnya <2.5:1 -> gelapkan ke 700-an. */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-orange-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-orange-400 {
   color: #c2410c;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-violet-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-violet-400 {
   color: #6d28d9;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-teal-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-teal-400 {
   color: #0f766e;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-indigo-400 {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .text-indigo-400 {
   color: #4338ca;
 }
 /* Tombol dengan latar warna tetap putih teksnya */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-sky-600, .bg-sky-500,
-  .bg-red-600, .bg-red-500, .bg-red-700,
-  .bg-amber-500, .bg-amber-600, .bg-amber-400,
-  .bg-emerald-600, .bg-emerald-500,
-  .bg-rose-600, .bg-rose-500,
-  .bg-pink-600, .bg-violet-600, .bg-violet-500,
-  .bg-teal-600, .bg-teal-500, .bg-purple-600,
-  .bg-indigo-600, .bg-indigo-500, .bg-zinc-900,
-  .bg-gradient-to-r, .bg-gradient-to-tr, .bg-gradient-to-t, .bg-gradient-to-b
-) .text-white,
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
-  .bg-sky-600, .bg-sky-500,
-  .bg-red-600, .bg-red-500, .bg-red-700,
-  .bg-amber-500, .bg-amber-600, .bg-amber-400,
-  .bg-emerald-600, .bg-emerald-500,
-  .bg-rose-600, .bg-rose-500,
-  .bg-pink-600, .bg-violet-600, .bg-violet-500,
-  .bg-teal-600, .bg-teal-500, .bg-purple-600,
-  .bg-indigo-600, .bg-indigo-500, .bg-zinc-900,
-  .bg-gradient-to-r, .bg-gradient-to-tr, .bg-gradient-to-t, .bg-gradient-to-b
-).text-white {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(
+    .bg-sky-600,
+    .bg-sky-500,
+    .bg-red-600,
+    .bg-red-500,
+    .bg-red-700,
+    .bg-amber-500,
+    .bg-amber-600,
+    .bg-amber-400,
+    .bg-emerald-600,
+    .bg-emerald-500,
+    .bg-rose-600,
+    .bg-rose-500,
+    .bg-pink-600,
+    .bg-violet-600,
+    .bg-violet-500,
+    .bg-teal-600,
+    .bg-teal-500,
+    .bg-purple-600,
+    .bg-indigo-600,
+    .bg-indigo-500,
+    .bg-zinc-900,
+    .bg-gradient-to-r,
+    .bg-gradient-to-tr,
+    .bg-gradient-to-t,
+    .bg-gradient-to-b
+  )
+  .text-white,
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  :is(
+    .bg-sky-600,
+    .bg-sky-500,
+    .bg-red-600,
+    .bg-red-500,
+    .bg-red-700,
+    .bg-amber-500,
+    .bg-amber-600,
+    .bg-amber-400,
+    .bg-emerald-600,
+    .bg-emerald-500,
+    .bg-rose-600,
+    .bg-rose-500,
+    .bg-pink-600,
+    .bg-violet-600,
+    .bg-violet-500,
+    .bg-teal-600,
+    .bg-teal-500,
+    .bg-purple-600,
+    .bg-indigo-600,
+    .bg-indigo-500,
+    .bg-zinc-900,
+    .bg-gradient-to-r,
+    .bg-gradient-to-tr,
+    .bg-gradient-to-t,
+    .bg-gradient-to-b
+  ).text-white {
   color: #ffffff;
 }
 /* Kartu modal & panel admin yang memakai glass-panel ikut terang */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .glass-panel {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .glass-panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
 }
 
 /* Chip dictionary & baris tabel responsif (mobile) ikut terang */
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .rb-chip {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .rb-chip {
   background: #eef2f7;
   border-color: #cbd5e1;
   color: #334155;
 }
-:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .rb-chip:hover {
+:is(
+    body.theme-light
+      :is(
+        #page-admin,
+        #modal-root,
+        [data-page='share'],
+        [data-page='ai-form'],
+        [data-page='siswa-baru']
+      ),
+    body.theme-light[data-page='share'],
+    body.theme-light[data-page='ai-form'],
+    body.theme-light[data-page='siswa-baru'],
+    body.theme-light[data-page='apply-full'],
+    body.theme-light[data-page='master-full']
+  )
+  .rb-chip:hover {
   color: #1c1917;
   border-color: rgba(106, 171, 0, 0.6);
 }
@@ -470,7 +1505,9 @@ body.theme-light[data-page='share'] #modal-preview .bg-slate-900 {
 body.theme-light[data-page='share'] #modal-preview .bg-slate-800 {
   background-color: #334155;
 }
-body.theme-light[data-page='share'] #modal-preview :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400) {
+body.theme-light[data-page='share']
+  #modal-preview
+  :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400) {
   color: #e2e8f0;
 }
 /* master-full.html #login-gate & #loading (gate login & loader) tetap gelap */
@@ -493,7 +1530,8 @@ body.theme-light[data-page='master-full'] :is(.bg-sky-600\/80, .bg-amber-600\/80
 }
 /* Gradient judul PT AMANAH SAKURA JAPAN (share): pink-200→white jadi gelap
    supaya terbaca di atas header putih mode light */
-body.theme-light[data-page='share'] .bg-gradient-to-r.from-pink-200.to-white.bg-clip-text.text-transparent {
+body.theme-light[data-page='share']
+  .bg-gradient-to-r.from-pink-200.to-white.bg-clip-text.text-transparent {
   background-image: linear-gradient(to right, #be185d, #1c1917);
 }
 /* index.html bagian publik (loker/layanan): kotak bg-slate-900/70 & /60 ikut
@@ -542,7 +1580,10 @@ body.theme-light #page-kandidat .bg-black\/40 :is(.text-white),
 body.theme-light #page-kandidat .bg-black\/40.text-white {
   color: #1c1917;
 }
-body.theme-light #page-kandidat .bg-black\/40 :is(.text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500) {
+body.theme-light
+  #page-kandidat
+  .bg-black\/40
+  :is(.text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500) {
   color: #44403c;
 }
 body.theme-light #page-kandidat .bg-black\/40.text-slate-300,
@@ -1032,8 +2073,20 @@ select:focus-visible,
   white-space: nowrap;
   flex: 1;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
 }
 .marquee-content {
   padding-left: 100%;

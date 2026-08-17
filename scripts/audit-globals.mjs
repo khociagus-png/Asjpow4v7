@@ -47,7 +47,12 @@ function frontendFiles() {
     }
   };
   walk(jsDir, '');
-  const stack = ['/api-client.js', '/i18n.js', '/pwa.js', ...jsFiles.sort((a, b) => a.localeCompare(b))];
+  const stack = [
+    '/api-client.js',
+    '/i18n.js',
+    '/pwa.js',
+    ...jsFiles.sort((a, b) => a.localeCompare(b)),
+  ];
   return stack
     .map((p) => {
       const abs = join(ROOT, p);
@@ -138,7 +143,12 @@ function countRefs(name) {
   return out;
 }
 
-const report = { generatedAt: new Date().toISOString(), files: files.length, symbols: decls.size, items: [] };
+const report = {
+  generatedAt: new Date().toISOString(),
+  files: files.length,
+  symbols: decls.size,
+  items: [],
+};
 for (const [name, declaredIn] of decls) {
   const refs = countRefs(name);
   const shadowsWindow = WINDOW_PROPS.has(name);

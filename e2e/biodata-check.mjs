@@ -22,14 +22,13 @@ const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/clien
 // Update biodata butuh sinkronisasi DB — default waitFor 30s.
 const waitFor = (c, t, i) => harnessWaitFor(c, t ?? 30000, i);
 const TEST_WA =
-  process.env.E2E_BIODATA_WA ||
-  '62812' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
+  process.env.E2E_BIODATA_WA || '62812' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
 const TEST_PIN = process.env.E2E_BIODATA_PIN || '9912';
 const TEST_NAMA = 'E2E BIODATA TEST';
 
 const TES_EMAIL = 'e2e.biodata.test@example.com';
 const TES_ALAMAT = 'E2E ALAMAT BIODATA TEST';
-const TES_TMPL = 'E2E TEMPAT LAHIR TEST'
+const TES_TMPL = 'E2E TEMPAT LAHIR TEST';
 
 // ---- Supabase direct (setup & cleanup kandidat tes) -------------------------
 const SB = supabaseUrl().replace(/\/$/, '');
@@ -158,16 +157,13 @@ try {
 
   // refreshDataDinamis berjalan async setelah simpan — tunggu data kandidat
   // benar-benar ter-update (bukti tersimpan di DB & ter-fetch ulang).
-  const synced = await waitFor(
-    async () => {
-      const b = await page.evaluate(() => {
-        const c = (window.ALL_CANDIDATES || [])[0];
-        return c && c.bio ? c.bio : null;
-      });
-      return !!b && b.email === TES_EMAIL && b.alamat === TES_ALAMAT && b.tmplahir === TES_TMPL;
-    },
-    30000,
-  );
+  const synced = await waitFor(async () => {
+    const b = await page.evaluate(() => {
+      const c = (window.ALL_CANDIDATES || [])[0];
+      return c && c.bio ? c.bio : null;
+    });
+    return !!b && b.email === TES_EMAIL && b.alamat === TES_ALAMAT && b.tmplahir === TES_TMPL;
+  }, 30000);
   check('Biodata tersinkron ke data kandidat (DB + fetch ulang)', synced);
 
   // Verifikasi: buka lagi → nilai tes tampil (persisted dari DB)

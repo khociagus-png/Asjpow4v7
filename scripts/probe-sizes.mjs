@@ -19,12 +19,17 @@ async function probe(table, sel, start, end) {
   });
   const body = await res.text();
   const cr = res.headers.get('content-range') || '';
-  return { bytes: body.length, total: parseInt(String(cr).split('/')[1] || '0', 10) || 0, status: res.status };
+  return {
+    bytes: body.length,
+    total: parseInt(String(cr).split('/')[1] || '0', 10) || 0,
+    status: res.status,
+  };
 }
 
 const CAND_LIGHT =
   'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar';
-const CAND_PAGE_FULL = 'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar,gender,usia,tb,bb,pendidikan,tahapan_seleksi,id_loker_pilihan,pas_photo,folder_url,jft,ssw,file_cv';
+const CAND_PAGE_FULL =
+  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar,gender,usia,tb,bb,pendidikan,tahapan_seleksi,id_loker_pilihan,pas_photo,folder_url,jft,ssw,file_cv';
 const FORM_LIGHT =
   'id,timestamp,code_job,kategory,nama_lengkap,no_wa,status,folder_url,pas_photo,jft,ssw,file_cv,keterangan,feedback_berkas,created_at,updated_at';
 
@@ -35,6 +40,12 @@ const form = await probe('database_asj_form', '*', 0, 499);
 const formLight = await probe('database_asj_form', FORM_LIGHT, 0, 499);
 
 const pct = (a, b) => (b ? Math.round((1 - a / b) * 100) : 0);
-console.log(`candidate: total=${cand.total} | select*=${cand.bytes}B (${(cand.bytes / 1024).toFixed(1)}KB, HTTP ${cand.status}) | light(min)=${candLight.bytes}B (${(candLight.bytes / 1024).toFixed(1)}KB, HTTP ${candLight.status})`);
-console.log(`candidate: 50 baris proyeksi-luas=${candPageFull.bytes}B (${(candPageFull.bytes / 1024).toFixed(1)}KB) — banding: select* 50 baris ≈ ${Math.round((cand.bytes * 50) / 222)}B`);
-console.log(`form:     total=${form.total} | select*=${form.bytes}B (${(form.bytes / 1024).toFixed(1)}KB, HTTP ${form.status}) | projected=${formLight.bytes}B (${(formLight.bytes / 1024).toFixed(1)}KB, HTTP ${formLight.status}) | hemat=${pct(formLight.bytes, form.bytes)}%`);
+console.log(
+  `candidate: total=${cand.total} | select*=${cand.bytes}B (${(cand.bytes / 1024).toFixed(1)}KB, HTTP ${cand.status}) | light(min)=${candLight.bytes}B (${(candLight.bytes / 1024).toFixed(1)}KB, HTTP ${candLight.status})`,
+);
+console.log(
+  `candidate: 50 baris proyeksi-luas=${candPageFull.bytes}B (${(candPageFull.bytes / 1024).toFixed(1)}KB) — banding: select* 50 baris ≈ ${Math.round((cand.bytes * 50) / 222)}B`,
+);
+console.log(
+  `form:     total=${form.total} | select*=${form.bytes}B (${(form.bytes / 1024).toFixed(1)}KB, HTTP ${form.status}) | projected=${formLight.bytes}B (${(formLight.bytes / 1024).toFixed(1)}KB, HTTP ${formLight.status}) | hemat=${pct(formLight.bytes, form.bytes)}%`,
+);

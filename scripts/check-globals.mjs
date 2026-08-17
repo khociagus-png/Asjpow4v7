@@ -29,7 +29,8 @@ const ROOT = process.cwd();
 
 // Deklarasi top-level (kolom 0): function/async function/class/const/let/var.
 // Fase 3: prefix `export` di file ESM (api-client.js/i18n.js) diabaikan.
-const DECL_RE = /^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b|^(?:export\s+)?class\s+([A-Za-z_$][\w$]*)/gm;
+const DECL_RE =
+  /^(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)|^(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\b|^(?:export\s+)?class\s+([A-Za-z_$][\w$]*)/gm;
 
 function topLevelDecls(filePath) {
   const text = readFileSync(filePath, 'utf8');
@@ -63,7 +64,9 @@ for (const [name, files] of byName) {
   const uniq = [...new Set(files)];
   if (uniq.length > 1) {
     errors++;
-    console.error(`[check-globals] ✖ KOLISI GLOBAL: ${name} dideklarasikan di ${uniq.length} file STACK:`);
+    console.error(
+      `[check-globals] ✖ KOLISI GLOBAL: ${name} dideklarasikan di ${uniq.length} file STACK:`,
+    );
     for (const f of uniq) console.error(`    ${f}`);
   }
 }
@@ -79,7 +82,7 @@ for (const p of pageFiles) {
     if (byName.has(name)) {
       pageWarn++;
       console.warn(
-        `[check-globals] ⚠ nama STACK "${name}" juga dideklarasikan di ${p} — hati-hati saat bundling per-halaman.`
+        `[check-globals] ⚠ nama STACK "${name}" juga dideklarasikan di ${p} — hati-hati saat bundling per-halaman.`,
       );
     }
   }
@@ -87,7 +90,7 @@ for (const p of pageFiles) {
 
 console.log(
   `[check-globals] ${STACK.length} file STACK · ${byName.size} simbol top-level unik · ` +
-    `${errors === 0 ? 'nol kolisi ✓' : errors + ' kolisi ✖'} · ${pageWarn} warning page`
+    `${errors === 0 ? 'nol kolisi ✓' : errors + ' kolisi ✖'} · ${pageWarn} warning page`,
 );
 
 if (missing > 0 || errors > 0) process.exit(1);

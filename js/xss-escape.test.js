@@ -39,8 +39,16 @@ function escJs(x) {
 // Fase 2: js/05_render.js dipecah menjadi 5 modul per domain — gabungkan
 // semuanya supaya assertion sink render di bawah tetap mencakup seluruh
 // jalur render (mail, kandidat, admin, loker publik).
-const RENDER_FILES = ['render/mail.js', 'render/candidate.js', 'render/admin.js', 'render/public.js', 'render/share.js'];
-const renderSrc = RENDER_FILES.map((f) => readFileSync(new URL('./' + f, import.meta.url), 'utf8')).join('\n');
+const RENDER_FILES = [
+  'render/mail.js',
+  'render/candidate.js',
+  'render/admin.js',
+  'render/public.js',
+  'render/share.js',
+];
+const renderSrc = RENDER_FILES.map((f) =>
+  readFileSync(new URL('./' + f, import.meta.url), 'utf8'),
+).join('\n');
 
 // Simulasi parser HTML: entity diubah kembali ke karakter asli (parser
 // HTML melakukan ini sebelum nilai atribut sampai ke engine JS).

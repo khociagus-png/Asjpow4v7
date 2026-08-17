@@ -12,13 +12,13 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 ## 1. Urutan dokumen yang wajib dibaca
 
-| Dokumen | Isi | Kapan dibaca |
-| --- | --- | --- |
-| **AGENTS.md** (ini) | Peta kode + konvensi patch cepat | Setiap sesi |
-| **WORKFLOW.md** | Aturan kerja tim: commit/push, struktur, command, larangan deploy | Setiap sesi |
-| **PIPELINE.md** | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline** | Sebelum menyentuh fitur tahapan kandidat |
-| **REVIEW.md** | Audit keamanan & rekomendasi | Saat kerja di backend/keamanan |
-| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama |
+| Dokumen                                                                                        | Isi                                                                                     | Kapan dibaca                             |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                        | Setiap sesi                              |
+| **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                       | Setiap sesi                              |
+| **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |
+| **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |
+| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama        |
 
 ---
 
@@ -50,13 +50,13 @@ root/
 
 **Edit SOURCE → `bun run build` → restart preview → verifikasi.**
 
-| Yang diubah | Sumber | Build wajib | Artifact ter-generate |
-| --- | --- | --- | --- |
-| Logika frontend | `js/*.js`, `api-client.js`, `i18n.js`, `pwa.js` | `bun run build:js` | `assets/app-<hash>.js` + ref di `index.html`/`admin.html` + `sw.js` |
-| ESM core (`api-client.js`, `i18n.js`, `js/core/*`, `js/init/state.js`, `js/init/util.js`, `js/04_auth.js`, `js/engine/*`) | **export + alias `window.*`** (state mutable pakai accessor get/set; fungsi yang dipanggil HTML onclick wajib alias — lihat `ESM_BRIDGE.md` §3.2) | build otomatis di-strip export (IIFE per file) utk bundel | halaman standalone load via `<script type="module">` |
-| Modal | `partials/modals-shared.html` | `bun run build:html` (+ `build:css` kalau kelas baru) | `assets/modals-shared.html` |
-| Styling | `src/main.css` + kelas Tailwind di HTML/JS | `bun run build:css` | `assets/main.css` |
-| Backend | `netlify/functions/_lib/*.js` | **tidak perlu build** | — (preview baca langsung, wajib **restart preview**) |
+| Yang diubah                                                                                                               | Sumber                                                                                                                                            | Build wajib                                               | Artifact ter-generate                                               |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------- |
+| Logika frontend                                                                                                           | `js/*.js`, `api-client.js`, `i18n.js`, `pwa.js`                                                                                                   | `bun run build:js`                                        | `assets/app-<hash>.js` + ref di `index.html`/`admin.html` + `sw.js` |
+| ESM core (`api-client.js`, `i18n.js`, `js/core/*`, `js/init/state.js`, `js/init/util.js`, `js/04_auth.js`, `js/engine/*`) | **export + alias `window.*`** (state mutable pakai accessor get/set; fungsi yang dipanggil HTML onclick wajib alias — lihat `ESM_BRIDGE.md` §3.2) | build otomatis di-strip export (IIFE per file) utk bundel | halaman standalone load via `<script type="module">`                |
+| Modal                                                                                                                     | `partials/modals-shared.html`                                                                                                                     | `bun run build:html` (+ `build:css` kalau kelas baru)     | `assets/modals-shared.html`                                         |
+| Styling                                                                                                                   | `src/main.css` + kelas Tailwind di HTML/JS                                                                                                        | `bun run build:css`                                       | `assets/main.css`                                                   |
+| Backend                                                                                                                   | `netlify/functions/_lib/*.js`                                                                                                                     | **tidak perlu build**                                     | — (preview baca langsung, wajib **restart preview**)                |
 
 > ⚠️ Jangan pernah edit `assets/*`, `sw.js`, atau wilayah `<!--SHARED_MODALS_START/END-->`
 > di halaman secara manual — semua hasil build. Edit sumbernya, lalu build.
@@ -68,15 +68,16 @@ root/
 
 Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 
-| Tabel | Isi | Kunci unik |
-| --- | --- | --- |
-| `database_asj_form` | Lamaran = "mail inbox" (1 kandidat × code_job) | `(no_wa, code_job)` — di panel dedupe by WA |
-| `database_candidate` | Kandidat (biodata, status, folder) | `no_wa` (1 baris per kandidat) |
-| `pemberkasan_checklist` | Berkas upload per tahap | `(wa, tahap)` |
-| `jobs` / `loker` / `lokers` | Lowongan | `code_job` |
-| `master_database_candidate` | Master biodata / riwayat (CV) | per kandidat |
+| Tabel                       | Isi                                            | Kunci unik                                  |
+| --------------------------- | ---------------------------------------------- | ------------------------------------------- |
+| `database_asj_form`         | Lamaran = "mail inbox" (1 kandidat × code_job) | `(no_wa, code_job)` — di panel dedupe by WA |
+| `database_candidate`        | Kandidat (biodata, status, folder)             | `no_wa` (1 baris per kandidat)              |
+| `pemberkasan_checklist`     | Berkas upload per tahap                        | `(wa, tahap)`                               |
+| `jobs` / `loker` / `lokers` | Lowongan                                       | `code_job`                                  |
+| `master_database_candidate` | Master biodata / riwayat (CV)                  | per kandidat                                |
 
 **Normalisasi WA — JANGAN PERNAH dilanggar:**
+
 - `supabase.normalizeWa(v)` (di `supabase.js`): buang non-digit, `0xx…` → `62xx…`.
 - Format baku tersimpan: **`628…`** (13 digit, awalan HP) — registrasi baru selalu disimpan format ini.
 - **Gate login/daftar** (`isValidWaFormat` di `handlers.js` + `normalizeWaInput`/`isValidWaInput`
@@ -85,6 +86,7 @@ Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 - Jangan buat kandidat/lamaran dengan WA format bebas — selalu lewat normalisasi.
 
 **Dedupe duplikat warisan** (`scripts/dedupe-duplicates.mjs`):
+
 - `bun run dedupe` = dry-run (read-only, exit 1 kalau ada duplikat).
 - `bun run dedupe:apply` = backup JSON penuh ke `.freebuff/dedupe-backup-<ts>.json`
   **sebelum** mutasi, lalu merge + hapus.
@@ -98,18 +100,20 @@ Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 ## 4. Konvensi kode saat patch
 
 **Frontend:**
+
 - Panggilan backend: `callAPI('namaAction', [arg1, arg2])` (lihat `api-client.js`).
   Nama action = nama handler di backend. `callAPI`/`tr`/`LANG` adalah modul ESM
-  + alias `window.*` — pemakai classic tetap pakai bare global; modul ESM baru
-  pakai `import`. Kalau nambah file ESM: ikuti aturan di `ESM_BRIDGE.md` §5
-  (export publik + alias window, referensi global → `window.*` eksplisit,
-  scan `bunx eslint --rule 'no-undef: error' <file>`).
+  - alias `window.*` — pemakai classic tetap pakai bare global; modul ESM baru
+    pakai `import`. Kalau nambah file ESM: ikuti aturan di `ESM_BRIDGE.md` §5
+    (export publik + alias window, referensi global → `window.*` eksplisit,
+    scan `bunx eslint --rule 'no-undef: error' <file>`).
 - i18n: semua teks UI lewat `tr('ui.key')` — key di `i18n.js` (`LANG.id` + `LANG.jp`).
   `tr()` sudah fallback ke `id` kalau key belum diterjemahkan. Key duplikat = error lint.
 - Jangan menulis ulang async/await jadi callback `.then()`.
 - Jangan sentuh `vite.config.ts`/HMR — project ini bukan Vite; preview = `serve-static.mjs`.
 
 **Backend (`handlers.js`):**
+
 - Tambah action baru = 1 fungsi `handleXxx(payload)` + daftarkan di switch `dispatchAction`.
 - Action yang butuh rate limit: tambahkan ke `LOGIN_ACTIONS` / `AI_ACTIONS` / `FONNTE_ACTIONS`.
 - Semua mutasi lewat `supabase.supabaseJson(...)` / helper di `supabase.js` — jangan fetch mentah.
@@ -162,11 +166,11 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 > Setiap fitur/lock di bawah MEMILIKI SATU sumber kebenaran — jangan menambah
 > varian normalisasi/lock baru di jalur lain; jangan longgarkan lock ini.
 
-| Fitur | Entry point | Terbuka untuk | Lock kalau |
-| --- | --- | --- | --- |
-| **E-Sign & Data Naitei** | `bukaModalTtd` (`js/12_esign_match.js`) | Admin ATAU kandidat yang **TAHAPAN-nya di loker sudah lolos/pemberkasan** (regex tahapan `LOLOS\|PEMBERKASAN\|MCU\|…\|TTD\|KONTRAK\|VISA\|…\|NAITEI` — sama persis situs lama) | Tahapan belum masuk daftar → toast `toast_naitei_locked`; **BUKAN** status lamaran `LULUS` di mail |
-| **AI CV Master Assistant** | `bukaMasterEksternal` (`js/03_candidate.js`) + guard `verifikasiAksesAiCv` (`ai_form.html`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan` di `js/03_candidate.js`, catatan internal `[VIP]`/`[KELAS …]`) | Non-VIP → toast `toast_ai_cv_locked`; keputusan final di server (`processAIChat`: `isAiCvAllowed` ATAU sesi admin) |
-| **Latihan Interview** | `bukaSimulatorInterview` (`js/ai_copilot/interview.js`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan`) | Non-VIP → toast `toast_feature_locked` |
+| Fitur                      | Entry point                                                                                 | Terbuka untuk                                                                                                                                                                  | Lock kalau                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **E-Sign & Data Naitei**   | `bukaModalTtd` (`js/12_esign_match.js`)                                                     | Admin ATAU kandidat yang **TAHAPAN-nya di loker sudah lolos/pemberkasan** (regex tahapan `LOLOS\|PEMBERKASAN\|MCU\|…\|TTD\|KONTRAK\|VISA\|…\|NAITEI` — sama persis situs lama) | Tahapan belum masuk daftar → toast `toast_naitei_locked`; **BUKAN** status lamaran `LULUS` di mail                 |
+| **AI CV Master Assistant** | `bukaMasterEksternal` (`js/03_candidate.js`) + guard `verifikasiAksesAiCv` (`ai_form.html`) | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan` di `js/03_candidate.js`, catatan internal `[VIP]`/`[KELAS …]`)                                                       | Non-VIP → toast `toast_ai_cv_locked`; keputusan final di server (`processAIChat`: `isAiCvAllowed` ATAU sesi admin) |
+| **Latihan Interview**      | `bukaSimulatorInterview` (`js/ai_copilot/interview.js`)                                     | Admin ATAU kandidat ber-tag **VIP/KELAS** (`isVipCatatan`)                                                                                                                     | Non-VIP → toast `toast_feature_locked`                                                                             |
 
 - **Normalisasi gender** hanya satu: `normalizeGender` di `netlify/functions/_lib/db/client.js`
   → kanonikal `LAKI-LAKI`/`PEREMPUAN` (konvensi situs lama). Render L/P di UI

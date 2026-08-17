@@ -214,7 +214,8 @@ export async function submitDataEsignFull() {
   }
 
   let btn = document.getElementById('btn-submit-esign');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.uploading_server') + '';
+  btn.innerHTML =
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.uploading_server') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -524,7 +525,8 @@ export async function kirimTawaranMassal() {
   if (matchedCandidates.length === 0)
     return window.showToast(window.tr('ui.toast_no_cand_offer'), 'error');
 
-  if (!window.confirm(`Kirim penawaran via WhatsApp ke ${matchedCandidates.length} kandidat ini?`)) return;
+  if (!window.confirm(`Kirim penawaran via WhatsApp ke ${matchedCandidates.length} kandidat ini?`))
+    return;
 
   let btn = document.getElementById('btn-blast-match');
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.sending') + '';
@@ -570,14 +572,12 @@ export async function kirimTawaranMassal() {
 // (renderStudentCard). initFsCanvas/getFsPointerPos/drawFs/dll tetap
 // internal — dipanggil file ini saja (addEventListener & helper).
 registerSeamAliases({
-    bukaModalTtd,
-    bukaLayarCanvas,
-    clearFsCanvas,
-    saveFsCanvas,
-    submitDataEsignFull,
-    bukaMatchmaking,
-    jalankanMatchmaking,
-    kirimTawaranMassal,
+  bukaModalTtd,
+  bukaLayarCanvas,
+  clearFsCanvas,
+  saveFsCanvas,
+  submitDataEsignFull,
+  bukaMatchmaking,
+  jalankanMatchmaking,
+  kirimTawaranMassal,
 });
-
-

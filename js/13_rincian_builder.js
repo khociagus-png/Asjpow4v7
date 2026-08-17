@@ -505,13 +505,12 @@ export function rbBatal() {
 }
 
 registerSeamAliases({
-    openRincianBuilder,
-    rbSimpan,
-    rbBatal,
-    rbSummaryFromData,
-    rbAddChip,
-    rbAddTahapan,
-    rbRemoveTahapan,
-    rbRenderPreview,
-});
-
+  openRincianBuilder,
+  rbSimpan,
+  rbBatal,
+  rbSummaryFromData,
+  rbAddChip,
+  rbAddTahapan,
+  rbRemoveTahapan,
+  rbRenderPreview,
+});

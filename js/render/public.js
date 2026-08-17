@@ -299,11 +299,9 @@ export function filterKelolaLoker() {
   renderAdmin(arr);
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (filterPublicData, renderPublicFiltered, window.limitPub+=10;...).
 registerSeamAliases({
-    filterPublicData,
-    renderPublicFiltered,
-});
-
+  filterPublicData,
+  renderPublicFiltered,
+});

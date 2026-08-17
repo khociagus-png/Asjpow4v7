@@ -85,13 +85,11 @@ export function renderJadwal() {
   tb.innerHTML = html;
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (render/admin.js window.renderJadwal /
 // window.renderDashboardAgenda, api/wa.js window.renderJadwal, tombol
 // "limitJad+=10; renderJadwal();").
 registerSeamAliases({
-    renderDashboardAgenda,
-    renderJadwal,
-});
-
+  renderDashboardAgenda,
+  renderJadwal,
+});

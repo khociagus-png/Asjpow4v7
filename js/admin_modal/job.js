@@ -42,10 +42,8 @@ export function copyInfoLoker(c) {
   window.salinTeksDecode(encodeURIComponent(txt));
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (render/public.js + 01_public.js lamarJob).
 registerSeamAliases({
-    lamarJob,
-});
-
+  lamarJob,
+});

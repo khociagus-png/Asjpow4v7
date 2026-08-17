@@ -299,24 +299,24 @@ function mergeAiOverflow(ai, overflow) {
     ai.kenalan_jepang = mergeObj(ai.kenalan_jepang, overflow.kenalan_jepang);
   }
   if (overflow.pendidikan) {
-    setSlot(
-      'pendidikan',
-      overflow.pendidikan,
-      (e) => String((e.tingkat || '') + (e.sekolah || '')).toLowerCase().replace(/[^a-z0-9]/g, ''),
+    setSlot('pendidikan', overflow.pendidikan, (e) =>
+      String((e.tingkat || '') + (e.sekolah || ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
     );
   }
   if (overflow.pekerjaan) {
-    setSlot(
-      'pekerjaan',
-      overflow.pekerjaan,
-      (e) => String(e.perusahaan || '').toLowerCase().replace(/[^a-z0-9]/g, ''),
+    setSlot('pekerjaan', overflow.pekerjaan, (e) =>
+      String(e.perusahaan || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
     );
   }
   if (overflow.keluarga) {
-    setSlot(
-      'keluarga',
-      overflow.keluarga,
-      (e) => String((e.nama || '') + (e.hubungan || '')).toLowerCase().replace(/[^a-z0-9]/g, ''),
+    setSlot('keluarga', overflow.keluarga, (e) =>
+      String((e.nama || '') + (e.hubungan || ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, ''),
     );
   }
   return ai;
@@ -1052,9 +1052,8 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         const candFound = await findCandidates();
         const want = normalizeWa(wa);
         c =
-          candFound.rows.find(
-            (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
-          ) || null;
+          candFound.rows.find((r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want) ||
+          null;
       }
       const candBody = {
         nama_lengkap: nama,

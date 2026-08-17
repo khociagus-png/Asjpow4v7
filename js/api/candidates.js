@@ -1,4 +1,10 @@
-import { ALL_CANDIDATES, ALL_CANDIDATES_TOTAL, ALL_JOBS, currentAdminName, currentKandidatWa } from '../init/state.js';
+import {
+  ALL_CANDIDATES,
+  ALL_CANDIDATES_TOTAL,
+  ALL_JOBS,
+  currentAdminName,
+  currentKandidatWa,
+} from '../init/state.js';
 import { renderLanguage } from '../01_public.js';
 import { renderAdminFull } from '../render/admin.js';
 import { normalizeGenderValue } from '../03_candidate.js';
@@ -56,7 +62,8 @@ export function cariKandidatManual(query) {
     .slice(0, 8);
 
   if (hasil.length === 0) {
-    ddEl.innerHTML = '<div class="p-2.5 text-sm text-slate-400">' + window.tr('ui.not_found') + '</div>';
+    ddEl.innerHTML =
+      '<div class="p-2.5 text-sm text-slate-400">' + window.tr('ui.not_found') + '</div>';
   } else {
     ddEl.innerHTML = hasil
       .map(function (c) {
@@ -593,9 +600,7 @@ export async function prosesUploadKandidat() {
       for (const r of lainRows) {
         const jenisLabel = String(r.jenis || 'DOKUMEN');
         setUploadStatus(r.stId, jenisLabel, 'uploading');
-        const lainUrl = await window
-          .uploadToCloudinary(r.input.files[0])
-          .catch(() => null);
+        const lainUrl = await window.uploadToCloudinary(r.input.files[0]).catch(() => null);
         if (lainUrl) {
           try {
             const lr = await window.callAPI('simpanBerkasTahapan', [
@@ -621,7 +626,10 @@ export async function prosesUploadKandidat() {
     }
   } catch (err) {
     markUploadResults(labels, []);
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = window.tr('button.save_upload');
     btn.disabled = false;
@@ -702,7 +710,8 @@ export async function simpanSuperEditKandidat() {
     window.showToast(ukuranErr, 'error');
     return;
   }
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving_upper') + '';
+  btn.innerHTML =
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.saving_upper') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
@@ -767,9 +776,7 @@ export async function simpanSuperEditKandidat() {
       for (const er of eLainRows) {
         const eJenisLabel = String(er.jenis || 'DOKUMEN');
         setUploadStatus(er.stId, eJenisLabel, 'uploading');
-        const eLainUrl = await window
-          .uploadToCloudinary(er.input.files[0])
-          .catch(() => null);
+        const eLainUrl = await window.uploadToCloudinary(er.input.files[0]).catch(() => null);
         if (eLainUrl) {
           try {
             // Nama kandidat untuk folder storage diambil dari data
@@ -795,7 +802,10 @@ export async function simpanSuperEditKandidat() {
       window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> ' + window.tr('ui.sync_3way') + '';
     btn.disabled = false;
@@ -810,7 +820,8 @@ export async function prosesUploadRevisi() {
     return;
   }
   let btn = document.getElementById('btn-revisi');
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.uploading_short') + '';
+  btn.innerHTML =
+    '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.uploading_short') + '';
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
   try {
@@ -827,7 +838,10 @@ export async function prosesUploadRevisi() {
       window.showToast(window.tr('ui.toast_failed_prefix') + res.error, 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = window.tr('button.upload_revise');
     btn.disabled = false;
@@ -885,7 +899,10 @@ export async function aksiGenerateQr(c, k) {
       window.showToast(window.tr('ui.toast_qr_failed'), 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     if (loader) loader.style.display = 'none';
   }
@@ -917,7 +934,9 @@ export function filterCbx(containerId, val) {
 // (blast WA, esign match, modal, dll). No-op bila total <= yang sudah dimuat
 // (mode kandidat: candidatesTotal tidak ada -> langsung kembali).
 export async function fetchCandidatesPage(page, pageSize, q) {
-  const res = await window.callAPI('getCandidatesPage', [{ page: page, pageSize: pageSize, q: q || '' }]);
+  const res = await window.callAPI('getCandidatesPage', [
+    { page: page, pageSize: pageSize, q: q || '' },
+  ]);
   if (!res || res.success !== true) throw new Error((res && res.error) || 'Gagal memuat kandidat');
   return res;
 }
@@ -974,7 +993,10 @@ export async function muatLebihKandidat() {
     window.ALL_CANDIDATES_TOTAL = res.total;
     if (typeof renderAdminFull === 'function') renderAdminFull();
     window.showToast(
-      window.tr('ui.toast_cand_label') + ALL_CANDIDATES.length + window.tr('ui.toast_of_sep') + res.total,
+      window.tr('ui.toast_cand_label') +
+        ALL_CANDIDATES.length +
+        window.tr('ui.toast_of_sep') +
+        res.total,
       'success',
     );
   } catch (err) {
@@ -982,25 +1004,23 @@ export async function muatLebihKandidat() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick/onchange (partials/modals-shared.html + admin/index) +
 // render/*, 03_candidate.js, 08_wa_pintar.js, 10_cv_rirekisho.js,
 // 12_esign_match.js, admin_ops/candidates.js (window.ensureAllCandidates).
 registerSeamAliases({
-    bukaModalTambahKandidat,
-    pilihKandidatManual,
-    cekKandidatOtomatis,
-    tandaiFileDipilih,
-    tambahBarisLain,
-    hapusBarisLain,
-    prosesUploadKandidat,
-    bukaSuperEditKandidat,
-    simpanSuperEditKandidat,
-    prosesUploadRevisi,
-    aksiGenerateQr,
-    tutupModalQr,
-    ensureAllCandidates,
-    muatLebihKandidat,
+  bukaModalTambahKandidat,
+  pilihKandidatManual,
+  cekKandidatOtomatis,
+  tandaiFileDipilih,
+  tambahBarisLain,
+  hapusBarisLain,
+  prosesUploadKandidat,
+  bukaSuperEditKandidat,
+  simpanSuperEditKandidat,
+  prosesUploadRevisi,
+  aksiGenerateQr,
+  tutupModalQr,
+  ensureAllCandidates,
+  muatLebihKandidat,
 });
-

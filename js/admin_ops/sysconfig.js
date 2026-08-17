@@ -136,7 +136,8 @@ export async function simpanConfigKeServer(key, arrayData) {
 
   try {
     const res = await window.callAPI('updateSysConfig', [key, arrayData, currentAdminName]);
-    if (!res.success) window.showToast(window.tr('ui.toast_save_server_failed') + res.error, 'error');
+    if (!res.success)
+      window.showToast(window.tr('ui.toast_save_server_failed') + res.error, 'error');
   } catch (err) {
     window.showToast(window.tr('ui.toast_network_error'), 'error');
   } finally {
@@ -173,16 +174,14 @@ export async function simpanPengumuman() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (render/admin.js & i18n.js window.renderSysConfig,
 // 01_public.js renderSysConfig, admin/index simpanPengumuman, tombol chip
 // tambahConfigItem/hapusConfigItem/pindahConfigItem).
 registerSeamAliases({
-    renderSysConfig,
-    tambahConfigItem,
-    hapusConfigItem,
-    pindahConfigItem,
-    simpanPengumuman,
-});
-
+  renderSysConfig,
+  tambahConfigItem,
+  hapusConfigItem,
+  pindahConfigItem,
+  simpanPengumuman,
+});

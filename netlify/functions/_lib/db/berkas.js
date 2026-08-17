@@ -5,7 +5,6 @@
 const { supabaseJson, toText, pick, normalizeWa, supabaseUrl, supabaseKey } = require('./client');
 const { fetchMasterLightByWa } = require('./master');
 
-
 // ---------------------------------------------------------------------------
 // Lampirkan berkas (pemberkasan_checklist) & bio (master_database_candidate)
 // ke tiap kandidat — bentuk yang diharapkan frontend (candidate.berkas /
@@ -60,7 +59,6 @@ const BIO_COLUMNS = [
   ['alamatpt', ['alamat_perusahaan', 'alamatpt']],
 ];
 
-
 // Tarik pemberkasan_checklist hanya untuk WA di daftar (fallback: null → scan).
 async function fetchBerkasByWa(waList) {
   try {
@@ -72,7 +70,6 @@ async function fetchBerkasByWa(waList) {
     return null;
   }
 }
-
 
 async function attachBerkasBio(candidates) {
   if (!Array.isArray(candidates) || candidates.length === 0) return candidates;
@@ -164,7 +161,6 @@ async function attachBerkasBio(candidates) {
   }
   return candidates;
 }
-
 
 // Daftar file dalam folder Supabase Storage (bucket asj-files). Dipakai
 // share-data untuk menampilkan dokumen folder master (KK/KTP/ijazah/dll),

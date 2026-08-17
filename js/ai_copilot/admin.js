@@ -30,7 +30,11 @@ export function bukaAdminAiCopilot(candidateId) {
         </div>`;
 
   adminAiHistory = [];
-  tampilkanSaranAdminAi([window.tr('ui.ai_sug1'), window.tr('ui.ai_sug2'), window.tr('ui.ai_sug3')]);
+  tampilkanSaranAdminAi([
+    window.tr('ui.ai_sug1'),
+    window.tr('ui.ai_sug2'),
+    window.tr('ui.ai_sug3'),
+  ]);
 }
 
 export function tutupAdminAi() {
@@ -145,7 +149,8 @@ export function simpanKandidatDariAi() {
   const loker = document.getElementById('ai-k-loker').value;
 
   if (!nama || !wa) {
-    if (typeof window.showToast !== 'undefined') window.showToast(window.tr('ui.toast_name_wa_required'), 'error');
+    if (typeof window.showToast !== 'undefined')
+      window.showToast(window.tr('ui.toast_name_wa_required'), 'error');
     return;
   }
 
@@ -156,7 +161,8 @@ export function simpanKandidatDariAi() {
 
   tutupAdminAi();
   document.getElementById('modal-tambah-kandidat').classList.remove('hidden');
-  if (typeof window.showToast !== 'undefined') window.showToast(window.tr('ui.toast_data_transferred'), 'success');
+  if (typeof window.showToast !== 'undefined')
+    window.showToast(window.tr('ui.toast_data_transferred'), 'success');
 }
 
 export function tambahPesanAdminAi(text, sender) {
@@ -210,7 +216,6 @@ export function tampilkanSaranAdminAi(actions) {
   });
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (admin/index bukaAdminAiCopilot, partials tutupAdminAi /
 // kirimPesanAdminAi / simpanKandidatDariAi). currentAiCandidateId memakai
@@ -219,18 +224,21 @@ export function tampilkanSaranAdminAi(actions) {
 // biasa (dibaca interview.js). tambahPesanAdminAi dipakai parse.js & results.js.
 Object.defineProperty(window, 'currentAiCandidateId', {
   configurable: true,
-  get() { return currentAiCandidateId; },
-  set(v) { currentAiCandidateId = v; },
+  get() {
+    return currentAiCandidateId;
+  },
+  set(v) {
+    currentAiCandidateId = v;
+  },
 });
 registerSeamAliases(
-    {
-        bukaAdminAiCopilot,
-        tutupAdminAi,
-        kirimPesanAdminAi,
-        simpanKandidatDariAi,
-        tambahPesanAdminAi,
-        urlFotoJeklin, // const string → data eksplisit (allowNonFunction)
-    },
-    { allowNonFunction: true, source: 'js/ai_copilot/admin.js' }
-);
-
+  {
+    bukaAdminAiCopilot,
+    tutupAdminAi,
+    kirimPesanAdminAi,
+    simpanKandidatDariAi,
+    tambahPesanAdminAi,
+    urlFotoJeklin, // const string → data eksplisit (allowNonFunction)
+  },
+  { allowNonFunction: true, source: 'js/ai_copilot/admin.js' },
+);

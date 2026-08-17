@@ -5,7 +5,14 @@
 'use strict';
 
 const { env, debugFileEnvKeys, debugFileStructure } = require('./env');
-const { columnsFromSchema, hasBackend, supabaseJson, supabaseUrl, tablesFromSchema, toText } = require('./db/client');
+const {
+  columnsFromSchema,
+  hasBackend,
+  supabaseJson,
+  supabaseUrl,
+  tablesFromSchema,
+  toText,
+} = require('./db/client');
 const { findJobs } = require('./db/jobs');
 const { findCandidates } = require('./db/candidates');
 const { findAdmins, findSettings } = require('./db/misc');
@@ -60,10 +67,7 @@ async function handleGetAppConfig(sessionToken) {
       ...new Set(
         jobs.rows
           .slice(0, 20)
-          .map(
-            (r) =>
-              'status=' + toText(r.status) + ' | tahapan=' + toText(r.tahapan),
-          ),
+          .map((r) => 'status=' + toText(r.status) + ' | tahapan=' + toText(r.tahapan)),
       ),
     ].slice(0, 8);
     diag.jobStatusAll = [...new Set(jobs.rows.map((r) => toText(r.status)))].slice(0, 15);
@@ -94,9 +98,10 @@ async function handleGetAppConfig(sessionToken) {
     diag.tables.settingsColumns = Object.keys(settings.rows[0]);
     // Nama config_type di sys_config (bukan nilai) — untuk menemukan
     // konfigurasi admin/assets/pengumuman.
-    diag.sysConfigTypes = [
-      ...new Set(settings.rows.map((r) => toText(r.config_type))),
-    ].slice(0, 30);
+    diag.sysConfigTypes = [...new Set(settings.rows.map((r) => toText(r.config_type)))].slice(
+      0,
+      30,
+    );
   }
 
   return diag;

@@ -4,7 +4,6 @@
 
 const { supabaseJson, toText, normalizeWa } = require('./client');
 
-
 // ===== Mail inbox (database_asj_form) =====
 // Kolom asli: id, timestamp, code_job, kategory, nama_lengkap, no_wa, gender,
 // usia, tb, bb, pas_photo, jft, ssw, file_cv, folder_name, folder_id,
@@ -34,7 +33,6 @@ function mapForm(row, i) {
   };
 }
 
-
 // Parse keterangan mail menjadi daftar dokumen {nama, url} (format NAMA:URL;...).
 function parseDocs(keterangan) {
   const out = [];
@@ -51,7 +49,6 @@ function parseDocs(keterangan) {
   return out;
 }
 
-
 // Kolom RINGAN mail inbox (database_asj_form) — gabungan semua kolom yang
 // benar-benar dibaca dari baris form: mapForm (formInbox admin),
 // attachApplications (lamaran per WA), parseDocs (keterangan NAMA:URL;...).
@@ -59,7 +56,6 @@ function parseDocs(keterangan) {
 // dibaca dari formInbox.
 const FORM_LIGHT_COLS =
   'id,timestamp,code_job,kategory,nama_lengkap,no_wa,status,folder_url,pas_photo,jft,ssw,file_cv,keterangan,feedback_berkas,created_at,updated_at';
-
 
 // Urutan form konsisten (dipakai getAppData DAN handler review/approve/reject/
 // delete yang menerima rowIndex = posisi di array ini).
@@ -69,7 +65,6 @@ async function findForms() {
   });
   return Array.isArray(rows) ? rows : [];
 }
-
 
 // Baris mail RINGAN (proyeksi FORM_LIGHT_COLS) untuk getAppData admin —
 // mapForm & attachApplications hanya membaca kolom di proyeksi ini, jadi
@@ -87,7 +82,6 @@ async function findFormsLight() {
     return undefined;
   }
 }
-
 
 // Semua baris mail (database_asj_form) untuk satu WA — urutan timestamp.desc
 // sama dengan findForms() supaya "baris pertama" konsisten.
@@ -118,7 +112,6 @@ async function findFormsByWa(wa) {
   return undefined;
 }
 
-
 // Insert baris mail dengan anti-duplikat (no_wa, code_job): upsert
 // on_conflict kalau constraint unik sudah ada di DB; kalau belum (HTTP 400
 // 42P10), fallback INSERT biasa. Race GET-then-POST (dua request paralel
@@ -143,7 +136,6 @@ async function upsertFormRow(body) {
   }
 }
 
-
 // Baris mail pada posisi index urutan timestamp.desc — pengganti scan 500
 // baris untuk aksi admin yang menerima rowIndex dari frontend (review/approve/
 // reject/hapus/tandai dibaca).
@@ -159,7 +151,6 @@ async function findFormByIndexFiltered(idx) {
     return undefined;
   }
 }
-
 
 // Baris mail untuk daftar WA (in-filter) — share-data extra docs &
 // attachApplications halaman kandidat. Hanya membaca kolom ringan

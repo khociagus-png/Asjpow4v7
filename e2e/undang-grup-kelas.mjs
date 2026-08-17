@@ -35,7 +35,9 @@ let browser = null;
 try {
   browser = await launchBrowser();
 } catch (e) {
-  console.log(`  ⚠ browser check dilewati (playwright tidak bisa launch di runtime ini): ${String(e.message || e).slice(0, 120)}`);
+  console.log(
+    `  ⚠ browser check dilewati (playwright tidak bisa launch di runtime ini): ${String(e.message || e).slice(0, 120)}`,
+  );
 }
 if (browser) {
   console.log(`\nTarget: ${BASE}\n`);
@@ -73,7 +75,9 @@ if (browser) {
   // -------------------------------------------------------------
   await page.evaluate(() => window.bukaModalUndanganKelas());
   const modalVisible = await waitFor(async () =>
-    page.evaluate(() => !document.getElementById('modal-undangan-kelas').classList.contains('hidden')),
+    page.evaluate(
+      () => !document.getElementById('modal-undangan-kelas').classList.contains('hidden'),
+    ),
   );
   check('Modal Undangan Grup Kelas terbuka', modalVisible);
 
@@ -93,11 +97,7 @@ if (browser) {
     /2/.test(preview.jumlah),
     `jumlah="${preview.jumlah}"`,
   );
-  check(
-    'Indikator 2 varian pesan tampil',
-    /2/.test(preview.varian),
-    `varian="${preview.varian}"`,
-  );
+  check('Indikator 2 varian pesan tampil', /2/.test(preview.varian), `varian="${preview.varian}"`);
   check(
     'Preview varian pertama + {nama} ter-replace',
     preview.prv.includes('Budi Santoso') && preview.prv.includes(LINK_GRUP),
@@ -127,9 +127,21 @@ if (browser) {
   const p = await page.evaluate(() => window.__e2eCaptured && window.__e2eCaptured[0]);
   check('Payload ada', !!p && Array.isArray(p.candidates));
   if (p && Array.isArray(p.candidates)) {
-    check('2 kandidat valid dikirim (invalid dibuang)', p.candidates.length === 2, `n=${p.candidates.length}`);
-    check('WA 0xx ternormalisasi → 628…', p.candidates[0].wa === '6281234567890', `wa0=${p.candidates[0].wa}`);
-    check('WA kanonik tetap 628…', p.candidates[1].wa === '6282222222222', `wa1=${p.candidates[1].wa}`);
+    check(
+      '2 kandidat valid dikirim (invalid dibuang)',
+      p.candidates.length === 2,
+      `n=${p.candidates.length}`,
+    );
+    check(
+      'WA 0xx ternormalisasi → 628…',
+      p.candidates[0].wa === '6281234567890',
+      `wa0=${p.candidates[0].wa}`,
+    );
+    check(
+      'WA kanonik tetap 628…',
+      p.candidates[1].wa === '6282222222222',
+      `wa1=${p.candidates[1].wa}`,
+    );
     check('jobCode kosong (mode kelas, bukan loker)', p.jobCode === '');
     check('linkGrup sesuai isian', p.linkGrup === LINK_GRUP);
     check('interval 10 dtk (jeda anti-ban)', p.interval === 10);
@@ -137,7 +149,11 @@ if (browser) {
       .split(/^---\s*$/m)
       .map((s) => s.trim())
       .filter(Boolean);
-    check('customMessage membawa 2 varian (backend rotasi per penerima)', variants.length === 2, `n=${variants.length}`);
+    check(
+      'customMessage membawa 2 varian (backend rotasi per penerima)',
+      variants.length === 2,
+      `n=${variants.length}`,
+    );
     check('placeholder {nama} dipertahankan sampai backend', p.customMessage.includes('{nama}'));
   }
 

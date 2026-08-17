@@ -12,10 +12,27 @@
 //     Redis, cukup untuk skala ASJ).
 'use strict';
 
-const { columnsFromSchema, findTable, getSchema, hasBackend, normalizeWa, pick, supabaseJson, tablesFromSchema, toText } = require('./db/client');
+const {
+  columnsFromSchema,
+  findTable,
+  getSchema,
+  hasBackend,
+  normalizeWa,
+  pick,
+  supabaseJson,
+  tablesFromSchema,
+  toText,
+} = require('./db/client');
 const { findJobs, mapJob } = require('./db/jobs');
 const { findForms, findFormsByWa, findFormsLight, mapForm } = require('./db/forms');
-const { attachApplications, findAllCandidatesLight, findCandidateByWaFiltered, findCandidates, findCandidatesByIds, mapCandidate } = require('./db/candidates');
+const {
+  attachApplications,
+  findAllCandidatesLight,
+  findCandidateByWaFiltered,
+  findCandidates,
+  findCandidatesByIds,
+  mapCandidate,
+} = require('./db/candidates');
 const { attachBerkasBio } = require('./db/berkas');
 const { findAssets, findSettings } = require('./db/misc');
 const session = require('./session');
@@ -122,13 +139,10 @@ function dedupeKandidatRaw(rows) {
   if (!Array.isArray(rows)) return rows;
   const seen = new Map();
   const out = [];
-  const tsOf = (r) =>
-    String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  const tsOf = (r) => String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
   for (const r of rows) {
     const wa = normalizeWa(
-      String(
-        pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
-      ),
+      String(pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
     );
     if (!wa) {
       out.push(r);
@@ -157,9 +171,7 @@ function saringKandidatUnik(uniq, q) {
   return uniq.filter((r) => {
     const nama = String(pick(r, ['nama_lengkap', 'nama', 'name']) || '').toLowerCase();
     const wa = normalizeWa(
-      String(
-        pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || '',
-      ),
+      String(pick(r, ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp', 'telp']) || ''),
     );
     return nama.includes(needle) || (digit && wa.includes(digit));
   });
@@ -188,8 +200,7 @@ async function loadCandidatesUnik(q, opts = {}) {
   const cached = cacheGet(cacheKey);
   if (cached) return cached;
   const start = (page - 1) * pageSize;
-  const tsOf = (r) =>
-    String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
+  const tsOf = (r) => String(pick(r, ['updated_at', 'created_at', 'tanggal_daftar']) || '');
   const urutkan = (uniq) =>
     uniq.sort((a, b) => (tsOf(b) > tsOf(a) ? 1 : tsOf(b) < tsOf(a) ? -1 : 0));
 
@@ -232,11 +243,7 @@ async function loadPublicBase(mode) {
 
   const base = demo.demoGetAppData(mode || 'public'); // reuse assets default
   // PARALEL: 3 query independen (dulu berurutan ~1 detik).
-  const [found, assets, settings] = await Promise.all([
-    findJobs(),
-    findAssets(),
-    findSettings(),
-  ]);
+  const [found, assets, settings] = await Promise.all([findJobs(), findAssets(), findSettings()]);
 
   // Fallback skema: hanya bila findJobs tidak menemukan tabel (query tambahan
   // dependen — tidak bisa ikut paralel).
@@ -265,9 +272,7 @@ async function loadPublicBase(mode) {
     return { notFound: true, base };
   }
 
-  const jobs = foundTable.rows
-    .map(mapJob)
-    .filter((j) => j.pekerjaan && j.pekerjaan !== '');
+  const jobs = foundTable.rows.map(mapJob).filter((j) => j.pekerjaan && j.pekerjaan !== '');
 
   // dropdowns + pengumuman dari sys_config (list_*, broadcast).
   const dropdowns = {};

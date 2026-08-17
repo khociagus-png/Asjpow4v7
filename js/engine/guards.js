@@ -103,12 +103,10 @@ export function updateMailBadge() {
   window.PREV_MAIL_COUNT = pendingMails;
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, api/*.js patch-in-place).
 registerSeamAliases({
-    adaModalTerbuka,
-    sedangDiscrollTabel,
-    updateMailBadge,
+  adaModalTerbuka,
+  sedangDiscrollTabel,
+  updateMailBadge,
 });
-

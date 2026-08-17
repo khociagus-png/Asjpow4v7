@@ -1,4 +1,11 @@
-import { ALL_CANDIDATES, ALL_DB_JOBS, ALL_JOBS, ASSETS, currentAdminName, isAdmin } from '../init/state.js';
+import {
+  ALL_CANDIDATES,
+  ALL_DB_JOBS,
+  ALL_JOBS,
+  ASSETS,
+  currentAdminName,
+  isAdmin,
+} from '../init/state.js';
 import { ensureAllCandidates } from '../api/candidates.js';
 import { normalizeGenderValue } from '../03_candidate.js';
 import { previewFileInFrame } from '../init/preview.js';
@@ -103,7 +110,8 @@ export async function bukaDigitalCV(id) {
         umurLive = age + window.tr('ui.age_years_suffix');
       }
     }
-    if (umurLive === '-' && c.usia && c.usia !== '-') umurLive = c.usia + window.tr('ui.age_years_suffix');
+    if (umurLive === '-' && c.usia && c.usia !== '-')
+      umurLive = c.usia + window.tr('ui.age_years_suffix');
     window.safeSet('cv-usia', umurLive);
 
     // TB/BB & TTL digabung di backend (mapCandidate: field tbBb/ttl) supaya
@@ -120,7 +128,10 @@ export async function bukaDigitalCV(id) {
     window.safeSet('cv-alamat', c.alamat || '-');
 
     let statusText =
-      window.esc(window.trOption(c.tahapan || 'Baru')) + ' \n(' + window.esc(window.trOption(c.status || 'Aktif')) + ')';
+      window.esc(window.trOption(c.tahapan || 'Baru')) +
+      ' \n(' +
+      window.esc(window.trOption(c.status || 'Aktif')) +
+      ')';
     window.safeSet('cv-status', statusText);
 
     var waLink = document.getElementById('cv-wa-link');
@@ -135,7 +146,8 @@ export async function bukaDigitalCV(id) {
     if (passRow && passEl) {
       if (isAdmin) {
         if (c.passwordDiubah) {
-          passEl.textContent = window.tr('ui.pass_changed_admin') + ' — ' + window.tr('ui.pass_changed_hint');
+          passEl.textContent =
+            window.tr('ui.pass_changed_admin') + ' — ' + window.tr('ui.pass_changed_hint');
           passRow.classList.remove('hidden');
         } else {
           var pass4 = String(c.wa || '')
@@ -434,7 +446,11 @@ export function isiEditCepatCv(c) {
       })
     ) {
       opts +=
-        '<option value="' + window.esc(curCodes[0]) + '" selected>' + window.esc(curCodes[0]) + '</option>';
+        '<option value="' +
+        window.esc(curCodes[0]) +
+        '" selected>' +
+        window.esc(curCodes[0]) +
+        '</option>';
     }
     jobs.forEach(function (j) {
       var code = j && j.code ? String(j.code) : '';
@@ -539,10 +555,16 @@ export async function simpanEditCepatCv() {
       });
       window.refreshDataDinamis('pelamar');
     } else {
-      window.showToast(window.tr('ui.toast_error_prefix') + (res && res.error ? res.error : ''), 'error');
+      window.showToast(
+        window.tr('ui.toast_error_prefix') + (res && res.error ? res.error : ''),
+        'error',
+      );
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     document.getElementById('global-loader').style.display = 'none';
   }
@@ -599,7 +621,7 @@ export async function simpanCatatanCv() {
   var vipToggle = document.getElementById('cv-vip-toggle');
   var vipOn = !!(vipToggle && vipToggle.checked);
   if (vipOn && !/\[VIP\]/i.test(intNote)) {
-    intNote = (intNote.trim() ? '[VIP] ' + intNote.trim() : '[VIP]');
+    intNote = intNote.trim() ? '[VIP] ' + intNote.trim() : '[VIP]';
   } else if (!vipOn && /\[VIP\]/i.test(intNote)) {
     intNote = intNote.replace(/\[VIP\]/gi, '').trim();
   }
@@ -614,7 +636,12 @@ export async function simpanCatatanCv() {
 
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await window.callAPI('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
+    const res = await window.callAPI('updateCatatanKandidat', [
+      id,
+      intNote,
+      extNote,
+      currentAdminName,
+    ]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_eval_note_saved'), 'success');
       document.getElementById('modal-cv').classList.add('hidden');
@@ -629,18 +656,16 @@ export async function simpanCatatanCv() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (partials/modals-shared.html toggleEditCepatCv /
 // simpanEditCepatCv / simpanCatatanCv), render/mail.js & render/candidate.js
 // (onclick bukaPdfPreview), engine/init.js (window.bukaDigitalCV),
 // api/candidates.js (window.toDateInputValue).
 registerSeamAliases({
-    bukaDigitalCV,
-    toDateInputValue,
-    toggleEditCepatCv,
-    simpanEditCepatCv,
-    bukaPdfPreview,
-    simpanCatatanCv,
-});
-
+  bukaDigitalCV,
+  toDateInputValue,
+  toggleEditCepatCv,
+  simpanEditCepatCv,
+  bukaPdfPreview,
+  simpanCatatanCv,
+});

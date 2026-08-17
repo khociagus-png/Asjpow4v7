@@ -45,8 +45,15 @@ export async function generateWawancaraModelAdmin() {
     const chatBox = document.getElementById('admin-ai-chat');
     if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     window.tambahPesanAdminAi(
-      '📋 **Model Wawancara — ' + window.esc(res.nama || res.bidang || 'SSW') + ' (' + window.esc(res.bidang) + ')**\n' +
-        'Bidang SSW: ' + window.esc(res.bidang) + '\n\n' + window.esc(res.model),
+      '📋 **Model Wawancara — ' +
+        window.esc(res.nama || res.bidang || 'SSW') +
+        ' (' +
+        window.esc(res.bidang) +
+        ')**\n' +
+        'Bidang SSW: ' +
+        window.esc(res.bidang) +
+        '\n\n' +
+        window.esc(res.model),
       'ai',
     );
     if (waInput && res.wa) waInput.value = res.wa;
@@ -56,7 +63,11 @@ export async function generateWawancaraModelAdmin() {
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
     console.error('[AI] generateWawancaraModel:', err);
-    window.tambahPesanAdminAi('⚠️ Gagal membuat model wawancara: ' + window.esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    window.tambahPesanAdminAi(
+      '⚠️ Gagal membuat model wawancara: ' +
+        window.esc(err && err.message ? err.message : 'AI sibuk'),
+      'ai',
+    );
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);
@@ -128,7 +139,10 @@ export async function lihatHasilWawancaraAdmin() {
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
     console.error('[AI] lihat hasil wawancara:', err);
-    window.tambahPesanAdminAi('⚠️ Gagal ambil hasil: ' + window.esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    window.tambahPesanAdminAi(
+      '⚠️ Gagal ambil hasil: ' + window.esc(err && err.message ? err.message : 'AI sibuk'),
+      'ai',
+    );
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);
@@ -179,7 +193,10 @@ export async function updateBiodataDariHasilAdmin() {
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
     console.error('[AI] update biodata dari hasil:', err);
-    window.tambahPesanAdminAi('⚠️ Gagal update biodata: ' + window.esc(err && err.message ? err.message : 'AI sibuk'), 'ai');
+    window.tambahPesanAdminAi(
+      '⚠️ Gagal update biodata: ' + window.esc(err && err.message ? err.message : 'AI sibuk'),
+      'ai',
+    );
     if (statusEl) {
       statusEl.textContent = '❌ ' + (err && err.message ? err.message : 'Gagal');
       setTimeout(() => statusEl.classList.add('hidden'), 8000);
@@ -187,13 +204,11 @@ export async function updateBiodataDariHasilAdmin() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (bar parse di parse.js: generateWawancaraModelAdmin /
 // lihatHasilWawancaraAdmin / updateBiodataDariHasilAdmin).
 registerSeamAliases({
-    generateWawancaraModelAdmin,
-    lihatHasilWawancaraAdmin,
-    updateBiodataDariHasilAdmin,
+  generateWawancaraModelAdmin,
+  lihatHasilWawancaraAdmin,
+  updateBiodataDariHasilAdmin,
 });
-

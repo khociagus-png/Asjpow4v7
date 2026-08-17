@@ -142,7 +142,7 @@ Kalau kamu (assistant) sedang mengerjakan repo ini, patuhi:
 ## 7. Jejak kerja — WAJIB jelas SIAPA & KAPAN ⏱️
 
 Repo ini dikerjakan dari beberapa akun/workspace (mis. `khoci89`, `ASJ OS DOKUMEN`),
-jadi riwayat commit harus selalu bisa menjawab: *siapa* yang mengubah dan *kapan*.
+jadi riwayat commit harus selalu bisa menjawab: _siapa_ yang mengubah dan _kapan_.
 
 ### 7.1 Format pesan commit (wajib)
 
@@ -180,6 +180,7 @@ pointer di atasnya) dengan header berisi
 
 ```markdown
 ## Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)
+
 - Commit: `56382b1` — Optimasi S2 lanjutan: daftar admin baris ringan + paginasi penuh
 - Ringkasan: ...
 ```

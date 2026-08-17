@@ -12,13 +12,7 @@ const session = require('./session');
 const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { findMasterByWa } = require('./actions-master');
 const { cacheClear } = require('./cache');
-const {
-  bucket,
-  storageRequest,
-  publicUrl,
-  hapusJenisVarian,
-  uploadBase64,
-} = require('./storage');
+const { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } = require('./storage');
 const { syncFormMailDariUpload } = require('./actions-mail');
 const { nextCandidateId } = require('./candidate-helpers');
 
@@ -152,8 +146,7 @@ async function handleCekDataPelamar(payload) {
         timestamp: toText(r.timestamp || r.created_at || ''),
       }))
       .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
-    const row =
-      rows.find((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
+    const row = rows.find((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
     if (!row) return { found: false, applications: apps };
     return {
       found: true,
@@ -181,9 +174,7 @@ async function handleIsJobRequiresCv(payload) {
     let job = await findJobByCodeFiltered(code);
     if (job === undefined) {
       const found = await findJobs();
-      job =
-        found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) ||
-        null;
+      job = found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) || null;
     }
     if (!job) return { success: false, error: 'Kode loker tidak ditemukan.' };
     const share = String(pick(job, ['dokumen_share', 'format_cv']) || '').toUpperCase();
@@ -206,9 +197,7 @@ async function handleSubmitApply(payload) {
     let job = await findJobByCodeFiltered(code);
     if (job === undefined) {
       const found = await findJobs();
-      job =
-        found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) ||
-        null;
+      job = found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) || null;
     }
     if (!job) return { success: false, message: 'Kode loker tidak ditemukan: ' + code };
     const share = String(pick(job, ['dokumen_share']) || '')
@@ -234,9 +223,7 @@ async function handleSubmitApply(payload) {
     // D. kategory otomatis dari bidang loker (kolom kategori/bidang/sektor)
     // kalau form tidak membawa ?bidang= — supaya mail tidak semua tampil
     // "Umum" di panel admin.
-    const jobBidang = String(
-      pick(job, ['kategori', 'category', 'bidang', 'sektor']) || '',
-    );
+    const jobBidang = String(pick(job, ['kategori', 'category', 'bidang', 'sektor']) || '');
     const body = {
       timestamp: new Date().toISOString(),
       code_job: code,
@@ -323,9 +310,7 @@ async function handleGetExistingCandidateJsonByWa(payload, sessionToken) {
       const found = await findCandidates();
       const want = normalizeWa(wa);
       row =
-        found.rows.find(
-          (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
-        ) || null;
+        found.rows.find((r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want) || null;
     }
     if (!row) return { success: false, error: 'Kandidat tidak ditemukan.' };
     const data = mapCandidate(row);
@@ -605,9 +590,8 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
       if (candRow === undefined) {
         const candFound = await findCandidates();
         candRow =
-          candFound.rows.find(
-            (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
-          ) || null;
+          candFound.rows.find((r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want) ||
+          null;
       }
     } catch (e) {
       /* lookup kandidat non-fatal */
@@ -714,9 +698,8 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
         const candFound = await findCandidates();
         const want = normalizeWa(wa);
         candRow =
-          candFound.rows.find(
-            (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
-          ) || null;
+          candFound.rows.find((r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want) ||
+          null;
       }
       if (candRow) {
         const jobCode = String(pick(candRow, ['id_loker_pilihan', 'id_loker']) || '')
@@ -746,9 +729,8 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
       const candFound = await findCandidates();
       const want = normalizeWa(wa);
       c =
-        candFound.rows.find(
-          (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
-        ) || null;
+        candFound.rows.find((r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want) ||
+        null;
     }
     if (c && c.id !== undefined) {
       await supabaseJson('PATCH', 'database_candidate', {

@@ -74,12 +74,8 @@ async function handleCheckAdminPersonal(payload) {
     try {
       const found = await findAdmins();
       for (const row of found.rows) {
-        const rn = toText(
-          pick(row, ['nama', 'name', 'admin_name', 'username', 'nama_admin']),
-        );
-        const rp = toText(
-          pick(row, ['pin', 'password', 'pass', 'pin_admin', 'kode']),
-        );
+        const rn = toText(pick(row, ['nama', 'name', 'admin_name', 'username', 'nama_admin']));
+        const rp = toText(pick(row, ['pin', 'password', 'pass', 'pin_admin', 'kode']));
         if (rn && rp && rn.toLowerCase() === name.toLowerCase() && rp === pin) ok = true;
       }
     } catch {
@@ -126,8 +122,7 @@ async function handleLoginKandidat(payload) {
       okPass = String(stored) === password;
     }
     if (!okPass) return { success: false, error: 'Password salah.' };
-    const nama =
-      toText(pick(row, ['nama_lengkap', 'nama', 'name', 'full_name'])) || wa;
+    const nama = toText(pick(row, ['nama_lengkap', 'nama', 'name', 'full_name'])) || wa;
     return {
       success: true,
       nama,

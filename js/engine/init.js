@@ -1,7 +1,25 @@
 import { callAPI } from '../../api-client.js';
 import { tr } from '../../i18n.js';
 import { showToast, safeSet } from '../init/util.js';
-import { ALL_CANDIDATES, ALL_DB_JOBS, ALL_FORM, ALL_JOBS, ALL_RIWAYAT_KANDIDAT, ALL_SCHEDULES, ALL_TUGAS, ALL_WA_TEMPLATES, ASSETS, AUTO_REFRESH_TIMER, CURRENT_THEME, DROPDOWNS, currentAdminName, currentKandidatName, currentKandidatWa, isAdmin, isKandidat } from '../init/state.js';
+import {
+  ALL_CANDIDATES,
+  ALL_DB_JOBS,
+  ALL_FORM,
+  ALL_JOBS,
+  ALL_RIWAYAT_KANDIDAT,
+  ALL_SCHEDULES,
+  ALL_TUGAS,
+  ALL_WA_TEMPLATES,
+  ASSETS,
+  AUTO_REFRESH_TIMER,
+  CURRENT_THEME,
+  DROPDOWNS,
+  currentAdminName,
+  currentKandidatName,
+  currentKandidatWa,
+  isAdmin,
+  isKandidat,
+} from '../init/state.js';
 import { renderAdminFull } from '../render/admin.js';
 import { renderFormInbox } from '../render/mail.js';
 import { renderJobDilamar, renderProgresPemberkasan } from './dashboard.js';
@@ -70,7 +88,9 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
             : tr('ui.toast_kandidat_session_expired');
         if (typeof showToast === 'function') showToast(msg, 'error');
         else if (typeof alert === 'function') alert(msg);
-      } catch (e) { /* opsional */ }
+      } catch (e) {
+        /* opsional */
+      }
       if (identLengkap) location.reload();
       return;
     }
@@ -227,15 +247,19 @@ export function initApp(res, isSilent = false) {
       globalAnnounce.classList.add('hidden');
     }
 
-    if (document.getElementById('input-kategori')) window.populate('input-kategori', DROPDOWNS.kategori);
+    if (document.getElementById('input-kategori'))
+      window.populate('input-kategori', DROPDOWNS.kategori);
     if (document.getElementById('input-gender')) window.populate('input-gender', DROPDOWNS.gender);
-    if (document.getElementById('edit-k-tahapan')) window.populate('edit-k-tahapan', DROPDOWNS.tahapan);
-    if (document.getElementById('edit-k-status')) window.populate('edit-k-status', DROPDOWNS.tahapan);
+    if (document.getElementById('edit-k-tahapan'))
+      window.populate('edit-k-tahapan', DROPDOWNS.tahapan);
+    if (document.getElementById('edit-k-status'))
+      window.populate('edit-k-status', DROPDOWNS.tahapan);
     if (document.getElementById('input-tsk')) window.populate('input-tsk', DROPDOWNS.tsk);
     if (document.getElementById('j-tsk')) window.populate('j-tsk', DROPDOWNS.tsk);
     if (document.getElementById('input-tahapan-db'))
       window.populate('input-tahapan-db', DROPDOWNS.tahapan);
-    if (document.getElementById('edit-db-tahapan')) window.populate('edit-db-tahapan', DROPDOWNS.tahapan);
+    if (document.getElementById('edit-db-tahapan'))
+      window.populate('edit-db-tahapan', DROPDOWNS.tahapan);
     if (document.getElementById('checkbox-lokasi'))
       window.populateCheckboxes('checkbox-lokasi', DROPDOWNS.lokasi, 'lokasi_cb');
     if (document.getElementById('checkbox-syarat'))
@@ -266,19 +290,25 @@ export function initApp(res, isSilent = false) {
 
     let dlKodeJob = document.getElementById('list-kode-job');
     if (dlKodeJob) {
-      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + window.esc(j.code) + '">').join('');
+      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + window.esc(j.code) + '">').join(
+        '',
+      );
     }
 
     let dlLokasi = document.getElementById('list-lokasi');
     if (dlLokasi) {
       let uniqueLokasi = [...new Set(ALL_JOBS.map((j) => j.lokasi).filter(Boolean))];
-      dlLokasi.innerHTML = uniqueLokasi.map((l) => '<option value="' + window.esc(l) + '">').join('');
+      dlLokasi.innerHTML = uniqueLokasi
+        .map((l) => '<option value="' + window.esc(l) + '">')
+        .join('');
     }
 
     let dlSyarat = document.getElementById('list-syarat');
     if (dlSyarat) {
       let uniqueSyarat = [...new Set(ALL_JOBS.map((j) => j.syarat).filter(Boolean))];
-      dlSyarat.innerHTML = uniqueSyarat.map((s) => '<option value="' + window.esc(s) + '">').join('');
+      dlSyarat.innerHTML = uniqueSyarat
+        .map((s) => '<option value="' + window.esc(s) + '">')
+        .join('');
     }
   }
 
@@ -346,7 +376,10 @@ export function initApp(res, isSilent = false) {
         document.getElementById('nav-mode').classList.add('hidden');
       if (document.getElementById('nav-kandidat-mode'))
         document.getElementById('nav-kandidat-mode').classList.remove('hidden');
-      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + window.esc(currentKandidatName));
+      safeSet(
+        'nama-kandidat-login',
+        tr('candidate.welcome') + ', ' + window.esc(currentKandidatName),
+      );
 
       var mLoggedOut = document.getElementById('mobile-nav-logged-out');
       var mAdmin = document.getElementById('mobile-nav-admin');
@@ -455,12 +488,10 @@ export function initApp(res, isSilent = false) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (init/boot.js initApp, js/04_auth.js refreshDataDinamis, HTML onclick,
 // api/*.js refreshDataDinamis, render/*.js, dll).
 registerSeamAliases({
-    refreshDataDinamis,
-    initApp,
+  refreshDataDinamis,
+  initApp,
 });
-

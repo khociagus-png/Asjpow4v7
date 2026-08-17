@@ -108,9 +108,9 @@ export const helpers_cv = { getPath, isGood, makeV, fmtMonthYearJp, asArr, merge
 // makeV/mergeArrRiwayat/getPath). Alias data property — helper ini pure &
 // tidak pernah di-reassign. Guard window utk test (vitest jalan di node).
 if (typeof window !== 'undefined') {
-    window.getPath = getPath;
+  window.getPath = getPath;
   window.isGood = isGood;
   window.makeV = makeV;
   window.fmtMonthYearJp = fmtMonthYearJp;
   window.mergeArrRiwayat = mergeArrRiwayat;
-}
+}

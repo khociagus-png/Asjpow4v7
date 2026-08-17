@@ -4,7 +4,6 @@
 
 const { supabaseJson, pick, toText, findTable, supabaseUrl, supabaseKey } = require('./client');
 
-
 // Query paginated dengan Range header + total dari Content-Range.
 async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
   const start = (page - 1) * pageSize;
@@ -34,7 +33,6 @@ async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
   return { rows, total };
 }
 
-
 async function findAdmins() {
   return findTable([
     'user_sessions',
@@ -46,7 +44,6 @@ async function findAdmins() {
     'pengguna',
   ]);
 }
-
 
 async function findSettings() {
   return findTable([
@@ -61,11 +58,9 @@ async function findSettings() {
   ]);
 }
 
-
 async function findAnnouncements() {
   return findTable(['pengumuman', 'announcements', 'announcement', 'marquee']);
 }
-
 
 // Bangun objek assets ({LOGO, BANNER, FOOTER, SOCIAL}) dari tabel settings jika ada.
 async function findAssets() {
@@ -108,7 +103,6 @@ async function findAssets() {
   }
   return null;
 }
-
 
 async function findPengumuman() {
   const ann = await findAnnouncements();

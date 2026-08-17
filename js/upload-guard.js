@@ -101,6 +101,5 @@ export function cekUploadFile(input, opts) {
 // BRIDGE ESM → classic/bundel & HTML inline: alias window.* (pemakai lama
 // memanggil `cekUploadFile(...)` bare dari onclick — string dieval global).
 registerSeamAliases({
-    cekUploadFile,
+  cekUploadFile,
 });
-

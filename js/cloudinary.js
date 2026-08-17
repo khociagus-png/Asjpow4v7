@@ -35,11 +35,7 @@ const CLOUDINARY_CLOUD_NAME = 'ybzzbw9i';
 const CLOUDINARY_UPLOAD_PRESET = 'asjportal';
 
 export function cloudinaryEndpoint() {
-  return (
-    'https://api.cloudinary.com/v1_1/' +
-    encodeURIComponent(CLOUDINARY_CLOUD_NAME) +
-    '/upload'
-  );
+  return 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(CLOUDINARY_CLOUD_NAME) + '/upload';
 }
 
 // uploadToCloudinary(file) → Promise<string secure_url>

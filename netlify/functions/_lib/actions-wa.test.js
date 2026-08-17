@@ -11,7 +11,11 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { buildPesanTawaranMassal } = require('./actions-wa.js');
 
-const V = ['Pesan A untuk {nama} ({link_grup})', 'Pesan B untuk {nama} ({link_grup})', 'Pesan C untuk {nama} ({link_grup})'];
+const V = [
+  'Pesan A untuk {nama} ({link_grup})',
+  'Pesan B untuk {nama} ({link_grup})',
+  'Pesan C untuk {nama} ({link_grup})',
+];
 
 describe('buildPesanTawaranMassal — varian pesan bergilir (anti-ban)', () => {
   it('3 varian × 5 penerima → bergilir v0,v1,v2,v0,v1', () => {
@@ -40,7 +44,14 @@ describe('buildPesanTawaranMassal — varian pesan bergilir (anti-ban)', () => {
 
   it('placeholder {nama}/{link_grup} diganti PER penerima, bukan sekali', () => {
     const got = [0, 1].map((i) =>
-      buildPesanTawaranMassal(V, null, i === 0 ? 'Budi' : 'Siti', '', 'https://chat.whatsapp.com/ABC', i),
+      buildPesanTawaranMassal(
+        V,
+        null,
+        i === 0 ? 'Budi' : 'Siti',
+        '',
+        'https://chat.whatsapp.com/ABC',
+        i,
+      ),
     );
     expect(got[0]).toContain('Pesan A untuk Budi (https://chat.whatsapp.com/ABC)');
     expect(got[1]).toContain('Pesan B untuk Siti (https://chat.whatsapp.com/ABC)');

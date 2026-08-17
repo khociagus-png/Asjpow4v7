@@ -71,7 +71,10 @@ export async function prosesReviewForm(r) {
       patchFormMail(r, res.form);
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export async function prosesApproveForm(r) {
@@ -85,7 +88,10 @@ export async function prosesApproveForm(r) {
       upsertCandidateMemory(res.candidate);
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export function prosesRejectForm(r) {
@@ -107,7 +113,10 @@ export async function submitRejectForm() {
       upsertCandidateMemory(res.candidate);
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 // Tandai Dibaca — baris status UPDATE (kandidat ubah data) kembali ke
@@ -120,7 +129,10 @@ export async function tandaiDibacaForm(r) {
       patchFormMail(r, res.form);
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export function toggleMailSelect(cb) {
@@ -195,7 +207,10 @@ export async function hapusFormMailTerpilih() {
       if (typeof window.updateMailBadge === 'function') window.updateMailBadge();
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
 export async function hapusFormMail(id) {
@@ -205,22 +220,23 @@ export async function hapusFormMail(id) {
     if (res.success) removeFormMail(id);
     else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   }
 }
-
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (mail table render/mail.js + partials/modals-shared.html).
 registerSeamAliases({
-    submitRejectForm,
-    toggleMailSelect,
-    mailSelectAll,
-    hapusFormMailTerpilih,
-    hapusFormMail,
-    prosesReviewForm,
-    prosesApproveForm,
-    prosesRejectForm,
-    tandaiDibacaForm,
-});
-
+  submitRejectForm,
+  toggleMailSelect,
+  mailSelectAll,
+  hapusFormMailTerpilih,
+  hapusFormMail,
+  prosesReviewForm,
+  prosesApproveForm,
+  prosesRejectForm,
+  tandaiDibacaForm,
+});

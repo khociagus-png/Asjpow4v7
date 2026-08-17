@@ -31,7 +31,9 @@ const apiCandidates = (apiJson && apiJson.candidates) || [];
 check('candidates array ada', Array.isArray(apiCandidates), 'harus array');
 check('setidaknya 1 kandidat', apiCandidates.length > 0, `n=${apiCandidates.length}`);
 const withExtra = apiCandidates.filter((c) => c.extraDocs && c.extraDocs.length).length;
-console.log(`  (info) ${apiCandidates.length} kandidat, ${withExtra} punya dokumen ekstra (KK/KTP/dll)`);
+console.log(
+  `  (info) ${apiCandidates.length} kandidat, ${withExtra} punya dokumen ekstra (KK/KTP/dll)`,
+);
 check(
   'kandidat punya field inti (nama_lengkap, pas_photo, file_cv)',
   apiCandidates.every((c) => c && c.nama_lengkap !== undefined),
@@ -43,7 +45,9 @@ let browser = null;
 try {
   browser = await launchBrowser();
 } catch (e) {
-  console.log(`  ⚠ browser check dilewati (playwright tidak bisa launch di runtime ini): ${String(e.message || e).slice(0, 100)}`);
+  console.log(
+    `  ⚠ browser check dilewati (playwright tidak bisa launch di runtime ini): ${String(e.message || e).slice(0, 100)}`,
+  );
 }
 if (browser) {
   const page = await browser.newPage();

@@ -63,38 +63,248 @@ function bridgeState(name, get, set) {
   Object.defineProperty(window, name, { configurable: true, get, set });
 }
 
-bridgeState('ALL_JOBS', () => ALL_JOBS, (v) => { ALL_JOBS = v; });
-bridgeState('ALL_DB_JOBS', () => ALL_DB_JOBS, (v) => { ALL_DB_JOBS = v; });
-bridgeState('ALL_CANDIDATES', () => ALL_CANDIDATES, (v) => { ALL_CANDIDATES = v; });
-bridgeState('ALL_CANDIDATES_TOTAL', () => ALL_CANDIDATES_TOTAL, (v) => { ALL_CANDIDATES_TOTAL = v; });
-bridgeState('ALL_SCHEDULES', () => ALL_SCHEDULES, (v) => { ALL_SCHEDULES = v; });
-bridgeState('ALL_TUGAS', () => ALL_TUGAS, (v) => { ALL_TUGAS = v; });
-bridgeState('ALL_FORM', () => ALL_FORM, (v) => { ALL_FORM = v; });
-bridgeState('ALL_WA_TEMPLATES', () => ALL_WA_TEMPLATES, (v) => { ALL_WA_TEMPLATES = v; });
-bridgeState('ALL_RIWAYAT_KANDIDAT', () => ALL_RIWAYAT_KANDIDAT, (v) => { ALL_RIWAYAT_KANDIDAT = v; });
-bridgeState('ASSETS', () => ASSETS, (v) => { ASSETS = v; });
-bridgeState('CURRENT_THEME', () => CURRENT_THEME, (v) => { CURRENT_THEME = v; });
-bridgeState('DROPDOWNS', () => DROPDOWNS, (v) => { DROPDOWNS = v; });
-bridgeState('isAdmin', () => isAdmin, (v) => { isAdmin = v; });
-bridgeState('isKandidat', () => isKandidat, (v) => { isKandidat = v; });
-bridgeState('currentAdminName', () => currentAdminName, (v) => { currentAdminName = v; });
-bridgeState('currentKandidatName', () => currentKandidatName, (v) => { currentKandidatName = v; });
-bridgeState('currentKandidatWa', () => currentKandidatWa, (v) => { currentKandidatWa = v; });
-bridgeState('currentKandidatId', () => currentKandidatId, (v) => { currentKandidatId = v; });
-bridgeState('limitPub', () => limitPub, (v) => { limitPub = v; });
-bridgeState('limitAdm', () => limitAdm, (v) => { limitAdm = v; });
-bridgeState('limitKan', () => limitKan, (v) => { limitKan = v; });
-bridgeState('limitJad', () => limitJad, (v) => { limitJad = v; });
-bridgeState('limitDb', () => limitDb, (v) => { limitDb = v; });
-bridgeState('dbSortType', () => dbSortType, (v) => { dbSortType = v; });
-bridgeState('dbFilterBidang', () => dbFilterBidang, (v) => { dbFilterBidang = v; });
-bridgeState('dbFilterTahapan', () => dbFilterTahapan, (v) => { dbFilterTahapan = v; });
-bridgeState('mailFilterStatus', () => mailFilterStatus, (v) => { mailFilterStatus = v; });
-bridgeState('mailSearchText', () => mailSearchText, (v) => { mailSearchText = v; });
-bridgeState('currentPublicFilter', () => currentPublicFilter, (v) => { currentPublicFilter = v; });
-bridgeState('currentCopyListTxt', () => currentCopyListTxt, (v) => { currentCopyListTxt = v; });
-bridgeState('CURRENT_WA_KANDIDAT', () => CURRENT_WA_KANDIDAT, (v) => { CURRENT_WA_KANDIDAT = v; });
-bridgeState('PREV_MAIL_COUNT', () => PREV_MAIL_COUNT, (v) => { PREV_MAIL_COUNT = v; });
-bridgeState('AUTO_REFRESH_TIMER', () => AUTO_REFRESH_TIMER, (v) => { AUTO_REFRESH_TIMER = v; });
-bridgeState('ACTIVE_PEMBERKASAN_WA', () => ACTIVE_PEMBERKASAN_WA, (v) => { ACTIVE_PEMBERKASAN_WA = v; });
-bridgeState('ACTIVE_PEMBERKASAN_NAMA', () => ACTIVE_PEMBERKASAN_NAMA, (v) => { ACTIVE_PEMBERKASAN_NAMA = v; });
+bridgeState(
+  'ALL_JOBS',
+  () => ALL_JOBS,
+  (v) => {
+    ALL_JOBS = v;
+  },
+);
+bridgeState(
+  'ALL_DB_JOBS',
+  () => ALL_DB_JOBS,
+  (v) => {
+    ALL_DB_JOBS = v;
+  },
+);
+bridgeState(
+  'ALL_CANDIDATES',
+  () => ALL_CANDIDATES,
+  (v) => {
+    ALL_CANDIDATES = v;
+  },
+);
+bridgeState(
+  'ALL_CANDIDATES_TOTAL',
+  () => ALL_CANDIDATES_TOTAL,
+  (v) => {
+    ALL_CANDIDATES_TOTAL = v;
+  },
+);
+bridgeState(
+  'ALL_SCHEDULES',
+  () => ALL_SCHEDULES,
+  (v) => {
+    ALL_SCHEDULES = v;
+  },
+);
+bridgeState(
+  'ALL_TUGAS',
+  () => ALL_TUGAS,
+  (v) => {
+    ALL_TUGAS = v;
+  },
+);
+bridgeState(
+  'ALL_FORM',
+  () => ALL_FORM,
+  (v) => {
+    ALL_FORM = v;
+  },
+);
+bridgeState(
+  'ALL_WA_TEMPLATES',
+  () => ALL_WA_TEMPLATES,
+  (v) => {
+    ALL_WA_TEMPLATES = v;
+  },
+);
+bridgeState(
+  'ALL_RIWAYAT_KANDIDAT',
+  () => ALL_RIWAYAT_KANDIDAT,
+  (v) => {
+    ALL_RIWAYAT_KANDIDAT = v;
+  },
+);
+bridgeState(
+  'ASSETS',
+  () => ASSETS,
+  (v) => {
+    ASSETS = v;
+  },
+);
+bridgeState(
+  'CURRENT_THEME',
+  () => CURRENT_THEME,
+  (v) => {
+    CURRENT_THEME = v;
+  },
+);
+bridgeState(
+  'DROPDOWNS',
+  () => DROPDOWNS,
+  (v) => {
+    DROPDOWNS = v;
+  },
+);
+bridgeState(
+  'isAdmin',
+  () => isAdmin,
+  (v) => {
+    isAdmin = v;
+  },
+);
+bridgeState(
+  'isKandidat',
+  () => isKandidat,
+  (v) => {
+    isKandidat = v;
+  },
+);
+bridgeState(
+  'currentAdminName',
+  () => currentAdminName,
+  (v) => {
+    currentAdminName = v;
+  },
+);
+bridgeState(
+  'currentKandidatName',
+  () => currentKandidatName,
+  (v) => {
+    currentKandidatName = v;
+  },
+);
+bridgeState(
+  'currentKandidatWa',
+  () => currentKandidatWa,
+  (v) => {
+    currentKandidatWa = v;
+  },
+);
+bridgeState(
+  'currentKandidatId',
+  () => currentKandidatId,
+  (v) => {
+    currentKandidatId = v;
+  },
+);
+bridgeState(
+  'limitPub',
+  () => limitPub,
+  (v) => {
+    limitPub = v;
+  },
+);
+bridgeState(
+  'limitAdm',
+  () => limitAdm,
+  (v) => {
+    limitAdm = v;
+  },
+);
+bridgeState(
+  'limitKan',
+  () => limitKan,
+  (v) => {
+    limitKan = v;
+  },
+);
+bridgeState(
+  'limitJad',
+  () => limitJad,
+  (v) => {
+    limitJad = v;
+  },
+);
+bridgeState(
+  'limitDb',
+  () => limitDb,
+  (v) => {
+    limitDb = v;
+  },
+);
+bridgeState(
+  'dbSortType',
+  () => dbSortType,
+  (v) => {
+    dbSortType = v;
+  },
+);
+bridgeState(
+  'dbFilterBidang',
+  () => dbFilterBidang,
+  (v) => {
+    dbFilterBidang = v;
+  },
+);
+bridgeState(
+  'dbFilterTahapan',
+  () => dbFilterTahapan,
+  (v) => {
+    dbFilterTahapan = v;
+  },
+);
+bridgeState(
+  'mailFilterStatus',
+  () => mailFilterStatus,
+  (v) => {
+    mailFilterStatus = v;
+  },
+);
+bridgeState(
+  'mailSearchText',
+  () => mailSearchText,
+  (v) => {
+    mailSearchText = v;
+  },
+);
+bridgeState(
+  'currentPublicFilter',
+  () => currentPublicFilter,
+  (v) => {
+    currentPublicFilter = v;
+  },
+);
+bridgeState(
+  'currentCopyListTxt',
+  () => currentCopyListTxt,
+  (v) => {
+    currentCopyListTxt = v;
+  },
+);
+bridgeState(
+  'CURRENT_WA_KANDIDAT',
+  () => CURRENT_WA_KANDIDAT,
+  (v) => {
+    CURRENT_WA_KANDIDAT = v;
+  },
+);
+bridgeState(
+  'PREV_MAIL_COUNT',
+  () => PREV_MAIL_COUNT,
+  (v) => {
+    PREV_MAIL_COUNT = v;
+  },
+);
+bridgeState(
+  'AUTO_REFRESH_TIMER',
+  () => AUTO_REFRESH_TIMER,
+  (v) => {
+    AUTO_REFRESH_TIMER = v;
+  },
+);
+bridgeState(
+  'ACTIVE_PEMBERKASAN_WA',
+  () => ACTIVE_PEMBERKASAN_WA,
+  (v) => {
+    ACTIVE_PEMBERKASAN_WA = v;
+  },
+);
+bridgeState(
+  'ACTIVE_PEMBERKASAN_NAMA',
+  () => ACTIVE_PEMBERKASAN_NAMA,
+  (v) => {
+    ACTIVE_PEMBERKASAN_NAMA = v;
+  },
+);

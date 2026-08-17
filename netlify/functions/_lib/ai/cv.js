@@ -5,7 +5,11 @@
 'use strict';
 
 const { normalizeWa, pick, supabaseJson } = require('../db/client');
-const { findCandidateByIdFiltered, findCandidateByWaFiltered, findCandidates } = require('../db/candidates');
+const {
+  findCandidateByIdFiltered,
+  findCandidateByWaFiltered,
+  findCandidates,
+} = require('../db/candidates');
 const { requireRole } = require('../actions-auth');
 // Satu sumber buildMasterNested (dari actions-master.js) supaya konteks AI
 // admin tidak pakai salinan lama yang belum merge ai_data_json (kenalan JP/
@@ -84,7 +88,14 @@ function buildRingkasData(cur) {
       'Pendidikan',
       pend
         .map((p) =>
-          [p.tingkat, p.sekolah || p.nama_sekolah, p.jurusan_id || p.jurusan, p.tahun_lulus ? p.tahun_lulus + ' lulus' : ''].filter(Boolean).join(' - '),
+          [
+            p.tingkat,
+            p.sekolah || p.nama_sekolah,
+            p.jurusan_id || p.jurusan,
+            p.tahun_lulus ? p.tahun_lulus + ' lulus' : '',
+          ]
+            .filter(Boolean)
+            .join(' - '),
         )
         .join('; '),
     );
@@ -95,7 +106,13 @@ function buildRingkasData(cur) {
       'Pengalaman kerja',
       pek
         .map((p) =>
-          [p.perusahaan || p.nama_perusahaan, p.jabatan, p.tahun_masuk ? p.tahun_masuk + '-' + (p.tahun_keluar || 'sekarang') : ''].filter(Boolean).join(' - '),
+          [
+            p.perusahaan || p.nama_perusahaan,
+            p.jabatan,
+            p.tahun_masuk ? p.tahun_masuk + '-' + (p.tahun_keluar || 'sekarang') : '',
+          ]
+            .filter(Boolean)
+            .join(' - '),
         )
         .join('; '),
     );
@@ -104,7 +121,13 @@ function buildRingkasData(cur) {
   if (klg.length) {
     add(
       'Keluarga',
-      klg.map((k) => [k.hubungan, k.nama, k.usia ? k.usia + ' th' : '', k.pekerjaan].filter(Boolean).join(' - ')).join('; '),
+      klg
+        .map((k) =>
+          [k.hubungan, k.nama, k.usia ? k.usia + ' th' : '', k.pekerjaan]
+            .filter(Boolean)
+            .join(' - '),
+        )
+        .join('; '),
     );
   }
   return lines.join('\n');
@@ -121,17 +144,14 @@ async function handleGetAdminAiContext(payload, sessionToken) {
     if (!row && (d.candidateId || d.idKandidat || d.wa)) {
       const id = String(d.candidateId || d.idKandidat || '');
       // Jalur cepat: cari baris kandidat via query server-side (by id / WA).
-      let cand = id
-        ? await findCandidateByIdFiltered(id)
-        : await findCandidateByWaFiltered(d.wa);
+      let cand = id ? await findCandidateByIdFiltered(id) : await findCandidateByWaFiltered(d.wa);
       if (cand === undefined) {
         const found = await findCandidates();
         cand =
           (found.rows || []).find((r) =>
             id
               ? String(pick(r, ['id_kandidat', 'id']) || '') === id
-              : normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) ===
-                normalizeWa(d.wa),
+              : normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === normalizeWa(d.wa),
           ) || null;
       }
       if (cand) row = await findMasterByWa(String(cand.no_wa || ''));
@@ -220,9 +240,7 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       query: { select: '*', limit: 100 },
     });
     const existing = (Array.isArray(existingRows) ? existingRows : []).find(
-      (r) =>
-        normalizeWa(String(r.wa || '')) === wa &&
-        String(r.submitted_via || '') === 'ai_form',
+      (r) => normalizeWa(String(r.wa || '')) === wa && String(r.submitted_via || '') === 'ai_form',
     );
     if (existing && existing.id !== undefined) {
       await supabaseJson('PATCH', 'ai_form_submissions', {

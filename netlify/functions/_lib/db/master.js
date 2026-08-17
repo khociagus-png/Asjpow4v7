@@ -4,7 +4,6 @@
 
 const { supabaseJson } = require('./client');
 
-
 // Kolom RINGAN master_database_candidate — hanya kolom yang benar-benar
 // dibaca attachBerkasBio (BERKAS_COLUMNS *_url + BIO_COLUMNS + pencocok WA).
 // Tabel master 154 kolom (±6,5 KB/baris); proyeksi ini ±16 kolom. Jalur yang
@@ -12,7 +11,6 @@ const { supabaseJson } = require('./client');
 // ai_data_json) TETAP memakai fetchMasterByWa select *.
 const MASTER_LIGHT_COLS =
   'id,id_kandidat,nama_lengkap,no_wa,kk_url,ijazah_sd_url,ijazah_smp_url,ijazah_sma_url,univ_url,ktp_url,email,tempat_lahir,tgl_lahir,alamat_lengkap,no_coe,exp_pasport';
-
 
 // Tarik master_database_candidate hanya untuk WA di daftar. Coba kolom WA
 // umum (or), lalu no_wa saja — fallback null → scan penuh.
@@ -40,7 +38,6 @@ async function fetchMasterByWa(waList) {
   }
   return null;
 }
-
 
 // Master RINGAN (proyeksi MASTER_LIGHT_COLS) untuk attachBerkasBio — TIDAK
 // membawa 138 kolom yang tidak pernah dibaca (berat ~6,5 KB/baris → ~0,5 KB).

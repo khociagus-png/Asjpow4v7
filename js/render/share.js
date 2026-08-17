@@ -259,16 +259,14 @@ export async function simpanDokumenShare(jobCode) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (tutupModalShare, copasShareWa, simpanDokumenShare,
 // toggleSharePreview, copyShareLink, dll).
 registerSeamAliases({
-    bukaModalShare,
-    tutupModalShare,
-    toggleSharePreview,
-    copasShareWa,
-    copyShareLink,
-    simpanDokumenShare,
-});
-
+  bukaModalShare,
+  tutupModalShare,
+  toggleSharePreview,
+  copasShareWa,
+  copyShareLink,
+  simpanDokumenShare,
+});

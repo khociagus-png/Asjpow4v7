@@ -48,10 +48,8 @@ export function jalankanSemuaSkeleton() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js window.jalankanSemuaSkeleton).
 registerSeamAliases({
-    jalankanSemuaSkeleton,
-});
-
+  jalankanSemuaSkeleton,
+});

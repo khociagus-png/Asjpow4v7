@@ -12,14 +12,28 @@ const { normalizeWa } = require('../shared/wa-rules');
 
 // ---- Strategi memilih baris penjaga ------------------------------------------
 const FORM_PRIO = {
-  LULUS: 6, LOLOS: 6, APPROVED: 6, APPROVE: 6,
-  GAGAL: 5, TOLAK: 5, REJECTED: 5, REJECT: 5,
-  'REVIEW ADMIN': 4, REVIEW: 4,
-  UPDATE: 3, UPDATED: 3, PROSES: 3,
-  MENUNGGU: 1, MAIL: 1, BARU: 1, PENDING: 1,
+  LULUS: 6,
+  LOLOS: 6,
+  APPROVED: 6,
+  APPROVE: 6,
+  GAGAL: 5,
+  TOLAK: 5,
+  REJECTED: 5,
+  REJECT: 5,
+  'REVIEW ADMIN': 4,
+  REVIEW: 4,
+  UPDATE: 3,
+  UPDATED: 3,
+  PROSES: 3,
+  MENUNGGU: 1,
+  MAIL: 1,
+  BARU: 1,
+  PENDING: 1,
 };
 function formPrio(r) {
-  const s = String(r.status || 'MENUNGGU').trim().toUpperCase();
+  const s = String(r.status || 'MENUNGGU')
+    .trim()
+    .toUpperCase();
   return FORM_PRIO[s] !== undefined ? FORM_PRIO[s] : 0;
 }
 function tsOf(r) {
@@ -30,7 +44,8 @@ function pickKeeper(rows, opts = {}) {
     const pa = opts.prio ? opts.prio(a) : 0;
     const pb = opts.prio ? opts.prio(b) : 0;
     if (pa !== pb) return pb - pa;
-    const ta = tsOf(a), tb = tsOf(b);
+    const ta = tsOf(a),
+      tb = tsOf(b);
     if (ta !== tb) return ta > tb ? -1 : 1;
     return (Number(b.id) || 0) - (Number(a.id) || 0);
   })[0];
@@ -42,7 +57,8 @@ function pickKeeper(rows, opts = {}) {
 // digit '8'). Kalau nama lengkapnya identik DAN jarak edit kedua WA <= 2,
 // perlakukan sebagai kandidat yang sama dan gabung jadi 1 baris.
 function levenshtein(a, b) {
-  const m = a.length, n = b.length;
+  const m = a.length,
+    n = b.length;
   if (!m) return n;
   if (!n) return m;
   const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
@@ -58,8 +74,12 @@ function levenshtein(a, b) {
   }
   return d[m][n];
 }
-const normNameKey = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-const waDigits = (r) => normalizeWa(r && (r.no_wa || r.wa) || '');
+const normNameKey = (v) =>
+  String(v || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+const waDigits = (r) => normalizeWa((r && (r.no_wa || r.wa)) || '');
 // Pilih WA "kanonik" dari sekumpulan WA yang mirip: preferensi awalan 628
 // (nomor HP) lalu digit terbanyak — angka yang benar biasanya 13 digit 628xx.
 function preferWa(was) {
@@ -193,9 +213,7 @@ function mergeFillLatest(rows, cols) {
   let changed = false;
   const sorted = [...rows].sort((a, b) => (tsOf(a) > tsOf(b) ? 1 : -1));
   for (const col of cols) {
-    const latest = [...sorted]
-      .reverse()
-      .find((r) => nonEmpty(r[col]));
+    const latest = [...sorted].reverse().find((r) => nonEmpty(r[col]));
     if (latest && String(latest[col]) !== String(rows[0][col])) {
       body[col] = latest[col];
       changed = true;
@@ -254,7 +272,10 @@ function mergeCatatanInternal(keeper, dups) {
       }
     }
   }
-  const freeTextOf = (c) => grab(c).replace(/\[[^\]]+\]\s*/g, '').trim();
+  const freeTextOf = (c) =>
+    grab(c)
+      .replace(/\[[^\]]+\]\s*/g, '')
+      .trim();
   let freeText = freeTextOf(keeper.catatan_internal);
   if (!freeText) {
     for (const d of dups) {

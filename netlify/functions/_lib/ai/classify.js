@@ -74,7 +74,10 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
   if (!PARSE_ALLOWED_MIME.has(mimeType)) {
     return {
       success: false,
-      error: 'Format tidak didukung: ' + (name.split('.').pop() || mimeType || '?') + '. Gunakan PDF/Excel/Word/CSV/TXT/gambar.',
+      error:
+        'Format tidak didukung: ' +
+        (name.split('.').pop() || mimeType || '?') +
+        '. Gunakan PDF/Excel/Word/CSV/TXT/gambar.',
     };
   }
 
@@ -86,14 +89,17 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
     if (cand === undefined) {
       const found = await findCandidates();
       cand =
-        (found.rows || []).find((r) =>
-          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        (found.rows || []).find(
+          (r) => String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
     if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
-    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+    return {
+      success: false,
+      error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.',
+    };
   }
 
   let namaSekarang = '';
@@ -108,9 +114,14 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
     const reply = await geminiParseFile(PARSE_SYSTEM_PROMPT, { mimeType, data });
     const parsed = parseJsonLoose(reply);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return { success: false, error: 'AI tidak bisa mengekstrak data dari file ini. Coba file lain.' };
+      return {
+        success: false,
+        error: 'AI tidak bisa mengekstrak data dari file ini. Coba file lain.',
+      };
     }
-    const fields = Object.keys(parsed).filter((k) => k !== 'pendidikan' && k !== 'pekerjaan' && k !== 'keluarga');
+    const fields = Object.keys(parsed).filter(
+      (k) => k !== 'pendidikan' && k !== 'pekerjaan' && k !== 'keluarga',
+    );
     return {
       success: true,
       wa,
@@ -126,7 +137,10 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
     };
   } catch (e) {
     console.error('[AI] parseDokumenBiodata error:', e && e.message ? e.message : e);
-    return { success: false, error: 'Gagal parse dokumen: ' + (e && e.message ? e.message : 'AI sibuk') };
+    return {
+      success: false,
+      error: 'Gagal parse dokumen: ' + (e && e.message ? e.message : 'AI sibuk'),
+    };
   }
 }
 

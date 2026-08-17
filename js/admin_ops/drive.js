@@ -233,15 +233,13 @@ export async function uploadDriveField(idKandidat, nama, field) {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (index.html & engine/init.js window.muatMigrasiDrive,
 // admin/index buka/tutupModalMigrasiDrive, tombol uploadDriveField di
 // migrasiDriveFieldHtml).
 registerSeamAliases({
-    muatMigrasiDrive,
-    bukaModalMigrasiDrive,
-    tutupModalMigrasiDrive,
-    uploadDriveField,
-});
-
+  muatMigrasiDrive,
+  bukaModalMigrasiDrive,
+  tutupModalMigrasiDrive,
+  uploadDriveField,
+});

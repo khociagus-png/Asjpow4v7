@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-17 — `TBD` 🧹 Rapikan repo: dokumen point-form + format kode seragam (prettier)
+
+### Ringkasan
+
+- Dokumen besar diringkas: `PROGRESS.md` (2300→35), `CHANGELOG.md` (1188→13), `ESM_BRIDGE.md` (774→25), `REFACTOR_TODO.md` (753→31), `REVIEW.md` (302→30); `README.md` jadi titik masuk ringkas. Riwayat penuh tetap di git history.
+- `bun run format` (prettier) normalisasi 115 file → `format:check` hijau; build idempoten, 148/148 test, lint 0 error.
+- `scripts/seed-wa-templates.mjs` (BARU): seed template WA (dry-run default) — default "Undangan Wali" (template ini memang belum ada di DB; belum di-apply).
+
+---
+
 ## 2026-08-17 — `26f2a91` ✅ Tes preset Cloudinary + penanda versi header → footer
 
 ### Ringkasan
@@ -27,6 +37,7 @@
 - **Verifikasi**: `node --check` OK · ESLint no-undef 0 · 148/148 test lulus · build → `app-4843ad1360.js` · `resolveFileUrl` diuji langsung (URL passthrough + base64 fallback jalan).
 
 ### Perlu tindakan pemilik
+
 - Preset unsigned `asjportal` tetap wajib ada di Cloudinary; deploy Netlify menunggu izin eksplisit pemilik.
 
 ---
@@ -42,5 +53,6 @@
 - **Verifikasi**: `node --check` OK · 148/148 unit test lulus · `bun run build` → bundel `app-85dc1bcb69.js` (46 file), `check:globals` 0 kolisi · simulasi langsung: POST & GET ping → `200 "pong"` mentah, action normal tetap JSON.
 
 ### Perlu tindakan pemilik
+
 - Pastikan preset unsigned `asjportal` ada di dashboard Cloudinary (Settings → Upload → Unsigned upload preset).
 - Deploy Netlify menunggu izin eksplisit pemilik (DEPLOY.md) — keep-alive & Cloudinary baru live setelah deploy.

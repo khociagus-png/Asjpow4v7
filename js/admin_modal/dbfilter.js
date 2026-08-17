@@ -79,14 +79,12 @@ export function renderDbFilters() {
   }
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (chip filter renderDbFilters sendiri + admin/index
 // setSortDb, render/admin.js window.renderDbFilters).
 registerSeamAliases({
-    setFilterBidang,
-    setFilterTahapan,
-    setSortDb,
-    renderDbFilters,
+  setFilterBidang,
+  setFilterTahapan,
+  setSortDb,
+  renderDbFilters,
 });
-

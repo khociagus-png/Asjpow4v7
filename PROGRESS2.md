@@ -5,7 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ✅ Verifikasi preset Cloudinary + penanda versi pindah dari header ke footer.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🧹 Rapikan repo: dokumen diringkas point-form + format kode seragam (prettier).
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `TBD`
+
+### 🧹 Rapikan repo (permintaan pemilik: "biar mudah dibaca AI, gak terlalu panjang, cukup point penting")
+
+- **Dokumen besar diringkas** menjadi point-form (riwayat penuh tetap di git history):
+  - `PROGRESS.md` 2300 → 35 baris (ringkasan fase 13–17/8 + keputusan penting)
+  - `CHANGELOG.md` 1188 → 13 baris (era ringkas + pointer `git log`)
+  - `ESM_BRIDGE.md` 774 → 25 baris (aturan ESM/bridge yang masih wajib)
+  - `REFACTOR_TODO.md` 753 → 31 baris (hanya sisa pekerjaan terbuka)
+  - `REVIEW.md` 302 → 30 baris (status item + rate limit + checklist K1)
+  - `README.md` → titik masuk ringkas (stack, struktur, command, aturan, peta dokumen)
+- **Format kode seragam**: `bun run format` (prettier: single quote, semi, 2-spasi, LF) — 115 file JS/MD/CSS dinormalisasi; `format:check` hijau.
+- **Template WA "Undangan Wali"**: dikonfirmasi tidak ada (DB cuma punya 2 template). Seed script baru `scripts/seed-wa-templates.mjs` (dry-run default, `--apply` insert yang belum ada) berisi default "Undangan Wali" — **belum di-apply ke DB** (butuh konfirmasi pemilik).
+- **Verifikasi:** build idempoten (bundel `app-23d620bb08.js`) · 148/148 test · lint 0 error (12 warning gaya lama) · seed dry-run OK.
 
 ---
 

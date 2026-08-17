@@ -120,13 +120,11 @@ export function logoutApp() {
   changePage('public');
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (index/admin changePage/toggleMobileMenu/logoutApp,
 // 04_auth.js & engine/init.js window.changePage).
 registerSeamAliases({
-    changePage,
-    toggleMobileMenu,
-    logoutApp,
+  changePage,
+  toggleMobileMenu,
+  logoutApp,
 });
-

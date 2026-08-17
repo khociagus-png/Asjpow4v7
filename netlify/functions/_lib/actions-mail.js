@@ -5,7 +5,13 @@
 
 const bcrypt = require('bcryptjs');
 const { normalizeWa, pick, supabaseJson } = require('./db/client');
-const { findFormByIndexFiltered, findForms, findFormsByWa, mapForm, upsertFormRow } = require('./db/forms');
+const {
+  findFormByIndexFiltered,
+  findForms,
+  findFormsByWa,
+  mapForm,
+  upsertFormRow,
+} = require('./db/forms');
 const { mapCandidate } = require('./db/candidates');
 const { attachBerkasBio } = require('./db/berkas');
 const { requireAdmin } = require('./actions-auth');
@@ -388,4 +394,3 @@ module.exports = {
   syncBiodataKeMail,
   syncFormMailDariUpload,
 };
-

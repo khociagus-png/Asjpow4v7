@@ -33,7 +33,11 @@ const normWa = (w) => String(w || '').replace(/\D/g, '');
 const isDrive = (u) => /drive\.google\.com|docs\.google\.com/i.test(String(u || ''));
 const isEmptyCv = (u) => !u || String(u).trim() === '' || String(u).trim() === '-';
 const pubUrl = (storagePath) =>
-  BASE + '/storage/v1/object/public/' + BUCKET + '/' + storagePath.split('/').map(encodeURIComponent).join('/');
+  BASE +
+  '/storage/v1/object/public/' +
+  BUCKET +
+  '/' +
+  storagePath.split('/').map(encodeURIComponent).join('/');
 
 async function getTable(name, select, order) {
   const out = [];
@@ -44,7 +48,8 @@ async function getTable(name, select, order) {
       `${BASE}/rest/v1/${name}?select=${select}&order=${order}&limit=${LIMIT}&offset=${offset}`,
       { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } },
     );
-    if (!res.ok) throw new Error(name + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
+    if (!res.ok)
+      throw new Error(name + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
     const batch = await res.json();
     if (!Array.isArray(batch) || batch.length === 0) break;
     out.push(...batch);
@@ -78,7 +83,9 @@ async function listPrefix(prefix) {
 // (TTD/foto/KK/KTP/ijazah/paspor/SIM).
 const isCvLike = (name) =>
   /CV|RIREKI|RIRIKISHO|履歴|RESUME|DAFTAR_RIWAYAT/i.test(name) &&
-  !/TTD|SIGN|TANDA|PAS_PHOTO|PHOTOFILE|FOTO|KK_|KTP_|IJAZAH|AKTE|PASSPORT|SIM_|PAS_FOTO/i.test(name);
+  !/TTD|SIGN|TANDA|PAS_PHOTO|PHOTOFILE|FOTO|KK_|KTP_|IJAZAH|AKTE|PASSPORT|SIM_|PAS_FOTO/i.test(
+    name,
+  );
 
 // Usia relatif file: preferensi updated_at storage, fallback timestamp nama.
 function fileAge(order) {
@@ -94,7 +101,11 @@ function isNewer(a, b) {
 }
 
 console.log('Membaca kandidat & master ...');
-const candidates = await getTable('database_candidate', 'id,id_kandidat,nama_lengkap,no_wa,file_cv', 'id');
+const candidates = await getTable(
+  'database_candidate',
+  'id,id_kandidat,nama_lengkap,no_wa,file_cv',
+  'id',
+);
 const masters = await getTable('master_database_candidate', 'id,id_kandidat,no_wa,file_cv', 'id');
 const masterByWa = new Map();
 for (const m of masters) {
@@ -103,19 +114,35 @@ for (const m of masters) {
 }
 const masterByIdKand = new Map();
 for (const m of masters) {
-  if (m.id_kandidat && !masterByIdKand.has(String(m.id_kandidat))) masterByIdKand.set(String(m.id_kandidat), m);
+  if (m.id_kandidat && !masterByIdKand.has(String(m.id_kandidat)))
+    masterByIdKand.set(String(m.id_kandidat), m);
 }
 
 const targetCands = candidates.filter((c) => isDrive(c.file_cv) || isEmptyCv(c.file_cv));
 const nDrive = targetCands.filter((c) => isDrive(c.file_cv)).length;
 const nKosong = targetCands.filter((c) => isEmptyCv(c.file_cv)).length;
-console.log('Kandidat file_cv link Drive:', nDrive, '| file_cv kosong:', nKosong, '| total target:', targetCands.length, 'dari', candidates.length, '\n');
+console.log(
+  'Kandidat file_cv link Drive:',
+  nDrive,
+  '| file_cv kosong:',
+  nKosong,
+  '| total target:',
+  targetCands.length,
+  'dari',
+  candidates.length,
+  '\n',
+);
 
 const results = [];
 for (const c of targetCands) {
   const nama = String(c.nama_lengkap || '').trim();
   const baseName = nama.toUpperCase().replace(/[^A-Z0-9_-]/g, '_');
-  const folders = [...new Set(['master/' + baseName + '/', 'master/' + nama.toUpperCase().replace(/\s+/g, '_') + '/'])];
+  const folders = [
+    ...new Set([
+      'master/' + baseName + '/',
+      'master/' + nama.toUpperCase().replace(/\s+/g, '_') + '/',
+    ]),
+  ];
   let names = [];
   for (const f of folders) {
     const items = await listPrefix(f);
@@ -156,7 +183,9 @@ for (const r of results) {
     console.log(`      lama: ${r.lama ? r.lama.slice(0, 70) : '(kosong)'}`);
     console.log(`      baru: ${r.baru.slice(0, 100)}`);
   } else {
-    console.log(`  [${r.id}] ${r.nama} (${r.wa}) → TANPA CV (folder: ${r.folderFiles.slice(0, 3).join(', ') || 'kosong'})`);
+    console.log(
+      `  [${r.id}] ${r.nama} (${r.wa}) → TANPA CV (folder: ${r.folderFiles.slice(0, 3).join(', ') || 'kosong'})`,
+    );
   }
 }
 
@@ -166,11 +195,18 @@ if (APPLY) {
     process.exit(0);
   }
   const stamp = new Date().toISOString();
-  const backupPath = path.resolve(fileURLToPath(import.meta.url), '../../.freebuff/filecv-migrate-backup-' + stamp.replace(/[:.]/g, '-') + '.json');
+  const backupPath = path.resolve(
+    fileURLToPath(import.meta.url),
+    '../../.freebuff/filecv-migrate-backup-' + stamp.replace(/[:.]/g, '-') + '.json',
+  );
   fs.mkdirSync(path.dirname(backupPath), { recursive: true });
   fs.writeFileSync(
     backupPath,
-    JSON.stringify(withFix.map((r) => ({ id: r.id, nama: r.nama, wa: r.wa, lama: r.lama, baru: r.baru })), null, 2),
+    JSON.stringify(
+      withFix.map((r) => ({ id: r.id, nama: r.nama, wa: r.wa, lama: r.lama, baru: r.baru })),
+      null,
+      2,
+    ),
   );
   console.log('\nBackup ->', backupPath);
 
@@ -178,11 +214,18 @@ if (APPLY) {
   for (const r of withFix) {
     const res = await fetch(`${BASE}/rest/v1/database_candidate?id=eq.${r.id}`, {
       method: 'PATCH',
-      headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: {
+        apikey: KEY,
+        Authorization: `Bearer ${KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
       body: JSON.stringify({ file_cv: r.baru }),
     });
     if (!res.ok) {
-      console.error('  GAGAL id=' + r.id + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
+      console.error(
+        '  GAGAL id=' + r.id + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150),
+      );
       continue;
     }
     n++;

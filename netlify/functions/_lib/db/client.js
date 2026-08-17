@@ -8,7 +8,6 @@ const { env } = require('../env');
 // (dipakai frontend js/04_auth.js juga). Jangan definisikan ulang di sini.
 const { normalizeWa } = require('../../../../shared/wa-rules');
 
-
 function supabaseUrl() {
   return env('SUPABASE_URL');
 }
@@ -20,7 +19,6 @@ function supabaseKey() {
 function hasBackend() {
   return !!(supabaseUrl() && supabaseKey());
 }
-
 
 async function supabaseJson(method, pathname, opts = {}) {
   const url = supabaseUrl();
@@ -45,7 +43,6 @@ async function supabaseJson(method, pathname, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-
 // Coba daftar nama tabel sampai satu yang benar-benar ada & mengembalikan baris.
 async function findTable(candidates, limit = 300) {
   for (const t of candidates) {
@@ -61,7 +58,6 @@ async function findTable(candidates, limit = 300) {
   return { table: null, rows: [] };
 }
 
-
 function pick(row, keys) {
   for (const k of keys) {
     if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
@@ -69,13 +65,11 @@ function pick(row, keys) {
   return null;
 }
 
-
 function toText(v) {
   if (v == null) return '';
   if (typeof v === 'object') return JSON.stringify(v);
   return String(v);
 }
-
 
 // Normalisasi nomor WA Indonesia: "0821..." -> "62821...", "+62821..." -> "62821...".
 // Status asli di DB campur: "✅ OPEN", "❌ CLOSE", "SELESAI / CLOSE",
@@ -91,7 +85,6 @@ function normalizeStatus(v) {
   return 'OPEN';
 }
 
-
 // SATU-SATUNYA normalisasi gender backend — disamakan dengan kanonikal situs
 // lama (normalizeGenderValue di js/03_candidate.js): LAKI-LAKI / PEREMPUAN.
 // CV AI dan render L/P mengecek format ini (includes('PEREMPUAN') dsb), jadi
@@ -101,11 +94,20 @@ function normalizeGender(v) {
   if (!s || s === '-') return '';
   if (s === 'L' || s === 'LK' || s === 'M' || s === 'PRIA' || s === 'MALE' || s.includes('LAKI'))
     return 'LAKI-LAKI';
-  if (s === 'P' || s === 'PR' || s === 'F' || s === 'W' || s === 'FEMALE' || s === 'WANITA' || s === 'CEWEK' || s.includes('PEREMPUAN') || s.includes('女'))
+  if (
+    s === 'P' ||
+    s === 'PR' ||
+    s === 'F' ||
+    s === 'W' ||
+    s === 'FEMALE' ||
+    s === 'WANITA' ||
+    s === 'CEWEK' ||
+    s.includes('PEREMPUAN') ||
+    s.includes('女')
+  )
     return 'PEREMPUAN';
   return '';
 }
-
 
 // Baca skema OpenAPI (daftar tabel + kolom) — dipakai untuk penemuan tabel
 // adaptif saat nama tabel tidak cocok dengan tebakan.
@@ -118,14 +120,12 @@ async function getSchema() {
   }
 }
 
-
 function tablesFromSchema(spec) {
   if (!spec || !spec.paths) return [];
   return Object.keys(spec.paths)
     .map((p) => p.replace(/^\//, ''))
     .filter(Boolean);
 }
-
 
 function columnsFromSchema(spec, table) {
   if (!spec || !spec.components || !spec.components.schemas) return [];

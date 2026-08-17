@@ -26,15 +26,11 @@ export function buildEduRows(eduList, v) {
     let sek_id = window.isGood(pE.sekolah)
       ? pE.sekolah
       : v('PENDIDIKAN' + i + 'NAMASEKOLAH', 'PENDIDIKAN' + i + 'SEKOLAHID');
-    let sek_jp = window.isGood(pE.sekolah_jp)
-      ? pE.sekolah_jp
-      : v('PENDIDIKAN' + i + 'SEKOLAHJP');
+    let sek_jp = window.isGood(pE.sekolah_jp) ? pE.sekolah_jp : v('PENDIDIKAN' + i + 'SEKOLAHJP');
     let jur_id = window.isGood(pE.jurusan_id)
       ? pE.jurusan_id
       : v('PENDIDIKAN' + i + 'JURUSAN', 'PENDIDIKAN' + i + 'JURUSANID');
-    let jur_jp = window.isGood(pE.jurusan_jp)
-      ? pE.jurusan_jp
-      : v('PENDIDIKAN' + i + 'JURUSANJP');
+    let jur_jp = window.isGood(pE.jurusan_jp) ? pE.jurusan_jp : v('PENDIDIKAN' + i + 'JURUSANJP');
 
     if (msk === '-') msk = '';
     if (lls === '-') lls = '';
@@ -91,9 +87,7 @@ export function buildJobRows(jobList, v) {
           'PEKERJAAN' + i + 'POSISI',
           'PEKERJAAN' + i + 'JABATANID',
         );
-    let ker_jp = window.isGood(pJ.jabatan_jp)
-      ? pJ.jabatan_jp
-      : v('PEKERJAAN' + i + 'JABATANJP');
+    let ker_jp = window.isGood(pJ.jabatan_jp) ? pJ.jabatan_jp : v('PEKERJAAN' + i + 'JABATANJP');
     let gaji = window.isGood(pJ.gaji) ? pJ.gaji : v('PEKERJAAN' + i + 'GAJI');
 
     if (msk === '-') msk = '';
@@ -140,17 +134,13 @@ export function buildFamRows(famList, v) {
     let hub = window.isGood(kF.hubungan)
       ? kF.hubungan
       : v('KELUARGA' + i + 'HUBUNGANID', 'KELUARGA' + i + 'HUBUNGAN');
-    let hub_jp = window.isGood(kF.hubungan_jp)
-      ? kF.hubungan_jp
-      : v('KELUARGA' + i + 'HUBUNGANJP');
+    let hub_jp = window.isGood(kF.hubungan_jp) ? kF.hubungan_jp : v('KELUARGA' + i + 'HUBUNGANJP');
     let nm = window.isGood(kF.nama) ? kF.nama : v('KELUARGA' + i + 'NAMA');
     let u = window.isGood(kF.umur) ? kF.umur : v('KELUARGA' + i + 'USIA', 'KELUARGA' + i + 'UMUR');
     let p = window.isGood(kF.pekerjaan)
       ? kF.pekerjaan
       : v('KELUARGA' + i + 'PEKERJAANID', 'KELUARGA' + i + 'PEKERJAAN');
-    let p_jp = window.isGood(kF.pekerjaan_jp)
-      ? kF.pekerjaan_jp
-      : v('KELUARGA' + i + 'PEKERJAANJP');
+    let p_jp = window.isGood(kF.pekerjaan_jp) ? kF.pekerjaan_jp : v('KELUARGA' + i + 'PEKERJAANJP');
     let g = window.isGood(kF.gaji) ? kF.gaji : v('KELUARGA' + i + 'GAJI');
 
     if (hub === '-') hub = '';
@@ -498,11 +488,9 @@ export function buildCvKertasA4(p) {
 // BRIDGE ESM → classic (bundel): dipanggil 10_cv_rirekisho.js (renderCVAjaib)
 // via window.* — alias data property (builder murni, tidak pernah di-reassign).
 registerSeamAliases({
-    buildEduRows,
-    buildJobRows,
-    buildFamRows,
-    buildCvIdentitas,
-    buildCvKertasA4,
+  buildEduRows,
+  buildJobRows,
+  buildFamRows,
+  buildCvIdentitas,
+  buildCvKertasA4,
 });
-
-

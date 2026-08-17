@@ -278,7 +278,7 @@ export async function prosesLoginPersonal() {
       setTimeout(window.applyInterMilanVibe, 50);
     }
   } else if (res) {
-    window.    showToast(res.error, 'error');
+    window.showToast(res.error, 'error');
   }
 }
 
@@ -295,20 +295,19 @@ export async function prosesLoginPersonal() {
 // 628… 12-13 digit. Alias ini SEMPAT dihapus saat pembersihan Fase 3.5 L6 dan
 // mematahkan normalisasi WA fitur itu (fallback regex ketat menolak 0xx/8xx).
 registerSeamAliases({
-    bukaModalKandidat,
-    normalizeWaInput,
-    isValidWaInput,
-    toastWaFormat,
-    prosesDaftarKandidat,
-    bukaModalGantiPass,
-    tutupModalGantiPass,
-    prosesGantiPasswordKandidat,
-    prosesLoginKandidat,
-    showLoginAdminMaster,
-    prosesLoginMaster,
-    showLoginPersonal,
-    prosesLoginPersonal,
+  bukaModalKandidat,
+  normalizeWaInput,
+  isValidWaInput,
+  toastWaFormat,
+  prosesDaftarKandidat,
+  bukaModalGantiPass,
+  tutupModalGantiPass,
+  prosesGantiPasswordKandidat,
+  prosesLoginKandidat,
+  showLoginAdminMaster,
+  prosesLoginMaster,
+  showLoginPersonal,
+  prosesLoginPersonal,
 });
 
-// ==========================================
-
+// ==========================================

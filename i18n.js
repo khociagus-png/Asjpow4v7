@@ -21,4 +21,4 @@ window.tr = tr;
 window.renderLanguageLight = renderLanguageLight;
 window.toggleFormLanguage = toggleFormLanguage;
 
-window.LANG = LANG;
+window.LANG = LANG;

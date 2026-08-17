@@ -2,8 +2,15 @@
 // attach lamaran. MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 'use strict';
 
-const { supabaseJson, pick, toText, normalizeWa, findTable, supabaseUrl, supabaseKey } = require('./client');
-
+const {
+  supabaseJson,
+  pick,
+  toText,
+  normalizeWa,
+  findTable,
+  supabaseUrl,
+  supabaseKey,
+} = require('./client');
 
 // Kolom asli tabel database_candidate:
 //   id, id_kandidat, nama_lengkap, nik, gender, usia, tb, bb, pendidikan,
@@ -69,7 +76,6 @@ function mapCandidate(row) {
   };
 }
 
-
 // Nama tabel kandidat yang umum (urutan prioritas) — dipakai findCandidates &
 // findAllCandidatesLight supaya jalur cepat & fallback mencari tabel yang sama.
 const CAND_TABLES = [
@@ -84,11 +90,9 @@ const CAND_TABLES = [
   'master_kandidat',
 ];
 
-
 async function findCandidates() {
   return findTable(CAND_TABLES);
 }
-
 
 // Fetch SEMUA baris satu tabel via header Range (loop 1000/halaman) — tanpa
 // batas `limit` query (PostgREST default maks 1000). Lempar error bila != 200.
@@ -118,12 +122,10 @@ async function fetchPagedAll(table, select) {
   return all;
 }
 
-
 // Kolom RINGAN untuk daftar admin — cukup untuk dedupe by WA + filter kata
 // kunci + urut updated_at (TIDAK membawa kolom berat seperti catatan/nik/email).
 const CAND_LIGHT_COLS =
   'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar';
-
 
 // Semua baris kandidat bentuk RINGAN (proyeksi) — paginasi penuh TANPA batas
 // 300 baris (admin list sebelumnya diam-diam terpotong saat >300 kandidat).
@@ -140,11 +142,12 @@ async function findAllCandidatesLight() {
   return undefined;
 }
 
-
 // Baris PENUH untuk daftar id (halaman daftar admin) — pengganti scan 300
 // baris `select *`: hanya id di halaman yang ditarik. undefined → gagal.
 async function findCandidatesByIds(ids) {
-  const list = [...new Set((Array.isArray(ids) ? ids : []).map((x) => String(x).trim()).filter(Boolean))];
+  const list = [
+    ...new Set((Array.isArray(ids) ? ids : []).map((x) => String(x).trim()).filter(Boolean)),
+  ];
   if (!list.length) return [];
   try {
     const rows = await supabaseJson('GET', 'database_candidate', {
@@ -155,7 +158,6 @@ async function findCandidatesByIds(ids) {
     return undefined;
   }
 }
-
 
 // Kolom WA yang umum di tabel kandidat (database_candidate / master) — dipakai
 // query targeted (findCandidateByWaFiltered) & filter WA-set di attachBerkasBio.
@@ -190,7 +192,6 @@ async function findCandidateByWaFiltered(wa) {
   return anySucceed ? null : undefined;
 }
 
-
 // Max nomor id kandidat (ASJ#####) dari kolom id_kandidat — server-side.
 // FIX 2026-08-16: id_kandidat juga dialokasikan ke master_database_candidate
 // (handleSubmitMasterForm → nextCandidateId). Kalau master sudah memakai id
@@ -221,7 +222,6 @@ async function maxCandidateIdNumber() {
   }
 }
 
-
 // Cari baris kandidat per id_kandidat / id — dipakai lookup by ID (admin).
 async function findCandidateByIdFiltered(id) {
   const want = String(id || '').trim();
@@ -241,7 +241,6 @@ async function findCandidateByIdFiltered(id) {
   return anyOk ? null : undefined;
 }
 
-
 // Kandidat yang terkait ke satu kode job (id_loker_pilihan bisa berisi banyak
 // kode dipisah koma) — filter server-side; caller TETAP memverifikasi token
 // eksak di JS supaya ilike tidak salah tangkap (mis. TG9ASJ vs TG90ASJ).
@@ -257,7 +256,6 @@ async function findCandidatesByJobFiltered(code) {
     return undefined;
   }
 }
-
 
 // Lampirkan daftar lamaran (database_asj_form) ke tiap kandidat — dipakai
 // dashboard kandidat & modal CV admin untuk menampilkan SEMUA job yang

@@ -221,8 +221,14 @@ export function applyTheme(theme) {
   setSakuraParticles(theme === 'SAKURA');
   // Banner & Footer: pakai aset backend kalau tersedia, fallback ke default
   // supaya selalu tampil & sinkron dengan theme walau backend gagal/lambat.
-  window.setBg('asj-header', (ASSETS.BANNER && ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
-  window.setBg('asj-footer', (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
+  window.setBg(
+    'asj-header',
+    (ASSETS.BANNER && ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme],
+  );
+  window.setBg(
+    'asj-footer',
+    (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme],
+  );
   // Simpan pilihan theme pengunjung.
   try {
     localStorage.setItem('asj_theme', theme);
@@ -232,19 +238,17 @@ export function applyTheme(theme) {
   if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (index/admin toggleTheme, engine/init.js
 // window.applyTheme & window.applyInterMilanVibe, 04_auth.js
 // window.applyInterMilanVibe). THEMES = data eksplisit (objek konfigurasi,
 // tidak pernah di-reassign) → allowNonFunction.
 registerSeamAliases(
-    {
-        toggleTheme,
-        applyInterMilanVibe,
-        applyTheme,
-        THEMES,
-    },
-    { allowNonFunction: true, source: 'js/init/theme.js' }
+  {
+    toggleTheme,
+    applyInterMilanVibe,
+    applyTheme,
+    THEMES,
+  },
+  { allowNonFunction: true, source: 'js/init/theme.js' },
 );
-

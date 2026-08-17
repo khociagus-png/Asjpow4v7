@@ -46,7 +46,12 @@ function makeHandler() {
     };
     // Respons RAW dari handler (action 'ping': { statusCode: 200, body: 'pong' })
     // diteruskan apa adanya — tanpa JSON.stringify, tanpa bungkus tambahan.
-    if (out && typeof out === 'object' && typeof out.statusCode === 'number' && out.body !== undefined) {
+    if (
+      out &&
+      typeof out === 'object' &&
+      typeof out.statusCode === 'number' &&
+      out.body !== undefined
+    ) {
       return {
         statusCode: out.statusCode,
         headers: baseHeaders,

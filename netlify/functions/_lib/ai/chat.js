@@ -5,7 +5,11 @@
 'use strict';
 
 const { normalizeWa, pick, supabaseJson } = require('../db/client');
-const { findCandidateByIdFiltered, findCandidateByWaFiltered, findCandidates } = require('../db/candidates');
+const {
+  findCandidateByIdFiltered,
+  findCandidateByWaFiltered,
+  findCandidates,
+} = require('../db/candidates');
 const { requireRole } = require('../actions-auth');
 const { buildRingkasData, findMasterByWa, APPLY_WA_COLS } = require('./cv');
 const { geminiGenerate, parseJsonLoose } = require('./providers');
@@ -49,7 +53,9 @@ async function handleProcessAIChat(payload, sessionToken) {
     if (!isAdmin) {
       const currentData = p.currentData && typeof p.currentData === 'object' ? p.currentData : {};
       const identitas =
-        currentData.identitas && typeof currentData.identitas === 'object' ? currentData.identitas : {};
+        currentData.identitas && typeof currentData.identitas === 'object'
+          ? currentData.identitas
+          : {};
       const wa = normalizeWa(String(identitas.hp || ''));
       if (wa) {
         let lookupError = false;
@@ -291,8 +297,8 @@ async function resolveProfilKandidat(wa) {
       if (c === undefined) {
         const found = await findCandidates();
         c =
-          (found.rows || []).find((r) =>
-            normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
+          (found.rows || []).find(
+            (r) => normalizeWa(String(pick(r, APPLY_WA_COLS) || '')) === want,
           ) || null;
       }
       if (c) {
@@ -329,7 +335,10 @@ function buildInterviewSystem(profil, kota) {
     '  • Pertanyaan balik untuk perusahaan.',
     'Topik khas bidang ' + b.label + ' (tanyakan dengan santai):',
   ];
-  lines.push.apply(lines, b.extra.map((q, i) => '  • ' + (i + 1) + ') ' + q));
+  lines.push.apply(
+    lines,
+    b.extra.map((q, i) => '  • ' + (i + 1) + ') ' + q),
+  );
   lines.push(
     'TUTUP wawancara dengan sopan (doumo arigatou gozaimasu + semangat) ketika semua topik inti sudah terjawab ATAU kandidat menutup pembicaraan.',
     'Di pesan PENUTUP, setelah teks terima kasih, tambahkan baris persis "===HASIL===" lalu JSON TUNGGAL tanpa teks lain:',
@@ -371,14 +380,17 @@ async function handleGenerateWawancaraModel(payload, sessionToken) {
     if (cand === undefined) {
       const found = await findCandidates();
       cand =
-        (found.rows || []).find((r) =>
-          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        (found.rows || []).find(
+          (r) => String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
     if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
-    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+    return {
+      success: false,
+      error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.',
+    };
   }
   const profil = await resolveProfilKandidat(wa);
   // Bidang bisa di-override admin (berguna untuk kandidat yang belum terdaftar
@@ -405,10 +417,19 @@ async function handleGenerateWawancaraModel(payload, sessionToken) {
     '\nKembalikan HANYA teks dokumen lengkap siap salin, tanpa penjelasan tambahan.';
   try {
     const r = await geminiGenerate(system, []);
-    return { success: true, model: r.reply, bidang: b.label, nama: (profil && profil.nama) || '', wa };
+    return {
+      success: true,
+      model: r.reply,
+      bidang: b.label,
+      nama: (profil && profil.nama) || '',
+      wa,
+    };
   } catch (e) {
     console.error('[AI] generateWawancaraModel error:', e && e.message ? e.message : e);
-    return { success: false, error: 'Gagal membuat model wawancara: ' + (e && e.message ? e.message : 'AI sibuk') };
+    return {
+      success: false,
+      error: 'Gagal membuat model wawancara: ' + (e && e.message ? e.message : 'AI sibuk'),
+    };
   }
 }
 
@@ -449,7 +470,10 @@ async function handleSelesaikanWawancara(payload, sessionToken) {
     return { success: true, hasil };
   } catch (e) {
     console.error('[AI] selesaikanWawancara error:', e && e.message ? e.message : e);
-    return { success: false, error: 'Gagal merangkum hasil: ' + (e && e.message ? e.message : 'AI sibuk') };
+    return {
+      success: false,
+      error: 'Gagal merangkum hasil: ' + (e && e.message ? e.message : 'AI sibuk'),
+    };
   }
 }
 
@@ -477,8 +501,7 @@ async function handleSimpanHasilWawancara(payload, sessionToken) {
     // CHECK constraint — pakai nilai yang diizinkan: AI_MASTER/MENUNGGU).
     const existing = (Array.isArray(rows) ? rows : []).find(
       (r) =>
-        normalizeWa(String(r.wa || '')) === wa &&
-        String(r.submitted_via || '') === 'interview',
+        normalizeWa(String(r.wa || '')) === wa && String(r.submitted_via || '') === 'interview',
     );
     const bio = (hasil.biodata || {}).nama || '';
     const body = {
@@ -524,14 +547,17 @@ async function handleGetHasilWawancara(payload, sessionToken) {
     if (cand === undefined) {
       const found = await findCandidates();
       cand =
-        (found.rows || []).find((r) =>
-          String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
+        (found.rows || []).find(
+          (r) => String(pick(r, ['id_kandidat', 'id']) || '') === String(d.candidateId),
         ) || null;
     }
     if (cand) wa = normalizeWa(String(cand.no_wa || ''));
   }
   if (!wa) {
-    return { success: false, error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.' };
+    return {
+      success: false,
+      error: 'Nomor WA kandidat tidak ditemukan — pilih kandidat dulu atau isi nomor WA.',
+    };
   }
   try {
     const rows = await supabaseJson('GET', 'ai_form_submissions', {
@@ -539,8 +565,7 @@ async function handleGetHasilWawancara(payload, sessionToken) {
     });
     const row = (Array.isArray(rows) ? rows : []).find(
       (r) =>
-        normalizeWa(String(r.wa || '')) === wa &&
-        String(r.submitted_via || '') === 'interview',
+        normalizeWa(String(r.wa || '')) === wa && String(r.submitted_via || '') === 'interview',
     );
     if (!row) return { success: true, hasil: null };
     let hasil = {};

@@ -73,9 +73,7 @@ for (const r of cands.rows) {
 }
 
 for (const x of report) {
-  console.log(
-    `  ${x.id} | ${x.nama} | WA ${x.wa} | ${x.dari} -> ${x.ke}`,
-  );
+  console.log(`  ${x.id} | ${x.nama} | WA ${x.wa} | ${x.dari} -> ${x.ke}`);
 }
 console.log(
   `\n${APPLY ? '✅ DIAPPLY' : '⏸ DRY-RUN (pakai --apply untuk eksekusi)'} — ${changed} kandidat diperbarui, ${skipped} tidak disentuh (sudah konsisten / tanpa lamaran LULUS).`,

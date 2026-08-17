@@ -15,7 +15,12 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
 const require = createRequire(import.meta.url);
-const { findTable, supabaseKey, supabaseUrl, toText } = require('../netlify/functions/_lib/db/client');
+const {
+  findTable,
+  supabaseKey,
+  supabaseUrl,
+  toText,
+} = require('../netlify/functions/_lib/db/client');
 const { findJobs } = require('../netlify/functions/_lib/db/jobs');
 const { findForms, parseDocs } = require('../netlify/functions/_lib/db/forms');
 
@@ -42,14 +47,17 @@ async function listPrefix(prefix) {
         Authorization: 'Bearer ' + KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prefix, limit: LIMIT, offset, sortBy: { column: 'name', order: 'asc' } }),
+      body: JSON.stringify({
+        prefix,
+        limit: LIMIT,
+        offset,
+        sortBy: { column: 'name', order: 'asc' },
+      }),
     });
     if (!res.ok) throw new Error('storage list HTTP ' + res.status);
     const j = await res.json();
     const batch = Array.isArray(j)
-      ? j
-          .map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : ''))
-          .filter(Boolean)
+      ? j.map((o) => (o && o.name ? String(o.name).replace(/\/$/, '') : '')).filter(Boolean)
       : [];
     if (batch.length === 0) break;
     out.push(...batch);
@@ -149,7 +157,9 @@ async function storageDelete(rels) {
 }
 
 // ---- Main -------------------------------------------------------------------
-console.log(`Scan file yatim di Storage ${PREFIXES.join(' & ')} (${APPLY ? 'APPLY' : 'read-only'})...\n`);
+console.log(
+  `Scan file yatim di Storage ${PREFIXES.join(' & ')} (${APPLY ? 'APPLY' : 'read-only'})...\n`,
+);
 const files = [];
 for (const p of PREFIXES) {
   const f = await listAllUnder(p);
@@ -165,7 +175,9 @@ console.log(`\nFile TIDAK direferensikan: ${orphan.length}/${files.length}\n`);
 //   B-folder-yatim — seluruh folder tak ada yang terreferensi
 //   C-lainnya      — tak direferensikan, folder lain ada yang terreferensi
 function stemOf(name) {
-  return String(name).replace(/\.\w+$/, '').replace(/_\d{10,}$/, '');
+  return String(name)
+    .replace(/\.\w+$/, '')
+    .replace(/_\d{10,}$/, '');
 }
 const byFolder = new Map();
 for (const o of files) {
@@ -174,7 +186,9 @@ for (const o of files) {
 }
 const SAFE = [];
 for (const o of orphan) {
-  const folderRefs = [...refs].filter((r) => r.startsWith('jobs/' + o.folder + '/') || r.startsWith('misc/' + o.folder + '/'));
+  const folderRefs = [...refs].filter(
+    (r) => r.startsWith('jobs/' + o.folder + '/') || r.startsWith('misc/' + o.folder + '/'),
+  );
   const folderKnown = folderRefs.length > 0;
   const s = stemOf(o.name);
   const varianLama = folderKnown && folderRefs.some((r) => stemOf(r.split('/').pop()) === s);
@@ -194,14 +208,24 @@ if (!APPLY) {
   process.exit(0);
 }
 
-const backupDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '.freebuff');
+const backupDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '.freebuff',
+);
 fs.mkdirSync(backupDir, { recursive: true });
 const ts = new Date().toISOString().replace(/[:.]/g, '-');
 const backupFile = path.join(backupDir, `storage-delete-backup-${ts}.json`);
 fs.writeFileSync(
   backupFile,
   JSON.stringify(
-    { timestamp: ts, total: SAFE.length, byTag, files: SAFE.map(({ tag, o }) => ({ tag, rel: o.rel })) },
+    {
+      timestamp: ts,
+      total: SAFE.length,
+      byTag,
+      files: SAFE.map(({ tag, o }) => ({ tag, rel: o.rel })),
+    },
     null,
     2,
   ),

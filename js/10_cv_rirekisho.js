@@ -130,7 +130,6 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
   // punya 3-4 anggota → preview CV tampak "dikit". Kolom flat legacy tidak
   // dipakai lagi karena backend sudah menormalkan ke array.
   const keyOf = {
-
     pendidikan: (e) =>
       String((e.tingkat || '') + (e.sekolah || e.sekolah_id || e.nama_sekolah || ''))
         .toLowerCase()
@@ -222,11 +221,10 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
 // render/candidate.js (bukaPreviewCV_Admin) & onclick "cetakCVRirekisho" di
 // btnPrintHtml (dibuat renderCVAjaib) butuh global — alias data property.
 registerSeamAliases({
-    bukaPreviewCV_Admin,
-    bukaPreviewCV,
-    cetakCVRirekisho,
+  bukaPreviewCV_Admin,
+  bukaPreviewCV,
+  cetakCVRirekisho,
 });
-
 
 // Cetak / Simpan PDF Rirekisho: hanya tersedia untuk Admin (tombolnya tidak
 // dirender untuk kandidat). "Simpan PDF" membuka dialog print yang sama,
@@ -237,5 +235,4 @@ export function cetakCVRirekisho() {
     return;
   }
   window.print();
-}
-
+}

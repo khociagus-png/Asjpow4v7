@@ -69,7 +69,18 @@ describe('normalizeGender — kanonikal LAKI-LAKI/PEREMPUAN (konvensi situs lama
   });
 
   it('berbagai varian perempuan (termasuk P — konvensi L/P)', () => {
-    for (const v of ['PEREMPUAN', 'perempuan', 'P', 'PR', 'W', 'F', 'FEMALE', 'WANITA', 'CEWEK', '女']) {
+    for (const v of [
+      'PEREMPUAN',
+      'perempuan',
+      'P',
+      'PR',
+      'W',
+      'F',
+      'FEMALE',
+      'WANITA',
+      'CEWEK',
+      '女',
+    ]) {
       expect(normalizeGender(v)).toBe('PEREMPUAN');
     }
   });

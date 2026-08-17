@@ -4,7 +4,13 @@
 'use strict';
 
 const { hasBackend, normalizeWa, pick, supabaseJson, toText } = require('./db/client');
-const { countCandidatesForJob, findJobByCodeFiltered, findJobs, mapJob, maxJobCodeNumber } = require('./db/jobs');
+const {
+  countCandidatesForJob,
+  findJobByCodeFiltered,
+  findJobs,
+  mapJob,
+  maxJobCodeNumber,
+} = require('./db/jobs');
 const { findForms, findFormsByWa, mapForm } = require('./db/forms');
 const { findCandidates, mapCandidate } = require('./db/candidates');
 const { attachBerkasBio } = require('./db/berkas');

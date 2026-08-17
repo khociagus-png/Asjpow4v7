@@ -83,12 +83,10 @@ export function tahapanStepIndex(thpRaw) {
   return -1; // MENUNGGU / REVIEW ADMIN dll → belum masuk pipeline
 }
 
-
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (render/admin.js, api/*.js, HTML onclick, dll).
 registerSeamAliases({
-    tahapanPipeline,
-    getTahapanProgress,
-    tahapanStepIndex,
-});
-
+  tahapanPipeline,
+  getTahapanProgress,
+  tahapanStepIndex,
+});

@@ -85,7 +85,8 @@ async function handleApi(req, res) {
     let out;
     try {
       const fwd = req.headers['x-forwarded-for'];
-      const ip = (fwd ? String(fwd).split(',')[0].trim() : null) || req.socket.remoteAddress || null;
+      const ip =
+        (fwd ? String(fwd).split(',')[0].trim() : null) || req.socket.remoteAddress || null;
       out = await loadHandlers().handleAction(body.action, body.payload, body.sessionToken, {
         ip,
       });
@@ -94,7 +95,12 @@ async function handleApi(req, res) {
     }
     // Respons RAW dari handler (action 'ping' → { statusCode: 200, body: 'pong' })
     // diteruskan apa adanya, tanpa dibungkus JSON.
-    if (out && typeof out === 'object' && typeof out.statusCode === 'number' && out.body !== undefined) {
+    if (
+      out &&
+      typeof out === 'object' &&
+      typeof out.statusCode === 'number' &&
+      out.body !== undefined
+    ) {
       res.writeHead(out.statusCode, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end(String(out.body));
       return;

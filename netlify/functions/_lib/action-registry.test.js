@@ -12,7 +12,12 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } = require('./action-registry.js');
+const {
+  ACTION_HANDLERS,
+  LOGIN_ACTIONS,
+  AI_ACTIONS,
+  FONNTE_ACTIONS,
+} = require('./action-registry.js');
 
 const ROOT = process.cwd();
 const CALL_RE = /callAPI\(\s*['"]([^'"]+)['"]/g;
@@ -59,7 +64,11 @@ describe('ACTION_HANDLERS — isi registry', () => {
 });
 
 describe('grup rate limit ⊆ registry', () => {
-  for (const [label, set] of [['LOGIN', LOGIN_ACTIONS], ['AI', AI_ACTIONS], ['FONNTE', FONNTE_ACTIONS]]) {
+  for (const [label, set] of [
+    ['LOGIN', LOGIN_ACTIONS],
+    ['AI', AI_ACTIONS],
+    ['FONNTE', FONNTE_ACTIONS],
+  ]) {
     it(`${label}_ACTIONS hanya berisi action terdaftar`, () => {
       for (const a of set) {
         expect(ACTION_HANDLERS[a], `'${a}' harus ada di ACTION_HANDLERS`).toBeDefined();
@@ -76,6 +85,9 @@ describe('kontrak frontend → registry', () => {
 
   it('setiap callAPI frontend ADA di registry backend', () => {
     const missing = front.filter((a) => !(a in ACTION_HANDLERS));
-    expect(missing, 'action dipanggil frontend tapi tidak terdaftar: ' + missing.join(', ')).toEqual([]);
+    expect(
+      missing,
+      'action dipanggil frontend tapi tidak terdaftar: ' + missing.join(', '),
+    ).toEqual([]);
   });
 });

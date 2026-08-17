@@ -18,14 +18,10 @@ async function handleShareData(jobCode) {
     let jobRow = await findJobByCodeFiltered(code);
     if (jobRow === undefined) {
       const found = await findJobs();
-      jobRow =
-        found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) ||
-        null;
+      jobRow = found.rows.find((r) => String(pick(r, ['code_job', 'code']) || '') === code) || null;
     }
     if (!jobRow) return { error: 'Kode job tidak ditemukan: ' + code };
-    const name = toText(
-      pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']),
-    );
+    const name = toText(pick(jobRow, ['pekerjaan', 'nama_pekerjaan', 'judul', 'title']));
     // Kandidat yang ter-approve untuk job ini (id_loker_pilihan berisi kode).
     // Jalur cepat: filter server-side via ilike, lalu verifikasi token eksak di
     // JS (kode bisa banyak dipisah koma) supaya tidak salah tangkap.

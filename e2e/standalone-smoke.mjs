@@ -55,7 +55,7 @@ try {
   let errs = await loadAndCollectErrors(
     `/ai_form.html?flow=master&wa=${WA}&nama=${encodeURIComponent(NAMA)}&job=TG9ASJ`,
   );
-  const aiCtx = (await safeEval(() => (window.AI_FORM_CONTEXT || {}), 'ai ctx')) || {};
+  const aiCtx = (await safeEval(() => window.AI_FORM_CONTEXT || {}, 'ai ctx')) || {};
   ok(aiCtx.wa === WA && aiCtx.nama === NAMA, 'ai_form: AI_FORM_CONTEXT dari URL (wa+nama+job)');
   const aiChat = await safeEval(() => {
     const el = document.getElementById('chatBox');
@@ -81,7 +81,8 @@ try {
 
   // ---- master-full.html ----
   errs = await loadAndCollectErrors(`/master-full.html?wa=${WA}&nama=${encodeURIComponent(NAMA)}`);
-  const mfNama = (await safeEval(() => document.getElementById('nama')?.value || '', 'mf nama')) || '';
+  const mfNama =
+    (await safeEval(() => document.getElementById('nama')?.value || '', 'mf nama')) || '';
   ok(mfNama === NAMA, 'master-full: nama terisi dari URL', mfNama);
   const mfAliases =
     (await safeEval(

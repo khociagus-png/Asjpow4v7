@@ -33,9 +33,7 @@ async function storageRequest(method, pathname, opts = {}) {
 }
 
 function publicUrl(path) {
-  return (
-    supabaseUrl().replace(/\/$/, '') + '/storage/v1/object/public/' + bucket() + '/' + path
-  );
+  return supabaseUrl().replace(/\/$/, '') + '/storage/v1/object/public/' + bucket() + '/' + path;
 }
 
 // Terima base64 (boleh dengan prefix data:*) → kembalikan Buffer.

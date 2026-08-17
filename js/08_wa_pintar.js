@@ -1,4 +1,10 @@
-import { ALL_CANDIDATES, ALL_RIWAYAT_KANDIDAT, ALL_WA_TEMPLATES, CURRENT_WA_KANDIDAT, currentAdminName } from './init/state.js';
+import {
+  ALL_CANDIDATES,
+  ALL_RIWAYAT_KANDIDAT,
+  ALL_WA_TEMPLATES,
+  CURRENT_WA_KANDIDAT,
+  currentAdminName,
+} from './init/state.js';
 import { ensureAllCandidates } from './api/candidates.js';
 import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
@@ -63,7 +69,10 @@ export async function submitWaTemplate(e) {
       window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_template') + '';
     btn.disabled = false;
@@ -99,7 +108,10 @@ export async function prosesHapusWa(id) {
       window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    window.showToast(
+      window.tr('alert.network') + (err && err.message ? err.message : err),
+      'error',
+    );
   } finally {
     if (loader) loader.style.display = 'none';
   }
@@ -264,14 +276,18 @@ export function renderRiwayatKandidat() {
           cls +
           '">' +
           window.esc(l.code) +
-          (l.st === 'LULUS' || l.st === 'AKTIF' || l.st === 'LOLOS' ? ' <i class="fas fa-check-circle"></i>' : '') +
+          (l.st === 'LULUS' || l.st === 'AKTIF' || l.st === 'LOLOS'
+            ? ' <i class="fas fa-check-circle"></i>'
+            : '') +
           '</button>';
       });
       html += '</div>';
     }
 
     var listShown = _riwayatLokerAktif
-      ? sorted.filter((r) => String(r.jobCode || r.kode || r.code || '').trim() === _riwayatLokerAktif)
+      ? sorted.filter(
+          (r) => String(r.jobCode || r.kode || r.code || '').trim() === _riwayatLokerAktif,
+        )
       : sorted;
     listShown.forEach((r) => {
       let st = String(r.status || '').toUpperCase();
@@ -456,20 +472,19 @@ export function tutupPamflet() {
 // string lintas file & onclick string internal (string dieval global).
 // `_riwayatLokerAktif` sengaja PRIVAT modul (tak ada pemakai luar).
 registerSeamAliases({
-    submitWaTemplate,
-    editWaTemplate,
-    batalEditWa,
-    prosesHapusWa,
-    injectModalWaPintar,
-    bukaModalWaPintar,
-    terapkanTemplateWa,
-    kirimWaPintar,
-    pilihLokerRiwayat,
-    bukaFotoPreview,
-    tutupFotoPreview,
-    bukaPamflet,
-    tutupPamflet,
+  submitWaTemplate,
+  editWaTemplate,
+  batalEditWa,
+  prosesHapusWa,
+  injectModalWaPintar,
+  bukaModalWaPintar,
+  terapkanTemplateWa,
+  kirimWaPintar,
+  pilihLokerRiwayat,
+  bukaFotoPreview,
+  tutupFotoPreview,
+  bukaPamflet,
+  tutupPamflet,
 });
 
-// ==========================================
-
+// ==========================================

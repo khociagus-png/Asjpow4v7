@@ -49,15 +49,13 @@ async function fetchGemini(model, key, contents) {
     throw new Error('Gemini HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
   }
   const j = await res.json();
-  return (
-    j &&
+  return j &&
     j.candidates &&
     j.candidates[0] &&
     j.candidates[0].content &&
     j.candidates[0].content.parts
-      ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
-      : ''
-  );
+    ? j.candidates[0].content.parts.map((p) => p.text || '').join('')
+    : '';
 }
 
 async function geminiGenerate(systemPrompt, history) {
@@ -94,10 +92,7 @@ async function geminiParseFile(systemPrompt, file) {
   const contents = [
     {
       role: 'user',
-      parts: [
-        { inlineData: { mimeType: file.mimeType, data: file.data } },
-        { text: systemPrompt },
-      ],
+      parts: [{ inlineData: { mimeType: file.mimeType, data: file.data } }, { text: systemPrompt }],
     },
   ];
   let lastErr = null;
@@ -114,7 +109,10 @@ async function geminiParseFile(systemPrompt, file) {
 
 function parseJsonLoose(text) {
   let t = String(text || '').trim();
-  t = t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  t = t
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
   try {
     return JSON.parse(t);
   } catch (e) {

@@ -71,8 +71,7 @@ export const PortalBridge = {
 
   // Pemanggilan aman: fallback ke alias classic kalau PortalBridge belum ada.
   safeCallAPI(action, payload) {
-    const fn =
-      (window.PortalBridge && window.PortalBridge.callAPI) || window.callAPI;
+    const fn = (window.PortalBridge && window.PortalBridge.callAPI) || window.callAPI;
     if (typeof fn !== 'function') {
       console.error('[portal] callAPI belum dimuat');
       return Promise.reject(new Error('PortalBridge belum siap'));
@@ -127,7 +126,7 @@ export function registerSeamAliases(aliases, opts = {}) {
     if (!isFn && !opts.allowNonFunction) {
       console.warn(
         `[bridge] registerSeamAliases: "${name}" bukan fungsi — dilewati. ` +
-          `Kalau ini data eksplisit (objek/const), daftarkan dengan { allowNonFunction: true }.`
+          `Kalau ini data eksplisit (objek/const), daftarkan dengan { allowNonFunction: true }.`,
       );
       continue;
     }
@@ -139,7 +138,7 @@ export function registerSeamAliases(aliases, opts = {}) {
         console.warn(
           `[bridge] TABRAKAN nama seam "${name}": sudah terdaftar oleh ` +
             `${SEAM_SOURCES.get(name) || 'modul lain'} dengan nilai berbeda — ` +
-            `nilai terbaru menang. Periksa duplikat antar modul!`
+            `nilai terbaru menang. Periksa duplikat antar modul!`,
         );
       }
     } else {
@@ -188,7 +187,9 @@ function resolveSeam(name) {
 export function dispatchSeamAction(name, event, args) {
   const fn = resolveSeam(name);
   if (typeof fn !== 'function') {
-    console.warn(`[bridge] data-action "${name}" tidak terdaftar (getSeamAliases()) maupun di window.*`);
+    console.warn(
+      `[bridge] data-action "${name}" tidak terdaftar (getSeamAliases()) maupun di window.*`,
+    );
     return undefined;
   }
   return fn.apply(event ? event.currentTarget : undefined, args || []);
@@ -207,7 +208,10 @@ function handleDelegatedAction(event, type) {
       if (Array.isArray(parsed)) args = parsed;
       else args = [parsed];
     } catch (err) {
-      console.warn(`[bridge] data-action-arg "${rawArg}" bukan JSON valid — dipanggil tanpa argumen.`, err);
+      console.warn(
+        `[bridge] data-action-arg "${rawArg}" bukan JSON valid — dipanggil tanpa argumen.`,
+        err,
+      );
     }
   }
   const result = dispatchSeamAction(name, event, args);
