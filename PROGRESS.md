@@ -4,11 +4,26 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ✉️ Fitur baru: Undangan Grup Kelas (orang tua/wali) via modal tempel daftar `Nama|WA` + reuse action `kirimTawaranMassal`.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit.
 
 ---
 
-## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `belum di-commit (siap lewat Changes panel)`
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `ee3e44d`
+
+### 🔧 Fase 3.5 L2-6 tuntas + sentralisasi alias seam via bridge + merge & verifikasi Undangan Grup Kelas
+
+**Ringkasan kerja:**
+1. **Jalur unblock sentralisasi PortalBridge** (ESM_BRIDGE §3.4) — `js/pages/*` jadi **entry ESM** (import core via `js/core/bridge.js`, tag core HTML standalone dihapus); **bridge.js masuk STACK bundel** (module-registry + `js/main.js`) → index/admin ikut punya `window.PortalBridge` + `registerSeamAliases`; alias seam HTML↔JS di 5 halaman standalone diregistrasikan **terpusat** via `registerSeamAliases({...})` (registry `SEAM_ALIASES` private, audit `getSeamAliases()`), menggantikan blok `window.X = X` per file.
+2. **Merge fitur Undang Grup Kelas (`10a45bc`)** ke worktree — stash → fast-forward → pop; `candidates.js` auto-merge bersih (hunk fitur vs hunk Fase 3.5 tidak bentrok); build artifact di-rebuild (bundel `app-7bc915049b.js`, 28 modal).
+3. **🐛 Fix regresi alias WA** (ketahuan smoke E2E): alias `window.normalizeWaInput`/`isValidWaInput` HILANG saat pembersihan Fase 3.5 L6 (04_auth.js) → `parseDaftarOrtu` fallback regex ketat menolak `0xx/8xx` (janji "0xx→62xx" di modal gagal). Alias dipulihkan + bundel di-rebuild.
+4. **Backend testable**: `buildPesanTawaranMassal` diekstrak jadi fungsi murni di `actions-wa.js` (rotasi varian bergilir anti-ban — tidak mengubah perilaku) + **`actions-wa.test.js`** (8 test: rotasi 3×5, varian=jumlah penerima, placeholder per penerima, template fallback, pesan default, gaya lama `<<NAMA>>`).
+5. **`e2e/undang-grup-kelas.mjs`** (Playwright, pola harness) — login admin → buka modal → preview (jumlah/varian/placeholder) → kirim dengan `window.callAPI` di-STUB (anti WA beneran — Fonnte terkonfigurasi) → verifikasi payload (WA ternormalisasi 62x, invalid dibuang, jobCode '', linkGrup, interval, 2 varian di customMessage) + toast + 0 error JS.
+
+**Verifikasi:** lint 0 error / 12 warning baseline · test **139/139** (131 + 8 baru) · build idempoten (bundel `app-7bc915049b.js`, 46 file, 0 kolisi, VERSION stabil) · smoke interaktif preview (parse ortu 2 valid + 1 invalid, preview varian, payload tertangkap, `081234567890`→`6281234567890`) · E2E Playwright TIDAK dijalankan di mesin ini (tanpa Node ≥22; playwright macet di Bun/Windows — jalankan `BASE_URL=http://localhost:3000 node e2e/undang-grup-kelas.mjs` di mesin ber-Node).
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `10a45bc` (fitur di-push pemilik)
 
 ### ✉️ Undangan Grup Kelas — kirim undangan WA grup ke orang tua/wali (Opsi A: tanpa ubah DB)
 

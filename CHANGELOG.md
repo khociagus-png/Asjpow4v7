@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`4fa4114` — Refactor arsitektur: WA rules satu sumber, registry action/build, harness E2E, dedupe rules, i18n split Fase 4 + import nyata core).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`ee3e44d` — Fase 3.5 L2-6 tuntas + sentralisasi alias seam via bridge + merge & verifikasi Undang Grup Kelas).
+
+---
+
+## 2026-08-17 — `ee3e44d` 🔧 Refactor: Fase 3.5 L2-6 tuntas — jembatan `window.*` → import nyata + sentralisasi alias seam via bridge
+
+### Ringkasan
+
+- **Sentralisasi PortalBridge (jalur unblock)** — `js/pages/*` jadi entry ESM (import core via `js/core/bridge.js`; tag core HTML standalone dihapus, `?v=esm14`); `bridge.js` masuk STACK bundel (index/admin punya `window.PortalBridge` + `registerSeamAliases`, hanya import core → aman); alias seam HTML↔JS di 5 halaman standalone diregistrasikan terpusat via `registerSeamAliases({...})` (`SEAM_ALIASES` registry private + `getSeamAliases()` untuk audit) menggantikan blok `window.X = X`.
+- **Fase 3.5 L2-6** — state accessor, render/api lintas domain, helper classic → import binding; 89 alias mati dihapus (337→236).
+- **Merge Undang Grup Kelas (`10a45bc`)** — modal tempel daftar `Nama|WA` + link grup + template pesan multi-varian (`---`) bergilir anti-ban; reuse `kirimTawaranMassal`.
+- **🐛 Fix** — alias `window.normalizeWaInput`/`isValidWaInput` dipulihkan di `04_auth.js` (hilang saat pembersihan L6 → `parseDaftarOrtu` menolak `0xx/8xx`; smoke E2E menangkap).
+- **Test** — `buildPesanTawaranMassal` diekstrak (murni, perilaku sama) + `actions-wa.test.js` 8 test rotasi varian/placeholder/fallback; `e2e/undang-grup-kelas.mjs` Playwright (stub `callAPI` → tidak mengirim WA beneran).
+
+### Verifikasi
+
+- Unit test **139/139** (131 + 8) · lint 0 error / 12 warning baseline · build idempoten (`app-7bc915049b.js`, 46 file, 0 kolisi) · smoke preview: parse ortu (2 valid + 1 invalid), preview varian, payload `kirimTawaranMassal` tertangkap dengan WA ternormalisasi `628…` · E2E Playwright butuh Node ≥22 (macet di Bun/Windows).
 
 ---
 
