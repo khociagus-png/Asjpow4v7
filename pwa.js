@@ -249,8 +249,43 @@ export function bersihkanDraftLamaBase64() {
 
 // BRIDGE ESM → classic/bundel & HTML onclick: alias window.*.
 window.cobaInstallApp = cobaInstallApp;
-window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;
+window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;  // Jalankan migrasi begitu pwa.js termuat (semua halaman, sebelum
+  // onload/initApp halaman mana pun).
+  bersihkanDraftLamaBase64();
 
-// Jalankan migrasi begitu pwa.js termuat (semua halaman, sebelum
-// onload/initApp halaman mana pun).
-bersihkanDraftLamaBase64();
+  // 6. PENANDA VERSI (verifikasi cepat): tempel versi bundel ke baris
+  // copyright di footer, mis. "…ALL RIGHTS RESERVED. · v2a72296550".
+  // User bisa langsung melihat versi mana yang tampil di layar — kalau tidak
+  // sama dengan versi terbaru, berarti browser masih pakai cache/SW lama
+  // (bukan masalah server). Membaca hash dari src script bundel
+  // (/assets/app-<hash>.js); halaman standalone fallback ke ?v= pwa.js.
+  // Aman: tidak mengubah layout & tidak muncul kalau footer tidak ada.
+  (function pasangPenandaVersi() {
+    try {
+      var el = document.querySelector('[data-lang="footer.copyright"]');
+      if (!el) return;
+      if (el.querySelector('.asj-ver-badge')) return; // idempotent
+      var ver = '';
+      var app = document.querySelector('script[src*="/assets/app-"]');
+      if (app) {
+        var m = app.getAttribute('src').match(/app-([a-f0-9]+)\.js/);
+        if (m) ver = m[1];
+      }
+      if (!ver) {
+        var pw = document.querySelector('script[src*="/pwa.js"]');
+        if (pw) {
+          var q = (pw.getAttribute('src') || '').match(/[?&]v=([^&]+)/);
+          if (q) ver = q[1];
+        }
+      }
+      if (!ver) return;
+      var span = document.createElement('span');
+      span.className = 'asj-ver-badge ml-2 text-emerald-300/90 font-mono';
+      span.textContent = 'v' + ver;
+      span.title =
+        'Versi aplikasi. Kalau tidak sama dengan versi terbaru, refresh / clear site data.';
+      el.appendChild(span);
+    } catch (e) {
+      /* penanda versi opsional — jangan ganggu halaman */
+    }
+  })();
