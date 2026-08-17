@@ -18,6 +18,48 @@
 
 ---
 
+## 📋 SISA PEKERJAAN — todo yang BELUM selesai (update 2026-08-17)
+
+> Daftar lengkap item yang masih `- [ ]`. Detail & konteks ada di masing-masing fase di bawah.
+
+**Fase 3.5 — jembatan `window.*` → import nyata (Kandidat 1, prioritas tertinggi):**
+- [ ] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …) → import binding; penulis tetap lewat accessor (pola ESM_BRIDGE §3.2)
+- [ ] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/`renderJadwal` → import dari `render/*`
+- [ ] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory` → import dari `api/*`
+- [ ] **Langkah 5 — helper classic**: `window.cekUploadFile`/`previewFileInFrame`/`normalizeGenderValue` → import dari modul pemiliknya
+- [ ] **Langkah 6 — fasad PortalBridge**: alias sisa (hanya pemakai HTML onclick/onchange) → satu registrasi terpusat di `js/core/bridge.js`; hapus alias window.* per-modul yang tak lagi dipakai HTML
+- [ ] Kriteria selesai tiap langkah: scan `window\.\w+\s*=` di `js/` menurun · `no-undef` 0 error · `check:globals` nol kolisi · E2E SEMUA LULUS
+
+**Fase 4 — i18n lanjutan:**
+- [ ] Pecah locales per domain (`common`, `auth`, `public`, …) — kini 1 file data per bahasa (`i18n/locales/{id,jp}.js`), split per domain tinggal mekanis
+- [ ] Verifikasi lint key duplikat (eslint.config.js) tetap jalan lintas file setelah split
+
+**Fase 5 — HTML & partial (belum dimulai):**
+- [ ] Ekstrak `head`, header, footer, bottom-nav, template social → `partials/` (perluas loader `build:html` untuk section)
+- [ ] Normalisasi stack `<script>` halaman standalone → satu urutan shared (`partials/scripts-shared.html`)
+- [ ] Pindahkan `<style>` inline halaman → `src/main.css` (class custom) atau `src/pages/*.css`
+- [ ] Verifikasi `bun run build:html` byte-compatible / hash berubah wajar; visual cek admin + index + 1 halaman form
+
+**Fase 6 — Build, tooling & dokumentasi:**
+- [ ] `build-js.mjs` → daftar entry/modul eksplisit (import graph), hapus STACK concat
+- [ ] (Opsional) sourcemap bundel (`--sourcemap=inline` dev, off di prod)
+- [ ] CI: `.github/workflows/` perluas job `lint + test + build + e2e:share`
+- [ ] Update `AGENTS.md` (peta struktur pasca-Fase 3/3.5/4) + `WORKFLOW.md` (command & aturan patch)
+
+**Backend & keputusan terbuka:**
+- [ ] Fase 1.1: pastikan semua modul memakai `supabase.*` helper (bukan fetch mentah)
+- [ ] Fase 3: keputusan entry per halaman standalone (`js/pages/*` → entry ESM) ATAU biarkan classic — catat di PROGRESS.md
+- [ ] Fase 3: hapus alias `window.*` per-simbol setelah semua pemakainya di-import (tercakup Fase 3.5 Langkah 6)
+
+**Performa (opsional, prioritas rendah):**
+- [ ] Cache admin TTL pendek (admin warm ±1,6 dtk)
+- [ ] Cek region Supabase vs Netlify (dokumentasi saja)
+
+**Infra E2E (lingkungan developer):**
+- [ ] E2E butuh runtime **Node.js asli** — playwright-core macet di Bun/Windows (root cause 2026-08-17); developer/CI wajib pakai Node ≥22, bukan bun
+
+---
+
 ## 📍 Kondisi aktual (baseline 2026-08-16)
 
 | Wilayah | File | Ukuran | Catatan |
@@ -63,7 +105,7 @@ Backend sudah berarsitektur ok (`_lib/*`), tinggal dipecah lebih tajam. Semua fu
       E2E lulus. Detail: `PROGRESS.md` sesi 2026-08-16.
 - [x] **DONE (2026-08-16):** kluster auth + WA gate (`masterPins`, `requireAdmin`, `isValidWaFormat`, `handleCheckAdminMaster/Personal`, `handleLoginKandidat`, `handleDaftarKandidat`, `handleGantiPasswordKandidat`) → **`_lib/actions-auth.js`**; `findCandidateByWa`/`CAND_WA_COLS` → **`_lib/candidate-helpers.js`** (dipakai lintas domain). Test 51/51, smoke auth OK, E2E login lulus.
 - [x] **DONE (2026-08-16):** handler mail/form (`handleFormStatus`, `syncCandidateDariForm`, review/approve/reject/delete/tandai dibaca) → **`_lib/actions-mail.js`**; handler kandidat (`updateCatatanKandidat`, `updateKandidatSuper`, `getCandidatesPage`) → **`_lib/actions-candidate.js`**; handler job/loker (simpan/edit/status/hapus/tahapan/dokumen/tandai gagal) → **`_lib/actions-job.js`**. `handlers.js` kini **629 baris** (dari 1.792). Test 51/51, smoke wiring OK, E2E login + backend-fast-path SEMUA LULUS.
-- [ ] Pindahkan handler upload/pemberkasan → `_lib/actions-upload.js`.
+- [x] **Pindahkan handler upload/pemberkasan → `_lib/actions-upload.js`** — tercakup Fase 1.2 langkah 5 (`actions-upload.js` 725 baris dibuat, `handlers.js` 343 baris).
 - [x] **SELESAI (2026-08-16)** — `handlers.js` kini **343 baris** = dispatcher + core
       murni (handleAction, rateLimitChecks, sessionIdentity, NOT_IMPLEMENTED,
       sets LOGIN/AI/FONNTE). `handleShareData`/`docTypeOf`/`docAge` →
@@ -475,7 +517,7 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       (419.8 KB, 45 file). Verifikasi: lint 0/12 ✓ · test 81/81 ✓ · build
       idempoten · 0 export bocor · check:globals nol kolisi (405 simbol) ·
       E2E login/upload/biodata SEMUA LULUS ✓.
-- [ ] Tandai batas modul per domain — **urutan konversi (dependency order)**
+- [x] **Tandai batas modul per domain — urutan konversi (dependency order)** — semua langkah 1–15 ✅ (core → init → auth → engine → render → api → admin_* → ai_copilot → sisanya); sisa: hapus alias `window.*` per-simbol (Fase 3.5)
       (langkah 1-2 core layer ✅, langkah 3 init ✅):
       1. ✅ `api-client.js` + `i18n.js` (core; diekspor + alias `window` utk pemakai classic),
       2. ✅ `init/{state,util}.js` (state: accessor bridge; util: alias window),

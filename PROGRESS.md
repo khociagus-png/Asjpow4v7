@@ -2089,19 +2089,17 @@ side-by-side) & Android; fix khusus jalur mobile.
 
 ---
 
-## ⏳ BELUM SELESAI
+## ⏳ BELUM SELESAI — todo yang masih terbuka (update 2026-08-17)
 
-1. **Preview visual belum diverifikasi** (tool preview tidak tersedia di sesi
-   pengerjaan) — terutama: modal masih terbuka normal di admin & index, dan
-   offline mode (SW precache) tetap jalan. Saat pertama buka setelah deploy:
-   **hard refresh sekali** (VERSION SW baru otomatis buang cache lama).
-   (SW version baru otomatis buang cache lama).
-2. **Deploy ke Netlify belum** — sesuai keputusan tim: tunggu sampai semua fix
-   beres dulu (token free tier tipis).
-3. **Demo assets cek manual** (lihat #3 di atas).
-4. Sisa `refreshDataDinamis` di aksi berat (`simpanJobBaru`, `editLokerFull`,
-   `simpanKandidatDanUpload`, sync 3-way, upload revisi) — bisa di-patch
-   berikutnya kalau dirasa masih lambat.
+> Daftar lengkap + konteks ada di `REFACTOR_TODO.md` → "📋 SISA PEKERJAAN".
+
+1. **Fase 3.5 (Kandidat 1) — selesaikan jembatan `window.*` → import nyata**: Langkah 1 ✅ (core → util/state, 19 referensi, commit `4fa4114`). Sisa Langkah 2–6: state accessor (pembaca → import binding), render lintas domain, api lintas domain, helper classic, fasad PortalBridge. Kriteria: scan `window\.\w+\s*=` menurun, no-undef 0 error, check:globals nol kolisi, E2E SEMUA LULUS.
+2. **Fase 4 lanjutan — i18n split per domain**: sekarang 1 file data per bahasa (`i18n/locales/{id,jp}.js`); pecah per domain (`common`, `auth`, `public`, …) + verifikasi lint key duplikat lintas file.
+3. **Fase 5 — HTML & partial (belum dimulai)**: ekstrak head/header/footer/bottom-nav/social ke `partials/`, normalisasi stack `<script>` halaman standalone → `scripts-shared.html`, pindahkan `<style>` inline → `src/`, verifikasi `build:html` byte-compatible + visual.
+4. **Fase 6 — build/tooling**: `build-js.mjs` daftar entry/modul eksplisit (hapus STACK concat), sourcemap opsional, CI perluas job lint+test+build+e2e:share, update AGENTS/WORKFLOW per fase.
+5. **Backend & keputusan terbuka**: pastikan semua modul pakai `supabase.*` helper (bukan fetch mentah) · keputusan entry per halaman standalone (entry ESM vs classic) · hapus alias `window.*` per-simbol (tercakup Fase 3.5 L6).
+6. **Performa opsional (prioritas rendah)**: cache admin TTL pendek · cek region Supabase.
+7. **Infra E2E**: butuh runtime Node.js asli — playwright-core macet di Bun/Windows (root cause 2026-08-17); developer/CI pakai Node ≥22, bukan bun.
 
 ---
 
@@ -2127,3 +2125,4 @@ bun run test         # Vitest (41 tes)
   `netlify/functions/_lib/handlers.js` + `actions-extra.js`, DB helper
   `_lib/supabase.js`, i18n `i18n.js` (hati-hati key duplikat!).
 - Saat minta fix, sebutkan file + fungsi spesifik — menghemat baca ulang.
+
