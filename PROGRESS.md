@@ -4,7 +4,22 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + **sentralisasi alias modul bundel (208 alias → `registerSeamAliases`)**.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`**.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `4135421`
+
+### 🔧 Seam registry lengkap: non-fungsi eksplisit + guard duplikat + dispatcher delegasi `data-action`
+
+**Ringkasan kerja:**
+1. **`registerSeamAliases` menerima NON-FUNGSI eksplisit** (`{ allowNonFunction: true, source }`) — `THEMES` (objek konfigurasi) & `urlFotoJeklin` (const string) pindah dari `window.X = X` ke registry → **210 alias seam** (audit `getSeamAliases()`). `helpers_cv.js` tetap satu-satunya pengecualian (guard `typeof window` untuk vitest).
+2. **Guard tabrakan nama seam** — nama yang sudah terdaftar lalu didaftarkan ulang dengan nilai BERBEDA → `console.warn` (deteksi dini duplikat antar modul; `opts.source` memberi label pendaftar di pesan). Re-registrasi nilai sama = idempotent tanpa warn.
+3. **Dispatcher delegasi `data-action`** di bridge.js — 1 listener document (click + change) menangkap elemen `[data-action]`, resolve nama dari registry seam (→ fallback `window.*`), panggil dengan argumen JSON `data-action-arg`, `false` → preventDefault. HTML tidak lagi butuh `window.fn` untuk handler polos.
+4. **Migrasi 131 handler** di `admin.html`/`index.html` (103 unik: `changePage`, `adminSwitchTab`, `filterPublicData`, `bukaModal*`, `setSortDb`, `openRincianBuilder`, dll) dari `onclick="fn('x')"` → `data-action="fn" data-action-arg='["x"]'` (skrip `.freebuff/migrasi-data-action.mjs`, JSON-validated, escape `&#39;`). ~50 handler tetap inline karena ekspresi/multi-statement/`this` (tidak bisa didelegasikan tanpa mengubah markup).
+5. **Test baru** `js/core/bridge.test.js` (6 test: non-fungsi ditolak/diterima, guard tabrakan, idempotent, resolve registry + fallback window, nama tak dikenal) — dynamic import dengan stub global (bridge/api-client eksekusi `window` di module scope).
+
+**Verifikasi:** no-undef 0 · lint 0 error/12 warn (baseline) · test **145/145** (139 + 6) · build idempoten (bundel `app-6cd19287b4.js`, 46 file) · audit-globals HIGH=0 · smoke browser (preview :3100): admin/index — 210 alias, SEMUA nama `data-action` ter-resolve (0 unresolved), klik delegasi nyata (`toggleTheme` SAKURA→TOKYO, `setSortDb` dispatch dengan argumen) bekerja, `dispatchSeamAction` + fallback window terverifikasi, 0 error JS; share standalone — tetap jalan (6 alias, dispatcher tersedia).
 
 ---
 

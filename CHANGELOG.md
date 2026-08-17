@@ -1,6 +1,22 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`58340e4` — sentralisasi alias seam modul bundel).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`4135421` — registry seam lengkap + dispatcher data-action).
+
+---
+
+## 2026-08-17 — `4135421` 🔧 Refactor: registry seam lengkap — non-fungsi eksplisit, guard tabrakan nama, dispatcher delegasi `data-action`
+
+### Ringkasan
+
+- **`registerSeamAliases` terima non-fungsi eksplisit** (`{ allowNonFunction: true, source }`) — `THEMES` & `urlFotoJeklin` masuk registry (210 alias); `helpers_cv.js` tetap pengecualian (vitest).
+- **Guard tabrakan nama seam** — re-registrasi nilai beda → `console.warn` + label `source`; nilai sama = idempotent.
+- **Dispatcher `data-action`** (bridge.js) — 1 listener document (click/change), resolve via SEAM_ALIASES → fallback window, argumen JSON `data-action-arg`, `false` → preventDefault; HTML lepas dari `window.fn` untuk handler polos.
+- **131 handler dipindah** di admin.html/index.html (`changePage`, `adminSwitchTab`, `filterPublicData`, `bukaModal*`, `setSortDb`, `openRincianBuilder`, ...); ~50 tetap inline (ekspresi/multi/`this`).
+- **Test** `js/core/bridge.test.js` (6 test, dynamic import + stub global).
+
+### Verifikasi
+
+- no-undef 0 · lint 0/12 · unit test **145/145** · build idempoten (`app-6cd19287b4.js`) · audit HIGH=0 · smoke preview: 210 alias, semua data-action ter-resolve, klik delegasi bekerja, 0 error JS.
 
 ---
 
