@@ -500,14 +500,21 @@ export async function prosesUploadKandidat() {
   }
   btn.innerHTML = window.tr('ui.processing');
   btn.disabled = true;
+  // Ambil File asli dari input — untuk upload LANGSUNG ke Cloudinary
+  // (backend hanya menerima URL string, bukan base64 lewat Netlify).
+  function ambilFileInput(id, label) {
+    const el = document.getElementById(id);
+    const f = el && el.files && el.files[0] ? el.files[0] : null;
+    return f ? { label: label, name: f.name, file: f } : null;
+  }
   let fd = [];
-  let ph = await window.bacaFileBase64(document.getElementById('k-photo'), 'PAS_PHOTO');
+  let ph = ambilFileInput('k-photo', 'PAS_PHOTO');
   if (ph) fd.push(ph);
-  let pc = await window.bacaFileBase64(document.getElementById('k-cv'), 'CV');
+  let pc = ambilFileInput('k-cv', 'CV');
   if (pc) fd.push(pc);
-  let pj = await window.bacaFileBase64(document.getElementById('k-jft'), 'JFT');
+  let pj = ambilFileInput('k-jft', 'JFT');
   if (pj) fd.push(pj);
-  let ps = await window.bacaFileBase64(document.getElementById('k-ssw'), 'SSW');
+  let ps = ambilFileInput('k-ssw', 'SSW');
   if (ps) fd.push(ps);
 
   // Indikator: semua file yang dipilih -> mengupload (yang kosong -> tidak dipilih)
@@ -526,8 +533,28 @@ export async function prosesUploadKandidat() {
   });
 
   document.getElementById('global-loader').style.display = 'flex';
+  // Upload file ke Cloudinary (langsung dari browser) — backend hanya
+  // menerima URL string di payload JSON, tidak lagi base64.
+  const cloudFiles = [];
+  for (const f of fd) {
+    try {
+      const url = await window.uploadToCloudinary(f.file);
+      cloudFiles.push({ label: f.label, name: f.name, url: url });
+    } catch (err) {
+      markUploadResults([f.label], []);
+      window.showToast(
+        'Gagal upload ' + f.label + ' ke Cloudinary: ' + (err && err.message ? err.message : err),
+        'error',
+      );
+      btn.innerHTML = window.tr('button.save_upload');
+      btn.disabled = false;
+      document.getElementById('global-loader').style.display = 'none';
+      return;
+    }
+  }
+
   // Kirim key 'loker' (bukan 'idLoker') + array files[] berlabel supaya
-  // backend simpanKandidatDanUpload menerima kode job & file upload dengan benar.
+  // backend simpanKandidatDanUpload menerima kode job & URL file dengan benar.
   // Field fisik (gender/usia/TB/BB/pendidikan) ikut dikirim supaya kandidat
   // tidak lahir "kosong" - disimpan ke master + baris lamaran di backend.
   var data = {
@@ -539,7 +566,7 @@ export async function prosesUploadKandidat() {
     tb: document.getElementById('k-tb').value,
     bb: document.getElementById('k-bb').value,
     pendidikan: document.getElementById('k-pendidikan').value,
-    files: fd,
+    files: cloudFiles,
   };
   try {
     const res = await window.callAPI('simpanKandidatDanUpload', [data]);
@@ -566,11 +593,13 @@ export async function prosesUploadKandidat() {
       for (const r of lainRows) {
         const jenisLabel = String(r.jenis || 'DOKUMEN');
         setUploadStatus(r.stId, jenisLabel, 'uploading');
-        const lainFile = await window.bacaFileBase64(r.input, 'DOKUMEN');
-        if (lainFile) {
+        const lainUrl = await window
+          .uploadToCloudinary(r.input.files[0])
+          .catch(() => null);
+        if (lainUrl) {
           try {
             const lr = await window.callAPI('simpanBerkasTahapan', [
-              { wa: wa, nama: nama, jenisBerkas: r.jenis, file: lainFile },
+              { wa: wa, nama: nama, jenisBerkas: r.jenis, fileUrl: lainUrl },
             ]);
             setUploadStatus(r.stId, jenisLabel, lr && lr.success ? 'ok' : 'fail');
           } catch (e) {
@@ -738,8 +767,10 @@ export async function simpanSuperEditKandidat() {
       for (const er of eLainRows) {
         const eJenisLabel = String(er.jenis || 'DOKUMEN');
         setUploadStatus(er.stId, eJenisLabel, 'uploading');
-        const eLainFile = await window.bacaFileBase64(er.input, 'DOKUMEN');
-        if (eLainFile) {
+        const eLainUrl = await window
+          .uploadToCloudinary(er.input.files[0])
+          .catch(() => null);
+        if (eLainUrl) {
           try {
             // Nama kandidat untuk folder storage diambil dari data
             // (payload tidak membawa nama) — folder harus cocok dengan
@@ -749,7 +780,7 @@ export async function simpanSuperEditKandidat() {
             });
             const eNama = eCand && eCand.nama ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
             const lr2 = await window.callAPI('simpanBerkasTahapan', [
-              { wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, file: eLainFile },
+              { wa: payload.wa, nama: eNama, jenisBerkas: er.jenis, fileUrl: eLainUrl },
             ]);
             setUploadStatus(er.stId, eJenisLabel, lr2 && lr2.success ? 'ok' : 'fail');
           } catch (e2) {
@@ -781,10 +812,14 @@ export async function prosesUploadRevisi() {
   let btn = document.getElementById('btn-revisi');
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.uploading_short') + '';
   btn.disabled = true;
-  let fileData = await window.bacaFileBase64(input, 'CV_REVISI');
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await window.callAPI('simpanRevisiKandidat', [currentKandidatWa, fileData]);
+    // Upload CV revisi LANGSUNG ke Cloudinary, backend hanya menerima URL.
+    const fileUrl = await window.uploadToCloudinary(input.files[0]);
+    const res = await window.callAPI('simpanRevisiKandidat', [
+      currentKandidatWa,
+      { name: input.files[0].name, url: fileUrl },
+    ]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_revisi_uploaded'), 'success');
       window.refreshDataDinamis();
@@ -967,5 +1002,5 @@ registerSeamAliases({
     tutupModalQr,
     ensureAllCandidates,
     muatLebihKandidat,
-});
+});
 

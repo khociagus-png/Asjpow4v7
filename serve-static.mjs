@@ -76,6 +76,12 @@ async function handleApi(req, res) {
     } catch {
       /* non-JSON body -> action kosong */
     }
+    // Keep-alive via GET (?action=ping) — action boleh datang dari query string.
+    if (!body.action) {
+      const q = new URL(req.url, 'http://localhost').searchParams;
+      body.action = q.get('action') || undefined;
+      if (body.action) body.payload = body.payload || q.get('payload') || undefined;
+    }
     let out;
     try {
       const fwd = req.headers['x-forwarded-for'];
@@ -85,6 +91,13 @@ async function handleApi(req, res) {
       });
     } catch (e) {
       out = { success: false, message: 'Error internal: ' + e.message };
+    }
+    // Respons RAW dari handler (action 'ping' → { statusCode: 200, body: 'pong' })
+    // diteruskan apa adanya, tanpa dibungkus JSON.
+    if (out && typeof out === 'object' && typeof out.statusCode === 'number' && out.body !== undefined) {
+      res.writeHead(out.statusCode, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end(String(out.body));
+      return;
     }
     sendJson(res, 200, out);
   });
@@ -139,7 +152,14 @@ createServer(async (req, res) => {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
 
     // Preview-only backend: semua POST data/action diarahkan ke handler rebuild.
-    if (req.method === 'POST' && pathname.startsWith('/.netlify/functions/')) {
+    // GET dengan ?action=ping juga dilayani (keep-alive lokal) — lihat
+    // handleApi untuk fallback query string.
+    if (
+      (req.method === 'POST' || req.method === 'GET') &&
+      pathname.startsWith('/.netlify/functions/') &&
+      (req.method === 'POST' ||
+        new URL(req.url, 'http://localhost').searchParams.get('action') === 'ping')
+    ) {
       handleApi(req, res);
       return;
     }

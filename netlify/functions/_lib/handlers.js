@@ -122,6 +122,16 @@ function rateLimitChecks(action, meta, sessionToken) {
 // Dispatcher utama
 // ---------------------------------------------------------------------------
 async function handleAction(action, payload, sessionToken, meta) {
+  // Anti cold-start / keep-warm (2026-08-17): action 'ping' dilayani PALING
+  // awal — sebelum rate limit, dispatch, inisialisasi koneksi Supabase, atau
+  // kerja apa pun. .github/workflows/keep-alive.yml menembak endpoint ini tiap
+  // 5 menit supaya fungsi Netlify tidak tertidur. Bentuk respons RAW
+  // {statusCode, body} diteruskan apa adanya oleh netlify-wrapper.js &
+  // serve-static.mjs (lihat keduanya).
+  if (action === 'ping') {
+    return { statusCode: 200, body: 'pong' };
+  }
+
   const checks = rateLimitChecks(action, meta, sessionToken);
   for (const c of checks) {
     const r = rateLimit.check(c.key, c.opts);

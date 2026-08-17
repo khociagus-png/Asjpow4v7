@@ -428,13 +428,18 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
     const files = Array.isArray(d.files) ? d.files : [];
     const fileUrls = {};
     for (const f of files) {
-      if (!f || !f.data) continue;
+      if (!f) continue;
       const label = String(f.label || '').toUpperCase();
-      const ext =
-        String(f.name || 'file')
-          .split('.')
-          .pop() || 'jpg';
-      const url = await uploadBase64(f.data, folder, (label || 'FILE') + '.' + ext);
+      // Jalur Cloudinary (2026-08-17): URL string dari browser langsung dipakai;
+      // base64 (jalur lama) tetap didukung sebagai fallback.
+      let url = String(f.url || '').trim();
+      if (!url && f.data) {
+        const ext =
+          String(f.name || 'file')
+            .split('.')
+            .pop() || 'jpg';
+        url = await uploadBase64(f.data, folder, (label || 'FILE') + '.' + ext);
+      }
       if (url) {
         fileUrls[label] = url;
         uploaded.push(label);
@@ -571,7 +576,12 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     .trim()
     .toUpperCase();
   const f = d.file || {};
-  if (!wa || !f.data) return { success: false, error: 'Data tidak lengkap.' };
+  // Jalur Cloudinary (2026-08-17): file diupload LANGSUNG dari browser,
+  // backend tidak lagi memproses file fisik — cukup ekstrak URL string dari
+  // payload JSON lalu update ke kolom dokumen. Base64 (jalur lama) tetap
+  // didukung sebagai fallback untuk klien yang belum dimigrasi.
+  const directUrl = String(d.fileUrl || (f && f.url) || '').trim();
+  if (!wa || (!directUrl && !f.data)) return { success: false, error: 'Data tidak lengkap.' };
   try {
     const nama = String(d.nama || 'KANDIDAT')
       .trim()
@@ -609,8 +619,12 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
         .replace(/[^A-Z0-9_-]/g, '_');
       if (jobCode) fileName = 'JOB' + jobCode + '_CV.' + ext;
     }
-    const url = await uploadBase64(f.data, folder, fileName);
-    if (!url) return { success: false, error: 'Upload gagal.' };
+
+    let url = directUrl;
+    if (!url) {
+      url = await uploadBase64(f.data, folder, fileName);
+      if (!url) return { success: false, error: 'Upload gagal.' };
+    }
 
     // MAIL = upload-driven: upload berkas → masuk mail inbox (untuk review),
     // menampilkan dokumen yang di-upload beserta preview-nya. Baris dipilih
@@ -677,7 +691,10 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
   cacheClear(); // revisi kandidat → buang cache dedupe
   const wa = String((payload && payload[0]) || '');
   const f = (payload && payload[1]) || {};
-  if (!wa || !f.data) return { success: false, error: 'Data tidak lengkap.' };
+  // Jalur Cloudinary (2026-08-17): URL string dari browser dipakai langsung;
+  // base64 (jalur lama) tetap didukung sebagai fallback.
+  const directUrl = String(f.url || f.fileUrl || '').trim();
+  if (!wa || (!directUrl && !f.data)) return { success: false, error: 'Data tidak lengkap.' };
   try {
     const row = await findMasterByWa(wa);
     const nama = row && row.nama_lengkap ? String(row.nama_lengkap).toUpperCase() : 'KANDIDAT';
@@ -712,7 +729,11 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
     } catch (e) {
       /* lookup kandidat non-fatal */
     }
-    const url = await uploadBase64(f.data, folder, fileName);
+    let url = directUrl;
+    if (!url) {
+      url = await uploadBase64(f.data, folder, fileName);
+      if (!url) return { success: false, error: 'Upload gagal.' };
+    }
     // Upload CV revisi juga masuk mail (dokumen pendukung) — per loker.
     try {
       await syncFormMailDariUpload(wa, nama, 'CV', url, cvJobCode);

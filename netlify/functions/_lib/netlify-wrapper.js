@@ -23,6 +23,15 @@ function makeHandler() {
     } catch {
       /* body non-JSON -> action kosong */
     }
+    // Keep-alive via GET (curl ?action=ping) — action boleh datang dari query
+    // string kalau body kosong (mis. GitHub Actions keep-alive).
+    if (!body.action) {
+      const q = (event && event.queryStringParameters) || {};
+      body.action = body.action || q.action || undefined;
+      if (body.action) {
+        body.payload = body.payload || q.payload || undefined;
+      }
+    }
     let out;
     try {
       out = await handleAction(body.action, body.payload, body.sessionToken, {
@@ -31,12 +40,22 @@ function makeHandler() {
     } catch (e) {
       out = { success: false, message: 'Error internal: ' + e.message };
     }
+    const baseHeaders = {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+    };
+    // Respons RAW dari handler (action 'ping': { statusCode: 200, body: 'pong' })
+    // diteruskan apa adanya — tanpa JSON.stringify, tanpa bungkus tambahan.
+    if (out && typeof out === 'object' && typeof out.statusCode === 'number' && out.body !== undefined) {
+      return {
+        statusCode: out.statusCode,
+        headers: baseHeaders,
+        body: String(out.body),
+      };
+    }
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: baseHeaders,
       body: JSON.stringify(out),
     };
   };

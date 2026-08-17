@@ -575,20 +575,64 @@ export async function prosesUploadPemberkasan(tahap) {
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
 
-  // Baca semua file yang dipilih SECARA PARALEL (Promise.all) — membaca
-  // base64 tidak saling bergantung, jadi tidak perlu berurutan.
-  const readJobs = inputs
+  // Ambil semua file yang dipilih (guard ukuran/ekstensi sudah dijalankan di
+  // atas). File dikirim LANGSUNG ke Cloudinary (uploadToCloudinary) — tidak
+  // lagi dibaca jadi base64 yang numpang lewat Netlify Functions.
+  const filesToUpload = inputs
     .filter((i) => {
       const el = document.getElementById(i.id);
       return el && el.files && el.files[0];
     })
-    .map(async (i) => {
+    .map((i) => {
       const el = document.getElementById(i.id);
-      const b64 = await bacaFileBase64(el, i.jenis);
-      return b64 ? { file: b64, jenisBerkas: i.jenis } : null;
+      return { fileObj: el.files[0], jenisBerkas: i.jenis };
     });
-  const hasilBaca = await Promise.all(readJobs);
-  const filesToUpload = hasilBaca.filter(Boolean);
+
+  // Konfirmasi "timpa file lama": kalau slot dokumen ini SUDAH punya URL
+  // tersimpan, minta persetujuan dulu sebelum menimpa dengan file baru.
+  const BERKAS_KEY_MAP = {
+    KK: 'kk',
+    AKTE: 'akte',
+    'IJAZAH SD': 'sd',
+    'IJAZAH SMP': 'smp',
+    'IJAZAH SMA': 'sma',
+    PASPORT: 'pasport',
+    MCU: 'mcu',
+    'KONTRAK KERJA': 'kontrak',
+    'CERTIFICATE JAPAN': 'cert',
+    KTP: 'ktp',
+    'PAS FOTO STUDIO': 'foto2',
+    'SURAT IJIN ORTU': 'ijinortu',
+    'PERNYATAAN CPMI': 'cpmi',
+    'STATUS PERKAWINAN': 'kawin',
+    'SURAT SEHAT PUSKESMAS': 'sehat',
+    'BPJS KETENAGAKERJAAN': 'bpjs',
+    'HASIL PSIKOTES': 'psikotes',
+  };
+  const cBerkas = (() => {
+    const c = ALL_CANDIDATES.find(
+      (kan) =>
+        window.normalizePhone(kan.wa) === window.normalizePhone(ACTIVE_PEMBERKASAN_WA),
+    );
+    return (c && c.berkas) || {};
+  })();
+  const adaLama = filesToUpload.filter((f) => {
+    const key = BERKAS_KEY_MAP[f.jenisBerkas];
+    const old = key ? cBerkas[key] : '';
+    return old && old !== '-';
+  });
+  if (adaLama.length) {
+    const namaList = adaLama.map((f) => f.jenisBerkas).join(', ');
+    if (!window.confirm('File berikut sudah ada dan akan DITIMPA: ' + namaList + '. Lanjutkan?')) {
+      btn.disabled = false;
+      btn.innerHTML =
+        tahap === 1
+          ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1'
+          : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2';
+      document.getElementById('global-loader').style.display = 'none';
+      return;
+    }
+  }
 
   if (filesToUpload.length === 0) {
     window.showToast(window.tr('ui.toast_pick_min_one'), 'error');
@@ -605,15 +649,17 @@ export async function prosesUploadPemberkasan(tahap) {
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' +
     window.tr('ui.uploading_files').replace('{n}', filesToUpload.length);
 
-  // Upload tiap berkas secara paralel via Promise.allSettled — satu berkas
-  // gagal tidak menggagalkan batch, dan hasil dihitung dari yang sukses.
+  // Upload tiap berkas ke Cloudinary secara paralel (Promise.allSettled —
+  // satu berkas gagal tidak menggagalkan batch), lalu kirim URL hasil upload
+  // ke backend lewat payload JSON standar (simpanBerkasTahapan).
   const results = await Promise.allSettled(
     filesToUpload.map(async (f) => {
+      const url = await window.uploadToCloudinary(f.fileObj);
       const payload = {
         wa: ACTIVE_PEMBERKASAN_WA,
         nama: ACTIVE_PEMBERKASAN_NAMA,
-        file: f.file,
         jenisBerkas: f.jenisBerkas,
+        fileUrl: url,
       };
       const res = await window.callAPI('simpanBerkasTahapan', [payload]);
       return !!(res && res.success);
@@ -708,5 +754,5 @@ registerSeamAliases({
     prosesUploadPemberkasan,
     prosesSimpanBiodataLengkap,
 });
-
+
 

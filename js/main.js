@@ -30,6 +30,10 @@ import './core/bridge.js';
 import './upload-guard.js';
 import './01_public.js';
 
+// Cloudinary direct unsigned upload (2026-08-17): window.uploadToCloudinary
+// dipakai alur pemberkasan / tambah kandidat / revisi CV.
+import './cloudinary.js';
+
 // Init: state/theme/util/preview/nav/boot (langkah 3 + 11)
 import './init/state.js';
 import './init/theme.js';
