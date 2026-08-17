@@ -1,8 +1,16 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit TDZ let/const + fix TDZ timer di bacaFileBase64).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (fix action hapusTugas tidak terdaftar di api-client).
 
 ---
+
+## 2026-08-17 — `2e9d78a` 🐛 Fix: `Aksi tidak dikenal: hapusTugas` — action hapusTugas tidak terdaftar di api-client.js
+
+### Ringkasan
+
+- **Gejala**: Papan Tugas Tim Admin (admin.html) memanggil `hapusTugasAdmin` → `callAPI('hapusTugas', ...)` → api-client mengembalikan "Aksi tidak dikenal" karena `hapusTugas` **tidak ada** di `ADMIN_ACTIONS` maupun `NETLIFY_FUNCTIONS` (backend `handleHapusTugas` sudah ada di `actions-schedule.js` + `action-registry.js` sejak lama).
+- **Fix**: daftarkan `hapusTugas` di `ADMIN_ACTIONS` (kirim session admin) + `NETLIFY_FUNCTIONS` (`schedule-reminders`) — sejajar `tambahTugasBaru`/`setTugasStatus`.
+- **Verifikasi**: preview — `callAPI('hapusTugas', ['fake-id'])` kini sampai backend (respons "Tugas tidak ditemukan."), bukan error client; console 0 error. Test 148/148.
 
 ## 2026-08-17 — `650098d` 🛡️ Audit TDZ (let/const) seluruh js/* + fix TDZ `timer` di bacaFileBase64
 
