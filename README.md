@@ -34,6 +34,7 @@ node serve-static.mjs  # preview lokal :3000 (backend in-process)
 
 ## Aturan penting
 
+0. **Format & syntax dijaga otomatis**: git hook pre-commit (`.githooks/`, aktif otomatis saat `bun install`) + **CI check GitHub** (`ci-check.yml`: format + lint + test + build) di tiap push/PR ke `main`. Skip darurat: `git commit --no-verify`.
 1. **Selesai tugas = commit + push ke `main`** (WORKFLOW.md §7).
 2. **Jangan deploy Netlify tanpa izin eksplisit pemilik** (DEPLOY.md).
 3. **WAJIB `bun run build`** setelah ubah JS/HTML/CSS — artefak di-commit (hosting tidak build).

@@ -178,6 +178,7 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 
 ## 7. Checklist wajib sebelum selesai
 
+0. ✅ Format & syntax dijaga otomatis: pre-commit hook `.githooks/` (aktif via `bun install` / `bun run hook:install`) + CI `ci-check.yml` di GitHub. Darurat: `git commit --no-verify`.
 1. ✅ `node --check` semua file JS yang diubah
 2. ✅ `bun run build` kalau menyentuh frontend/partial/css
 3. ✅ `freebuff-preview restart` + pastikan status `running/listening`
