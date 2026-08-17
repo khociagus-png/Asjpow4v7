@@ -346,13 +346,9 @@ window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;  // Jalankan migrasi
       if (!ver) return;
       var title =
         'Versi aplikasi. Kalau tidak sama dengan versi terbaru, refresh / clear site data.';
-      // Chip versi di header (admin & publik) — langsung terlihat tanpa scroll.
-      var chip = document.getElementById('asj-ver-chip');
-      if (chip && !chip.textContent) {
-        chip.textContent = 'v' + ver;
-        chip.title = title;
-      }
-      // Badge versi di footer (kalau elemen footer ada).
+      // Badge versi di footer (kalau elemen footer ada). Chip di header
+      // (asj-ver-chip) dihapus 2026-08-17 atas permintaan pemilik — versi
+      // tidak perlu tampil di banner, cukup di footer.
       var el = document.querySelector('[data-lang="footer.copyright"]');
       if (!el || el.querySelector('.asj-ver-badge')) return; // idempotent
       var span = document.createElement('span');

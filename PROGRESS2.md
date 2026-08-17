@@ -5,7 +5,23 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ☁️ Migrasi lengkap sisa alur upload ke Cloudinary (master-full, apply-full, ai_form, siswa-baru, loker admin).
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ✅ Verifikasi preset Cloudinary + penanda versi pindah dari header ke footer.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `TBD`
+
+### ✅ Tes preset Cloudinary `asjportal` — BERFUNGSI
+
+- Upload uji file kecil (raw) ke `https://api.cloudinary.com/v1_1/ybzzbw9i/upload` dengan `upload_preset=asjportal` → **HTTP 200 + `secure_url` dikembalikan**. Preset unsigned valid.
+- Catatan: preset mengarahkan file ke folder `DOKUMENASJ/` (bawaan preset — tidak masalah, yang penting URL). File uji 35 byte (`DOKUMENASJ/asj-preset-test_*.txt`) tersisa di akun — boleh dihapus manual.
+
+### 🎨 Penanda versi: header → footer saja
+
+- **Permintaan pemilik:** "jangan tampilkan kode versi (mis. `36373f3`) di banner, taruh di footer saja".
+- `pwa.js` (`pasangPenandaVersi`): blok pengisian chip header `#asj-ver-chip` dihapus; badge versi `.asj-ver-badge` di footer (`[data-lang="footer.copyright"]`) tetap ada.
+- `index.html` & `admin.html`: elemen `<span id="asj-ver-chip">` dihapus dari judul header (pill kosong tidak ikut render).
+- **Verifikasi:** `node --check` OK · bundel `app-23d620bb08.js` berisi 0 `asj-ver-chip`, 1 `asj-ver-badge` · 148/148 test lulus.
 
 ---
 

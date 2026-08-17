@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-17 — `TBD` ✅ Tes preset Cloudinary + penanda versi header → footer
+
+### Ringkasan
+
+- **Tes preset `asjportal`** (unsigned) ke cloud `ybzzbw9i`: upload file uji → 200 + `secure_url` ✅. Preset valid; file masuk folder `DOKUMENASJ/` (konfigurasi preset).
+- **Penanda versi**: `pwa.js` tidak lagi mengisi chip `#asj-ver-chip` di header — versi (`v<hash>`) hanya tampil sebagai badge kecil di footer; elemen chip dihapus dari `index.html`/`admin.html`.
+- **Verifikasi**: build → `app-23d620bb08.js` (0 `asj-ver-chip`, badge footer tetap) · 148/148 test lulus.
+
+---
+
 ## 2026-08-17 — `36373f3` ☁️ Migrasi lengkap sisa alur upload ke Cloudinary (master-full, apply-full, ai_form, siswa-baru, loker admin)
 
 ### Ringkasan
