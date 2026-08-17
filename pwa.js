@@ -78,6 +78,37 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
   );
 
   window.addEventListener('load', function () {
+    // SELF-CHECK ANTI-BASI (jaring pengaman #2, TIDAK tergantung siklus hidup
+    // service worker): bandingkan VERSION sw.js di server dengan yang terakhir
+    // dilihat. Kalau berubah (deploy baru), reload sekali — halaman basi dari
+    // cache langsung dilempar ke versi terbaru. Query param acak memastikan
+    // fetch ini tidak pernah dijawab dari cache SW/HTTP lama.
+    // (Jaring pengaman #1 = siklus SW di bawah: skipWaiting + activate purge +
+    // broadcast ASJ_FORCE_RELOAD di sw.js.)
+    (function cekVersiSw() {
+      try {
+        if (!window.sessionStorage) return;
+        fetch('/sw.js?v=' + Date.now(), { cache: 'no-store' })
+          .then(function (r) {
+            return r.text();
+          })
+          .then(function (t) {
+            var m = t.match(/const VERSION = '([^']+)'/);
+            if (!m) return;
+            var ver = m[1];
+            var last = sessionStorage.getItem('asj_sw_ver');
+            sessionStorage.setItem('asj_sw_ver', ver);
+            if (last && last !== ver && !refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          })
+          .catch(function () {});
+      } catch (e) {
+        /* non-blokir */
+      }
+    })();
+
     // updateViaCache:'none' -> browser SELALU mengecek sw.js ke jaringan
     // (tidak memakai HTTP cache) setiap kali update dicek. Tanpa ini browser
     // bisa memakai sw.js lama berhari-hari dan versi lama terus disajikan.
@@ -132,6 +163,27 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
         }
       } catch (e) {
         /* toast opsional — jangan sampai memblokir reload */
+      }
+      window.setTimeout(function () {
+        window.location.reload();
+      }, 1200);
+    });
+
+    // Pesan dari Service Worker: versi baru SUDAH aktif (ASJ_FORCE_RELOAD
+    // dikirim sw.js saat activate). Langsung muat ulang — tanpa menunggu
+    // reload manual. Sama seperti controllerchange di atas, tapi ini juga
+    // menangkap tab yang sedang terbuka saat SW baru mengambil alih.
+    navigator.serviceWorker.addEventListener('message', function (ev) {
+      if (!ev.data || ev.data.type !== 'ASJ_FORCE_RELOAD') return;
+      if (refreshing) return;
+      if (userInteracted) return; // user sedang aktif — jangan ganggu
+      refreshing = true;
+      try {
+        if (window.showToast) {
+          window.showToast('Versi terbaru tersedia — memuat ulang…', 'info');
+        }
+      } catch (e) {
+        /* toast opsional */
       }
       window.setTimeout(function () {
         window.location.reload();
@@ -276,9 +328,8 @@ window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;  // Jalankan migrasi
   // Aman: tidak mengubah layout & tidak muncul kalau footer tidak ada.
   (function pasangPenandaVersi() {
     try {
-      var el = document.querySelector('[data-lang="footer.copyright"]');
-      if (!el) return;
-      if (el.querySelector('.asj-ver-badge')) return; // idempotent
+      // Hitung dulu hash bundel dari <script src="/assets/app-<hash>.js">
+      // (fallback: query ?v= di pwa.js untuk halaman standalone).
       var ver = '';
       var app = document.querySelector('script[src*="/assets/app-"]');
       if (app) {
@@ -293,11 +344,21 @@ window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64;  // Jalankan migrasi
         }
       }
       if (!ver) return;
+      var title =
+        'Versi aplikasi. Kalau tidak sama dengan versi terbaru, refresh / clear site data.';
+      // Chip versi di header (admin & publik) — langsung terlihat tanpa scroll.
+      var chip = document.getElementById('asj-ver-chip');
+      if (chip && !chip.textContent) {
+        chip.textContent = 'v' + ver;
+        chip.title = title;
+      }
+      // Badge versi di footer (kalau elemen footer ada).
+      var el = document.querySelector('[data-lang="footer.copyright"]');
+      if (!el || el.querySelector('.asj-ver-badge')) return; // idempotent
       var span = document.createElement('span');
       span.className = 'asj-ver-badge ml-2 text-emerald-300/90 font-mono';
       span.textContent = 'v' + ver;
-      span.title =
-        'Versi aplikasi. Kalau tidak sama dengan versi terbaru, refresh / clear site data.';
+      span.title = title;
       el.appendChild(span);
     } catch (e) {
       /* penanda versi opsional — jangan ganggu halaman */

@@ -3,8 +3,20 @@
    - Navigasi halaman: network-first (online selalu fresh, offline pakai cache)
    - Aset statis: stale-while-revalidate
    - API (.netlify, /api) & domain luar: selalu jaringan, tidak pernah di-cache
+
+   Strategi update ANTI-CACHE-NYANGKUT (kasus 2026-08-17: HP user terus lihat
+   versi lama walau deploy sudah live):
+   - self.skipWaiting() dipanggil PALING AWAL di install — SW baru langsung
+     aktif tanpa menunggu SKIP_WAITING dari pwa.js maupun semua tab ditutup.
+     Sebelumnya skipWaiting dipanggil SETELAH precache selesai; kalau precache
+     lambat dan user reload berulang, install di-abort tiap reload -> SW baru
+     tidak pernah aktif -> cache lama menempel selamanya.
+   - activate: hapus SEMUA cache lama, claim semua tab, lalu broadcast pesan
+     ASJ_FORCE_RELOAD -> pwa.js versi baru langsung reload halaman ke versi
+     terbaru (tanpa perlu reload manual).
+   - SHELL/VERSION di-patch otomatis oleh scripts/build-js.mjs tiap build.
 */
-const VERSION = 'asj-portal-app-935b39d018-m886a44dc';
+const VERSION = 'asj-portal-app-a6d33c32dd-m886a44dc';
 const SHELL = [
   '/',
   '/index.html',
@@ -14,7 +26,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-935b39d018.js',
+  '/assets/app-a6d33c32dd.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',
@@ -24,12 +36,15 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
+  // 1) AKTIFKAN SEKARANG — jangan pernah biarkan SW baru menunggu. Ini kunci
+  //    anti-cache-nyangkut: begitu sw.js berubah, SW baru langsung mengambil
+  //    alih pada kunjungan berikutnya.
+  self.skipWaiting();
+  // 2) Precache best-effort (per-item catch: satu aset gagal tidak menggagalkan).
   e.waitUntil(
     (async () => {
       const cache = await caches.open(VERSION);
-      // add per-item dengan catch: satu aset gagal tidak menggagalkan instalasi
       await Promise.all(SHELL.map((url) => cache.add(url).catch(() => {})));
-      await self.skipWaiting();
     })(),
   );
 });
@@ -37,16 +52,23 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     (async () => {
+      // Hapus SEMUA cache versi lama — tidak ada toleransi cache basi.
       const keys = await caches.keys();
       await Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)));
       await self.clients.claim();
+      // Beri tahu semua tab yang terbuka: versi baru sudah aktif, muat ulang.
+      // (pwa.js versi baru mendengarkan pesan ASJ_FORCE_RELOAD; tab yang masih
+      // menjalankan pwa.js lama otomatis dapat versi baru di navigasi berikutnya.)
+      const clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach((client) => {
+        client.postMessage({ type: 'ASJ_FORCE_RELOAD' }).catch(() => {});
+      });
     })(),
   );
 });
 
 // Pesan dari halaman (pwa.js): SW baru sudah terpasang -> aktifkan segera
-// (skipWaiting) supaya versi terbaru langsung dipakai tanpa menunggu semua
-// tab ditutup. Cache versi lama otomatis dihapus di activate di atas.
+// (jaring pengaman tambahan, selain skipWaiting di install).
 self.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -63,13 +85,17 @@ self.addEventListener('fetch', (e) => {
   // API Netlify: selalu jaringan (jangan di-cache)
   if (url.pathname.startsWith('/.netlify/') || url.pathname.startsWith('/api/')) return;
 
-  // Navigasi halaman: network-first dengan fallback cache
+  // Navigasi halaman: network-first dengan fallback cache.
+  // HANYA respons sukses (200) yang boleh masuk cache — halaman error tidak
+  // boleh menimpa cache offline yang masih bagus.
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
-          const copy = res.clone();
-          caches.open(VERSION).then((c) => c.put(url.pathname, copy));
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(VERSION).then((c) => c.put(url.pathname, copy));
+          }
           return res;
         })
         .catch(() => caches.match(url.pathname).then((m) => m || caches.match('/index.html'))),
