@@ -4,7 +4,27 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`**.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)**.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `dce8da8`
+
+### 🎨 Fix kontras tema light halaman standalone + keterbacaan label AI CV
+
+User melaporkan: di share view mode light **nama kandidat tidak terbaca**; di AI CV (ai_form.html) **tulisan label di atas blok isian manual tidak kebaca di mode dark** ("tulisan kayak mata semut").
+
+**Akar masalah kontras light (BUG selector lama):** semua override tema light generic (`body.theme-light :is(#page-admin, #modal-root, [data-page="share"], ...) :is(.bg-slate-950, .text-white, ...)`) memakai DESCENDANT combinator — hanya cocok elemen ber-`data-page` DI DALAM body. Kenyataannya atribut `data-page` ada di `<body>` itu sendiri → selector tidak pernah match di halaman standalone → kartu share tetap putih (glass-card di-override) tapi teks nama tetap `text-white` = **putih di atas putih**; panel ai-form/apply/master tetap gelap di mode light.
+
+**Fix:** semua selector generic tema light diperluas dengan varian `body.theme-light[data-page="share|ai-form|siswa-baru|apply-full|master-full"]` (langsung ke body) + varian opacity bg baru (`.bg-slate-900/70,/60,/40`, `.bg-slate-800/40`, `.bg-slate-700/80`) → override bg/text/border kini benar-benar jalan di 5 halaman standalone. Bagian ini sebenarnya sudah digarap sesi sebelumnya tapi **belum di-build ke `assets/main.css`** — sekarang di-build + hash `?v=` di-bump di 7 halaman.
+
+**Fix keterbacaan AI CV (mode dark):** di `ai_form.html` inline `<style>`:
+- `.label-micro`: 0.55rem → **0.66rem**, warna `#94a3b8` → **`#cbd5e1`** (lebih terang di atas blok isian gelap), margin bawah sedikit dilonggarkan.
+- `.section-title`: 0.65rem → **0.78rem** (judul seksi "1. Identitas & Kontak" dll).
+- `.input-micro`: 0.65rem → **0.72rem** (isi kolom manual ikut lebih terbaca); mobile 0.7/0.78rem.
+- Light mode tetap: `body.theme-light[data-page=ai-form] .label-micro/.section-title` = `#475569` (kontras 7.4:1 di atas putih) — tidak berubah.
+
+**Verifikasi:** `bun run build` idempotent (bundle `app-70c4fbc34d.js` & sw.js tidak berubah; assets/main.css kini memuat 86× selector `body.theme-light[data-page=apply-full]` — sebelumnya 0) · test **148/148** · diff bersih hanya 9 file (src/main.css + build + hash `?v=907489c892` di 7 HTML).
 
 ---
 

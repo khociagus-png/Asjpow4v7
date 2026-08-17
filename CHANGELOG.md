@@ -1,8 +1,16 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (skrip deploy Netlify otomatis + E2E regresi penuh di live + rename site asjportal).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (fix kontras tema light halaman standalone + keterbacaan label AI CV).
 
 ---
+
+## 2026-08-17 — `dce8da8` 🎨 Fix kontras tema light halaman standalone + keterbacaan label AI CV
+
+### Ringkasan
+
+- **Bug selector tema light (akar masalah "nama tidak terbaca di share mode light")**: override generic `body.theme-light :is(...[data-page="share"]...) :is(.bg-*, .text-*)` memakai descendant combinator, padahal `data-page` ada di `<body>` → tidak pernah match di halaman standalone. Selector diperluas dengan varian langsung `body.theme-light[data-page="share|ai-form|siswa-baru|apply-full|master-full"]` (+ varian opacity bg baru) → light theme benar-benar diterapkan ke share/ai-form/apply-full/master-full/siswa-baru.
+- **AI CV (ai_form.html) mode dark**: label di atas blok isian manual diperbesar `0.55rem→0.66rem` & dicerahkan `#94a3b8→#cbd5e1`; `section-title` `0.65rem→0.78rem`; `input-micro` `0.65rem→0.72rem` (+ versi mobile). Light mode tetap `#475569`.
+- **Build**: `assets/main.css` di-rebuild dari `src/main.css` (perubahan sesi sebelumnya yang belum di-build ikut ter-deploy) + hash `?v=8657590e50→907489c892` di-bump di 7 halaman. Test 148/148; build idempotent (bundle `app-70c4fbc34d.js` tidak berubah).
 
 ## 2026-08-17 — `2d59356` 🚀 Skrip deploy Netlify otomatis + E2E regresi penuh di live
 
