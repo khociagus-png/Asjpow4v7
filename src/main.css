@@ -389,6 +389,20 @@ body.theme-light #asj-footer {
 :is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(.text-blue-200, .text-blue-300, .text-blue-400) {
   color: #1d4ed8;
 }
+/* Aksen 400 yang belum diremap (label upload & judul seksi ai-form/share):
+   di atas kartu putih 400-an cerah kontrasnya <2.5:1 -> gelapkan ke 700-an. */
+:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-orange-400 {
+  color: #c2410c;
+}
+:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-violet-400 {
+  color: #6d28d9;
+}
+:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-teal-400 {
+  color: #0f766e;
+}
+:is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) .text-indigo-400 {
+  color: #4338ca;
+}
 /* Tombol dengan latar warna tetap putih teksnya */
 :is(body.theme-light :is(#page-admin, #modal-root, [data-page="share"], [data-page="ai-form"], [data-page="siswa-baru"]), body.theme-light[data-page="share"], body.theme-light[data-page="ai-form"], body.theme-light[data-page="siswa-baru"], body.theme-light[data-page="apply-full"], body.theme-light[data-page="master-full"]) :is(
   .bg-sky-600, .bg-sky-500,

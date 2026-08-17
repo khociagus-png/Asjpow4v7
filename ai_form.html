@@ -28,11 +28,14 @@
     .fade-in { animation: fadeIn 0.4s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     input[readonly], textarea[readonly] { cursor: default; }
-    /* Kontras & keterbacaan (2026-08-17): label & judul seksi diperbesar
-       (dulu 0.55rem/0.65rem = "mata semut") dan label dicerahkan dari
-       #94a3b8 -> #cbd5e1 supaya terbaca di mode dark di atas blok isian. */
-    .section-title { font-size: 0.78rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 0.25rem; }
-    .label-micro { display: block; font-size: 0.66rem; color: #cbd5e1; margin-bottom: 0.15rem; }
+    /* Kontras & keterbacaan (2026-08-17): label di atas blok isian manual
+       diperbesar 0.66rem -> 0.75rem & dicerahkan #cbd5e1 -> #e2e8f0 di mode
+       dark (dulu 0.55rem = "mata semut"). Di mode light (SAKURA) kartu berubah
+       putih, jadi label dipakai warna gelap #334155 supaya tetap terbaca
+       (sebelumnya #cbd5e1 di atas putih = nyaris tak terlihat). */
+    .section-title { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 0.25rem; }
+    .label-micro { display: block; font-size: 0.75rem; color: #e2e8f0; margin-bottom: 0.15rem; }
+    body.theme-light .label-micro { color: #334155; }
     /* .input-micro TIDAK men-set color (mengikuti warna body) supaya utility
        text-* (mis. text-pink-300 pada field Katakana/JP) bisa menimpanya —
        dan TIDAK dibungkus @layer components: blok <style> inline yang muncul
@@ -40,7 +43,7 @@
        (components jadi sebelum base) sehingga preflight malah menimpa
        komponen => background & border hilang. Border dibuat terlihat supaya
        tempat ketik manual jelas (dulu transparent = kolom tak terlihat). */
-    .input-micro { width: 100%; background-color: #1e293b; border-radius: 0.25rem; padding: 0.3rem 0.4rem; font-size: 0.72rem; outline: none; border: 1px solid #334155; }
+    .input-micro { width: 100%; background-color: #1e293b; border-radius: 0.25rem; padding: 0.3rem 0.4rem; font-size: 0.78rem; outline: none; border: 1px solid #475569; }
     .input-micro:focus { border-color: #5a8d00; }
     @media (max-width: 767px) {
       /* 100dvh = tinggi viewport DINAMIS iPhone Safari (URL bar naik/turun saat
@@ -51,16 +54,16 @@
       #chatPanel > div:last-child { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
       #sendBtn { min-height: 44px; min-width: 44px; }
       #userInput { min-height: 44px; }
-      .input-micro { font-size: 0.78rem; padding: 0.4rem 0.5rem; }
-      .label-micro { font-size: 0.7rem; }
-      .section-title { font-size: 0.82rem; }
+      .input-micro { font-size: 0.84rem; padding: 0.4rem 0.5rem; }
+      .label-micro { font-size: 0.78rem; }
+      .section-title { font-size: 0.85rem; }
     }
   </style>
   <!-- Fase 3.5 L6: js/pages/ai_form.js = entry ESM — meng-import core sendiri
        lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script (konteks URL) dipindah ke js/pages/ai_form.js (isi byte-identik) -->
-  <link rel="stylesheet" crossorigin href="/assets/main.css?v=907489c892">
+  <link rel="stylesheet" crossorigin href="/assets/main.css?v=c1e5a9f34b">
 </head>
 <body data-page="ai-form" class="flex flex-col md:flex-row h-screen w-full relative" style="height:100vh;height:100dvh" onload="initApp()">
 <script>try{var _t=localStorage.getItem('asj_theme');document.body.classList.add(_t==='SAKURA'?'theme-light':'theme-dark')}catch(e){document.body.classList.add('theme-dark')}</script>
@@ -100,7 +103,7 @@
           <img id="logoAsj" src="" alt="ASJ Logo" class="h-8 md:h-10 object-contain drop-shadow-md">
           <div>
             <h1 class="text-sm md:text-base font-black text-white leading-tight" data-lang="form.ai_title">PREVIEW CV JEPANG</h1>
-            <p class="text-[9px] md:text-[10px] text-slate-400"><span data-lang="form.ai_edit_manual">Edit manual aktif.</span> <span id="formModeLabel" data-lang="form.ai_saved">Data tersimpan otomatis di perangkat.</span></p>
+            <p class="text-[10px] md:text-[11px] text-slate-400"><span data-lang="form.ai_edit_manual">Edit manual aktif.</span> <span id="formModeLabel" data-lang="form.ai_saved">Data tersimpan otomatis di perangkat.</span></p>
           </div>
         </div>
         <button type="button" id="btnSaveDB" onclick="saveToDatabase()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] md:text-xs font-bold px-4 py-2 rounded-lg transition shadow-lg flex items-center gap-2"><i class="fas fa-cloud-upload-alt"></i> <span data-lang="form.ai_simpan_db">SIMPAN DB</span></button>
