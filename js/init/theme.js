@@ -236,11 +236,15 @@ export function applyTheme(theme) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (index/admin toggleTheme, engine/init.js
 // window.applyTheme & window.applyInterMilanVibe, 04_auth.js
-// window.applyInterMilanVibe).
-window.THEMES = THEMES;
-registerSeamAliases({
-    toggleTheme,
-    applyInterMilanVibe,
-    applyTheme,
-});
+// window.applyInterMilanVibe). THEMES = data eksplisit (objek konfigurasi,
+// tidak pernah di-reassign) → allowNonFunction.
+registerSeamAliases(
+    {
+        toggleTheme,
+        applyInterMilanVibe,
+        applyTheme,
+        THEMES,
+    },
+    { allowNonFunction: true, source: 'js/init/theme.js' }
+);
 

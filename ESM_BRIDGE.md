@@ -315,9 +315,13 @@ bawah file; sekarang diregistrasikan TERPUSAT lewat bridge.js:
 
 ```js
 // js/core/bridge.js — export publik
-export function registerSeamAliases(aliases) {
+export function registerSeamAliases(aliases, opts = {}) {
   for (const [name, value] of Object.entries(aliases || {})) {
-    if (typeof value !== 'function') continue; // guard: hanya fungsi
+    const isFn = typeof value === 'function';
+    if (!isFn && !opts.allowNonFunction) continue; // non-fungsi: perlu opt-in
+    if (SEAM_ALIASES.has(name) && SEAM_ALIASES.get(name) !== value) {
+      console.warn(`[bridge] TABRAKAN nama seam "${name}" ...`); // guard duplikat
+    }
     SEAM_ALIASES.set(name, value);  // registry pusat (private modul)
     window[name] = value;           // alias untuk pemakai global/HTML
   }
@@ -329,6 +333,16 @@ import { registerSeamAliases } from '../core/bridge.js';
 registerSeamAliases({ toggleLang, toggleSelection, submitSelection, openPreview, closePreview, renderGrid });
 ```
 
+- **Non-fungsi (objek/const)**: terima dengan `registerSeamAliases({ X },
+  { allowNonFunction: true, source: 'js/...' })` — untuk data immutable
+  (mis. `THEMES`, `urlFotoJeklin`). Hati-hati: nilai MUTABLE yang di-reassign
+  dari luar modul tidak sinkron (alias data = snapshot binding) → pakai
+  accessor (§3.2).
+- **Guard tabrakan nama**: nama yang sudah terdaftar lalu didaftarkan lagi
+  dengan nilai BERBEDA → `console.warn` (deteksi dini duplikat antar modul);
+  `opts.source` memberi label modul pendaftar di pesan. Re-registrasi nilai
+  sama = idempotent (tanpa warn).
+
 - **Pemakai**: 5 halaman standalone (`js/pages/*`) + **39 modul bundel**
   (`render/*`, `admin_ops/*`, `admin_modal/*`, `api/*`, `ai_copilot/*`,
   `engine/*`, `init/*`, `js/12_esign_match.js`, `js/13_rincian_builder.js`,
@@ -336,14 +350,53 @@ registerSeamAliases({ toggleLang, toggleSelection, submitSelection, openPreview,
   bawah tiap file diganti satu panggilan `registerSeamAliases({...})`.
 - **Ketersediaan**: bridge.js masuk STACK bundel + di-import `js/main.js` →
   index/admin ikut punya mekanisme ini. Semua modul bundel meng-import
-  `registerSeamAliases` dari `./core/bridge.js`; non-fungsi (objek/state)
-  TETAP `window.X = X` (registerSeamAliases menolak non-fungsi).
+  `registerSeamAliases` dari `./core/bridge.js`. Non-fungsi yang DAHULU
+  `window.X = X` (`THEMES`, `urlFotoJeklin`) kini ikut via
+  `{ allowNonFunction: true }`; `helpers_cv.js` tetap guard `typeof window`
+  (vitest) — satu-satunya pengecualian.
 - **Audit**: `PortalBridge.getSeamAliases()` = snapshot registry alias yang
-  terdaftar (smoke: admin/index = 208 alias, standalone = alias halamannya).
+  terdaftar (smoke: admin/index = 210 alias termasuk THEMES/urlFotoJeklin,
+  standalone = alias halamannya).
 - **Migrasi otomatis**: `.freebuff/sentralisasi-alias.mjs` (dry-run default,
   `--apply` untuk menulis) — memindahkan self-alias FUNGSI per modul,
   mempertahankan EOL per-baris (repo campuran CRLF/LF/lone-CR → tanpa itu
   `git diff` jadi churn penuh).
+
+### 3.5 Dispatcher delegasi `data-action` — HTML tidak lagi butuh `window.fn` (Fase 3.5 Langkah 6 lanjutan)
+
+Handler HTML inline yang POLOS (panggilan fungsi tunggal dengan argumen
+literal) bisa lepas dari `window.fn` global: pindahkan `onclick="fn('x')"`
+menjadi `data-action="fn" data-action-arg='["x"]'`. Satu listener delegasi di
+document (click + change) yang dipasang bridge.js saat load menangkap event,
+resolve nama dari registry seam (`SEAM_ALIASES` → fallback `window.*`), lalu
+memanggilnya:
+
+```html
+<button data-action="bukaModalKandidat" data-action-arg='["login"]'>Masuk</button>
+<input data-action="filterKandidat">  <!-- change -->
+```
+
+```js
+// bridge.js — dipasang sekali (idempotent), resolve via registry seam
+const fn = SEAM_ALIASES.get(name) || window[name]; // resolveSeam
+fn.apply(event.currentTarget, args);               // args dari data-action-arg
+if (result === false) event.preventDefault();
+```
+
+- **Syarat aman**: panggilan TUNGGAL `fn()` / `fn('a', 2)` dengan argumen
+  literal murni (string/angka/true/false/null). Handler EKSPRESI (ternary,
+  `===`, `||`), multi-statement (`a(); b();`), pakai `this`, template literal,
+  atau argumen non-literal TETAP `onclick` inline — tidak bisa didelegasikan
+  tanpa mengubah markup.
+- **Migrasi (2026-08-17)**: 131 handler di `admin.html`/`index.html` (103
+  unik: `changePage`, `adminSwitchTab`, `filterPublicData`, `bukaModal*`, ...)
+  dipindah ke `data-action`; sisa ~50 tetap inline karena ekspresi/
+  multi-statement/`this` (`setLanguage(CURRENT_LANG...)`, `cekUploadFile(this,
+  ...)`, filter mail). Skrip: `.freebuff/migrasi-data-action.mjs` (dry-run /
+  `--apply`, JSON-validated, escape `&#39;` untuk atribut kutip-tunggal).
+- **Audit**: `PortalBridge.dispatchSeamAction(name, event, args)` = eksekusi
+  langsung (dipakai dispatcher & unit test). Test: `js/core/bridge.test.js`
+  (6 test — non-fungsi/guard duplikat/idempotent/resolve/fallback).
 
 ---
 

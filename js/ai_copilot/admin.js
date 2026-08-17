@@ -222,12 +222,15 @@ Object.defineProperty(window, 'currentAiCandidateId', {
   get() { return currentAiCandidateId; },
   set(v) { currentAiCandidateId = v; },
 });
-registerSeamAliases({
-    bukaAdminAiCopilot,
-    tutupAdminAi,
-    kirimPesanAdminAi,
-    simpanKandidatDariAi,
-    tambahPesanAdminAi,
-});
-window.urlFotoJeklin = urlFotoJeklin;
+registerSeamAliases(
+    {
+        bukaAdminAiCopilot,
+        tutupAdminAi,
+        kirimPesanAdminAi,
+        simpanKandidatDariAi,
+        tambahPesanAdminAi,
+        urlFotoJeklin, // const string → data eksplisit (allowNonFunction)
+    },
+    { allowNonFunction: true, source: 'js/ai_copilot/admin.js' }
+);
 

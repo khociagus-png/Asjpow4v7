@@ -32,6 +32,18 @@
 //     }
 //     return fn(action, payload);
 //   }
+//
+// DISPATCHER DELEGASI `data-action` (Fase 3.5 Langkah 6 lanjutan):
+//   Handler HTML inline yang POLOS (panggilan fungsi tunggal dengan argumen
+//   literal) bisa dipindah dari `onclick="fn('x')"` ke atribut
+//   `data-action="fn"` (+ `data-action-arg='["x"]'` JSON untuk argumen).
+//   Satu listener delegasi di document (click/change) yang dipasang di bawah
+//   menangkap event, resolve nama dari registry seam (SEAM_ALIASES → fallback
+//   window), lalu memanggilnya. Dengan begitu halaman TIDAK bergantung pada
+//   `window.fn` untuk handler itu — alias cukup terdaftar di registry.
+//   Handler yang masih EKSPRESI (ternary, multi-statement, `this`, template
+//   literal) TETAP pakai onclick inline — tidak bisa didelegasikan tanpa
+//   mengubah markup (lihat ESM_BRIDGE.md §3.5).
 // =============================================================================
 import * as api from '../../api-client.js';
 import * as i18n from '../../i18n.js';
@@ -71,6 +83,9 @@ export const PortalBridge = {
   // --- Registrasi alias seam HTML↔JS (sentralisasi, Fase 3.5 Langkah 6) ---
   registerSeamAliases,
   getSeamAliases,
+
+  // --- Dispatcher delegasi data-action (Fase 3.5 Langkah 6 lanjutan) ---
+  dispatchSeamAction,
 };
 
 // =============================================================================
@@ -89,19 +104,46 @@ export const PortalBridge = {
 // dan re-registrasi idempotent (nilai sama → tidak ada efek ganda).
 // =============================================================================
 
-// Registry pusat: nama alias → fungsi. Private modul (tidak bocor ke window).
+// Registry pusat: nama alias → nilai (fungsi, atau data eksplisit via
+// `{ allowNonFunction: true }`). Private modul (tidak bocor ke window).
 const SEAM_ALIASES = new Map();
+// Jejak nama → deskripsi modul pendaftar (untuk pesan tabrakan yang jelas).
+const SEAM_SOURCES = new Map();
 
 /**
  * Daftarkan peta alias seam HTML↔JS ke window secara terpusat.
- * @param {Record<string, Function>} aliases Nama alias → fungsi handler.
- * @returns {Record<string, Function>} Peta yang sama (untuk chaining/tes).
+ * @param {Record<string, Function|*>} aliases Nama alias → handler (fungsi)
+ *   atau nilai data (objek/const — HANYA dengan `opts.allowNonFunction`).
+ * @param {{ allowNonFunction?: boolean, source?: string }} [opts]
+ *   - `allowNonFunction`: izinkan nilai non-fungsi (objek/const). Hati-hati:
+ *     nilai yang MUTABLE lalu di-reassign dari luar modul tidak akan sinkron
+ *     (alias data property = snapshot binding) — untuk itu pakai accessor.
+ *   - `source`: label modul pendaftar (untuk pesan tabrakan nama).
+ * @returns {Record<string, Function|*>} Peta yang sama (untuk chaining/tes).
  */
-export function registerSeamAliases(aliases) {
+export function registerSeamAliases(aliases, opts = {}) {
   for (const [name, value] of Object.entries(aliases || {})) {
-    if (typeof value !== 'function') {
-      console.warn(`[bridge] registerSeamAliases: "${name}" bukan fungsi — dilewati.`);
+    const isFn = typeof value === 'function';
+    if (!isFn && !opts.allowNonFunction) {
+      console.warn(
+        `[bridge] registerSeamAliases: "${name}" bukan fungsi — dilewati. ` +
+          `Kalau ini data eksplisit (objek/const), daftarkan dengan { allowNonFunction: true }.`
+      );
       continue;
+    }
+    // Guard tabrakan nama: nama yang sama terdaftar ulang dengan nilai berbeda
+    // = indikasi dua modul mendefinisikan seam yang sama → deteksi dini.
+    if (SEAM_ALIASES.has(name)) {
+      const prev = SEAM_ALIASES.get(name);
+      if (prev !== value) {
+        console.warn(
+          `[bridge] TABRAKAN nama seam "${name}": sudah terdaftar oleh ` +
+            `${SEAM_SOURCES.get(name) || 'modul lain'} dengan nilai berbeda — ` +
+            `nilai terbaru menang. Periksa duplikat antar modul!`
+        );
+      }
+    } else {
+      SEAM_SOURCES.set(name, opts.source || 'modul lain');
     }
     SEAM_ALIASES.set(name, value);
     window[name] = value;
@@ -111,14 +153,79 @@ export function registerSeamAliases(aliases) {
 
 /**
  * Snapshot registry alias seam (untuk audit/debug).
- * @returns {Record<string, Function>}
+ * @returns {Record<string, Function|*>}
  */
 export function getSeamAliases() {
   return Object.fromEntries(SEAM_ALIASES);
 }
 
+// =============================================================================
+// Dispatcher delegasi `data-action` — 1 listener di document untuk semua
+// elemen `[data-action]` (click/change), resolve dari registry seam.
+// -----------------------------------------------------------------------------
+// Elemen: `<button data-action="bukaModalKandidat" data-action-arg='["login"]'>`
+// atau `<input data-action="filterKandidat">` (change). Nama di-resolve dari
+// SEAM_ALIASES (→ fallback window.*), dipanggil dengan argumen JSON
+// `data-action-arg` (array). Handler yang butuh ekspresi/this TETAP inline.
+// =============================================================================
+
+const ACTION_SELECTOR = '[data-action]';
+let dispatcherInstalled = false;
+
+function resolveSeam(name) {
+  if (SEAM_ALIASES.has(name)) return SEAM_ALIASES.get(name);
+  if (typeof window[name] === 'function') return window[name];
+  return null;
+}
+
+/**
+ * Eksekusi satu seam action secara langsung (dipakai dispatcher & tes).
+ * @param {string} name Nama action (harus terdaftar / ada di window).
+ * @param {Event} [event] Event asli (untuk konteks `currentTarget`).
+ * @param {any[]} [args] Argumen tambahan (dari data-action-arg).
+ * @returns {*} Nilai balik handler (false → caller boleh preventDefault).
+ */
+export function dispatchSeamAction(name, event, args) {
+  const fn = resolveSeam(name);
+  if (typeof fn !== 'function') {
+    console.warn(`[bridge] data-action "${name}" tidak terdaftar (getSeamAliases()) maupun di window.*`);
+    return undefined;
+  }
+  return fn.apply(event ? event.currentTarget : undefined, args || []);
+}
+
+function handleDelegatedAction(event, type) {
+  const el = event.target && event.target.closest ? event.target.closest(ACTION_SELECTOR) : null;
+  if (!el) return;
+  const name = el.getAttribute('data-action');
+  if (!name) return;
+  let args = [];
+  const rawArg = el.getAttribute('data-action-arg');
+  if (rawArg) {
+    try {
+      const parsed = JSON.parse(rawArg);
+      if (Array.isArray(parsed)) args = parsed;
+      else args = [parsed];
+    } catch (err) {
+      console.warn(`[bridge] data-action-arg "${rawArg}" bukan JSON valid — dipanggil tanpa argumen.`, err);
+    }
+  }
+  const result = dispatchSeamAction(name, event, args);
+  if (result === false) event.preventDefault();
+  void type;
+}
+
+/** Pasang listener delegasi document (sekali saja, idempotent). */
+export function initSeamDispatcher() {
+  if (dispatcherInstalled || typeof document === 'undefined') return;
+  dispatcherInstalled = true;
+  document.addEventListener('click', (e) => handleDelegatedAction(e, 'click'));
+  document.addEventListener('change', (e) => handleDelegatedAction(e, 'change'));
+}
+
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
+initSeamDispatcher();
 
 // ESM-only: modul lain bisa `import { PortalBridge, registerSeamAliases } from './bridge.js'`.
 export default PortalBridge;

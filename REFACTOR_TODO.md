@@ -657,11 +657,26 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
         self-alias fungsi di 39 modul bundel (`render/*`, `admin_ops/*`,
         `admin_modal/*`, `api/*`, `ai_copilot/*`, `engine/*`, `init/*`, dll)
         dipindah ke `registerSeamAliases` (skrip `.freebuff/sentralisasi-alias.mjs`,
-        EOL-preserving). Yang TETAP `window.X = X` (sengaja): non-fungsi
-        (`window.THEMES`, `window.urlFotoJeklin` const), `helpers_cv.js`
-        (guard `typeof window` utk vitest), dan `js/pages/*` tetap via bridge.
-        `js/apply-docs.js` (standalone apply-full) ikut via bridge. Runtime
-        preview: registry = 208 alias (admin/index/share/apply-full), 0 error JS.
+        EOL-preserving). `helpers_cv.js` (guard `typeof window` utk vitest)
+        tetap pengecualian; `js/pages/*` & `js/apply-docs.js` via bridge.
+        Runtime preview: registry = 208 alias, 0 error JS.
+      ④ **DATA + DISPATCHER SELESAI (2026-08-17)** — (a) `registerSeamAliases`
+        menerima NON-FUNGSI eksplisit (`{ allowNonFunction: true, source }`) →
+        `THEMES` & `urlFotoJeklin` ikut registry (210 alias); (b) **guard
+        tabrakan nama**: nama terdaftar ulang dgn nilai berbeda → console.warn
+        (deteksi dini duplikat antar modul; `source` utk label);
+        (c) **dispatcher delegasi `data-action`** di bridge.js (1 listener
+        document click/change, resolve dari SEAM_ALIASES → fallback window.*,
+        argumen JSON `data-action-arg`, `false` → preventDefault) — HTML tidak
+        lagi butuh `window.fn` utk handler polos. **131 handler dipindah** dari
+        `admin.html`/`index.html` (103 unik: changePage/adminSwitchTab/
+        filterPublicData/bukaModal*/setSortDb/dll; skrip
+        `.freebuff/migrasi-data-action.mjs`, JSON-validated); ~50 tetap inline
+        (ekspresi/multi-statement/this — tidak bisa didelegasikan tanpa ubah
+        markup). Test: `js/core/bridge.test.js` (6 test). Verifikasi: no-undef
+        0 · lint 0/12 · test 145/145 · build idempoten · audit HIGH=0 · smoke
+        preview: 210 alias, semua data-action ter-resolve, klik delegasi
+        (toggleTheme) bekerja, standalone tetap jalan, 0 error JS.
 - [ ] Kriteria selesai per langkah: scan `window\.\w+\s*=` di `js/` menurun; `no-undef`
       tetap 0 error; `check:globals` nol kolisi; E2E SEMUA LULUS.
 
