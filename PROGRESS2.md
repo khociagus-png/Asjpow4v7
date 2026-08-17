@@ -5,7 +5,18 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🧹 Rapikan repo: dokumen diringkas point-form + format kode seragam (prettier).
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔒 Pengaman format: pre-commit hook + CI check GitHub.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `02cc74f`
+
+### 🔒 Pengaman format anti-melenceng (team pakai desktop/HP/GitHub web/local)
+
+- **Pre-commit hook** `.githooks/pre-commit` (DI-COMMIT, executable): cek `format:check` (prettier) seluruh repo + `node --check` file `.js/.mjs` yang di-stage. Aktif otomatis saat `bun install` (`prepare` script di `package.json`) atau manual `bun run hook:install`. Skip darurat: `git commit --no-verify`.
+- **CI check** `.github/workflows/ci-check.yml`: `bun install` → `format:check` → `lint` → `test` → `build` di tiap push/PR ke `main` — menangkap commit dari GitHub web/HP yang tidak lewat hook lokal.
+- README (aturan 0) & AGENTS.md §7 di-update.
+- **Teruji**: hook menolak file tak rapi (exit 1) & commit bersih lolos (commit ini sendiri dibuat lewat hook).
 
 ---
 

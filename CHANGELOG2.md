@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-17 — `02cc74f` 🔒 Pengaman format: pre-commit hook + CI check GitHub
+
+### Ringkasan
+
+- `.githooks/pre-commit` (di-commit, executable): format:check + node --check file staged; aktif via `bun install` (prepare) / `bun run hook:install`; skip `--no-verify`.
+- `.github/workflows/ci-check.yml`: format + lint + test + build di tiap push/PR ke `main` (menangkap commit GitHub web/HP).
+- Teruji: tolak file tak rapi (exit 1) + commit bersih lolos. README/AGENTS di-update.
+
+---
+
 ## 2026-08-17 — `dcb6938` 🧹 Rapikan repo: dokumen point-form + format kode seragam (prettier)
 
 ### Ringkasan
