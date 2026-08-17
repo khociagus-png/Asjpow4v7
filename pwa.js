@@ -9,19 +9,33 @@
    file; standalone: <script type="module"> yang dieksekusi setelah parse,
    sebelum DOMContentLoaded/onload).
 */
-// 0. MODE DEV (localhost) — preview SELALU fresh, tanpa chance versi lama.
+// 0. MODE DEV (localhost) & PREVIEW Freebuff — preview SELALU fresh, tanpa
+// chance versi lama.
 // Service worker memakai strategi stale-while-revalidate: di production VERSION
 // SW naik tiap deploy (bump-cache-versions) jadi cache dibuang otomatis, tapi
 // di dev VERSION TIDAK berubah saat kita mengedit file -> aset JS lama bisa
 // terus disajikan dari cache SW walau kode sumber sudah berubah. Solusinya:
 // jangan daftarkan SW di localhost SAMA SEKALI, dan unregister + bersihkan
 // cache SW lama (dari sesi dev sebelumnya) supaya tidak ada yang ikut campur.
+//
+// Host PREVIEW Freebuff (mis. https://3000-<id>.daytonaproxy01.net) juga
+// BUKAN production, tapi bukan localhost pula — tanpa pengecualian ini HP user
+// mendaftarkan SW beneran di domain preview dan cache-nya nyangkut (reload
+// berulang tetap versi lama, kasus 2026-08-17). Perlakukan sama seperti
+// localhost: unregister SW lama + bersihkan cache + JANGAN daftar. (Server
+// preview serve-static.mjs juga melayani sw.js no-op sebagai jaring pengaman —
+// lihat NOOP_SW di sana.)
 var IS_DEV_HOST =
   typeof location !== 'undefined' &&
   (location.hostname === 'localhost' ||
     location.hostname === '127.0.0.1' ||
     location.hostname === '[::1]');
-if (IS_DEV_HOST && 'serviceWorker' in navigator) {
+var IS_PREVIEW_HOST =
+  typeof location !== 'undefined' &&
+  (location.hostname.indexOf('daytonaproxy') > -1 ||
+    location.hostname.indexOf('.freebuff') > -1 ||
+    location.hostname.indexOf('freebuff.app') > -1);
+if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
   // Hapus SW lama + cache-nya (aman: hanya di localhost, production tidak
   // tersentuh). Dipanggil sekali di awal, sebelum registrasi apa pun.
   navigator.serviceWorker

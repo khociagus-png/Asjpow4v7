@@ -90,6 +90,36 @@ async function handleApi(req, res) {
   });
 }
 
+// Service worker NO-OP untuk preview.
+//
+// Masalah nyata (user, 2026-08-17): preview Freebuff dibuka dari HP. Domain
+// preview BUKAN localhost, jadi pwa.js mendaftarkan service worker beneran di
+// domain preview itu -> cache SW nyangkut di HP -> reload berulang tetap versi
+// lama walau kode sudah berubah. Solusi: preview TIDAK BOLEH punya SW beneran.
+// sw.js yang dilayani di sini hanya pembersih:
+//   - activate  -> hapus SEMUA cache + clients.claim (menimpa SW lama yang
+//                  masih terdaftar & membersihkan cache versi lamanya),
+//   - TANPA fetch listener -> tidak pernah meng-intercept request apa pun,
+//                  setiap load diambil langsung dari jaringan (selalu fresh).
+// Production (Netlify) TIDAK terpengaruh: file sw.js asli di repo tetap
+// dipakai di sana (lihat netlify.toml + build-js.mjs).
+const NOOP_SW = [
+  '/* ASJ Portal preview: service worker no-op (lihat serve-static.mjs) */',
+  "self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });",
+  "self.addEventListener('activate', (e) => {",
+  '  e.waitUntil(',
+  '    (async () => {',
+  '      const keys = await caches.keys();',
+  '      await Promise.all(keys.map((k) => caches.delete(k)));',
+  '      await self.clients.claim();',
+  '    })(),',
+  '  );',
+  '});',
+  "self.addEventListener('message', (e) => {",
+  "  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();",
+  '});',
+].join('\n');
+
 async function resolveFile(pathname) {
   if (pathname.endsWith('/')) pathname += 'index.html';
   const file = normalize(join(ROOT, pathname));
@@ -128,6 +158,18 @@ createServer(async (req, res) => {
         out = { error: 'Error internal: ' + e.message };
       }
       sendJson(res, out.error ? 400 : 200, out);
+      return;
+    }
+
+    // Preview: /sw.js SELALU no-op (lihat NOOP_SW) — SW lama dari sesi
+    // preview sebelumnya langsung diganti + cache-nya dihapus. Header
+    // no-store supaya browser/proxy tidak meng-cache sw.js ini.
+    if (req.method === 'GET' && pathname === '/sw.js') {
+      res.writeHead(200, {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store',
+      });
+      res.end(NOOP_SW);
       return;
     }
 
