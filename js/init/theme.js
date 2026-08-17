@@ -1,5 +1,6 @@
 import { ASSETS, CURRENT_THEME } from './state.js';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -237,6 +238,9 @@ export function applyTheme(theme) {
 // window.applyTheme & window.applyInterMilanVibe, 04_auth.js
 // window.applyInterMilanVibe).
 window.THEMES = THEMES;
-window.toggleTheme = toggleTheme;
-window.applyInterMilanVibe = applyInterMilanVibe;
-window.applyTheme = applyTheme;
+registerSeamAliases({
+    toggleTheme,
+    applyInterMilanVibe,
+    applyTheme,
+});
+

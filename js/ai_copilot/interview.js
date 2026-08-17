@@ -1,5 +1,6 @@
 import { ALL_CANDIDATES, currentKandidatName, currentKandidatWa } from '../init/state.js';
 import { ensureAllCandidates } from '../api/candidates.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -272,5 +273,8 @@ export async function kirimHasilWawancaraKeAdmin(hasil) {
   appendInterviewChat('ai', msg);
 }
 
-window.bukaSimulatorInterview = bukaSimulatorInterview;
-window.sendInterviewMessage = sendInterviewMessage;
+registerSeamAliases({
+    bukaSimulatorInterview,
+    sendInterviewMessage,
+});
+

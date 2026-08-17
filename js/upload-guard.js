@@ -1,3 +1,4 @@
+import { registerSeamAliases } from './core/bridge.js';
 // =============================================================================
 // upload-guard.js — Validasi SERAGAM untuk SEMUA input type="file" di portal.
 // -----------------------------------------------------------------------------
@@ -99,4 +100,7 @@ export function cekUploadFile(input, opts) {
 
 // BRIDGE ESM → classic/bundel & HTML inline: alias window.* (pemakai lama
 // memanggil `cekUploadFile(...)` bare dari onclick — string dieval global).
-window.cekUploadFile = cekUploadFile;
+registerSeamAliases({
+    cekUploadFile,
+});
+

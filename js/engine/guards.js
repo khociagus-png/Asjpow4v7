@@ -1,6 +1,7 @@
 import { tr } from '../../i18n.js';
 import { showToast } from '../init/util.js';
 import { ALL_FORM, PREV_MAIL_COUNT } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -105,6 +106,9 @@ export function updateMailBadge() {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, api/*.js patch-in-place).
-window.adaModalTerbuka = adaModalTerbuka;
-window.sedangDiscrollTabel = sedangDiscrollTabel;
-window.updateMailBadge = updateMailBadge;
+registerSeamAliases({
+    adaModalTerbuka,
+    sedangDiscrollTabel,
+    updateMailBadge,
+});
+

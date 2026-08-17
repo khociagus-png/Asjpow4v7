@@ -9,3 +9,6 @@ dist/
 
 # Local Netlify folder
 .netlify
+
+# stray file Windows (nama reserved) — jangan pernah diikutkan
+nul

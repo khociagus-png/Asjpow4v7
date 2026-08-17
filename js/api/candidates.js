@@ -2,6 +2,7 @@ import { ALL_CANDIDATES, ALL_CANDIDATES_TOTAL, ALL_JOBS, currentAdminName, curre
 import { renderLanguage } from '../01_public.js';
 import { renderAdminFull } from '../render/admin.js';
 import { normalizeGenderValue } from '../03_candidate.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 9. INTERAKSI BACKEND — DOMAIN KANDIDAT (candidates)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -951,17 +952,20 @@ export async function muatLebihKandidat() {
 // HTML inline onclick/onchange (partials/modals-shared.html + admin/index) +
 // render/*, 03_candidate.js, 08_wa_pintar.js, 10_cv_rirekisho.js,
 // 12_esign_match.js, admin_ops/candidates.js (window.ensureAllCandidates).
-window.bukaModalTambahKandidat = bukaModalTambahKandidat;
-window.pilihKandidatManual = pilihKandidatManual;
-window.cekKandidatOtomatis = cekKandidatOtomatis;
-window.tandaiFileDipilih = tandaiFileDipilih;
-window.tambahBarisLain = tambahBarisLain;
-window.hapusBarisLain = hapusBarisLain;
-window.prosesUploadKandidat = prosesUploadKandidat;
-window.bukaSuperEditKandidat = bukaSuperEditKandidat;
-window.simpanSuperEditKandidat = simpanSuperEditKandidat;
-window.prosesUploadRevisi = prosesUploadRevisi;
-window.aksiGenerateQr = aksiGenerateQr;
-window.tutupModalQr = tutupModalQr;
-window.ensureAllCandidates = ensureAllCandidates;
-window.muatLebihKandidat = muatLebihKandidat;
+registerSeamAliases({
+    bukaModalTambahKandidat,
+    pilihKandidatManual,
+    cekKandidatOtomatis,
+    tandaiFileDipilih,
+    tambahBarisLain,
+    hapusBarisLain,
+    prosesUploadKandidat,
+    bukaSuperEditKandidat,
+    simpanSuperEditKandidat,
+    prosesUploadRevisi,
+    aksiGenerateQr,
+    tutupModalQr,
+    ensureAllCandidates,
+    muatLebihKandidat,
+});
+

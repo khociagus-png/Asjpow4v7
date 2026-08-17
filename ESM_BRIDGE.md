@@ -293,9 +293,14 @@ Sejak Langkah 14 (esbuild bundle mode via js/main.js), modul ESM **boleh saling
   ③ **alias seam HTML↔JS diregistrasikan TERPUSAT** lewat `registerSeamAliases
   ({ namaFn, ... })` di bridge.js — registry `SEAM_ALIASES` (audit via
   `getSeamAliases()`), menggantikan blok `window.X = X` per file di 5 halaman
-  standalone. Alias per-simbol di modul bundel (admin/index) masih
-  self-registered `window.X = X` — mekanisme sentral sudah tersedia (bridge
-  ada di STACK/main.js), migrasinya menyusul.
+  standalone. ④ **SENTRALISASI modul bundel SELESAI (2026-08-17)** — 208
+  self-alias fungsi di 39 modul bundel (`render/*`, `admin_ops/*`,
+  `admin_modal/*`, `api/*`, `ai_copilot/*`, `engine/*`, `init/*`, dll)
+  dipindah ke `registerSeamAliases` (skrip `.freebuff/sentralisasi-alias.mjs`,
+  EOL-preserving) + `js/apply-docs.js` (standalone apply-full) ikut via
+  bridge. Yang TETAP `window.X = X` (sengaja): non-fungsi (`window.THEMES`,
+  `window.urlFotoJeklin` const), `helpers_cv.js` (guard `typeof window` utk
+  vitest).
 
 Aturan tetap: alias `window.*` dipertahankan untuk pemakai HTML inline
 (onclick/onchange) — seam HTML↔JS itu sah dan tidak akan dihapus; yang
@@ -324,14 +329,21 @@ import { registerSeamAliases } from '../core/bridge.js';
 registerSeamAliases({ toggleLang, toggleSelection, submitSelection, openPreview, closePreview, renderGrid });
 ```
 
-- **Pemakai**: 5 halaman standalone (`js/pages/*`) — blok `window.X = X` di
+- **Pemakai**: 5 halaman standalone (`js/pages/*`) + **39 modul bundel**
+  (`render/*`, `admin_ops/*`, `admin_modal/*`, `api/*`, `ai_copilot/*`,
+  `engine/*`, `init/*`, `js/12_esign_match.js`, `js/13_rincian_builder.js`,
+  dll) + `js/apply-docs.js` (standalone apply-full) — blok `window.X = X` di
   bawah tiap file diganti satu panggilan `registerSeamAliases({...})`.
 - **Ketersediaan**: bridge.js masuk STACK bundel + di-import `js/main.js` →
-  index/admin ikut punya mekanisme ini (bundel tidak memanggilnya dengan alias
-  halaman, jadi aman). Modul bundel yang mau sentral juga bisa meng-import
-  `registerSeamAliases` dari `./core/bridge.js`.
+  index/admin ikut punya mekanisme ini. Semua modul bundel meng-import
+  `registerSeamAliases` dari `./core/bridge.js`; non-fungsi (objek/state)
+  TETAP `window.X = X` (registerSeamAliases menolak non-fungsi).
 - **Audit**: `PortalBridge.getSeamAliases()` = snapshot registry alias yang
-  terdaftar (digunakan smoke test halaman standalone).
+  terdaftar (smoke: admin/index = 208 alias, standalone = alias halamannya).
+- **Migrasi otomatis**: `.freebuff/sentralisasi-alias.mjs` (dry-run default,
+  `--apply` untuk menulis) — memindahkan self-alias FUNGSI per modul,
+  mempertahankan EOL per-baris (repo campuran CRLF/LF/lone-CR → tanpa itu
+  `git diff` jadi churn penuh).
 
 ---
 
@@ -480,7 +492,11 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    (bukan esbuild `--splitting`/bundle per halaman): tiap modul halaman
    meng-import core lewat `js/core/bridge.js` (`registerSeamAliases`) sehingga
    tag core terpisah di HTML dihapus. Ini membuka jalur sentralisasi alias
-   (Fase 3.5 Langkah 6) — lihat §3.4. Opsi esbuild bundle per halaman tetap
+   (Fase 3.5 Langkah 6) — lihat §3.4. **Jalur DIJALANKAN PENUH 2026-08-17:**
+   208 self-alias fungsi di 39 modul bundel + `js/apply-docs.js` dipindah ke
+   `registerSeamAliases` (skrip `.freebuff/sentralisasi-alias.mjs`, dry-run
+   default / `--apply`); non-fungsi (`THEMES`, `urlFotoJeklin`) & `helpers_cv`
+   tetap `window.X = X` (sengaja). Opsi esbuild bundle per halaman tetap
    terbuka di masa depan kalau mau 1 file per halaman.
 6. ✅ **Aktifkan `no-undef` per file ESM** — SELESAI (langkah 15, turn ini).
    `eslint.config.js` memakai `no-undef: error` utk `js/**/*.js` +

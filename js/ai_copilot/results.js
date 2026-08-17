@@ -1,4 +1,5 @@
 import { isAdmin } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -190,6 +191,9 @@ export async function updateBiodataDariHasilAdmin() {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (bar parse di parse.js: generateWawancaraModelAdmin /
 // lihatHasilWawancaraAdmin / updateBiodataDariHasilAdmin).
-window.generateWawancaraModelAdmin = generateWawancaraModelAdmin;
-window.lihatHasilWawancaraAdmin = lihatHasilWawancaraAdmin;
-window.updateBiodataDariHasilAdmin = updateBiodataDariHasilAdmin;
+registerSeamAliases({
+    generateWawancaraModelAdmin,
+    lihatHasilWawancaraAdmin,
+    updateBiodataDariHasilAdmin,
+});
+

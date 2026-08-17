@@ -10,6 +10,7 @@ import { normalizeWa, isValidWaFormat } from '../shared/wa-rules.js';
 import { callAPI } from '../api-client.js';
 import { tr } from '../i18n.js';
 import { showToast, safeSet } from './init/util.js';
+import { registerSeamAliases } from './core/bridge.js';
 
 import { currentAdminName, currentKandidatWa } from './init/state.js';
 export function bukaModalKandidat(mode) {
@@ -289,22 +290,25 @@ export async function prosesLoginPersonal() {
 // window.showLoginAdminMaster). js/04_auth.js TIDAK dimuat halaman
 // standalone — bridge hanya untuk bundel.
 // ---------------------------------------------------------------------------
-window.bukaModalKandidat = bukaModalKandidat;
 // Gate WA (normalizeWaInput/isValidWaInput) dipakai admin_ops/candidates.js
 // parseDaftarOrtu (Undang Grup Kelas) — 0xx/8xx otomatis jadi 62xx + validasi
 // 628… 12-13 digit. Alias ini SEMPAT dihapus saat pembersihan Fase 3.5 L6 dan
 // mematahkan normalisasi WA fitur itu (fallback regex ketat menolak 0xx/8xx).
-window.normalizeWaInput = normalizeWaInput;
-window.isValidWaInput = isValidWaInput;
-window.toastWaFormat = toastWaFormat;
-window.prosesDaftarKandidat = prosesDaftarKandidat;
-window.bukaModalGantiPass = bukaModalGantiPass;
-window.tutupModalGantiPass = tutupModalGantiPass;
-window.prosesGantiPasswordKandidat = prosesGantiPasswordKandidat;
-window.prosesLoginKandidat = prosesLoginKandidat;
-window.showLoginAdminMaster = showLoginAdminMaster;
-window.prosesLoginMaster = prosesLoginMaster;
-window.showLoginPersonal = showLoginPersonal;
-window.prosesLoginPersonal = prosesLoginPersonal;
+registerSeamAliases({
+    bukaModalKandidat,
+    normalizeWaInput,
+    isValidWaInput,
+    toastWaFormat,
+    prosesDaftarKandidat,
+    bukaModalGantiPass,
+    tutupModalGantiPass,
+    prosesGantiPasswordKandidat,
+    prosesLoginKandidat,
+    showLoginAdminMaster,
+    prosesLoginMaster,
+    showLoginPersonal,
+    prosesLoginPersonal,
+});
 
 // ==========================================
+

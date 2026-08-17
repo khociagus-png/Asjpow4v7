@@ -1,3 +1,4 @@
+import { registerSeamAliases } from './core/bridge.js';
 // apply-docs.js — Logika MURNI model dokumen upload di apply-full.html.
 //
 // Dipisah dari HTML supaya mudah di-unit-test dan mencegah regresi diam-diam:
@@ -52,5 +53,5 @@ export function applyDocsPlan(reqStr) {
   };
 }
 
-// BRIDGE ESM → classic/bundel: apply_full.js memanggil via window.*.
-window.applyDocsPlan = applyDocsPlan;
+// BRIDGE ESM → classic/bundel: apply_full.js memanggil via window.* (terdaftar di bridge).
+registerSeamAliases({ applyDocsPlan });

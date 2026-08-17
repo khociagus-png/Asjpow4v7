@@ -1,4 +1,5 @@
 import { isAdmin, isKandidat } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -50,4 +51,7 @@ export function jalankanSemuaSkeleton() {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js window.jalankanSemuaSkeleton).
-window.jalankanSemuaSkeleton = jalankanSemuaSkeleton;
+registerSeamAliases({
+    jalankanSemuaSkeleton,
+});
+

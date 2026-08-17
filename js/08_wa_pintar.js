@@ -1,5 +1,6 @@
 import { ALL_CANDIDATES, ALL_RIWAYAT_KANDIDAT, ALL_WA_TEMPLATES, CURRENT_WA_KANDIDAT, currentAdminName } from './init/state.js';
 import { ensureAllCandidates } from './api/candidates.js';
+import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (submitWaTemplate/batalEditWa/tutupPamflet), onclick string
 // render/admin.js + render/candidate.js + render/mail.js (renderWaTemplates,
@@ -454,18 +455,21 @@ export function tutupPamflet() {
 // BRIDGE ESM → classic (bundel): alias window.* utk HTML onclick, onclick
 // string lintas file & onclick string internal (string dieval global).
 // `_riwayatLokerAktif` sengaja PRIVAT modul (tak ada pemakai luar).
-window.submitWaTemplate = submitWaTemplate;
-window.editWaTemplate = editWaTemplate;
-window.batalEditWa = batalEditWa;
-window.prosesHapusWa = prosesHapusWa;
-window.injectModalWaPintar = injectModalWaPintar;
-window.bukaModalWaPintar = bukaModalWaPintar;
-window.terapkanTemplateWa = terapkanTemplateWa;
-window.kirimWaPintar = kirimWaPintar;
-window.pilihLokerRiwayat = pilihLokerRiwayat;
-window.bukaFotoPreview = bukaFotoPreview;
-window.tutupFotoPreview = tutupFotoPreview;
-window.bukaPamflet = bukaPamflet;
-window.tutupPamflet = tutupPamflet;
+registerSeamAliases({
+    submitWaTemplate,
+    editWaTemplate,
+    batalEditWa,
+    prosesHapusWa,
+    injectModalWaPintar,
+    bukaModalWaPintar,
+    terapkanTemplateWa,
+    kirimWaPintar,
+    pilihLokerRiwayat,
+    bukaFotoPreview,
+    tutupFotoPreview,
+    bukaPamflet,
+    tutupPamflet,
+});
 
 // ==========================================
+

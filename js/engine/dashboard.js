@@ -1,5 +1,6 @@
 import { tr } from '../../i18n.js';
 import { ASSETS } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -257,5 +258,8 @@ export function kalkulasiProgress(myData) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, render/candidate.js, dll).
-window.evaluasiTahapanKandidat = evaluasiTahapanKandidat;
-window.kalkulasiProgress = kalkulasiProgress;
+registerSeamAliases({
+    evaluasiTahapanKandidat,
+    kalkulasiProgress,
+});
+

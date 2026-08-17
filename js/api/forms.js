@@ -1,5 +1,6 @@
 import { ALL_CANDIDATES, ALL_FORM, currentAdminName } from '../init/state.js';
 import { renderFormInbox } from '../render/mail.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 9. INTERAKSI BACKEND (NETLIFY FUNCTIONS + SUPABASE) — DOMAIN MAIL INBOX
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -211,12 +212,15 @@ export async function hapusFormMail(id) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (mail table render/mail.js + partials/modals-shared.html).
-window.submitRejectForm = submitRejectForm;
-window.toggleMailSelect = toggleMailSelect;
-window.mailSelectAll = mailSelectAll;
-window.hapusFormMailTerpilih = hapusFormMailTerpilih;
-window.hapusFormMail = hapusFormMail;
-window.prosesReviewForm = prosesReviewForm;
-window.prosesApproveForm = prosesApproveForm;
-window.prosesRejectForm = prosesRejectForm;
-window.tandaiDibacaForm = tandaiDibacaForm;
+registerSeamAliases({
+    submitRejectForm,
+    toggleMailSelect,
+    mailSelectAll,
+    hapusFormMailTerpilih,
+    hapusFormMail,
+    prosesReviewForm,
+    prosesApproveForm,
+    prosesRejectForm,
+    tandaiDibacaForm,
+});
+

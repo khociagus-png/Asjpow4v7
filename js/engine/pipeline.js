@@ -1,4 +1,5 @@
 import { DROPDOWNS } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -85,6 +86,9 @@ export function tahapanStepIndex(thpRaw) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (render/admin.js, api/*.js, HTML onclick, dll).
-window.tahapanPipeline = tahapanPipeline;
-window.getTahapanProgress = getTahapanProgress;
-window.tahapanStepIndex = tahapanStepIndex;
+registerSeamAliases({
+    tahapanPipeline,
+    getTahapanProgress,
+    tahapanStepIndex,
+});
+

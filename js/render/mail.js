@@ -1,5 +1,6 @@
 import { tr } from '../../i18n.js';
 import { ALL_FORM, mailFilterStatus, mailSearchText } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 7. FUNGSI RENDER — DOMAIN MAIL INBOX (tabel lamaran admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -354,5 +355,8 @@ Object.defineProperty(window, "MAIL_SELECTED", {
   get() { return MAIL_SELECTED; },
   set(v) { MAIL_SELECTED = v; },
 });
-window.renderMailFilterUI = renderMailFilterUI;
-window.renderFormInbox = renderFormInbox;
+registerSeamAliases({
+    renderMailFilterUI,
+    renderFormInbox,
+});
+

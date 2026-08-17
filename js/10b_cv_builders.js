@@ -1,3 +1,4 @@
+import { registerSeamAliases } from './core/bridge.js';
 // 10b. PEMBANGUN SECTION CV RIREKISHO (BAGIAN MURNI HTML)
 // Dipisah dari renderCVAjaib (10_cv_rirekisho.js) saat god-object refactor.
 // Tiap fungsi murni: terima data + helper v(), kembalikan HTML string.
@@ -496,9 +497,12 @@ export function buildCvKertasA4(p) {
 
 // BRIDGE ESM → classic (bundel): dipanggil 10_cv_rirekisho.js (renderCVAjaib)
 // via window.* — alias data property (builder murni, tidak pernah di-reassign).
-window.buildEduRows = buildEduRows;
-window.buildJobRows = buildJobRows;
-window.buildFamRows = buildFamRows;
-window.buildCvIdentitas = buildCvIdentitas;
-window.buildCvKertasA4 = buildCvKertasA4;
+registerSeamAliases({
+    buildEduRows,
+    buildJobRows,
+    buildFamRows,
+    buildCvIdentitas,
+    buildCvKertasA4,
+});
+
 

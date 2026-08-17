@@ -1,4 +1,5 @@
 import { DROPDOWNS } from './state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -270,22 +271,25 @@ export function toggleMinimize(id, btnEl) {
 // masuk. Fungsi tidak pernah di-reassign, jadi data property cukup (beda
 // dengan state.js yang butuh accessor get/set).
 // ---------------------------------------------------------------------------
-window.thumbnailUrl = thumbnailUrl;
-window.safeSetVal = safeSetVal;
-window.normalizePhone = normalizePhone;
-window.showToast = showToast;
-window.safeSet = safeSet;
-window.setImg = setImg;
-window.setBg = setBg;
-window.getHighResImage = getHighResImage;
-window.getDirectDownloadUrl = getDirectDownloadUrl;
-window.formatPendidikanTingkat = formatPendidikanTingkat;
-window.isPreviewableFile = isPreviewableFile;
-window.previewFinalUrl = previewFinalUrl;
-window.populate = populate;
-window.rePopulateDropdowns = rePopulateDropdowns;
-window.populateCheckboxes = populateCheckboxes;
-window.formatInputWA = formatInputWA;
-window.hapusRingWA = hapusRingWA;
-window.salinTeksDecode = salinTeksDecode;
-window.toggleMinimize = toggleMinimize;
+registerSeamAliases({
+    thumbnailUrl,
+    safeSetVal,
+    normalizePhone,
+    showToast,
+    safeSet,
+    setImg,
+    setBg,
+    getHighResImage,
+    getDirectDownloadUrl,
+    formatPendidikanTingkat,
+    isPreviewableFile,
+    previewFinalUrl,
+    populate,
+    rePopulateDropdowns,
+    populateCheckboxes,
+    formatInputWA,
+    hapusRingWA,
+    salinTeksDecode,
+    toggleMinimize,
+});
+

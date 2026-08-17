@@ -4,7 +4,7 @@
    - Aset statis: stale-while-revalidate
    - API (.netlify, /api) & domain luar: selalu jaringan, tidak pernah di-cache
 */
-const VERSION = 'asj-portal-app-7bc915049b-m6d8b9c1a';
+const VERSION = 'asj-portal-app-5a15730349-m6d8b9c1a';
 const SHELL = [
   '/',
   '/index.html',

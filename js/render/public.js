@@ -1,6 +1,7 @@
 import { tr } from '../../i18n.js';
 import { ALL_JOBS, CURRENT_THEME, currentPublicFilter, limitPub } from '../init/state.js';
 import { renderAdmin } from './admin.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 7. FUNGSI RENDER — DOMAIN PUBLIK (index.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -301,5 +302,8 @@ export function filterKelolaLoker() {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (filterPublicData, renderPublicFiltered, window.limitPub+=10;...).
-window.filterPublicData = filterPublicData;
-window.renderPublicFiltered = renderPublicFiltered;
+registerSeamAliases({
+    filterPublicData,
+    renderPublicFiltered,
+});
+

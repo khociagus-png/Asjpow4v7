@@ -1,6 +1,7 @@
 import { tr } from '../../i18n.js';
 import { ALL_CANDIDATES, ASSETS, limitKan } from '../init/state.js';
 import { ensureAllCandidates } from '../api/candidates.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 7. FUNGSI RENDER — DOMAIN KANDIDAT (tabel daftar kandidat admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -215,4 +216,7 @@ export function renderKandidatTable(arr) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
-window.filterKandidat = filterKandidat;
+registerSeamAliases({
+    filterKandidat,
+});
+

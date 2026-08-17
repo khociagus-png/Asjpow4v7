@@ -1,3 +1,4 @@
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -95,5 +96,8 @@ export async function salinSqlMigrasi() {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (admin/index jalankanMigrasi / salinSqlMigrasi).
-window.jalankanMigrasi = jalankanMigrasi;
-window.salinSqlMigrasi = salinSqlMigrasi;
+registerSeamAliases({
+    jalankanMigrasi,
+    salinSqlMigrasi,
+});
+

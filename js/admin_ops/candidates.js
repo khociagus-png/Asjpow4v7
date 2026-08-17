@@ -2,6 +2,7 @@ import { ALL_CANDIDATES, ALL_DB_JOBS } from '../init/state.js';
 import { renderAdminFull } from '../render/admin.js';
 import { ensureAllCandidates } from '../api/candidates.js';
 import { upsertCandidateMemory, patchFormMail } from '../api/forms.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -341,12 +342,15 @@ export async function bukaModalCekDataSiswa() {
 // HTML inline onclick (render/admin.js bukaModalListKandidat, partials
 // mulaiKirimUndanganGrup, admin/index bukaModalCekDataSiswa, tombol
 // keluarkanKandidatDariJob di daftar).
-window.bukaModalListKandidat = bukaModalListKandidat;
-window.keluarkanKandidatDariJob = keluarkanKandidatDariJob;
-window.mulaiKirimUndanganGrup = mulaiKirimUndanganGrup;
-window.bukaModalCekDataSiswa = bukaModalCekDataSiswa;
-window.parseDaftarOrtu = parseDaftarOrtu;
-window.parseVarianPesan = parseVarianPesan;
-window.bukaModalUndanganKelas = bukaModalUndanganKelas;
-window.previewUndanganKelas = previewUndanganKelas;
-window.kirimUndanganKelas = kirimUndanganKelas;
+registerSeamAliases({
+    bukaModalListKandidat,
+    keluarkanKandidatDariJob,
+    mulaiKirimUndanganGrup,
+    bukaModalCekDataSiswa,
+    parseDaftarOrtu,
+    parseVarianPesan,
+    bukaModalUndanganKelas,
+    previewUndanganKelas,
+    kirimUndanganKelas,
+});
+

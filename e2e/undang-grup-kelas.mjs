@@ -142,9 +142,14 @@ if (browser) {
   }
 
   const toastOk = await waitFor(async () =>
-    page.evaluate(() => (document.getElementById('toast-container') || {}).textContent || ''),
+    page
+      .evaluate(() => (document.getElementById('toast-container') || {}).textContent || '')
+      .then((t) => t.includes('2')),
   );
-  check('Toast sukses muncul (2 undangan)', toastOk.includes('2'), `toast="${String(toastOk).slice(0, 60)}"`);
+  const toastText = await page.evaluate(
+    () => (document.getElementById('toast-container') || {}).textContent || '',
+  );
+  check('Toast sukses muncul (2 undangan)', toastOk, `toast="${String(toastText).slice(0, 60)}"`);
 
   check('Tidak ada error JS', jsErrors.length === 0, jsErrors.slice(0, 3).join(' | '));
   await browser.close();

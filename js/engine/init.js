@@ -8,6 +8,7 @@ import { renderJobDilamar, renderProgresPemberkasan } from './dashboard.js';
 import { renderRiwayatKandidat } from '../08_wa_pintar.js';
 import { renderStudentCard } from '../12_esign_match.js';
 import { renderLanguage } from '../01_public.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -458,5 +459,8 @@ export function initApp(res, isSilent = false) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (init/boot.js initApp, js/04_auth.js refreshDataDinamis, HTML onclick,
 // api/*.js refreshDataDinamis, render/*.js, dll).
-window.refreshDataDinamis = refreshDataDinamis;
-window.initApp = initApp;
+registerSeamAliases({
+    refreshDataDinamis,
+    initApp,
+});
+

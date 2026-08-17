@@ -1,3 +1,4 @@
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -237,7 +238,10 @@ export async function uploadDriveField(idKandidat, nama, field) {
 // HTML inline onclick (index.html & engine/init.js window.muatMigrasiDrive,
 // admin/index buka/tutupModalMigrasiDrive, tombol uploadDriveField di
 // migrasiDriveFieldHtml).
-window.muatMigrasiDrive = muatMigrasiDrive;
-window.bukaModalMigrasiDrive = bukaModalMigrasiDrive;
-window.tutupModalMigrasiDrive = tutupModalMigrasiDrive;
-window.uploadDriveField = uploadDriveField;
+registerSeamAliases({
+    muatMigrasiDrive,
+    bukaModalMigrasiDrive,
+    tutupModalMigrasiDrive,
+    uploadDriveField,
+});
+

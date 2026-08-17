@@ -7,6 +7,7 @@ import { renderSysConfig } from '../admin_ops/sysconfig.js';
 import { renderDbFilters } from '../admin_modal/dbfilter.js';
 import { renderJadwal, renderDashboardAgenda } from '../admin_ops/schedule.js';
 import { renderTugas } from '../api/wa.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 7. FUNGSI RENDER — DOMAIN ADMIN (admin.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -309,7 +310,10 @@ export function renderDbJobTable(arr) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (adminSwitchTab, filterDbJob, window.limitDb+=10;...).
-window.adminSwitchTab = adminSwitchTab;
-window.renderAdmin = renderAdmin;
-window.filterDbJob = filterDbJob;
-window.badgeTahapanDb = badgeTahapanDb;
+registerSeamAliases({
+    adminSwitchTab,
+    renderAdmin,
+    filterDbJob,
+    badgeTahapanDb,
+});
+

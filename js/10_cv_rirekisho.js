@@ -1,5 +1,6 @@
 import { ALL_CANDIDATES, currentKandidatWa, isAdmin } from './init/state.js';
 import { ensureAllCandidates } from './api/candidates.js';
+import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — pemakai classic/bundel via window.*
 // (render/candidate.js onclick "bukaPreviewCV_Admin", HTML onclick
 // "bukaPreviewCV", onclick "cetakCVRirekisho"). Helper dari helpers_cv.js &
@@ -220,9 +221,11 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
 // BRIDGE ESM → classic (bundel): HTML onclick (bukaPreviewCV), onclick string
 // render/candidate.js (bukaPreviewCV_Admin) & onclick "cetakCVRirekisho" di
 // btnPrintHtml (dibuat renderCVAjaib) butuh global — alias data property.
-window.bukaPreviewCV_Admin = bukaPreviewCV_Admin;
-window.bukaPreviewCV = bukaPreviewCV;
-window.cetakCVRirekisho = cetakCVRirekisho;
+registerSeamAliases({
+    bukaPreviewCV_Admin,
+    bukaPreviewCV,
+    cetakCVRirekisho,
+});
 
 
 // Cetak / Simpan PDF Rirekisho: hanya tersedia untuk Admin (tombolnya tidak
@@ -235,3 +238,4 @@ export function cetakCVRirekisho() {
   }
   window.print();
 }
+

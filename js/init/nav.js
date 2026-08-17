@@ -1,5 +1,6 @@
 import { AUTO_REFRESH_TIMER } from './state.js';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -123,6 +124,9 @@ export function logoutApp() {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (index/admin changePage/toggleMobileMenu/logoutApp,
 // 04_auth.js & engine/init.js window.changePage).
-window.changePage = changePage;
-window.toggleMobileMenu = toggleMobileMenu;
-window.logoutApp = logoutApp;
+registerSeamAliases({
+    changePage,
+    toggleMobileMenu,
+    logoutApp,
+});
+

@@ -1,4 +1,5 @@
 import { ALL_SCHEDULES, limitJad } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -89,5 +90,8 @@ export function renderJadwal() {
 // HTML inline onclick (render/admin.js window.renderJadwal /
 // window.renderDashboardAgenda, api/wa.js window.renderJadwal, tombol
 // "limitJad+=10; renderJadwal();").
-window.renderDashboardAgenda = renderDashboardAgenda;
-window.renderJadwal = renderJadwal;
+registerSeamAliases({
+    renderDashboardAgenda,
+    renderJadwal,
+});
+

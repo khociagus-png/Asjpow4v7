@@ -2,6 +2,7 @@ import { callAPI } from '../../api-client.js';
 import { tr } from '../../i18n.js';
 import { showToast } from '../init/util.js';
 import { ALL_DB_JOBS, ALL_JOBS } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 7. FUNGSI RENDER — DOMAIN SHARE LOKER (modal share + template WA)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -262,9 +263,12 @@ export async function simpanDokumenShare(jobCode) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (tutupModalShare, copasShareWa, simpanDokumenShare,
 // toggleSharePreview, copyShareLink, dll).
-window.bukaModalShare = bukaModalShare;
-window.tutupModalShare = tutupModalShare;
-window.toggleSharePreview = toggleSharePreview;
-window.copasShareWa = copasShareWa;
-window.copyShareLink = copyShareLink;
-window.simpanDokumenShare = simpanDokumenShare;
+registerSeamAliases({
+    bukaModalShare,
+    tutupModalShare,
+    toggleSharePreview,
+    copasShareWa,
+    copyShareLink,
+    simpanDokumenShare,
+});
+

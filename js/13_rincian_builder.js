@@ -1,3 +1,4 @@
+import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* sudah ada di bawah
 // (openRincianBuilder/rbSimpan/dll utk HTML onclick & api/jobs.js
 // rbSummaryFromData). Referensi bare callAPI/tr/showToast/parseRincianBiaya
@@ -503,11 +504,14 @@ export function rbBatal() {
   if (m) m.classList.add('hidden');
 }
 
-window.openRincianBuilder = openRincianBuilder;
-window.rbSimpan = rbSimpan;
-window.rbBatal = rbBatal;
-window.rbSummaryFromData = rbSummaryFromData;
-window.rbAddChip = rbAddChip;
-window.rbAddTahapan = rbAddTahapan;
-window.rbRemoveTahapan = rbRemoveTahapan;
-window.rbRenderPreview = rbRenderPreview;
+registerSeamAliases({
+    openRincianBuilder,
+    rbSimpan,
+    rbBatal,
+    rbSummaryFromData,
+    rbAddChip,
+    rbAddTahapan,
+    rbRemoveTahapan,
+    rbRenderPreview,
+});
+

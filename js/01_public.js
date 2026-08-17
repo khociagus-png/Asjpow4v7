@@ -2,6 +2,7 @@ import { ALL_JOBS, ASSETS, CURRENT_THEME, isAdmin } from './init/state.js';
 import { renderPublicFilterUI, renderPublicFiltered } from './render/public.js';
 import { renderAdminFull } from './render/admin.js';
 import { renderSysConfig } from './admin_ops/sysconfig.js';
+import { registerSeamAliases } from './core/bridge.js';
 // 1. LANGUAGE ENGINE V1.0 (LOCK)
 // ==========================================
 // CURRENT_LANG is now in src/i18n.js
@@ -600,13 +601,16 @@ export function tutupDetailLoker() {
 // render/public.js + admin_modal/job.js; parseRincianBiaya →
 // 13_rincian_builder (rbSeedFromText/rbSummaryFromData); tutupDetailLoker →
 // onclick string di bukaDetailLoker sendiri (string dieval global).
-window.switchPublicTab = switchPublicTab;
-window.setLanguage = setLanguage;
-window.parseRincianBiaya = parseRincianBiaya;
-window.lokerGenderBadge = lokerGenderBadge;
-window.jobTutupUntukLamar = jobTutupUntukLamar;
-window.bukaDetailLoker = bukaDetailLoker;
-window.tutupDetailLoker = tutupDetailLoker;
+registerSeamAliases({
+    switchPublicTab,
+    setLanguage,
+    parseRincianBiaya,
+    lokerGenderBadge,
+    jobTutupUntukLamar,
+    bukaDetailLoker,
+    tutupDetailLoker,
+});
 
 
 // ==========================================
+

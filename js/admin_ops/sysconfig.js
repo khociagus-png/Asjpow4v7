@@ -1,4 +1,5 @@
 import { DROPDOWNS, currentAdminName } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -177,8 +178,11 @@ export async function simpanPengumuman() {
 // HTML inline onclick (render/admin.js & i18n.js window.renderSysConfig,
 // 01_public.js renderSysConfig, admin/index simpanPengumuman, tombol chip
 // tambahConfigItem/hapusConfigItem/pindahConfigItem).
-window.renderSysConfig = renderSysConfig;
-window.tambahConfigItem = tambahConfigItem;
-window.hapusConfigItem = hapusConfigItem;
-window.pindahConfigItem = pindahConfigItem;
-window.simpanPengumuman = simpanPengumuman;
+registerSeamAliases({
+    renderSysConfig,
+    tambahConfigItem,
+    hapusConfigItem,
+    pindahConfigItem,
+    simpanPengumuman,
+});
+

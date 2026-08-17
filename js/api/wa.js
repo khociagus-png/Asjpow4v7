@@ -1,5 +1,6 @@
 import { ALL_SCHEDULES, ALL_TUGAS, currentAdminName } from '../init/state.js';
 import { renderJadwal } from '../admin_ops/schedule.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 9. INTERAKSI BACKEND — DOMAIN JADWAL & TUGAS ADMIN (wa)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -202,9 +203,12 @@ export async function submitJadwal(e) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (papan tugas & jadwal admin) + render/admin.js
 // (window.renderTugas).
-window.renderTugas = renderTugas;
-window.tambahTugasAdmin = tambahTugasAdmin;
-window.updateStatusTugas = updateStatusTugas;
-window.hapusTugasAdmin = hapusTugasAdmin;
-window.prosesHapusJadwal = prosesHapusJadwal;
-window.submitJadwal = submitJadwal;
+registerSeamAliases({
+    renderTugas,
+    tambahTugasAdmin,
+    updateStatusTugas,
+    hapusTugasAdmin,
+    prosesHapusJadwal,
+    submitJadwal,
+});
+

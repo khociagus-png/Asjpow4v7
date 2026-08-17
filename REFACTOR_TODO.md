@@ -653,9 +653,15 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
         standalone — semua alias seam terdaftar (share 6, ai_form 11,
         master-full 8, apply-full 4, siswa-baru 7), 0 error JS; index/admin —
         PortalBridge + registerSeamAliases tersedia, app boot normal, 0 error.
-      - SISA: alias per-simbol di modul bundel (admin/index) masih
-        self-registered `window.X = X` — mekanisme sentral sudah tersedia
-        (bridge di STACK/main.js), migrasinya bisa menyusul per modul.
+      - **③ SENTRALISASI SEAM modul bundel SELESAI (2026-08-17)** — 208
+        self-alias fungsi di 39 modul bundel (`render/*`, `admin_ops/*`,
+        `admin_modal/*`, `api/*`, `ai_copilot/*`, `engine/*`, `init/*`, dll)
+        dipindah ke `registerSeamAliases` (skrip `.freebuff/sentralisasi-alias.mjs`,
+        EOL-preserving). Yang TETAP `window.X = X` (sengaja): non-fungsi
+        (`window.THEMES`, `window.urlFotoJeklin` const), `helpers_cv.js`
+        (guard `typeof window` utk vitest), dan `js/pages/*` tetap via bridge.
+        `js/apply-docs.js` (standalone apply-full) ikut via bridge. Runtime
+        preview: registry = 208 alias (admin/index/share/apply-full), 0 error JS.
 - [ ] Kriteria selesai per langkah: scan `window\.\w+\s*=` di `js/` menurun; `no-undef`
       tetap 0 error; `check:globals` nol kolisi; E2E SEMUA LULUS.
 

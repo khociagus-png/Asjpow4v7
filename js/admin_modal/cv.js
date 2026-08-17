@@ -2,6 +2,7 @@ import { ALL_CANDIDATES, ALL_DB_JOBS, ALL_JOBS, ASSETS, currentAdminName, isAdmi
 import { ensureAllCandidates } from '../api/candidates.js';
 import { normalizeGenderValue } from '../03_candidate.js';
 import { previewFileInFrame } from '../init/preview.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
 // js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
 // 06_admin_modal.js — perilaku tidak berubah.
@@ -634,9 +635,12 @@ export async function simpanCatatanCv() {
 // simpanEditCepatCv / simpanCatatanCv), render/mail.js & render/candidate.js
 // (onclick bukaPdfPreview), engine/init.js (window.bukaDigitalCV),
 // api/candidates.js (window.toDateInputValue).
-window.bukaDigitalCV = bukaDigitalCV;
-window.toDateInputValue = toDateInputValue;
-window.toggleEditCepatCv = toggleEditCepatCv;
-window.simpanEditCepatCv = simpanEditCepatCv;
-window.bukaPdfPreview = bukaPdfPreview;
-window.simpanCatatanCv = simpanCatatanCv;
+registerSeamAliases({
+    bukaDigitalCV,
+    toDateInputValue,
+    toggleEditCepatCv,
+    simpanEditCepatCv,
+    bukaPdfPreview,
+    simpanCatatanCv,
+});
+

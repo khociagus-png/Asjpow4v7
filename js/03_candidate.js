@@ -1,5 +1,6 @@
 import { ACTIVE_PEMBERKASAN_NAMA, ACTIVE_PEMBERKASAN_WA, ALL_CANDIDATES, currentKandidatName, currentKandidatWa, isAdmin } from './init/state.js';
 import { previewFileInFrame } from './init/preview.js';
+import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (bukaModalCvMini, bukaMasterEksternal, bukaMasterLengkapPortal,
 // bukaFormSiswa, bukaModalPemberkasan, prosesUploadPemberkasan, tutupPreviewDokumen),
@@ -686,20 +687,23 @@ export async function prosesSimpanBiodataLengkap() {
 // string lintas file & pemakai ESM lain. MAX_FILE_BYTES/ALLOWED_FILE_EXT/
 // ekstensiDariAccept/compressImage/setStatusBerkas sengaja tetap internal
 // (dipakai file ini saja — apply_full.js punya salinan lokal sendiri).
-window.bukaModalCvMini = bukaModalCvMini;
-window.prosesSimpanCvMini = prosesSimpanCvMini;
-window.isVipCatatan = isVipCatatan;
-window.bukaMasterEksternal = bukaMasterEksternal;
-window.bukaFormBridge = bukaFormBridge;
-window.bukaMasterEksternalAdmin = bukaMasterEksternalAdmin;
-window.bukaMasterLengkapPortal = bukaMasterLengkapPortal;
-window.bukaFormSiswa = bukaFormSiswa;
-window.cekUkuranFile = cekUkuranFile;
-window.cekEkstensiFile = cekEkstensiFile;
-window.bacaFileBase64 = bacaFileBase64;
-window.bukaPreviewDokumen = bukaPreviewDokumen;
-window.tutupPreviewDokumen = tutupPreviewDokumen;
-window.bukaModalPemberkasan = bukaModalPemberkasan;
-window.prosesUploadPemberkasan = prosesUploadPemberkasan;
-window.prosesSimpanBiodataLengkap = prosesSimpanBiodataLengkap;
+registerSeamAliases({
+    bukaModalCvMini,
+    prosesSimpanCvMini,
+    isVipCatatan,
+    bukaMasterEksternal,
+    bukaFormBridge,
+    bukaMasterEksternalAdmin,
+    bukaMasterLengkapPortal,
+    bukaFormSiswa,
+    cekUkuranFile,
+    cekEkstensiFile,
+    bacaFileBase64,
+    bukaPreviewDokumen,
+    tutupPreviewDokumen,
+    bukaModalPemberkasan,
+    prosesUploadPemberkasan,
+    prosesSimpanBiodataLengkap,
+});
 
+

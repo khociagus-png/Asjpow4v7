@@ -1,5 +1,6 @@
 import { ALL_DB_JOBS, ALL_JOBS, currentAdminName } from '../init/state.js';
 import { renderAdminFull } from '../render/admin.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // 9. INTERAKSI BACKEND — DOMAIN LOKER / KELOLA (jobs)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -384,10 +385,13 @@ export async function simpanUpdateDbJob() {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (submitFormAdmin/submitEditFullLoker/simpanUpdateDbJob)
 // + render/admin.js (aksiAdmin/hapusLoker/bukaEditFullLoker/bukaModalEditDbJob).
-window.aksiAdmin = aksiAdmin;
-window.hapusLoker = hapusLoker;
-window.submitFormAdmin = submitFormAdmin;
-window.bukaEditFullLoker = bukaEditFullLoker;
-window.submitEditFullLoker = submitEditFullLoker;
-window.bukaModalEditDbJob = bukaModalEditDbJob;
-window.simpanUpdateDbJob = simpanUpdateDbJob;
+registerSeamAliases({
+    aksiAdmin,
+    hapusLoker,
+    submitFormAdmin,
+    bukaEditFullLoker,
+    submitEditFullLoker,
+    bukaModalEditDbJob,
+    simpanUpdateDbJob,
+});
+

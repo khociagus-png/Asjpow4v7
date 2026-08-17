@@ -1,3 +1,4 @@
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -199,5 +200,8 @@ export function pesanPreviewTidakTersedia(url) {
 // (03_candidate.js & admin_modal/cv.js window.previewFileInFrame,
 // 03_candidate.js & pages/share.js pesanPreviewTidakTersedia; VENDOR_V /
 // _vendorPromises tetap PRIVATE modul — tidak ada pemakai eksternal).
-window.previewFileInFrame = previewFileInFrame;
-window.pesanPreviewTidakTersedia = pesanPreviewTidakTersedia;
+registerSeamAliases({
+    previewFileInFrame,
+    pesanPreviewTidakTersedia,
+});
+

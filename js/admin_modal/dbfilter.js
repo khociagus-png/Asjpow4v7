@@ -1,4 +1,5 @@
 import { DROPDOWNS, dbFilterBidang, dbFilterTahapan } from '../init/state.js';
+import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
 // js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
 // 06_admin_modal.js — perilaku tidak berubah.
@@ -82,7 +83,10 @@ export function renderDbFilters() {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (chip filter renderDbFilters sendiri + admin/index
 // setSortDb, render/admin.js window.renderDbFilters).
-window.setFilterBidang = setFilterBidang;
-window.setFilterTahapan = setFilterTahapan;
-window.setSortDb = setSortDb;
-window.renderDbFilters = renderDbFilters;
+registerSeamAliases({
+    setFilterBidang,
+    setFilterTahapan,
+    setSortDb,
+    renderDbFilters,
+});
+

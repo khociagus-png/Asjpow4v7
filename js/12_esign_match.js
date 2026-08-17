@@ -1,5 +1,6 @@
 import { ALL_CANDIDATES, currentKandidatWa, isAdmin, isKandidat } from './init/state.js';
 import { ensureAllCandidates, buatQrDataUrl } from './api/candidates.js';
+import { registerSeamAliases } from './core/bridge.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (bukaModalTtd, bukaLayarCanvas, clearFsCanvas, saveFsCanvas,
 // submitDataEsignFull, jalankanMatchmaking, kirimTawaranMassal), onclick
@@ -568,12 +569,15 @@ export async function kirimTawaranMassal() {
 // string render/admin.js (bukaMatchmaking) & engine/init.js
 // (renderStudentCard). initFsCanvas/getFsPointerPos/drawFs/dll tetap
 // internal — dipanggil file ini saja (addEventListener & helper).
-window.bukaModalTtd = bukaModalTtd;
-window.bukaLayarCanvas = bukaLayarCanvas;
-window.clearFsCanvas = clearFsCanvas;
-window.saveFsCanvas = saveFsCanvas;
-window.submitDataEsignFull = submitDataEsignFull;
-window.bukaMatchmaking = bukaMatchmaking;
-window.jalankanMatchmaking = jalankanMatchmaking;
-window.kirimTawaranMassal = kirimTawaranMassal;
+registerSeamAliases({
+    bukaModalTtd,
+    bukaLayarCanvas,
+    clearFsCanvas,
+    saveFsCanvas,
+    submitDataEsignFull,
+    bukaMatchmaking,
+    jalankanMatchmaking,
+    kirimTawaranMassal,
+});
 
+
