@@ -410,6 +410,55 @@
      </div>
   </div>
 
+<!-- UNDANGAN GRUP KELAS (orang tua/wali) — Opsi A: tanpa ubah DB.
+     Admin menempel daftar "Nama|628xxx" (1 baris per orang tua), isi link
+     grup + jeda, lalu kirim via action kirimTawaranMassal yang SUDAH ADA.
+     Anti-ban: tiap orang dapat PESAN berisi link undangan (bukan add anggota
+     manual) — jeda default lebih lambat (10 dtk) untuk ortu. -->
+<div id="modal-undangan-kelas" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[999] flex items-center justify-center p-4">
+    <div class="glass-panel p-6 md:p-8 rounded-[2rem] w-full max-w-2xl shadow-2xl relative max-h-[90vh] flex flex-col border border-emerald-500/50">
+       <button onclick="document.getElementById('modal-undangan-kelas').classList.add('hidden')" class="absolute top-5 right-6 text-slate-400 hover:text-white transition z-[100]" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-2xl"></i></button>
+       
+       <h3 class="text-xl font-black text-white mb-2 border-b border-emerald-900/50 pb-3">
+           <i class="fab fa-whatsapp text-emerald-400 mr-2"></i><span data-lang="ui.invite_class_title"> Undangan Grup WhatsApp Kelas
+       </span></h3>
+       <p class="text-xs text-slate-400 mb-4 leading-relaxed"><span data-lang="ui.invite_class_desc">Tempel daftar orang tua/wali (Nama|WA), isi link grup &amp; jeda, lalu kirim. Pesan berisi link undangan dikirim satu per satu via Fonnte — aman dari banned.</span></p>
+       
+       <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1">
+           <div>
+               <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-users mr-1"></i><span data-lang="ui.paste_list_label"> DAFTAR ORANG TUA/WALI (Nama|WA)</span></label>
+               <textarea id="input-daftar-ortu" rows="6" oninput="previewUndanganKelas()" placeholder="Nama Orang Tua/Wali|628xxxxxxxxxx" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500"></textarea>
+               <p class="text-[9px] text-slate-500 mt-1"><span data-lang="ui.paste_list_hint">1 baris per orang tua. Format: </span><b>Nama|628xxxxxxxxxx</b> <span data-lang="ui.paste_list_hint2">(bisa dari Excel/WA; 0xx/8xx otomatis jadi 62xx).</span></p>
+           </div>
+           <div>
+               <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-link mr-1"></i><span data-lang="ui.group_link_label"> LINK GRUP WHATSAPP</span></label>
+               <input type="text" id="input-link-grup-kelas" placeholder="https://chat.whatsapp.com/..." class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500">
+           </div>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+               <div>
+                   <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-stopwatch mr-1"></i><span data-lang="ui.interval_label"> JEDA ANTAR PESAN (DETIK)</span></label>
+                   <input type="number" inputmode="numeric" id="input-interval-kelas" value="10" min="1" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500">
+               </div>
+               <div class="flex flex-col items-end justify-end gap-0.5">
+                   <span id="span-kelas-jumlah" class="text-xs font-bold text-emerald-400"></span>
+                   <span id="span-kelas-varian" class="text-[9px] font-bold text-amber-400"></span>
+               </div>
+           </div>
+           <div>
+               <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-comment-dots mr-1"></i><span data-lang="ui.message_label"> TEMPLATE PESAN</span></label>
+               <textarea id="input-pesan-kelas" rows="9" oninput="previewUndanganKelas()" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 leading-relaxed"></textarea>
+               <p class="text-[9px] text-slate-500 mt-1"><span data-lang="ui.message_hint">Placeholder: </span><b>{nama}</b> <span data-lang="ui.message_hint2">= nama siswa, </span><b>{link_grup}</b> <span data-lang="ui.message_hint3">= link grup di atas.</span></p>
+           </div>
+           <div class="bg-black/40 border border-slate-700 rounded-xl p-3">
+               <p class="text-[9px] font-bold text-slate-400 mb-1 uppercase"><i class="fas fa-eye mr-1"></i><span data-lang="ui.message_preview"> PRATINJAU PESAN PERTAMA</span></p>
+               <div id="preview-pesan-kelas" class="text-xs text-slate-300 whitespace-pre-wrap leading-relaxed"></div>
+           </div>
+       </div>
+
+       <button id="btn-undang-kelas" onclick="kirimUndanganKelas()" class="w-full mt-4 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(118,185,0,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
+    </div>
+</div>
+
 <div id="modal-rincian-builder" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[350] flex items-center justify-center p-3 md:p-5">
     <div class="glass-panel rounded-[2rem] w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar shadow-2xl relative p-6 md:p-8">
       <button onclick="rbBatal()" class="absolute top-5 right-5 z-[100] w-10 h-10 flex items-center justify-center bg-black/60 border border-white/20 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition" aria-label="Tutup" data-lang-aria="public.close"><i class="fas fa-times text-xl"></i></button>

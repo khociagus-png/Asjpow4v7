@@ -120,6 +120,15 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
   const linkGrup = String(d.linkGrup || '');
   const interval = Math.max(Number(d.interval) || 5, 1);
   const results = [];
+  // customMessage boleh berisi BANYAK VARIAN pesan, dipisah baris `---`.
+  // Varian dikirim BERGILIRAN per penerima (sesuai urutan daftar) → tiap
+  // orang dapat pesan berbeda (anti-ban pesan identik massal). Kalau jumlah
+  // varian = jumlah penerima dengan urutan sama, tiap orang mendapat pesan
+  // yang ditulis khusus untuknya (cocok untuk 34 pesan ortu berbeda).
+  const variants = String(d.customMessage || '')
+    .split(/^---\s*$/m)
+    .map((s) => s.trim())
+    .filter(Boolean);
   try {
     let templateIsi = null;
     try {
@@ -139,23 +148,25 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
     } catch (e) {
       /* template opsional */
     }
-    for (const c of cands) {
+    for (let i = 0; i < cands.length; i += 1) {
+      const c = cands[i];
       const wa = normalizeWa(String(c.wa || ''));
       const nama = String(c.nama || 'Kandidat');
-      let message =
-        d.customMessage ||
-        templateIsi ||
-        'Halo ' +
+      let message;
+      if (variants.length) {
+        // Varian ke-i (mod jumlah varian) — placeholder tetap di-replace per
+        // penerima supaya {nama}/{link_grup} selalu benar.
+        message = applyTemplatePlaceholders(variants[i % variants.length], nama, jobCode, linkGrup);
+      } else if (templateIsi) {
+        message = applyTemplatePlaceholders(templateIsi, nama, jobCode, linkGrup);
+      } else {
+        message =
+          'Halo ' +
           nama +
           '! Anda terpilih untuk Lowongan ' +
           jobCode +
           '. Silakan bergabung ke grup resmi kami: ' +
           linkGrup;
-      // FIX: replace placeholder juga berlaku untuk customMessage (matchmaking
-      // esign pakai `{nama}`/`{job_code}`/`{link_grup}`) — dulu hanya template
-      // tersimpan yang di-replace, pesan custom terkirim mentah.
-      if (d.customMessage || templateIsi) {
-        message = applyTemplatePlaceholders(message, nama, jobCode, linkGrup);
       }
       try {
         await fonnteSend(wa, message);

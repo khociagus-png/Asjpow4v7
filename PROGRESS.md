@@ -4,7 +4,28 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Refactor arsitektur: WA rules satu sumber, registry action/build, harness E2E, dedupe rules, i18n split (Fase 4) + import nyata core.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — ✉️ Fitur baru: Undangan Grup Kelas (orang tua/wali) via modal tempel daftar `Nama|WA` + reuse action `kirimTawaranMassal`.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `belum di-commit (siap lewat Changes panel)`
+
+### ✉️ Undangan Grup Kelas — kirim undangan WA grup ke orang tua/wali (Opsi A: tanpa ubah DB)
+
+**Fokus user:** WA admin sering kena banned saat invite massal ke grup kelas orang tua/wali (kasus: 34 siswa kelas J). Minta: pakai fitur undangan loker yang SUDAH ADA, ditambah jalur untuk kirim undangan grup ke ortu. Cakupan A (cepat, tanpa ubah DB) — sumber nomor dari daftar admin (Excel/WA).
+
+**Keputusan desain:** TIDAK membuat handler/action backend baru — reuse `kirimTawaranMassal` (`actions-wa.js`) yang sudah punya guard admin + rate limit `FONNTE_ACTIONS` + replace placeholder `{nama}`/`{link_grup}` di `customMessage`. Anti-ban tetap: tiap orang dapat PESAN berisi link undangan (bukan add anggota manual), jeda default **10 dtk** (lebih lambat dari 5 dtk di undangan loker) supaya akun sender aman.
+
+**Yang ditambahkan:**
+1. **Modal `modal-undangan-kelas`** (`partials/modals-shared.html`) — textarea tempel daftar `Nama|628xxx` (1 baris per ortu, pemisah `|`/tab/`;` atau nomor di akhir baris), input link grup, jeda (default 10), template pesan editable (pre-filled contoh pesan ortu yang dipakai admin, placeholder `{nama}`/`{link_grup}`), pratinjau jumlah terbaca + pesan pertama live.
+2. **JS** (`js/admin_ops/candidates.js`) — `parseDaftarOrtu` (normalisasi+gate WA pakai `window.normalizeWaInput`/`isValidWaInput` dari `shared/wa-rules.js` — SATU sumber kebenaran, baris invalid dihitung & dikeluarkan), `bukaModalUndanganKelas` (prefill link terakhir dari localStorage), `previewUndanganKelas`, `kirimUndanganKelas` (validasi → confirm → `callAPI('kirimTawaranMassal', [{candidates, jobCode:'', linkGrup, interval, customMessage}])`).
+3. **Tombol "Undang Grup Kelas"** di `admin.html` (samping "Cek Data", ikon WA).
+4. **Pesan custom ANTI-BAN bisa beda-beda per orang**: template pesan boleh berisi BANYAK VARIAN dipisah baris `---`; `parseVarianPesan` + backend `handleKirimTawaranMassal` mengirim varian BERGILIRAN per penerima (varian ke-i mod jumlah varian, placeholder tetap di-replace per penerima). Untuk 34 ortu: tulis 34 pesan beda (urutan sama dgn daftar) atau beberapa varian — tiap orang dapat pesan berbeda → aman dari banned pesan identik massal. Modal menampilkan badge jumlah varian (`span-kelas-varian`) + preview pesan pertama.
+5. **i18n** id+jp (±20 key baru: label modal, hint format, toast invalid rows / no valid WA / confirm, `variant_count_n`).
+
+**Verifikasi:** `node --check` 4 file OK · `bun run build` hijau (check:globals 0 kolisi, CSS/HTML/JS OK — 28 modal, bundel `app-07b85797dd.js`) · lint **0 error** (12 warning lama, tidak disentuh) · test **131/131** (paritas i18n id↔jp ikut lulus).
+
+**Catatan pemakaian:** admin tinggal tempel daftar (contoh 34 pesan user → 1 template + daftar `Nama|WA`), isi link grup (`https://chat.whatsapp.com/…`), jeda disarankan 10-20 dtk, kirim bertahap 10-15 nomor dulu supaya aman.
 
 ---
 

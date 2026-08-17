@@ -107,6 +107,177 @@ export async function mulaiKirimUndanganGrup() {
   btn.disabled = false;
 }
 
+// ==========================================
+// UNDANGAN GRUP KELAS (orang tua/wali) — Opsi A: tanpa ubah DB.
+// Admin menempel daftar "Nama|628xxx" (1 baris per orang tua), isi link grup
+// + jeda, lalu kirim via action kirimTawaranMassal yang SUDAH ADA (anti-ban:
+// tiap orang dapat PESAN berisi link undangan, bukan add anggota manual).
+// ==========================================
+
+// Template default pesan undangan kelas (contoh pesan ortu yang dipakai admin,
+// placeholder {nama} = nama siswa, {link_grup} = link grup dari form).
+const DEFAULT_PESAN_UNDANGAN_KELAS = [
+  "Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali dari {nama}.",
+  'Kami dari pengurus LPK AMANAH SAKURA JAPAN PONOROGO mengundang Bapak/Ibu untuk bergabung ke dalam grup WhatsApp resmi kelas guna memantau perkembangan belajar serta informasi kegiatan belajar mengajar (KBM).',
+  '',
+  'Silakan klik tautan berikut untuk bergabung:',
+  '{link_grup}',
+  '',
+  'Terima kasih atas perhatian dan kerja samanya.',
+].join('\n');
+
+// Parse daftar tempelan "Nama|628xxx" → [{nama, wa}]. Terima pemisah |, tab,
+// titik koma, atau nomor di akhir baris tanpa separator. Baris tanpa nomor
+// valid (gate 628… 12-13 digit) dihitung invalid & dikeluarkan.
+export function parseDaftarOrtu(text) {
+  const list = [];
+  let invalid = 0;
+  String(text || '')
+    .split(/\r?\n/)
+    .forEach((raw) => {
+      const line = raw.trim();
+      if (!line) return;
+      let nama = '';
+      let waRaw = '';
+      const sep = line.search(/[|\t;]/);
+      if (sep !== -1) {
+        nama = line.slice(0, sep).trim();
+        waRaw = line.slice(sep + 1).trim();
+      } else {
+        const m = line.match(/^(.*?)(\d{9,15})$/);
+        if (!m) {
+          invalid += 1;
+          return;
+        }
+        nama = m[1].trim();
+        waRaw = m[2];
+      }
+      const wa = window.normalizeWaInput ? window.normalizeWaInput(waRaw) : waRaw.replace(/\D/g, '');
+      const ok = window.isValidWaInput ? window.isValidWaInput(wa) : /^628\d{9,10}$/.test(wa);
+      if (!ok || !wa) {
+        invalid += 1;
+        return;
+      }
+      list.push({ nama: nama || 'Orang Tua/Wali', wa });
+    });
+  return { list, invalid };
+}
+
+// Pisahkan beberapa VARIAN pesan (dipisah baris `---`). Backend mengirim
+// varian BERGILIRAN per penerima — tiap orang tua dapat pesan berbeda
+// (anti-ban pesan identik massal). Dipakai preview di sini, logika kirim
+// ada di actions-wa.js (handleKirimTawaranMassal).
+export function parseVarianPesan(tpl) {
+  return String(tpl || '')
+    .split(/^---\s*$/m)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function bukaModalUndanganKelas() {
+  const linkInput = document.getElementById('input-link-grup-kelas');
+  // Prefill link dari kiriman terakhir (localStorage) supaya tidak ketik ulang.
+  if (linkInput && !linkInput.value) {
+    try {
+      linkInput.value = localStorage.getItem('asj_link_grup_kelas') || '';
+    } catch (e) {
+      /* private mode */
+    }
+  }
+  const pesan = document.getElementById('input-pesan-kelas');
+  if (pesan && !pesan.value) pesan.value = DEFAULT_PESAN_UNDANGAN_KELAS;
+  previewUndanganKelas();
+  const modal = document.getElementById('modal-undangan-kelas');
+  if (modal) modal.classList.remove('hidden');
+}
+
+export function previewUndanganKelas() {
+  const daftarEl = document.getElementById('input-daftar-ortu');
+  const list = parseDaftarOrtu(daftarEl ? daftarEl.value : '').list;
+  const jml = document.getElementById('span-kelas-jumlah');
+  if (jml) jml.textContent = window.tr('ui.list_preview_n').replace('{n}', String(list.length));
+  const linkEl = document.getElementById('input-link-grup-kelas');
+  const link = linkEl ? linkEl.value.trim() : '';
+  const tplEl = document.getElementById('input-pesan-kelas');
+  const tpl = tplEl ? tplEl.value : '';
+  const variants = parseVarianPesan(tpl);
+  const varianEl = document.getElementById('span-kelas-varian');
+  if (varianEl) {
+    varianEl.textContent =
+      variants.length > 1 ? ' • ' + window.tr('ui.variant_count_n').replace('{n}', String(variants.length)) : '';
+  }
+  const prv = document.getElementById('preview-pesan-kelas');
+  if (prv) {
+    const contohNama = list.length ? list[0].nama : 'Nama Siswa';
+    // Preview memakai varian pertama (penerima pertama dapat varian pertama).
+    const contohVarian = variants.length ? variants[0] : tpl;
+    prv.textContent = contohVarian
+      .replace(/\{nama\}/g, contohNama)
+      .replace(/\{link_grup\}/g, link || 'https://chat.whatsapp.com/...');
+  }
+}
+
+export async function kirimUndanganKelas() {
+  const daftarEl = document.getElementById('input-daftar-ortu');
+  const { list, invalid } = parseDaftarOrtu(daftarEl ? daftarEl.value : '');
+  const linkGrup = (document.getElementById('input-link-grup-kelas').value || '').trim();
+  const interval = parseInt(document.getElementById('input-interval-kelas').value) || 10;
+  const pesan = (document.getElementById('input-pesan-kelas').value || '').trim();
+
+  if (list.length === 0) {
+    window.showToast(window.tr('ui.toast_no_valid_wa'), 'error');
+    return;
+  }
+  if (invalid > 0) {
+    window.showToast(window.tr('ui.toast_invalid_rows_n').replace('{n}', String(invalid)), 'warning');
+  }
+  if (!linkGrup) {
+    window.showToast(window.tr('ui.toast_group_link_required'), 'error');
+    return;
+  }
+  if (!pesan) {
+    window.showToast(window.tr('ui.toast_msg_empty'), 'error');
+    return;
+  }
+  if (
+    !confirm(
+      window
+        .tr('ui.toast_confirm_send_n')
+        .replace('{n}', String(list.length))
+        .replace('{s}', String(interval)),
+    )
+  )
+    return;
+
+  const btn = document.getElementById('btn-undang-kelas');
+  btn.innerHTML = window.tr('ui.sending');
+  btn.disabled = true;
+  try {
+    const res = await window.callAPI('kirimTawaranMassal', [
+      {
+        candidates: list,
+        jobCode: '',
+        linkGrup: linkGrup,
+        interval: interval,
+        customMessage: pesan,
+      },
+    ]);
+    const results = (res && res.results) || [];
+    const ok = results.filter((r) => r.success).length;
+    try {
+      localStorage.setItem('asj_link_grup_kelas', linkGrup);
+    } catch (e) {
+      /* private mode */
+    }
+    window.showToast(window.tr('ui.toast_invites_done_n').replace('{n}', String(ok)), 'success');
+  } catch (e) {
+    window.showToast(window.tr('ui.toast_invite_send_failed') + (e && e.message ? e.message : e), 'error');
+  } finally {
+    btn.innerHTML = window.tr('ui.start_send_invite');
+    btn.disabled = false;
+  }
+}
+
 // === FUNGSI BUKA MODAL CEK DATA SISWA ===
 export async function bukaModalCekDataSiswa() {
   const loader = document.getElementById('global-loader');
@@ -170,3 +341,8 @@ window.bukaModalListKandidat = bukaModalListKandidat;
 window.keluarkanKandidatDariJob = keluarkanKandidatDariJob;
 window.mulaiKirimUndanganGrup = mulaiKirimUndanganGrup;
 window.bukaModalCekDataSiswa = bukaModalCekDataSiswa;
+window.parseDaftarOrtu = parseDaftarOrtu;
+window.parseVarianPesan = parseVarianPesan;
+window.bukaModalUndanganKelas = bukaModalUndanganKelas;
+window.previewUndanganKelas = previewUndanganKelas;
+window.kirimUndanganKelas = kirimUndanganKelas;
