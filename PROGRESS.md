@@ -4,7 +4,32 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)** + **deploy Netlify commit `693931b` (izin token user) — live kini `app-935b39d018.js` + `sw.js` precache bundel terbaru (user HP tidak nyangkut versi lama)**.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)** + **deploy Netlify commit `693931b` (izin token user) — live kini `app-935b39d018.js` + `sw.js` precache bundel terbaru (user HP tidak nyangkut versi lama)** + **deploy Netlify commit `83f5ebf` (izin token user) — SW anti-cache-nyangkut: skipWaiting instan + broadcast ASJ_FORCE_RELOAD + self-check versi + badge `v<hash>` di header admin (live `app-a6d33c32dd.js`)**.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `83f5ebf` (deploy Netlify)
+
+### 🚀 Deploy Netlify — SW anti-cache-nyangkut + badge versi di header
+
+**Perintah user:** token `nfp_…sb844` via chat + keluhan "Masih sama ga ada badgenya, wa undangan wali juga ga ada — bikin habis token AE ga ke fix".
+
+**Diagnosa dulu (bukti, bukan asumsi):** server live SEBELUM deploy ini SUDAH benar — `admin.html` live memuat tombol `bukaModalUndanganKelas` (Undangan Grup WhatsApp Kelas) + elemen `footer.copyright`; `sw.js` live precache bundel benar + `Cache-Control: no-cache`. Jadi yang nyangkut = **service worker lama di HP user** (cache versi lama menempel), bukan server.
+
+**Kenapa cache bisa nyangkut walau SW baru sudah di-deploy:** `sw.js` lama memanggil `skipWaiting()` SETELAH precache selesai. Kalau precache lambat dan user reload berulang, browser meng-abort instalasi SW baru tiap reload → SW baru tidak pernah aktif → cache lama disajikan terus.
+
+**Fix berlapis (commit `83f5ebf`):**
+- `sw.js`: `self.skipWaiting()` dipanggil PALING AWAL di install — SW baru langsung aktif di kunjungan berikutnya, tidak bisa lagi tertahan oleh reload berulang.
+- `sw.js` activate: hapus semua cache lama + `clients.claim()` + **broadcast `ASJ_FORCE_RELOAD`** ke semua tab → pwa.js langsung reload ke versi terbaru tanpa reload manual.
+- `sw.js` fetch navigasi: hanya cache respons 200 (halaman error tidak menimpa cache offline).
+- `pwa.js`: listener pesan `ASJ_FORCE_RELOAD` + **self-check VERSION sw.js tiap load** (fetch `/sw.js?v=acak` cache-busted) → reload sekali kalau ada deploy baru (jaring pengaman kedua yang tidak tergantung siklus hidup SW).
+- **Badge versi `v<hash>` kini tampil di header admin & publik** (`#asj-ver-chip` di samping judul PT AMANAH SAKURA JAPAN) — bukan hanya di footer — jadi user langsung bisa lihat versi mana yang sedang tampil di layar.
+
+**Deploy:** `NETLIFY_AUTH_TOKEN=… SKIP_INSTALL=1 SKIP_BUILD=1 bun scripts/deploy-netlify.mjs` → deploy ID `6a8316913c4ff6fd46510e5e`; hashing 328 file + 19 functions; CDN upload 8 file.
+
+**Verifikasi live:** ✅ homepage 200 · ✅ bundle `app-a6d33c32dd.js` live · ✅ `getAppData` jobs=132. `sw.js` live VERSION `asj-portal-app-a6d33c32dd-m886a44dc`.
+
+**Langkah untuk HP yang masih nyangkut (satu kali):** buka https://asjportal.netlify.app → ⋮ Chrome → Setelan situs → Hapus & setel ulang (atau buka di mode penyamaran). Setelah itu versi baru langsung tampil, dan deploy berikutnya tidak akan pernah nyangkut lagi (self-check + skipWaiting instan).
 
 ---
 
