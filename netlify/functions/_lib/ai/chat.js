@@ -10,6 +10,13 @@ const { requireRole } = require('../actions-auth');
 const { buildRingkasData, findMasterByWa, APPLY_WA_COLS } = require('./cv');
 const { geminiGenerate, parseJsonLoose } = require('./providers');
 
+// Tag VIP di catatan internal kandidat (satu-satunya sumber kebenaran — sama
+// persis dengan isVipCatatan di js/03_candidate.js & js/pages/ai_form.js).
+function isVipCatatan(catatan) {
+  const c = String(catatan || '');
+  return c.includes('[VIP]') || /\[(?:KELAS\s*[A-Z0-9]+|[A-Z0-9]+)\]/i.test(c);
+}
+
 // Skema data yang DIISI OTOMATIS ke form ai_form (kunci persis fieldPaths di
 // js/pages/ai_form.js). AI diminta mengembalikan JSON {reply, data} — tanpa ini
 // form tidak pernah terisi (dulu AI cuma balas teks).
@@ -30,9 +37,48 @@ const AI_FORM_DATA_INSTRUCTION =
   'gender SELALU dinormalisasi ke "LAKI-LAKI" atau "PEREMPUAN"; ' +
   'JANGAN menebak/mengarang data yang tidak disebut kandidat; sertakan juga data yang sudah ada di DATA KANDIDAT SAAT INI.\n';
 
-async function handleProcessAIChat(payload) {
+async function handleProcessAIChat(payload, sessionToken) {
   const p = payload || {};
   const flow = String(p.flow || 'master');
+  // LOCK VIP (AGENTS.md §6): AI CV Master (flow=master) hanya untuk admin ATAU
+  // kandidat ber-tag VIP/KELAS. Keputusan FINAL di server — jangan mengandalkan
+  // guard frontend saja (bisa di-bypass dengan memanggil action langsung).
+  if (flow === 'master') {
+    const guard = requireRole(sessionToken, 'admin');
+    const isAdmin = !guard.error;
+    if (!isAdmin) {
+      const currentData = p.currentData && typeof p.currentData === 'object' ? p.currentData : {};
+      const identitas =
+        currentData.identitas && typeof currentData.identitas === 'object' ? currentData.identitas : {};
+      const wa = normalizeWa(String(identitas.hp || ''));
+      if (wa) {
+        let lookupError = false;
+        let catatan = '';
+        try {
+          const cand = await findCandidateByWaFiltered(wa);
+          if (cand) {
+            catatan = String(cand.catatan_internal || cand.catatan_int || cand.catatan_admin || '');
+          } else {
+            // Fallback: kandidat yang CV-nya cuma ada di master_database_candidate.
+            const m = await findMasterByWa(wa);
+            catatan = m
+              ? String(m.catatan_internal || m.catatan_int || m.catatan || m.catatan_admin || '')
+              : '';
+          }
+        } catch (e) {
+          // Error lookup → jangan blokir (fail-open, sama seperti guard frontend).
+          lookupError = true;
+        }
+        if (!lookupError && !isVipCatatan(catatan)) {
+          return {
+            success: false,
+            error:
+              'Fitur AI CV Master eksklusif untuk Siswa ASJ (VIP / Kelas LPK). Hubungi Admin untuk akses.',
+          };
+        }
+      }
+    }
+  }
   const history = Array.isArray(p.history) ? p.history : [];
   const lang = String(p.lang || 'id');
   const ringkas = buildRingkasData(p.currentData);

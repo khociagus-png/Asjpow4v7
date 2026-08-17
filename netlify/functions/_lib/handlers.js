@@ -319,7 +319,7 @@ async function dispatchAction(action, payload, sessionToken) {
       return drive.handleRunMigration(payload, sessionToken);
     // AI (Gemini) & submit AI form
     case 'processAIChat':
-      return aiChat.handleProcessAIChat(payload);
+      return aiChat.handleProcessAIChat(payload, sessionToken);
     case 'processAdminAIChat':
       return aiChat.handleProcessAdminAIChat(payload, sessionToken);
     case 'processSiswaAIChat':

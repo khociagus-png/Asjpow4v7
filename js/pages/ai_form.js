@@ -510,6 +510,13 @@
           inputEl.disabled = false; btnEl.disabled = false; inputEl.focus(); 
           $("aiTypingStatus").classList.add("hidden");
           
+          // Lock VIP di-enforce SERVER (AGENTS.md §6) — kalau action dipanggil
+          // langsung tanpa sesi admin & kandidat non-VIP, tampilkan pesan lock.
+          if (res.success === false) {
+              appendHTML('ai', res.error || window.tr('ui.toast_ai_cv_locked'));
+              return;
+          }
+          
           if(res.reply) { 
               var finalReply = res.reply;
               if (typeof res.reply === 'string' && res.reply.startsWith('{')) {

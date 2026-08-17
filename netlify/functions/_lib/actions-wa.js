@@ -92,6 +92,23 @@ async function handleKirimSatuPesanFonnte(payload, sessionToken) {
   }
 }
 
+// Ganti placeholder template WA ke nilai per-kandidat. Terima SEMUA format
+// yang pernah dipakai UI/admin: `{nama}`/`{job}`/`{link}` (server lama) DAN
+// `<<NAMA>>`/`<<JOB>>`/`<<LINK>>` (WA Pintar frontend) DAN
+// `{job_code}`/`{link_grup}` (matchmaking esign). Tanpa ini template yang
+// disimpan admin dengan `<<NAMA>>` terkirim mentah ke kandidat.
+function applyTemplatePlaceholders(text, nama, jobCode, linkGrup) {
+  return String(text || '')
+    .replace(/\{nama\}/g, nama)
+    .replace(/<<NAMA>>/gi, nama)
+    .replace(/\{job_code\}/g, jobCode)
+    .replace(/\{job\}/g, jobCode)
+    .replace(/<<JOB>>/gi, jobCode)
+    .replace(/\{link_grup\}/g, linkGrup)
+    .replace(/\{link\}/g, linkGrup)
+    .replace(/<<LINK>>/gi, linkGrup);
+}
+
 // kirimTawaranMassal([{candidates, jobCode, linkGrup, interval, customMessage}])
 async function handleKirimTawaranMassal(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
@@ -134,11 +151,11 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
           jobCode +
           '. Silakan bergabung ke grup resmi kami: ' +
           linkGrup;
-      if (templateIsi && !d.customMessage) {
-        message = templateIsi
-          .replace(/\{nama\}/g, nama)
-          .replace(/\{job\}/g, jobCode)
-          .replace(/\{link\}/g, linkGrup);
+      // FIX: replace placeholder juga berlaku untuk customMessage (matchmaking
+      // esign pakai `{nama}`/`{job_code}`/`{link_grup}`) — dulu hanya template
+      // tersimpan yang di-replace, pesan custom terkirim mentah.
+      if (d.customMessage || templateIsi) {
+        message = applyTemplatePlaceholders(message, nama, jobCode, linkGrup);
       }
       try {
         await fonnteSend(wa, message);

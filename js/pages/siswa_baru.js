@@ -22,7 +22,15 @@
 
     function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
 
+    // Tab terakhir yang aktif di layar < 768px + status desktop/mobile.
+    // Dipakai handleResize supaya rotasi layar kembali ke tab yang dipilih,
+    // TANPA memaksa pindah tab saat iPhone memicu "resize" tiap scroll
+    // (URL bar Safari naik/turun) — penyebab panel "puter-puter". Pola sama
+    // dengan ai_form.js.
+    var lastMobileTab = "chat";
+    var wasDesktop = window.innerWidth >= 768;
     export function switchTab(target) {
+      lastMobileTab = target;
       if(window.innerWidth >= 768) return; 
       var cPanel = $('chatPanel'), fPanel = $('formPanel'), tChat = $('btnTabChat'), tForm = $('btnTabForm');
       if(target === 'chat') {
@@ -73,11 +81,17 @@
               candidateData = parsed.data || {};
               uploadedFiles = parsed.files || { ktp: null, kk: null, ijazah: null };
 
-              // Render ulang history chat
-              chatHistory.forEach(msg => {
-                  let role = msg.role === 'user' ? 'user' : 'ai';
-                  appendHTML(role, msg.parts[0].text);
-              });
+      // Render ulang history chat. Pesan disimpan dalam DUA format: welcome
+      // lama {role:'model', parts:[{text}]} dan pesan user/AI {role, content}.
+      // Baca keduanya — kalau hanya mengandalkan msg.parts, TypeError di
+      // pesan {role, content} → catch → SELURUH draft dihapus (data hilang).
+      chatHistory.forEach(msg => {
+          let role = msg.role === 'user' ? 'user' : 'ai';
+          let text = (msg && typeof msg.content === 'string' && msg.content)
+              ? msg.content
+              : (msg && msg.parts && msg.parts[0] && msg.parts[0].text) || '';
+          if (text) appendHTML(role, text);
+      });
 
               // Pulihkan status file upload
               ['ktp', 'kk', 'ijazah'].forEach(type => {
@@ -100,13 +114,25 @@
 
       // Desktop (>=768px): display kedua panel ditangani CSS (override `md:block`/
       // `md:flex` di main.css) — tidak perlu manipulasi class di sini.
-      window.addEventListener('resize', () => { if (window.innerWidth < 768) switchTab('chat'); }); 
+      window.addEventListener('resize', handleResize);
+    }
+
+    function handleResize() {
+      // iPhone Safari memicu "resize" tiap scroll (URL bar naik/turun) —
+      // hanya bereaksi saat MENYEBRANG breakpoint md (mis. rotasi layar),
+      // dan kembali ke tab terakhir yang aktif, bukan paksa "chat".
+      var isDesktop = window.innerWidth >= 768;
+      if (isDesktop === wasDesktop) return;
+      wasDesktop = isDesktop;
+      if (!isDesktop) switchTab(lastMobileTab);
     }
 
     function sendWelcomeMessage() {
       var welcome = "Yatta! Halo kak! Kenalin aku Qween Jeklin 👑. Mau daftar jadi siswa ASJ ya? Biar gampang, kita ngobrol aja yuk! Boleh sebutin **Nama Lengkap** kakak dulu?";
       appendHTML('ai', welcome);
-      chatHistory.push({ "role": "model", "parts": [{ "text": welcome }] });
+      // Format sama dengan pesan lain ({role, content}) supaya restore draft
+      // dan history yang dikirim ke server konsisten.
+      chatHistory.push({ "role": "assistant", "content": welcome });
       saveToLocal();
     }
 
