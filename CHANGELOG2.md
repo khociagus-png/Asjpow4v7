@@ -6,7 +6,7 @@
 
 ---
 
-## 2026-08-17 — `TBD` ✅ Tes preset Cloudinary + penanda versi header → footer
+## 2026-08-17 — `26f2a91` ✅ Tes preset Cloudinary + penanda versi header → footer
 
 ### Ringkasan
 
