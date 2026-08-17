@@ -172,8 +172,11 @@ git config user.name   # contoh: khoci89 / ASJ OS DOKUMEN
 
 ### 7.3 Update PROGRESS.md di akhir setiap sesi (wajib)
 
-Setiap sesi kerja WAJIB menambah entri di `PROGRESS.md` dengan header berisi
+Setiap sesi kerja WAJIB menambah entri di `PROGRESS.md` (atau `PROGRESS2.md`
+bila PROGRESS.md sudah panjang — file lama disimpan sebagai legacy, lihat
+pointer di atasnya) dengan header berisi
 **tanggal, nama/akun pengerja, hash commit, ringkasan kerja**:
+(`CHANGELOG.md`/`CHANGELOG2.md` menyusul per fitur/commit.)
 
 ```markdown
 ## Sesi 2026-08-15 — dikerjakan oleh: khoci89 (via Freebuff)

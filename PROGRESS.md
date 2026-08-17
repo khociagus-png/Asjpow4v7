@@ -4,6 +4,9 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
+> 🔗 **Sesi terbaru dicatat di [`PROGRESS2.md`](PROGRESS2.md)** — file ini menyimpan
+> riwayat legacy (2026-08-15 s/d awal 2026-08-17), dibaca kalau butuh konteks lama.
+
 **Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)** + **deploy Netlify commit `693931b` (izin token user) — live kini `app-935b39d018.js` + `sw.js` precache bundel terbaru (user HP tidak nyangkut versi lama)** + **deploy Netlify commit `83f5ebf` (izin token user) — SW anti-cache-nyangkut: skipWaiting instan + broadcast ASJ_FORCE_RELOAD + self-check versi + badge `v<hash>` di header admin (live `app-a6d33c32dd.js`)**.
 
 ---

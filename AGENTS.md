@@ -18,7 +18,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 | **WORKFLOW.md** | Aturan kerja tim: commit/push, struktur, command, larangan deploy | Setiap sesi |
 | **PIPELINE.md** | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline** | Sebelum menyentuh fitur tahapan kandidat |
 | **REVIEW.md** | Audit keamanan & rekomendasi | Saat kerja di backend/keamanan |
-| **PROGRESS.md / CHANGELOG.md** | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama |
+| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama |
 
 ---
 

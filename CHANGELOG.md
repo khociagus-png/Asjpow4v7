@@ -2,6 +2,8 @@
 
 > Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (preview Freebuff di HP selalu fresh — SW no-op di preview).
 
+> 🔗 **Entri terbaru dicatat di [`CHANGELOG2.md`](CHANGELOG2.md)** — file ini menyimpan riwayat legacy.
+
 ---
 
 ## 2026-08-17 — `548d12c` 📱 Preview Freebuff di HP selalu fresh: SW no-op di preview + deteksi host preview di pwa.js

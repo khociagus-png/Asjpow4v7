@@ -1,0 +1,21 @@
+# CHANGELOG2 — ASJ Portal (riwayat terbaru)
+
+> Kelanjutan `CHANGELOG.md` (legacy — entri lama ada di sana). Mulai sesi ini,
+> entri per commit dicatat di sini supaya file riwayat tidak membengkak.
+> Format: paling lama di atas (paling baru di bawah).
+
+---
+
+## 2026-08-17 — `941b01a` ⚡ Optimasi free-tier: keep-alive `ping` + offloading upload dokumen ke Cloudinary
+
+### Ringkasan
+
+- **Keep-alive / anti cold-start**: action `ping` dilayani PALING AWAL di `handleAction` (`handlers.js`) — sebelum rate limit, dispatch, atau init Supabase — dan mengembalikan respons RAW `{statusCode:200, body:'pong'}`. `netlify-wrapper.js` & `serve-static.mjs` mendukung `GET ?action=ping` + meneruskan respons RAW apa adanya. Workflow GitHub Actions baru `.github/workflows/keep-alive.yml` (cron `*/5 * * * *`) menembak dispatcher Netlify; URL bisa di-override via repo variable `KEEPALIVE_URL`.
+- **Cloudinary direct unsigned upload**: helper `uploadToCloudinary(file)` baru di `js/cloudinary.js` (cloud `ybzzbw9i`, preset `asjportal`) — file dikirim LANGSUNG browser→Cloudinary, backend tidak lagi memproses file fisik. Alur yang dikonversi: pemberkasan kandidat (+ konfirmasi timpa file lama), tambah kandidat admin, dokumen ekstra modal input & super-edit, dan revisi CV.
+- **Backend** (`actions-upload.js`): `simpanBerkasTahapan` / `simpanRevisiKandidat` / `simpanKandidatDanUpload` hanya mengekstrak string URL dari payload JSON (`d.fileUrl` / `f.url`) lalu update kolom dokumen; jalur base64 lama tetap berfungsi sebagai fallback.
+- **Keamanan**: key/secret Cloudinary TIDAK dimasukkan ke frontend (file publik); alur unsigned upload memang tidak membutuhkannya.
+- **Verifikasi**: `node --check` OK · 148/148 unit test lulus · `bun run build` → bundel `app-85dc1bcb69.js` (46 file), `check:globals` 0 kolisi · simulasi langsung: POST & GET ping → `200 "pong"` mentah, action normal tetap JSON.
+
+### Perlu tindakan pemilik
+- Pastikan preset unsigned `asjportal` ada di dashboard Cloudinary (Settings → Upload → Unsigned upload preset).
+- Deploy Netlify menunggu izin eksplisit pemilik (DEPLOY.md) — keep-alive & Cloudinary baru live setelah deploy.
