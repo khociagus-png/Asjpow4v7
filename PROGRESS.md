@@ -4,7 +4,21 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + **sentralisasi alias modul bundel (208 alias → `registerSeamAliases`)**.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `58340e4`
+
+### 🔧 Sentralisasi alias seam modul bundel — 208 self-alias `window.X = X` → `registerSeamAliases` via bridge
+
+**Ringkasan kerja:**
+1. **Migrasi 208 self-alias fungsi di 39 modul bundel** (`render/*` 5, `admin_ops/*` 6, `admin_modal/*` 3, `api/*` 4, `ai_copilot/*` 4, `engine/*` 4, `init/*` 5, plus `01_public`, `03_candidate`, `08_wa_pintar`, `10_cv_rirekisho`, `10b_cv_builders`, `12_esign_match`, `13_rincian_builder`, `upload-guard`) — tiap modul kini `import { registerSeamAliases } from '../core/bridge.js'` + satu panggilan registrasi, menggantikan blok `window.X = X` per file. `js/apply-docs.js` (standalone apply-full, bukan modul STACK) dikonversi manual — `applyDocsPlan` via bridge, tetap tampil sebagai `window.applyDocsPlan`.
+2. **Yang sengaja TETAP `window.X = X`**: non-fungsi (`window.THEMES` objek, `window.urlFotoJeklin` const — `registerSeamAliases` menolak non-fungsi) dan `helpers_cv.js` (guard `typeof window` untuk vitest — import bridge akan mengeksekusi i18n di node → ReferenceError).
+3. **🐛 Fix EOL-critical**: skrip versi awal menulis LF murni → `git diff` churn penuh (1227 baris palsu di `01_public.js`) karena blob HEAD ber-CRLF + lone-CR (artefak sesi lama) dan autocrlf menormalkan sisi working tree. Skrip ditulis ulang **EOL-preserving per-baris** (CRLF/LF/lone-CR dipertahankan) → diff hanya berisi perubahan nyata (411+/639−, `diff -w` identik).
+4. **Skrip migrasi** `.freebuff/sentralisasi-alias.mjs` (dry-run default, `--apply` untuk menulis) — didokumentasikan di ESM_BRIDGE §3.4.
+
+**Verifikasi:** no-undef 0 error (40 file tersentuh) · lint 0 error / 12 warning baseline · test **139/139** · build idempoten (bundel `app-5a15730349.js`, 46 file) · audit-globals HIGH=0 · smoke browser preview :3100 — admin **208 alias seam terdaftar** via `PortalBridge.getSeamAliases()` (sampel lintas modul: `adminSwitchTab`, `filterDbJob`, `bukaModalUndanganKelas`, `bukaAdminAiCopilot`, `openRincianBuilder`, `bukaModalTtd`), index boot normal + halaman publik tampil, share standalone 6 alias, apply-full `applyDocsPlan` terdaftar + tetap `window.applyDocsPlan` — semua 0 error JS.
 
 ---
 

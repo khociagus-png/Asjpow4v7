@@ -1,6 +1,21 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`ee3e44d` — Fase 3.5 L2-6 tuntas + sentralisasi alias seam via bridge + merge & verifikasi Undang Grup Kelas).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`58340e4` — sentralisasi alias seam modul bundel).
+
+---
+
+## 2026-08-17 — `58340e4` 🔧 Refactor: sentralisasi alias seam modul bundel — 208 self-alias `window.X = X` → `registerSeamAliases` via bridge
+
+### Ringkasan
+
+- **208 self-alias fungsi di 39 modul bundel dipindah ke `registerSeamAliases`** (`render/*`, `admin_ops/*`, `admin_modal/*`, `api/*`, `ai_copilot/*`, `engine/*`, `init/*`, esign, rincian builder, cv, upload-guard) — tiap modul import bridge + 1 panggilan registrasi; alias HTML↔JS kini terpusat di registry `SEAM_ALIASES` (audit `getSeamAliases()`).
+- **`js/apply-docs.js`** (standalone apply-full) ikut via bridge — `applyDocsPlan` terdaftar + tetap `window.applyDocsPlan` untuk pemakai classic.
+- **Tetap `window.X = X` (sengaja)**: non-fungsi (`THEMES`, `urlFotoJeklin`) & `helpers_cv.js` (guard `typeof window` untuk vitest).
+- **Skrip migrasi** `.freebuff/sentralisasi-alias.mjs` EOL-preserving — repo campuran CRLF/LF/lone-CR; menulis LF murni membuat `git diff` churn penuh (bug yang ditemukan & diperbaiki di sesi ini).
+
+### Verifikasi
+
+- no-undef 0 error · lint 0/12 · unit test **139/139** · build idempoten (`app-5a15730349.js`) · audit HIGH=0 · smoke preview: admin **208 alias** di registry, index/share/apply-full OK, 0 error JS.
 
 ---
 
