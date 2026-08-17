@@ -8,6 +8,22 @@
 
 ---
 
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `548d12c`
+
+### 📱 Preview Freebuff di HP selalu tampil versi LAMA — fix: preview dilarang pakai service worker
+
+**Masalah user:** preview Freebuff dibuka dari HP (`hp.freebuff web preview`) — reload berulang-ulang tetap tampil model lama, padahal kode sudah ter-update. Akar masalah: domain preview (`…daytonaproxy….net`) BUKAN `localhost`, jadi `pwa.js` mendaftarkan **service worker beneran** di domain preview → cache SW nyangkut di HP → versi lama terus disajikan walau bundel baru sudah di-build (pola sama seperti bug `sw.js` SHELL lama di Netlify, commit `f9a83ca`).
+
+**Fix berlapis (preview):**
+- `serve-static.mjs`: `/sw.js` SELALU dilayani **service worker no-op** (`NOOP_SW`) — `activate` menghapus SEMUA cache + `clients.claim()`, TANPA fetch listener (tidak pernah meng-intercept request) → SW lama di HP langsung diganti & cache-nya dibuang, setiap load diambil fresh dari jaringan. Header `Cache-Control: no-cache, no-store`. Production Netlify tidak terpengaruh (sw.js asli tetap dipakai di sana).
+- `pwa.js`: host preview Freebuff (`daytonaproxy`, `.freebuff`, `freebuff.app`) diperlakukan sama seperti localhost — unregister SW lama + bersihkan cache + **tidak** mendaftarkan SW lagi (jaring pengaman sisi klien).
+
+**Verifikasi:** build bersih (bundle baru `app-935b39d018.js`, sw.js production ikut update `asj-portal-app-935b39d018-m886a44dc`, bundel lama dihapus); uji langsung server preview → `/sw.js` mengembalikan no-op, `/` HTTP 200 + referensi bundel baru; bundel memuat logika `daytonaproxy`; `node --check` bersih.
+
+**Cara user cek di HP:** buka/refresh preview — load pertama mungkin masih versi lama (SW lama yang sedang mengontrol), lalu dalam ≤60 dtk SW no-op mengambil alih + auto-reload → versi baru. Kalau masih lama, tutup tab & buka lagi (maks 2×). Cek badge **`v935b39d018`** di footer.
+
+---
+
 ## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `d68c6ce`
 
 ### 🚀 PWA selalu versi terbaru: auto-update service worker + auto-hapus cache lama + header cache Netlify

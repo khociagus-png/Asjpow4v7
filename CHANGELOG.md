@@ -1,6 +1,17 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (fix kontras tema light halaman standalone + keterbacaan label AI CV).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (preview Freebuff di HP selalu fresh — SW no-op di preview).
+
+---
+
+## 2026-08-17 — `548d12c` 📱 Preview Freebuff di HP selalu fresh: SW no-op di preview + deteksi host preview di pwa.js
+
+### Ringkasan
+
+- **Akar masalah**: preview Freebuff diakses dari HP lewat domain proxy (`…daytonaproxy….net`, bukan localhost) → `pwa.js` mendaftarkan service worker beneran di domain preview → cache SW nyangkut di HP → reload berulang tetap versi lama.
+- **serve-static.mjs**: `/sw.js` di preview dilayani sebagai service worker **no-op** — `activate` hapus SEMUA cache + `clients.claim()`, tanpa fetch listener → SW lama diganti & cache dibuang, setiap load fresh dari jaringan (`Cache-Control: no-cache, no-store`). Production Netlify tetap pakai sw.js asli.
+- **pwa.js**: host preview (`daytonaproxy`/`.freebuff`/`freebuff.app`) diperlakukan seperti localhost — unregister SW lama + bersihkan cache + tidak mendaftarkan SW.
+- **Verifikasi**: build bersih (bundle `app-935b39d018.js`, sw.js production update), uji server preview → `/sw.js` no-op + `/` HTTP 200 + bundel baru, `node --check` OK.
 
 ---
 
