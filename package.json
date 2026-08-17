@@ -18,6 +18,7 @@
     "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify",
     "build:js": "node scripts/build-js.mjs",
     "build:html": "node scripts/build-html.mjs",
+    "deploy": "bun scripts/deploy-netlify.mjs",
     "check:globals": "node scripts/check-globals.mjs",
     "build": "bun run check:globals && bun run build:css && bun run build:html && bun run build:js"
   },

@@ -1,8 +1,18 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit kualitas terjemahan JP — 5 key salah arti/janggal diperbaiki).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (skrip deploy Netlify otomatis + E2E regresi penuh di live + rename site asjportal).
 
 ---
+
+## 2026-08-17 — `PENDING` 🚀 Skrip deploy Netlify otomatis + E2E regresi penuh di live
+
+### Ringkasan
+
+- **`scripts/deploy-netlify.mjs`** — deploy Netlify satu perintah: clean install → `bun run build` → patch `nodejs-compile-cache.js` (bug Bun: `enableCompileCache()` null) → `netlify-cli deploy --prod` → verifikasi live (homepage 200, bundle terbaru, getAppData jobs). Dipanggil via `bun run deploy`; override env `NETLIFY_SITE_ID`/`NETLIFY_SITE_URL`/`SKIP_*`.
+- **`netlify-cli` jadi devDependency** (package.json + bun.lock) — deploy tanpa npx/bunx; bun.lock hanya bertambah dep netlify-cli (~900 pkg), 0 package lama hilang (frozen install OK).
+- **Fix `e2e/login-check.mjs`**: `page.click` → `evaluate.click` untuk tombol login (loader overlay menutupi tombol — sama seperti upload/biodata-check).
+- **E2E regresi penuh di live `https://asjportal.netlify.app` SEMUA LULUS**: login-check, biodata-check, upload-check (termasuk Storage+cleanup), undang-grup-kelas.
+- **Catatan penting**: site Netlify di-rename `asjportal-379` → **`asjportal`** (URL lama 404) — DEPLOY.md §3 diupdate.
 
 ## 2026-08-17 — `63216e4` 🇯🇵 Audit kualitas terjemahan Jepang (i18n/locales/jp.js) — 5 key salah arti/janggal diperbaiki
 

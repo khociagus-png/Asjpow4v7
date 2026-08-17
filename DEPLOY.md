@@ -45,9 +45,9 @@ boleh deploy ke mana**. Baca sebelum commit, push, atau deploy.
 
 | Item | Nilai |
 | --- | --- |
-| Nama site | `asjportal-379` |
-| URL | https://asjportal-379.netlify.app |
-| Admin URL | https://app.netlify.com/projects/asjportal-379 |
+| Nama site | `asjportal` (sebelumnya `asjportal-379` — di-rename; URL lama `asjportal-379.netlify.app` kini 404) |
+| URL | https://asjportal.netlify.app |
+| Admin URL | https://app.netlify.com/projects/asjportal |
 | Akun Netlify | `nerazzurri190889@gmail.com` (tim `asjamnag`) |
 | Project ID | `7e433a31-82cd-4afb-8d1b-f0391cabdd3e` |
 
@@ -73,7 +73,8 @@ GEMINI_API_KEY, FONNTE_TOKEN, NETLIFY_SITE_URL
 | 2026-08-15 | khoci89 (user, token diberikan via chat) | `asjportal-379` | Deploy CLI pertama (`--prod --dir .`); 237 file + 19 functions; 12 env var; visibility di-set Public; verifikasi OK (homepage 200, PIN admin, getAppData 132 jobs) |
 | 2026-08-15 | khoci89 (user: "Redeploy") | `asjportal-379` | Redeploy fix `ecc1828` (export fetchMasterByWa) `--skip-functions-cache`; verifikasi ulang live: upload-check & biodata-check **full lulus**, getDrafCvMaster AGUS KHOCI lengkap (auto-fill CV AI terisi) |
 | 2026-08-16 | khoci89 (user: "Tolong deploy ke netlify terus update github") | `asjportal-379` | Deploy `14c2661` (fix simpan AI form CHECK constraint `d0c1a71` + assets build) `--skip-functions-cache`; verifikasi live OK: homepage 200, checkAdminMaster `success:true`, getAppData jobs ada; 23 file + 19 functions |
-| 2026-08-17 | khoci89 (user: kirim token `NETLIFY_AUTH_TOKEN` via chat, minta clean install + deploy) | `asjportal-379` | Deploy `7796fb7` (i18n JP fix + tombol undangan pindah ke panel WA + fix hapusTugas); clean install bun (146 pkg) + `netlify-cli` jadi devDependency; patch lokal `nodejs-compile-cache.js` (Bun: `enableCompileCache()` null → destructure crash); verifikasi live: homepage 200, bundle `app-70c4fbc34d.js` berisi 5 fix JP, checkAdminMaster `success:true`, getAppData jobs ada |
+| 2026-08-17 | khoci89 (user: kirim token `NETLIFY_AUTH_TOKEN` via chat, minta clean install + deploy) | `asjportal` | Deploy `7796fb7` (i18n JP fix + tombol undangan pindah ke panel WA + fix hapusTugas); clean install bun (146 pkg) + `netlify-cli` jadi devDependency; patch lokal `nodejs-compile-cache.js` (Bun: `enableCompileCache()` null → destructure crash); verifikasi live: homepage 200, bundle `app-70c4fbc34d.js` berisi 5 fix JP, checkAdminMaster `success:true`, getAppData jobs ada |
+| 2026-08-17 | khoci89 (token sama, "comit semua + comit netlify") | `asjportal` | Deploy ulang via **`scripts/deploy-netlify.mjs`** (SKIP_INSTALL/SKIP_BUILD — hanya deploy+verify) — script otomatis: clean install → build → patch compile-cache → deploy → verifikasi live. Verifikasi: homepage 200, bundle live, getAppData jobs=132. **Catatan penting: site sudah di-rename `asjportal-379` → `asjportal`** (URL lama 404). E2E regresi penuh di live LULUS: login-check, biodata-check, upload-check, undang-grup-kelas (login-check butuh fix `page.click` → `evaluate.click` — loader overlay menutupi tombol) |
 
 > Isi baris baru SETIAP kali deploy Netlify dilakukan. Tanpa baris di tabel ini,
 > deploy Netlify dianggap tidak sah.

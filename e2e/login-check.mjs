@@ -58,7 +58,9 @@ console.log(`\nTarget: ${BASE}\n`);
 
   await page.fill('#log-wa', WA);
   await page.fill('#log-pass', PIN);
-  await page.click('#btn-log-kandidat');
+  // click via evaluate: #global-loader bisa menutupi tombol saat proses
+  // login, dan modal tertutup tepat saat Playwright mengecek stabilitas
+  await page.evaluate(() => document.getElementById('btn-log-kandidat').click());
 
   // Nav top memakai kelas !hidden (sengaja selalu tersembunyi) — indikator
   // login yang valid: dashboard kandidat tampil (changePage dipanggil initApp)
@@ -111,9 +113,10 @@ console.log(`\nTarget: ${BASE}\n`);
   const step3 = await waitFor(async () => await page.locator('#login-step-3').isVisible());
   check(`Step 2 (pilih ${ADMIN_NAME})`, step3);
 
-  // Step 3: PIN personal → masuk portal
+  // Step 3: PIN personal → masuk portal (click via evaluate — lihat catatan
+  // di TEST 2: #global-loader bisa menutupi tombol saat proses login)
   await page.fill('#admin-pin-personal', ADMIN_PIN);
-  await page.click('#btn-login-personal');
+  await page.evaluate(() => document.getElementById('btn-login-personal').click());
   const adminMode = await waitFor(async () => await page.locator('#page-admin').isVisible());
   check('Login admin sukses → dashboard admin tampil', adminMode);
   check(
