@@ -4,7 +4,24 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-16 — dikerjakan oleh **khoci89** (via Freebuff) — 🛠️ L/P siswa baru, auto-fill AI form (JSON {reply,data}), biaya magang 5,5 Jt, lock naitei by LULUS.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **khoci89** (via Freebuff) — 🛠️ Fix 5 bug: i18n JP, draft siswa hilang, resize iPhone, placeholder WA massal, lock VIP AI CV di server.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: khoci89 (via Freebuff) — commit `74f503f` (+ `f0c66ce`)
+
+### 🛠️ Fix 5 bug hasil perburuan bug + commit sisa sesi sebelumnya (naitei by tahapan, carry-over TSK)
+
+**Fokus user:** "cari semua bug di sini" → 5 bug ditemukan & dilaporkan, user pilih **fix semua sekaligus**.
+
+**Perbaikan (semua terverifikasi):**
+1. **i18n JP tidak lengkap** — 12 key salah namespace: `master-full.html` pakai `form.gender_l/p`, `form.agama_*`, `form.nikah_*` padahal definisinya di `candidate.*`; `ai_form.html` pakai `form.ai_nilai` (tidak ada); `js/api/candidates.js` pakai `ui.berkas_tersimpan` (ada di `admin.*`). Fix: `master-full.html` → `candidate.*`, tambah `form.ai_nilai` (id+jp) & `ui.berkas_tersimpan` (id+jp). Check i18n otomatis: 0 key hilang (dari 12).
+2. **Draft siswa baru HILANG setelah refresh** ⚠️ — `siswa_baru.js` restore pakai `msg.parts[0].text` tapi pesan user/AI disimpan `{role, content}` → TypeError → catch → `localStorage.removeItem(DRAFT_KEY)` → chat + form + status upload hilang total. Fix: restore baca dua format + welcome diseragamkan ke `{role:'assistant', content}`.
+3. **Resize "puter-puter" iPhone** di `siswa_baru.js` — pola lama paksa `switchTab('chat')` tiap resize; diganti pola `lastMobileTab`/`wasDesktop`/`handleResize` (sama persis `ai_form.js`).
+4. **Placeholder WA massal tidak ter-replace** — frontend/UI pakai `<<NAMA>>`/`<<JOB>>`, server massal cuma replace `{nama}`/`{job}`/`{link}`, dan `customMessage` (matchmaking esign `{nama}`/`{job_code}`/`{link_grup}`) TIDAK di-replace sama sekali → kandidat terima teks mentah. Fix: `applyTemplatePlaceholders` di `actions-wa.js` menangani semua format untuk template & customMessage.
+5. **Lock VIP AI CV tidak di-enforce server** — klaim AGENTS.md (`isAiCvAllowed`) tidak ada di kode; `processAIChat` dipanggil tanpa sessionToken & tanpa cek VIP → non-VIP bisa bypass. Fix: `handleProcessAIChat(payload, sessionToken)` — flow=master wajib sesi admin ATAU catatan kandidat `[VIP]`/`[KELAS]` (cek `database_candidate` → fallback `master_database_candidate`; error lookup fail-open). Frontend `ai_form.js` menampilkan pesan lock saat `{success:false}`. Smoke test live: `processAIChat` flow=master WA fiktif → `{success:false, error:'Fitur AI CV Master eksklusif…'}` tanpa panggil Gemini.
+
+**Verifikasi:** `node --check` semua file JS diubah · eslint 0 error (ESM no-undef 0) · unit test **91/91** · `bun run build` sukses (`app-fbbbee6390.js`) · check i18n 0 key hilang · preview restart OK · smoke test lock VIP live OK.
 
 ---
 
