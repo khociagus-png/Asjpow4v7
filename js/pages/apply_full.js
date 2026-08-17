@@ -11,6 +11,7 @@
 // (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
 // registerSeamAliases — bukan window.X = X per baris.
 import { registerSeamAliases } from '../core/bridge.js';
+import { uploadToCloudinary } from '../cloudinary.js';
 
     // FASE 3/4: field JOB/BIDANG/WA/NAMA dulu diisi server (GAS scriptlet)
     // dari e.parameter saat halaman dibuka. Sekarang dibaca dari query
@@ -246,43 +247,20 @@ import { registerSeamAliases } from '../core/bridge.js';
     }
 
     async function uploadFilesDirectly(filesObj, folder) {
-      // Downscale dulu (foto → max 800px jpeg) supaya byte di Storage kecil;
+      // Downscale dulu (foto → max 800px jpeg) supaya byte di Cloudinary kecil;
       // non-gambar (cv/jft/ssw pdf) dibiarkan utuh oleh downscaleImageFile.
       const files = {};
       for (const k of Object.keys(filesObj)) files[k] = filesObj[k] ? await downscaleImageFile(filesObj[k], 800, 0.8) : null;
       const toUpload = Object.keys(files).filter(k => files[k]);
       if (toUpload.length === 0) return {};
       
-      // CV per code job: beda loker = beda file CV (JOB<code>_CV). Upload baru
-      // untuk code job yang SAMA yang menimpa; CV loker lain tetap utuh.
-      var cvJobPrefix = '';
-      try {
-        var jobEl = document.getElementById('job');
-        if (jobEl && jobEl.value) cvJobPrefix = 'JOB' + String(jobEl.value).trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '_') + '_';
-      } catch (e) { /* job tidak tersedia — pakai nama default */ }
-      const payloadFiles = toUpload.map(k => {
-        const file = files[k];
-        let prefix = k.toUpperCase();
-        if (k === 'cvFile' && cvJobPrefix) prefix = cvJobPrefix + 'CV';
-        return { key: k, prefix: prefix, ext: file.name.split('.').pop() || 'bin' };
-      });
-      
-      const res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
-      if (!res.success) throw new Error('Gagal mendapatkan link upload: ' + (res.message || res.error || ''));
-      
+      // Upload LANGSUNG ke Cloudinary — backend hanya menerima string URL hasil
+      // upload (tidak ada lagi request getUploadUrls / PUT ke Supabase Storage).
+      // Cloudinary memberi public_id unik per upload, jadi tidak ada risiko
+      // menimpa file lama (dulu CV per loker butuh prefix JOB<code>_CV).
       const uploadedUrls = {};
       for (const key of toUpload) {
-        const file = files[key];
-        const { signedUrl, publicUrl } = res.urls[key];
-        
-        const uploadRes = await fetch(signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type || 'application/octet-stream' },
-          body: file
-        });
-        
-        if (!uploadRes.ok) throw new Error('Gagal mengunggah ' + key);
-        uploadedUrls[key] = publicUrl;
+        uploadedUrls[key] = await uploadToCloudinary(files[key]);
       }
       return uploadedUrls;
     }

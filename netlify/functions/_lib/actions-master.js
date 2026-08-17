@@ -11,6 +11,7 @@ const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
 const { syncBiodataKeMail } = require('./actions-mail');
 const { nextCandidateId } = require('./candidate-helpers');
 const { cacheClear } = require('./cache');
+const { resolveFileUrl } = require('./storage');
 
 // Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
 // Dipakai handleSimpanUpdateMaster untuk mencatat "[BIODATA] … diubah" ke mail
@@ -809,12 +810,14 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         .toUpperCase() || 'KANDIDAT';
     const folder = 'master/' + nama.replace(/[^A-Z0-9_-]/g, '_');
 
-    // Upload file base64 (jika ada).
+    // Upload file (jika ada): nilai URL string (Cloudinary, dikirim langsung
+    // dari browser) dipakai apa adanya; base64 (jalur lama) tetap fallback ke
+    // Supabase Storage via resolveFileUrl.
     const fileUrls = {};
     for (const [from, col] of Object.entries(MASTER_FILE_COLUMNS)) {
       if (d[from]) {
         const prefix = from.replace(/File$/, '').toUpperCase();
-        const url = await uploadBase64(d[from], folder, prefix + '.jpg');
+        const url = await resolveFileUrl(d[from], folder, prefix + '.jpg');
         if (url) fileUrls[col] = url;
       }
     }

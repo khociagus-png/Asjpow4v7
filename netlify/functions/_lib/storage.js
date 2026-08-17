@@ -153,6 +153,16 @@ async function uploadBase64(data, folder, fileName) {
   return publicUrl(path);
 }
 
+// Jalur Cloudinary (2026-08-17): nilai sudah URL string (hasil upload langsung
+// dari browser) → dipakai apa adanya. Base64 (jalur lama Frontend → Netlify →
+// Storage) tetap didukung sebagai fallback untuk klien yang belum dimigrasi.
+async function resolveFileUrl(value, folder, fileName) {
+  if (typeof value === 'string' && /^https?:\/\//i.test(value.trim())) {
+    return value.trim();
+  }
+  return uploadBase64(value, folder, fileName);
+}
+
 module.exports = {
   bucket,
   storageRequest,
@@ -163,4 +173,5 @@ module.exports = {
   isVarianOf,
   hapusJenisVarian,
   uploadBase64,
+  resolveFileUrl,
 };

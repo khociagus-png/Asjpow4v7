@@ -12,6 +12,7 @@
 // (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
 // registerSeamAliases — bukan window.X = X per baris.
 import { registerSeamAliases } from '../core/bridge.js';
+import { uploadToCloudinary } from '../cloudinary.js';
 
     // Bahasa terpilih (asj_lang) ikut serta; label statis diterjemahkan onload.
     document.addEventListener('DOMContentLoaded', function () {
@@ -398,14 +399,6 @@ import { registerSeamAliases } from '../core/bridge.js';
       }
     }
 
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve({ name: file.name, mime: file.type, data: e.target.result.split(",")[1] });
-        reader.onerror = reject; reader.readAsDataURL(file);
-      });
-    }
-
     export function changeStep(dir) {
         try {
             let curStepEl = getEl(`step-${currentStep}`);
@@ -483,15 +476,17 @@ import { registerSeamAliases } from '../core/bridge.js';
 
             const valSafe = (id) => getEl(id) ? getEl(id).value : "";
 
-            let filePhoto = getEl("photo") && getEl("photo").files.length > 0 ? await fileToBase64(getEl("photo").files[0]) : null;
-            let fileJft = getEl("jft") && getEl("jft").files.length > 0 ? await fileToBase64(getEl("jft").files[0]) : null;
-            let fileSsw = getEl("ssw") && getEl("ssw").files.length > 0 ? await fileToBase64(getEl("ssw").files[0]) : null;
-            let fileIjazahSd = getEl("ijazahSd") && getEl("ijazahSd").files.length > 0 ? await fileToBase64(getEl("ijazahSd").files[0]) : null;
-            let fileIjazahSmp = getEl("ijazahSmp") && getEl("ijazahSmp").files.length > 0 ? await fileToBase64(getEl("ijazahSmp").files[0]) : null;
-            let fileIjazahSma = getEl("ijazahSma") && getEl("ijazahSma").files.length > 0 ? await fileToBase64(getEl("ijazahSma").files[0]) : null;
-            let fileUniv = getEl("univ") && getEl("univ").files.length > 0 ? await fileToBase64(getEl("univ").files[0]) : null;
-            let fileKtp = getEl("ktpFile") && getEl("ktpFile").files.length > 0 ? await fileToBase64(getEl("ktpFile").files[0]) : null;
-            let fileKk = getEl("kk") && getEl("kk").files.length > 0 ? await fileToBase64(getEl("kk").files[0]) : null;
+            // File dikirim LANGSUNG ke Cloudinary (uploadToCloudinary) — backend
+            // hanya menerima string URL hasil upload (resolveFileUrl).
+            let filePhoto = getEl("photo") && getEl("photo").files.length > 0 ? await uploadToCloudinary(getEl("photo").files[0]) : null;
+            let fileJft = getEl("jft") && getEl("jft").files.length > 0 ? await uploadToCloudinary(getEl("jft").files[0]) : null;
+            let fileSsw = getEl("ssw") && getEl("ssw").files.length > 0 ? await uploadToCloudinary(getEl("ssw").files[0]) : null;
+            let fileIjazahSd = getEl("ijazahSd") && getEl("ijazahSd").files.length > 0 ? await uploadToCloudinary(getEl("ijazahSd").files[0]) : null;
+            let fileIjazahSmp = getEl("ijazahSmp") && getEl("ijazahSmp").files.length > 0 ? await uploadToCloudinary(getEl("ijazahSmp").files[0]) : null;
+            let fileIjazahSma = getEl("ijazahSma") && getEl("ijazahSma").files.length > 0 ? await uploadToCloudinary(getEl("ijazahSma").files[0]) : null;
+            let fileUniv = getEl("univ") && getEl("univ").files.length > 0 ? await uploadToCloudinary(getEl("univ").files[0]) : null;
+            let fileKtp = getEl("ktpFile") && getEl("ktpFile").files.length > 0 ? await uploadToCloudinary(getEl("ktpFile").files[0]) : null;
+            let fileKk = getEl("kk") && getEl("kk").files.length > 0 ? await uploadToCloudinary(getEl("kk").files[0]) : null;
 
             const payload = {
                 wa: valSafe("wa"), nama: valSafe("nama").toUpperCase(), furigana: valSafe("furigana"), panggilan: valSafe("panggilan").toUpperCase(),

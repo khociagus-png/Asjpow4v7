@@ -1,6 +1,7 @@
 import { ALL_DB_JOBS, ALL_JOBS, currentAdminName } from '../init/state.js';
 import { renderAdminFull } from '../render/admin.js';
 import { registerSeamAliases } from '../core/bridge.js';
+import { uploadToCloudinary } from '../cloudinary.js';
 // 9. INTERAKSI BACKEND — DOMAIN LOKER / KELOLA (jobs)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -107,30 +108,18 @@ export async function downscaleImageFile(file, maxWidth, quality) {
 }
 
 export async function uploadFilesDirectly(filesObj, folder) {
-  // Downscale dulu (foto/pamflet → max 800px jpeg) supaya byte di Storage
+  // Downscale dulu (foto/pamflet → max 800px jpeg) supaya byte di Cloudinary
   // kecil; non-gambar dibiarkan utuh oleh downscaleImageFile.
   const files = {};
   for (const k of Object.keys(filesObj))
     files[k] = filesObj[k] ? await downscaleImageFile(filesObj[k], 800, 0.8) : null;
   const toUpload = Object.keys(files).filter((k) => files[k]);
   if (toUpload.length === 0) return {};
-  const payloadFiles = toUpload.map((k) => {
-    const file = files[k];
-    return { key: k, prefix: k.toUpperCase(), ext: file.name.split('.').pop() || 'bin' };
-  });
-  const res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
-  if (!res.success) throw new Error('Gagal mendapatkan link upload');
+  // Upload LANGSUNG ke Cloudinary — backend hanya menerima string URL hasil
+  // upload (tidak ada lagi getUploadUrls / PUT ke Supabase Storage).
   const uploadedUrls = {};
   for (const key of toUpload) {
-    const file = files[key];
-    const { signedUrl, publicUrl } = res.urls[key];
-    const uploadRes = await fetch(signedUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true' },
-      body: file,
-    });
-    if (!uploadRes.ok) throw new Error('Gagal mengunggah ' + key);
-    uploadedUrls[key] = publicUrl;
+    uploadedUrls[key] = await uploadToCloudinary(files[key]);
   }
   return uploadedUrls;
 }
@@ -393,5 +382,5 @@ registerSeamAliases({
     submitEditFullLoker,
     bukaModalEditDbJob,
     simpanUpdateDbJob,
-});
+});
 

@@ -11,6 +11,7 @@
 // (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
 // registerSeamAliases — bukan window.X = X per baris.
 import { registerSeamAliases } from '../core/bridge.js';
+import { uploadToCloudinary } from '../cloudinary.js';
 
     export function $(id) { return document.getElementById(id); }
     var chatHistory = []; 
@@ -283,28 +284,16 @@ import { registerSeamAliases } from '../core/bridge.js';
       var toUpload = Object.keys(filesObj).filter(function(k) { return filesObj[k] && filesObj[k].data; });
       if (toUpload.length === 0) return {};
       
-      var payloadFiles = toUpload.map(function(k) {
-        var file = filesObj[k];
-        return { key: k, prefix: k.toUpperCase(), ext: (file.name || '').split('.').pop() || 'bin' };
-      });
-      
-      var res = await window.callAPI('getUploadUrls', { files: payloadFiles, folder: folder });
-      if (!res.success) throw new Error('Gagal mendapatkan link upload');
-      
+      // Upload LANGSUNG ke Cloudinary: base64 diubah kembali jadi File, lalu
+      // dikirim ke Cloudinary. Backend hanya menerima string URL hasil upload
+      // (tidak ada lagi getUploadUrls / Supabase Storage).
       var uploadedUrls = {};
       for (var i = 0; i < toUpload.length; i++) {
         var key = toUpload[i];
         var file = filesObj[key];
-        var signedUrl = res.urls[key].signedUrl;
-        
         var blob = base64ToBlob(file.data, file.mime);
-        var uploadRes = await fetch(signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.mime || 'application/octet-stream', 'x-upsert': 'true' },
-          body: blob
-        });
-        if (!uploadRes.ok) throw new Error('Gagal mengunggah ' + key);
-        uploadedUrls[key] = res.urls[key].publicUrl;
+        var f = new File([blob], file.name || key + '.jpg', { type: file.mime || 'application/octet-stream' });
+        uploadedUrls[key] = await uploadToCloudinary(f);
       }
       return uploadedUrls;
     }
