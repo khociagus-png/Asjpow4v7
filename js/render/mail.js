@@ -88,6 +88,19 @@ export function renderFormInbox() {
   var tb = document.getElementById('admin-mail-body');
   if (!tb) return;
   var html = '';
+
+  // Escape teks bebas (alasan reject dari admin / nama dokumen tambahan)
+  // supaya tidak bisa menyisipkan HTML/script saat dirender. WAJIB di sini
+  // (di atas forEach docs): var esc LOKAL men-shadow window.esc — hoisting
+  // membuat `esc` = undefined sampai baris ini dijalankan, jadi pemakaian
+  // lebih awal (extraDocBtns) akan TypeError "f is not a function".
+  var esc = function (s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  };
   // Filter status (default MENUNGGU/MAIL/BARU utk daftar review; bisa
   // diubah lewat tombol APPROVED/REJECTED/ALL) + pencarian nama/WA/job.
   var arr = ALL_FORM.filter(function (f) {
@@ -177,15 +190,6 @@ export function renderFormInbox() {
               ? 'bg-sky-900/40 border-sky-500/30 text-sky-400'
               : 'bg-amber-900/40 border-amber-500/30 text-amber-300';
     // Row yang sudah diproses: tampilkan keterangan feedback, tanpa tombol review.
-    // Escape teks bebas (alasan reject dari admin) supaya tidak bisa
-    // menyisipkan HTML/script saat dirender.
-    var esc = function (s) {
-      return String(s || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
     var actionCell = '';
     var deleteBtn =
       '<button onclick="hapusFormMail(' +
