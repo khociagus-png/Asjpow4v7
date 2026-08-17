@@ -4,7 +4,7 @@
 
 ---
 
-## 2026-08-17 — `PENDING` 🌐 i18n lengkap teks Undang Grup Kelas — placeholder & deskripsi panel WA tidak lagi literal
+## 2026-08-17 — `baa653d` 🌐 i18n lengkap teks Undang Grup Kelas — placeholder & deskripsi panel WA tidak lagi literal
 
 ### Ringkasan
 
