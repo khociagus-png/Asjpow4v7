@@ -4,7 +4,20 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)**.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp** + **audit kualitas terjemahan JP: 5 key salah arti/janggal diperbaiki (bio_mother, class_dana_desc, exam_list_3, domisili, zero_candidates)** + **deploy Netlify otomatis (`scripts/deploy-netlify.mjs`, netlify-cli jadi devDependency) + fix `e2e/login-check.mjs` (click via evaluate) + E2E regresi penuh di live LULUS (login, upload, biodata, undang grup) + catatan rename site Netlify `asjportal-379` → `asjportal`** + **fix kontras tema light halaman standalone + keterbacaan label AI CV (commit `dce8da8`)** + **deploy Netlify commit `693931b` (izin token user) — live kini `app-935b39d018.js` + `sw.js` precache bundel terbaru (user HP tidak nyangkut versi lama)**.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `693931b` (deploy Netlify)
+
+### 🚀 Deploy Netlify — versi terbaru live (SW fix SHELL bundel lama)
+
+**Perintah user:** kirim token Netlify + "Deploy Ke netlivy".
+
+- `bun run build` lokal idempotent (bundle `app-935b39d018.js`, sw.js SHELL → bundel terbaru, VERSION `asj-portal-app-935b39d018-m886a44dc`) — repo bersih, tidak ada asset berubah.
+- Deploy via `scripts/deploy-netlify.mjs` (SKIP_INSTALL/SKIP_BUILD): deploy ID `6a8311c8ba99f1911dd51677`; hashing 328 file + 19 functions; CDN diff 0 baru karena file sudah di upload Freebuff deploy yang sempat putus — deploy baru tetap valid & live.
+- **Verifikasi live:** homepage 200 · bundle `app-935b39d018.js` 200 · `getAppData` jobs=132 · `sw.js` live precache `app-935b39d018.js` + `Cache-Control: no-cache` (netlify.toml).
+- **Efek untuk user:** HP/desktop yang nyangkut versi lama kini otomatis beralih — `sw.js` tidak lagi menunjuk bundel yang dihapus; PWA auto-update (SKIP_WAITING + hapus cache lama) jalan di Netlify.
 
 ---
 
