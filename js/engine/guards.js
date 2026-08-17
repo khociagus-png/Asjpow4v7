@@ -1,5 +1,6 @@
 import { tr } from '../../i18n.js';
 import { showToast } from '../init/util.js';
+import { ALL_FORM, PREV_MAIL_COUNT } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -46,7 +47,7 @@ export function sedangDiscrollTabel() {
 // oleh initApp (auto-refresh) DAN patch-in-place aksi admin (07_api.js)
 // supaya angka selalu konsisten tanpa harus tarik ulang semua data.
 export function updateMailBadge() {
-  let pendingMails = window.ALL_FORM.filter(
+  let pendingMails = ALL_FORM.filter(
     (f) =>
       f.status.toUpperCase() === 'MENUNGGU' ||
       f.status.toUpperCase() === 'MAIL' ||
@@ -88,9 +89,9 @@ export function updateMailBadge() {
   // Toast mail baru hanya terpicu jika pending NAIK dibanding siklus
   // sebelumnya — aksi admin (review/lulus/gagal/hapus) selalu MENURUNKAN
   // pending, jadi aman dipanggil dari patch-in-place tanpa bunyi palsu.
-  if (window.PREV_MAIL_COUNT !== null && pendingMails > window.PREV_MAIL_COUNT) {
+  if (PREV_MAIL_COUNT !== null && pendingMails > PREV_MAIL_COUNT) {
     showToast(
-      tr('ui.toast_new_mail').replace('{n}', pendingMails - window.PREV_MAIL_COUNT) +
+      tr('ui.toast_new_mail').replace('{n}', pendingMails - PREV_MAIL_COUNT) +
         tr('ui.toast_mail_inbox_n'),
       'success',
     );

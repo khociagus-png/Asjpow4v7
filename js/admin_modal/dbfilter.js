@@ -1,3 +1,4 @@
+import { DROPDOWNS, dbFilterBidang, dbFilterTahapan } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
 // js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
 // 06_admin_modal.js — perilaku tidak berubah.
@@ -31,21 +32,21 @@ export function setSortDb(t) {
 export function renderDbFilters() {
   var bContainer = document.getElementById('filter-bidang-container');
   var tContainer = document.getElementById('filter-tahapan-container');
-  if (window.DROPDOWNS.kategori && bContainer) {
+  if (DROPDOWNS.kategori && bContainer) {
     var bHtml =
       '<button onclick="setFilterBidang(\'ALL\')" class="px-3 py-1 rounded-full ' +
-      (window.dbFilterBidang === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
+      (dbFilterBidang === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
       '">' +
       window.tr('public.all') +
       '</button>';
     // Label chip dwi bahasa (trOption); onclick tetap ID asli (trOptionId)
     // supaya filter cocok dengan data yang tersimpan.
-    window.DROPDOWNS.kategori.forEach((kat) => {
+    DROPDOWNS.kategori.forEach((kat) => {
       bHtml +=
         '<button onclick="setFilterBidang(\'' +
         window.escJs(window.trOptionId(kat)) +
         '\')" class="px-3 py-1 rounded-full ' +
-        (window.dbFilterBidang === window.trOptionId(kat)
+        (dbFilterBidang === window.trOptionId(kat)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +
@@ -54,19 +55,19 @@ export function renderDbFilters() {
     });
     bContainer.innerHTML = bHtml;
   }
-  if (window.DROPDOWNS.tahapan && tContainer) {
+  if (DROPDOWNS.tahapan && tContainer) {
     var tHtml =
       '<button onclick="setFilterTahapan(\'ALL\')" class="px-3 py-1 rounded-full ' +
-      (window.dbFilterTahapan === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
+      (dbFilterTahapan === 'ALL' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400') +
       '">' +
       window.tr('public.all') +
       '</button>';
-    window.DROPDOWNS.tahapan.forEach((thp) => {
+    DROPDOWNS.tahapan.forEach((thp) => {
       tHtml +=
         '<button onclick="setFilterTahapan(\'' +
         window.escJs(window.trOptionId(thp)) +
         '\')" class="px-3 py-1 rounded-full ' +
-        (window.dbFilterTahapan === window.trOptionId(thp)
+        (dbFilterTahapan === window.trOptionId(thp)
           ? 'bg-purple-600 text-white'
           : 'bg-slate-800 text-slate-400') +
         '">' +

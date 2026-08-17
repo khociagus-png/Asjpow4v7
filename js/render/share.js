@@ -1,6 +1,7 @@
 import { callAPI } from '../../api-client.js';
 import { tr } from '../../i18n.js';
 import { showToast } from '../init/util.js';
+import { ALL_DB_JOBS, ALL_JOBS } from '../init/state.js';
 // 7. FUNGSI RENDER — DOMAIN SHARE LOKER (modal share + template WA)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -42,10 +43,10 @@ export function shareLinkFor(jobCode) {
 
 export function getJobByCode(jobCode) {
   var arr =
-    typeof window.ALL_DB_JOBS !== 'undefined' && window.ALL_DB_JOBS.length
-      ? window.ALL_DB_JOBS
-      : typeof window.ALL_JOBS !== 'undefined'
-        ? window.ALL_JOBS
+    typeof ALL_DB_JOBS !== 'undefined' && ALL_DB_JOBS.length
+      ? ALL_DB_JOBS
+      : typeof ALL_JOBS !== 'undefined'
+        ? ALL_JOBS
         : [];
   for (var i = 0; i < arr.length; i++) if (arr[i].code === jobCode) return arr[i];
   return null;
@@ -261,16 +262,9 @@ export async function simpanDokumenShare(jobCode) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (tutupModalShare, copasShareWa, simpanDokumenShare,
 // toggleSharePreview, copyShareLink, dll).
-window.shareLinkFor = shareLinkFor;
-window.getJobByCode = getJobByCode;
 window.bukaModalShare = bukaModalShare;
 window.tutupModalShare = tutupModalShare;
 window.toggleSharePreview = toggleSharePreview;
-window.shareDocLabel = shareDocLabel;
-window.renderShareCheckboxes = renderShareCheckboxes;
-window.templateShareWa = templateShareWa;
-window.updateSharePreview = updateSharePreview;
 window.copasShareWa = copasShareWa;
 window.copyShareLink = copyShareLink;
-window.currentShareDocs = currentShareDocs;
-window.simpanDokumenShare = simpanDokumenShare;
+window.simpanDokumenShare = simpanDokumenShare;

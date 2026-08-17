@@ -1,6 +1,13 @@
 import { callAPI } from '../../api-client.js';
 import { tr } from '../../i18n.js';
 import { showToast, safeSet } from '../init/util.js';
+import { ALL_CANDIDATES, ALL_DB_JOBS, ALL_FORM, ALL_JOBS, ALL_RIWAYAT_KANDIDAT, ALL_SCHEDULES, ALL_TUGAS, ALL_WA_TEMPLATES, ASSETS, AUTO_REFRESH_TIMER, CURRENT_THEME, DROPDOWNS, currentAdminName, currentKandidatName, currentKandidatWa, isAdmin, isKandidat } from '../init/state.js';
+import { renderAdminFull } from '../render/admin.js';
+import { renderFormInbox } from '../render/mail.js';
+import { renderJobDilamar, renderProgresPemberkasan } from './dashboard.js';
+import { renderRiwayatKandidat } from '../08_wa_pintar.js';
+import { renderStudentCard } from '../12_esign_match.js';
+import { renderLanguage } from '../01_public.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -10,7 +17,7 @@ import { showToast, safeSet } from '../init/util.js';
 
 export function refreshDataDinamis(switchTab, isSilent = false) {
   var loader = document.getElementById('global-loader');
-  var isFirstLoad = window.ALL_JOBS.length === 0;
+  var isFirstLoad = ALL_JOBS.length === 0;
 
   if (loader && !isSilent && isFirstLoad) {
     loader.style.display = 'flex';
@@ -110,8 +117,8 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
         localStorage.removeItem('asj_kandidat_name');
         localStorage.removeItem('asj_kandidat_wa');
         localStorage.removeItem('asj_kandidat_session');
-        if (window.AUTO_REFRESH_TIMER) {
-          clearInterval(window.AUTO_REFRESH_TIMER);
+        if (AUTO_REFRESH_TIMER) {
+          clearInterval(AUTO_REFRESH_TIMER);
           window.AUTO_REFRESH_TIMER = null;
           window.PREV_MAIL_COUNT = null;
         }
@@ -129,7 +136,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
           setTimeout(() => {
             window.bukaDigitalCV(publicCvId);
             // Hilangkan tombol close jika yang melihat adalah orang Jepang
-            if (!window.isAdmin && !window.isKandidat) {
+            if (!isAdmin && !isKandidat) {
               let closeBtn = document.querySelector('#modal-cv button');
               if (closeBtn) closeBtn.style.display = 'none';
             }
@@ -153,17 +160,17 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
       if (!isSilent && !isFirstLoad)
         initApp(
           {
-            jobs: window.ALL_JOBS,
-            dbJobs: window.ALL_DB_JOBS,
-            candidates: window.ALL_CANDIDATES,
-            schedules: window.ALL_SCHEDULES,
-            tugas: window.ALL_TUGAS,
-            formInbox: window.ALL_FORM,
-            waTemplates: window.ALL_WA_TEMPLATES,
-            kandidatRiwayat: window.ALL_RIWAYAT_KANDIDAT,
-            dropdowns: window.DROPDOWNS,
-            activeTheme: window.CURRENT_THEME,
-            assets: window.ASSETS,
+            jobs: ALL_JOBS,
+            dbJobs: ALL_DB_JOBS,
+            candidates: ALL_CANDIDATES,
+            schedules: ALL_SCHEDULES,
+            tugas: ALL_TUGAS,
+            formInbox: ALL_FORM,
+            waTemplates: ALL_WA_TEMPLATES,
+            kandidatRiwayat: ALL_RIWAYAT_KANDIDAT,
+            dropdowns: DROPDOWNS,
+            activeTheme: CURRENT_THEME,
+            assets: ASSETS,
           },
           isSilent,
         );
@@ -179,7 +186,7 @@ export function initApp(res, isSilent = false) {
   window.ALL_JOBS = res.jobs || res.dbJobs || [];
   window.ALL_DB_JOBS = res.dbJobs || res.jobs || [];
   window.ALL_CANDIDATES = res.candidates || [];
-  window.ALL_CANDIDATES_TOTAL = res.candidatesTotal || window.ALL_CANDIDATES.length;
+  window.ALL_CANDIDATES_TOTAL = res.candidatesTotal || ALL_CANDIDATES.length;
   window.ALL_SCHEDULES = res.schedules || [];
   window.ALL_TUGAS = res.tugas || [];
   window.ALL_FORM = res.formInbox || [];
@@ -190,20 +197,20 @@ export function initApp(res, isSilent = false) {
 
   if (!isSilent) {
     var logo = document.getElementById('logo-asj');
-    if (logo && window.ASSETS.LOGO) logo.src = window.ASSETS.LOGO;
-    if (window.ASSETS.SOCIAL) {
+    if (logo && ASSETS.LOGO) logo.src = ASSETS.LOGO;
+    if (ASSETS.SOCIAL) {
       var fWa = document.getElementById('footer-wa');
-      if (fWa) fWa.href = 'https://wa.me/' + (window.ASSETS.SOCIAL.whatsapp || '').replace(/\D/g, '');
+      if (fWa) fWa.href = 'https://wa.me/' + (ASSETS.SOCIAL.whatsapp || '').replace(/\D/g, '');
       var fIg = document.getElementById('footer-ig');
-      if (fIg) fIg.href = window.ASSETS.SOCIAL.instagram || '#';
+      if (fIg) fIg.href = ASSETS.SOCIAL.instagram || '#';
       var fTk = document.getElementById('footer-tk');
-      if (fTk) fTk.href = window.ASSETS.SOCIAL.tiktok || '#';
+      if (fTk) fTk.href = ASSETS.SOCIAL.tiktok || '#';
       var fGps = document.getElementById('footer-gps');
-      if (fGps) fGps.href = window.ASSETS.SOCIAL.maps || '#';
+      if (fGps) fGps.href = ASSETS.SOCIAL.maps || '#';
       // Link maps banner LPK ikut single-source dari window.ASSETS.SOCIAL.maps
       // (backend) supaya ganti 1 tempat, semua link ter-update.
       var mapsLpk = document.getElementById('maps-lpk-link');
-      if (mapsLpk && window.ASSETS.SOCIAL && window.ASSETS.SOCIAL.maps) mapsLpk.href = window.ASSETS.SOCIAL.maps;
+      if (mapsLpk && ASSETS.SOCIAL && ASSETS.SOCIAL.maps) mapsLpk.href = ASSETS.SOCIAL.maps;
     }
 
     let pengumumanText = res.pengumuman || '';
@@ -219,22 +226,22 @@ export function initApp(res, isSilent = false) {
       globalAnnounce.classList.add('hidden');
     }
 
-    if (document.getElementById('input-kategori')) window.populate('input-kategori', window.DROPDOWNS.kategori);
-    if (document.getElementById('input-gender')) window.populate('input-gender', window.DROPDOWNS.gender);
-    if (document.getElementById('edit-k-tahapan')) window.populate('edit-k-tahapan', window.DROPDOWNS.tahapan);
-    if (document.getElementById('edit-k-status')) window.populate('edit-k-status', window.DROPDOWNS.tahapan);
-    if (document.getElementById('input-tsk')) window.populate('input-tsk', window.DROPDOWNS.tsk);
-    if (document.getElementById('j-tsk')) window.populate('j-tsk', window.DROPDOWNS.tsk);
+    if (document.getElementById('input-kategori')) window.populate('input-kategori', DROPDOWNS.kategori);
+    if (document.getElementById('input-gender')) window.populate('input-gender', DROPDOWNS.gender);
+    if (document.getElementById('edit-k-tahapan')) window.populate('edit-k-tahapan', DROPDOWNS.tahapan);
+    if (document.getElementById('edit-k-status')) window.populate('edit-k-status', DROPDOWNS.tahapan);
+    if (document.getElementById('input-tsk')) window.populate('input-tsk', DROPDOWNS.tsk);
+    if (document.getElementById('j-tsk')) window.populate('j-tsk', DROPDOWNS.tsk);
     if (document.getElementById('input-tahapan-db'))
-      window.populate('input-tahapan-db', window.DROPDOWNS.tahapan);
-    if (document.getElementById('edit-db-tahapan')) window.populate('edit-db-tahapan', window.DROPDOWNS.tahapan);
+      window.populate('input-tahapan-db', DROPDOWNS.tahapan);
+    if (document.getElementById('edit-db-tahapan')) window.populate('edit-db-tahapan', DROPDOWNS.tahapan);
     if (document.getElementById('checkbox-lokasi'))
-      window.populateCheckboxes('checkbox-lokasi', window.DROPDOWNS.lokasi, 'lokasi_cb');
+      window.populateCheckboxes('checkbox-lokasi', DROPDOWNS.lokasi, 'lokasi_cb');
     if (document.getElementById('checkbox-syarat'))
-      window.populateCheckboxes('checkbox-syarat', window.DROPDOWNS.syarat, 'syarat_cb');
-    if (document.getElementById('ef-kategori')) window.populate('ef-kategori', window.DROPDOWNS.kategori);
-    if (document.getElementById('ef-tsk')) window.populate('ef-tsk', window.DROPDOWNS.tsk);
-    if (document.getElementById('ef-gender')) window.populate('ef-gender', window.DROPDOWNS.gender);
+      window.populateCheckboxes('checkbox-syarat', DROPDOWNS.syarat, 'syarat_cb');
+    if (document.getElementById('ef-kategori')) window.populate('ef-kategori', DROPDOWNS.kategori);
+    if (document.getElementById('ef-tsk')) window.populate('ef-tsk', DROPDOWNS.tsk);
+    if (document.getElementById('ef-gender')) window.populate('ef-gender', DROPDOWNS.gender);
 
     // Datalist kode loker utk input "JOB DILAMAR (KODE)" di modal Input
     // Kandidat Manual. FIX 2026-08-12: sebelumnya menarget id 'datalist-loker'
@@ -243,7 +250,7 @@ export function initApp(res, isSilent = false) {
     let dlLoker = document.getElementById('list-kode-job');
     if (dlLoker) {
       let htmlDl = '<option value="UMUM">Lamar Umum (Tanpa Loker Spesifik)</option>';
-      window.ALL_JOBS.forEach((j) => {
+      ALL_JOBS.forEach((j) => {
         htmlDl +=
           '<option value="' +
           window.esc(j.code) +
@@ -258,18 +265,18 @@ export function initApp(res, isSilent = false) {
 
     let dlKodeJob = document.getElementById('list-kode-job');
     if (dlKodeJob) {
-      dlKodeJob.innerHTML = window.ALL_JOBS.map((j) => '<option value="' + window.esc(j.code) + '">').join('');
+      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + window.esc(j.code) + '">').join('');
     }
 
     let dlLokasi = document.getElementById('list-lokasi');
     if (dlLokasi) {
-      let uniqueLokasi = [...new Set(window.ALL_JOBS.map((j) => j.lokasi).filter(Boolean))];
+      let uniqueLokasi = [...new Set(ALL_JOBS.map((j) => j.lokasi).filter(Boolean))];
       dlLokasi.innerHTML = uniqueLokasi.map((l) => '<option value="' + window.esc(l) + '">').join('');
     }
 
     let dlSyarat = document.getElementById('list-syarat');
     if (dlSyarat) {
-      let uniqueSyarat = [...new Set(window.ALL_JOBS.map((j) => j.syarat).filter(Boolean))];
+      let uniqueSyarat = [...new Set(ALL_JOBS.map((j) => j.syarat).filter(Boolean))];
       dlSyarat.innerHTML = uniqueSyarat.map((s) => '<option value="' + window.esc(s) + '">').join('');
     }
   }
@@ -284,7 +291,7 @@ export function initApp(res, isSilent = false) {
       if (document.getElementById('nav-admin-mode'))
         document.getElementById('nav-admin-mode').classList.remove('hidden');
       window.changePage('admin');
-      window.renderAdminFull();
+      renderAdminFull();
       // Audit otomatis: kandidat yg masih pakai link Google Drive -> banner kuning
       if (typeof window.muatMigrasiDrive === 'function') window.muatMigrasiDrive();
 
@@ -300,7 +307,7 @@ export function initApp(res, isSilent = false) {
       // Data (window.ALL_FORM) sudah di-update di memori di atas, dan badge
       // notifikasi tetap dihitung di bawah.
       if (!window.sedangDiscrollTabel()) {
-        window.renderFormInbox();
+        renderFormInbox();
       }
     }
 
@@ -313,7 +320,7 @@ export function initApp(res, isSilent = false) {
     // yang sedang di-scroll). Kalau ada modal terbuka, refresh ditunda dan akan
     // jalan di siklus berikutnya. Tab yang tidak terlihat (hidden) juga di-skip
     // — tarikan sia-sia dikurangi (kandidat/admin buka tab lain).
-    if (!window.AUTO_REFRESH_TIMER) {
+    if (!AUTO_REFRESH_TIMER) {
       window.AUTO_REFRESH_TIMER = setInterval(() => {
         if (document.hidden) return; // tab tidak terlihat → skip tarikan sia-sia
         if (window.adaModalTerbuka()) return; // modal terbuka → skip refresh
@@ -323,7 +330,7 @@ export function initApp(res, isSilent = false) {
       // interval berikutnya) supaya data tidak basi saat user balik ke tab.
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) return;
-        if (!window.AUTO_REFRESH_TIMER) return;
+        if (!AUTO_REFRESH_TIMER) return;
         if (window.adaModalTerbuka()) return;
         refreshDataDinamis(null, true);
       });
@@ -338,7 +345,7 @@ export function initApp(res, isSilent = false) {
         document.getElementById('nav-mode').classList.add('hidden');
       if (document.getElementById('nav-kandidat-mode'))
         document.getElementById('nav-kandidat-mode').classList.remove('hidden');
-      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + window.esc(window.currentKandidatName));
+      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + window.esc(currentKandidatName));
 
       var mLoggedOut = document.getElementById('mobile-nav-logged-out');
       var mAdmin = document.getElementById('mobile-nav-admin');
@@ -348,12 +355,12 @@ export function initApp(res, isSilent = false) {
       if (mKandidat) mKandidat.classList.remove('hidden');
     }
 
-    let myData = window.ALL_CANDIDATES.find(
-      (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
+    let myData = ALL_CANDIDATES.find(
+      (c) => window.normalizePhone(c.wa) === window.normalizePhone(currentKandidatWa),
     );
     if (myData) {
       window.currentKandidatId = myData.idKandidat;
-      safeSet('k-dash-job', window.renderJobDilamar(myData));
+      safeSet('k-dash-job', renderJobDilamar(myData));
       // Tampilan tahapan/status sesuai bahasa; logika (evaluasiTahapanKandidat
       // & regex) tetap memakai nilai ASLI myData.tahapan/status.
       safeSet('k-dash-tahapan', window.esc(window.trOption(myData.tahapan)));
@@ -382,13 +389,13 @@ export function initApp(res, isSilent = false) {
       }
 
       window.evaluasiTahapanKandidat(myData.tahapan);
-      window.renderProgresPemberkasan(myData);
+      renderProgresPemberkasan(myData);
       window.kalkulasiProgress(myData);
 
       // Tombol AI CV & Latihan Interview tetap tampil untuk semua (biar kelihatan
       // bedanya siswa ASJ vs kandidat luar); aksesnya dibatasi di fungsi masing-masing.
-      window.renderRiwayatKandidat();
-      window.renderStudentCard();
+      renderRiwayatKandidat();
+      renderStudentCard();
       let mySchedules = res.mySchedules || [];
       let boxJadwal = document.getElementById('k-dash-jadwal-box');
       let listJadwal = document.getElementById('k-dash-jadwal-list');
@@ -432,7 +439,7 @@ export function initApp(res, isSilent = false) {
 
   // 👉 PERBAIKAN: INI KURUNG PENUTUP YANG HILANG!
   if (!isSilent) {
-    if (window.currentAdminName === 'KHOCI') {
+    if (currentAdminName === 'KHOCI') {
       window.applyInterMilanVibe();
     } else {
       // Pilihan theme pengunjung (localStorage) menang, fallback ke
@@ -443,7 +450,7 @@ export function initApp(res, isSilent = false) {
       } catch (e) {}
       window.applyTheme(savedTheme || res.activeTheme || 'TOKYO');
     }
-    window.renderLanguage();
+    renderLanguage();
   }
 }
 

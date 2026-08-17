@@ -1,3 +1,7 @@
+import { ALL_CANDIDATES, ALL_DB_JOBS, ALL_JOBS, ASSETS, currentAdminName, isAdmin } from '../init/state.js';
+import { ensureAllCandidates } from '../api/candidates.js';
+import { normalizeGenderValue } from '../03_candidate.js';
+import { previewFileInFrame } from '../init/preview.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
 // js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
 // 06_admin_modal.js — perilaku tidak berubah.
@@ -7,13 +11,13 @@
 // ==========================================
 
 export async function bukaDigitalCV(id) {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
   try {
-    var c = window.ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
+    var c = ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
     if (!c) {
       window.showToast(window.tr('ui.toast_profile_not_found2'), 'error');
       return;
@@ -23,7 +27,7 @@ export async function bukaDigitalCV(id) {
     isiEditCepatCv(c);
 
     let logoCv = document.getElementById('cv-logo-asj');
-    if (logoCv && window.ASSETS.LOGO) logoCv.src = window.ASSETS.LOGO;
+    if (logoCv && ASSETS.LOGO) logoCv.src = ASSETS.LOGO;
 
     window.safeSet('cv-id', c.idKandidat || '-');
 
@@ -62,7 +66,7 @@ export async function bukaDigitalCV(id) {
     let catatanIntStr = c.catatanInt || '';
     if (catatanIntStr.includes('[VIP]')) {
       let logoSrc =
-        window.ASSETS.LOGO ||
+        ASSETS.LOGO ||
         'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
       cvBadges +=
         '<img src="' +
@@ -128,7 +132,7 @@ export async function bukaDigitalCV(id) {
     var passRow = document.getElementById('cv-pass-row');
     var passEl = document.getElementById('cv-pass');
     if (passRow && passEl) {
-      if (window.isAdmin) {
+      if (isAdmin) {
         if (c.passwordDiubah) {
           passEl.textContent = window.tr('ui.pass_changed_admin') + ' — ' + window.tr('ui.pass_changed_hint');
           passRow.classList.remove('hidden');
@@ -232,7 +236,7 @@ export async function bukaDigitalCV(id) {
     var btnSsw = document.getElementById('btn-cv-ssw');
     var btnCv = document.getElementById('btn-cv-dokumen');
 
-    if (window.isAdmin) {
+    if (isAdmin) {
       if (c.jftUrl && c.jftUrl !== '-' && c.jftUrl.toLowerCase().startsWith('http')) {
         btnJft.onclick = function () {
           bukaInlinePreview(c.jftUrl);
@@ -265,7 +269,7 @@ export async function bukaDigitalCV(id) {
 
     let notesArea = document.getElementById('cv-admin-notes-area');
     if (notesArea) {
-      if (window.isAdmin) {
+      if (isAdmin) {
         notesArea.classList.remove('hidden');
         // Biar kalau disave ulang, tulisan Kelasnya tidak terhapus berantakan
         document.getElementById('cv-catatan-int').value = catatanIntStr
@@ -292,12 +296,12 @@ export async function bukaDigitalCV(id) {
     let btnFolder = document.getElementById('btn-cv-folder');
 
     if (areaBerkas) {
-      if (window.isAdmin && isLolos) {
+      if (isAdmin && isLolos) {
         areaBerkas.classList.remove('hidden');
 
         var bFolder = document.getElementById('btn-cv-folder');
         if (bFolder) {
-          var jd = window.ALL_DB_JOBS.find((j) => j.code === c.idLoker);
+          var jd = ALL_DB_JOBS.find((j) => j.code === c.idLoker);
           var jobFolder = jd && jd.folderUrl && jd.folderUrl !== '-' ? jd.folderUrl : c.folderUrl;
           if (jobFolder && jobFolder !== '-') {
             bFolder.href = jobFolder;
@@ -365,7 +369,7 @@ export function isiEditCepatCv(c) {
   var btn = document.getElementById('btn-cv-edit-cepat');
   var form = document.getElementById('cv-edit-cepat-form');
   if (!btn || !form) return;
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     btn.classList.add('hidden');
     form.classList.add('hidden');
     return;
@@ -375,7 +379,7 @@ export function isiEditCepatCv(c) {
   // menghapus ketikan admin saat modal dibuka ulang)
   var gen = document.getElementById('cv-edit-gender');
   // Normalisasi gender (DB campur kapital) supaya select Edit Cepat terisi.
-  if (gen && !gen.dataset.touched) gen.value = window.normalizeGenderValue(c.gender);
+  if (gen && !gen.dataset.touched) gen.value = normalizeGenderValue(c.gender);
   var usia = document.getElementById('cv-edit-usia');
   if (usia && !usia.dataset.touched)
     usia.value = c.usia && c.usia !== '-' && c.usia !== '' ? c.usia : '';
@@ -412,7 +416,7 @@ export function isiEditCepatCv(c) {
       .map(function (a) {
         return String(a.code).trim();
       });
-    var jobs = (window.ALL_JOBS || []).slice();
+    var jobs = (ALL_JOBS || []).slice();
     jobs.sort(function (a, b) {
       var ai = lulusCodes.indexOf(String((a && a.code) || '')) !== -1 ? 0 : 1;
       var bi = lulusCodes.indexOf(String((b && b.code) || '')) !== -1 ? 0 : 1;
@@ -500,9 +504,9 @@ export async function simpanEditCepatCv() {
   }
   var payload = {
     wa: wa,
-    admin: window.currentAdminName,
+    admin: currentAdminName,
     // Normalisasi ke format kanonikal supaya DB konvergen.
-    gender: window.normalizeGenderValue(document.getElementById('cv-edit-gender').value),
+    gender: normalizeGenderValue(document.getElementById('cv-edit-gender').value),
     usia: document.getElementById('cv-edit-usia').value,
     tempatLahir: document.getElementById('cv-edit-tempat-lahir').value.trim(),
     tglLahir: document.getElementById('cv-edit-tgl-lahir').value,
@@ -552,7 +556,7 @@ export function bukaInlinePreview(url) {
   if (previewContainer && frame) {
     // Satu pintu preview: gambar/PDF native, CSV -> render lokal,
     // Office (docx/pptx) -> MS Office Viewer, lain -> URL asli.
-    window.previewFileInFrame(frame, url);
+    previewFileInFrame(frame, url);
     if (btnExt) btnExt.href = url;
     previewContainer.classList.remove('hidden');
   } else {
@@ -567,7 +571,7 @@ export function bukaPdfPreview(url) {
   var btnExt = document.getElementById('btn-pdf-external');
 
   if (frame) {
-    window.previewFileInFrame(frame, url);
+    previewFileInFrame(frame, url);
   }
   if (btnExt) btnExt.href = url;
 
@@ -576,9 +580,9 @@ export function bukaPdfPreview(url) {
 }
 
 export async function simpanCatatanCv() {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
   var id = document.getElementById('cv-id').innerText;
@@ -587,7 +591,7 @@ export async function simpanCatatanCv() {
 
   if (!id || id === '-') return;
 
-  var c = window.ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
+  var c = ALL_CANDIDATES.find((kan) => String(kan.idKandidat).trim() === String(id).trim());
   // FIX VIP: tulis ulang [VIP] kalau checkbox aktif (mirip penanganan KELAS di
   // bawah). Kalau dicentang maka [VIP] pasti tersimpan; kalau tidak dicentang
   // tag dihapus secara eksplisit oleh admin.
@@ -609,7 +613,7 @@ export async function simpanCatatanCv() {
 
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await window.callAPI('updateCatatanKandidat', [id, intNote, extNote, window.currentAdminName]);
+    const res = await window.callAPI('updateCatatanKandidat', [id, intNote, extNote, currentAdminName]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_eval_note_saved'), 'success');
       document.getElementById('modal-cv').classList.add('hidden');
@@ -631,10 +635,8 @@ export async function simpanCatatanCv() {
 // (onclick bukaPdfPreview), engine/init.js (window.bukaDigitalCV),
 // api/candidates.js (window.toDateInputValue).
 window.bukaDigitalCV = bukaDigitalCV;
-window.isiEditCepatCv = isiEditCepatCv;
 window.toDateInputValue = toDateInputValue;
 window.toggleEditCepatCv = toggleEditCepatCv;
 window.simpanEditCepatCv = simpanEditCepatCv;
-window.bukaInlinePreview = bukaInlinePreview;
 window.bukaPdfPreview = bukaPdfPreview;
-window.simpanCatatanCv = simpanCatatanCv;
+window.simpanCatatanCv = simpanCatatanCv;

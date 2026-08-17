@@ -1,5 +1,12 @@
 import { tr } from '../../i18n.js';
 import { safeSet } from '../init/util.js';
+import { ALL_CANDIDATES, ALL_CANDIDATES_TOTAL, ALL_DB_JOBS, ALL_JOBS, currentAdminName, dbFilterBidang, dbFilterTahapan, dbSortType, limitAdm, limitDb } from '../init/state.js';
+import { renderFormInbox } from './mail.js';
+import { renderWaTemplates } from '../08_wa_pintar.js';
+import { renderSysConfig } from '../admin_ops/sysconfig.js';
+import { renderDbFilters } from '../admin_modal/dbfilter.js';
+import { renderJadwal, renderDashboardAgenda } from '../admin_ops/schedule.js';
+import { renderTugas } from '../api/wa.js';
 // 7. FUNGSI RENDER — DOMAIN ADMIN (admin.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -24,31 +31,31 @@ export function adminSwitchTab(t) {
   if (tgtT)
     tgtT.className =
       'px-4 py-2.5 bg-red-600 text-white rounded-lg text-xs font-bold transition shadow-md flex-1 md:flex-none text-center';
-  if (t === 'mail') window.renderFormInbox();
-  if (t === 'wa') window.renderWaTemplates();
-  if (t === 'config') window.renderSysConfig();
+  if (t === 'mail') renderFormInbox();
+  if (t === 'wa') renderWaTemplates();
+  if (t === 'config') renderSysConfig();
 }
 
 export function renderAdminFull() {
-  safeSet('dash-loker', window.ALL_JOBS.filter((j) => j.status.includes('OPEN')).length);
-  var candTotal = window.ALL_CANDIDATES_TOTAL || window.ALL_CANDIDATES.length;
+  safeSet('dash-loker', ALL_JOBS.filter((j) => j.status.includes('OPEN')).length);
+  var candTotal = ALL_CANDIDATES_TOTAL || ALL_CANDIDATES.length;
   safeSet('dash-pelamar', candTotal);
   var ccEl = document.getElementById('kandidat-count');
-  if (ccEl) ccEl.textContent = window.ALL_CANDIDATES.length + ' dari ' + candTotal + ' kandidat';
+  if (ccEl) ccEl.textContent = ALL_CANDIDATES.length + ' dari ' + candTotal + ' kandidat';
   var btnMore = document.getElementById('btn-muat-kandidat');
-  if (btnMore) btnMore.style.display = window.ALL_CANDIDATES.length >= candTotal ? 'none' : '';
-  safeSet('dash-admin-name', window.currentAdminName);
+  if (btnMore) btnMore.style.display = ALL_CANDIDATES.length >= candTotal ? 'none' : '';
+  safeSet('dash-admin-name', currentAdminName);
   // FIX 2026-08-12: renderReport() dihapus — renderer Report Log dihapus total (migrasi 017) tapi call site-nya tertinggal,
   // menyebabkan ReferenceError "renderReport is not defined" di tiap render dashboard admin.
-  window.renderAdmin();
-  window.renderDbFilters();
+  renderAdmin();
+  renderDbFilters();
   filterDbJob();
-  window.renderFormInbox();
+  renderFormInbox();
   window.filterKandidat();
-  window.renderJadwal();
-  window.renderTugas();
-  window.renderDashboardAgenda();
-  window.renderWaTemplates();
+  renderJadwal();
+  renderTugas();
+  renderDashboardAgenda();
+  renderWaTemplates();
 }
 
 export function renderAdmin(filteredJobs) {
@@ -58,7 +65,7 @@ export function renderAdmin(filteredJobs) {
     return;
   }
   var html = '';
-  var sourceArray = [...(filteredJobs || window.ALL_JOBS || [])];
+  var sourceArray = [...(filteredJobs || ALL_JOBS || [])];
   sourceArray.sort(function (a, b) {
     var aOpen = (a.status || '').toUpperCase().includes('OPEN') ? 1 : 0;
     var bOpen = (b.status || '').toUpperCase().includes('OPEN') ? 1 : 0;
@@ -73,7 +80,7 @@ export function renderAdmin(filteredJobs) {
     return timeB - timeA;
   });
 
-  for (var i = 0; i < Math.min(sourceArray.length, window.limitAdm); i++) {
+  for (var i = 0; i < Math.min(sourceArray.length, limitAdm); i++) {
     var j = sourceArray[i];
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5 transition-all">' +
@@ -136,7 +143,7 @@ export function renderAdmin(filteredJobs) {
       '" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"><i class="fas fa-trash"></i></button></td>' +
       '</tr>';
   }
-  if (sourceArray.length > window.limitAdm) {
+  if (sourceArray.length > limitAdm) {
     html +=
       '<tr><td colspan="5" class="p-4 text-center"><button onclick="window.limitAdm+=10; window.renderAdmin();" class="text-xs text-red-400">' +
       tr('button.more') +
@@ -148,29 +155,29 @@ export function renderAdmin(filteredJobs) {
 export function filterDbJob() {
   var el = document.getElementById('search-dbjob');
   var val = el ? el.value.toLowerCase() : '';
-  var arr = window.ALL_DB_JOBS.filter(function (db) {
+  var arr = ALL_DB_JOBS.filter(function (db) {
     var matchSearch =
       (db.code || '').toLowerCase().includes(val) ||
       (db.tsk || '').toLowerCase().includes(val) ||
       (db.pekerjaan || '').toLowerCase().includes(val) ||
       (db.lokasi || '').toLowerCase().includes(val);
-    var matchBidang = window.dbFilterBidang === 'ALL' || db.kategori === window.dbFilterBidang;
-    var matchTahapan = window.dbFilterTahapan === 'ALL' || db.tahapan === window.dbFilterTahapan;
+    var matchBidang = dbFilterBidang === 'ALL' || db.kategori === dbFilterBidang;
+    var matchTahapan = dbFilterTahapan === 'ALL' || db.tahapan === dbFilterTahapan;
     return matchSearch && matchBidang && matchTahapan;
   });
   arr.sort(function (a, b) {
-    if (window.dbSortType === 'TERBANYAK') {
+    if (dbSortType === 'TERBANYAK') {
       return (
-        window.ALL_CANDIDATES.filter((c) => c.idLoker === b.code).length -
-        window.ALL_CANDIDATES.filter((c) => c.idLoker === a.code).length
+        ALL_CANDIDATES.filter((c) => c.idLoker === b.code).length -
+        ALL_CANDIDATES.filter((c) => c.idLoker === a.code).length
       );
     }
     let tA = new Date(a.createdAt || 0).getTime();
     let tB = new Date(b.createdAt || 0).getTime();
     if (tA === tB || isNaN(tA) || isNaN(tB)) {
-      return window.dbSortType === 'TERLAMA' ? a.code.localeCompare(b.code) : b.code.localeCompare(a.code);
+      return dbSortType === 'TERLAMA' ? a.code.localeCompare(b.code) : b.code.localeCompare(a.code);
     }
-    return window.dbSortType === 'TERLAMA' ? tA - tB : tB - tA;
+    return dbSortType === 'TERLAMA' ? tA - tB : tB - tA;
   });
   renderDbJobTable(arr);
 }
@@ -229,9 +236,9 @@ export function renderDbJobTable(arr) {
   var tb = document.getElementById('admin-dbjob-body');
   if (!tb) return;
   var html = '';
-  for (var i = 0; i < Math.min(arr.length, window.limitDb); i++) {
+  for (var i = 0; i < Math.min(arr.length, limitDb); i++) {
     var db = arr[i];
-    var cands = window.ALL_CANDIDATES.filter((c) => c.idLoker === db.code);
+    var cands = ALL_CANDIDATES.filter((c) => c.idLoker === db.code);
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
@@ -290,7 +297,7 @@ export function renderDbJobTable(arr) {
       '</td>' +
       '</tr>';
   }
-  if (arr.length > window.limitDb) {
+  if (arr.length > limitDb) {
     html +=
       '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitDb+=10; filterDbJob();" class="text-xs text-purple-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
@@ -303,8 +310,6 @@ export function renderDbJobTable(arr) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (adminSwitchTab, filterDbJob, window.limitDb+=10;...).
 window.adminSwitchTab = adminSwitchTab;
-window.renderAdminFull = renderAdminFull;
 window.renderAdmin = renderAdmin;
 window.filterDbJob = filterDbJob;
-window.badgeTahapanDb = badgeTahapanDb;
-window.renderDbJobTable = renderDbJobTable;
+window.badgeTahapanDb = badgeTahapanDb;

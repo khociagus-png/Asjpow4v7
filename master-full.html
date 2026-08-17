@@ -344,11 +344,11 @@
     </div>
   </div>
 
-  <!-- Fase 3: core ESM — bridge memuat i18n + api-client sebagai module (deferred) -->
-  <script type="module" src="/js/core/bridge.js?v=esm1"></script>
+  <!-- Fase 3.5 L6: js/pages/master_full.js = entry ESM — meng-import core sendiri
+       lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
     <!-- Fase 2: inline script utama dipindah ke js/pages/master_full.js (isi byte-identik) -->
-  <script type="module" src="/js/pages/master_full.js?v=esm13"></script>
+  <script type="module" src="/js/pages/master_full.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm13"></script>
 </body>
 </html>

@@ -1,3 +1,5 @@
+import { ALL_CANDIDATES, ALL_FORM, currentAdminName } from '../init/state.js';
+import { renderFormInbox } from '../render/mail.js';
 // 9. INTERAKSI BACKEND (NETLIFY FUNCTIONS + SUPABASE) — DOMAIN MAIL INBOX
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -19,20 +21,20 @@ export function patchFormMail(rowIndex, newForm) {
   var i = Number(rowIndex);
   // Data bisa saja sudah bergeser karena aksi admin lain (auto-refresh
   // berjalan di latar) — fallback cari by id sebelum menimpa.
-  if (i >= 0 && i < window.ALL_FORM.length && window.ALL_FORM[i] && window.ALL_FORM[i].id === newForm.id) {
-    window.ALL_FORM[i] = newForm;
+  if (i >= 0 && i < ALL_FORM.length && ALL_FORM[i] && ALL_FORM[i].id === newForm.id) {
+    ALL_FORM[i] = newForm;
   } else {
     var found = -1;
-    for (var k = 0; k < window.ALL_FORM.length; k++) {
-      if (window.ALL_FORM[k] && window.ALL_FORM[k].id === newForm.id) {
+    for (var k = 0; k < ALL_FORM.length; k++) {
+      if (ALL_FORM[k] && ALL_FORM[k].id === newForm.id) {
         found = k;
         break;
       }
     }
-    if (found >= 0) window.ALL_FORM[found] = newForm;
-    else window.ALL_FORM.push(newForm);
+    if (found >= 0) ALL_FORM[found] = newForm;
+    else ALL_FORM.push(newForm);
   }
-  if (typeof window.renderFormInbox === 'function') window.renderFormInbox();
+  if (typeof renderFormInbox === 'function') renderFormInbox();
   if (typeof window.updateMailBadge === 'function') window.updateMailBadge();
 }
 // Upsert kandidat hasil approve/reject ke memori — tab DB JOB & daftar
@@ -40,28 +42,28 @@ export function patchFormMail(rowIndex, newForm) {
 export function upsertCandidateMemory(cand) {
   if (!cand || !cand.wa) return;
   var found = -1;
-  for (var k = 0; k < window.ALL_CANDIDATES.length; k++) {
-    if (window.ALL_CANDIDATES[k] && window.ALL_CANDIDATES[k].wa === cand.wa) {
+  for (var k = 0; k < ALL_CANDIDATES.length; k++) {
+    if (ALL_CANDIDATES[k] && ALL_CANDIDATES[k].wa === cand.wa) {
       found = k;
       break;
     }
   }
-  if (found >= 0) window.ALL_CANDIDATES[found] = cand;
-  else window.ALL_CANDIDATES.push(cand);
+  if (found >= 0) ALL_CANDIDATES[found] = cand;
+  else ALL_CANDIDATES.push(cand);
 }
 // Hapus baris mail di memori + render ulang (dipakai hapus tunggal).
 export function removeFormMail(rowIndex) {
   var i = Number(rowIndex);
-  if (i >= 0 && i < window.ALL_FORM.length) window.ALL_FORM.splice(i, 1);
+  if (i >= 0 && i < ALL_FORM.length) ALL_FORM.splice(i, 1);
   // Indeks di atas baris yang dihapus bergeser → seleksi massal tidak valid.
   window.MAIL_SELECTED = {};
-  if (typeof window.renderFormInbox === 'function') window.renderFormInbox();
+  if (typeof renderFormInbox === 'function') renderFormInbox();
   if (typeof window.updateMailBadge === 'function') window.updateMailBadge();
 }
 export async function prosesReviewForm(r) {
   if (!confirm(window.tr('form.txt_review_confirm'))) return;
   try {
-    const res = await window.callAPI('reviewForm', [r, window.currentAdminName]);
+    const res = await window.callAPI('reviewForm', [r, currentAdminName]);
     if (res.success) {
       // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
       window.MAIL_SELECTED[r] = true;
@@ -74,7 +76,7 @@ export async function prosesReviewForm(r) {
 export async function prosesApproveForm(r) {
   if (!confirm(window.tr('form.txt_approve_confirm'))) return;
   try {
-    const res = await window.callAPI('approveForm', [r, window.currentAdminName]);
+    const res = await window.callAPI('approveForm', [r, currentAdminName]);
     if (res.success) {
       // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
       window.MAIL_SELECTED[r] = true;
@@ -96,7 +98,7 @@ export async function submitRejectForm() {
   const reason = document.getElementById('reject-reason-text').value;
   document.getElementById('modal-reject-mail').classList.add('hidden');
   try {
-    const res = await window.callAPI('rejectForm', [r, window.currentAdminName, reason]);
+    const res = await window.callAPI('rejectForm', [r, currentAdminName, reason]);
     if (res.success) {
       // Auto-centang baris yang sudah diproses (memudahkan hapus massal).
       window.MAIL_SELECTED[r] = true;
@@ -173,7 +175,7 @@ export async function hapusFormMailTerpilih() {
         const res = await window.callAPI('deleteForm', [idList[i]]);
         if (res && res.success) {
           ok++;
-          window.ALL_FORM.splice(idList[i], 1);
+          ALL_FORM.splice(idList[i], 1);
         } else fail++;
       } catch (e) {
         fail++;
@@ -188,7 +190,7 @@ export async function hapusFormMailTerpilih() {
       // Sebagian gagal → indeks server tidak sinkron lagi → tarik ulang penuh.
       window.refreshDataDinamis('mail');
     } else {
-      if (typeof window.renderFormInbox === 'function') window.renderFormInbox();
+      if (typeof renderFormInbox === 'function') renderFormInbox();
       if (typeof window.updateMailBadge === 'function') window.updateMailBadge();
     }
   } catch (err) {
@@ -217,7 +219,4 @@ window.hapusFormMail = hapusFormMail;
 window.prosesReviewForm = prosesReviewForm;
 window.prosesApproveForm = prosesApproveForm;
 window.prosesRejectForm = prosesRejectForm;
-window.tandaiDibacaForm = tandaiDibacaForm;
-window.patchFormMail = patchFormMail;
-window.upsertCandidateMemory = upsertCandidateMemory;
-window.removeFormMail = removeFormMail;
+window.tandaiDibacaForm = tandaiDibacaForm;

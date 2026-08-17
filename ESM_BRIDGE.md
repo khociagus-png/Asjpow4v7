@@ -258,12 +258,80 @@ Sejak Langkah 14 (esbuild bundle mode via js/main.js), modul ESM **boleh saling
   `04_auth.js`, `engine/{dashboard,guards,init}.js`, `render/{public,admin,
   candidate,share,mail}.js`. Path: dari `js/` = `../api-client.js`;
   dari `js/engine|render/` = `../../api-client.js` & `../init/util.js`.
-- **Belum**: state accessor, render lintas domain, api lintas domain, helper
-  classic, dan fasad PortalBridge — masih `window.*` eksplisit (guard `typeof`
-  dibiarkan, tidak merusak).
+- **Langkah 2 (SELESAI 2026-08-17)**: state accessor — pembaca `window.<state>`
+  di 33 file bundle diganti import binding `js/init/state.js` (live binding);
+  penulis/re-assignment TETAP via `window.*` accessor (§3.2). Detail:
+  REFACTOR_TODO Fase 3.5 Langkah 2. Sisa `window.<state>` kini hanya penulis,
+  onclick HTML (`window.limitPub+=10;...`), dan komentar.
+- **Langkah 3 (SELESAI 2026-08-17)**: render lintas domain — 27 pembaca
+  `window.render*` di 11 file bundle diganti import binding dari modul pemilik
+  (`render/*`, `admin_ops/*`, `api/wa.js`, `08_wa_pintar.js`, `12_esign_match.js`,
+  `01_public.js`). Alias `window.renderX = renderX` TETAP (pemakai HTML
+  onclick/onchange + pemakai classic lain — target Langkah 6); onclick string
+  HTML & pemanggil self dalam modul yang sama tidak disentuh. Detail:
+  REFACTOR_TODO Fase 3.5 Langkah 3.
+- **Langkah 4 (SELESAI 2026-08-17)**: api lintas domain — 13 pembaca `window.*`
+  api di 7 file bundle diganti import binding dari `api/{candidates,forms}.js`
+  (`ensureAllCandidates`, `upsertCandidateMemory`, `patchFormMail`,
+  `buatQrDataUrl`). Alias `window.X = X` di api/* TETAP (pemakai HTML
+  onclick/onchange + pemakai classic lain — target Langkah 6). Detail:
+  REFACTOR_TODO Fase 3.5 Langkah 4.
+- **Langkah 5 (SELESAI 2026-08-17)**: helper classic — `previewFileInFrame` &
+  `normalizeGenderValue` di-import nyata dari modul pemiliknya; `cekUploadFile`
+  TETAP window.* (HTML onchange admin.html + halaman standalone classic).
+- **Langkah 6 (SEBAGIAN 2026-08-17, jalur unblock DIJALANKAN 2026-08-17)**:
+  pembersihan — 89 alias mati dihapus dari 31 file (self-alias 337 → 236).
+  Sentralisasi alias ke bridge.js sempat DITUNDA (bridge.js hanya dimuat di
+  halaman standalone, bukan bundel index/admin; meng-import seluruh modul
+  bundel darinya akan mengeksekusi app penuh di halaman form). **Jalur unblock
+  kini dijalankan**: ① `js/pages/*` = **entry ESM** — tiap halaman meng-import
+  core sendiri lewat `js/core/bridge.js` (`registerSeamAliases`) dan tag core
+  terpisah di HTML standalone dihapus; ② **`js/core/bridge.js` masuk STACK
+  bundel** (module-registry + js/main.js) — index/admin ikut punya
+  `window.PortalBridge` + `registerSeamAliases` (hanya import core api-client
+  + i18n, di-dedupe esbuild, TIDAK meng-import modul halaman → aman);
+  ③ **alias seam HTML↔JS diregistrasikan TERPUSAT** lewat `registerSeamAliases
+  ({ namaFn, ... })` di bridge.js — registry `SEAM_ALIASES` (audit via
+  `getSeamAliases()`), menggantikan blok `window.X = X` per file di 5 halaman
+  standalone. Alias per-simbol di modul bundel (admin/index) masih
+  self-registered `window.X = X` — mekanisme sentral sudah tersedia (bridge
+  ada di STACK/main.js), migrasinya menyusul.
 
 Aturan tetap: alias `window.*` dipertahankan untuk pemakai HTML inline
-(onclick/onchange) — seam HTML↔JS itu sah dan tidak akan dihapus.
+(onclick/onchange) — seam HTML↔JS itu sah dan tidak akan dihapus; yang
+berubah hanyalah CARA registrasinya (terpusat di bridge.js, bukan per file).
+
+### 3.4 Registrasi alias seam HTML↔JS terpusat — `registerSeamAliases` (Fase 3.5 Langkah 6)
+
+Fungsi yang dipanggil dari atribut HTML (`onclick`/`onchange`/`onload`) atau
+dari string onclick yang di-generate runtime DIEVAL di global scope → harus
+punya alias `window.*`. Dulu tiap modul menulis `window.X = X` sendiri di
+bawah file; sekarang diregistrasikan TERPUSAT lewat bridge.js:
+
+```js
+// js/core/bridge.js — export publik
+export function registerSeamAliases(aliases) {
+  for (const [name, value] of Object.entries(aliases || {})) {
+    if (typeof value !== 'function') continue; // guard: hanya fungsi
+    SEAM_ALIASES.set(name, value);  // registry pusat (private modul)
+    window[name] = value;           // alias untuk pemakai global/HTML
+  }
+}
+export function getSeamAliases() { return Object.fromEntries(SEAM_ALIASES); }
+
+// js/pages/share.js (contoh entry ESM halaman standalone):
+import { registerSeamAliases } from '../core/bridge.js';
+registerSeamAliases({ toggleLang, toggleSelection, submitSelection, openPreview, closePreview, renderGrid });
+```
+
+- **Pemakai**: 5 halaman standalone (`js/pages/*`) — blok `window.X = X` di
+  bawah tiap file diganti satu panggilan `registerSeamAliases({...})`.
+- **Ketersediaan**: bridge.js masuk STACK bundel + di-import `js/main.js` →
+  index/admin ikut punya mekanisme ini (bundel tidak memanggilnya dengan alias
+  halaman, jadi aman). Modul bundel yang mau sentral juga bisa meng-import
+  `registerSeamAliases` dari `./core/bridge.js`.
+- **Audit**: `PortalBridge.getSeamAliases()` = snapshot registry alias yang
+  terdaftar (digunakan smoke test halaman standalone).
 
 ---
 
@@ -271,33 +339,39 @@ Aturan tetap: alias `window.*` dipertahankan untuk pemakai HTML inline
 
 ### 4.1 Halaman standalone (ai_form, apply-full, master-full, share, siswa-baru)
 
-Tag `i18n.js`/`api-client.js` yang dulu classic (`<script src>`) diganti
-**`<script type="module">`** — satu tag per halaman, di posisi yang sama:
+Sejak Fase 3.5 Langkah 6, **`js/pages/*.js` = ENTRY ESM per halaman**: modul
+halaman meng-import core sendiri lewat `js/core/bridge.js` (i18n + api-client)
+dan mendaftarkan alias seam-nya via `registerSeamAliases`. Karena itu TIDAK
+ada lagi tag core terpisah (`bridge.js`/`api-client.js`/`i18n.js`) di HTML
+standalone — tag yang tersisa hanya helper halaman:
 
 ```html
-<!-- ai_form.html & master-full.html: core lengkap lewat bridge -->
-<script type="module" src="/js/core/bridge.js?v=esm1"></script>
-
-<!-- apply-full.html & siswa-baru.html: hanya api-client (tidak butuh i18n) -->
-<script type="module" src="/api-client.js?v=esm1"></script>
-
-<!-- share.html: hanya i18n -->
-<script type="module" src="/i18n.js?v=esm1"></script>
+<!-- ai_form.html & master-full.html & apply-full.html & siswa-baru.html: -->
+<script type="module" src="/js/upload-guard.js?v=esm13"></script>
+<script type="module" src="/js/pages/<nama>.js?v=esm14"></script>
+<script type="module" src="/pwa.js?v=esm13"></script>
+<!-- apply-full.html tambahan: -->
+<script type="module" src="/js/apply-docs.js?v=esm13"></script>
 ```
+
+Dependency core (bridge → i18n + api-client) ditarik otomatis oleh browser
+saat modul halaman dievaluasi — urutan antar-modul dijamin, semua selesai
+**sebelum `DOMContentLoaded`**.
 
 **Aturan urutan (penting, karena modul SELALU deferred):**
 
 ```html
-<script type="module" src="...core..."></script>   <!-- 1. ESM core (deferred) -->
-<script src="/js/upload-guard.js"></script>        <!-- 2. classic: jalan saat parse -->
-<script src="/js/pages/xxx.js"></script>           <!-- 3. classic: jalan saat parse -->
-<script src="/pwa.js"></script>
+<script type="module" src="/js/pages/xxx.js"></script>   <!-- 1. entry ESM (deferred; import core sendiri) -->
+<script type="module" src="/js/upload-guard.js"></script> <!-- 2. helper (deferred) -->
+<script type="module" src="/pwa.js"></script>             <!-- 3. helper (deferred) -->
 ```
 
 1. Script **classic** dieksekusi saat parsing dokumen (sebelum modul).
 2. Script **module** dieksekusi setelah parse selesai, **sebelum
-   `DOMContentLoaded`**.
-3. Syarat aman: kode top-level classic di `js/pages/*.js`, `upload-guard.js`,
+   `DOMContentLoaded`** — dependensi import modul diselesaikan lebih dulu,
+   jadi `window.PortalBridge`/`callAPI`/`tr` tersedia sebelum body modul
+   halaman jalan.
+3. Syarat aman: kode top-level di `js/pages/*.js`, `upload-guard.js`,
    `apply-docs.js` **tidak boleh memanggil `callAPI`/`tr`/`LANG` saat parse**
    (sudah diaudit — semua pemakaian ada di fungsi/event runtime).
 4. Inline `onclick="callAPI(...)"` aman: pasti terjadi setelah modul jalan.
@@ -401,10 +475,13 @@ api-client.js, bridge.js). Service worker TIDAK meng-cache file `/i18n.js`,
    `treeShaking: false` WAJIB — import side-effect + alias window.* harus
    dipertahankan (pengalaman empiris langkah 1: bundle mode RENAME/tree-shake
    simbol dan mematahkan referensi global).
-5. ⏭️ Halaman standalone jadi entry ESM per halaman (esbuild `entryPoints`
-   array / `--splitting`) ATAU tetap `<script type="module">` per halaman —
-   keputusan dicatat di PROGRESS.md. Sekarang tidak mendesak: halaman
-   standalone tetap jalan tanpa bundel.
+5. ✅ **KEPUTUSAN (2026-08-17): halaman standalone tetap `<script
+   type="module">` per halaman — TAPI `js/pages/*` kini ENTRY ESM sejati**
+   (bukan esbuild `--splitting`/bundle per halaman): tiap modul halaman
+   meng-import core lewat `js/core/bridge.js` (`registerSeamAliases`) sehingga
+   tag core terpisah di HTML dihapus. Ini membuka jalur sentralisasi alias
+   (Fase 3.5 Langkah 6) — lihat §3.4. Opsi esbuild bundle per halaman tetap
+   terbuka di masa depan kalau mau 1 file per halaman.
 6. ✅ **Aktifkan `no-undef` per file ESM** — SELESAI (langkah 15, turn ini).
    `eslint.config.js` memakai `no-undef: error` utk `js/**/*.js` +
    `api-client.js` + `i18n.js` + `pwa.js`. Scan awal: **39 pelanggaran di

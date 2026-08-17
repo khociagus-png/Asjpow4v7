@@ -8,6 +8,11 @@
 // ==========================================
 // AI FORM (Qween CV) — konteks dari URL + logika chat/autofill/upload
 // ==========================================
+// ENTRY ESM (Fase 3.5 Langkah 6): halaman meng-import core lewat bridge.js
+// (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
+// registerSeamAliases — bukan window.X = X per baris.
+import { registerSeamAliases } from '../core/bridge.js';
+
     // FASE 3/4: dulu diisi server (GAS scriptlet) saat halaman dibuka dari
     // Portal ASJ. Sekarang dibaca dari query string URL (?flow=&job=&bidang=&wa=&nama=)
     // - persis parameter yang sama, cuma sumbernya URL bukan server-side render.
@@ -826,15 +831,19 @@
     }
 
     // Bridge ESM→legacy (Fase 3 langkah 13): HTML onclick/onchange/onload +
-    // string onclick dinamis dari renderEditableArray tetap butuh global.
-    window.initApp = initApp;
-    window.switchTab = switchTab;
-    window.handleEnter = handleEnter;
-    window.sendMessage = sendMessage;
-    window.updateFormUI = updateFormUI;
-    window.compressImage = compressImage;
-    window.handleDocUpload = handleDocUpload;
-    window.saveToDatabase = saveToDatabase;
-    window.updateArrayField = updateArrayField;
-    window.removeArrayItem = removeArrayItem;
-    window.addArrayItem = addArrayItem;
+    // string onclick dinamis dari renderEditableArray tetap butuh global —
+    // kini SEMUA alias seam HTML diregistrasikan TERPUSAT via
+    // registerSeamAliases (js/core/bridge.js).
+    registerSeamAliases({
+        initApp,
+        switchTab,
+        handleEnter,
+        sendMessage,
+        updateFormUI,
+        compressImage,
+        handleDocUpload,
+        saveToDatabase,
+        updateArrayField,
+        removeArrayItem,
+        addArrayItem,
+    });

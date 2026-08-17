@@ -11,6 +11,7 @@ import { callAPI } from '../api-client.js';
 import { tr } from '../i18n.js';
 import { showToast, safeSet } from './init/util.js';
 
+import { currentAdminName, currentKandidatWa } from './init/state.js';
 export function bukaModalKandidat(mode) {
   const m = document.getElementById('modal-kandidat');
   if (m) m.classList.remove('hidden');
@@ -114,7 +115,7 @@ export async function prosesGantiPasswordKandidat() {
     showToast(tr('ui.pass_new_hint'), 'error');
     return;
   }
-  if (!window.currentKandidatWa) {
+  if (!currentKandidatWa) {
     showToast(tr('ui.toast_kandidat_session_expired'), 'error');
     return;
   }
@@ -122,7 +123,7 @@ export async function prosesGantiPasswordKandidat() {
     btn,
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.change_password') + '…',
     '<i class="fas fa-check mr-1.5"></i> ' + tr('ui.change_password'),
-    () => callAPI('gantiPasswordKandidat', [window.currentKandidatWa, lama, baru]),
+    () => callAPI('gantiPasswordKandidat', [currentKandidatWa, lama, baru]),
   );
   if (res && res.success) {
     showToast(tr('ui.pass_changed_ok'), 'success');
@@ -272,7 +273,7 @@ export async function prosesLoginPersonal() {
     await window.refreshDataDinamis();
 
     // 👉 TRIGGER TEMA KHOCI SAAT BARU LOGIN
-    if (window.currentAdminName === 'KHOCI') {
+    if (currentAdminName === 'KHOCI') {
       setTimeout(window.applyInterMilanVibe, 50);
     }
   } else if (res) {
@@ -289,7 +290,10 @@ export async function prosesLoginPersonal() {
 // standalone — bridge hanya untuk bundel.
 // ---------------------------------------------------------------------------
 window.bukaModalKandidat = bukaModalKandidat;
-window.runAuthAction = runAuthAction;
+// Gate WA (normalizeWaInput/isValidWaInput) dipakai admin_ops/candidates.js
+// parseDaftarOrtu (Undang Grup Kelas) — 0xx/8xx otomatis jadi 62xx + validasi
+// 628… 12-13 digit. Alias ini SEMPAT dihapus saat pembersihan Fase 3.5 L6 dan
+// mematahkan normalisasi WA fitur itu (fallback regex ketat menolak 0xx/8xx).
 window.normalizeWaInput = normalizeWaInput;
 window.isValidWaInput = isValidWaInput;
 window.toastWaFormat = toastWaFormat;
@@ -303,4 +307,4 @@ window.prosesLoginMaster = prosesLoginMaster;
 window.showLoginPersonal = showLoginPersonal;
 window.prosesLoginPersonal = prosesLoginPersonal;
 
-// ==========================================
+// ==========================================

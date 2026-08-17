@@ -109,6 +109,31 @@ function applyTemplatePlaceholders(text, nama, jobCode, linkGrup) {
     .replace(/<<LINK>>/gi, linkGrup);
 }
 
+// Pilih & isi pesan untuk penerima ke-`index`. `variants` (customMessage yang
+// dipisah baris `---`) dikirim BERGILIRAN — `index % variants.length` → tiap
+// penerima dapat pesan berbeda (anti-ban pesan identik massal); kalau jumlah
+// varian = jumlah penerima dengan urutan sama, tiap orang mendapat pesan yang
+// ditulis khusus untuknya (cocok untuk 34 pesan ortu berbeda). Placeholder
+// {nama}/{job_code}/{link_grup} (dan gaya lama <<NAMA>>/<<JOB>>/<<LINK>>)
+// tetap di-replace per penerima. Fallback: template wa_templates, lalu pesan
+// default. Fungsi murni — di-unit-test (actions-wa.test.js).
+function buildPesanTawaranMassal(variants, templateIsi, nama, jobCode, linkGrup, index) {
+  if (variants.length) {
+    return applyTemplatePlaceholders(variants[index % variants.length], nama, jobCode, linkGrup);
+  }
+  if (templateIsi) {
+    return applyTemplatePlaceholders(templateIsi, nama, jobCode, linkGrup);
+  }
+  return (
+    'Halo ' +
+    nama +
+    '! Anda terpilih untuk Lowongan ' +
+    jobCode +
+    '. Silakan bergabung ke grup resmi kami: ' +
+    linkGrup
+  );
+}
+
 // kirimTawaranMassal([{candidates, jobCode, linkGrup, interval, customMessage}])
 async function handleKirimTawaranMassal(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
@@ -121,10 +146,6 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
   const interval = Math.max(Number(d.interval) || 5, 1);
   const results = [];
   // customMessage boleh berisi BANYAK VARIAN pesan, dipisah baris `---`.
-  // Varian dikirim BERGILIRAN per penerima (sesuai urutan daftar) → tiap
-  // orang dapat pesan berbeda (anti-ban pesan identik massal). Kalau jumlah
-  // varian = jumlah penerima dengan urutan sama, tiap orang mendapat pesan
-  // yang ditulis khusus untuknya (cocok untuk 34 pesan ortu berbeda).
   const variants = String(d.customMessage || '')
     .split(/^---\s*$/m)
     .map((s) => s.trim())
@@ -152,22 +173,7 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
       const c = cands[i];
       const wa = normalizeWa(String(c.wa || ''));
       const nama = String(c.nama || 'Kandidat');
-      let message;
-      if (variants.length) {
-        // Varian ke-i (mod jumlah varian) — placeholder tetap di-replace per
-        // penerima supaya {nama}/{link_grup} selalu benar.
-        message = applyTemplatePlaceholders(variants[i % variants.length], nama, jobCode, linkGrup);
-      } else if (templateIsi) {
-        message = applyTemplatePlaceholders(templateIsi, nama, jobCode, linkGrup);
-      } else {
-        message =
-          'Halo ' +
-          nama +
-          '! Anda terpilih untuk Lowongan ' +
-          jobCode +
-          '. Silakan bergabung ke grup resmi kami: ' +
-          linkGrup;
-      }
+      const message = buildPesanTawaranMassal(variants, templateIsi, nama, jobCode, linkGrup, i);
       try {
         await fonnteSend(wa, message);
         results.push({ wa: c.wa, nama, success: true });
@@ -187,4 +193,5 @@ module.exports = {
   handleHapusWaTemplate,
   handleKirimSatuPesanFonnte,
   handleKirimTawaranMassal,
+  buildPesanTawaranMassal,
 };

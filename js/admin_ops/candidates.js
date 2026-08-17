@@ -1,3 +1,7 @@
+import { ALL_CANDIDATES, ALL_DB_JOBS } from '../init/state.js';
+import { renderAdminFull } from '../render/admin.js';
+import { ensureAllCandidates } from '../api/candidates.js';
+import { upsertCandidateMemory, patchFormMail } from '../api/forms.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -6,13 +10,13 @@
 // ==========================================
 
 export async function bukaModalListKandidat(code) {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
-  var job = window.ALL_DB_JOBS.find((j) => j.code === code);
-  var cands = window.ALL_CANDIDATES.filter((c) => c.idLoker && c.idLoker.includes(code));
+  var job = ALL_DB_JOBS.find((j) => j.code === code);
+  var cands = ALL_CANDIDATES.filter((c) => c.idLoker && c.idLoker.includes(code));
   if (!job) return;
   window.safeSet('list-job-code', code);
   var html = '';
@@ -54,9 +58,9 @@ export async function keluarkanKandidatDariJob(wa, jobCode) {
       document.getElementById('modal-list-kandidat').classList.add('hidden');
       // PATCH-IN-PLACE: backend mengembalikan kandidat & baris mail hasil
       // update — timpa di memori + render ulang, tanpa tarik ulang getAppData.
-      window.upsertCandidateMemory(res.candidate);
-      if (res.form) window.patchFormMail(res.form.rowIndex, res.form);
-      if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
+      upsertCandidateMemory(res.candidate);
+      if (res.form) patchFormMail(res.form.rowIndex, res.form);
+      if (typeof renderAdminFull === 'function') renderAdminFull();
     } else window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
   } catch (err) {
     window.showToast(window.tr('ui.toast_network_error'), 'error');
@@ -73,12 +77,12 @@ export async function mulaiKirimUndanganGrup() {
     return;
   }
 
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
-  let cands = window.ALL_CANDIDATES.filter((c) => c.idLoker && c.idLoker.includes(jobCode));
+  let cands = ALL_CANDIDATES.filter((c) => c.idLoker && c.idLoker.includes(jobCode));
   if (cands.length === 0) {
     window.showToast(window.tr('ui.toast_no_cand_in_job'), 'error');
     return;

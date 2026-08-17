@@ -1,3 +1,5 @@
+import { ASSETS, CURRENT_THEME } from './state.js';
+import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -51,7 +53,7 @@ export var DEFAULT_ASSETS = {
 export function renderThemeToggle() {
   var btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
-  var light = window.CURRENT_THEME === 'SAKURA';
+  var light = CURRENT_THEME === 'SAKURA';
   btn.className =
     'px-3 py-2 rounded-full text-[10px] font-bold transition-colors shadow-lg flex items-center gap-1.5 border ' +
     (light
@@ -73,7 +75,7 @@ export function renderThemeToggle() {
 // Tekan 1 tombol = ganti theme (Dark ↔ Light), pilihan disimpan di
 // localStorage supaya diingat saat pengunjung buka halaman lagi.
 export function toggleTheme() {
-  applyTheme(window.CURRENT_THEME === 'TOKYO' ? 'SAKURA' : 'TOKYO');
+  applyTheme(CURRENT_THEME === 'TOKYO' ? 'SAKURA' : 'TOKYO');
 }
 
 // ========== PARTIKEL SAKURA (hanya theme Light) ==========
@@ -218,15 +220,15 @@ export function applyTheme(theme) {
   setSakuraParticles(theme === 'SAKURA');
   // Banner & Footer: pakai aset backend kalau tersedia, fallback ke default
   // supaya selalu tampil & sinkron dengan theme walau backend gagal/lambat.
-  window.setBg('asj-header', (window.ASSETS.BANNER && window.ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
-  window.setBg('asj-footer', (window.ASSETS.FOOTER && window.ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
+  window.setBg('asj-header', (ASSETS.BANNER && ASSETS.BANNER[theme]) || DEFAULT_ASSETS.BANNER[theme]);
+  window.setBg('asj-footer', (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme]);
   // Simpan pilihan theme pengunjung.
   try {
     localStorage.setItem('asj_theme', theme);
   } catch (e) {}
   renderThemeToggle();
-  if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
-  if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
+  if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
+  if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
 }
 
 
@@ -235,10 +237,6 @@ export function applyTheme(theme) {
 // window.applyTheme & window.applyInterMilanVibe, 04_auth.js
 // window.applyInterMilanVibe).
 window.THEMES = THEMES;
-window.DEFAULT_ASSETS = DEFAULT_ASSETS;
-window.renderThemeToggle = renderThemeToggle;
 window.toggleTheme = toggleTheme;
-window.buatPartikelSakura = buatPartikelSakura;
-window.setSakuraParticles = setSakuraParticles;
 window.applyInterMilanVibe = applyInterMilanVibe;
 window.applyTheme = applyTheme;

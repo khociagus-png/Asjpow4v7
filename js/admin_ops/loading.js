@@ -1,3 +1,4 @@
+import { isAdmin, isKandidat } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -29,7 +30,7 @@ export function jalankanSemuaSkeleton() {
   // Publik
   if (document.getElementById('public-table-body')) setSkeletonLoading('public-table-body', 5);
   // Admin
-  if (window.isAdmin) {
+  if (isAdmin) {
     if (document.getElementById('admin-table-body')) setSkeletonLoading('admin-table-body', 5);
     if (document.getElementById('admin-dbjob-body')) setSkeletonLoading('admin-dbjob-body', 6);
     if (document.getElementById('admin-kandidat-body'))
@@ -39,7 +40,7 @@ export function jalankanSemuaSkeleton() {
   }
   // Kandidat (Riwayat)
   var kRiwayat = document.getElementById('k-dash-riwayat');
-  if (window.isKandidat && kRiwayat) {
+  if (isKandidat && kRiwayat) {
     kRiwayat.innerHTML =
       '<div class="p-3.5 rounded-xl border border-slate-700/50 bg-black/40 mb-2 animate-pulse"><div class="h-4 bg-slate-700/60 rounded w-1/2 mb-2"></div><div class="h-3 bg-slate-700/60 rounded w-1/3"></div></div>' +
       '<div class="p-3.5 rounded-xl border border-slate-700/50 bg-black/40 animate-pulse"><div class="h-4 bg-slate-700/60 rounded w-2/3 mb-2"></div><div class="h-3 bg-slate-700/60 rounded w-1/4"></div></div>';
@@ -49,5 +50,4 @@ export function jalankanSemuaSkeleton() {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js window.jalankanSemuaSkeleton).
-window.setSkeletonLoading = setSkeletonLoading;
-window.jalankanSemuaSkeleton = jalankanSemuaSkeleton;
+window.jalankanSemuaSkeleton = jalankanSemuaSkeleton;

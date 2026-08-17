@@ -1,3 +1,5 @@
+import { AUTO_REFRESH_TIMER } from './state.js';
+import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -17,8 +19,8 @@ export function changePage(page) {
   // Re-render tabel publik setiap kali halaman publik dibuka
   // agar tabel tidak kosong saat admin/kandidat berpindah halaman.
   if (page === 'public') {
-    if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
-    if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
+    if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
+    if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
   }
 
   // Close mobile nav when changing page
@@ -105,8 +107,8 @@ export function logoutApp() {
   window.currentKandidatWa = '';
   window.currentKandidatId = '';
 
-  if (window.AUTO_REFRESH_TIMER) {
-    clearInterval(window.AUTO_REFRESH_TIMER);
+  if (AUTO_REFRESH_TIMER) {
+    clearInterval(AUTO_REFRESH_TIMER);
     window.AUTO_REFRESH_TIMER = null;
     window.PREV_MAIL_COUNT = null;
   }
@@ -122,6 +124,5 @@ export function logoutApp() {
 // HTML inline onclick (index/admin changePage/toggleMobileMenu/logoutApp,
 // 04_auth.js & engine/init.js window.changePage).
 window.changePage = changePage;
-window.closeMobileMenu = closeMobileMenu;
 window.toggleMobileMenu = toggleMobileMenu;
 window.logoutApp = logoutApp;

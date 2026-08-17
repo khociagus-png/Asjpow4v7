@@ -1,4 +1,5 @@
 import { tr } from '../../i18n.js';
+import { ASSETS } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -210,7 +211,7 @@ export function kalkulasiProgress(myData) {
   }
   if (isVip) {
     let logoSrc =
-      window.ASSETS.LOGO ||
+      ASSETS.LOGO ||
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
     badges +=
       '<img src="' +
@@ -257,8 +258,4 @@ export function kalkulasiProgress(myData) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, render/candidate.js, dll).
 window.evaluasiTahapanKandidat = evaluasiTahapanKandidat;
-window.renderJobDilamar = renderJobDilamar;
-window.BERKAS_17 = BERKAS_17;
-window.BIO_FIELDS_19 = BIO_FIELDS_19;
-window.renderProgresPemberkasan = renderProgresPemberkasan;
-window.kalkulasiProgress = kalkulasiProgress;
+window.kalkulasiProgress = kalkulasiProgress;

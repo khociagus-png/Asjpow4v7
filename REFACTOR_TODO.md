@@ -23,11 +23,11 @@
 > Daftar lengkap item yang masih `- [ ]`. Detail & konteks ada di masing-masing fase di bawah.
 
 **Fase 3.5 — jembatan `window.*` → import nyata (Kandidat 1, prioritas tertinggi):**
-- [ ] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …) → import binding; penulis tetap lewat accessor (pola ESM_BRIDGE §3.2)
-- [ ] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/`renderJadwal` → import dari `render/*`
-- [ ] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory` → import dari `api/*`
-- [ ] **Langkah 5 — helper classic**: `window.cekUploadFile`/`previewFileInFrame`/`normalizeGenderValue` → import dari modul pemiliknya
-- [ ] **Langkah 6 — fasad PortalBridge**: alias sisa (hanya pemakai HTML onclick/onchange) → satu registrasi terpusat di `js/core/bridge.js`; hapus alias window.* per-modul yang tak lagi dipakai HTML
+- [x] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …) → import binding; penulis tetap lewat accessor (pola ESM_BRIDGE §3.2) — SELESAI 2026-08-17
+- [x] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/`renderJadwal` → import dari `render/*`
+- [x] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory` → import dari `api/*`
+- [x] **Langkah 5 — helper classic**: `previewFileInFrame`/`normalizeGenderValue` → import dari modul pemiliknya; `cekUploadFile` TETAP (pemakai HTML onchange + halaman standalone classic) — SELESAI 2026-08-17
+- [~] **Langkah 6 — fasad PortalBridge**: PEMBERSIHAN SELESAI (89 alias mati dihapus, 337→236) + **SENTRALISASI SEAM halaman standalone SELESAI (2026-08-17)** — js/pages/* entry ESM import bridge, alias seam diregistrasikan terpusat via `registerSeamAliases` (bridge.js masuk STACK bundel). Sisa: migrasi alias per-simbol modul bundel (admin/index) ke `registerSeamAliases` (mekanisme sudah tersedia)
 - [ ] Kriteria selesai tiap langkah: scan `window\.\w+\s*=` di `js/` menurun · `no-undef` 0 error · `check:globals` nol kolisi · E2E SEMUA LULUS
 
 **Fase 4 — i18n lanjutan:**
@@ -555,17 +555,107 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
       `import` nyata (api-client.js, i18n.js, init/util.js) — 19 referensi, word-boundary
       (`window.trOption`/`trOptionId` TIDAK tersentuh). Verifikasi: lint 0/12 ✓ · test
       131/131 ✓ · build idempoten ✓ · E2E login/upload/biodata/share SEMUA LULUS ✓.
-- [ ] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …)
+- [x] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …)
       ganti `import` binding + accessor — tulis tetap lewat `window.*` accessor (pola §3.2).
-- [ ] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/
-      `renderJadwal` dll → import dari `render/*`.
-- [ ] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory`
-      → import dari `api/*`.
-- [ ] **Langkah 5 — helper classic**: `window.cekUploadFile`/`previewFileInFrame`/
-      `normalizeGenderValue` → import dari modul pemiliknya.
-- [ ] **Langkah 6 — fasad PortalBridge**: alias yang tersisa (hanya pemakai HTML onclick/
-      onchange) dipindah ke satu registrasi terpusat di `js/core/bridge.js`; hapus alias
-      window.* per-modul yang tidak lagi dipakai HTML.
+      **SELESAI 2026-08-17** — 33 file bundle diubah (335+/302− baris):
+      339 pembaca `window.<state>` → import binding dari `js/init/state.js` (live binding;
+      `export var`/`let`). Penulis (re-assignment) TETAP via `window.*` accessor — contoh
+      `engine/init.js` (setter utama), `04_auth.js`, `init/nav.js`, `03_candidate.js`
+      (ACTIVE_PEMBERKASAN_*), `08_wa_pintar.js` (CURRENT_WA_KANDIDAT), `admin_modal/
+      dbfilter.js` (dbFilter*), `render/public.js` (currentPublicFilter/limitPub). Mutasi
+      elemen (`ALL_FORM[i]=x`, `.push`, `.splice`) legal di binding import — dipertahankan
+      sebagai pembaca. `typeof window.X !== 'undefined'` guard dipertahankan strukturnya
+      (`typeof X !== 'undefined'`). onclink HTML `window.limitX+=10;...` TIDAK disentuh
+      (string literal, dievaluasi di global scope). Verifikasi: lint 0/12 ✓ · test
+      131/131 ✓ · build idempoten `app-8eb9da7a4a.js` (413.7 KB) ✓ · check:globals nol
+      kolisi (400 simbol) ✓ · audit HIGH=0 ✓ · uji round-trip accessor↔binding + import
+      konsumen (20/20) ✓. ⚠️ E2E Playwright TIDAK dijalankan — lingkungan ini tanpa
+      Node ≥22 (playwright-core macet di Bun/Windows, lihat infra E2E); jalankan
+      `BASE_URL=http://localhost:3000 node e2e/*.mjs` di mesin ber-Node sebelum merge.
+- [x] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/
+      `renderJadwal` dll → import dari `render/*` — SELESAI 2026-08-17. 11 file bundle
+      diubah (+34/−33 baris): 27 pembaca `window.render*` → import binding dari modul
+      pemilik. Rincian: `api/jobs.js` (renderAdminFull←render/admin.js, 3×),
+      `api/forms.js` (renderFormInbox←render/mail.js, 3×), `api/wa.js`
+      (renderJadwal←admin_ops/schedule.js, 2×), `api/candidates.js`
+      (renderLanguage←01_public.js 3× + renderAdminFull 1×), `admin_ops/candidates.js`
+      (renderAdminFull 1×), `engine/init.js` (renderAdminFull, renderFormInbox,
+      renderJobDilamar+renderProgresPemberkasan←engine/dashboard.js,
+      renderRiwayatKandidat←08_wa_pintar.js, renderStudentCard←12_esign_match.js,
+      renderLanguage — 7×), `init/nav.js`+`init/theme.js` (renderPublicFilterUI/
+      Filtered←render/public.js), `01_public.js` (renderPublicFilterUI/Filtered,
+      renderAdminFull, renderSysConfig), `render/admin.js` (renderFormInbox,
+      renderWaTemplates←08_wa_pintar.js, renderSysConfig, renderDbFilters←
+      admin_modal/dbfilter.js, renderJadwal+renderDashboardAgenda←admin_ops/schedule.js,
+      renderTugas←api/wa.js — 8×), `render/public.js` (renderAdmin←render/admin.js).
+      Yang TIDAK disentuh: alias `window.renderX = renderX` (pemakai HTML onclick/
+      onchange & pemakai classic lain — target Langkah 6), onclick string HTML (mis.
+      `onclick="window.limitAdm+=10; window.renderAdmin();"` — dievaluasi di global
+      scope), pemanggil self dalam modul yang sama, dan halaman standalone `js/pages/*`
+      (classic, `window.renderLanguageLight` via i18n.js). Verifikasi: lint 0/12 ✓ ·
+      test 131/131 ✓ · build idempoten `app-14fe068fc9.js` (412.4 KB) ✓ ·
+      check:globals nol kolisi (409 simbol) ✓ · audit HIGH=0 ✓ · no-undef 0 error ✓ ·
+      runtime preview: dashboard (renderJobDilamar/renderProgresPemberkasan/
+      renderRiwayatKandidat/renderStudentCard), publik (renderPublicFilterUI/Filtered —
+      132/6/0/121), admin (renderAdminFull cluster + renderFormInbox 12 baris mail) —
+      semua render, 0 error console ✓. ⚠️ E2E Playwright TIDAK dijalankan — lingkungan
+      ini tanpa Node ≥22 (playwright-core macet di Bun/Windows); jalankan
+      `BASE_URL=http://localhost:3000 node e2e/*.mjs` di mesin ber-Node sebelum merge.
+- [x] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory`
+      → import dari `api/*` — SELESAI 2026-08-17. 7 file bundle diubah: 13 pembaca
+      `window.*` api → import binding dari modul pemilik. Rincian: `08_wa_pintar.js`
+      (ensureAllCandidates←api/candidates.js), `10_cv_rirekisho.js`
+      (ensureAllCandidates), `12_esign_match.js` (ensureAllCandidates 2× +
+      buatQrDataUrl←api/candidates.js), `admin_modal/cv.js` (ensureAllCandidates 2×),
+      `admin_ops/candidates.js` (ensureAllCandidates 2× + upsertCandidateMemory +
+      patchFormMail←api/forms.js), `ai_copilot/interview.js` (ensureAllCandidates),
+      `render/candidate.js` (ensureAllCandidates — jalur filterKandidat). Guard
+      `typeof` dipertahankan (`typeof ensureAllCandidates === 'function'`). Yang
+      TIDAK disentuh: alias `window.X = X` di api/* (pemakai HTML onclick/onchange +
+      pemakai classic lain — target Langkah 6), halaman standalone `js/pages/*`.
+      Verifikasi: lint 0/12 ✓ · test 131/131 ✓ · build idempoten
+      `app-c172828ade.js` (411.9 KB) ✓ · check:globals nol kolisi (400 simbol) ✓ ·
+      audit HIGH=0 ✓ · no-undef 0 error (7 file) ✓ · runtime preview: dashboard /
+      publik / admin + filterKandidat (ensureAllCandidates import), WA Pintar modal
+      (bukaModalWaPintar → ensureAllCandidates), QR naitei (buatQrDataUrl → data URL
+      2598 char) — semua jalan, 0 error console ✓. ⚠️ E2E Playwright TIDAK
+      dijalankan — lingkungan ini tanpa Node ≥22 (playwright-core macet di
+      Bun/Windows); jalankan `BASE_URL=http://localhost:3000 node e2e/*.mjs` di mesin
+      ber-Node sebelum merge.
+- [x] **Langkah 5 — helper classic (SELESAI 2026-08-17)**: `previewFileInFrame`
+      (03_candidate.js, admin_modal/cv.js) & `normalizeGenderValue`
+      (admin_modal/cv.js, api/candidates.js) → import binding dari modul
+      pemiliknya. `cekUploadFile` TETAP window.* — pemakainya hanya HTML
+      onchange (admin.html:550) + halaman standalone classic (js/pages/*,
+      `window.cekUploadFile` eksplisit), bukan modul bundel.
+- [~] **Langkah 6 — fasad PortalBridge (SEBAGIAN)**: ① PEMBERSIHAN SELESAI —
+      89 alias mati dihapus dari 31 file (self-alias 337 → 236; skor scan
+      `window.\w+\s*=` turun; bundel 411.9 → 409.4 KB). Verifikasi: no-undef 0,
+      lint 0/12, test 131/131, build idempoten, check:globals nol kolisi
+      (400 simbol), audit HIGH=0, runtime preview (dashboard/publik/admin +
+      mail filter HTML onclick + share/master-full standalone) 0 error. ⚠️ E2E
+      Playwright tidak dijalankan (lingkungan tanpa Node ≥22).
+      ② **SENTRALISASI SEAM halaman standalone SELESAI (2026-08-17)** — jalur
+      unblock dijalankan penuh:
+      - `js/pages/*` = **ENTRY ESM** — tiap halaman meng-import core lewat
+        `js/core/bridge.js` (`import { registerSeamAliases } from
+        '../core/bridge.js'`); tag core terpisah (bridge/api-client/i18n) di
+        5 HTML standalone DIHAPUS; tag halaman di-bump `?v=esm14`.
+      - **`js/core/bridge.js` masuk STACK bundel** (module-registry + import di
+        `js/main.js`) — index/admin ikut punya `window.PortalBridge` +
+        `registerSeamAliases`. Aman: bridge hanya import core (api-client +
+        i18n, di-dedupe esbuild), TIDAK meng-import modul halaman → tidak ada
+        eksekusi app di halaman form (kendala (b) lama tidak relevan).
+      - **Alias seam HTML↔JS diregistrasikan TERPUSAT** via `registerSeamAliases
+        ({ namaFn, ... })` — blok `window.X = X` di 5 halaman standalone
+        diganti 1 panggilan; registry `SEAM_ALIASES` private modul, audit via
+        `getSeamAliases()`. Verifikasi browser (preview :3000): 5 halaman
+        standalone — semua alias seam terdaftar (share 6, ai_form 11,
+        master-full 8, apply-full 4, siswa-baru 7), 0 error JS; index/admin —
+        PortalBridge + registerSeamAliases tersedia, app boot normal, 0 error.
+      - SISA: alias per-simbol di modul bundel (admin/index) masih
+        self-registered `window.X = X` — mekanisme sentral sudah tersedia
+        (bridge di STACK/main.js), migrasinya bisa menyusul per modul.
 - [ ] Kriteria selesai per langkah: scan `window\.\w+\s*=` di `js/` menurun; `no-undef`
       tetap 0 error; `check:globals` nol kolisi; E2E SEMUA LULUS.
 

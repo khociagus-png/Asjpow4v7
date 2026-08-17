@@ -328,13 +328,13 @@
   </div>
 
   <!-- SCRIPT ENGINE -->
-  <!-- Fase 3: core ESM — api-client.js sebagai module (deferred) -->
-  <script type="module" src="/api-client.js?v=esm1"></script>
+  <!-- Fase 3.5 L6: js/pages/apply_full.js = entry ESM — meng-import core sendiri
+       lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
   <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
   <script type="module" src="/js/apply-docs.js?v=esm13"></script>
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script dipindah ke js/pages/apply_full.js (isi byte-identik) -->
-  <script type="module" src="/js/pages/apply_full.js?v=esm13"></script>
+  <script type="module" src="/js/pages/apply_full.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm13"></script>
 </body>
 </html>

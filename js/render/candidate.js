@@ -1,4 +1,6 @@
 import { tr } from '../../i18n.js';
+import { ALL_CANDIDATES, ASSETS, limitKan } from '../init/state.js';
+import { ensureAllCandidates } from '../api/candidates.js';
 // 7. FUNGSI RENDER — DOMAIN KANDIDAT (tabel daftar kandidat admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -53,9 +55,9 @@ export function jobDilamarCell(c) {
 
 export async function filterKandidat() {
   // Pencarian admin butuh daftar penuh - pastikan semua halaman sudah dimuat.
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
   var el = document.getElementById('search-kandidat');
@@ -71,7 +73,7 @@ export async function filterKandidat() {
     ? document.getElementById('filter-db-jft').value
     : 'all';
 
-  var arr = window.ALL_CANDIDATES.filter(function (c) {
+  var arr = ALL_CANDIDATES.filter(function (c) {
     // Text Search
     let matchText =
       c.nama.toLowerCase().includes(val) ||
@@ -112,13 +114,13 @@ export function renderKandidatTable(arr) {
   var tb = document.getElementById('admin-kandidat-body');
   if (!tb) return;
   var html = '';
-  for (var i = 0; i < Math.min(arr.length, window.limitKan); i++) {
+  for (var i = 0; i < Math.min(arr.length, limitKan); i++) {
     var c = arr[i];
     var waLink = 'https://wa.me/' + String(c.wa).replace(/\D/g, '');
 
     let isVip = (c.catatanInt || '').includes('[VIP]');
     let logoSrc =
-      window.ASSETS.LOGO ||
+      ASSETS.LOGO ||
       'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
 
     let namaTampil = isVip
@@ -201,7 +203,7 @@ export function renderKandidatTable(arr) {
       '"><i class="fab fa-whatsapp"></i></button>' +
       '</td></tr>';
   }
-  if (arr.length > window.limitKan) {
+  if (arr.length > limitKan) {
     html +=
       '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
@@ -213,6 +215,4 @@ export function renderKandidatTable(arr) {
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
-window.jobDilamarCell = jobDilamarCell;
-window.filterKandidat = filterKandidat;
-window.renderKandidatTable = renderKandidatTable;
+window.filterKandidat = filterKandidat;

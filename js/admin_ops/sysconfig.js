@@ -1,3 +1,4 @@
+import { DROPDOWNS, currentAdminName } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -45,7 +46,7 @@ export function renderSysConfig() {
   var html = '';
 
   CONFIG_CATEGORIES.forEach((cat) => {
-    let items = window.DROPDOWNS[cat.key] || [];
+    let items = DROPDOWNS[cat.key] || [];
     let chipHtml = '';
 
     if (items.length === 0) {
@@ -89,11 +90,11 @@ export function tambahConfigItem(key) {
   let val = input.value.trim();
   if (!val) return;
 
-  if (!window.DROPDOWNS[key]) window.DROPDOWNS[key] = [];
+  if (!DROPDOWNS[key]) DROPDOWNS[key] = [];
   // Cek duplikat berdasarkan ID (bagian sebelum '|') — jadi "CHECK KAIWA"
   // dan "CHECK KAIWA|チェック会話" dianggap sama (tidak dobel).
   let valId = window.trOptionId(val);
-  let ada = window.DROPDOWNS[key].some(function (ex) {
+  let ada = DROPDOWNS[key].some(function (ex) {
     return window.trOptionId(ex) === valId;
   });
   if (ada) {
@@ -101,23 +102,23 @@ export function tambahConfigItem(key) {
     return;
   }
 
-  window.DROPDOWNS[key].push(val);
+  DROPDOWNS[key].push(val);
   input.value = '';
   renderSysConfig(); // Render lokal dulu agar UI cepat berubah
-  simpanConfigKeServer(key, window.DROPDOWNS[key]);
+  simpanConfigKeServer(key, DROPDOWNS[key]);
 }
 
 export function hapusConfigItem(key, index) {
   if (!confirm(window.tr('form.txt_hapus_confirm'))) return;
-  window.DROPDOWNS[key].splice(index, 1);
+  DROPDOWNS[key].splice(index, 1);
   renderSysConfig(); // Render lokal
-  simpanConfigKeServer(key, window.DROPDOWNS[key]);
+  simpanConfigKeServer(key, DROPDOWNS[key]);
 }
 
 // Pindahkan posisi chip (urutan dropdown penting, mis. pipeline tahapan
 // yang bernomor). -1 = naik, +1 = turun; simpan langsung ke server.
 export function pindahConfigItem(key, index, delta) {
-  var arr = window.DROPDOWNS[key];
+  var arr = DROPDOWNS[key];
   if (!Array.isArray(arr) || arr.length < 2) return;
   var target = index + delta;
   if (target < 0 || target >= arr.length) return;
@@ -125,7 +126,7 @@ export function pindahConfigItem(key, index, delta) {
   arr[index] = arr[target];
   arr[target] = tmp;
   renderSysConfig(); // Render lokal
-  simpanConfigKeServer(key, window.DROPDOWNS[key]);
+  simpanConfigKeServer(key, DROPDOWNS[key]);
 }
 
 export async function simpanConfigKeServer(key, arrayData) {
@@ -133,7 +134,7 @@ export async function simpanConfigKeServer(key, arrayData) {
   if (loader) loader.style.display = 'flex';
 
   try {
-    const res = await window.callAPI('updateSysConfig', [key, arrayData, window.currentAdminName]);
+    const res = await window.callAPI('updateSysConfig', [key, arrayData, currentAdminName]);
     if (!res.success) window.showToast(window.tr('ui.toast_save_server_failed') + res.error, 'error');
   } catch (err) {
     window.showToast(window.tr('ui.toast_network_error'), 'error');
@@ -150,7 +151,7 @@ export async function simpanPengumuman() {
   btn.disabled = true;
 
   try {
-    const res = await window.callAPI('updateSysConfig', ['pengumuman', [teks], window.currentAdminName]);
+    const res = await window.callAPI('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_marquee_updated'), 'success');
       // Update langsung di layar Admin
@@ -180,5 +181,4 @@ window.renderSysConfig = renderSysConfig;
 window.tambahConfigItem = tambahConfigItem;
 window.hapusConfigItem = hapusConfigItem;
 window.pindahConfigItem = pindahConfigItem;
-window.simpanConfigKeServer = simpanConfigKeServer;
-window.simpanPengumuman = simpanPengumuman;
+window.simpanPengumuman = simpanPengumuman;

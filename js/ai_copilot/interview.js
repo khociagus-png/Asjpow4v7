@@ -1,3 +1,5 @@
+import { ALL_CANDIDATES, currentKandidatName, currentKandidatWa } from '../init/state.js';
+import { ensureAllCandidates } from '../api/candidates.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -7,14 +9,14 @@
 export let interviewHistory = [];
 
 export async function bukaSimulatorInterview() {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
   // Cari data kandidat yang sedang login
-  let myData = window.ALL_CANDIDATES.find(
-    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
+  let myData = ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(currentKandidatWa),
   );
   if (!myData) return window.showToast(window.tr('ui.toast_session_invalid_relogin'), 'error');
 
@@ -74,7 +76,7 @@ export async function selesaikanWawancaraInterview() {
   }
   try {
     const res = await window.callAPI('selesaikanWawancara', [
-      { wa: window.currentKandidatWa, history: interviewHistory },
+      { wa: currentKandidatWa, history: interviewHistory },
     ]);
     if (!res || res.success === false) {
       throw new Error((res && res.error) || 'Gagal merangkum hasil');
@@ -116,13 +118,13 @@ export async function mulaiWawancaraInterview() {
   chatBox.scrollTop = chatBox.scrollHeight;
   try {
     const res = await window.callAPI('processAiInterview', {
-      wa: window.currentKandidatWa,
-      candidateName: window.currentKandidatName,
+      wa: currentKandidatWa,
+      candidateName: currentKandidatName,
       history: [],
     });
     const el = document.getElementById(typingId);
     if (el) el.remove();
-    const reply = (res && res.reply) || 'Konnichiwa ' + window.currentKandidatName + '-san! Mari mulai wawancara kita.';
+    const reply = (res && res.reply) || 'Konnichiwa ' + currentKandidatName + '-san! Mari mulai wawancara kita.';
     appendInterviewChat('ai', reply);
     interviewHistory.push({ role: 'assistant', content: reply });
   } catch (err) {
@@ -131,7 +133,7 @@ export async function mulaiWawancaraInterview() {
     if (el) el.remove();
     appendInterviewChat(
       'ai',
-      `Konnichiwa **${window.currentKandidatName}**-san! Saya Jeklin-sensei.\nKetik jawabanmu untuk memulai latihan wawancara ya!`,
+      `Konnichiwa **${currentKandidatName}**-san! Saya Jeklin-sensei.\nKetik jawabanmu untuk memulai latihan wawancara ya!`,
     );
   }
 }
@@ -190,8 +192,8 @@ export async function sendInterviewMessage() {
   typingEl.classList.remove('hidden');
 
   let payload = {
-    wa: window.currentKandidatWa,
-    candidateName: window.currentKandidatName,
+    wa: currentKandidatWa,
+    candidateName: currentKandidatName,
     history: interviewHistory.slice(-6), // Kirim 6 chat terakhir agar AI tidak lupa konteks
   };
 
@@ -251,7 +253,7 @@ export function cobaParseJsonLoose(text) {
 export async function kirimHasilWawancaraKeAdmin(hasil) {
   let res = null;
   try {
-    res = await window.callAPI('simpanHasilWawancara', [{ wa: window.currentKandidatWa, hasil }]);
+    res = await window.callAPI('simpanHasilWawancara', [{ wa: currentKandidatWa, hasil }]);
   } catch (err) {
     console.error('[AI] simpan hasil wawancara:', err);
   }

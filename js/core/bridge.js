@@ -13,8 +13,13 @@
 // SEMUA pemakai lama tetap jalan tanpa perubahan — window.PortalBridge hanya
 // tambahan namespaced yang rapi untuk kode baru / migrasi bertahap.
 //
-// CARA LOAD di halaman standalone (ganti 1-2 tag classic):
-//   <script type="module" src="/js/core/bridge.js?v=esm1"></script>
+// CARA LOAD:
+//   - Halaman standalone: js/pages/* adalah ENTRY ESM — tiap halaman
+//     meng-import modul ini sendiri (`import { registerSeamAliases } from
+//     '../core/bridge.js'`), jadi TIDAK perlu lagi tag <script> core terpisah.
+//   - Bundel admin/index: bridge.js masuk STACK + di-import js/main.js
+//     (hanya core — api-client/i18n, di-dedupe esbuild) → window.PortalBridge
+//     tersedia di SEMUA halaman.
 // (module = deferred → jalan setelah parse, SEBELUM DOMContentLoaded; kode
 // classic yang butuh callAPI/tr dipanggil runtime/event, bukan saat parse.)
 //
@@ -62,10 +67,58 @@ export const PortalBridge = {
     }
     return fn(action, payload);
   },
+
+  // --- Registrasi alias seam HTML↔JS (sentralisasi, Fase 3.5 Langkah 6) ---
+  registerSeamAliases,
+  getSeamAliases,
 };
+
+// =============================================================================
+// Registrasi alias seam HTML↔JS — TERPUSAT di sini (Fase 3.5 Langkah 6)
+// -----------------------------------------------------------------------------
+// Fungsi yang dipanggil dari atribut HTML (onclick/onchange/onload) atau dari
+// string onclick yang di-generate runtime DIEVAL di global scope → harus punya
+// alias `window.*`. Sebelumnya tiap modul halaman menulis `window.X = X`
+// sendiri-sendiri di bagian bawah file. Sekarang diregistrasikan terpusat:
+//   - js/pages/* (entry ESM halaman standalone) memanggil
+//     `registerSeamAliases({ namaFn, ... })` — peta ekspor handler-nya.
+//   - Modul bundel admin/index juga bisa memakai mekanisme ini (bridge.js ada
+//     di STACK/main.js) — alias per-simbol lama tetap jalan sampai semua
+//     pemakainya pindah ke sini.
+// Registry (SEAM_ALIASES) disimpan supaya bisa diaudit via getSeamAliases()
+// dan re-registrasi idempotent (nilai sama → tidak ada efek ganda).
+// =============================================================================
+
+// Registry pusat: nama alias → fungsi. Private modul (tidak bocor ke window).
+const SEAM_ALIASES = new Map();
+
+/**
+ * Daftarkan peta alias seam HTML↔JS ke window secara terpusat.
+ * @param {Record<string, Function>} aliases Nama alias → fungsi handler.
+ * @returns {Record<string, Function>} Peta yang sama (untuk chaining/tes).
+ */
+export function registerSeamAliases(aliases) {
+  for (const [name, value] of Object.entries(aliases || {})) {
+    if (typeof value !== 'function') {
+      console.warn(`[bridge] registerSeamAliases: "${name}" bukan fungsi — dilewati.`);
+      continue;
+    }
+    SEAM_ALIASES.set(name, value);
+    window[name] = value;
+  }
+  return aliases;
+}
+
+/**
+ * Snapshot registry alias seam (untuk audit/debug).
+ * @returns {Record<string, Function>}
+ */
+export function getSeamAliases() {
+  return Object.fromEntries(SEAM_ALIASES);
+}
 
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
 
-// ESM-only: modul lain bisa `import { PortalBridge } from './bridge.js'`.
+// ESM-only: modul lain bisa `import { PortalBridge, registerSeamAliases } from './bridge.js'`.
 export default PortalBridge;

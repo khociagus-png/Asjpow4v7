@@ -20,6 +20,12 @@
 import '../api-client.js';
 import '../i18n.js';
 
+// Bridge (Fase 3.5 langkah 6): window.PortalBridge + registerSeamAliases
+// (registrasi alias seam HTML↔JS terpusat) tersedia di SEMUA halaman, bundel
+// admin/index sekalipun. Hanya import core (api-client + i18n — di-dedupe
+// esbuild), tidak meng-import modul halaman → aman di bundel.
+import './core/bridge.js';
+
 // Guard upload + publik (langkah 13 + 12)
 import './upload-guard.js';
 import './01_public.js';

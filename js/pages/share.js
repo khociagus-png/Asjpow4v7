@@ -9,6 +9,11 @@
 // ==========================================
 // SHARE VIEW — viewer kandidat aman untuk kaisha + modal preview dokumen
 // ==========================================
+// ENTRY ESM (Fase 3.5 Langkah 6): halaman meng-import core lewat bridge.js
+// (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
+// registerSeamAliases — bukan window.X = X per baris.
+import { registerSeamAliases } from '../core/bridge.js';
+
         // LANG lokal di-rename jadi SHARE_LANG supaya tidak bentrok dengan
         // `const LANG` global dari i18n.js (yang dimuat sebagai satu sumber tr()).
         const SHARE_LANG = {
@@ -519,17 +524,18 @@
             if(el) el.innerText = msg;
         }
 
-        // BRIDGE ESM → classic/HTML inline: alias window.* utk handler HTML
-        // (onclick toggleLang/submitSelection, onchange renderGrid) & onclick
-        // string yang di-generate renderGrid (toggleSelection — dipanggil bare
-        // dari string, dieval global). openPreview/closePreview dipanggil
-        // renderGrid dengan prefix window.* eksplisit.
-        window.toggleLang = toggleLang;
-        window.updateStaticText = updateStaticText;
-        window.toggleSelection = toggleSelection;
-        window.submitSelection = submitSelection;
-        window.openPreview = openPreview;
-        window.closePreview = closePreview;
-        window.renderGrid = renderGrid;
-        window.showError = showError;
+        // BRIDGE ESM → classic/HTML inline: SEMUA alias seam HTML↔JS
+        // diregistrasikan TERPUSAT lewat registerSeamAliases (js/core/bridge.js)
+        // — bukan window.X = X per baris. Mencakup handler HTML (onclick
+        // toggleLang/submitSelection, onchange renderGrid) & onclick string yang
+        // di-generate renderGrid (toggleSelection dipanggil bare — dieval
+        // global; openPreview/closePreview dengan prefix window.* eksplisit).
+        registerSeamAliases({
+            toggleLang,
+            toggleSelection,
+            submitSelection,
+            openPreview,
+            closePreview,
+            renderGrid,
+        });
 

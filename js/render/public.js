@@ -1,4 +1,6 @@
 import { tr } from '../../i18n.js';
+import { ALL_JOBS, CURRENT_THEME, currentPublicFilter, limitPub } from '../init/state.js';
+import { renderAdmin } from './admin.js';
 // 7. FUNGSI RENDER — DOMAIN PUBLIK (index.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -16,7 +18,7 @@ export function filterPublicData(s) {
 // Filter status publik (Semua/Buka/Urgent/Tutup) dengan hitungan per status
 // + state aktif yang kontras di bar terang (Sakura) maupun gelap (Tokyo).
 export function renderPublicFilterUI() {
-  var light = window.CURRENT_THEME === 'SAKURA';
+  var light = CURRENT_THEME === 'SAKURA';
   var defs = {
     ALL: {
       key: 'public.all',
@@ -40,8 +42,8 @@ export function renderPublicFilterUI() {
     },
   };
   var count = function (st) {
-    if (st === 'ALL') return window.ALL_JOBS.length;
-    return window.ALL_JOBS.filter(function (j) {
+    if (st === 'ALL') return ALL_JOBS.length;
+    return ALL_JOBS.filter(function (j) {
       return String(j.status || '')
         .toUpperCase()
         .includes(st);
@@ -53,7 +55,7 @@ export function renderPublicFilterUI() {
   ['ALL', 'OPEN', 'URGENT', 'CLOSE'].forEach(function (st) {
     var btn = document.getElementById('public-f-' + st);
     if (!btn) return;
-    var active = window.currentPublicFilter === st;
+    var active = currentPublicFilter === st;
     btn.className =
       'px-4 py-2 rounded-lg text-xs font-bold shadow-md transition ' +
       (active ? defs[st].active : baseInactive);
@@ -79,9 +81,9 @@ export function renderPublicFiltered() {
   if (!tb) return;
   renderPublicFilterUI();
   var html = '';
-  var arr = window.ALL_JOBS;
-  if (window.currentPublicFilter !== 'ALL') {
-    arr = window.ALL_JOBS.filter((j) => j.status.includes(window.currentPublicFilter));
+  var arr = ALL_JOBS;
+  if (currentPublicFilter !== 'ALL') {
+    arr = ALL_JOBS.filter((j) => j.status.includes(currentPublicFilter));
   }
 
   var sourceArray = [...arr];
@@ -99,7 +101,7 @@ export function renderPublicFiltered() {
     return timeB - timeA;
   });
 
-  for (var i = 0; i < Math.min(sourceArray.length, window.limitPub); i++) {
+  for (var i = 0; i < Math.min(sourceArray.length, limitPub); i++) {
     var j = sourceArray[i];
 
     let statusKey = j.status.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -148,7 +150,7 @@ export function renderPublicFiltered() {
     let ketHtml =
       j.keterangan && j.keterangan !== '-'
         ? '<div class="mt-2 pt-2 border-t border-slate-700/50 text-[10px] ' +
-          (window.CURRENT_THEME === 'SAKURA' ? 'text-amber-700' : 'text-amber-300/90') +
+          (CURRENT_THEME === 'SAKURA' ? 'text-amber-700' : 'text-amber-300/90') +
           ' leading-relaxed"><i class="fas fa-info-circle mr-1"></i> ' +
           window.esc(j.keterangan) +
           '</div>'
@@ -157,7 +159,7 @@ export function renderPublicFiltered() {
     let gText = (j.gender || '').toUpperCase();
     let gLabel = window.trOption(j.gender);
     // Badge gender ikut theme: di SAKURA (light) pakai latar terang + teks gelap.
-    let light = window.CURRENT_THEME === 'SAKURA';
+    let light = CURRENT_THEME === 'SAKURA';
     let genderBadge = '';
     if (gText.includes('PRIA') || gText.includes('LAKI')) {
       genderBadge =
@@ -215,7 +217,7 @@ export function renderPublicFiltered() {
 
     html +=
       '<tr class="rt-row border-b ' +
-      (window.THEMES[window.CURRENT_THEME] ? window.THEMES[window.CURRENT_THEME].border : 'border-slate-800') +
+      (window.THEMES[CURRENT_THEME] ? window.THEMES[CURRENT_THEME].border : 'border-slate-800') +
       ' ' +
       rowHover +
       ' transition">' +
@@ -278,7 +280,7 @@ export function renderPublicFiltered() {
       '<tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
       tr('public.empty') +
       '</td></tr>';
-  } else if (arr.length > window.limitPub) {
+  } else if (arr.length > limitPub) {
     html +=
       '<tr><td colspan="5" class="p-5 text-center"><button onclick="window.limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
       tr('button.more') +
@@ -290,16 +292,14 @@ export function renderPublicFiltered() {
 export function filterKelolaLoker() {
   var el = document.getElementById('search-kelola');
   var val = el ? el.value.toLowerCase() : '';
-  var arr = window.ALL_JOBS.filter(function (db) {
+  var arr = ALL_JOBS.filter(function (db) {
     return db.code.toLowerCase().includes(val) || db.pekerjaan.toLowerCase().includes(val);
   });
-  window.renderAdmin(arr);
+  renderAdmin(arr);
 }
-window.filterKelolaLoker = filterKelolaLoker;
 
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (filterPublicData, renderPublicFiltered, window.limitPub+=10;...).
 window.filterPublicData = filterPublicData;
-window.renderPublicFilterUI = renderPublicFilterUI;
-window.renderPublicFiltered = renderPublicFiltered;
+window.renderPublicFiltered = renderPublicFiltered;

@@ -1,3 +1,4 @@
+import { currentAdminName, isAdmin } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -10,7 +11,7 @@ export const urlFotoJeklin =
   'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png';
 
 export function bukaAdminAiCopilot(candidateId) {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
@@ -68,7 +69,7 @@ export async function kirimPesanAdminAi(event) {
   try {
     const res = await window.callAPI('processAdminAIChat', [
       {
-        adminName: window.currentAdminName,
+        adminName: currentAdminName,
         message: msg,
         history: adminAiHistory,
         candidateId: currentAiCandidateId,
@@ -225,5 +226,4 @@ window.tutupAdminAi = tutupAdminAi;
 window.kirimPesanAdminAi = kirimPesanAdminAi;
 window.simpanKandidatDariAi = simpanKandidatDariAi;
 window.tambahPesanAdminAi = tambahPesanAdminAi;
-window.tampilkanSaranAdminAi = tampilkanSaranAdminAi;
-window.urlFotoJeklin = urlFotoJeklin;
+window.urlFotoJeklin = urlFotoJeklin;

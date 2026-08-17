@@ -1,3 +1,4 @@
+import { DROPDOWNS } from './state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -170,19 +171,19 @@ export function populate(id, list) {
 // bahasa diganti — label ikut bahasa baru, value terpilih tetap dipertahankan.
 export function rePopulateDropdowns() {
   var defs = [
-    ['input-kategori', window.DROPDOWNS.kategori, null],
-    ['input-gender', window.DROPDOWNS.gender, null],
-    ['edit-k-tahapan', window.DROPDOWNS.tahapan, null],
-    ['edit-k-status', window.DROPDOWNS.tahapan, null],
-    ['input-tsk', window.DROPDOWNS.tsk, null],
-    ['j-tsk', window.DROPDOWNS.tsk, null],
-    ['input-tahapan-db', window.DROPDOWNS.tahapan, null],
-    ['edit-db-tahapan', window.DROPDOWNS.tahapan, null],
-    ['checkbox-lokasi', window.DROPDOWNS.lokasi, 'lokasi_cb'],
-    ['checkbox-syarat', window.DROPDOWNS.syarat, 'syarat_cb'],
-    ['ef-kategori', window.DROPDOWNS.kategori, null],
-    ['ef-tsk', window.DROPDOWNS.tsk, null],
-    ['ef-gender', window.DROPDOWNS.gender, null],
+    ['input-kategori', DROPDOWNS.kategori, null],
+    ['input-gender', DROPDOWNS.gender, null],
+    ['edit-k-tahapan', DROPDOWNS.tahapan, null],
+    ['edit-k-status', DROPDOWNS.tahapan, null],
+    ['input-tsk', DROPDOWNS.tsk, null],
+    ['j-tsk', DROPDOWNS.tsk, null],
+    ['input-tahapan-db', DROPDOWNS.tahapan, null],
+    ['edit-db-tahapan', DROPDOWNS.tahapan, null],
+    ['checkbox-lokasi', DROPDOWNS.lokasi, 'lokasi_cb'],
+    ['checkbox-syarat', DROPDOWNS.syarat, 'syarat_cb'],
+    ['ef-kategori', DROPDOWNS.kategori, null],
+    ['ef-tsk', DROPDOWNS.tsk, null],
+    ['ef-gender', DROPDOWNS.gender, null],
   ];
   for (var i = 0; i < defs.length; i++) {
     var el = document.getElementById(defs[i][0]);

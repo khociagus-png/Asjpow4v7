@@ -240,8 +240,4 @@ export async function uploadDriveField(idKandidat, nama, field) {
 window.muatMigrasiDrive = muatMigrasiDrive;
 window.bukaModalMigrasiDrive = bukaModalMigrasiDrive;
 window.tutupModalMigrasiDrive = tutupModalMigrasiDrive;
-window.renderMigrasiDriveList = renderMigrasiDriveList;
-window.migrasiDriveFieldHtml = migrasiDriveFieldHtml;
-window.driveSetStatus = driveSetStatus;
-window.driveBacaFileBase64 = driveBacaFileBase64;
-window.uploadDriveField = uploadDriveField;
+window.uploadDriveField = uploadDriveField;

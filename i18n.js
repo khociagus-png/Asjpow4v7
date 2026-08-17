@@ -15,11 +15,10 @@ import {
 // Accessor window.CURRENT_LANG (Fase 3 langkah 12) ada di i18n/core.js —
 // di sana CURRENT_LANG adalah binding modul (agregat tidak bisa men-assign
 // binding import).
-window.OPTION_TRANSLATIONS = OPTION_TRANSLATIONS;
 window.trOption = trOption;
 window.trOptionId = trOptionId;
 window.tr = tr;
 window.renderLanguageLight = renderLanguageLight;
 window.toggleFormLanguage = toggleFormLanguage;
 
-window.LANG = LANG;
+window.LANG = LANG;

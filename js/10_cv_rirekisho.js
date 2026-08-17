@@ -1,3 +1,5 @@
+import { ALL_CANDIDATES, currentKandidatWa, isAdmin } from './init/state.js';
+import { ensureAllCandidates } from './api/candidates.js';
 // ESM (Fase 3 langkah 12): modul ES — pemakai classic/bundel via window.*
 // (render/candidate.js onclick "bukaPreviewCV_Admin", HTML onclick
 // "bukaPreviewCV", onclick "cetakCVRirekisho"). Helper dari helpers_cv.js &
@@ -6,9 +8,9 @@
 // === FUNGSI BUKA PREVIEW DRAF CV RIREKISHO ===
 // FUNGSI 1: Dipanggil saat Admin mengklik tombol "CV" di tabel
 export async function bukaPreviewCV_Admin(waTarget) {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
   if (!waTarget) return window.showToast(window.tr('ui.toast_wa_invalid'), 'error');
@@ -27,7 +29,7 @@ export async function bukaPreviewCV_Admin(waTarget) {
       return;
     }
 
-    let c = window.ALL_CANDIDATES.find(
+    let c = ALL_CANDIDATES.find(
       (k) => window.normalizePhone(k.wa) === window.normalizePhone(waTarget),
     );
     // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
@@ -55,7 +57,7 @@ export async function bukaPreviewCV_Admin(waTarget) {
 
 // FUNGSI 2: Dipanggil saat Kandidat mengklik "Preview Desain CV" di dashboardnya
 export function bukaPreviewCV() {
-  let waTarget = window.currentKandidatWa;
+  let waTarget = currentKandidatWa;
   if (!waTarget) return window.showToast(window.tr('ui.toast_session_invalid'), 'error');
   prosesBukaRirekisho(waTarget);
 }
@@ -76,7 +78,7 @@ export async function prosesBukaRirekisho(waTarget) {
       return;
     }
 
-    let c = window.ALL_CANDIDATES.find(
+    let c = ALL_CANDIDATES.find(
       (k) => window.normalizePhone(k.wa) === window.normalizePhone(waTarget),
     );
     // Foto utama dari master (uploads.photo) — pas_photo di database_candidate
@@ -173,7 +175,7 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
     ? `<img src="${fotoUrl}" style="width: 100%; height: 100%; min-height: 195px; object-fit: cover; object-position: top center; display: block; margin: 0; padding: 0;">`
     : `<div style="width: 100%; min-height: 195px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">FOTO</div>`;
 
-  let btnPrintHtml = window.isAdmin
+  let btnPrintHtml = isAdmin
     ? `
             <div class="flex flex-wrap items-center gap-2 mb-3 print:hidden z-50 relative">
                 <button onclick="cetakCVRirekisho()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg flex items-center font-sans text-sm transition-all hover:scale-105 border border-emerald-500">
@@ -220,8 +222,6 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
 // btnPrintHtml (dibuat renderCVAjaib) butuh global — alias data property.
 window.bukaPreviewCV_Admin = bukaPreviewCV_Admin;
 window.bukaPreviewCV = bukaPreviewCV;
-window.prosesBukaRirekisho = prosesBukaRirekisho;
-window.renderCVAjaib = renderCVAjaib;
 window.cetakCVRirekisho = cetakCVRirekisho;
 
 
@@ -229,9 +229,9 @@ window.cetakCVRirekisho = cetakCVRirekisho;
 // dirender untuk kandidat). "Simpan PDF" membuka dialog print yang sama,
 // browser menyediakan opsi "Save as PDF".
 export function cetakCVRirekisho() {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_rireki_admin_only'), 'error');
     return;
   }
   window.print();
-}
+}

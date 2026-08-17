@@ -1,3 +1,7 @@
+import { ALL_JOBS, ASSETS, CURRENT_THEME, isAdmin } from './init/state.js';
+import { renderPublicFilterUI, renderPublicFiltered } from './render/public.js';
+import { renderAdminFull } from './render/admin.js';
+import { renderSysConfig } from './admin_ops/sysconfig.js';
 // 1. LANGUAGE ENGINE V1.0 (LOCK)
 // ==========================================
 // CURRENT_LANG is now in src/i18n.js
@@ -20,7 +24,7 @@ export function switchPublicTab(tab) {
   var btnLoker = document.getElementById('tab-pub-loker');
   var btnLayanan = document.getElementById('tab-pub-layanan');
 
-  var light = typeof window.CURRENT_THEME !== 'undefined' && window.CURRENT_THEME === 'SAKURA';
+  var light = typeof CURRENT_THEME !== 'undefined' && CURRENT_THEME === 'SAKURA';
   var inactive =
     'px-6 py-3 rounded-full text-sm font-bold transition-colors bg-transparent ' +
     (light ? 'text-stone-600 hover:bg-rose-900/10 hover:text-stone-900' : 'text-slate-400 hover:bg-white/10 hover:text-white');
@@ -96,20 +100,20 @@ export function setLanguage(lang) {
     document.getElementById('page-public') &&
     !document.getElementById('page-public').classList.contains('hidden')
   ) {
-    if (typeof window.renderPublicFilterUI === 'function') window.renderPublicFilterUI();
-    if (typeof window.renderPublicFiltered === 'function') window.renderPublicFiltered();
+    if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
+    if (typeof renderPublicFiltered === 'function') renderPublicFiltered();
   }
   // Re-render tabel admin jika sedang mode admin
   if (
-    typeof window.isAdmin !== 'undefined' &&
-    window.isAdmin &&
-    typeof window.renderAdminFull === 'function'
+    typeof isAdmin !== 'undefined' &&
+    isAdmin &&
+    typeof renderAdminFull === 'function'
   ) {
-    window.renderAdminFull();
+    renderAdminFull();
   }
   // Re-render chip Pengaturan Sistem (label dropdown sesuai bahasa)
-  if (typeof window.renderSysConfig === 'function' && document.getElementById('config-container')) {
-    window.renderSysConfig();
+  if (typeof renderSysConfig === 'function' && document.getElementById('config-container')) {
+    renderSysConfig();
   }
   // Re-populate dropdown/checkbox form yang nilainya dari sys config
   // (label ikut bahasa; value tetap ID asli).
@@ -400,7 +404,7 @@ export function jobTutupUntukLamar(j) {
 }
 
 export function bukaDetailLoker(code) {
-  var j = (window.ALL_JOBS || []).find(function (x) {
+  var j = (ALL_JOBS || []).find(function (x) {
     return x.code === code;
   });
   if (!j) return;
@@ -533,8 +537,8 @@ export function bukaDetailLoker(code) {
   }
 
   var waNum =
-    window.ASSETS && window.ASSETS.SOCIAL && window.ASSETS.SOCIAL.whatsapp
-      ? String(window.ASSETS.SOCIAL.whatsapp).replace(/\D/g, '')
+    ASSETS && ASSETS.SOCIAL && ASSETS.SOCIAL.whatsapp
+      ? String(ASSETS.SOCIAL.whatsapp).replace(/\D/g, '')
       : '';
   var waMsg =
     'Halo Admin ASJ, saya tertarik lowongan ' +
@@ -597,14 +601,12 @@ export function tutupDetailLoker() {
 // 13_rincian_builder (rbSeedFromText/rbSummaryFromData); tutupDetailLoker →
 // onclick string di bukaDetailLoker sendiri (string dieval global).
 window.switchPublicTab = switchPublicTab;
-window.renderLanguage = renderLanguage;
 window.setLanguage = setLanguage;
 window.parseRincianBiaya = parseRincianBiaya;
-window.renderRincianSections = renderRincianSections;
 window.lokerGenderBadge = lokerGenderBadge;
 window.jobTutupUntukLamar = jobTutupUntukLamar;
 window.bukaDetailLoker = bukaDetailLoker;
 window.tutupDetailLoker = tutupDetailLoker;
 
 
-// ==========================================
+// ==========================================

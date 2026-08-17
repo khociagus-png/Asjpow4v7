@@ -1,4 +1,5 @@
 import { tr } from '../../i18n.js';
+import { ALL_FORM, mailFilterStatus, mailSearchText } from '../init/state.js';
 // 7. FUNGSI RENDER — DOMAIN MAIL INBOX (tabel lamaran admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -40,7 +41,7 @@ export function renderMailFilterUI() {
     var b = document.getElementById('mail-f-' + s);
     if (b)
       b.className =
-        window.mailFilterStatus === s
+        mailFilterStatus === s
           ? 'px-3 py-2 text-[10px] font-bold bg-sky-600 text-white transition'
           : 'px-3 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-slate-700 transition';
   });
@@ -49,8 +50,8 @@ export function renderMailFilterUI() {
     // Hitungan konsisten dengan filter: MENUNGGU = MENUNGGU+MAIL+BARU+PENDING,
     // LULUS = LULUS+LOLOS+APPROVED+APPROVE, GAGAL = GAGAL+TOLAK+REJECTED+REJECT.
     var count = function (st) {
-      if (st === 'ALL') return window.ALL_FORM.length;
-      return window.ALL_FORM.filter(function (x) {
+      if (st === 'ALL') return ALL_FORM.length;
+      return ALL_FORM.filter(function (x) {
         return MAIL_BUCKET(MAIL_STATE_OF(x)) === st;
       }).length;
     };
@@ -88,21 +89,21 @@ export function renderFormInbox() {
   var html = '';
   // Filter status (default MENUNGGU/MAIL/BARU utk daftar review; bisa
   // diubah lewat tombol APPROVED/REJECTED/ALL) + pencarian nama/WA/job.
-  var arr = window.ALL_FORM.filter(function (f) {
+  var arr = ALL_FORM.filter(function (f) {
     var st = MAIL_STATE_OF(f);
     var bucket = MAIL_BUCKET(st);
     var ok = false;
-    if (window.mailFilterStatus === 'ALL') ok = true;
+    if (mailFilterStatus === 'ALL') ok = true;
     // Tab MENUNGGU menampilkan lamaran baru + yang di-update kandidat
     // (UPDATE) — keduanya butuh perhatian admin.
-    else if (window.mailFilterStatus === 'MENUNGGU') ok = bucket === 'MENUNGGU' || bucket === 'UPDATE';
-    else if (window.mailFilterStatus === 'REVIEW') ok = bucket === 'REVIEW';
-    else if (window.mailFilterStatus === 'LULUS') ok = bucket === 'LULUS';
-    else if (window.mailFilterStatus === 'GAGAL') ok = bucket === 'GAGAL';
-    else ok = st === window.mailFilterStatus;
+    else if (mailFilterStatus === 'MENUNGGU') ok = bucket === 'MENUNGGU' || bucket === 'UPDATE';
+    else if (mailFilterStatus === 'REVIEW') ok = bucket === 'REVIEW';
+    else if (mailFilterStatus === 'LULUS') ok = bucket === 'LULUS';
+    else if (mailFilterStatus === 'GAGAL') ok = bucket === 'GAGAL';
+    else ok = st === mailFilterStatus;
     if (!ok) return false;
-    if (window.mailSearchText) {
-      var q = window.mailSearchText.toLowerCase();
+    if (mailSearchText) {
+      var q = mailSearchText.toLowerCase();
       return (
         (f.nama || '').toLowerCase().includes(q) ||
         (f.wa || '').includes(q) ||
@@ -330,10 +331,10 @@ export function renderFormInbox() {
   }
   if (arr.length === 0) {
     var emptyMsg =
-      window.mailFilterStatus === 'ALL'
+      mailFilterStatus === 'ALL'
         ? 'TIDAK ADA DATA MAIL'
         : 'TIDAK ADA DATA MAIL DENGAN STATUS ' +
-          (MAIL_STATUS_LABEL[window.mailFilterStatus] || window.mailFilterStatus);
+          (MAIL_STATUS_LABEL[mailFilterStatus] || mailFilterStatus);
     html =
       '<tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold">' +
       emptyMsg +

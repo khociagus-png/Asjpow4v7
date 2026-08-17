@@ -1,3 +1,5 @@
+import { ALL_CANDIDATES, currentKandidatWa, isAdmin, isKandidat } from './init/state.js';
+import { ensureAllCandidates, buatQrDataUrl } from './api/candidates.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (bukaModalTtd, bukaLayarCanvas, clearFsCanvas, saveFsCanvas,
 // submitDataEsignFull, jalankanMatchmaking, kirimTawaranMassal), onclick
@@ -26,13 +28,13 @@ let signData = { ttd1: null, nama1: null, ttd2: null, nama2: null };
 // asjportal.netlify.app). BUKAN status lamaran LULUS di mail inbox. Admin
 // selalu bisa membuka.
 export async function bukaModalTtd() {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
-  let cleanWa = window.normalizePhone(window.currentKandidatWa);
-  let c = window.ALL_CANDIDATES.find(
+  let cleanWa = window.normalizePhone(currentKandidatWa);
+  let c = ALL_CANDIDATES.find(
     (kan) => window.normalizePhone(kan.wa) === window.normalizePhone(cleanWa),
   );
   if (!c) return;
@@ -42,7 +44,7 @@ export async function bukaModalTtd() {
       thp,
     );
 
-  if (!isValid && !window.isAdmin) {
+  if (!isValid && !isAdmin) {
     window.showToast(window.tr('ui.toast_naitei_locked'), 'error');
     return;
   }
@@ -224,7 +226,7 @@ export async function submitDataEsignFull() {
 
   try {
     const res = await window.callAPI('simpanDataTtdNaitei', {
-      wa: window.currentKandidatWa,
+      wa: currentKandidatWa,
       ...payload,
     });
     if (res.success) {
@@ -250,9 +252,9 @@ export async function submitDataEsignFull() {
 
 // Panggil fungsi ini saat data selesai di-load (disisipkan di fungsi initApp)
 export async function renderStudentCard() {
-  if (!window.isKandidat) return;
-  let myData = window.ALL_CANDIDATES.find(
-    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
+  if (!isKandidat) return;
+  let myData = ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(currentKandidatWa),
   );
   if (!myData) return;
 
@@ -306,7 +308,7 @@ export async function renderStudentCard() {
     try {
       let base = typeof location !== 'undefined' && location.origin ? location.origin : '';
       let verifyUrl = base + '/?cv=' + encodeURIComponent(myData.idKandidat);
-      var qrData = typeof window.buatQrDataUrl === 'function' ? window.buatQrDataUrl(verifyUrl) : '';
+      var qrData = typeof buatQrDataUrl === 'function' ? buatQrDataUrl(verifyUrl) : '';
       document.getElementById('sc-qr').src =
         qrData ||
         'data:image/svg+xml;utf8,' +
@@ -391,12 +393,12 @@ export function jalankanMatchmaking() {
   let fSsw = document.getElementById('match-filter-ssw').checked;
 
   setTimeout(async () => {
-    if (typeof window.ensureAllCandidates === 'function') {
+    if (typeof ensureAllCandidates === 'function') {
       try {
-        await window.ensureAllCandidates();
+        await ensureAllCandidates();
       } catch (e) {}
     }
-    matchedCandidates = window.ALL_CANDIDATES.filter((c) => {
+    matchedCandidates = ALL_CANDIDATES.filter((c) => {
       // RULE 1: WAJIB Status Aktif & Belum Terdaftar di Job ini
       if (c.status.toUpperCase() !== 'AKTIF') return false;
       if ((c.idLoker || '').includes(currentMatchJobCode)) return false;
@@ -567,19 +569,11 @@ export async function kirimTawaranMassal() {
 // (renderStudentCard). initFsCanvas/getFsPointerPos/drawFs/dll tetap
 // internal — dipanggil file ini saja (addEventListener & helper).
 window.bukaModalTtd = bukaModalTtd;
-window.initFsCanvas = initFsCanvas;
 window.bukaLayarCanvas = bukaLayarCanvas;
-window.getFsPointerPos = getFsPointerPos;
-window.startDrawFs = startDrawFs;
-window.drawFs = drawFs;
-window.stopDrawFs = stopDrawFs;
 window.clearFsCanvas = clearFsCanvas;
-window.isCanvasBlank = isCanvasBlank;
 window.saveFsCanvas = saveFsCanvas;
 window.submitDataEsignFull = submitDataEsignFull;
-window.renderStudentCard = renderStudentCard;
-window.getPendidikanScore = getPendidikanScore;
 window.bukaMatchmaking = bukaMatchmaking;
 window.jalankanMatchmaking = jalankanMatchmaking;
 window.kirimTawaranMassal = kirimTawaranMassal;
-
+

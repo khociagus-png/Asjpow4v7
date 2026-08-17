@@ -15,6 +15,10 @@
 export const STACK = [
   '/api-client.js',
   '/i18n.js',
+  // Fase 3.5 Langkah 6: bridge masuk STACK — index/admin ikut punya
+  // window.PortalBridge + registerSeamAliases (hanya import core: api-client
+  // + i18n, di-dedupe esbuild; TIDAK meng-import modul halaman → aman).
+  '/js/core/bridge.js',
   '/js/upload-guard.js',
   '/js/01_public.js',
   // Fase 2: js/02_init.js dipecah per domain (state/theme/util/preview/nav/boot).

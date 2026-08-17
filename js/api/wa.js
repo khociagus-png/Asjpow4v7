@@ -1,3 +1,5 @@
+import { ALL_SCHEDULES, ALL_TUGAS, currentAdminName } from '../init/state.js';
+import { renderJadwal } from '../admin_ops/schedule.js';
 // 9. INTERAKSI BACKEND — DOMAIN JADWAL & TUGAS ADMIN (wa)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -10,7 +12,7 @@ export function renderTugas() {
   var list = document.getElementById('todo-list');
   if (!list) return;
   var html = '';
-  window.ALL_TUGAS.forEach((t) => {
+  ALL_TUGAS.forEach((t) => {
     var bg =
       t.status == 'BARU'
         ? 'bg-slate-800'
@@ -50,7 +52,7 @@ export function renderTugas() {
       delBtn +
       '</div></div>';
   });
-  if (window.ALL_TUGAS.length === 0)
+  if (ALL_TUGAS.length === 0)
     html =
       '<div class="text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Tidak ada tugas baru.</div>';
   list.innerHTML = html;
@@ -63,44 +65,44 @@ export function renderTugas() {
 export function upsertScheduleMemory(s) {
   if (!s || !s.idJadwal) return;
   var found = -1;
-  for (var k = 0; k < window.ALL_SCHEDULES.length; k++) {
+  for (var k = 0; k < ALL_SCHEDULES.length; k++) {
     if (
-      window.ALL_SCHEDULES[k] &&
-      (window.ALL_SCHEDULES[k].idJadwal === s.idJadwal || window.ALL_SCHEDULES[k].id === s.idJadwal)
+      ALL_SCHEDULES[k] &&
+      (ALL_SCHEDULES[k].idJadwal === s.idJadwal || ALL_SCHEDULES[k].id === s.idJadwal)
     ) {
       found = k;
       break;
     }
   }
-  if (found >= 0) window.ALL_SCHEDULES[found] = s;
-  else window.ALL_SCHEDULES.push(s);
+  if (found >= 0) ALL_SCHEDULES[found] = s;
+  else ALL_SCHEDULES.push(s);
 }
 export function removeScheduleMemory(id) {
   if (!id) return;
-  for (var k = window.ALL_SCHEDULES.length - 1; k >= 0; k--) {
-    var s = window.ALL_SCHEDULES[k];
+  for (var k = ALL_SCHEDULES.length - 1; k >= 0; k--) {
+    var s = ALL_SCHEDULES[k];
     if (s && (String(s.idJadwal) === String(id) || String(s.id || '') === String(id)))
-      window.ALL_SCHEDULES.splice(k, 1);
+      ALL_SCHEDULES.splice(k, 1);
   }
 }
 export function upsertTugasMemory(t) {
   if (!t || !t.id) return;
   var found = -1;
-  for (var k = 0; k < window.ALL_TUGAS.length; k++) {
-    if (window.ALL_TUGAS[k] && (window.ALL_TUGAS[k].id === t.id || window.ALL_TUGAS[k].idTugas === t.id)) {
+  for (var k = 0; k < ALL_TUGAS.length; k++) {
+    if (ALL_TUGAS[k] && (ALL_TUGAS[k].id === t.id || ALL_TUGAS[k].idTugas === t.id)) {
       found = k;
       break;
     }
   }
-  if (found >= 0) window.ALL_TUGAS[found] = t;
-  else window.ALL_TUGAS.push(t);
+  if (found >= 0) ALL_TUGAS[found] = t;
+  else ALL_TUGAS.push(t);
 }
 export function removeTugasMemory(id) {
   if (!id) return;
-  for (var k = window.ALL_TUGAS.length - 1; k >= 0; k--) {
-    var t = window.ALL_TUGAS[k];
+  for (var k = ALL_TUGAS.length - 1; k >= 0; k--) {
+    var t = ALL_TUGAS[k];
     if (t && (String(t.id) === String(id) || String(t.idTugas || '') === String(id)))
-      window.ALL_TUGAS.splice(k, 1);
+      ALL_TUGAS.splice(k, 1);
   }
 }
 export async function tambahTugasAdmin() {
@@ -111,7 +113,7 @@ export async function tambahTugasAdmin() {
   input.value = '';
   input.disabled = true;
   try {
-    const res = await window.callAPI('tambahTugasBaru', [text, window.currentAdminName]);
+    const res = await window.callAPI('tambahTugasBaru', [text, currentAdminName]);
     if (!res.success) {
       input.value = text;
       window.showToast(res.error || window.tr('alert.failed'), 'error');
@@ -128,7 +130,7 @@ export async function tambahTugasAdmin() {
 }
 export async function updateStatusTugas(id, st) {
   try {
-    const res = await window.callAPI('setTugasStatus', [id, st, window.currentAdminName]);
+    const res = await window.callAPI('setTugasStatus', [id, st, currentAdminName]);
     if (res.success) {
       upsertTugasMemory(res.tugas);
       if (typeof renderTugas === 'function') renderTugas();
@@ -140,7 +142,7 @@ export async function updateStatusTugas(id, st) {
 export async function hapusTugasAdmin(id) {
   if (!confirm('Hapus tugas ini?')) return;
   try {
-    const res = await window.callAPI('hapusTugas', [id, window.currentAdminName]);
+    const res = await window.callAPI('hapusTugas', [id, currentAdminName]);
     if (res.success) {
       removeTugasMemory(id);
       if (typeof renderTugas === 'function') renderTugas();
@@ -152,10 +154,10 @@ export async function hapusTugasAdmin(id) {
 export async function prosesHapusJadwal(r) {
   if (!confirm('Hapus Jadwal?')) return;
   try {
-    const res = await window.callAPI('hapusJadwal', [r, window.currentAdminName]);
+    const res = await window.callAPI('hapusJadwal', [r, currentAdminName]);
     if (res.success) {
       removeScheduleMemory(r);
-      if (typeof window.renderJadwal === 'function') window.renderJadwal();
+      if (typeof renderJadwal === 'function') renderJadwal();
     } else window.showToast(res.error || 'Gagal hapus jadwal', 'error');
   } catch (err) {
     window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
@@ -170,7 +172,7 @@ export async function submitJadwal(e) {
   btn.disabled = true;
   document.getElementById('global-loader').style.display = 'flex';
   const data = {
-    admin: window.currentAdminName,
+    admin: currentAdminName,
     nama: document.getElementById('j-nama').value,
     loker: document.getElementById('j-loker').value || '-',
     waktu: document.getElementById('j-waktu').value.replace('T', ' '),
@@ -185,7 +187,7 @@ export async function submitJadwal(e) {
       document.getElementById('form-tambah-jadwal').reset();
       document.getElementById('form-jadwal-container').classList.add('hidden');
       upsertScheduleMemory(res.schedule);
-      if (typeof window.renderJadwal === 'function') window.renderJadwal();
+      if (typeof renderJadwal === 'function') renderJadwal();
     } else window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
   } catch (err) {
     window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');

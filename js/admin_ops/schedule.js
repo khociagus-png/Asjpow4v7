@@ -1,3 +1,4 @@
+import { ALL_SCHEDULES, limitJad } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
 // Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
@@ -31,7 +32,7 @@ export function getStatusWaktu(waktuStr) {
 export function renderDashboardAgenda() {
   var list = document.getElementById('dash-agenda-list');
   if (!list) return;
-  var upcoming = window.ALL_SCHEDULES.filter((s) => {
+  var upcoming = ALL_SCHEDULES.filter((s) => {
     let diff = new Date(s.waktu.replace(' ', 'T')) - new Date();
     return !isNaN(diff) && diff > -86400000;
   })
@@ -61,8 +62,8 @@ export function renderJadwal() {
   var tb = document.getElementById('admin-jadwal-body');
   if (!tb) return;
   var html = '';
-  for (var i = 0; i < Math.min(window.ALL_SCHEDULES.length, window.limitJad); i++) {
-    var j = window.ALL_SCHEDULES[i];
+  for (var i = 0; i < Math.min(ALL_SCHEDULES.length, limitJad); i++) {
+    var j = ALL_SCHEDULES[i];
     var s = getStatusWaktu(j.waktu);
     var badgeWaktu = `<span class="px-2 py-0.5 rounded text-[9px] font-bold ml-2 ${s.bg} ${s.color}">${window.esc(s.text)}</span>`;
 
@@ -74,7 +75,7 @@ export function renderJadwal() {
                 <td data-label="Aksi" class="p-4 text-center"><button onclick="prosesHapusJadwal('${window.escJs(j.idJadwal)}')" aria-label="${window.tr('table.delete')}" class="px-3 py-1.5 bg-red-600 text-white rounded font-bold text-[10px]"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
   }
-  if (window.ALL_SCHEDULES.length > window.limitJad) {
+  if (ALL_SCHEDULES.length > limitJad) {
     html +=
       '<tr><td colspan="5" class="p-4 text-center"><button onclick="window.limitJad+=10; renderJadwal();" class="text-xs text-amber-400 font-bold">' +
       window.tr('form.txt_lebih_banyak') +
@@ -88,6 +89,5 @@ export function renderJadwal() {
 // HTML inline onclick (render/admin.js window.renderJadwal /
 // window.renderDashboardAgenda, api/wa.js window.renderJadwal, tombol
 // "limitJad+=10; renderJadwal();").
-window.getStatusWaktu = getStatusWaktu;
 window.renderDashboardAgenda = renderDashboardAgenda;
-window.renderJadwal = renderJadwal;
+window.renderJadwal = renderJadwal;

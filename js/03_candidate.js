@@ -1,3 +1,5 @@
+import { ACTIVE_PEMBERKASAN_NAMA, ACTIVE_PEMBERKASAN_WA, ALL_CANDIDATES, currentKandidatName, currentKandidatWa, isAdmin } from './init/state.js';
+import { previewFileInFrame } from './init/preview.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (bukaModalCvMini, bukaMasterEksternal, bukaMasterLengkapPortal,
 // bukaFormSiswa, bukaModalPemberkasan, prosesUploadPemberkasan, tutupPreviewDokumen),
@@ -10,8 +12,8 @@
 // Render/engine dipindah ke 03_engine.js saat god-object refactor.
 // ==========================================
 export function bukaModalCvMini() {
-  let myData = window.ALL_CANDIDATES.find(
-    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
+  let myData = ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(currentKandidatWa),
   );
   if (myData) {
     let cleanGender =
@@ -47,8 +49,8 @@ export async function prosesSimpanCvMini() {
   let pPhoto = await bacaFileBase64(document.getElementById('um-photo'), 'PHOTO');
 
   let payload = {
-    wa: window.normalizePhone(window.currentKandidatWa),
-    nama: window.currentKandidatName,
+    wa: window.normalizePhone(currentKandidatWa),
+    nama: currentKandidatName,
     gender: document.getElementById('um-gender').value,
     usia: document.getElementById('um-usia').value,
     tb: document.getElementById('um-tb').value,
@@ -85,16 +87,16 @@ export function isVipCatatan(catatan) {
 }
 
 export function bukaMasterEksternal() {
-  if (!window.currentKandidatWa) {
+  if (!currentKandidatWa) {
     window.showToast(window.tr('ui.toast_session_invalid_relogin'), 'error');
     return;
   }
-  let myData = window.ALL_CANDIDATES.find(
-    (c) => window.normalizePhone(c.wa) === window.normalizePhone(window.currentKandidatWa),
+  let myData = ALL_CANDIDATES.find(
+    (c) => window.normalizePhone(c.wa) === window.normalizePhone(currentKandidatWa),
   );
   let catatan = myData ? myData.catatanInt || '' : '';
   if (isVipCatatan(catatan)) {
-    bukaAiFormPortal('master', '', '', window.currentKandidatWa, window.currentKandidatName);
+    bukaAiFormPortal('master', '', '', currentKandidatWa, currentKandidatName);
   } else {
     window.showToast(window.tr('ui.toast_ai_cv_locked'), 'info');
   }
@@ -140,13 +142,13 @@ export function bukaMasterEksternalAdmin(waRaw, nama) {
 }
 
 export function bukaMasterLengkapPortal() {
-  if (!window.currentKandidatWa) {
+  if (!currentKandidatWa) {
     window.showToast(window.tr('ui.toast_session_invalid_relogin'), 'error');
     return;
   }
   bukaFormBridge(
     'generateLegacyMasterBridge',
-    [window.currentKandidatWa, window.currentKandidatName],
+    [currentKandidatWa, currentKandidatName],
     window.tr('ui.toast_master_form_url_missing'),
   );
 }
@@ -403,8 +405,8 @@ export function bukaPreviewDokumen(url) {
 
   // Satu pintu preview (02_init.js): gambar/PDF native, CSV -> render lokal,
   // Office (docx/pptx) -> MS Office Viewer, zip/dll -> pesan + tombol Unduh.
-  if (typeof window.previewFileInFrame === 'function') {
-    window.previewFileInFrame(frame, url);
+  if (typeof previewFileInFrame === 'function') {
+    previewFileInFrame(frame, url);
   } else if (!window.isPreviewableFile(url)) {
     frame.srcdoc = window.pesanPreviewTidakTersedia(url);
   } else {
@@ -429,7 +431,7 @@ export function tutupPreviewDokumen() {
 // Buka Modal Pemberkasan Sentral
 export function bukaModalPemberkasan(waTarget) {
   let cleanWa = window.normalizePhone(waTarget);
-  let c = window.ALL_CANDIDATES.find((kan) => window.normalizePhone(kan.wa) === cleanWa);
+  let c = ALL_CANDIDATES.find((kan) => window.normalizePhone(kan.wa) === cleanWa);
   if (!c) {
     window.showToast(window.tr('ui.toast_applicant_not_found'), 'error');
     return;
@@ -445,7 +447,7 @@ export function bukaModalPemberkasan(waTarget) {
     /LOLOS|PEMBERKASAN|MCU|MEDICAL|MEDIKAL|PARPOR|PASPOR|PASPORT|MATCH|TERIMA|SIAP/i.test(thp);
   let isTahap2 = /TTD|KONTRAK|VISA|COE|KTKLN|SISKOP|FLIGHT|BERANGKAT|TERBANG|TIKET|E-ID/i.test(thp);
 
-  if (!isTahap1 && !isTahap2 && !window.isAdmin) {
+  if (!isTahap1 && !isTahap2 && !isAdmin) {
     window.showToast(window.tr('ui.toast_upload_locked'), 'error');
     return;
   }
@@ -463,11 +465,11 @@ export function bukaModalPemberkasan(waTarget) {
     if (pT1) pT1.classList.remove('hidden');
     if (pT2) pT2.classList.remove('hidden');
     if (pBio) pBio.classList.remove('hidden');
-  } else if (isTahap1 || window.isAdmin) {
+  } else if (isTahap1 || isAdmin) {
     // Jika admin, biarkan terbuka semua untuk antisipasi
     if (pT1) pT1.classList.remove('hidden');
     if (pBio) pBio.classList.remove('hidden');
-    if (window.isAdmin) if (pT2) pT2.classList.remove('hidden');
+    if (isAdmin) if (pT2) pT2.classList.remove('hidden');
   }
 
   // Terapkan Checklist Dokumen (Sudah/Belum)
@@ -521,7 +523,7 @@ export function bukaModalPemberkasan(waTarget) {
 }
 
 export async function prosesUploadPemberkasan(tahap) {
-  if (!window.ACTIVE_PEMBERKASAN_WA)
+  if (!ACTIVE_PEMBERKASAN_WA)
     return window.showToast(window.tr('ui.toast_target_invalid'), 'error');
   let btnId = tahap === 1 ? 'btn-upload-t1' : 'btn-upload-t2';
   let btn = document.getElementById(btnId);
@@ -604,8 +606,8 @@ export async function prosesUploadPemberkasan(tahap) {
   const results = await Promise.allSettled(
     filesToUpload.map(async (f) => {
       const payload = {
-        wa: window.ACTIVE_PEMBERKASAN_WA,
-        nama: window.ACTIVE_PEMBERKASAN_NAMA,
+        wa: ACTIVE_PEMBERKASAN_WA,
+        nama: ACTIVE_PEMBERKASAN_NAMA,
         file: f.file,
         jenisBerkas: f.jenisBerkas,
       };
@@ -632,7 +634,7 @@ export async function prosesUploadPemberkasan(tahap) {
 }
 
 export async function prosesSimpanBiodataLengkap() {
-  if (!window.ACTIVE_PEMBERKASAN_WA)
+  if (!ACTIVE_PEMBERKASAN_WA)
     return window.showToast(window.tr('ui.toast_target_invalid'), 'error');
   let btn = document.getElementById('btn-submit-bio');
   if (!btn) return;
@@ -641,7 +643,7 @@ export async function prosesSimpanBiodataLengkap() {
   document.getElementById('global-loader').style.display = 'flex';
 
   let payload = {
-    wa: window.ACTIVE_PEMBERKASAN_WA,
+    wa: ACTIVE_PEMBERKASAN_WA,
     email: document.getElementById('bio-email').value,
     tempat_lahir: document.getElementById('bio-tmplahir').value,
     tgl_lahir: document.getElementById('bio-tgllahir').value,
@@ -691,15 +693,13 @@ window.bukaMasterEksternal = bukaMasterEksternal;
 window.bukaFormBridge = bukaFormBridge;
 window.bukaMasterEksternalAdmin = bukaMasterEksternalAdmin;
 window.bukaMasterLengkapPortal = bukaMasterLengkapPortal;
-window.bukaAiFormPortal = bukaAiFormPortal;
 window.bukaFormSiswa = bukaFormSiswa;
 window.cekUkuranFile = cekUkuranFile;
 window.cekEkstensiFile = cekEkstensiFile;
-window.normalizeGenderValue = normalizeGenderValue;
 window.bacaFileBase64 = bacaFileBase64;
 window.bukaPreviewDokumen = bukaPreviewDokumen;
 window.tutupPreviewDokumen = tutupPreviewDokumen;
 window.bukaModalPemberkasan = bukaModalPemberkasan;
 window.prosesUploadPemberkasan = prosesUploadPemberkasan;
 window.prosesSimpanBiodataLengkap = prosesSimpanBiodataLengkap;
-
+

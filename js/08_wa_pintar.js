@@ -1,3 +1,5 @@
+import { ALL_CANDIDATES, ALL_RIWAYAT_KANDIDAT, ALL_WA_TEMPLATES, CURRENT_WA_KANDIDAT, currentAdminName } from './init/state.js';
+import { ensureAllCandidates } from './api/candidates.js';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* di bridge bawah utk
 // HTML onclick (submitWaTemplate/batalEditWa/tutupPamflet), onclick string
 // render/admin.js + render/candidate.js + render/mail.js (renderWaTemplates,
@@ -12,7 +14,7 @@ export function renderWaTemplates() {
   var list = document.getElementById('wa-template-list');
   if (!list) return;
   var html = '';
-  window.ALL_WA_TEMPLATES.forEach((t) => {
+  ALL_WA_TEMPLATES.forEach((t) => {
     html +=
       '<div class="bg-black/40 border border-slate-700 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/50 transition">' +
       '<div>' +
@@ -33,7 +35,7 @@ export function renderWaTemplates() {
       '</div>' +
       '</div>';
   });
-  if (window.ALL_WA_TEMPLATES.length === 0)
+  if (ALL_WA_TEMPLATES.length === 0)
     html =
       '<div class="col-span-2 text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Belum ada template. Silakan buat di form sebelah kiri.</div>';
   list.innerHTML = html;
@@ -51,7 +53,7 @@ export async function submitWaTemplate(e) {
   var isi = document.getElementById('wa-isi').value;
 
   try {
-    const res = await window.callAPI('simpanWaTemplate', [id, nama, isi, window.currentAdminName]);
+    const res = await window.callAPI('simpanWaTemplate', [id, nama, isi, currentAdminName]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_wa_template_saved'), 'success');
       batalEditWa();
@@ -69,7 +71,7 @@ export async function submitWaTemplate(e) {
 }
 
 export function editWaTemplate(id) {
-  var t = window.ALL_WA_TEMPLATES.find((x) => x.id === id);
+  var t = ALL_WA_TEMPLATES.find((x) => x.id === id);
   if (!t) return;
   document.getElementById('wa-id').value = t.id;
   document.getElementById('wa-nama').value = t.nama;
@@ -90,7 +92,7 @@ export async function prosesHapusWa(id) {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
   try {
-    const res = await window.callAPI('hapusWaTemplate', [id, window.currentAdminName]);
+    const res = await window.callAPI('hapusWaTemplate', [id, currentAdminName]);
     if (res.success) window.refreshDataDinamis('wa');
     else {
       window.showToast(window.tr('ui.toast_error_prefix') + res.error, 'error');
@@ -135,12 +137,12 @@ export function injectModalWaPintar() {
 }
 
 export async function bukaModalWaPintar(idKan) {
-  if (typeof window.ensureAllCandidates === 'function') {
+  if (typeof ensureAllCandidates === 'function') {
     try {
-      await window.ensureAllCandidates();
+      await ensureAllCandidates();
     } catch (e) {}
   }
-  var c = window.ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
+  var c = ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
   if (!c) return window.showToast(window.tr('ui.toast_cand_not_found'), 'error');
 
   // Tulis via accessor bridge (state.js) — CURRENT_WA_KANDIDAT binding modul
@@ -155,7 +157,7 @@ export async function bukaModalWaPintar(idKan) {
   // DOM OPT: kumpulkan semua <option> ke satu string, injeksikan sekali
   // (dulu innerHTML += per template = tulis DOM berulang dalam loop).
   var optHtml = '<option value="">' + window.tr('ui.manual_or_template') + '</option>';
-  window.ALL_WA_TEMPLATES.forEach((t) => {
+  ALL_WA_TEMPLATES.forEach((t) => {
     optHtml += '<option value="' + t.id + '">' + t.nama + '</option>';
   });
   sel.innerHTML = optHtml;
@@ -171,12 +173,12 @@ export function terapkanTemplateWa() {
     return;
   }
 
-  var t = window.ALL_WA_TEMPLATES.find((x) => x.id === val);
-  if (!t || !window.CURRENT_WA_KANDIDAT) return;
+  var t = ALL_WA_TEMPLATES.find((x) => x.id === val);
+  if (!t || !CURRENT_WA_KANDIDAT) return;
 
   var msg = t.isi;
-  msg = msg.replace(/<<NAMA>>/gi, window.CURRENT_WA_KANDIDAT.nama);
-  msg = msg.replace(/<<JOB>>/gi, window.CURRENT_WA_KANDIDAT.idLoker || 'Umum');
+  msg = msg.replace(/<<NAMA>>/gi, CURRENT_WA_KANDIDAT.nama);
+  msg = msg.replace(/<<JOB>>/gi, CURRENT_WA_KANDIDAT.idLoker || 'Umum');
 
   ta.value = msg;
 }
@@ -208,7 +210,7 @@ export function renderRiwayatKandidat() {
   var html = '';
   var badge = document.getElementById('badge-notif-kandidat');
 
-  if (!window.ALL_RIWAYAT_KANDIDAT || window.ALL_RIWAYAT_KANDIDAT.length === 0) {
+  if (!ALL_RIWAYAT_KANDIDAT || ALL_RIWAYAT_KANDIDAT.length === 0) {
     html =
       '<div class="text-xs text-slate-500 text-center py-6 border border-dashed border-slate-700/50 rounded-xl">Anda belum pernah melamar job apapun.</div>';
     if (badge) badge.classList.add('hidden');
@@ -216,13 +218,13 @@ export function renderRiwayatKandidat() {
     // Update Angka Lonceng Notifikasi
     if (badge) {
       badge.classList.remove('hidden');
-      badge.innerText = window.ALL_RIWAYAT_KANDIDAT.length;
+      badge.innerText = ALL_RIWAYAT_KANDIDAT.length;
       badge.classList.add('animate-bounce'); // Efek mental saat load
       setTimeout(() => badge.classList.remove('animate-bounce'), 2000);
     }
 
     // Urutkan dari yang terbaru
-    let sorted = window.ALL_RIWAYAT_KANDIDAT.slice().sort(
+    let sorted = ALL_RIWAYAT_KANDIDAT.slice().sort(
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
     );
 
@@ -452,7 +454,6 @@ export function tutupPamflet() {
 // BRIDGE ESM → classic (bundel): alias window.* utk HTML onclick, onclick
 // string lintas file & onclick string internal (string dieval global).
 // `_riwayatLokerAktif` sengaja PRIVAT modul (tak ada pemakai luar).
-window.renderWaTemplates = renderWaTemplates;
 window.submitWaTemplate = submitWaTemplate;
 window.editWaTemplate = editWaTemplate;
 window.batalEditWa = batalEditWa;
@@ -462,10 +463,9 @@ window.bukaModalWaPintar = bukaModalWaPintar;
 window.terapkanTemplateWa = terapkanTemplateWa;
 window.kirimWaPintar = kirimWaPintar;
 window.pilihLokerRiwayat = pilihLokerRiwayat;
-window.renderRiwayatKandidat = renderRiwayatKandidat;
 window.bukaFotoPreview = bukaFotoPreview;
 window.tutupFotoPreview = tutupFotoPreview;
 window.bukaPamflet = bukaPamflet;
 window.tutupPamflet = tutupPamflet;
 
-// ==========================================
+// ==========================================

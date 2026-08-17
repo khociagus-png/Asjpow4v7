@@ -1,3 +1,4 @@
+import { DROPDOWNS } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -9,8 +10,8 @@
 // CHECK KAIWA → MENDAN → MENSETSU → LOLOS USER → MCU PARPOR → TTD KONTRAK
 // → PROSES COE → VISA → FLIGHT. Fallback ke daftar lama kalau config kosong.
 export function tahapanPipeline() {
-  if (window.DROPDOWNS && Array.isArray(window.DROPDOWNS.tahapan) && window.DROPDOWNS.tahapan.length)
-    return window.DROPDOWNS.tahapan;
+  if (DROPDOWNS && Array.isArray(DROPDOWNS.tahapan) && DROPDOWNS.tahapan.length)
+    return DROPDOWNS.tahapan;
   return [
     'CHECK KAIWA',
     'MENDAN',
@@ -85,6 +86,5 @@ export function tahapanStepIndex(thpRaw) {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (render/admin.js, api/*.js, HTML onclick, dll).
 window.tahapanPipeline = tahapanPipeline;
-window.tahapanMatchIdx = tahapanMatchIdx;
 window.getTahapanProgress = getTahapanProgress;
-window.tahapanStepIndex = tahapanStepIndex;
+window.tahapanStepIndex = tahapanStepIndex;

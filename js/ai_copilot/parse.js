@@ -1,3 +1,4 @@
+import { isAdmin } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -54,7 +55,7 @@ export function bacaFileBase64Front(file) {
 }
 
 export async function uploadDokumenBiodataAdmin(input) {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
@@ -136,5 +137,4 @@ export async function uploadDokumenBiodataAdmin(input) {
 // HTML inline onclick (pastikanBarParseAdminAi di-inject ke modal-admin-ai:
 // uploadDokumenBiodataAdmin) + admin.js window.pastikanBarParseAdminAi.
 window.pastikanBarParseAdminAi = pastikanBarParseAdminAi;
-window.bacaFileBase64Front = bacaFileBase64Front;
-window.uploadDokumenBiodataAdmin = uploadDokumenBiodataAdmin;
+window.uploadDokumenBiodataAdmin = uploadDokumenBiodataAdmin;

@@ -8,6 +8,11 @@
 // ==========================================
 // MASTER FULL — form master 5 langkah + gerbang login kandidat + auto-fill
 // ==========================================
+// ENTRY ESM (Fase 3.5 Langkah 6): halaman meng-import core lewat bridge.js
+// (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
+// registerSeamAliases — bukan window.X = X per baris.
+import { registerSeamAliases } from '../core/bridge.js';
+
     // Bahasa terpilih (asj_lang) ikut serta; label statis diterjemahkan onload.
     document.addEventListener('DOMContentLoaded', function () {
       var lb = document.getElementById('lang-btn-mf');
@@ -543,12 +548,15 @@
     // master-full.html + string onchange dinamis (toggleImaMade/onPekerjaanSelect/
     // onFamPekerjaanSelect) butuh global — bridge ini SEMPAT HILANG saat
     // konversi langkah 13, ketahuan lewat aktivasi no-undef + smoke (klik
-    // Langkah/Batal/Simpan bakal ReferenceError).
-    window.toggleImaMade = toggleImaMade;
-    window.gateLogin = gateLogin;
-    window.onSswSelect = onSswSelect;
-    window.onPekerjaanSelect = onPekerjaanSelect;
-    window.onFamPekerjaanSelect = onFamPekerjaanSelect;
-    window.handleFile = handleFile;
-    window.changeStep = changeStep;
-    window.submitMaster = submitMaster;
+    // Langkah/Batal/Simpan bakal ReferenceError). Kini SEMUA alias seam HTML
+    // diregistrasikan TERPUSAT via registerSeamAliases (js/core/bridge.js).
+    registerSeamAliases({
+        toggleImaMade,
+        gateLogin,
+        onSswSelect,
+        onPekerjaanSelect,
+        onFamPekerjaanSelect,
+        handleFile,
+        changeStep,
+        submitMaster,
+    });

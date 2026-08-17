@@ -199,9 +199,5 @@ export function pesanPreviewTidakTersedia(url) {
 // (03_candidate.js & admin_modal/cv.js window.previewFileInFrame,
 // 03_candidate.js & pages/share.js pesanPreviewTidakTersedia; VENDOR_V /
 // _vendorPromises tetap PRIVATE modul — tidak ada pemakai eksternal).
-window.muatVendorLib = muatVendorLib;
-window.renderExcelKeFrame = renderExcelKeFrame;
-window._pasangTimerPreviewFallback = _pasangTimerPreviewFallback;
 window.previewFileInFrame = previewFileInFrame;
-window.pesanLoadingPreview = pesanLoadingPreview;
-window.pesanPreviewTidakTersedia = pesanPreviewTidakTersedia;
+window.pesanPreviewTidakTersedia = pesanPreviewTidakTersedia;

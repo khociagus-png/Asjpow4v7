@@ -6,10 +6,10 @@
     <title>ASJ - Candidate Viewer</title>
   <link rel="manifest" href="/manifest.webmanifest?v=8f163ba13c">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=b90abf8d0a">
-    <!-- i18n.js = satu sumber terjemahan bersama index/admin. Dimuat lebih dulu
-         supaya pesan preview (tr 'ui.preview_unavailable' dll) konsisten di semua halaman. -->
-    <!-- Fase 3: core ESM — i18n.js sebagai module (deferred) -->
-    <script type="module" src="/i18n.js?v=esm1"></script>
+    <!-- Fase 3.5 L6: js/pages/share.js = entry ESM — meng-import core sendiri
+         lewat bridge.js (i18n + api-client = satu sumber terjemahan bersama
+         index/admin, pesan preview tr 'ui.preview_unavailable' dll konsisten),
+         jadi tag core terpisah tidak perlu lagi. -->
     
     <link rel="icon" type="image/png" href="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo-removebg-preview.webp">
     <link rel="shortcut icon" type="image/png" href="https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo-removebg-preview.webp">
@@ -225,7 +225,7 @@
     </div>
 
     <!-- Fase 2: inline script dipindah ke js/pages/share.js (isi byte-identik) -->
-    <script type="module" src="/js/pages/share.js?v=esm13"></script>
+    <script type="module" src="/js/pages/share.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm13"></script>
   <!-- Renderer dokumen lokal (dibutuhkan saat preview dibuka): Excel -> SheetJS,
        Word -> mammoth, PPT -> pptx-preview. Dimuat terakhir supaya tidak

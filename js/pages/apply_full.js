@@ -7,6 +7,11 @@
 // ==========================================
 // APPLY FULL — form lamaran loker 3 langkah + auto-fill riwayat + upload
 // ==========================================
+// ENTRY ESM (Fase 3.5 Langkah 6): halaman meng-import core lewat bridge.js
+// (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
+// registerSeamAliases — bukan window.X = X per baris.
+import { registerSeamAliases } from '../core/bridge.js';
+
     // FASE 3/4: field JOB/BIDANG/WA/NAMA dulu diisi server (GAS scriptlet)
     // dari e.parameter saat halaman dibuka. Sekarang dibaca dari query
     // string URL (?job=&bidang=&wa=&nama=), sumbernya sama persis (link
@@ -431,13 +436,17 @@
       }
     };
 
-    // BRIDGE ESM → classic/HTML inline: alias window.* utk handler HTML
-    // (onclick changeStep/submitApply, onblur formatInputWA) & onclick string
-    // yang di-generate window.onload (handleExtraFile). State $/currentStep/
+    // BRIDGE ESM → classic/HTML inline: SEMUA alias seam HTML↔JS
+    // diregistrasikan TERPUSAT lewat registerSeamAliases (js/core/bridge.js)
+    // — bukan window.X = X per baris. Mencakup handler HTML (onclick
+    // changeStep/submitApply, onblur formatInputWA) & onclick string yang
+    // di-generate window.onload (handleExtraFile). State $/currentStep/
     // oldPhotoUrl dll tetap PRIVATE modul (tak ada pemakai luar);
     // window.dynamicReqStr/window.dynamicExtraFiles sengaja tetap global
     // (dibaca onload & generateFormBridge).
-    window.formatInputWA = formatInputWA;
-    window.handleExtraFile = handleExtraFile;
-    window.changeStep = changeStep;
-    window.submitApply = submitApply;
+    registerSeamAliases({
+        formatInputWA,
+        handleExtraFile,
+        changeStep,
+        submitApply,
+    });

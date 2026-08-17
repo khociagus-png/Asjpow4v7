@@ -96,5 +96,4 @@ export async function salinSqlMigrasi() {
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (admin/index jalankanMigrasi / salinSqlMigrasi).
 window.jalankanMigrasi = jalankanMigrasi;
-window.renderMigrasiResults = renderMigrasiResults;
-window.salinSqlMigrasi = salinSqlMigrasi;
+window.salinSqlMigrasi = salinSqlMigrasi;

@@ -1,3 +1,4 @@
+import { isAdmin } from '../init/state.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
 // js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
 // dari 09_ai_copilot.js — perilaku tidak berubah.
@@ -12,7 +13,7 @@
 // ke Google Sheet kandidat, gaya dokumen wawancara kaigo yang dibagikan tim.
 // ==========================================
 export async function generateWawancaraModelAdmin() {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
@@ -68,7 +69,7 @@ export async function generateWawancaraModelAdmin() {
 export let lastAdminHasil = null;
 
 export async function lihatHasilWawancaraAdmin() {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }
@@ -135,7 +136,7 @@ export async function lihatHasilWawancaraAdmin() {
 }
 
 export async function updateBiodataDariHasilAdmin() {
-  if (!window.isAdmin) {
+  if (!isAdmin) {
     window.showToast(window.tr('ui.toast_admin_login_first'), 'error');
     return;
   }

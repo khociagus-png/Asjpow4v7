@@ -1,3 +1,7 @@
+import { ALL_CANDIDATES, ALL_CANDIDATES_TOTAL, ALL_JOBS, currentAdminName, currentKandidatWa } from '../init/state.js';
+import { renderLanguage } from '../01_public.js';
+import { renderAdminFull } from '../render/admin.js';
+import { normalizeGenderValue } from '../03_candidate.js';
 // 9. INTERAKSI BACKEND — DOMAIN KANDIDAT (candidates)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
@@ -37,7 +41,7 @@ export function cariKandidatManual(query) {
   }
 
   var seenWa = {};
-  var hasil = (window.ALL_CANDIDATES || [])
+  var hasil = (ALL_CANDIDATES || [])
     .filter(function (c) {
       if (!c.wa || seenWa[c.wa]) return false;
       var match =
@@ -74,7 +78,7 @@ export function cariKandidatManual(query) {
 }
 
 export function pilihKandidatManual(wa) {
-  var found = (window.ALL_CANDIDATES || []).find(function (c) {
+  var found = (ALL_CANDIDATES || []).find(function (c) {
     return c.wa === wa;
   });
   if (!found) return;
@@ -115,7 +119,7 @@ export function pilihKandidatManual(wa) {
 // Kalau kandidat sudah pernah upload JFT/SSW, field upload-nya di-gelapkan
 // (disabled) — cukup CV yang perlu diupload untuk lamaran baru.
 export function cekDokumenSebelumnya(wa) {
-  var c = (window.ALL_CANDIDATES || []).find(function (x) {
+  var c = (ALL_CANDIDATES || []).find(function (x) {
     return window.normalizePhone(String(x.wa || '')) === window.normalizePhone(String(wa || ''));
   });
   var setDok = function (inputId, statusId, label, punya) {
@@ -149,7 +153,7 @@ export function cekKandidatOtomatis() {
   var waEl = document.getElementById('k-wa');
   var wa = waEl ? String(waEl.value || '').replace(/\D/g, '') : '';
   if (!wa) return;
-  var c = (window.ALL_CANDIDATES || []).find(function (x) {
+  var c = (ALL_CANDIDATES || []).find(function (x) {
     return window.normalizePhone(String(x.wa || '')) === window.normalizePhone(wa);
   });
   if (!c) {
@@ -329,7 +333,7 @@ export function initLainRows(prefix) {
   var container = document.getElementById(prefix + '-lain-rows');
   if (!container) return;
   container.innerHTML = renderLainRow(prefix, 0);
-  if (typeof window.renderLanguage === 'function') window.renderLanguage();
+  if (typeof renderLanguage === 'function') renderLanguage();
 }
 
 // ===== BERKAS TERSIMPAN (Super Edit Kandidat) =====
@@ -389,7 +393,7 @@ export function renderBerkasTersimpan(berkas) {
     '<p class="text-[10px] font-bold text-emerald-400 mb-1.5"><i class="fas fa-check-circle mr-1"></i><span data-lang="ui.berkas_tersimpan">Berkas Sudah Tersimpan</span>:</p><div class="flex flex-wrap gap-1.5">' +
     chips +
     '</div>';
-  if (typeof window.renderLanguage === 'function') window.renderLanguage();
+  if (typeof renderLanguage === 'function') renderLanguage();
 }
 
 export function tambahBarisLain(prefix) {
@@ -397,7 +401,7 @@ export function tambahBarisLain(prefix) {
   if (!container) return;
   var idx = container.children.length;
   container.insertAdjacentHTML('beforeend', renderLainRow(prefix, idx));
-  if (typeof window.renderLanguage === 'function') window.renderLanguage();
+  if (typeof renderLanguage === 'function') renderLanguage();
 }
 
 export function hapusBarisLain(btn, prefix) {
@@ -596,7 +600,7 @@ export async function prosesUploadKandidat() {
 }
 
 export function bukaSuperEditKandidat(idKan) {
-  var c = window.ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
+  var c = ALL_CANDIDATES.find((x) => x.idKandidat === idKan);
   if (!c) return window.showToast(window.tr('ui.toast_data_not_found'), 'error');
 
   window.safeSet('super-nama-kandidat', c.nama);
@@ -614,7 +618,7 @@ export function bukaSuperEditKandidat(idKan) {
 
   // Normalisasi gender (DB campur kapital: perempuan/PEREMPUAN/Perempuan/Laki-laki)
   // supaya select yang opsi-nya hanya LAKI-LAKI/PEREMPUAN selalu terisi benar.
-  document.getElementById('edit-k-gender').value = window.normalizeGenderValue(c.gender);
+  document.getElementById('edit-k-gender').value = normalizeGenderValue(c.gender);
   document.getElementById('edit-k-tempat-lahir').value =
     c.tempatLahir && c.tempatLahir !== '-' ? c.tempatLahir : '';
   var editTgl = document.getElementById('edit-k-tgl-lahir');
@@ -675,13 +679,13 @@ export async function simpanSuperEditKandidat() {
   const payload = {
     rowIndex: document.getElementById('edit-k-row').value,
     wa: window.normalizePhone(document.getElementById('edit-k-wa').value),
-    admin: window.currentAdminName,
+    admin: currentAdminName,
     tahapan: document.getElementById('edit-k-tahapan').value,
     status: document.getElementById('edit-k-status').value,
     catatanExt: document.getElementById('edit-k-catatan').value,
     // Normalisasi ke format kanonikal supaya DB konvergen (dan CV AI
     // yang mengecek includes('PEREMPUAN') tidak salah render Laki-laki).
-    gender: window.normalizeGenderValue(document.getElementById('edit-k-gender').value),
+    gender: normalizeGenderValue(document.getElementById('edit-k-gender').value),
     tempatLahir: document.getElementById('edit-k-tempat-lahir').value.trim(),
     tglLahir: document.getElementById('edit-k-tgl-lahir').value,
     tb: document.getElementById('edit-k-tb').value,
@@ -739,7 +743,7 @@ export async function simpanSuperEditKandidat() {
             // Nama kandidat untuk folder storage diambil dari data
             // (payload tidak membawa nama) — folder harus cocok dengan
             // master kandidat supaya berkas bisa dipreview.
-            const eCand = (window.ALL_CANDIDATES || []).find(function (x) {
+            const eCand = (ALL_CANDIDATES || []).find(function (x) {
               return window.normalizePhone(String(x.wa || '')) === payload.wa;
             });
             const eNama = eCand && eCand.nama ? String(eCand.nama).toUpperCase() : 'KANDIDAT';
@@ -779,7 +783,7 @@ export async function prosesUploadRevisi() {
   let fileData = await window.bacaFileBase64(input, 'CV_REVISI');
   document.getElementById('global-loader').style.display = 'flex';
   try {
-    const res = await window.callAPI('simpanRevisiKandidat', [window.currentKandidatWa, fileData]);
+    const res = await window.callAPI('simpanRevisiKandidat', [currentKandidatWa, fileData]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_revisi_uploaded'), 'success');
       window.refreshDataDinamis();
@@ -816,7 +820,7 @@ export async function aksiGenerateQr(c, k) {
   const loader = document.getElementById('global-loader');
   if (loader) loader.style.display = 'flex';
 
-  var job = window.ALL_JOBS.find((j) => j.code === c);
+  var job = ALL_JOBS.find((j) => j.code === c);
   var jobTitle = job ? c + ' - ' + job.pekerjaan : c;
   var templateCv = job ? job.templateCv : '';
 
@@ -883,20 +887,20 @@ export async function fetchCandidatesPage(page, pageSize, q) {
 }
 export function appendCandidates(list) {
   var existing = new Set(
-    (window.ALL_CANDIDATES || []).map(function (c) {
+    (ALL_CANDIDATES || []).map(function (c) {
       return c.wa;
     }),
   );
   (list || []).forEach(function (c) {
     if (c && c.wa && !existing.has(c.wa)) {
-      window.ALL_CANDIDATES.push(c);
+      ALL_CANDIDATES.push(c);
       existing.add(c.wa);
     }
   });
 }
 export async function ensureAllCandidates() {
-  var loaded = (window.ALL_CANDIDATES || []).length;
-  var total = window.ALL_CANDIDATES_TOTAL || loaded;
+  var loaded = (ALL_CANDIDATES || []).length;
+  var total = ALL_CANDIDATES_TOTAL || loaded;
   if (loaded >= total) return;
 
   // Dapatkan halaman mana saja yang belum dimuat (mulai dari halaman 2 jika getAppData memuat hal 1)
@@ -926,15 +930,15 @@ export async function ensureAllCandidates() {
   }
 }
 export async function muatLebihKandidat() {
-  var loaded = (window.ALL_CANDIDATES || []).length;
+  var loaded = (ALL_CANDIDATES || []).length;
   var page = Math.floor(loaded / 50) + 1;
   try {
     const res = await fetchCandidatesPage(page, 50, '');
     appendCandidates(res.candidates);
     window.ALL_CANDIDATES_TOTAL = res.total;
-    if (typeof window.renderAdminFull === 'function') window.renderAdminFull();
+    if (typeof renderAdminFull === 'function') renderAdminFull();
     window.showToast(
-      window.tr('ui.toast_cand_label') + window.ALL_CANDIDATES.length + window.tr('ui.toast_of_sep') + res.total,
+      window.tr('ui.toast_cand_label') + ALL_CANDIDATES.length + window.tr('ui.toast_of_sep') + res.total,
       'success',
     );
   } catch (err) {
@@ -948,32 +952,16 @@ export async function muatLebihKandidat() {
 // render/*, 03_candidate.js, 08_wa_pintar.js, 10_cv_rirekisho.js,
 // 12_esign_match.js, admin_ops/candidates.js (window.ensureAllCandidates).
 window.bukaModalTambahKandidat = bukaModalTambahKandidat;
-window.cariKandidatManual = cariKandidatManual;
 window.pilihKandidatManual = pilihKandidatManual;
-window.cekDokumenSebelumnya = cekDokumenSebelumnya;
 window.cekKandidatOtomatis = cekKandidatOtomatis;
 window.tandaiFileDipilih = tandaiFileDipilih;
-window.setUploadStatus = setUploadStatus;
-window.markUploadResults = markUploadResults;
-window.resetUploadStatus = resetUploadStatus;
-window.renderLainRow = renderLainRow;
-window.initLainRows = initLainRows;
-window.renderBerkasTersimpan = renderBerkasTersimpan;
 window.tambahBarisLain = tambahBarisLain;
 window.hapusBarisLain = hapusBarisLain;
-window.collectLainRows = collectLainRows;
-window.cekSemuaUkuranFile = cekSemuaUkuranFile;
-window.cekSemuaEkstensiFile = cekSemuaEkstensiFile;
-window.cekSemuaFileModal = cekSemuaFileModal;
 window.prosesUploadKandidat = prosesUploadKandidat;
 window.bukaSuperEditKandidat = bukaSuperEditKandidat;
 window.simpanSuperEditKandidat = simpanSuperEditKandidat;
 window.prosesUploadRevisi = prosesUploadRevisi;
-window.buatQrDataUrl = buatQrDataUrl;
 window.aksiGenerateQr = aksiGenerateQr;
 window.tutupModalQr = tutupModalQr;
-window.filterCbx = filterCbx;
-window.fetchCandidatesPage = fetchCandidatesPage;
-window.appendCandidates = appendCandidates;
 window.ensureAllCandidates = ensureAllCandidates;
-window.muatLebihKandidat = muatLebihKandidat;
+window.muatLebihKandidat = muatLebihKandidat;

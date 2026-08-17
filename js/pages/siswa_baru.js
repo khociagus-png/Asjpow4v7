@@ -7,6 +7,11 @@
 // ==========================================
 // SISWA BARU — pendaftaran siswa via chat AI + upload berkas + draft
 // ==========================================
+// ENTRY ESM (Fase 3.5 Langkah 6): halaman meng-import core lewat bridge.js
+// (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
+// registerSeamAliases — bukan window.X = X per baris.
+import { registerSeamAliases } from '../core/bridge.js';
+
     export function $(id) { return document.getElementById(id); }
     var chatHistory = []; 
     var candidateData = {}; 
@@ -365,14 +370,18 @@
       }
     }
 
-    // BRIDGE ESM → classic/HTML inline: alias window.* utk handler yang
-    // dipanggil dari atribut HTML (body onload / onkeypress / onchange /
-    // onclick). $/escapeHtml/chatHistory/candidateData/uploadedFiles dll
-    // tetap PRIVATE modul (tak ada pemakai luar).
-    window.$ = $;
-    window.switchTab = switchTab;
-    window.initApp = initApp;
-    window.handleEnter = handleEnter;
-    window.sendMessage = sendMessage;
-    window.handleDocUpload = handleDocUpload;
-    window.saveToDatabase = saveToDatabase;
+    // BRIDGE ESM → classic/HTML inline: SEMUA alias seam HTML↔JS
+    // diregistrasikan TERPUSAT lewat registerSeamAliases (js/core/bridge.js)
+    // — bukan window.X = X per baris. Mencakup handler yang dipanggil dari
+    // atribut HTML (body onload / onkeypress / onchange / onclick).
+    // $/escapeHtml/chatHistory/candidateData/uploadedFiles dll tetap PRIVATE
+    // modul (tak ada pemakai luar).
+    registerSeamAliases({
+        $,
+        switchTab,
+        initApp,
+        handleEnter,
+        sendMessage,
+        handleDocUpload,
+        saveToDatabase,
+    });

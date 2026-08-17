@@ -112,7 +112,5 @@ if (typeof window !== 'undefined') {
   window.isGood = isGood;
   window.makeV = makeV;
   window.fmtMonthYearJp = fmtMonthYearJp;
-  window.asArr = asArr;
   window.mergeArrRiwayat = mergeArrRiwayat;
-  window.helpers_cv = helpers_cv;
-}
+}
