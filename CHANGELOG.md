@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-08-17 — `d68c6ce` 🚀 PWA selalu versi terbaru: auto-update SW + auto-hapus cache lama + header cache Netlify
+
+### Ringkasan
+
+- **pwa.js**: register SW dengan `updateViaCache:'none'` (selalu re-check sw.js ke jaringan, tidak pakai HTTP cache), cek update otomatis tiap 60 dtk & saat tab fokus, kirim `SKIP_WAITING` ke SW baru agar langsung aktif, toast + auto-reload saat versi baru mengambil alih.
+- **sw.js**: listener pesan `SKIP_WAITING`; cache versi lama dihapus otomatis di `activate` (VERSION baru = cache baru, lama dibuang).
+- **netlify.toml**: `/sw.js` & `/*.html` → `Cache-Control: no-cache` (revalidasi tiap load); `/assets/app-*.js` → `public, max-age=31536000, immutable` (hash unik per konten).
+- **5 halaman standalone** (ai_form/apply-full/master-full/share/siswa-baru): bump `/pwa.js?v=esm13 → esm15`.
+- **Verifikasi**: build idempotent (bundle `app-2a72296550.js`), test 148/148, preview & URL publik HTTP 200.
+
 ## 2026-08-17 — `dce8da8` 🎨 Fix kontras tema light halaman standalone + keterbacaan label AI CV
 
 ### Ringkasan

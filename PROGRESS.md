@@ -8,6 +8,22 @@
 
 ---
 
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `d68c6ce`
+
+### 🚀 PWA selalu versi terbaru: auto-update service worker + auto-hapus cache lama + header cache Netlify
+
+**Masalah user:** preview terus menampilkan versi lama walau file sudah ter-update — browser memakai service worker + cache lama (parah saat server preview mati/502: SW fallback ke shell cache lama → fitur baru seperti "undang grup wali" tidak kelihatan).
+
+**Fix berlapis (berlaku di preview & Netlify):**
+- `pwa.js`: registrasi SW pakai `updateViaCache:'none'` (browser selalu re-check sw.js ke jaringan), cek update otomatis tiap 60 dtk + saat tab kembali fokus, kirim `SKIP_WAITING` ke SW baru (langsung aktif tanpa tunggu tab ditutup), toast "Versi terbaru tersedia — memuat ulang…" sebelum auto-reload.
+- `sw.js`: listener pesan `SKIP_WAITING`; cache versi lama tetap dihapus otomatis di `activate` (VERSION baru = cache baru, yang lama dibuang).
+- `netlify.toml`: header cache baru — `/sw.js` & `/*.html` = `no-cache` (revalidasi tiap load), `/assets/app-*.js` = `immutable` (URL unik per konten → update = URL baru).
+- 5 halaman standalone: bump `/pwa.js?v=esm13` → `esm15` (bust cache).
+
+**Verifikasi:** build idempotent (bundle `app-2a72296550.js`), test **148/148**, prettier/lint bersih, preview serve bundel/sw.js/HTML terbaru, URL publik HTTP 200. Catatan: server preview sempat mati lagi (pola sandbox tidak stabil) — dihidupkan ulang via `scripts/preview-watchdog.sh`.
+
+---
+
 ## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `dce8da8`
 
 ### 🎨 Fix kontras tema light halaman standalone + keterbacaan label AI CV
