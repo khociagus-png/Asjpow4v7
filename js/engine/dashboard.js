@@ -1,3 +1,4 @@
+import { tr } from '../../i18n.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -120,7 +121,7 @@ export function renderProgresPemberkasan(myData) {
   var listEl = document.getElementById('prog-berkas-list');
   if (bar) bar.style.width = pct + '%';
   if (pctEl) pctEl.textContent = pct + '%';
-  if (txtEl) txtEl.textContent = done + window.tr('ui.docs_count');
+  if (txtEl) txtEl.textContent = done + tr('ui.docs_count');
   if (listEl) listEl.innerHTML = listHtml;
 
   // Biodata: 18 field yang tersedia (19 di antaranya; pasport/coe dibagi jadi
@@ -134,11 +135,11 @@ export function renderProgresPemberkasan(myData) {
   if (badge) {
     if (bioFull)
       badge.innerHTML =
-        '<i class="fas fa-check-circle mr-0.5"></i> ' + window.tr('ui.biodata_complete') + '';
+        '<i class="fas fa-check-circle mr-0.5"></i> ' + tr('ui.biodata_complete') + '';
     else
       badge.innerHTML =
         '<i class="fas fa-exclamation-circle mr-0.5"></i> ' +
-        window.tr('ui.biodata_partial') +
+        tr('ui.biodata_partial') +
         bioDone +
         '/18';
     badge.className =
@@ -193,18 +194,18 @@ export function kalkulasiProgress(myData) {
 
   badges +=
     '<i class="fas fa-medal text-orange-500 text-2xl md:text-3xl drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]" title="' +
-    window.tr('ui.badge_bronze') +
+    tr('ui.badge_bronze') +
     '"></i>';
   if (progMini === 100) {
     badges +=
       '<i class="fas fa-award text-slate-300 text-2xl md:text-3xl drop-shadow-[0_0_10px_rgba(203,213,225,0.8)]" title="' +
-      window.tr('ui.badge_silver') +
+      tr('ui.badge_silver') +
       '"></i>';
   }
   if (progMaster === 100) {
     badges +=
       '<i class="fas fa-crown text-yellow-400 text-3xl md:text-4xl drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" title="' +
-      window.tr('ui.badge_gold') +
+      tr('ui.badge_gold') +
       '"></i>';
   }
   if (isVip) {
@@ -215,7 +216,7 @@ export function kalkulasiProgress(myData) {
       '<img src="' +
       window.esc(logoSrc) +
       '" class="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-[0_0_15px_rgba(52,211,153,0.8)] rounded-full border border-emerald-500/50" title="' +
-      window.tr('ui.badge_official') +
+      tr('ui.badge_official') +
       '">';
   }
 
@@ -230,7 +231,7 @@ export function kalkulasiProgress(myData) {
 
   let namaHeader = document.getElementById('k-dash-nama');
   if (namaHeader) {
-    namaHeader.innerHTML = window.tr('candidate.welcome') + ', ' + window.esc(myData.nama) + badges;
+    namaHeader.innerHTML = tr('candidate.welcome') + ', ' + window.esc(myData.nama) + badges;
   }
 
   let progMsg = document.getElementById('prog-msg');
@@ -238,16 +239,16 @@ export function kalkulasiProgress(myData) {
     if (isVip && progMaster === 100 && progMini === 100) {
       progMsg.innerHTML =
         '<span class="text-amber-400 font-black tracking-widest"><i class="fas fa-star mr-1"></i> ' +
-        window.tr('ui.perfect_student') +
+        tr('ui.perfect_student') +
         ' <i class="fas fa-star ml-1"></i></span>';
     } else if (progMaster === 100 && progMini === 100) {
       progMsg.innerHTML =
-        '<span class="text-yellow-400 font-bold">' + window.tr('ui.profile_100') + '</span>';
+        '<span class="text-yellow-400 font-bold">' + tr('ui.profile_100') + '</span>';
     } else if (progMini === 100) {
       progMsg.innerHTML =
-        '<span class="text-slate-300 font-bold">' + window.tr('ui.profile_silver_next') + '</span>';
+        '<span class="text-slate-300 font-bold">' + tr('ui.profile_silver_next') + '</span>';
     } else {
-      progMsg.innerHTML = '' + window.tr('ui.profile_incomplete') + '';
+      progMsg.innerHTML = '' + tr('ui.profile_incomplete') + '';
     }
   }
 }

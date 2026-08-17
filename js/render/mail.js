@@ -1,3 +1,4 @@
+import { tr } from '../../i18n.js';
 // 7. FUNGSI RENDER — DOMAIN MAIL INBOX (tabel lamaran admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -55,27 +56,27 @@ export function renderMailFilterUI() {
     };
     el.innerHTML =
       '<span class="text-sky-400">' +
-      window.tr('ui.waiting_label') +
+      tr('ui.waiting_label') +
       count('MENUNGGU') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-violet-400">' +
-      window.tr('ui.update_label') +
+      tr('ui.update_label') +
       count('UPDATE') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-amber-400">' +
-      window.tr('ui.review_label') +
+      tr('ui.review_label') +
       count('REVIEW') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-emerald-400">' +
-      window.tr('ui.lulus_label') +
+      tr('ui.lulus_label') +
       count('LULUS') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-red-400">' +
-      window.tr('ui.gagal_label') +
+      tr('ui.gagal_label') +
       count('GAGAL') +
       '</span> &nbsp;|&nbsp; ' +
       '<span class="text-slate-300">' +
-      window.tr('ui.total_label') +
+      tr('ui.total_label') +
       count('ALL') +
       '</span>';
   }
@@ -188,7 +189,7 @@ export function renderFormInbox() {
       '<button onclick="hapusFormMail(' +
       f.rowIndex +
       ')" class="px-2 py-1.5 bg-slate-700 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
-      window.tr('ui.delete_mail') +
+      tr('ui.delete_mail') +
       '"><i class="fas fa-trash-alt"></i></button>';
     if (MAIL_BUCKET(st) === 'UPDATE') {
       // Baris UPDATE: tampilkan ringkasan apa yang berubah + tombol
@@ -203,9 +204,9 @@ export function renderFormInbox() {
         '<button onclick="tandaiDibacaForm(' +
         f.rowIndex +
         ')" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
-        window.tr('ui.mark_read_label') +
+        tr('ui.mark_read_label') +
         '"><i class="fas fa-check-double mr-1"></i>' +
-        window.tr('ui.mark_read_label') +
+        tr('ui.mark_read_label') +
         '</button> ' +
         deleteBtn +
         '</div>';
@@ -215,7 +216,7 @@ export function renderFormInbox() {
         esc(
           f.feedback ||
             f.keterangan ||
-            (MAIL_BUCKET(st) === 'GAGAL' ? window.tr('ui.lamaran_ditolak') : window.tr('ui.lamaran_disetujui')),
+            (MAIL_BUCKET(st) === 'GAGAL' ? tr('ui.lamaran_ditolak') : tr('ui.lamaran_disetujui')),
         ) +
         '</div>' +
         deleteBtn +
@@ -228,9 +229,9 @@ export function renderFormInbox() {
           ? '<button onclick="prosesReviewForm(' +
             f.rowIndex +
             ')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
-            window.tr('ui.set_review') +
+            tr('ui.set_review') +
             '">' +
-            window.tr('form.txt_review_admin') +
+            tr('form.txt_review_admin') +
             '</button> '
           : '';
       actionCell =
@@ -239,16 +240,16 @@ export function renderFormInbox() {
         '<button onclick="prosesApproveForm(' +
         f.rowIndex +
         ')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
-        window.tr('ui.set_pass') +
+        tr('ui.set_pass') +
         '">' +
-        window.tr('form.txt_lulus') +
+        tr('form.txt_lulus') +
         '</button> ' +
         '<button onclick="prosesRejectForm(' +
         f.rowIndex +
         ')" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[10px] font-bold shadow transition" title="' +
-        window.tr('ui.set_fail') +
+        tr('ui.set_fail') +
         '">' +
-        window.tr('form.txt_gagal') +
+        tr('form.txt_gagal') +
         '</button> ' +
         deleteBtn +
         '</div>';
@@ -265,32 +266,32 @@ export function renderFormInbox() {
       ck +
       ' aria-label="Pilih" class="w-4 h-4 accent-rose-500 cursor-pointer"></td>' +
       '<td data-label="' +
-      window.tr('table.timestamp') +
+      tr('table.timestamp') +
       '" class="p-4 text-[10px] text-slate-400 whitespace-nowrap">' +
       (f.timestamp ? String(f.timestamp).substring(0, 10) : '-') +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.job_code') +
+      tr('table.job_code') +
       '" class="p-4 font-mono text-sky-300 font-bold text-xs">' +
       esc(f.code) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.category') +
+      tr('table.category') +
       '" class="p-4 text-[10px] font-bold text-amber-300 uppercase">' +
       esc(window.trOption(f.kategori || '-')) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.applicant_name') +
+      tr('table.applicant_name') +
       '" class="p-4 font-bold text-white text-xs whitespace-nowrap">' +
       esc(f.nama) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.wa_num') +
+      tr('table.wa_num') +
       '" class="p-4 text-xs text-emerald-400">' +
       esc(f.wa) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.status') +
+      tr('table.status') +
       '" class="p-4 text-center"><span class="px-2 py-1 rounded text-[9px] font-bold ' +
       badgeClass +
       '">' +
@@ -305,13 +306,13 @@ export function renderFormInbox() {
         : '') +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.doc_folder') +
+      tr('table.doc_folder') +
       '" class="rt-full p-4 text-center">' +
       '<div class="flex flex-wrap gap-1 justify-center">' +
       '<a href="' +
       esc(f.folderUrl) +
       '" target="_blank" aria-label="' +
-      window.tr('table.doc_folder') +
+      tr('table.doc_folder') +
       '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' +
       btnPhoto +
       btnJft +
@@ -321,7 +322,7 @@ export function renderFormInbox() {
       '</div>' +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.action_review') +
+      tr('table.action_review') +
       '" class="rt-full p-4 text-center">' +
       actionCell +
       '</td>' +

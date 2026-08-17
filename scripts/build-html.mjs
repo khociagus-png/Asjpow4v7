@@ -19,10 +19,13 @@
 // =============================================================================
 
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
+// Halaman bundel + partial modal — satu sumber kebenaran:
+// scripts/module-registry.mjs.
+import { BUNDLE_PAGES, MODAL_PARTIAL } from './module-registry.mjs';
 
 const ROOT = process.cwd();
-const PAGES = ['admin.html', 'index.html'];
-const PARTIAL_PATH = `${ROOT}/partials/modals-shared.html`;
+const PAGES = BUNDLE_PAGES;
+const PARTIAL_PATH = `${ROOT}/${MODAL_PARTIAL}`;
 const ASSET_PATH = `${ROOT}/assets/modals-shared.html`;
 const START = '<!--SHARED_MODALS_START-->';
 const END = '<!--SHARED_MODALS_END-->';

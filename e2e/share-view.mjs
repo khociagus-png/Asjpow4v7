@@ -8,19 +8,10 @@
 //    launch (mis. runtime bun) — jangan sampai menggantung.
 // Jalankan: bun e2e/share-view.mjs   (BASE_URL & SHARE_JOB bisa di-override)
 // =============================================================
-import { chromium } from 'playwright';
+import { check, waitFor, launchBrowser, finish } from './harness.mjs';
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
 const JOB = process.env.SHARE_JOB || 'TG633ASJ';
-
-let failures = 0;
-function check(name, cond, extra = '') {
-  if (cond) console.log(`  ✅ ${name}`);
-  else {
-    console.log(`  ❌ ${name} ${extra}`);
-    failures++;
-  }
-}
 
 // ---- 1. API check ----------------------------------------------------------
 const api = await fetch(`${BASE}/api/share-data?job=${encodeURIComponent(JOB)}`);
@@ -50,7 +41,7 @@ check(
 // ---- 2. Browser check (best-effort) ----------------------------------------
 let browser = null;
 try {
-  browser = await chromium.launch({ timeout: 20000 });
+  browser = await launchBrowser();
 } catch (e) {
   console.log(`  ⚠ browser check dilewati (playwright tidak bisa launch di runtime ini): ${String(e.message || e).slice(0, 100)}`);
 }
@@ -98,5 +89,4 @@ if (browser) {
   await browser.close();
 }
 
-console.log(`\n${failures === 0 ? '🎉 SEMUA LULUS' : `💥 ${failures} GAGAL`}`);
-process.exit(failures === 0 ? 0 : 1);
+finish();

@@ -499,12 +499,55 @@ Ubah bundel dari *concat 45 file* menjadi **bundle graph modul** (esbuild `bundl
 
 ---
 
+## ⏳ FASE 3.5 — selesaikan jembatan `window.*` → import nyata (Kandidat 1 arsitektur)
+
+> Konteks: Fase 3 mengubah semua file jadi ESM, tapi panggilan lintas modul masih
+> lewat `window.*` + guard `typeof` (±209 kemunculan) — tiap modul punya 2 antarmuka.
+> Sejak Langkah 14 (esbuild bundle mode), modul BISA saling `import`.
+> **Satu langkah = satu commit** (aturan WORKFLOW §7); tiap langkah: node --check →
+> lint → test → build → E2E → hard refresh preview.
+
+- [x] **Langkah 1 — core → util/state (SELESAI 2026-08-17)**: `js/04_auth.js`,
+      `engine/{dashboard,guards,init}`, `render/{public,admin,candidate,share,mail}`
+      ganti `window.callAPI`/`window.tr`/`window.showToast`/`window.safeSet` jadi
+      `import` nyata (api-client.js, i18n.js, init/util.js) — 19 referensi, word-boundary
+      (`window.trOption`/`trOptionId` TIDAK tersentuh). Verifikasi: lint 0/12 ✓ · test
+      131/131 ✓ · build idempoten ✓ · E2E login/upload/biodata/share SEMUA LULUS ✓.
+- [ ] **Langkah 2 — state accessor**: pembaca state (`window.ALL_JOBS`, `window.isAdmin`, …)
+      ganti `import` binding + accessor — tulis tetap lewat `window.*` accessor (pola §3.2).
+- [ ] **Langkah 3 — render lintas domain**: `window.renderAdminFull`/`renderFormInbox`/
+      `renderJadwal` dll → import dari `render/*`.
+- [ ] **Langkah 4 — api lintas domain**: `window.ensureAllCandidates`/`upsertCandidateMemory`
+      → import dari `api/*`.
+- [ ] **Langkah 5 — helper classic**: `window.cekUploadFile`/`previewFileInFrame`/
+      `normalizeGenderValue` → import dari modul pemiliknya.
+- [ ] **Langkah 6 — fasad PortalBridge**: alias yang tersisa (hanya pemakai HTML onclick/
+      onchange) dipindah ke satu registrasi terpusat di `js/core/bridge.js`; hapus alias
+      window.* per-modul yang tidak lagi dipakai HTML.
+- [ ] Kriteria selesai per langkah: scan `window\.\w+\s*=` di `js/` menurun; `no-undef`
+      tetap 0 error; `check:globals` nol kolisi; E2E SEMUA LULUS.
+
 ## ✅ FASE 4 — i18n modular (i18n.js 2631 baris) 🌐
 
-- [ ] `i18n/core.js`: `tr()`, fallback ke `id`, `setLanguage`, deteksi bahasa, render `data-lang` (logika — kecil).
-- [ ] `i18n/locales/id.js` + `i18n/locales/jp.js`: **hanya data**, dipecah per domain (`common`, `auth`, `public`, `candidate`, `admin`, `cv`, `ai`, `wa`, `mail`).
+- [x] **Pemisahan per bahasa SELESAI (2026-08-17)**: `i18n/core.js` (logika —
+      CURRENT_LANG + accessor window.CURRENT_LANG + LANG komposisi + OPTION_TRANSLATIONS
+      + trOption/trOptionId + tr + renderLanguageLight + toggleFormLanguage +
+      ekstensi `LANG.{id,jp}.form` yang menempel pasca-deklarasi) + `i18n/locales/id.js`
+      (852 baris data) + `i18n/locales/jp.js` (848 baris). `i18n.js` = agregat
+      re-export `export * from './i18n/core.js'` + alias window.* — SEMUA pemuat
+      (bundel, bridge, halaman standalone) tidak berubah. ⚠️ `Object.defineProperty`
+      CURRENT_LANG WAJIB di core (bukan agregat): agregat tidak bisa men-assign
+      binding import (error esbuild). Verifikasi: lint 0/12 ✓ · test 131 ✓ · build
+      idempoten ✓ · E2E SEMUA LULUS ✓ · toggle JP/ID di browser ✓.
+- [ ] **Langkah lanjutan (belum):** pecah locales per domain (`common`, `auth`, `public`, …)
+      — sekarang 1 file data per bahasa; split per domain tinggal mekanis.
 - [ ] Lint key duplikat (yang sudah ada di `eslint.config.js`) tetap jalan lintas file.
-- [ ] Test: setiap key `id` punya pasangan `jp` atau dijamin fallback `id` (regresi i18n).
+- [x] **Test paritas SELESAI** (2026-08-17, sesi pull-terbaru-semua): `i18n.test.js` —
+      setiap key `id` punya pasangan `jp`, tidak ada key yatim, `tr()` tidak mengembalikan
+      key mentah. 🐛 Fix ketahuan: `ui.toast_wa_format` TIDAK punya terjemahan jp
+      (user JP melihat key mentah) — ditambahkan. ⚠️ Temuan: `tr()` TIDAK fallback ke
+      `id` (AGENTS.md klaim fallback — kode mengembalikan key saat missing di bahasa
+      aktif); test paritas menjaga jp tetap lengkap.
 
 ---
 

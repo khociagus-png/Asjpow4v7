@@ -1,3 +1,4 @@
+import { tr } from '../../i18n.js';
 // 7. FUNGSI RENDER — DOMAIN PUBLIK (index.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -60,7 +61,7 @@ export function renderPublicFilterUI() {
       '<i class="fas ' +
       defs[st].icon +
       ' mr-1"></i> ' +
-      window.tr(defs[st].key) +
+      tr(defs[st].key) +
       ' <span class="px-1.5 py-0.5 rounded-full text-[9px] ml-0.5 font-black ' +
       (active
         ? 'bg-white/30 text-white'
@@ -102,7 +103,7 @@ export function renderPublicFiltered() {
     var j = sourceArray[i];
 
     let statusKey = j.status.toLowerCase().replace(/[^a-z0-9]/g, '');
-    let translatedStatus = window.tr('status.' + statusKey);
+    let translatedStatus = tr('status.' + statusKey);
     if (translatedStatus === 'status.' + statusKey) translatedStatus = j.status;
 
     // FIX: tombol Lamar ikut tertutup kalau tahapan job sudah berjalan
@@ -110,7 +111,7 @@ export function renderPublicFiltered() {
     var tutupLamar = window.jobTutupUntukLamar(j);
     var btnLamar = tutupLamar
       ? '<button disabled class="w-full sm:w-auto px-4 py-2.5 bg-slate-600 rounded-lg text-white text-[10px] font-bold opacity-50 cursor-not-allowed shadow-inner border border-slate-500">' +
-        window.tr('button.closed') +
+        tr('button.closed') +
         '</button>'
       : '<button onclick="lamarJob(\'' +
         window.escJs(j.code) +
@@ -119,7 +120,7 @@ export function renderPublicFiltered() {
         "', '" +
         window.escJs(j.dokumenShare || '') +
         '\')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-[0_4px_15px_rgba(5,150,105,0.4)] transition text-[11px] font-bold border border-emerald-500/50"><i class="fas fa-paper-plane mr-1"></i> ' +
-        window.tr('button.apply') +
+        tr('button.apply') +
         '</button>';
 
     var directUrl = window.getDirectDownloadUrl(j.templateCv);
@@ -127,7 +128,7 @@ export function renderPublicFiltered() {
       ? '<a href="' +
         directUrl +
         '" target="_blank" download class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg shadow-[0_4px_15px_rgba(2,132,199,0.4)] transition text-[10px] font-bold border border-sky-500/50"><i class="fas fa-download mr-1"></i> ' +
-        window.tr('button.format') +
+        tr('button.format') +
         '</a>'
       : '';
 
@@ -136,9 +137,9 @@ export function renderPublicFiltered() {
       '<button onclick="bukaDetailLoker(\'' +
       window.escJs(j.code) +
       '\')" class="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-[0_4px_15px_rgba(245,158,11,0.4)] transition text-[10px] font-black border border-amber-500/50" title="' +
-      window.tr('button.detail') +
+      tr('button.detail') +
       '"><i class="fas fa-eye mr-1"></i> ' +
-      window.tr('button.detail') +
+      tr('button.detail') +
       '</button>';
     if (btnTemplate) actionBtns += btnTemplate;
     actionBtns += btnLamar;
@@ -201,7 +202,7 @@ export function renderPublicFiltered() {
         '\')" class="w-16 h-24 sm:w-20 sm:h-28 object-cover rounded-lg border ' +
         (light ? 'border-rose-200' : 'border-slate-600') +
         ' shadow-md cursor-pointer hover:opacity-80 hover:scale-105 transition-all flex-shrink-0" title="' +
-        window.tr('ui.click_zoom') +
+        tr('ui.click_zoom') +
         '" alt="Pamflet">';
     }
 
@@ -219,14 +220,14 @@ export function renderPublicFiltered() {
       rowHover +
       ' transition">' +
       '<td data-label="' +
-      window.tr('table.code') +
+      tr('table.code') +
       '" class="p-4 font-mono text-sm text-center font-bold align-top ' +
       (light ? 'text-sky-600' : 'text-sky-400') +
       '">' +
       window.esc(j.code) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.job') +
+      tr('table.job') +
       '" class="rt-full p-4 align-top whitespace-normal min-w-[250px]">' +
       '<div class="flex items-start gap-4">' +
       pamfletHtml +
@@ -247,12 +248,12 @@ export function renderPublicFiltered() {
       '</div>' +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.status') +
+      tr('table.status') +
       '" class="p-4 text-center align-top">' +
       window.badgeTahapanDb(j.status) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.req') +
+      tr('table.req') +
       '" class="rt-full p-4 text-xs ' +
       textSub +
       ' whitespace-normal min-w-[250px] max-w-sm leading-relaxed align-top">' +
@@ -265,7 +266,7 @@ export function renderPublicFiltered() {
       ketHtml +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.action') +
+      tr('table.action') +
       '" class="rt-full p-4 align-top w-48">' +
       actionBtns +
       '</td>' +
@@ -275,12 +276,12 @@ export function renderPublicFiltered() {
   if (arr.length === 0) {
     html =
       '<tr><td colspan="5" class="p-10 text-center text-slate-500 font-bold">' +
-      window.tr('public.empty') +
+      tr('public.empty') +
       '</td></tr>';
   } else if (arr.length > window.limitPub) {
     html +=
       '<tr><td colspan="5" class="p-5 text-center"><button onclick="window.limitPub+=10; renderPublicFiltered();" class="px-6 py-2.5 bg-slate-800 text-white rounded-full text-xs font-bold shadow-lg hover:bg-slate-700">' +
-      window.tr('button.more') +
+      tr('button.more') +
       ' <i class="fas fa-chevron-down ml-2"></i></button></td></tr>';
   }
   tb.innerHTML = html;

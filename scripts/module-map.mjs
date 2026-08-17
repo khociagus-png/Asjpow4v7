@@ -20,6 +20,9 @@
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+// Daftar halaman untuk deteksi pemanggil HTML — satu sumber kebenaran:
+// scripts/module-registry.mjs.
+import { ALL_PAGES, MODAL_PARTIAL } from './module-registry.mjs';
 
 const ROOT = process.cwd();
 const ARGS = new Set(process.argv.slice(2));
@@ -99,16 +102,7 @@ const sources = new Map(files.map((f) => [f.rel, readFileSync(f.abs, 'utf8')]));
 
 // Caller tambahan: HTML halaman (onclick="..." / inline script) supaya fungsi
 // yang dipanggil dari markup TIDAK salah dianggap dead code.
-const PAGES = [
-  'index.html',
-  'admin.html',
-  'apply-full.html',
-  'master-full.html',
-  'ai_form.html',
-  'share.html',
-  'siswa-baru.html',
-  'partials/modals-shared.html', // modal runtime (onclick handler ada di sini)
-];
+const PAGES = [...ALL_PAGES, MODAL_PARTIAL];
 if (MODE === 'frontend') {
   for (const p of PAGES) {
     const abs = join(ROOT, p);

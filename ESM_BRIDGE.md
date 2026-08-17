@@ -247,16 +247,23 @@ bare baca `ALL_JOBS` → getter → nilai modul. Tidak ada jalur yang bisa basi.
 Catatan: import namespace bersifat read-only — modul ESM lain yang mau
 MENULIS state harus lewat fungsi setter/action (belum ada), bukan assignment.
 
-### 3.3 Panggilan lintas-file ESM — pakai `window.*`, BELUM `import`
+### 3.3 Panggilan lintas-file ESM — `import` nyata (sejak Langkah 14, diperluas Fase 3.5)
 
-Build saat ini masih concat + IIFE per file (export di-strip per file, bundel
-classic). Konsekuensi: **file ESM tidak boleh saling `import`** — statement
-import tidak di-resolve oleh transform dan akan bocor ke bundel classic
-(SyntaxError). Sampai bundle jadi ESM (langkah 6 roadmap), panggilan lintas
-modul ESM memakai `window.*` eksplisit, mis. init.js (ESM) memanggil
-renderJobDilamar dari dashboard.js (ESM) via `window.renderJobDilamar(...)`.
-Ekspor tiap modul tetap ada (untuk import ESM masa depan) — hanya pemakaian
-lintas modul saat ini yang lewat window alias.
+Sejak Langkah 14 (esbuild bundle mode via js/main.js), modul ESM **boleh saling
+`import`** — esbuild me-resolve & men-dedupe. Migrasi bertahap `window.*` →
+`import` dicatat di REFACTOR_TODO **Fase 3.5**:
+
+- **Langkah 1 (SELESAI 2026-08-17)**: core/util — `callAPI` (api-client.js),
+  `tr` (i18n.js), `showToast`/`safeSet` (init/util.js) sudah di-import nyata di
+  `04_auth.js`, `engine/{dashboard,guards,init}.js`, `render/{public,admin,
+  candidate,share,mail}.js`. Path: dari `js/` = `../api-client.js`;
+  dari `js/engine|render/` = `../../api-client.js` & `../init/util.js`.
+- **Belum**: state accessor, render lintas domain, api lintas domain, helper
+  classic, dan fasad PortalBridge — masih `window.*` eksplisit (guard `typeof`
+  dibiarkan, tidak merusak).
+
+Aturan tetap: alias `window.*` dipertahankan untuk pemakai HTML inline
+(onclick/onchange) — seam HTML↔JS itu sah dan tidak akan dihapus.
 
 ---
 

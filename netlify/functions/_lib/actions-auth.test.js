@@ -19,6 +19,11 @@ describe('isValidWaFormat — gate login/daftar kandidat', () => {
     expect(isValidWaFormat('082130442661')).toBe(true);
   });
 
+  it('menerima 8xx… tanpa nol depan (konsisten dengan frontend)', () => {
+    expect(isValidWaFormat('81234567890')).toBe(true);
+    expect(isValidWaFormat('82130442661')).toBe(true);
+  });
+
   it('menerima 628 + 9 digit (total 12)', () => {
     expect(isValidWaFormat('628123456789')).toBe(true);
   });

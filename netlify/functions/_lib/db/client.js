@@ -4,6 +4,9 @@
 'use strict';
 
 const { env } = require('../env');
+// Aturan WA (normalisasi + gate) — satu sumber kebenaran: shared/wa-rules.js
+// (dipakai frontend js/04_auth.js juga). Jangan definisikan ulang di sini.
+const { normalizeWa } = require('../../../../shared/wa-rules');
 
 
 function supabaseUrl() {
@@ -75,13 +78,6 @@ function toText(v) {
 
 
 // Normalisasi nomor WA Indonesia: "0821..." -> "62821...", "+62821..." -> "62821...".
-function normalizeWa(v) {
-  let d = String(v || '').replace(/\D/g, '');
-  if (d.startsWith('0')) d = '62' + d.slice(1);
-  return d;
-}
-
-
 // Status asli di DB campur: "✅ OPEN", "❌ CLOSE", "SELESAI / CLOSE",
 // "PENCARIAN KANDIDAT", "PEMBERKASAN", "APPROVED", "" — yang berarti masih
 // rekrutmen hanya yang eksplisit tertutup; sisanya dianggap OPEN.

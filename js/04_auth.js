@@ -4,6 +4,13 @@
 // State tombol dikelola lewat finally sehingga tidak pernah terkunci,
 // dan pesan kesalahan ditangani di satu tempat (showAuthError).
 
+// Aturan WA (normalisasi + gate) — SATU sumber kebenaran: shared/wa-rules.js
+// (backend netlify/functions/_lib memakai yang sama via db/client).
+import { normalizeWa, isValidWaFormat } from '../shared/wa-rules.js';
+import { callAPI } from '../api-client.js';
+import { tr } from '../i18n.js';
+import { showToast, safeSet } from './init/util.js';
+
 export function bukaModalKandidat(mode) {
   const m = document.getElementById('modal-kandidat');
   if (m) m.classList.remove('hidden');
@@ -25,7 +32,7 @@ export async function runAuthAction(btn, loadingHtml, idleText, fn) {
     const res = await fn();
     return res;
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
     return null;
   } finally {
     if (btn) {
@@ -35,23 +42,20 @@ export async function runAuthAction(btn, loadingHtml, idleText, fn) {
   }
 }
 
-// Gate WA (login & daftar): normalisasi 0xx/8xx → 628xx + validasi nomor HP
-// Indonesia (62 8xx, total 12-13 digit). Mencegah typo (mis. 6223... bukan
-// 6282...) melahirkan kandidat duplikat seperti kasus SATRIA (2026-08-15).
+// Gate WA (login & daftar) — implementasi DIIMPOR dari shared/wa-rules.js
+// (normalizeWa + isValidWaFormat). Wrapper di bawah menjaga nama ekspor lama
+// agar pemanggil (HTML onclick, lintas file) tidak berubah.
 export function normalizeWaInput(w) {
-  let d = String(w || '').replace(/\D/g, '');
-  if (d.startsWith('0')) d = '62' + d.slice(1);
-  else if (d.startsWith('8')) d = '62' + d;
-  return d;
+  return normalizeWa(w);
 }
 export function isValidWaInput(w) {
-  return /^628\d{9,10}$/.test(normalizeWaInput(w));
+  return isValidWaFormat(w);
 }
 // Pesan gate WA: pakai teks panjang (id) kalau ada, fallback ke key lama yang
 // sudah diterjemahkan di semua bahasa.
 export function toastWaFormat() {
-  const m = window.tr('ui.toast_wa_format');
-  return m && m !== 'ui.toast_wa_format' ? m : window.tr('ui.toast_wa_invalid');
+  const m = tr('ui.toast_wa_format');
+  return m && m !== 'ui.toast_wa_format' ? m : tr('ui.toast_wa_invalid');
 }
 
 export async function prosesDaftarKandidat() {
@@ -59,26 +63,26 @@ export async function prosesDaftarKandidat() {
   const n = document.getElementById('reg-nama').value;
   const w = document.getElementById('reg-wa').value;
   if (!n || !w) {
-    window.showToast(window.tr('alert.mandatory'), 'error');
+    showToast(tr('alert.mandatory'), 'error');
     return;
   }
   const waNorm = normalizeWaInput(w);
   if (!isValidWaInput(w)) {
-    window.showToast(toastWaFormat(), 'error');
+    showToast(toastWaFormat(), 'error');
     return;
   }
   // Password tidak diminta lagi: otomatis 4 digit terakhir nomor WA
   // (kebijakan seragam, lihat daftarKandidat di auth.ts).
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.registering'),
-    window.tr('button.register'),
-    () => window.callAPI('daftarKandidat', [n, waNorm]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.registering'),
+    tr('button.register'),
+    () => callAPI('daftarKandidat', [n, waNorm]),
   );
   if (res && res.success) {
-    window.showToast(window.tr('alert.success'), 'success');
+    showToast(tr('alert.success'), 'success');
     bukaModalKandidat('login');
-  } else if (res) window.showToast(res.error, 'error');
+  } else if (res) showToast(res.error, 'error');
 }
 
 // Ganti password kandidat (fitur 2026-08-12): password default 4 digit WA
@@ -99,35 +103,35 @@ export async function prosesGantiPasswordKandidat() {
   const baru = document.getElementById('gp-pass-baru').value;
   const konfirmasi = document.getElementById('gp-pass-konfirmasi').value;
   if (!lama || !baru || !konfirmasi) {
-    window.showToast(window.tr('alert.mandatory'), 'error');
+    showToast(tr('alert.mandatory'), 'error');
     return;
   }
   if (baru !== konfirmasi) {
-    window.showToast(window.tr('ui.pass_mismatch'), 'error');
+    showToast(tr('ui.pass_mismatch'), 'error');
     return;
   }
   if (baru.length < 6 || baru.length > 20 || /\s/.test(baru)) {
-    window.showToast(window.tr('ui.pass_new_hint'), 'error');
+    showToast(tr('ui.pass_new_hint'), 'error');
     return;
   }
   if (!window.currentKandidatWa) {
-    window.showToast(window.tr('ui.toast_kandidat_session_expired'), 'error');
+    showToast(tr('ui.toast_kandidat_session_expired'), 'error');
     return;
   }
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.change_password') + '…',
-    '<i class="fas fa-check mr-1.5"></i> ' + window.tr('ui.change_password'),
-    () => window.callAPI('gantiPasswordKandidat', [window.currentKandidatWa, lama, baru]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.change_password') + '…',
+    '<i class="fas fa-check mr-1.5"></i> ' + tr('ui.change_password'),
+    () => callAPI('gantiPasswordKandidat', [window.currentKandidatWa, lama, baru]),
   );
   if (res && res.success) {
-    window.showToast(window.tr('ui.pass_changed_ok'), 'success');
+    showToast(tr('ui.pass_changed_ok'), 'success');
     tutupModalGantiPass();
     document.getElementById('gp-pass-lama').value = '';
     document.getElementById('gp-pass-baru').value = '';
     document.getElementById('gp-pass-konfirmasi').value = '';
   } else if (res) {
-    window.showToast(res.error || window.tr('ui.pass_mismatch'), 'error');
+    showToast(res.error || tr('ui.pass_mismatch'), 'error');
   }
 }
 
@@ -137,20 +141,20 @@ export async function prosesLoginKandidat() {
   const p = document.getElementById('log-pass').value;
 
   if (!w || !p) {
-    window.showToast(window.tr('alert.mandatory'), 'error');
+    showToast(tr('alert.mandatory'), 'error');
     return;
   }
   const waNorm = normalizeWaInput(w);
   if (!isValidWaInput(w)) {
-    window.showToast(toastWaFormat(), 'error');
+    showToast(toastWaFormat(), 'error');
     return;
   }
 
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.searching_data'),
-    window.tr('button.enter_dashboard'),
-    () => window.callAPI('loginKandidat', [waNorm, p]),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.searching_data'),
+    tr('button.enter_dashboard'),
+    () => callAPI('loginKandidat', [waNorm, p]),
   );
 
   if (res && res.success) {
@@ -187,7 +191,7 @@ export async function prosesLoginKandidat() {
     // Optimistic UI: pindah tampilan dulu, data di-refresh paralel di background
     await window.refreshDataDinamis();
   } else if (res) {
-    window.showToast(res.error, 'error');
+    showToast(res.error, 'error');
   }
 }
 
@@ -207,22 +211,22 @@ export async function prosesLoginMaster() {
   const btn = document.getElementById('btn-login-master');
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.checking'),
-    window.tr('button.verify'),
-    () => window.callAPI('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || '']),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
+    tr('button.verify'),
+    () => callAPI('checkAdminMaster', [pin, localStorage.getItem('asj_session_token') || '']),
   );
   if (res && res.success) {
     document.getElementById('login-step-1').classList.add('hidden');
     document.getElementById('login-step-2').classList.remove('hidden');
   } else if (res) {
-    window.showToast(res.error, 'error');
+    showToast(res.error, 'error');
   }
 }
 
 export function showLoginPersonal(name) {
   const s2 = document.getElementById('login-step-2');
   if (s2) s2.classList.add('hidden');
-  window.safeSet('lbl-nama-admin', window.tr('header.admin_login') + ' ' + name);
+  safeSet('lbl-nama-admin', tr('header.admin_login') + ' ' + name);
   const t = document.getElementById('admin-name-temp');
   if (t) t.value = name;
   const s3 = document.getElementById('login-step-3');
@@ -236,10 +240,10 @@ export async function prosesLoginPersonal() {
 
   const res = await runAuthAction(
     btn,
-    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + window.tr('ui.checking'),
-    window.tr('button.enter_portal'),
+    '<i class="fas fa-spinner fa-spin mr-2"></i> ' + tr('ui.checking'),
+    tr('button.enter_portal'),
     () =>
-      window.callAPI('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || '']),
+      callAPI('checkAdminPersonal', [name, pin, localStorage.getItem('asj_session_token') || '']),
   );
 
   if (res && res.success) {
@@ -272,7 +276,7 @@ export async function prosesLoginPersonal() {
       setTimeout(window.applyInterMilanVibe, 50);
     }
   } else if (res) {
-    window.    window.showToast(res.error, 'error');
+    window.    showToast(res.error, 'error');
   }
 }
 

@@ -9,7 +9,10 @@
 
 const bcrypt = require('bcryptjs');
 const { env } = require('./env');
-const { hasBackend, normalizeWa, pick, supabaseJson, toText } = require('./db/client');
+// Aturan WA (normalisasi + gate) — satu sumber kebenaran: shared/wa-rules.js
+// (frontend js/04_auth.js memakai yang sama).
+const { normalizeWa, isValidWaFormat } = require('../../../shared/wa-rules');
+const { hasBackend, pick, supabaseJson, toText } = require('./db/client');
 const { findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
 const { findAdmins } = require('./db/misc');
 const session = require('./session');
@@ -91,12 +94,8 @@ async function handleCheckAdminPersonal(payload) {
   };
 }
 
-// Gate WA: hanya nomor HP Indonesia (62 + 8xx, total 12-13 digit) yang
-// diterima — mencegah typo (mis. 6223... bukan 6282...) melahirkan kandidat
-// duplikat seperti kasus SATRIA (2026-08-15).
-function isValidWaFormat(wa) {
-  return /^628\d{9,10}$/.test(normalizeWa(wa));
-}
+// Gate WA (isValidWaFormat) + normalisasi (normalizeWa) diimpor dari
+// shared/wa-rules.js — lihat komentar import di atas.
 
 async function handleLoginKandidat(payload) {
   const wa = normalizeWa(String((payload && payload[0]) || ''));

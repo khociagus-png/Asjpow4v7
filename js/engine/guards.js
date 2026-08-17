@@ -1,3 +1,5 @@
+import { tr } from '../../i18n.js';
+import { showToast } from '../init/util.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -87,9 +89,9 @@ export function updateMailBadge() {
   // sebelumnya — aksi admin (review/lulus/gagal/hapus) selalu MENURUNKAN
   // pending, jadi aman dipanggil dari patch-in-place tanpa bunyi palsu.
   if (window.PREV_MAIL_COUNT !== null && pendingMails > window.PREV_MAIL_COUNT) {
-    window.showToast(
-      window.tr('ui.toast_new_mail').replace('{n}', pendingMails - window.PREV_MAIL_COUNT) +
-        window.tr('ui.toast_mail_inbox_n'),
+    showToast(
+      tr('ui.toast_new_mail').replace('{n}', pendingMails - window.PREV_MAIL_COUNT) +
+        tr('ui.toast_mail_inbox_n'),
       'success',
     );
     try {

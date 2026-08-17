@@ -1,3 +1,6 @@
+import { callAPI } from '../../api-client.js';
+import { tr } from '../../i18n.js';
+import { showToast, safeSet } from '../init/util.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
 // 03_engine.js — perilaku tidak berubah.
@@ -55,9 +58,9 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
       try {
         const msg =
           modeLoad === 'admin'
-            ? window.tr('ui.toast_admin_session_expired')
-            : window.tr('ui.toast_kandidat_session_expired');
-        if (typeof showToast === 'function') window.showToast(msg, 'error');
+            ? tr('ui.toast_admin_session_expired')
+            : tr('ui.toast_kandidat_session_expired');
+        if (typeof showToast === 'function') showToast(msg, 'error');
         else if (typeof alert === 'function') alert(msg);
       } catch (e) { /* opsional */ }
       if (identLengkap) location.reload();
@@ -72,7 +75,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
   // (Retry TIDAK diterapkan ke action tulis lain yang berisiko double-submit.)
   async function muatData(percobaan) {
     try {
-      const res = await window.callAPI('getAppData', [modeLoad, payload, publicCvId]);
+      const res = await callAPI('getAppData', [modeLoad, payload, publicCvId]);
       if (!res || !res.success) {
         if (percobaan < 1) {
           setTimeout(function () {
@@ -80,7 +83,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
           }, 1200);
           return;
         }
-        if (!isSilent) window.showToast(window.tr('alert.failed'), 'error');
+        if (!isSilent) showToast(tr('alert.failed'), 'error');
         if (loader) loader.style.display = 'none';
         return;
       }
@@ -93,7 +96,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
         localStorage.removeItem('asj_admin_login');
         localStorage.removeItem('asj_admin_session');
         if (loader) loader.style.display = 'none';
-        if (!isSilent) window.showToast(window.tr('ui.toast_admin_session_expired'), 'error');
+        if (!isSilent) showToast(tr('ui.toast_admin_session_expired'), 'error');
         location.reload();
         return;
       }
@@ -113,7 +116,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
           window.PREV_MAIL_COUNT = null;
         }
         if (loader) loader.style.display = 'none';
-        if (!isSilent) window.showToast(window.tr('ui.toast_kandidat_session_expired'), 'error');
+        if (!isSilent) showToast(tr('ui.toast_kandidat_session_expired'), 'error');
         location.reload();
         return;
       }
@@ -133,7 +136,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
           }, 800);
         }
       } catch (e) {
-        if (!isSilent) window.showToast(window.tr('ui.toast_render_error') + e.message, 'error');
+        if (!isSilent) showToast(tr('ui.toast_render_error') + e.message, 'error');
       } finally {
         if (loader) loader.style.display = 'none';
       }
@@ -145,7 +148,7 @@ export function refreshDataDinamis(switchTab, isSilent = false) {
         }, 1200);
         return;
       }
-      if (!isSilent) window.showToast(window.tr('alert.network') + err.message, 'error');
+      if (!isSilent) showToast(tr('alert.network') + err.message, 'error');
       if (loader) loader.style.display = 'none';
       if (!isSilent && !isFirstLoad)
         initApp(
@@ -335,7 +338,7 @@ export function initApp(res, isSilent = false) {
         document.getElementById('nav-mode').classList.add('hidden');
       if (document.getElementById('nav-kandidat-mode'))
         document.getElementById('nav-kandidat-mode').classList.remove('hidden');
-      window.safeSet('nama-kandidat-login', window.tr('candidate.welcome') + ', ' + window.esc(window.currentKandidatName));
+      safeSet('nama-kandidat-login', tr('candidate.welcome') + ', ' + window.esc(window.currentKandidatName));
 
       var mLoggedOut = document.getElementById('mobile-nav-logged-out');
       var mAdmin = document.getElementById('mobile-nav-admin');
@@ -350,11 +353,11 @@ export function initApp(res, isSilent = false) {
     );
     if (myData) {
       window.currentKandidatId = myData.idKandidat;
-      window.safeSet('k-dash-job', window.renderJobDilamar(myData));
+      safeSet('k-dash-job', window.renderJobDilamar(myData));
       // Tampilan tahapan/status sesuai bahasa; logika (evaluasiTahapanKandidat
       // & regex) tetap memakai nilai ASLI myData.tahapan/status.
-      window.safeSet('k-dash-tahapan', window.esc(window.trOption(myData.tahapan)));
-      window.safeSet('k-dash-status', window.esc(window.trOption(myData.status)));
+      safeSet('k-dash-tahapan', window.esc(window.trOption(myData.tahapan)));
+      safeSet('k-dash-status', window.esc(window.trOption(myData.status)));
 
       let boxCatatan = document.getElementById('k-dash-catatan-box');
       if (boxCatatan) {
@@ -364,7 +367,7 @@ export function initApp(res, isSilent = false) {
           myData.catatanExt.trim() !== '-'
         ) {
           boxCatatan.classList.remove('hidden');
-          window.safeSet('k-dash-catatan-ext', '"' + window.esc(myData.catatanExt) + '"');
+          safeSet('k-dash-catatan-ext', '"' + window.esc(myData.catatanExt) + '"');
         } else {
           boxCatatan.classList.add('hidden');
         }
@@ -373,7 +376,7 @@ export function initApp(res, isSilent = false) {
       let areaRev = document.getElementById('area-revisi');
       if (myData.status && myData.status.toUpperCase() === 'REVISI') {
         if (areaRev) areaRev.classList.remove('hidden');
-        window.safeSet('k-dash-catatan', window.esc(myData.catatan || window.tr('candidate.doc_revise_desc')));
+        safeSet('k-dash-catatan', window.esc(myData.catatan || tr('candidate.doc_revise_desc')));
       } else {
         if (areaRev) areaRev.classList.add('hidden');
       }
@@ -396,7 +399,7 @@ export function initApp(res, isSilent = false) {
           mySchedules.forEach((j) => {
             let linkBtn =
               j.link && j.link !== '-'
-                ? `<a href="${window.esc(j.link)}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition"><i class="fas fa-external-link-alt mr-1.5"></i> ${window.tr('ui.open_link')}</a>`
+                ? `<a href="${window.esc(j.link)}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition"><i class="fas fa-external-link-alt mr-1.5"></i> ${tr('ui.open_link')}</a>`
                 : '';
 
             htmlJadwal += `

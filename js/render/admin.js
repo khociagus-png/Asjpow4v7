@@ -1,3 +1,5 @@
+import { tr } from '../../i18n.js';
+import { safeSet } from '../init/util.js';
 // 7. FUNGSI RENDER — DOMAIN ADMIN (admin.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -28,14 +30,14 @@ export function adminSwitchTab(t) {
 }
 
 export function renderAdminFull() {
-  window.safeSet('dash-loker', window.ALL_JOBS.filter((j) => j.status.includes('OPEN')).length);
+  safeSet('dash-loker', window.ALL_JOBS.filter((j) => j.status.includes('OPEN')).length);
   var candTotal = window.ALL_CANDIDATES_TOTAL || window.ALL_CANDIDATES.length;
-  window.safeSet('dash-pelamar', candTotal);
+  safeSet('dash-pelamar', candTotal);
   var ccEl = document.getElementById('kandidat-count');
   if (ccEl) ccEl.textContent = window.ALL_CANDIDATES.length + ' dari ' + candTotal + ' kandidat';
   var btnMore = document.getElementById('btn-muat-kandidat');
   if (btnMore) btnMore.style.display = window.ALL_CANDIDATES.length >= candTotal ? 'none' : '';
-  window.safeSet('dash-admin-name', window.currentAdminName);
+  safeSet('dash-admin-name', window.currentAdminName);
   // FIX 2026-08-12: renderReport() dihapus — renderer Report Log dihapus total (migrasi 017) tapi call site-nya tertinggal,
   // menyebabkan ReferenceError "renderReport is not defined" di tiap render dashboard admin.
   window.renderAdmin();
@@ -76,32 +78,32 @@ export function renderAdmin(filteredJobs) {
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5 transition-all">' +
       '<td data-label="' +
-      window.tr('table.code') +
+      tr('table.code') +
       '" class="p-4 font-mono text-red-300 font-bold">' +
       window.esc(j.code) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.job') +
+      tr('table.job') +
       '" class="rt-full p-4 font-bold text-white">' +
       window.esc(j.pekerjaan) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.status') +
+      tr('table.status') +
       '" class="p-4 text-center">' +
       window.badgeTahapanDb(j.status) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.admin_action') +
+      tr('table.admin_action') +
       '" class="rt-full p-4 text-center flex flex-wrap justify-center gap-2">' +
       "<button onclick=\"aksiAdmin('✅ OPEN', '" +
       window.escJs(j.code) +
       '\')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-full text-[11px] text-white font-bold shadow-lg transition-all">' +
-      window.tr('admin.set_open') +
+      tr('admin.set_open') +
       '</button> ' +
       "<button onclick=\"aksiAdmin('❌ CLOSE', '" +
       window.escJs(j.code) +
       '\')" class="px-5 py-2 bg-slate-600 hover:bg-slate-500 rounded-full text-[11px] text-white font-bold shadow-lg transition-all">' +
-      window.tr('admin.set_close') +
+      tr('admin.set_close') +
       '</button> ' +
       '<button onclick="bukaMatchmaking(\'' +
       window.escJs(j.code) +
@@ -110,34 +112,34 @@ export function renderAdmin(filteredJobs) {
       "', '" +
       window.escJs(j.gender) +
       '\')" class="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-full text-[11px] font-bold shadow-[0_0_10px_rgba(139,92,246,0.4)] transition-all"><i class="fas fa-search-dollar mr-1"></i> ' +
-      window.tr('admin.btn_match') +
+      tr('admin.btn_match') +
       '</button> ' +
       '<button onclick="aksiGenerateQr(\'' +
       window.escJs(j.code) +
       "', '" +
       window.escJs(j.kategori) +
       '\')" class="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-full text-[11px] font-bold shadow-lg transition-all"><i class="fas fa-qrcode mr-1"></i> ' +
-      window.tr('admin.btn_qr_pamflet') +
+      tr('admin.btn_qr_pamflet') +
       '</button>' +
       '<button onclick="bukaEditFullLoker(\'' +
       window.escJs(j.code) +
       '\')" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-full text-[11px] font-bold shadow-lg transition-all"><i class="fas fa-edit"></i> ' +
-      window.tr('admin.btn_edit') +
+      tr('admin.btn_edit') +
       '</button>' +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.delete') +
+      tr('table.delete') +
       '" class="p-4 text-center"><button onclick="hapusLoker(\'' +
       window.escJs(j.code) +
       '\')" aria-label="' +
-      window.tr('table.delete') +
+      tr('table.delete') +
       '" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"><i class="fas fa-trash"></i></button></td>' +
       '</tr>';
   }
   if (sourceArray.length > window.limitAdm) {
     html +=
       '<tr><td colspan="5" class="p-4 text-center"><button onclick="window.limitAdm+=10; window.renderAdmin();" class="text-xs text-red-400">' +
-      window.tr('button.more') +
+      tr('button.more') +
       '</button></td></tr>';
   }
   tb.innerHTML = html;
@@ -233,17 +235,17 @@ export function renderDbJobTable(arr) {
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
-      window.tr('table.job_code') +
+      tr('table.job_code') +
       '" class="p-4 font-mono text-purple-300 font-bold">' +
       window.esc(db.code) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.tsk') +
+      tr('table.tsk') +
       '" class="p-4">' +
       window.esc(db.tsk) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.field_location') +
+      tr('table.field_location') +
       '" class="rt-full p-4">' +
       '<div class="font-bold text-white text-[13px]">' +
       window.esc(db.pekerjaan) +
@@ -255,19 +257,19 @@ export function renderDbJobTable(arr) {
       '</span></div>' +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.candidate_count') +
+      tr('table.candidate_count') +
       '" class="p-4 text-center cursor-pointer group" onclick="bukaModalListKandidat(\'' +
       window.escJs(db.code) +
       '\')"><div class="inline-block px-4 py-1.5 bg-sky-900/30 group-hover:bg-sky-600 rounded-lg transition-all"><span class="text-sky-400 group-hover:text-white font-bold text-lg">' +
       cands.length +
       '</span></div></td>' +
       '<td data-label="' +
-      window.tr('table.stage_status') +
+      tr('table.stage_status') +
       '" class="p-4 text-center">' +
       window.badgeTahapanDb(db.tahapan) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.action_db') +
+      tr('table.action_db') +
       '" class="p-4 text-center">' +
       '<button onclick="bukaModalEditDbJob(\'' +
       window.escJs(db.code) +
@@ -276,14 +278,14 @@ export function renderDbJobTable(arr) {
       "', '" +
       window.escJs(db.statusInt || '') +
       '\')" class="px-3 py-1.5 bg-purple-600 text-white rounded font-bold shadow text-[10px]"><i class="fas fa-edit"></i> ' +
-      window.tr('admin.btn_edit') +
+      tr('admin.btn_edit') +
       '</button>' +
       '<button onclick="bukaModalShare(\'' +
       window.escJs(db.code) +
       '\')" class="ml-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold shadow text-[10px]" title="' +
-      window.tr('ui.share_toggle_text') +
+      tr('ui.share_toggle_text') +
       '"><i class="fas fa-share-alt"></i> ' +
-      window.tr('ui.share_toggle') +
+      tr('ui.share_toggle') +
       '</button>' +
       '</td>' +
       '</tr>';
@@ -291,7 +293,7 @@ export function renderDbJobTable(arr) {
   if (arr.length > window.limitDb) {
     html +=
       '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitDb+=10; filterDbJob();" class="text-xs text-purple-400 font-bold">' +
-      window.tr('form.txt_lebih_banyak') +
+      tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
   tb.innerHTML = html;

@@ -14,6 +14,11 @@ describe('normalizeWa — format baku 628…', () => {
     expect(normalizeWa('082130442661')).toBe('6282130442661');
   });
 
+  it('8xx… (tanpa nol depan) dikonversi ke 628xx… — sama dengan frontend', () => {
+    expect(normalizeWa('81234567890')).toBe('6281234567890');
+    expect(normalizeWa('82130442661')).toBe('6282130442661');
+  });
+
   it('buang semua non-digit (spasi, +, -, kurung)', () => {
     expect(normalizeWa('+62 812-3456-7890')).toBe('6281234567890');
     expect(normalizeWa('(0812) 345 678')).toBe('62812345678');

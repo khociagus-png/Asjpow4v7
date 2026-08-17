@@ -10,35 +10,14 @@
 // Kredensial tes default = akun kandidat & admin milik pemilik repo
 // (bisa dioverride via env: E2E_WA, E2E_PIN, E2E_ADMIN_NAME, E2E_ADMIN_PIN).
 // =============================================================
-import { chromium } from 'playwright';
-
-const BASE = process.env.BASE_URL || 'http://localhost:3000';
+import { BASE, check, waitFor, launchBrowser, finish } from './harness.mjs';
 const WA = process.env.E2E_WA || '082130442661';
 const PIN = process.env.E2E_PIN || '2661';
 const ADMIN_MASTER_PIN = process.env.E2E_MASTER_PIN || '123456';
 const ADMIN_NAME = process.env.E2E_ADMIN_NAME || 'KHOCI';
 const ADMIN_PIN = process.env.E2E_ADMIN_PIN || '4444';
 
-let failures = 0;
-function check(name, cond, extra = '') {
-  if (cond) console.log(`  ✅ ${name}`);
-  else {
-    console.log(`  ❌ ${name} ${extra}`);
-    failures++;
-  }
-}
-
-// Tunggu sampai condition() true (polling) — pengganti expect().toBeVisible
-async function waitFor(condition, timeoutMs = 15000, intervalMs = 300) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    if (await condition()) return true;
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  return false;
-}
-
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 console.log(`\nTarget: ${BASE}\n`);
 
 // -------------------------------------------------------------
@@ -166,5 +145,4 @@ console.log(`\nTarget: ${BASE}\n`);
 }
 
 await browser.close();
-console.log(`\n${failures === 0 ? '🎉 SEMUA LULUS' : `💥 ${failures} GAGAL`}\n`);
-process.exit(failures === 0 ? 0 : 1);
+finish();

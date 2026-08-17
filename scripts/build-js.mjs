@@ -18,75 +18,12 @@
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
+// Struktur modul (STACK bundel + daftar halaman) — satu sumber kebenaran:
+// scripts/module-registry.mjs. Jangan definisikan ulang daftar di sini.
+import { STACK, STANDALONE_PAGES } from './module-registry.mjs';
 
 const ROOT = process.cwd();
-const PAGES = [
-  'admin.html',
-  'index.html',
-  'ai_form.html',
-  'apply-full.html',
-  'master-full.html',
-  'share.html',
-  'siswa-baru.html',
-];
-
-// Urutan canonical stack (sumber kebenaran — sama dengan urutan tag asli di
-// admin.html/index.html: 00 → 09, lalu 11,12,13, helpers_cv, 10b, 10_cv, pwa).
-const STACK = [
-  '/api-client.js',
-  '/i18n.js',
-  '/js/upload-guard.js',
-  '/js/01_public.js',
-  // Fase 2: js/02_init.js dipecah per domain (state/theme/util/preview/nav/boot).
-  '/js/init/state.js',
-  '/js/init/theme.js',
-  '/js/init/util.js',
-  '/js/init/preview.js',
-  '/js/init/nav.js',
-  '/js/init/boot.js',
-  '/js/03_candidate.js',
-  // Fase 2: js/03_engine.js dipecah per domain (pipeline/dashboard/guards/init).
-  '/js/engine/pipeline.js',
-  '/js/engine/dashboard.js',
-  '/js/engine/guards.js',
-  '/js/engine/init.js',
-  '/js/04_auth.js',
-  // Fase 2: js/05_render.js dipecah per domain (public/admin/candidate/share/mail).
-  '/js/render/public.js',
-  '/js/render/admin.js',
-  '/js/render/candidate.js',
-  '/js/render/share.js',
-  '/js/render/mail.js',
-  // Fase 2: js/06_admin_modal.js dipecah per domain (dbfilter/cv/job).
-  '/js/admin_modal/dbfilter.js',
-  '/js/admin_modal/cv.js',
-  '/js/admin_modal/job.js',
-  // Fase 2: js/07_api.js dipecah per domain (forms/jobs/candidates/wa).
-  // Urutan antar-modul bebas (fungsi global di-hoist), dipakai runtime.
-  '/js/api/forms.js',
-  '/js/api/jobs.js',
-  '/js/api/candidates.js',
-  '/js/api/wa.js',
-  '/js/08_wa_pintar.js',
-  // Fase 2: js/09_ai_copilot.js dipecah per domain (admin/interview/parse/results).
-  '/js/ai_copilot/admin.js',
-  '/js/ai_copilot/interview.js',
-  '/js/ai_copilot/parse.js',
-  '/js/ai_copilot/results.js',
-  // Fase 2: js/11_admin_ops.js dipecah per domain (schedule/candidates/sysconfig/loading/migration/drive).
-  '/js/admin_ops/schedule.js',
-  '/js/admin_ops/candidates.js',
-  '/js/admin_ops/sysconfig.js',
-  '/js/admin_ops/loading.js',
-  '/js/admin_ops/migration.js',
-  '/js/admin_ops/drive.js',
-  '/js/12_esign_match.js',
-  '/js/13_rincian_builder.js',
-  '/js/helpers_cv.js',
-  '/js/10b_cv_builders.js',
-  '/js/10_cv_rirekisho.js',
-  '/pwa.js',
-];
+const PAGES = STANDALONE_PAGES;
 
 // 1. Bundle semua modul via entry js/main.js (esbuild bundle mode → IIFE).
 //    - treeShaking:false — import side-effect + alias window.* wajib dipertahankan
@@ -192,10 +129,14 @@ if (!sw.includes(`'/assets/modals-shared.html',`)) {
   console.log('[build-js] sw.js: SHELL -> /assets/modals-shared.html');
 }
 // VERSION ikut hash modals supaya SW refresh saat partial berubah (tanpa ubah JS).
+// Hash dihitung atas konten ternormalisasi LF: dengan core.autocrlf=true (Windows)
+// working-tree berbentuk CRLF, sha1 byte mentah beda dari blob LF di repo —
+// membuat VERSION (dan git status sw.js) berubah tiap build tanpa perubahan konten.
 let modHash = '';
 const modPath = `${ROOT}/assets/modals-shared.html`;
 if (existsSync(modPath)) {
-  modHash = '-m' + createHash('sha1').update(readFileSync(modPath)).digest('hex').slice(0, 8);
+  const modContent = readFileSync(modPath, 'utf8').replace(/\r\n/g, '\n');
+  modHash = '-m' + createHash('sha1').update(modContent).digest('hex').slice(0, 8);
 }
 sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = 'asj-portal-app-${hash}${modHash}';`);
 writeFileSync(swPath, sw);

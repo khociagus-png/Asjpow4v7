@@ -1,3 +1,4 @@
+import { tr } from '../../i18n.js';
 // 7. FUNGSI RENDER — DOMAIN KANDIDAT (tabel daftar kandidat admin)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -125,63 +126,63 @@ export function renderKandidatTable(arr) {
         ' <img src="' +
         window.esc(logoSrc) +
         '" class="inline-block w-4 h-4 ml-1 rounded-full border border-emerald-500/50 object-contain drop-shadow-md" title="' +
-        window.tr('ui.badge_official') +
+        tr('ui.badge_official') +
         '">'
       : window.esc(c.nama);
 
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +
-      window.tr('table.candidate_id') +
+      tr('table.candidate_id') +
       '" class="p-4 font-mono text-sky-300 font-bold">' +
       window.esc(c.idKandidat) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.full_name') +
+      tr('table.full_name') +
       '" class="p-4 font-bold text-white">' +
       namaTampil +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.applied_job') +
+      tr('table.applied_job') +
       '" class="p-4 text-amber-300 font-mono text-xs max-w-[200px]">' +
       jobDilamarCell(c) +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.stage_status') +
+      tr('table.stage_status') +
       '" class="rt-full p-4 text-xs font-bold text-sky-400">' +
       window.esc(window.trOption(c.tahapan)) +
       '<br><span class="text-[10px] font-normal text-slate-400">' +
       window.esc(window.trOption(c.status)) +
       '</span></td>' +
       '<td data-label="' +
-      window.tr('table.admin_note') +
+      tr('table.admin_note') +
       '" class="rt-full p-4 text-[11px] text-slate-400 max-w-[150px] truncate">' +
       window.esc(c.catatanExt || c.catatan || '-') +
       '</td>' +
       '<td data-label="' +
-      window.tr('table.action_candidate') +
+      tr('table.action_candidate') +
       '" class="rt-full p-4 text-center flex gap-2 justify-center flex-wrap">' +
       // TOMBOL 1: Lihat Dashboard/Profil Digital
       '<button onclick="bukaDigitalCV(\'' +
       window.escJs(c.idKandidat) +
       '\')" aria-label="' +
-      window.tr('button.view_cv') +
+      tr('button.view_cv') +
       '" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-[10px] shadow transition" title="' +
-      window.tr('button.view_cv') +
+      tr('button.view_cv') +
       '"><i class="fas fa-user-circle"></i></button> ' +
       // TOMBOL 2: Tombol Baru Admin Lihat & Print CV
       '<button onclick="bukaPreviewCV_Admin(\'' +
       window.escJs(c.wa) +
       '\')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] shadow transition font-bold" title="' +
-      window.tr('ui.view_rireki') +
+      tr('ui.view_rireki') +
       '"><i class="fas fa-file-pdf mr-1"></i> CV</button> ' +
       // TOMBOL 3: Super Edit Kandidat
       '<button onclick="bukaSuperEditKandidat(\'' +
       window.escJs(c.idKandidat) +
       '\')" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded text-[10px] font-bold shadow transition" title="' +
-      window.tr('ui.edit_candidate') +
+      tr('ui.edit_candidate') +
       '"><i class="fas fa-user-shield"></i> ' +
-      window.tr('admin.btn_edit') +
+      tr('admin.btn_edit') +
       '</button> ' +
       // TOMBOL 4 & 5: Buka Form Master Manual & Kirim WA
       '<button onclick="bukaMasterEksternalAdmin(\'' +
@@ -189,21 +190,21 @@ export function renderKandidatTable(arr) {
       "', '" +
       window.escJs(c.nama) +
       '\')" class="px-3 py-1.5 bg-pink-600 hover:bg-pink-500 text-white rounded text-[10px] shadow transition" title="' +
-      window.tr('ui.open_master_form') +
+      tr('ui.open_master_form') +
       '"><i class="fas fa-file-alt"></i> AI CV</button>' +
       '<button onclick="bukaModalWaPintar(\'' +
       window.escJs(c.idKandidat) +
       '\')" aria-label="' +
-      window.tr('ui.send_wa_call') +
+      tr('ui.send_wa_call') +
       '" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] shadow transition" title="' +
-      window.tr('ui.send_wa_call') +
+      tr('ui.send_wa_call') +
       '"><i class="fab fa-whatsapp"></i></button>' +
       '</td></tr>';
   }
   if (arr.length > window.limitKan) {
     html +=
       '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
-      window.tr('form.txt_lebih_banyak') +
+      tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
   tb.innerHTML = html;

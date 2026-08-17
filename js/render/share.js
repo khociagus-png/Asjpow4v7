@@ -1,3 +1,6 @@
+import { callAPI } from '../../api-client.js';
+import { tr } from '../../i18n.js';
+import { showToast } from '../init/util.js';
 // 7. FUNGSI RENDER — DOMAIN SHARE LOKER (modal share + template WA)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -104,7 +107,7 @@ export function toggleSharePreview(jobCode) {
   }
 }
 
-// Label chip dokumen share (dwi-bahasa via window.tr()); token tanpa kunci
+// Label chip dokumen share (dwi-bahasa via tr()); token tanpa kunci
 // (SIM A, KTP, dll) tampil apa adanya.
 export function shareDocLabel(key) {
   var kunci = {
@@ -117,7 +120,7 @@ export function shareDocLabel(key) {
     UNIVERSITAS: 'admin.doc_univ',
     ALL: 'ui.share_doc_all',
   }[key];
-  return kunci ? window.tr(kunci) : key;
+  return kunci ? tr(kunci) : key;
 }
 
 // Render checkbox dokumen yang di-share (di dalam modal).
@@ -212,9 +215,9 @@ export async function copasShareWa(jobCode) {
   var textToCopy = templateShareWa(jobCode, db ? db.pekerjaan : '');
   try {
     await navigator.clipboard.writeText(textToCopy);
-    window.showToast(window.tr('ui.toast_tsk_copied'), 'success');
+    showToast(tr('ui.toast_tsk_copied'), 'success');
   } catch (err) {
-    window.showToast(window.tr('ui.toast_copy_text_failed'), 'error');
+    showToast(tr('ui.toast_copy_text_failed'), 'error');
   }
 }
 
@@ -224,9 +227,9 @@ export async function copyShareLink() {
   if (!linkInput || !linkInput.value) return;
   try {
     await navigator.clipboard.writeText(linkInput.value);
-    window.showToast(window.tr('ui.toast_tsk_copied'), 'success');
+    showToast(tr('ui.toast_tsk_copied'), 'success');
   } catch (err) {
-    window.showToast(window.tr('ui.toast_copy_text_failed'), 'error');
+    showToast(tr('ui.toast_copy_text_failed'), 'error');
   }
 }
 
@@ -242,15 +245,15 @@ export function currentShareDocs(jobCode) {
 export async function simpanDokumenShare(jobCode) {
   var joined = currentShareDocs(jobCode).join(',');
   try {
-    const res = await window.callAPI('updateDokumenShare', [jobCode, joined]);
+    const res = await callAPI('updateDokumenShare', [jobCode, joined]);
     if (res.success) {
-      window.showToast(window.tr('ui.toast_share_saved'), 'success');
+      showToast(tr('ui.toast_share_saved'), 'success');
       window.refreshDataDinamis('dbjob');
     } else {
-      window.showToast(window.tr('alert.failed') + ' ' + (res.error || ''), 'error');
+      showToast(tr('alert.failed') + ' ' + (res.error || ''), 'error');
     }
   } catch (err) {
-    window.showToast(window.tr('alert.network') + (err && err.message ? err.message : err), 'error');
+    showToast(tr('alert.network') + (err && err.message ? err.message : err), 'error');
   }
 }
 

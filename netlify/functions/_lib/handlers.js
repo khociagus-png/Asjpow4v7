@@ -10,28 +10,11 @@
 'use strict';
 
 const session = require('./session');
-const upload = require('./actions-upload');
-const drive = require('./actions-drive');
-const schedule = require('./actions-schedule');
-const wa = require('./actions-wa');
-const config = require('./actions-config');
-const register = require('./actions-register');
-const master = require('./actions-master');
-// Modul AI (Fase 1.4): chat/wawancara, konteks CV/master, parse dokumen,
-// provider Gemini — actions-ai.js dipecah jadi ai/{chat,cv,classify,providers}.js.
-const aiChat = require('./ai/chat');
-const aiCv = require('./ai/cv');
-const aiClassify = require('./ai/classify');
 const rateLimit = require('./rate-limit');
-const publicData = require('./actions-public');
-const auth = require('./actions-auth');
-// Modul domain (Fase 1.1c): lowongan, kandidat, mail inbox — dipindah dari
-// file ini, dispatcher tinggal memetakan action → handler modul.
-const jobActions = require('./actions-job');
-const candidateActions = require('./actions-candidate');
-const mailActions = require('./actions-mail');
+// Kontrak action (nama → handler + grup rate limit) — satu sumber kebenaran:
+// action-registry.js. Dispatcher di bawah memakai tabel, bukan switch.
+const { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } = require('./action-registry');
 const shareActions = require('./actions-share');
-const diagnostics = require('./actions-diagnostics');
 
 const NOT_IMPLEMENTED =
   'Fungsi ini belum diimplementasi di backend rebuild (repo GitHub hanya berisi frontend).';
@@ -89,21 +72,7 @@ const NOT_IMPLEMENTED =
 // lockout 5 menit setelah 10 gagal, AI 10/menit per identitas + 60/menit/IP,
 // Fonnte 2×/menit per admin, aksi CRUD admin 120/menit sebagai jaring pengaman.
 // ---------------------------------------------------------------------------
-const LOGIN_ACTIONS = new Set([
-  'checkAdminMaster',
-  'checkAdminPersonal',
-  'loginKandidat',
-  'daftarKandidat',
-]);
-const AI_ACTIONS = new Set([
-  'processAIChat',
-  'processSiswaAIChat',
-  'processAdminAIChat',
-  'processAiInterview',
-  'parseDokumenBiodata',
-  'generateWawancaraModel',
-]);
-const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
+// LOGIN_ACTIONS / AI_ACTIONS / FONNTE_ACTIONS diimpor dari action-registry.
 
 function sessionIdentity(sessionToken) {
   const t = session.verifyToken(sessionToken);
@@ -176,167 +145,11 @@ async function handleAction(action, payload, sessionToken, meta) {
 }
 
 async function dispatchAction(action, payload, sessionToken) {
-  switch (action) {
-    case 'getAppData':
-      return publicData.handleGetAppData(payload, sessionToken);
-    case 'getAppConfig':
-      return diagnostics.handleGetAppConfig(sessionToken);
-    case 'checkAdminMaster':
-      return auth.handleCheckAdminMaster(payload);
-    case 'checkAdminPersonal':
-      return auth.handleCheckAdminPersonal(payload);
-    case 'loginKandidat':
-      return auth.handleLoginKandidat(payload);
-    case 'daftarKandidat':
-      return auth.handleDaftarKandidat(payload);
-    case 'gantiPasswordKandidat':
-      return auth.handleGantiPasswordKandidat(payload, sessionToken);
-    case 'logout':
-      return { success: true };
-    // Kelola lowongan
-    case 'simpanJobBaru':
-      return jobActions.handleSimpanJobBaru(payload, sessionToken);
-    case 'editLokerFull':
-      return jobActions.handleEditLokerFull(payload, sessionToken);
-    case 'parseDokumenBiodata':
-      return aiClassify.handleParseDokumenBiodata(payload, sessionToken);
-    case 'generateWawancaraModel':
-      return aiChat.handleGenerateWawancaraModel(payload, sessionToken);
-    case 'simpanHasilWawancara':
-      return aiChat.handleSimpanHasilWawancara(payload, sessionToken);
-    case 'selesaikanWawancara':
-      return aiChat.handleSelesaikanWawancara(payload, sessionToken);
-    case 'getHasilWawancara':
-      return aiChat.handleGetHasilWawancara(payload, sessionToken);
-    case 'ubahStatusJob':
-      return jobActions.handleUbahStatusJob(payload, sessionToken);
-    case 'hapusJobData':
-      return jobActions.handleHapusJobData(payload, sessionToken);
-    case 'updateTahapanDbJob':
-      return jobActions.handleUpdateTahapanDbJob(payload, sessionToken);
-    case 'updateDokumenShare':
-      return jobActions.handleUpdateDokumenShare(payload, sessionToken);
-    case 'tandaiGagalJob':
-      return jobActions.handleTandaiGagalJob(payload, sessionToken);
-    // Kelola kandidat
-    case 'updateCatatanKandidat':
-      return candidateActions.handleUpdateCatatanKandidat(payload, sessionToken);
-    case 'updateKandidatSuper':
-      return candidateActions.handleUpdateKandidatSuper(payload, sessionToken);
-    case 'getCandidatesPage':
-      return candidateActions.handleGetCandidatesPage(payload, sessionToken);
-    // Mail inbox
-    case 'reviewForm':
-      return mailActions.handleReviewForm(payload, sessionToken);
-    case 'approveForm':
-      return mailActions.handleApproveForm(payload, sessionToken);
-    case 'rejectForm':
-      return mailActions.handleRejectForm(payload, sessionToken);
-    case 'deleteForm':
-      return mailActions.handleDeleteForm(payload, sessionToken);
-    case 'tandaiDibacaForm':
-      return mailActions.handleTandaiDibacaForm(payload, sessionToken);
-    // Upload & file
-    case 'getUploadUrls':
-      return upload.handleGetUploadUrls(payload, sessionToken);
-    // Lamaran publik (apply-full.html)
-    case 'cekDataPelamar':
-      return upload.handleCekDataPelamar(payload);
-    case 'isJobRequiresCv':
-      return upload.handleIsJobRequiresCv(payload);
-    case 'submitApply':
-      return upload.handleSubmitApply(payload);
-    case 'getExistingCandidateJsonByWa':
-      return upload.handleGetExistingCandidateJsonByWa(payload, sessionToken);
-    // Master data (master-full.html, CV)
-    case 'getMasterDataByWa':
-      return master.handleGetMasterDataByWa(payload, sessionToken);
-    case 'getDrafCvMaster':
-      return master.handleGetDrafCvMaster(payload, sessionToken);
-    case 'submitMasterForm':
-    case 'simpanBiodataLengkap':
-      return master.handleSubmitMasterForm(payload, sessionToken);
-    case 'simpanUpdateMaster':
-      return master.handleSimpanUpdateMaster(payload, sessionToken);
-    case 'simpanKandidatDanUpload':
-      return upload.handleSimpanKandidatDanUpload(payload, sessionToken);
-    case 'simpanBerkasTahapan':
-      return upload.handleSimpanBerkasTahapan(payload, sessionToken);
-    case 'simpanRevisiKandidat':
-      return upload.handleSimpanRevisiKandidat(payload, sessionToken);
-    // Jadwal & tugas
-    case 'simpanJadwalBaru':
-      return schedule.handleSimpanJadwalBaru(payload, sessionToken);
-    case 'hapusJadwal':
-      return schedule.handleHapusJadwal(payload, sessionToken);
-    case 'tambahTugasBaru':
-      return schedule.handleTambahTugasBaru(payload, sessionToken);
-    case 'setTugasStatus':
-      return schedule.handleSetTugasStatus(payload, sessionToken);
-    case 'hapusTugas':
-      return schedule.handleHapusTugas(payload, sessionToken);
-    case 'checkAndSendAgendaReminders':
-      return { success: true, sent: 0 };
-    // Template & kirim WA (Fonnte)
-    case 'simpanWaTemplate':
-      return wa.handleSimpanWaTemplate(payload, sessionToken);
-    case 'hapusWaTemplate':
-      return wa.handleHapusWaTemplate(payload, sessionToken);
-    case 'kirimSatuPesanFonnte':
-      return wa.handleKirimSatuPesanFonnte(payload, sessionToken);
-    case 'kirimTawaranMassal':
-      return wa.handleKirimTawaranMassal(payload, sessionToken);
-    // Konfigurasi sistem
-    case 'updateSysConfig':
-      return config.handleUpdateSysConfig(payload, sessionToken);
-    // Preset rincian biaya
-    case 'getRincianPresets':
-      return config.handleGetRincianPresets(payload, sessionToken);
-    case 'saveRincianPreset':
-      return config.handleSaveRincianPreset(payload, sessionToken);
-    case 'deleteRincianPreset':
-      return config.handleDeleteRincianPreset(payload, sessionToken);
-    // Siswa baru
-    case 'getDaftarSiswaBaru':
-      return register.handleGetDaftarSiswaBaru(payload, sessionToken);
-    case 'submitDaftarSiswa':
-      return register.handleSubmitDaftarSiswa(payload);
-    // Link & bridge (QR / form)
-    case 'getLinkSiswaBaru':
-      return register.handleGetLinkSiswaBaru();
-    case 'generateFormBridge':
-      return register.handleGenerateFormBridge(payload);
-    case 'generateLegacyMasterBridge':
-      return register.handleGenerateLegacyMasterBridge(payload);
-    case 'generateAiFormBridge':
-      return register.handleGenerateAiFormBridge(payload);
-    // Drive links & migrasi
-    case 'getDriveLinkCandidates':
-      return drive.handleGetDriveLinkCandidates(payload, sessionToken);
-    case 'uploadDriveReplacement':
-      return drive.handleUploadDriveReplacement(payload, sessionToken);
-    case 'runMigration':
-      return drive.handleRunMigration(payload, sessionToken);
-    // AI (Gemini) & submit AI form
-    case 'processAIChat':
-      return aiChat.handleProcessAIChat(payload, sessionToken);
-    case 'processAdminAIChat':
-      return aiChat.handleProcessAdminAIChat(payload, sessionToken);
-    case 'processSiswaAIChat':
-      return aiChat.handleProcessSiswaAIChat(payload);
-    case 'processAiInterview':
-      return aiChat.handleProcessAiInterview(payload, sessionToken);
-    case 'getAdminAiContext':
-      return aiCv.handleGetAdminAiContext(payload, sessionToken);
-    case 'buildAdminAiCandidateSummary':
-      return aiCv.handleBuildAdminAiCandidateSummary(payload, sessionToken);
-    case 'submitDataAsj':
-      return aiCv.handleSubmitDataAsj(payload, sessionToken);
-    case 'simpanDataTtdNaitei':
-      return aiCv.handleSimpanDataTtdNaitei(payload, sessionToken);
-    default:
-      return { success: false, message: NOT_IMPLEMENTED + ' (action: ' + action + ')' };
+  const handler = ACTION_HANDLERS[action];
+  if (!handler) {
+    return { success: false, message: NOT_IMPLEMENTED + ' (action: ' + action + ')' };
   }
+  return handler(payload, sessionToken);
 }
 
 // Fase 1.1d (2026-08-16): handleShareData, docTypeOf, docAge, TYPE_ALIAS,

@@ -14,12 +14,13 @@
 // Jalankan: BASE_URL=<url> node e2e/biodata-check.mjs
 //   (butuh Supabase keys di .env.local / env — dibaca _lib/supabase.js)
 // =============================================================
-import { chromium } from 'playwright';
+import { check, waitFor as harnessWaitFor, launchBrowser, finish, BASE } from './harness.mjs';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
 
-const BASE = process.env.BASE_URL || 'http://localhost:3000';
+// Update biodata butuh sinkronisasi DB — default waitFor 30s.
+const waitFor = (c, t, i) => harnessWaitFor(c, t ?? 30000, i);
 const TEST_WA =
   process.env.E2E_BIODATA_WA ||
   '62812' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
@@ -28,24 +29,7 @@ const TEST_NAMA = 'E2E BIODATA TEST';
 
 const TES_EMAIL = 'e2e.biodata.test@example.com';
 const TES_ALAMAT = 'E2E ALAMAT BIODATA TEST';
-const TES_TMPL = 'E2E TEMPAT LAHIR TEST';
-
-let failures = 0;
-function check(name, cond, extra = '') {
-  if (cond) console.log(`  ✅ ${name}`);
-  else {
-    console.log(`  ❌ ${name} ${extra}`);
-    failures++;
-  }
-}
-async function waitFor(condition, timeoutMs = 30000, intervalMs = 300) {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    if (await condition()) return true;
-    await new Promise((r) => setTimeout(r, intervalMs));
-  }
-  return false;
-}
+const TES_TMPL = 'E2E TEMPAT LAHIR TEST'
 
 // ---- Supabase direct (setup & cleanup kandidat tes) -------------------------
 const SB = supabaseUrl().replace(/\/$/, '');
@@ -101,7 +85,7 @@ async function simpanBiodata(page, { email, alamat, tmplahir }) {
   return waitFor(async () => !(await page.locator('#modal-pemberkasan').isVisible()), 30000);
 }
 
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 console.log(`\nTarget: ${BASE} | Kandidat tes: ${TEST_WA}\n`);
 
 try {
@@ -225,5 +209,4 @@ try {
   await browser.close();
 }
 
-console.log(`\n${failures === 0 ? '🎉 SEMUA LULUS' : `💥 ${failures} GAGAL`}\n`);
-process.exit(failures === 0 ? 0 : 1);
+finish();

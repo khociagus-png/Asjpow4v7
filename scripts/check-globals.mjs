@@ -21,15 +21,11 @@
 // =============================================================================
 
 import { readFileSync, existsSync } from 'node:fs';
+// STACK dibaca dari registry (bukan di-parse dari build-js via regex) —
+// satu sumber kebenaran struktur modul.
+import { STACK, PAGE_JS } from './module-registry.mjs';
 
 const ROOT = process.cwd();
-const buildJs = readFileSync(new URL('./build-js.mjs', import.meta.url), 'utf8');
-const stackMatch = buildJs.match(/const STACK = \[([\s\S]*?)\];/);
-if (!stackMatch) {
-  console.error('[check-globals] STACK tidak ditemukan di build-js.mjs — batal.');
-  process.exit(1);
-}
-const STACK = [...stackMatch[1].matchAll(/'(\/[^']+)'/g)].map((x) => x[1]);
 
 // Deklarasi top-level (kolom 0): function/async function/class/const/let/var.
 // Fase 3: prefix `export` di file ESM (api-client.js/i18n.js) diabaikan.
@@ -74,9 +70,7 @@ for (const [name, files] of byName) {
 
 // Warning: nama STACK juga dipakai js/pages/* (saat halaman standalone
 // dijadikan entry ESM, kolisi dengan bundel admin/index harus dihindari).
-const pageFiles = ['ai_form', 'master_full', 'apply_full', 'share', 'siswa_baru'].map(
-  (n) => `/js/pages/${n}.js`
-);
+const pageFiles = PAGE_JS;
 let pageWarn = 0;
 for (const p of pageFiles) {
   const file = ROOT + p;
