@@ -230,10 +230,14 @@ export const jp = {
       invite_class_title: 'クラス WhatsApp グループ招待',
       invite_class_desc:
         '保護者リスト（名前|WA番号）を貼り付け、グループリンクと間隔を入力して送信します。招待リンク付きメッセージがFonnte経由で1件ずつ送信されます（BAN防止）。',
+      invite_class_wa_desc:
+        '保護者へクラス WhatsApp グループの招待を一括送信 — <span class="font-mono text-emerald-400">名前|WA番号</span>リストを貼り付け、グループリンクとメッセージ（<span class="font-mono text-emerald-400">---</span>区切りで交互に送信しBAN防止）を入力して送信します。',
       paste_list_label: '保護者リスト（名前|WA番号）',
+      paste_list_placeholder: '保護者名|628xxxxxxxxxx',
       paste_list_hint: '1行に1名。形式: ',
       paste_list_hint2: '（Excel/WAからコピー可。0xx/8xxは自動で62xxに変換）',
       group_link_label: 'WhatsApp グループリンク',
+      group_link_placeholder: 'https://chat.whatsapp.com/...',
       interval_label: '送信間隔（秒）',
       message_label: 'メッセージテンプレート',
       message_hint: 'プレースホルダー: ',

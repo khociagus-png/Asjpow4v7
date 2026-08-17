@@ -427,12 +427,12 @@
        <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1">
            <div>
                <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-users mr-1"></i><span data-lang="ui.paste_list_label"> DAFTAR ORANG TUA/WALI (Nama|WA)</span></label>
-               <textarea id="input-daftar-ortu" rows="6" oninput="previewUndanganKelas()" placeholder="Nama Orang Tua/Wali|628xxxxxxxxxx" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500"></textarea>
+               <textarea id="input-daftar-ortu" rows="6" oninput="previewUndanganKelas()" placeholder="Nama Orang Tua/Wali|628xxxxxxxxxx" data-lang-placeholder="ui.paste_list_placeholder" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500"></textarea>
                <p class="text-[9px] text-slate-500 mt-1"><span data-lang="ui.paste_list_hint">1 baris per orang tua. Format: </span><b>Nama|628xxxxxxxxxx</b> <span data-lang="ui.paste_list_hint2">(bisa dari Excel/WA; 0xx/8xx otomatis jadi 62xx).</span></p>
            </div>
            <div>
                <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-1"><i class="fas fa-link mr-1"></i><span data-lang="ui.group_link_label"> LINK GRUP WHATSAPP</span></label>
-               <input type="text" id="input-link-grup-kelas" placeholder="https://chat.whatsapp.com/..." class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500">
+               <input type="text" id="input-link-grup-kelas" placeholder="https://chat.whatsapp.com/..." data-lang-placeholder="ui.group_link_placeholder" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-sm text-white outline-none focus:border-emerald-500 placeholder:text-slate-500">
            </div>
            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div>

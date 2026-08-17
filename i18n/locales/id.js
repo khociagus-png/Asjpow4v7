@@ -233,10 +233,14 @@ export const id = {
       invite_class_title: 'Undangan Grup WhatsApp Kelas',
       invite_class_desc:
         'Tempel daftar orang tua/wali (Nama|WA), isi link grup & jeda, lalu kirim. Pesan berisi link undangan dikirim satu per satu via Fonnte — aman dari banned.',
+      invite_class_wa_desc:
+        'Kirim undangan Grup WA ke Orang Tua/Wali secara massal — tempel daftar <span class="font-mono text-emerald-400">Nama|WA</span>, isi link grup + pesan (varian dipisah <span class="font-mono text-emerald-400">---</span> bergilir anti-ban), lalu kirim.',
       paste_list_label: 'DAFTAR ORANG TUA/WALI (Nama|WA)',
+      paste_list_placeholder: 'Nama Orang Tua/Wali|628xxxxxxxxxx',
       paste_list_hint: '1 baris per orang tua. Format: ',
       paste_list_hint2: '(bisa dari Excel/WA; 0xx/8xx otomatis jadi 62xx).',
       group_link_label: 'LINK GRUP WHATSAPP',
+      group_link_placeholder: 'https://chat.whatsapp.com/...',
       interval_label: 'JEDA ANTAR PESAN (DETIK)',
       message_label: 'TEMPLATE PESAN',
       message_hint: 'Placeholder: ',

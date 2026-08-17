@@ -4,7 +4,7 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar**.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Fase 3.5 L2-6 tuntas (jembatan `window.*`→import + sentralisasi alias seam via bridge) + merge fitur Undangan Grup Kelas + fix alias WA + test E2E/unit + sentralisasi alias modul bundel (208 alias) + **non-fungsi & guard duplikat & dispatcher `data-action`** + **audit hoisting + unit test `renderFormInbox` jalur `f.docs`** + **audit TDZ `let`/`const` (skrip tokenizer lengkap) + fix TDZ `timer` di `bacaFileBase64`** + **fix action `hapusTugas` tidak terdaftar di api-client.js** + **tombol Undang Grup Kelas dipindah ke panel WA Pintar** + **i18n lengkap teks Undang Grup Kelas (placeholder + deskripsi panel WA) id+jp**.
 
 ---
 

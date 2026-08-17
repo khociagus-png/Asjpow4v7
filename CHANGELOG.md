@@ -1,8 +1,17 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (tombol Undang Grup Kelas dipindah ke panel WA Pintar).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (i18n lengkap teks Undang Grup Kelas id+jp).
 
 ---
+
+## 2026-08-17 — `PENDING` 🌐 i18n lengkap teks Undang Grup Kelas — placeholder & deskripsi panel WA tidak lagi literal
+
+### Ringkasan
+
+- Key `invite_class_*` & teman-temannya sudah ada di `i18n/locales/{id,jp}.js` sejak fitur dibuat; yang masih literal di HTML: placeholder textarea daftar ortu, placeholder input link grup, dan deskripsi section baru di panel WA Pintar.
+- **Key baru ditambahkan** (id + jp): `ui.invite_class_wa_desc` (deskripsi panel WA), `ui.paste_list_placeholder`, `ui.group_link_placeholder`.
+- **HTML di-wire**: `data-lang-placeholder` di 2 input modal + `data-lang` di deskripsi section WA → semua teks kini ikut bahasa (ID/JP) via `renderLanguage`.
+- **Verifikasi**: preview ID & JP — deskripsi, placeholder, judul modal berganti bahasa dengan benar; lint bersih (tanpa duplikat baru), test 148/148.
 
 ## 2026-08-17 — `94f097f` 🎨 Tombol "Undang Grup Kelas" dipindah ke panel WA Pintar (admin-wa)
 
