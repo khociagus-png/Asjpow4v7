@@ -4,7 +4,32 @@
 > supaya tidak mengerjakan ulang hal yang sudah selesai / tidak menyentuh yang
 > memang belum waktunya.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **khoci89** (via Freebuff) — 🛠️ Fix 5 bug: i18n JP, draft siswa hilang, resize iPhone, placeholder WA massal, lock VIP AI CV di server.
+**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔧 Refactor arsitektur: WA rules satu sumber, registry action/build, harness E2E, dedupe rules, i18n split (Fase 4) + import nyata core.
+
+---
+
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `4fa4114`
+
+### 🔧 Refactor arsitektur (5 kandidat deepening) + E2E penuh + 2 debug root-cause
+
+**Fokus user:** "kerjakan semua to do list dan rekomendasi di atas" — laporan arsitektur (`.freebuff/architecture-review.html`, 6 kandidat → 5 dieksekusi), E2E tertunda, 2 tugas debug, lalu eksekusi Fase 3.5 Langkah 1 + Fase 4 i18n.
+
+**Debug (systematic-debugging — root cause dulu, tanpa fix ditebak):**
+1. **Hash VERSION sw.js beda tiap build** — root cause: `build-js.mjs` menghitung `-m<8hex>` dari byte mentah `assets/modals-shared.html`; `core.autocrlf=true` → working tree CRLF vs blob LF → sha1 beda padahal konten sama (CRLF `1335ddba` vs LF `b4f9dc47` = nilai commit, jadi sw.js di repo benar). Fix: hash atas konten ternormalisasi LF → build idempoten, VERSION stabil.
+2. **E2E gagal launch Playwright** — root cause lingkungan: Node.js/Python tidak terpasang (hanya Bun); playwright-core macet di Bun/Windows (pipe DevTools buntu, ws mati setelah handshake 101). Aplikasi & binary chrome sehat (dump-dom OK). Solusi: **Node.js v24.19.0 portable** (temp, ~30 MB) → 4 skrip E2E semua lulus.
+
+**Kandidat arsitektur yang dieksekusi:**
+1. **Normalisasi WA satu sumber** — `shared/wa-rules.js` baru (`normalizeWa` + `isValidWaFormat`) dipakai frontend (`js/04_auth.js`) + backend (`db/client.js` re-export ke 19 pemakai). **Drift nyata diperbaiki**: frontend terima `8xx…` → backend tolak; kini konsisten. (+11 test, kasus SATRIA + 8xx)
+2. **Registry modul build** — `scripts/module-registry.mjs` satu sumber STACK 45 file / halaman / partial modal; `build-js`, `build-html`, `check-globals` (tanpa parse regex), `module-map` semuanya baca registry. Output identik.
+3. **Registry action backend** — `netlify/functions/_lib/action-registry.js` tabel 60+ action + grup rate limit; `handlers.js` turun ±195 baris (switch → lookup). **Test kontrak**: tiap `callAPI('x')` di frontend wajib ada di registry — typo action gagal di test, bukan produksi. (+7 test)
+4. **Harness E2E + dedupe testable** — `e2e/harness.mjs` (check/waitFor/launchBrowser/finish) dipakai 4 skrip (login/upload/biodata/share); `scripts/dedupe-rules.mjs` aturan merge (pickKeeper, fuzzyCluster, deep-merge `ai_data_json`) jadi fungsi murni (+17 test), skrip CLI tinggal orkestrasi.
+5. **i18n fondasi Fase 4** — `i18n.test.js` paritas id↔jp (1.125 key) + guard typo `tr()`. **Bug nyata diperbaiki**: `ui.toast_wa_format` tidak punya terjemahan jp (user JP lihat key mentah). Temuan: `tr()` TIDAK fallback ke id (berlawanan klaim AGENTS.md) — dicatat di REFACTOR_TODO.
+
+**Eksekusi lanjutan (diminta user):**
+- **Fase 3.5 Langkah 1**: `callAPI`/`tr`/`showToast`/`safeSet` jadi **import nyata** di 9 file (`04_auth.js`, `engine/{dashboard,guards,init}`, `render/{public,admin,candidate,share,mail}`) — penggantian word-boundary, `window.trOption`/`trOptionId` tidak tersentuh; `window.*` tinggal di seam HTML onclick.
+- **Fase 4**: `i18n.js` dipecah → `i18n/core.js` (logika + accessor `CURRENT_LANG` + ekstensi `form.*`) + `i18n/locales/{id,jp}.js` (data 852/848 baris); `i18n.js` jadi agregat re-export + alias `window.*` — semua pemuat lama (bundel, bridge, halaman standalone) tidak berubah. Catatan teknis: accessor wajib di core (esbuild tolak assignment ke binding import).
+
+**Verifikasi:** lint 0 error / 12 warning (baseline) · unit test **91 → 131** · build idempoten (`app-4c52ddca9f.js`, VERSION `-mb4f9dc47` stabil) · **4 E2E SEMUA LULUS** (Node portable) · preview :3000 render sempurna, konsol bersih, toggle JP `応募者ログイン` / ID `Login Pelamar` bekerja di browser.
 
 ---
 

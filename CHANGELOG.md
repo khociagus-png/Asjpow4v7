@@ -1,6 +1,24 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`f10c98a` — L/P siswa, auto-fill AI form, biaya 5,5jt, lock naitei).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (`4fa4114` — Refactor arsitektur: WA rules satu sumber, registry action/build, harness E2E, dedupe rules, i18n split Fase 4 + import nyata core).
+
+---
+
+## 2026-08-17 — `4fa4114` 🔧 Refactor arsitektur: WA rules satu sumber, registry action/build, harness E2E, dedupe rules murni, i18n split (Fase 4) + import nyata core (Fase 3.5 L1)
+
+### Ringkasan
+
+- **`shared/wa-rules.js`** (baru) — satu-satunya sumber `normalizeWa`/`isValidWaFormat`, dipakai frontend (`js/04_auth.js`) + backend (`db/client.js` re-export ke 19 pemakai). Drift nyata diperbaiki: frontend menerima `8xx…` sedangkan backend menolak.
+- **`scripts/module-registry.mjs`** (baru) — STACK 45 file / halaman / partial modal satu sumber untuk `build-js`, `build-html`, `check-globals`, `module-map`. Bonus: hash VERSION modals dihitung atas konten LF → stabil di mesin CRLF (fix root-cause `sw.js` selalu dirty setelah build).
+- **`netlify/functions/_lib/action-registry.js`** (baru) — dispatcher tabel 60+ action + grup rate limit; `handlers.js` −195 baris. Test kontrak: setiap `callAPI('x')` frontend wajib terdaftar di registry.
+- **`e2e/harness.mjs`** (baru) — `check`/`waitFor`/`launchBrowser`/`finish` satu tempat untuk 4 skrip E2E (login, upload, biodata, share).
+- **`scripts/dedupe-rules.mjs`** (baru) — aturan merge dedupe (pickKeeper, fuzzyCluster, deep-merge `ai_data_json`) jadi fungsi murni testable; skrip CLI tinggal orkestrasi.
+- **i18n** — `i18n.test.js` paritas id↔jp (1.125 key) + fix `ui.toast_wa_format` jp (user JP sebelumnya melihat key mentah). Fase 4: `i18n.js` dipecah jadi `i18n/core.js` + `i18n/locales/{id,jp}.js`; `i18n.js` tetap agregat re-export + alias `window.*`.
+- **Fase 3.5 Langkah 1** — `callAPI`/`tr`/`showToast`/`safeSet` jadi import nyata di 9 file (`04_auth`, `engine/*`, `render/*`); `window.*` hanya di seam HTML onclick.
+
+### Verifikasi
+
+- Unit test **131/131** (sebelumnya 91) · lint 0 error / 12 warning baseline · build idempoten (`app-4c52ddca9f.js`, VERSION `-mb4f9dc47` stabil) · **4 E2E SEMUA LULUS** (via Node.js v24.19.0 portable — Playwright tidak kompatibel di Bun/Windows) · preview live render + toggle bahasa JP/ID bekerja.
 
 ---
 
