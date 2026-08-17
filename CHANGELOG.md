@@ -1,8 +1,16 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit hoisting + unit test renderFormInbox jalur f.docs).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit TDZ let/const + fix TDZ timer di bacaFileBase64).
 
 ---
+
+## 2026-08-17 — `650098d` 🛡️ Audit TDZ (let/const) seluruh js/* + fix TDZ `timer` di bacaFileBase64
+
+### Ringkasan
+
+- **Audit diperluas** (`.freebuff/audit-hoisting.mjs`): selain hoisting `var`, kini mendeteksi **temporal dead zone** — pemakaian `let`/`const` sebelum deklarasi di blok yang sama/lebih dalam. Tokenizer char-level menangani string, comment, template literal (termasuk tokenisasi penuh ekspresi `${...}`: string/regex/comment — memperbaiki false-positive flag regex `g`), regex literal, CRLF/lone-CR, arrow function (paren + single-param), function expression, dan loop `for`/`for-of`/`for-in`. Tervalidasi menangkap bug `esc` lama + 3 kasus TDZ sintetik.
+- **Bug nyata ditemukan & diperbaiki**: `js/03_candidate.js` `bacaFileBase64` — `done()` memakai `clearTimeout(timer)` sebelum `const timer` di-deklarasi; `done(null)` dipanggil sinkron untuk input kosong → ReferenceError TDZ. Deklarasi `timer` dipindah ke atas `done` + komentar penjelas. Verifikasi: jalur input kosong di preview kini resolve `null` (sebelumnya crash).
+- **Hasil audit akhir: 0 temuan** di seluruh `js/*` (hoisting + TDZ). Test 148/148, lint bersih, build idempoten.
 
 ## 2026-08-17 — `ec61aa5` 🛡️ Audit pola hoisting js/render + js/engine + unit test renderFormInbox (jalur f.docs)
 
