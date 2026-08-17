@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-08-17 — `0b3edbe` 🐛 Fix: Error Render "f is not a function" di Mail Inbox (renderFormInbox)
+
+### Ringkasan
+
+- **Bug pre-existing** (ada sejak sebelum sesi ini): `renderFormInbox` memanggil `esc(...)` di `forEach(f.docs)` sebelum `var esc` di-assign → hoisting membuat `esc` undefined → TypeError. Muncul hanya saat ada lamaran ber-dokumen tambahan.
+- **Fix**: deklarasi `var esc` dipindah ke atas fungsi; duplikat di loop dihapus.
+- **Verifikasi**: lint 0/12 · test 145/145 · build (`app-45f0576074.js`) · smoke renderFormInbox + simulasi data docs OK, 0 error.
+
+---
+
 ## 2026-08-17 — `4135421` 🔧 Refactor: registry seam lengkap — non-fungsi eksplisit, guard tabrakan nama, dispatcher delegasi `data-action`
 
 ### Ringkasan

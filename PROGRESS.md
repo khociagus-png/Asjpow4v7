@@ -8,6 +8,20 @@
 
 ---
 
+## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `0b3edbe`
+
+### 🐛 Fix bug pre-existing: `Error Render: f is not a function` di Mail Inbox (renderFormInbox)
+
+User melaporkan error banner `Error Render: f is not a function` di halaman (screenshot preview).
+
+**Akar masalah (BUG PRE-EXISTING, bukan regresi sesi ini — terkonfirmasi ada sejak 3c1e493/58340e4):** di `renderFormInbox` (`js/render/mail.js`), `var escNama = esc(dc.nama...)` di dalam `forEach(f.docs)` (baris ~151) memanggil `esc` SEBELUM deklarasi `var esc = function...` (baris ~182). Karena hoisting `var`, `esc` = `undefined` saat forEach jalan → TypeError "f is not a function". Error hanya muncul kalau ada lamaran dengan dokumen tambahan (`f.docs` non-kosong) — makanya tidak ketahuan di smoke sebelumnya (data kosong).
+
+**Fix:** deklarasi `var esc` dipindah ke ATAS fungsi `renderFormInbox` (sebelum pemakaian), dengan komentar penjelas; blok duplikat di dalam loop dihapus.
+
+**Verifikasi:** `node --check` OK · lint 0/12 · test 145/145 · build (`app-45f0576074.js`) · smoke preview: `renderFormInbox()` OK termasuk SIMULASI data docs (jalur bug dipaksa jalan), `renderDashboardAgenda` OK, toast & console 0 error.
+
+---
+
 ## 🆕 Sesi 2026-08-17 — dikerjakan oleh: codebuff (via Freebuff) — commit `4135421`
 
 ### 🔧 Seam registry lengkap: non-fungsi eksplisit + guard duplikat + dispatcher delegasi `data-action`
