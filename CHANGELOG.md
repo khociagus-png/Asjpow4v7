@@ -1,8 +1,17 @@
 # CHANGELOG — ASJ Portal
 
-> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (i18n lengkap teks Undang Grup Kelas id+jp).
+> Riwayat fitur & perbaikan per commit, paling lama di atas. Update terakhir: (audit kualitas terjemahan JP — 5 key salah arti/janggal diperbaiki).
 
 ---
+
+## 2026-08-17 — `PENDING` 🇯🇵 Audit kualitas terjemahan Jepang (i18n/locales/jp.js) — 5 key salah arti/janggal diperbaiki
+
+### Ringkasan
+
+- Skrip pembanding id↔jp: **0 key missing** di jp; 11 nilai identik semuanya wajar (alamat, merek, URL, copyright).
+- **Fix salah arti**: `candidate.bio_mother` '母の旧姓' (nama gadis) → '実母の氏名' (nama ibu kandung, sesuai id "NAMA IBU KANDUNG").
+- **Fix janggal**: `landing.class_dana_desc` "無利子／リバなし" → "無利子・利息なし（リバなし）"; `landing.exam_list_3` urutan kata → "会場リクエスト100%保証"; `ui.domisili` '出身地' (tempat lahir) → '現住所（居住地）' (domisili); `ui.zero_candidates` '0 候補者' → '候補者 0人' (gaya JP).
+- **Verifikasi**: preview ID↔JP — kelima key tampil benar di bahasa Jepang; test 148/148; build `app-70c4fbc34d.js`.
 
 ## 2026-08-17 — `baa653d` 🌐 i18n lengkap teks Undang Grup Kelas — placeholder & deskripsi panel WA tidak lagi literal
 
