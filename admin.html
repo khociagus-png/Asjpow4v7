@@ -303,7 +303,6 @@
            <div class="flex flex-col sm:flex-row gap-3 mt-auto">
                <a href="https://chat.whatsapp.com/F0iP9xcdi4G8QDzn1U4bAH" target="_blank" class="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-sm font-bold text-center rounded-xl shadow-md transition hover:-translate-y-0.5" title="Join Grup WhatsApp"><i class="fab fa-whatsapp text-emerald-400 text-lg"></i><span data-lang="landing.class_btn_wa"> Grup WA</span></a>
                <button data-action="bukaModalCekDataSiswa" class="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white text-sm font-bold text-center rounded-xl shadow-md transition hover:-translate-y-0.5" title="Cek List Kandidat Terdaftar"><i class="fas fa-list-alt text-sky-400 text-lg"></i><span data-lang="landing.class_btn_cek"> Cek Data</span></button>
-               <button data-action="bukaModalUndanganKelas" class="px-5 py-3.5 bg-slate-800 hover:bg-emerald-700 border border-emerald-600/60 text-white text-sm font-bold text-center rounded-xl shadow-md transition hover:-translate-y-0.5" title="Kirim Undangan Grup WA ke Orang Tua/Wali (tempel daftar Nama|WA)"><i class="fab fa-whatsapp text-emerald-400 text-lg"></i><span data-lang="ui.invite_class_group"> Undang Grup Kelas</span></button>
                <button data-action="bukaFormSiswa" class="w-full inline-flex items-center justify-center px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition shadow-[0_0_15px_rgba(118,185,0,0.4)]">
                    <i class="fas fa-edit mr-2"></i><span data-lang="landing.class_btn_form"> Form Daftar Siswa
                 </span></button>
@@ -780,6 +779,15 @@
               <!-- JS Render Here -->
            </div>
         </div>
+     </div>
+
+     <!-- UNDANGAN GRUP KELAS (Orang Tua/Wali) — dipindah ke panel WA Pintar supaya satu tempat -->
+     <div class="mt-6 bg-black/40 p-5 rounded-2xl border border-emerald-600/40 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex-1">
+           <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-widest mb-1"><i class="fab fa-whatsapp text-emerald-400 mr-1"></i><span data-lang="ui.invite_class_title">Undangan Grup WhatsApp Kelas (Orang Tua/Wali)</span></h3>
+           <p class="text-xs text-slate-400 leading-relaxed">Kirim undangan Grup WA ke Orang Tua/Wali secara massal — tempel daftar <span class="font-mono text-emerald-400">Nama|WA</span>, isi link grup + pesan (varian dipisah <span class="font-mono text-emerald-400">---</span> bergilir anti-ban), lalu kirim.</p>
+        </div>
+        <button data-action="bukaModalUndanganKelas" class="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold text-center rounded-xl shadow-md transition hover:-translate-y-0.5 shrink-0" title="Kirim Undangan Grup WA ke Orang Tua/Wali (tempel daftar Nama|WA)"><i class="fab fa-whatsapp text-white text-lg mr-1"></i><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
      </div>
   </div>
 
