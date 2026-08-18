@@ -36,6 +36,7 @@ const ACTION_HANDLERS = {
   // Auth
   checkAdminMaster: auth.handleCheckAdminMaster,
   checkAdminPersonal: auth.handleCheckAdminPersonal,
+  refreshAdminSession: auth.handleRefreshAdminSession,
   loginKandidat: auth.handleLoginKandidat,
   daftarKandidat: auth.handleDaftarKandidat,
   gantiPasswordKandidat: auth.handleGantiPasswordKandidat,
@@ -125,6 +126,7 @@ const ACTION_HANDLERS = {
 const LOGIN_ACTIONS = new Set([
   'checkAdminMaster',
   'checkAdminPersonal',
+  'refreshAdminSession',
   'loginKandidat',
   'daftarKandidat',
 ]);

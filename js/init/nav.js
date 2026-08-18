@@ -84,7 +84,27 @@ export function logoutApp() {
   // menunda logout: callAPI membaca localStorage secara sinkron saat
   // membangun body, jadi token sudah terambil sebelum clear di bawah.
   window.callAPI('logout', []).catch(function () {});
-  localStorage.clear();
+  // Hapus HANYA key sesi/auth — BUKAN localStorage.clear() (dulu wipe semua
+  // termasuk preferensi theme per user & draft CV). Kalau admin tidak logout
+  // tapi key sesi utama hilang sebagian, refresh token (asj_admin_refresh)
+  // di boot tetap bisa memulihkan sesi diam-diam.
+  [
+    'asj_admin_login',
+    'asj_admin_name',
+    'asj_admin_session',
+    'asj_admin_refresh',
+    'asj_kandidat_login',
+    'asj_kandidat_name',
+    'asj_kandidat_wa',
+    'asj_kandidat_session',
+    'asj_session_token',
+  ].forEach(function (k) {
+    try {
+      localStorage.removeItem(k);
+    } catch (e) {
+      /* abaikan */
+    }
+  });
   var nAdm = document.getElementById('nav-admin-mode');
   if (nAdm) nAdm.classList.add('hidden');
   var nKan = document.getElementById('nav-kandidat-mode');

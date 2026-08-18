@@ -5,22 +5,60 @@
 // BOOT — urutan inisialisasi saat DOM siap + listener global
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function () {
+import { callAPI } from '../../api-client.js';
+import { getSavedTheme } from './theme.js';
+
+document.addEventListener('DOMContentLoaded', async function () {
   window.injectModalWaPintar();
-  // Terapkan tema SEKARANG (banner/footer/panel sinkron sejak awal, tidak
-  // menunggu respons backend yang bisa lambat/gagal). initApp akan
-  // memanggil applyTheme lagi dengan data backend kalau berhasil dimuat.
+
+  // PEMULIHAN SESI ADMIN DIAM-DIAM (fitur "selama tidak logout, selalu
+  // login walau buka besok"): kalau flag login hilang (mis. localStorage
+  // terhapus sebagian) tapi refresh token masih ada, tukar refresh token
+  // dengan sessionToken baru TANPA modal login. Refresh token hanya
+  // diberikan saat login berhasil dan dicabut saat logout — jadi kalau
+  // masih ada, admin memang belum logout.
+  if (window.IS_ADMIN_PORTAL && localStorage.getItem('asj_admin_login') !== 'sukses') {
+    var refreshToken = null;
+    try {
+      refreshToken = localStorage.getItem('asj_admin_refresh');
+    } catch (e) {
+      /* localStorage tidak tersedia */
+    }
+    if (refreshToken) {
+      var rr = await callAPI('refreshAdminSession', [refreshToken]).catch(function () {
+        return null;
+      });
+      if (rr && rr.success) {
+        localStorage.setItem('asj_admin_login', 'sukses');
+        if (rr.name) localStorage.setItem('asj_admin_name', rr.name);
+        localStorage.setItem('asj_admin_session', rr.sessionToken || '');
+      } else {
+        // Refresh token basi/ditolak → cabut supaya tidak dicoba tiap buka.
+        try {
+          localStorage.removeItem('asj_admin_refresh');
+        } catch (e) {
+          /* abaikan */
+        }
+      }
+    }
+  }
+
+  // Terapkan tema SEKARANG — per identitas aktif (admin/kandidat/guest),
+  // lihat getSavedTheme di theme.js. Banner/footer/panel sinkron sejak
+  // awal, tidak menunggu respons backend yang bisa lambat/gagal; initApp
+  // akan memanggil applyTheme lagi dengan data backend kalau berhasil dimuat.
   var savedTheme = null;
   try {
-    savedTheme = localStorage.getItem('asj_theme');
+    savedTheme = getSavedTheme();
   } catch (e) {}
   window.applyTheme(savedTheme || 'TOKYO');
   window.refreshDataDinamis(false);
 
   // admin.html (window.IS_ADMIN_PORTAL) = portal admin khusus.
-  // Kalau belum login admin, langsung buka modal login admin supaya
-  // halaman benar-benar berfungsi sebagai gerbang panel admin. Kalau
-  // sudah login, initApp() sudah otomatis masuk mode admin.
+  // Kalau masih belum login admin SETELAH percobaan pemulihan refresh
+  // token di atas, buka modal login admin supaya halaman benar-benar
+  // berfungsi sebagai gerbang panel admin. Kalau sudah login (sesi utuh
+  // atau berhasil dipulihkan), initApp() otomatis masuk mode admin.
   if (window.IS_ADMIN_PORTAL && localStorage.getItem('asj_admin_login') !== 'sukses') {
     setTimeout(function () {
       if (typeof window.showLoginAdminMaster === 'function') window.showLoginAdminMaster();

@@ -79,6 +79,40 @@ export function toggleTheme() {
   applyTheme(CURRENT_THEME === 'TOKYO' ? 'SAKURA' : 'TOKYO');
 }
 
+// ========== THEME PER USER ==========
+// Pilihan theme disimpan PER IDENTITAS, bukan satu key global — admin,
+// kandidat, dan pengunjung punya theme sendiri-sendiri:
+//   - admin login   → 'asj_theme_admin'
+//   - kandidat login → 'asj_theme_<wa>'
+//   - selainnya     → 'asj_theme' (pengunjung/guest)
+export function getThemeKey() {
+  try {
+    if (localStorage.getItem('asj_admin_login') === 'sukses') return 'asj_theme_admin';
+    var wa = localStorage.getItem('asj_kandidat_wa');
+    if (localStorage.getItem('asj_kandidat_login') === 'sukses' && wa) {
+      return 'asj_theme_' + wa;
+    }
+  } catch (e) {
+    /* localStorage tidak tersedia */
+  }
+  return 'asj_theme';
+}
+
+// Baca theme tersimpan untuk identitas aktif. Migrasi sekali: kalau key
+// per-user belum ada (pertama kali login setelah fitur ini), pakai nilai
+// key global lama supaya pilihan yang sudah ada tidak hilang.
+export function getSavedTheme() {
+  try {
+    var key = getThemeKey();
+    var v = localStorage.getItem(key);
+    if (v) return v;
+    if (key !== 'asj_theme') return localStorage.getItem('asj_theme');
+  } catch (e) {
+    /* localStorage tidak tersedia */
+  }
+  return null;
+}
+
 // ========== PARTIKEL SAKURA (hanya theme Light) ==========
 // Kelopak sakura berjatuhan halus: kecil, tembus pandang, dan
 // pointer-events-none sehingga tidak mengganggu baca maupun klik.
@@ -229,9 +263,10 @@ export function applyTheme(theme) {
     'asj-footer',
     (ASSETS.FOOTER && ASSETS.FOOTER[theme]) || DEFAULT_ASSETS.FOOTER[theme],
   );
-  // Simpan pilihan theme pengunjung.
+  // Simpan pilihan theme — per identitas aktif (admin/kandidat/guest),
+  // lihat getThemeKey di atas.
   try {
-    localStorage.setItem('asj_theme', theme);
+    localStorage.setItem(getThemeKey(), theme);
   } catch (e) {}
   renderThemeToggle();
   if (typeof renderPublicFilterUI === 'function') renderPublicFilterUI();
@@ -248,6 +283,8 @@ registerSeamAliases(
     toggleTheme,
     applyInterMilanVibe,
     applyTheme,
+    getThemeKey,
+    getSavedTheme,
     THEMES,
   },
   { allowNonFunction: true, source: 'js/init/theme.js' },

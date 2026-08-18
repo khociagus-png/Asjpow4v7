@@ -101,6 +101,59 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
             var m = t.match(/const VERSION = '([^']+)'/);
             if (!m) return;
             var ver = m[1];
+            var swHash = (ver.match(/app-([a-f0-9]+)/) || [])[1];
+
+            // Hash bundel yang BENAR-BENAR TERMUAT di halaman ini (bukan
+            // yang di-sw.js). Kalau beda dengan versi di server → halaman
+            // basi: bersihkan SEMUA cache + unregister SW + reload SEKALI
+            // (guard sessionStorage anti-loop). Ini jaring pengaman terkuat
+            // "selalu auto-update": tidak bergantung sama sekali pada siklus
+            // hidup service worker, jalan tiap kali portal dibuka.
+            var loadedHash = '';
+            var app = document.querySelector('script[src*="/assets/app-"]');
+            if (app) {
+              var am = app.getAttribute('src').match(/app-([a-f0-9]+)\.js/);
+              if (am) loadedHash = am[1];
+            }
+            if (!loadedHash) {
+              var pw = document.querySelector('script[src*="/pwa.js"]');
+              if (pw) {
+                var q = (pw.getAttribute('src') || '').match(/[?&]v=([^&]+)/);
+                if (q) loadedHash = q[1];
+              }
+            }
+            if (loadedHash && swHash && loadedHash !== swHash && !refreshing) {
+              var purged = sessionStorage.getItem('asj_sw_purged');
+              if (purged !== ver) {
+                sessionStorage.setItem('asj_sw_purged', ver);
+                refreshing = true;
+                // Hapus semua cache + unregister SW lama — halaman basi tidak
+                // boleh punya apa pun untuk dijadikan sumber aset lama.
+                if (window.caches && caches.keys) {
+                  caches
+                    .keys()
+                    .then(function (keys) {
+                      keys.forEach(function (k) {
+                        caches.delete(k).catch(function () {});
+                      });
+                    })
+                    .catch(function () {});
+                }
+                if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+                  navigator.serviceWorker
+                    .getRegistrations()
+                    .then(function (regs) {
+                      regs.forEach(function (reg) {
+                        reg.unregister().catch(function () {});
+                      });
+                    })
+                    .catch(function () {});
+                }
+                window.location.reload();
+                return;
+              }
+            }
+
             var last = sessionStorage.getItem('asj_sw_ver');
             sessionStorage.setItem('asj_sw_ver', ver);
             if (last && last !== ver && !refreshing) {

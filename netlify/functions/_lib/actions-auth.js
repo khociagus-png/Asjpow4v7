@@ -87,6 +87,30 @@ async function handleCheckAdminPersonal(payload) {
   return {
     success: true,
     sessionToken: session.signToken({ role: 'admin', name }),
+    // Refresh token "ingat saya": token terpisah (role admin + kind refresh)
+    // yang disimpan frontend di key sendiri. Dipakai boot untuk memulihkan
+    // sesi admin secara diam-diam (tanpa modal login) selama user tidak
+    // logout — walau key sesi utama hilang/terhapus sebagian. Dicabut saat
+    // logout (frontend hapus asj_admin_refresh).
+    refreshToken: session.signToken({ role: 'admin', name, kind: 'refresh' }),
+  };
+}
+
+// Pemulihan sesi diam-diam (refresh token, fitur "selalu login selama tidak
+// logout"): verifikasi refresh token admin, kalau sah terbitkan sessionToken
+// baru. Tidak butuh PIN ulang — token refresh hanya diberikan saat login
+// berhasil dan dicabut saat logout, jadi ini setara dengan sesi yang diperpanjang.
+async function handleRefreshAdminSession(payload) {
+  const rt = String((payload && payload[0]) || '');
+  const t = session.verifyToken(rt);
+  if (!t || t.role !== 'admin' || t.kind !== 'refresh') {
+    return { success: false, sessionInvalid: true, message: 'Sesi admin tidak valid' };
+  }
+  const name = String(t.name || '');
+  return {
+    success: true,
+    name,
+    sessionToken: session.signToken({ role: 'admin', name }),
   };
 }
 
@@ -284,6 +308,7 @@ module.exports = {
   isValidWaFormat,
   handleCheckAdminMaster,
   handleCheckAdminPersonal,
+  handleRefreshAdminSession,
   handleLoginKandidat,
   handleDaftarKandidat,
   handleGantiPasswordKandidat,

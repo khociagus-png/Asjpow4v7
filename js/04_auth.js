@@ -257,6 +257,9 @@ export async function prosesLoginPersonal() {
     // createSession di checkAdminPersonal) - inilah yang dicek
     // ulang oleh doPost untuk semua aksi admin.
     localStorage.setItem('asj_admin_session', res.sessionToken || '');
+    // Refresh token "ingat saya" (key terpisah): dipakai boot untuk
+    // memulihkan sesi admin tanpa modal login selama tidak logout.
+    if (res.refreshToken) localStorage.setItem('asj_admin_refresh', res.refreshToken);
     document.getElementById('modal-admin').classList.add('hidden');
     window.isAdmin = true;
     window.currentAdminName = name;

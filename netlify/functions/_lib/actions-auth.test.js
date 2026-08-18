@@ -6,7 +6,31 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { isValidWaFormat } = require('./actions-auth.js');
+const auth = require('./actions-auth.js');
+const { isValidWaFormat, handleRefreshAdminSession } = auth;
+const session = require('./session.js');
+
+describe('refreshAdminSession — pemulihan sesi admin diam-diam', () => {
+  it('refresh token admin yang sah → sessionToken baru + nama', async () => {
+    const rt = session.signToken({ role: 'admin', name: 'AGUS', kind: 'refresh' });
+    const res = await handleRefreshAdminSession([rt]);
+    expect(res.success).toBe(true);
+    expect(res.name).toBe('AGUS');
+    const t = session.verifyToken(res.sessionToken);
+    expect(t.role).toBe('admin');
+    expect(t.name).toBe('AGUS');
+    expect(t.kind).toBeUndefined(); // token sesi biasa, bukan refresh
+  });
+
+  it('menolak token non-refresh (sesi biasa / role lain / rusak)', async () => {
+    const st = session.signToken({ role: 'admin', name: 'AGUS' });
+    expect((await handleRefreshAdminSession([st])).sessionInvalid).toBe(true);
+    const kand = session.signToken({ role: 'kandidat', wa: '6281234567890', kind: 'refresh' });
+    expect((await handleRefreshAdminSession([kand])).sessionInvalid).toBe(true);
+    expect((await handleRefreshAdminSession(['bogus.token'])).sessionInvalid).toBe(true);
+    expect((await handleRefreshAdminSession([''])).sessionInvalid).toBe(true);
+  });
+});
 
 describe('isValidWaFormat — gate login/daftar kandidat', () => {
   it('menerima 628… 13 digit (awalan HP baku)', () => {

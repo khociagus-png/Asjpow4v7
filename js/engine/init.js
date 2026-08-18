@@ -26,6 +26,7 @@ import { renderJobDilamar, renderProgresPemberkasan } from './dashboard.js';
 import { renderRiwayatKandidat } from '../08_wa_pintar.js';
 import { renderStudentCard } from '../12_esign_match.js';
 import { renderLanguage } from '../01_public.js';
+import { getSavedTheme } from '../init/theme.js';
 import { registerSeamAliases } from '../core/bridge.js';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
 // js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
@@ -476,11 +477,11 @@ export function initApp(res, isSilent = false) {
     if (currentAdminName === 'KHOCI') {
       window.applyInterMilanVibe();
     } else {
-      // Pilihan theme pengunjung (localStorage) menang, fallback ke
-      // config backend, terakhir default TOKYO.
+      // Pilihan theme PER USER (admin/kandidat/guest — getSavedTheme)
+      // menang, fallback ke config backend, terakhir default TOKYO.
       var savedTheme = null;
       try {
-        savedTheme = localStorage.getItem('asj_theme');
+        savedTheme = getSavedTheme();
       } catch (e) {}
       window.applyTheme(savedTheme || res.activeTheme || 'TOKYO');
     }
