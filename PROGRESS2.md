@@ -32,6 +32,18 @@
 
 - 153/153 vitest (tambah 2 test `refreshAdminSession`) · lint 0 error · prettier rapi · audit-globals: tidak ada global baru bermasalah · bundel `app-160ec775b8.js` · preview sehat (PID 18744).
 
+### 🔁 Lanjutan — refresh token KANDIDAT (commit `acb299b`)
+
+- `loginKandidat` kini mengembalikan `refreshToken` (role kandidat + kind refresh); action baru **`refreshKandidatSession`** menukar refresh token → `sessionToken` baru (nama diambil ulang dari DB, fallback ke WA). Boot memulihkan sesi kandidat diam-diam di semua halaman bundel (index.html) — kandidat juga tetap login selama tidak logout.
+- **Hardening keamanan**: token `kind:'refresh'` kini DITOLAK oleh `requireRole`, `isOwnerOrAdmin`, dan `handleGantiPasswordKandidat` — refresh token hanya sah untuk action refresh, tidak bisa dipakai sebagai sesi aksi lain.
+- `logoutApp` ikut mencabut `asj_kandidat_refresh`. Test: +3 vitest — **156/156 vitest**, lint 0 error, bundel `app-0d473e8141.js`. Preview terverifikasi: hapus key sesi kandidat + reload → `isKandidat=true`, `currentKandidatName=AGUS KHOCI`, tanpa modal; logout → refresh token hilang, theme per user utuh.
+
+### 🧪 Audit env Netlify (dicek langsung via Netlify API, 2026-08-18)
+
+- **Semua 12 key inti sudah terpasang** di produksi, termasuk `SESSION_SECRET` (64-hex kuat) — DEPLOY.md lama yang bilang "masih menunggu" sudah salah.
+- ⚠️ **`ASJ_ADMINS` salah format**: isinya daftar 5 nomor WA (salinan `ADMIN_NUMBERS`), bukan `Nama:pin,Nama:pin` → kode melewati item tanpa `:` → login admin personal via env tidak pernah match; praktis hanya KHOCI (via `PIN_KHOCI`) yang bisa login. Tidak ada tabel admin di Supabase sebagai fallback (`findAdmins` hanya menemukan `user_sessions`). **Butuh aksi pemilik**: kasih daftar `Nama:pin` untuk diisi.
+- ⚠️ `ADMIN_NUMBERS` di produksi masih typo 13-digit `0082229020129` (sudah dibetulkan di `.env.local`). `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` belum dipasang di produksi tapi juga belum dipakai kode — opsional.
+
 ---
 
 ## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — lanjutan audit mail: AI form & jalur upload sync

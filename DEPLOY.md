@@ -66,18 +66,28 @@ GEMINI_API_KEY, FONNTE_TOKEN, NETLIFY_SITE_URL,
 GROQ_API_KEY, LOG_DRAIN_TOKEN    # ditambahkan 2026-08-18 (whitelist env.js sudah ada)
 ```
 
-> **Update env terbaru 2026-08-18** (nilai diberikan pemilik via chat): semua key
-> di daftar atas sudah punya nilai **kecuali `ASJ_ADMINS` dan `SESSION_SECRET`** —
-> dua ini wajib di-set. Nilai secret tidak ditulis di repo; set di dashboard
-> Netlify lalu **redeploy** (env baru baru terpasang setelah redeploy).
-> Status 2026-08-18: nilai sudah di-apply ke `.env.local` (preview lokal,
-> gitignored — 12 key terverifikasi hash cocok); **dashboard Netlify masih
-> menunggu**.
-> `ADMIN_NUMBERS` sudah di whitelist `env.js` tapi belum dipakai kode mana pun
-> (legacy — konfirmasi apakah masih dibutuhkan). `CLOUDINARY_URL`,
-> `NETLIFY_AUTH_TOKEN`, dan deploy key SSH bukan env aplikasi — simpan di
-> Keys/API keys Freebuff untuk CLI deploy (cloud `ybzzbw9i` sudah hardcoded di
-> `js/cloudinary.js`). Daftar tugas terbuka: lihat `TODO.md`.
+> **Audit env produksi 2026-08-18** (dicek langsung via Netlify API — status
+> autoritatif):
+>
+> | Key                                                                 | Produksi | Status           | Catatan                                                                                                                                                                                                                                                                                                                                                      |
+> | ------------------------------------------------------------------- | -------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | `SUPABASE_URL` / `SERVICE_ROLE_KEY` / `ANON_KEY` / `STORAGE_BUCKET` | ✅       | OK               | —                                                                                                                                                                                                                                                                                                                                                            |
+> | `ADMIN_MASTER_PIN`                                                  | ✅       | OK               | PIN master admin                                                                                                                                                                                                                                                                                                                                             |
+> | `PIN_KHOCI`                                                         | ✅       | OK               | PIN khusus KHOCI (theme Inter)                                                                                                                                                                                                                                                                                                                               |
+> | `GEMINI_API_KEY` / `FONNTE_TOKEN` / `NETLIFY_SITE_URL`              | ✅       | OK               | —                                                                                                                                                                                                                                                                                                                                                            |
+> | `SESSION_SECRET`                                                    | ✅       | OK               | 64-hex kuat — penanda token sesi HMAC                                                                                                                                                                                                                                                                                                                        |
+> | `ASJ_ADMINS`                                                        | ⚠️       | **SALAH FORMAT** | Terisi daftar 5 **nomor WA** (salinan `ADMIN_NUMBERS`), bukan `Nama:pin,Nama:pin`. Kode (`handleCheckAdminPersonal`) melewati item tanpa `:` → login admin personal via env **tidak pernah match**; praktis hanya KHOCI (via `PIN_KHOCI`) yang bisa login. **Fix wajib**: isi `Nama:pin` (mis. `KHOCI:4444,AGUS:1234`) — pemilik harus kasih nama+PIN admin. |
+> | `ADMIN_NUMBERS`                                                     | ⚠️       | typo             | Masih ada nomor 13-digit `0082229020129` (harusnya `082229020129`, sudah dibetulkan di `.env.local`). Belum dipakai kode (legacy).                                                                                                                                                                                                                           |
+> | `GROQ_API_KEY` / `LOG_DRAIN_TOKEN`                                  | ❌       | opsional         | Sudah di `.env.local` + whitelist `env.js`, **belum dibaca kode mana pun** — boleh diisi untuk persiapan.                                                                                                                                                                                                                                                    |
+>
+> Nilai secret tidak ditulis di repo; set di dashboard Netlify → **redeploy**
+> (env baru terpasang setelah redeploy). Catatan lain: tidak ada tabel admin di
+> Supabase (`admin_users`/`admins`/`staff` tidak ada; `findAdmins` hanya
+> menemukan `user_sessions`) — jadi `ASJ_ADMINS` adalah SATU-SATUNYA mekanisme
+> login admin personal selain KHOCI. `CLOUDINARY_URL`, `NETLIFY_AUTH_TOKEN`, dan
+> deploy key SSH bukan env aplikasi — simpan di Keys/API keys Freebuff untuk CLI
+> deploy (cloud `ybzzbw9i` sudah hardcoded di `js/cloudinary.js`). Daftar tugas
+> terbuka: lihat `TODO.md`.
 
 ---
 

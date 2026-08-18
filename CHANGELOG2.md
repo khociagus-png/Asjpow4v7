@@ -18,6 +18,17 @@
 
 ---
 
+## 2026-08-18 — `acb299b` 🔁 Refresh token kandidat + audit env Netlify
+
+### Ringkasan
+
+- **Refresh token kandidat**: `loginKandidat` mengembalikan `refreshToken` (role kandidat + kind refresh); action baru `refreshKandidatSession` → `sessionToken` baru (nama diambil ulang dari DB, fallback WA). Boot memulihkan sesi kandidat diam-diam (tanpa modal login) di halaman bundel — kandidat tetap login selama tidak logout, setara fitur admin `8511014`.
+- **Hardening**: token `kind:'refresh'` ditolak oleh `requireRole` / `isOwnerOrAdmin` / `handleGantiPasswordKandidat` — refresh token tidak bisa dipakai sebagai sesi aksi lain (test guard ditambahkan).
+- **Audit env Netlify via API** (autoritatif): 12 key inti sudah terpasang termasuk `SESSION_SECRET` (64-hex). ⚠️ `ASJ_ADMINS` **salah format** (isi nomor WA, bukan `Nama:pin`) → login admin personal non-KHOCI tidak berfungsi; tidak ada tabel admin di Supabase. ⚠️ `ADMIN_NUMBERS` produksi masih typo `0082229020129`. `GROQ_API_KEY`/`LOG_DRAIN_TOKEN` belum dipasang (belum dipakai kode). DEPLOY.md §3 diperbarui dengan tabel audit.
+- **Test**: +3 vitest → **156/156** · lint 0 error · bundel `app-0d473e8141.js` · preview terverifikasi.
+
+---
+
 ## 2026-08-18 — 🐛 fix `tandaiDibacaForm` + chip versi footer + investigasi Undangan Wali
 
 ### Ringkasan
