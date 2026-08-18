@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🔧 Audit semua filter + fix 3 handler inline tidak ter-expose (ReferenceError filterKelolaLoker/filterCbx/cariKandidatManual)
+
+### Ringkasan
+
+- **Gejala**: search "Kelola Loker" di admin error `filterKelolaLoker is not defined` tiap ketik; auto-search LOKASI/SYARAT di form Tambah Job tidak bekerja ("kode lokasi ga ada" — padahal 57 opsi checkbox + 52 opsi datalist terisi, yang rusak hanya auto-search-nya).
+- **Akar masalah**: 3 fungsi yang dipanggil HTML inline (`onkeyup`/`onclick`) tidak didaftarkan ke registry seam alias ESM (`registerSeamAliases`) → `window.*` undefined (regresi refactor Fase 3.5: dulu global otomatis saat STACK concat).
+- **Fix** (+3 alias): `filterKelolaLoker` (js/render/public.js), `filterCbx` (js/api/candidates.js), `cariKandidatManual` (js/api/candidates.js — komentar lama "fungsi ini belum pernah dibuat" ternyata sudah ada fungsinya, cuma tidak di-alias).
+- **Audit 64 handler inline** (admin/index/modals-shared) → 0 missing setelah fix; uji fungsional semua filter publik+admin lulus (Playwright), vitest 156/156, lint 0 error.
+
 ## 2026-08-18 — 🟢 LIVE CHECK menyeluruh (E2E + tes + responsif + data + Cloudinary) + fix pwa.js self-check & guard SW E2E
 
 ### Ringkasan

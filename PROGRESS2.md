@@ -5,11 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — live check menyeluruh: semua E2E & tes lulus, tarikan data OK, responsif OK, Cloudinary OK; fix bug self-check versi pwa.js (reload palsu di halaman standalone) + guard SW di E2E (commit `…`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — audit SEMUA filter: 3 handler inline yang tidak ter-expose diperbaiki (`filterKelolaLoker`, `filterCbx`, `cariKandidatManual`), audit 64 handler = 0 missing, semua filter teruji fungsional (commit `…`).
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — LIVE CHECK menyeluruh (E2E + tes + responsif + data + Cloudinary) + fix pwa.js self-check & guard SW E2E
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — audit semua filter admin/publik + fix 3 handler inline tidak ter-expose (ReferenceError)
+
+### Ringkasan
+
+- **Laporan user**: "filter admin loker publik ga jalan — `Uncaught ReferenceError: filterKelolaLoker is not defined`" dan "tambah job: kode lokasi ga ada & auto-search ga bisa".
+- **Akar masalah (satu kelas bug)**: fungsi yang dipanggil HTML inline `onkeyup`/`onclick` tidak didaftarkan ke registry seam alias (`registerSeamAliases`) — jadi `window.filterKelolaLoker`/`window.filterCbx`/`window.cariKandidatManual` **undefined** di bundle (dulu global otomatis saat masih STACK concat, hilang setelah refactor ESM).
+  - `filterKelolaLoker` (search tabel Kelola Loker) → tidak di-seam di `js/render/public.js`.
+  - `filterCbx` (auto-search checkbox LOKASI & SYARAT di form Tambah Job) → tidak di-seam di `js/api/candidates.js`.
+  - `cariKandidatManual` (auto-fill modal Input Kandidat Manual) → tidak di-seam di `js/api/candidates.js` (komentar di file bahkan sudah mencatat bug ini: "fungsi ini belum pernah dibuat" — padahal sudah ada, cuma tidak di-alias).
+- **Audit menyeluruh**: scan semua `onkeyup/oninput/onclick/onchange/onblur` inline di `admin.html`/`index.html`/`partials/modals-shared.html` (64 handler unik) → setelah fix, **0 handler missing** di bundle (diverifikasi browser setelah login admin).
+- **Uji fungsional semua model filter (Playwright, preview lokal)**: publik (search + tab `switchPublicTab`), admin Kelola Loker (`filterKelolaLoker`), Kandidat (`filterKandidat` + filter gender/umur/JFT), DB Job (`filterDbJob`), checkbox LOKASI & SYARAT (`filterCbx`), lokasi edit modal (`list-lokasi` datalist 52 opsi) — **semua memfilter dengan benar, 0 error JS**.
+- **"kode lokasi ga ada" = persepsi efek bug**: opsi lokasi SEBENARNYA terisi penuh (57 checkbox di Tambah Job, 52 opsi datalist di Edit Loker) di lokal maupun live — yang rusak hanya auto-search-nya (ketik → ReferenceError → tidak memfilter apa pun). Setelah fix, ketik langsung memfilter.
+
+## Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — LIVE CHECK menyeluruh (E2E + tes + responsif + data + Cloudinary) + fix pwa.js self-check & guard SW E2E
 
 ### Ringkasan
 
