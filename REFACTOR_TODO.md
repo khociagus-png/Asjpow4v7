@@ -15,14 +15,14 @@
 - [x] **SELESAI 2026-08-18** — `i18n/locales/{id,jp}.js` dipecah per domain ke `i18n/locales/{id,jp}/` (15 domain/bahasa: loader, a11y, header, public, status, table, landing, siswa, ui, candidate, admin, button, footer, alert, form — form dipindah dari `i18n/core.js`; binding `public` pakai `publicKeys` karena reserved di strict mode).
 - [x] **Lint duplikat lintas file** — `scripts/check-i18n.mjs` (baru, ikut `bun run lint`): tiap fragment 1 export objek berisi 1 domain; domain tidak boleh ada di 2+ file (spread-merge di index.js menimpa diam-diam); set domain id == jp; index.js memuat semua domain. Paritas leaf id↔jp tetap diuji runtime `i18n.test.js`.
 
-### Fase 5 — HTML & partial (belum dimulai)
+### Fase 5 — HTML & partial (SELESAI 2026-08-18)
 
-- [ ] Ekstrak head/header/footer/bottom-nav/social ke `partials/`; normalisasi stack `<script>` standalone (`partials/scripts-shared.html`); pindahkan `<style>` inline → `src/`.
-- [ ] Verifikasi `build:html` byte-compatible + visual.
+- [x] **SELESAI** — Ekstrak head/header/footer/social/bottom-nav ke `partials/` (6 partial baru: `head.html` [token `{{ADMIN_SCRIPT}}`], `header.html` [token hamburger/nav margin], `footer.html` + `social.html`, `bottom-nav.html`, `scripts-shared.html` [token `{{PAGE_MODULES}}`/`{{AFTER_PWA}}`]); normalisasi stack `<script>` standalone; style inline (fade-in, print CV, light theme) dipindah → `src/main.css` (light theme kini global, dulu hanya inline di index).
+- [x] **Verifikasi** — `build:html` byte-compatible: 7 halaman = snapshot ± marker region ± style removal ± bump `?v=` CSS (`c1e5a9f34b`→`ed681b7b61`), semua byte lain identik; build idempotent (2× = md5 sama).
 
-### Fase 6 — build/tooling
+### Fase 6 — build/tooling (SELESAI 2026-08-18)
 
-- [ ] `build-js.mjs` daftar entry/modul eksplisit (hapus STACK concat); sourcemap opsional; CI diperluas (lint+test+build+e2e:share).
+- [x] **SELESAI** — `build-js.mjs` pakai daftar modul eksplisit dari import `js/main.js` (`bundleModules()` di module-registry — STACK concat dihapus; bonus: daftar sekarang memuat `js/cloudinary.js` yang dulu tertinggal di STACK); CI diperluas dengan step **e2e:share** (bootstrap server + conditional pada secrets Supabase, di-skip kalau belum dikonfigurasi).
 
 ### Backend & keputusan terbuka
 

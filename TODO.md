@@ -42,11 +42,17 @@
 - [x] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain — ✅ selesai
       2026-08-18 (15 domain/bahasa di `i18n/locales/{id,jp}/` + lint
       `scripts/check-i18n.mjs` untuk duplikat lintas file, ikut `bun run lint`).
-- [ ] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/`;
+- [x] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/`;
       `partials/scripts-shared.html`; pindah `<style>` inline → `src/`;
-      verifikasi `build:html` byte-compatible.
-- [ ] **Fase 6** — `build-js.mjs` entry/modul eksplisit (hapus STACK concat);
-      sourcemap opsional; CI diperluas (lint+test+build+e2e:share).
+      verifikasi `build:html` byte-compatible — ✅ selesai 2026-08-18
+      (6 partial; marker region `<!--XXX_START/END-->`; byte-compat 7 halaman
+      terverifikasi + build idempotent; `?v=` CSS di-bump `ed681b7b61`;
+      light theme kini global di `main.css`).
+- [x] **Fase 6** — `build-js.mjs` entry/modul eksplisit (hapus STACK concat) —
+      ✅ selesai 2026-08-18 (`bundleModules()` dari import `js/main.js`;
+      47 modul incl. `cloudinary.js` yang dulu tertinggal; CI + step
+      `e2e:share` conditional pada secrets Supabase).
+- [ ] Sourcemap bundel opsional (Fase 6, prioritas rendah).
 - [ ] Pastikan semua modul backend pakai `supabase.*` helper (bukan fetch mentah).
 - [ ] (Opsional) cache admin TTL pendek; cek region Supabase.
 

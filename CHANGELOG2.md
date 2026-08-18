@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-18 — Fase 5 (HTML partial) + Fase 6 (build/CI)
+
+### Ringkasan
+
+- **Fase 5**: 6 partial baru (`head/header/footer/social/bottom-nav/scripts-shared`); halaman index/admin/standalone pakai marker region `<!--XXX_START/END-->` yang diregenerasi `build:html` (idempotent, byte-compat terverifikasi vs snapshot — beda hanya marker + style removal + bump `?v=` CSS); style inline (fade-in/print/light) pindah ke `src/main.css`.
+- **Fase 6**: STACK concat dihapus → `bundleModules()` dari import `js/main.js` (47 modul, incl. `cloudinary.js`); CI + step `e2e:share` (conditional secrets Supabase).
+- **Verifikasi**: prettier · lint 0 error · 148/148 vitest · check:globals nol kolisi · build idempotent · E2E login+upload+share semua lulus · preview bersih.
+
+---
+
 ## 2026-08-17 — `02cc74f` 🔒 Pengaman format: pre-commit hook + CI check GitHub
 
 ### Ringkasan

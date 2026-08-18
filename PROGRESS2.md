@@ -5,7 +5,27 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 4 i18n split + sentralisasi alias core root + install Node v22.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 5 (HTML partial) + Fase 6 (build tooling) tuntas.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — Fase 5 partial HTML + Fase 6 build/CI
+
+### 🧩 Fase 5 — HTML & partial: byte-compatible
+
+- **6 partial baru** di `partials/`: `head.html` (token `{{ADMIN_SCRIPT}}` — satu-satunya beda index vs admin), `header.html` (token `{{HAMBURGER_COMMENT}}`/`{{HAMBURGER_CLASS_EXTRA}}`/`{{NAV_ADMIN_MARGIN}}`/`{{NAV_KANDIDAT_MARGIN}}`), `footer.html` + `social.html` (token `{{SOCIAL}}`), `bottom-nav.html` (identik kedua halaman), `scripts-shared.html` (token `{{PAGE_MODULES}}`/`{{AFTER_PWA}}` untuk 5 halaman standalone).
+- **Marker region** `<!--HEAD/HEADER/FOOTER/BOTTOM_NAV/SCRIPTS_SHARED_START/END-->` tetap tinggal di halaman; `build:html` meregenerasi isi region dari partial tiap build (**idempotent** — diuji 2× md5 sama). Token per-halaman di `module-registry.mjs` (`BUNDLE_TOKENS`, `SCRIPT_TOKENS`, `BUNDLE_REGIONS`, `STANDALONE_REGION`).
+- **Style inline dipindah → `src/main.css`** (fade-in, print CV, light theme). Catatan: light theme dulu hanya inline di index.html, sekarang global (admin ikut dapat saat theme-light) — posisi di akhir file menjaga kemenangan cascade seperti inline-in-body.
+- **Verifikasi byte-compat**: 7 halaman (index/admin/5 standalone) di-diff terhadap snapshot pra-refactor — perbedaan hanya marker + style removal + bump `?v=` CSS `c1e5a9f34b`→`ed681b7b61`; semua byte lain identik. Partial dibuat dari byte persis halaman (script one-off di-generate + round-trip assert, lalu dihapus).
+
+### ⚙️ Fase 6 — build tooling: entry eksplisit + CI e2e:share
+
+- **STACK concat dihapus** dari `module-registry.mjs` → `bundleModules()` menurunkan daftar modul bundel dari **import eksplisit `js/main.js`** (satu sumber kebenaran; `build-js.mjs` validasi + `check-globals.mjs` scan). Bonus: daftar kini memuat `js/cloudinary.js` yang dulu tertinggal di STACK → **47 modul**.
+- **CI diperluas**: step `E2E share-view` di `ci-check.yml` — bootstrap server (`bun serve-static.mjs` + ping wait), `node e2e/share-view.mjs`; step **conditional pada secrets Supabase** (di-skip kalau belum dikonfigurasi). Browser check best-effort (chromium tidak di-install di CI → API check yang dijamin).
+
+### ✅ Verifikasi akhir
+
+format:check bersih · lint 0 error (12 warning eqeqeq lama) · 148/148 vitest · check:globals nol kolisi (47 modul) · check:i18n OK · build idempotent · bundle `app-216286d90f.js` (tidak berubah — tidak ada JS yang disentuh) · **E2E login-check + upload-check + share-view SEMUA LULUS** · preview: index/admin/apply-full render bersih (konsol 0 error, IS_ADMIN_PORTAL true, sosial 4 ikon).
 
 ---
 
