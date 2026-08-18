@@ -7,6 +7,10 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { mailStatusUntukUpdate, appendFeedback } = require('./actions-mail.js');
+// Label seksi AI form — diimpor dari ai/cv.js (bukan duplikat) supaya test
+// menjaga sinkron dengan kode produksi; simpan ini juga membuktikan tidak ada
+// circular require (ai/cv → actions-mail).
+const { AI_SEKSI_LABEL } = require('./ai/cv.js');
 
 describe('mailStatusUntukUpdate — transisi status saat biodata/berkas diubah', () => {
   it('baris belum diproses (MENUNGGU/MAIL/BARU/PENDING) tetap MENUNGGU', () => {
@@ -41,6 +45,26 @@ describe('appendFeedback — riwayat aktivitas terakhir (maks 3 entri)', () => {
 
   it('maks 3 entri — yang paling lama dibuang', () => {
     expect(appendFeedback('[A] · [B] · [C]', '[D]')).toBe('[D] · [A] · [B]');
+  });
+});
+
+describe('AI_SEKSI_LABEL — label seksi ai_form untuk ringkasan mail (sync biodata)', () => {
+  it('mencakup semua seksi yang dikelola form AI', () => {
+    expect(AI_SEKSI_LABEL.identitas).toBe('identitas');
+    expect(AI_SEKSI_LABEL.fisik).toBe('fisik & ukuran');
+    expect(AI_SEKSI_LABEL.medis).toBe('medis');
+    expect(AI_SEKSI_LABEL.pendidikan).toBe('pendidikan');
+    expect(AI_SEKSI_LABEL.pekerjaan).toBe('pekerjaan');
+    expect(AI_SEKSI_LABEL.sertifikasi).toBe('sertifikasi');
+    expect(AI_SEKSI_LABEL.keluarga).toBe('keluarga');
+    expect(AI_SEKSI_LABEL.wawancara).toBe('wawancara');
+  });
+
+  it('label terbaca (bukan nama kolom mentah)', () => {
+    for (const label of Object.values(AI_SEKSI_LABEL)) {
+      expect(label.includes('_')).toBe(false);
+      expect(label.trim().length).toBeGreaterThan(0);
+    }
   });
 
   it('spasi ganda / pemisah kosong dibersihkan', () => {

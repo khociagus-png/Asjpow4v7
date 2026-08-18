@@ -15,6 +15,21 @@ const { requireRole } = require('../actions-auth');
 // admin tidak pakai salinan lama yang belum merge ai_data_json (kenalan JP/
 // alamat & array riwayat tampil kosong di copilot admin).
 const { buildMasterNested } = require('../actions-master');
+const { syncBiodataKeMail } = require('../actions-mail');
+
+// Label seksi AI form untuk ringkasan mail ("[BIODATA] fisik & ukuran, medis") —
+// samakan dengan fix sync biodata (submitMasterForm/updateKandidatSuper) supaya
+// admin tahu bagian mana yang di-update kandidat lewat ai_form.
+const AI_SEKSI_LABEL = {
+  identitas: 'identitas',
+  fisik: 'fisik & ukuran',
+  medis: 'medis',
+  pendidikan: 'pendidikan',
+  pekerjaan: 'pekerjaan',
+  sertifikasi: 'sertifikasi',
+  keluarga: 'keluarga',
+  wawancara: 'wawancara',
+};
 
 const APPLY_WA_COLS = ['no_wa', 'wa', 'whatsapp'];
 
@@ -258,9 +273,10 @@ async function handleSubmitDataAsj(payload, sessionToken) {
       const m = await findMasterByWa(wa);
       if (m && m.id !== undefined) {
         let aiOut = aiData;
+        let prev = null;
         try {
           const prevRaw = m.ai_data_json;
-          const prev =
+          prev =
             typeof prevRaw === 'string' && prevRaw.trim() && prevRaw !== '-'
               ? JSON.parse(prevRaw)
               : null;
@@ -272,13 +288,34 @@ async function handleSubmitDataAsj(payload, sessionToken) {
             for (const k of Object.keys(aiData)) aiOut[k] = aiData[k];
           }
         } catch (e) {
-          aiOut = aiData;
+          prev = null;
         }
         await supabaseJson('PATCH', 'master_database_candidate', {
           query: { id: 'eq.' + m.id },
           body: { ai_data_json: JSON.stringify(aiOut), ai_updated_at: new Date().toISOString() },
           headers: { Prefer: 'return=minimal' },
         });
+        // Ringkasan perubahan ke mail (badge UPDATE + "[BIODATA] …"): hanya
+        // seksi yang BENAR-BENAR berubah dari ai_data_json lama, supaya simpan
+        // AI form berulang (tanpa perubahan) tidak menulis feedback tiap kali.
+        try {
+          const labels = [];
+          for (const [key, label] of Object.entries(AI_SEKSI_LABEL)) {
+            const oldVal =
+              prev && typeof prev === 'object' ? JSON.stringify(prev[key] || {}) : null;
+            const newVal = JSON.stringify(aiData[key] || {});
+            if (oldVal !== newVal) labels.push(label);
+          }
+          if (labels.length) {
+            await syncBiodataKeMail(
+              wa,
+              String(identitas.nama_lengkap || identitas.nama || '').trim() || 'KANDIDAT',
+              labels,
+            );
+          }
+        } catch (e) {
+          /* sync mail opsional — jangan gagalkan simpan AI form */
+        }
       }
     } catch (e) {
       /* opsional */
@@ -349,6 +386,7 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
 
 module.exports = {
   APPLY_WA_COLS,
+  AI_SEKSI_LABEL,
   buildMasterNested,
   buildRingkasData,
   findMasterByWa,
