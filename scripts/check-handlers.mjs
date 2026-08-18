@@ -62,6 +62,9 @@ function stripComments(text) {
 
 // Handler inline: onXXX="...". Nilai diambil sampai kutip penutup.
 const ON_RE = /on(?:click|keyup|input|change|blur|load|submit|focus|dblclick)="([^"]*)"/g;
+// data-action="nama" (dispatcher delegasi bridge — resolve dari seam/window;
+// kalau missing: console.warn + klik tidak melakukan apa-apa).
+const ACTION_RE = /data-action="([A-Za-z_$][A-Za-z0-9_$]*)"/g;
 // Panggilan fungsi di dalam nilai handler: (window.)?NAME(
 const CALL_RE = /(window\.)?([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/g;
 
@@ -191,6 +194,9 @@ function collect(text, file) {
       if (STD_GLOBALS.has(name)) continue; // global standard browser/JS
       if (!refs.has(name)) refs.set(name, file);
     }
+  }
+  while ((m = ACTION_RE.exec(text))) {
+    if (!refs.has(m[1])) refs.set(m[1], file);
   }
 }
 
