@@ -70,8 +70,10 @@
 
 ## 🧪 Infra E2E
 
-- [ ] Jalankan E2E Playwright dengan **Node ≥22** (macet di Bun/Windows) —
-      dev/CI pakai Node ≥22, bukan bun.
+- [x] **Jalankan E2E Playwright dengan Node ≥22** — ✅ selesai 2026-08-18:
+      Node v22.23.2 ter-install user-local (tanpa admin); login-check,
+      upload-check, share-view SEMUA lulus; pre-commit hook jalan penuh.
+      CI tetap pakai Node ≥22 (bukan bun) untuk Playwright.
 
 ---
 
