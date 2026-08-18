@@ -5,11 +5,22 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — perburuan bug menyeluruh selesai: audit handler lintas SEMUA halaman/state + smoke click-through admin/kandidat/publik = 0 error; hardening `filterKandidat` (commit `8c008ed`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix AKAR masalah kelas bug handler: scanner permanen `check-handlers.mjs` (terpasang di build + CI) + bug nyata ke-4 `cekRiwayat` ketemu & diperbaiki (commit `…`).
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — PERBURUAN BUG MENYELURUH (audit handler semua halaman + smoke click-through + hardening filter)
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — FIX AKAR MASALAH: scanner `check-handlers.mjs` + bug ke-4 `cekRiwayat` (apply-full)
+
+### Ringkasan
+
+- **Metode systematic-debugging**: fix sebelumnya (daftarkan 3 fungsi) adalah fix GEJALA. Akar masalahnya: TIDAK ADA pengaman otomatis yang menangkap "handler inline dipanggil tapi tidak terdaftar di seam" — kelas bug ini bisa lolos refactor ESM lagi kapan pun.
+- **Baru**: `scripts/check-handlers.mjs` — scanner permanen yang mengumpulkan SEMUA nama fungsi yang dipanggil dari handler inline (HTML statis + string JS yang di-generate, sadar-string-literal, strip komentar, skip property access `document./this./event.` dan global standard browser) lalu membandingkan dengan SEMUA nama yang terdaftar ke `window` (kunci `registerSeamAliases` + `window.X =`) di seluruh js/ + file root. GAGAL (exit 1) kalau ada yang missing.
+- **Terbukti menangkap regresi**: hapus 1 alias sementara (`cekRiwayat`) → scanner GAGAL dengan pesan persis `cekRiwayat (dipakai di: apply-full.html)`; dipulihkan → LULUS.
+- **Bug nyata ke-4 ketemu oleh scanner** (lolos audit sebelumnya karena audit hanya menangkap call PERTAMA per atribut): `cekRiwayat` dipanggil `onblur="formatInputWA(this); cekRiwayat();"` di apply-full.html tapi TIDAK terdaftar di seam apply_full.js → radar "cek WA sudah pernah daftar" di form lamaran TIDAK PERNAH jalan (ReferenceError diam-diam). Fix: daftarkan di seam + terverifikasi runtime `window.cekRiwayat = function`, 0 error.
+- **Terpasang permanen**: `bun run build` sekarang = `check:globals && check:handlers && build:*`; CI (ci-check.yml) dapat step `Check handler aliases (seam)` setelah lint — regresi kelas ini langsung memerah di CI/commit.
+- Validasi: scanner 157 referensi = 0 missing; vitest 156/156; build lulus.
+
+## Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — PERBURUAN BUG MENYELURUH (audit handler semua halaman + smoke click-through + hardening filter)
 
 ### Ringkasan
 

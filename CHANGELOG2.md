@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-18 — 🛡 Fix akar masalah: scanner check-handlers.mjs (build+CI) + bug ke-4 cekRiwayat (apply-full)
+
+### Ringkasan
+
+- **Akar masalah kelas bug** "handler inline tidak ter-expose": tidak ada pengaman otomatis. Baru: `scripts/check-handlers.mjs` — scan semua referensi handler (HTML statis + string JS, sadar-quote, strip komentar, skip DOM API/global browser) vs semua nama terdaftar di window (kunci registerSeamAliases + `window.X =`), exit 1 kalau ada yang missing. Terbukti menangkap regresi (uji hapus-alias).
+- **Bug ke-4 ketemu scanner**: `cekRiwayat` dipanggil `onblur` di apply-full.html tapi tidak di-seam → radar cek WA terdaftar di form lamaran tidak pernah jalan. Fix di `js/pages/apply_full.js`, terverifikasi runtime.
+- **Terpasang di `bun run build`** (check:globals && check:handlers && build:*) **dan CI** (step baru setelah lint). Vitest 156/156.
+
 ## 2026-08-18 — 🔍 Perburuan bug menyeluruh: audit handler semua halaman/state + smoke click-through + hardening filterKandidat
 
 ### Ringkasan
