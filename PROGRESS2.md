@@ -5,7 +5,27 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `338feee` Fase 3.5 L6 tuntas + perbaikan ADMIN_NUMBERS.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 4 i18n split + sentralisasi alias core root + install Node v22.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — Fase 4 tuntas + alias core root + Node
+
+### 🌐 Fase 4 — i18n dipecah per domain + lint duplikat lintas file
+
+- `i18n/locales/{id,jp}.js` (masing-masing ~876 baris) dipecah ke `i18n/locales/{id,jp}/` — **15 domain per bahasa**: loader, a11y, header, public, status, table, landing, siswa, ui, candidate, admin, button, footer, alert, form. Domain `form` (mf__/ai__/txt_*) dipindah dari mutasi `LANG.{id,jp}.form` di `i18n/core.js` ke fragment `form.js` — core kini murni `LANG = { id, jp }`. Binding `public` pakai nama `publicKeys` (reserved di strict-mode ESM).
+- **Lint duplikat lintas file**: `scripts/check-i18n.mjs` (baru, ikut `bun run lint`) — tiap fragment wajib 1 export objek berisi 1 domain; domain tidak boleh muncul di 2+ file (spread-merge di index.js menimpa diam-diam); set domain id == jp; index.js memuat semua domain. Paritas leaf id↔jp tetap diuji `i18n.test.js`.
+- Migrasi pakai script one-off (di-generate, lalu dihapus) — 148/148 vitest lulus sebelum & sesudah.
+
+### 🔌 Fase 3.5 L6 gelombang 2 — alias core root ikut registry seam
+
+- `api-client.js` (callAPI/esc/escJs/resolveSelfUrl) & `i18n.js` (tr/LANG/trOption/trOptionId/renderLanguageLight/toggleFormLanguage) kini **MURNI ESM** — tidak ada `window.X = X` lagi; alias dipasang di `js/core/bridge.js` via `registerSeamAliases` (source `bridge:api-client` / `bridge:i18n`). `i18n.js` jadi agregat `export * from './i18n/core.js'`.
+- `pwa.js` (cobaInstallApp/bersihkanDraftLamaBase64) registrasi sendiri via `import { registerSeamAliases } from './js/core/bridge.js'` (source `pwa`).
+- Verifikasi: 148/148 vitest · eslint no-undef 0 · check:globals nol kolisi · verifikasi browser (bundel + halaman standalone: semua alias = fungsi, terdaftar di `getSeamAliases()`, `tr`/`callAPI` jalan) · **E2E Playwright login-check & upload-check SEMUA LULUS**.
+
+### ⚙️ Infra — Node.js v22.23.2 ter-install
+
+- **Node v22.23.2 + npm 10.9.8** di-install user-local (tanpa admin): `C:\Users\AMANAH Sakura 3\nodejs-v22.23.2\node-v22.23.2-win-x64` (User PATH). E2E Playwright (chromium sudah ada) dan pre-commit hook (`node --check`) kini bisa jalan penuh — dua E2E pertama sukses di mesin ini. Catatan sesi bash lama: `export PATH="$PATH:/c/Users/AMANAH Sakura 3/nodejs-v22.23.2/node-v22.23.2-win-x64"`.
 
 ---
 

@@ -69,6 +69,17 @@
 
 ---
 
+## 2026-08-18 — 🌐 Fase 4 i18n split + 🔌 alias core root + ⚙️ Node v22
+
+### Ringkasan
+
+- **Fase 4**: `i18n/locales/{id,jp}.js` → `i18n/locales/{id,jp}/` (15 domain/bahasa, `form` dipindah dari core.js); lint duplikat lintas file `scripts/check-i18n.mjs` (ikut `bun run lint`).
+- **Fase 3.5 L6 gelombang 2**: alias core root (`api-client.js`, `i18n.js`, `pwa.js`) tidak lagi menulis `window.X = X` — diregistrasikan lewat registry seam di `js/core/bridge.js` (api/i18n) & import bridge (pwa).
+- **Infra**: Node.js v22.23.2 user-local ter-install → E2E Playwright login-check & upload-check **SEMUA LULUS** di mesin ini; pre-commit hook jalan.
+- Verifikasi: 148/148 vitest · eslint no-undef 0 · check:globals nol kolisi · bundle `app-216286d90f.js`.
+
+---
+
 ## 2026-08-18 — `338feee` 🔧 Fase 3.5 L6 tuntas + perbaikan ADMIN_NUMBERS
 
 ### Ringkasan

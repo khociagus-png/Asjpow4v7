@@ -39,8 +39,9 @@
       `helpers_cv.js` dipindah ke registry seam via `js/main.js`; scan
       `window.\w+=` di `js/` 112→108; no-undef 0; check:globals nol kolisi;
       148/148 test; bundle `app-698fbe088a.js`).
-- [ ] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain (`common`, `auth`,
-      `public`, …) + lint key duplikat lintas file.
+- [x] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain — ✅ selesai
+      2026-08-18 (15 domain/bahasa di `i18n/locales/{id,jp}/` + lint
+      `scripts/check-i18n.mjs` untuk duplikat lintas file, ikut `bun run lint`).
 - [ ] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/`;
       `partials/scripts-shared.html`; pindah `<style>` inline → `src/`;
       verifikasi `build:html` byte-compatible.
