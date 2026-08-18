@@ -69,6 +69,16 @@
 
 ---
 
+## 2026-08-18 — `338feee` 🔧 Fase 3.5 L6 tuntas + perbaikan ADMIN_NUMBERS
+
+### Ringkasan
+
+- `helpers_cv.js`: blok alias `window.X = X` (5 simbol) dihapus → registrasi terpusat `registerSeamAliases` di `js/main.js` (Fase 3.5 L6 selesai; modul tetap murni untuk unit-test node).
+- Verifikasi: scan `window.\w+=` di `js/` 112→108 · no-undef 0 · `check:globals` nol kolisi · 148/148 vitest · bundle `app-698fbe088a.js` · browser smoke test OK.
+- `.env.local` ditulis ulang bersih (12 key, tanpa duplikat); `ADMIN_NUMBERS` typo `0082229020129` → `082229020129`.
+
+---
+
 ## 2026-08-18 — `57eb79e` 📋 TODO list + env terbaru + seed template WA
 
 ### Ringkasan

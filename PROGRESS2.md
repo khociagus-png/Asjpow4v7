@@ -5,7 +5,19 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `57eb79e` TODO list + env terbaru ke .env.local + seed template WA "Undangan Wali".
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `338feee` Fase 3.5 L6 tuntas + perbaikan ADMIN_NUMBERS.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — commit `338feee`
+
+### 🔧 Fase 3.5 Langkah 6 tuntas + perbaikan env
+
+- **Fase 3.5 L6 (fasad PortalBridge) SELESAI** — blok alias per-simbol terakhir di `js/` (`helpers_cv.js`: getPath/isGood/makeV/fmtMonthYearJp/mergeArrRiwayat) dihapus; 5 alias diregistrasikan TERPUSAT via `registerSeamAliases` di `js/main.js` (source `main:helpers_cv`). `helpers_cv.js` tetap murni (unit-test node tanpa window).
+- **Verifikasi**: scan `window.\w+=` di `js/` 112→108 · eslint no-undef 0 · `check:globals` nol kolisi · **148/148 vitest** · bundle `app-698fbe088a.js` · verifikasi browser (5 global = fungsi, `getSeamAliases` berisi, konsol bersih). E2E Playwright tidak jalan di mesin ini (node tidak ter-install — keterbatasan terdokumentasi di `REFACTOR_TODO.md` Infra E2E).
+- **`.env.local` ditulis ulang bersih** — 12 key, satu baris masing-masing (sebelumnya ada baris duplikat `ADMIN_NUMBERS`/`NETLIFY_SITE_URL` dari update kemarin karena bug regex script).
+- **`ADMIN_NUMBERS` typo diperbaiki (konfirmasi pemilik)**: `0082229020129` → **`082229020129`** (kelebihan satu 0). Nilai final: `082130442661, 082229020129, 087864932711, 087728149733, 087889502004`. Preview direstart agar env ter-load.
+- Catatan: `ADMIN_NUMBERS`/`GROQ_API_KEY`/`LOG_DRAIN_TOKEN` masih whitelist-only (belum dipakai kode); `SESSION_SECRET` & `ASJ_ADMINS` belum ada.
 
 ---
 
