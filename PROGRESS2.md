@@ -5,11 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — audit SEMUA filter: 3 handler inline yang tidak ter-expose diperbaiki (`filterKelolaLoker`, `filterCbx`, `cariKandidatManual`), audit 64 handler = 0 missing, semua filter teruji fungsional (commit `…`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — perburuan bug menyeluruh selesai: audit handler lintas SEMUA halaman/state + smoke click-through admin/kandidat/publik = 0 error; hardening `filterKandidat` (commit `…`).
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — audit semua filter admin/publik + fix 3 handler inline tidak ter-expose (ReferenceError)
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — PERBURUAN BUG MENYELURUH (audit handler semua halaman + smoke click-through + hardening filter)
+
+### Ringkasan
+
+- **Latarbelakang**: user minta "cari semua bug dulu, jangan buru-buru deploy" — audit sebelumnya hanya men-scan HTML statis; kali ini diperluas ke SEMUA jalur referensi handler.
+- **Audit handler lintas semua halaman + state (runtime Playwright)**:
+  - Publik (guest), Admin (70 handler + 69 handler dinamis JS-generated), Kandidat (15), dan 5 halaman standalone (apply-full/master-full/share/siswa-baru/ai_form) — **semua handler ter-expose, 0 page error, 0 console error** di tiap halaman.
+  - 10 nama "missing" yang muncul di scan statis (addArrayItem/removeArrayItem/updateArrayField/toggleImaMade/toggleSelection/handleExtraFile/onPekerjaanSelect/onFamPekerjaanSelect/openPreview/closePreview) terbukti **false positive** — semuanya handler halaman standalone yang sudah lolos audit di halamannya masing-masing (dikonfirmasi via grep sumber).
+  - Scan `eslint --rule 'no-undef: error'` di SEMUA modul ESM (api-client, i18n, core/init/engine/render/api/pages/admin_modal/ai_copilot, cloudinary, pwa) → **0 error**.
+- **Smoke click-through (browser nyata, tanpa mutasi data)**: 5 tab admin (mail/pelamar/kelola/wa/seting), 8 modal utama (WA Pintar, Undangan Kelas, Tambah Kandidat, Editor Rincian, Edit Loker Full, E-Sign TTD, CV Mini, AI Copilot), klik baris mail pertama, detail loker publik + tab filter publik, CV Mini + Digital CV + modal edit kandidat — **0 error** di semua.
+- **Hardening `filterKandidat`** (js/render/candidate.js): `.toLowerCase()` pada `nama`/`idKandidat`/`tahapan`/`idLoker` tanpa guard → 1 baris kandidat dengan field NULL akan mematikan SELURUH filter (TypeError). Fakta DB: 86/223 kandidat punya `tahapan_seleksi` kosong (empty string, aman) tapi 0 NULL saat ini — hardening mencegah bug di masa depan kalau data kotor masuk.
+- **Kesimpulan**: kelas bug "handler inline tidak ter-expose" sudah tuntas diberantas (3 fix di commit `8812800`); tidak ditemukan bug baru lain di jalur yang diaudit.
+
+## Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — audit semua filter admin/publik + fix 3 handler inline tidak ter-expose (ReferenceError)
 
 ### Ringkasan
 

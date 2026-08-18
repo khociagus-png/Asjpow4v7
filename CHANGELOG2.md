@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🔍 Perburuan bug menyeluruh: audit handler semua halaman/state + smoke click-through + hardening filterKandidat
+
+### Ringkasan
+
+- **Audit runtime lengkap** (Playwright): publik/admin(70+69 dinamis)/kandidat/5 halaman standalone → semua handler ter-expose, 0 page error, 0 console error. Scan `eslint no-undef` seluruh modul ESM → 0 error. 10 "missing" statis terbukti false positive (handler standalone).
+- **Smoke click-through**: 5 tab admin + 8 modal utama + mail row + detail loker publik + CV Mini/Digital CV/modal edit kandidat → 0 error (tanpa mutasi data).
+- **Hardening `filterKandidat`** (js/render/candidate.js): guard `|| ''` di `nama`/`idKandidat`/`tahapan`/`idLoker` — 1 baris kandidat NULL akan mematikan filter (TypeError). Fakta DB: 86/223 kandidat tahapan kosong (empty string aman), 0 NULL saat ini — defensif untuk data kotor ke depan.
+- **Kesimpulan**: kelas bug "handler inline tidak ter-expose" tuntas (3 fix di `8812800`); tidak ada bug baru di jalur yang diaudit. Vitest 156/156, lint 0 error.
+
 ## 2026-08-18 — 🔧 Audit semua filter + fix 3 handler inline tidak ter-expose (ReferenceError filterKelolaLoker/filterCbx/cariKandidatManual)
 
 ### Ringkasan
