@@ -64,6 +64,7 @@ const ADMIN_ACTIONS = new Set([
   'updateKandidatSuper',
   'getCandidatesPage',
   'deleteForm',
+  'tandaiDibacaForm',
   'updateTahapanDbJob',
   'simpanKandidatDanUpload',
   'tandaiGagalJob',
@@ -165,6 +166,7 @@ const NETLIFY_FUNCTIONS = {
   rejectForm: 'candidates',
   reviewForm: 'candidates',
   deleteForm: 'candidates',
+  tandaiDibacaForm: 'candidates',
   // Link bridge & siswa baru
   getDaftarSiswaBaru: 'bridge-links',
   getLinkSiswaBaru: 'bridge-links',

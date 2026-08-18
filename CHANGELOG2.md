@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-08-18 — 🐛 fix `tandaiDibacaForm` + chip versi footer + investigasi Undangan Wali
+
+### Ringkasan
+
+- **Bug "Aksi tidak dikenal: tandaiDibacaForm"**: handler backend ada tapi action tidak terdaftar di peta routing frontend `NETLIFY_FUNCTIONS` (api-client.js) → `callAPI` menolak. Fix: tambah ke `ADMIN_ACTIONS` + `NETLIFY_FUNCTIONS` (`→ 'candidates'`); kontrak test baru memastikan setiap `callAPI` frontend punya route NETLIFY_FUNCTIONS (parsed dari sumber) — **149/149 vitest**.
+- **Chip versi footer hilang**: `pasangPenandaVersi` menempel badge ke `[data-lang="footer.copyright"]`, tapi `renderLanguage`/`renderLanguageLight` menimpa elemen dengan `innerHTML` → badge terhapus tiap render bahasa. Fix: kedua fungsi mempertahankan child `.asj-ver-badge` — terverifikasi `ve185a7dd30` tampil di footer.
+- **Investigasi "Undangan Wali"**: "undang wali" = FITUR Undang Grup Kelas (commit `10a45bc`, pesan default hardcoded di `js/admin_ops/candidates.js`, kirim via `kirimTawaranMassal`) — TIDAK membaca tabel `wa_templates`. Template DB "Undangan Wali" (seed 2026-08-18) isinya beda & hanya dipakai panel WA Pintar. Keputusan hapus/samakan/tetap menunggu pemilik.
+- **SW auto-update KONFIRMASI AKTIF**: `updateViaCache:'none'` + cek 60 dtk + focus/visibility + SKIP_WAITING + auto-reload (controllerchange/ASJ_FORCE_RELOAD) + self-check VERSION; sw.js `skipWaiting()` di install + purge cache lama. (Tidak aktif di localhost/preview — by design.)
+- Build → bundel `app-e185a7dd30.js` · preview bersih.
+
+---
+
 ## 2026-08-18 — Fase 5 lanjutan (partial head standalone) + sourcemap/laporan bundel
 
 ### Ringkasan

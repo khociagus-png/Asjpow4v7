@@ -77,6 +77,22 @@ describe('grup rate limit ⊆ registry', () => {
   }
 });
 
+// Kunci-kunci literal di peta NETLIFY_FUNCTIONS (api-client.js) — routing
+// action → nama function Netlify. Parsed dari sumber karena peta ini PRIVATE
+// modul (tidak di-export). Menjaga agar SETIAP action yang dipanggil frontend
+// punya route — tanpa ini callAPI menolak dengan "Aksi tidak dikenal" walau
+// handler backend-nya ada (bug tandaiDibacaForm, 2026-08-18).
+function netlifyFunctionRoutes() {
+  const src = readFileSync(join(ROOT, 'api-client.js'), 'utf8');
+  const block = src.match(/const NETLIFY_FUNCTIONS = \{([\s\S]*?)\n\};/);
+  if (!block) return [];
+  const keys = [];
+  const re = /^\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/gm;
+  let m;
+  while ((m = re.exec(block[1])) !== null) keys.push(m[1]);
+  return keys;
+}
+
 describe('kontrak frontend → registry', () => {
   const front = frontendActions();
   it('menemukan action yang dipanggil frontend (sanity)', () => {
@@ -88,6 +104,15 @@ describe('kontrak frontend → registry', () => {
     expect(
       missing,
       'action dipanggil frontend tapi tidak terdaftar: ' + missing.join(', '),
+    ).toEqual([]);
+  });
+
+  it('setiap callAPI frontend ADA di peta routing NETLIFY_FUNCTIONS', () => {
+    const routes = new Set(netlifyFunctionRoutes());
+    const missing = front.filter((a) => !routes.has(a));
+    expect(
+      missing,
+      'action dipanggil frontend tapi tidak punya route NETLIFY_FUNCTIONS: ' + missing.join(', '),
     ).toEqual([]);
   });
 });

@@ -5,7 +5,39 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 5 lanjutan (partial head standalone) + sourcemap & laporan ukuran bundel.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix bug `tandaiDibacaForm` + chip versi footer + investigasi "Undangan Wali" & konfirmasi SW auto-update.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — fix bug tandaiDibacaForm + chip versi footer + investigasi Undangan Wali
+
+### 🐛 Fix "Gagal! Aksi tidak dikenal: tandaiDibacaForm" (dari screenshot pemilik)
+
+- Akar masalah: handler backend ADA (`actions-mail.handleTandaiDibacaForm`, terdaftar di `action-registry.js`), tapi action TIDAK ada di peta routing frontend `NETLIFY_FUNCTIONS` (`api-client.js`) → `callAPI` menolak sebelum request terkirim. Juga tidak ada di `ADMIN_ACTIONS` → token sesi admin tidak dikirim.
+- Fix: `tandaiDibacaForm` ditambahkan ke `ADMIN_ACTIONS` + `NETLIFY_FUNCTIONS` (`→ 'candidates'`, satu function dengan reviewForm/approveForm/rejectForm/deleteForm).
+- **Kontrak test diperkuat** (`action-registry.test.js`): test baru — setiap `callAPI('x')` frontend wajib punya route di peta `NETLIFY_FUNCTIONS` (di-parse dari sumber karena peta PRIVATE modul). Bug kelas ini (handler backend ada, route frontend hilang) tidak akan lolos lagi. **149/149 vitest**.
+- Terverifikasi di preview: `callAPI('tandaiDibacaForm')` kini dieksekusi (bukan "Aksi tidak dikenal" lagi).
+
+### 🐛 Chip versi di footer hilang ("ga sync antar team")
+
+- Akar masalah: `pasangPenandaVersi` (pwa.js) menempel badge `.asj-ver-badge` ke `[data-lang="footer.copyright"]`, lalu `renderLanguage` (`01_public.js`) / `renderLanguageLight` (`i18n/core.js`) menimpa elemen itu dengan `el.innerHTML = text` → badge terhapus tiap render bahasa. Jadi chip versi TIDAK PERNAH tampil di footer (bukan masalah cache/SW).
+- Fix: kedua fungsi render bahasa mempertahankan child `.asj-ver-badge` saat mengganti innerHTML. Terverifikasi di preview: `ve185a7dd30` tampil di footer (bundel `app-e185a7dd30.js`).
+
+### 🔍 Investigasi "Undangan Wali" — kok beda? (fitur vs template)
+
+- **"Undang Wali" = FITUR Undang Grup Kelas** (commit `10a45bc`): modal di admin, pesan default **HARDCODED** di `js/admin_ops/candidates.js` (`DEFAULT_PESAN_UNDANGAN_KELAS` — "pengurus LPK AMANAH SAKURA JAPAN PONOROGO … bergabung ke grup WhatsApp resmi kelas … {link_grup}"), dikirim via `kirimTawaranMassal` (`customMessage`). Fitur ini TIDAK membaca tabel `wa_templates`.
+- **Template DB "Undangan Wali"** (di-seed 2026-08-18 atas permintaan awal pemilik, `wa_templates` 2→3) isinya BEDA ("PT Amanah Sakura Japan … hadir dalam pertemuan orang tua/wali") dan HANYA dipakai panel **Kelola Template WA Pintar** (kirim pesan manual via template). Jadi isi berbeda karena memang dua hal yang berbeda.
+- **Menunggu keputusan pemilik**: (a) hapus row template "Undangan Wali" dari DB, (b) samakan isinya dengan default fitur, atau (c) biarkan sebagai template WA Pintar. Tidak ada yang dihapus/diubah di DB tanpa konfirmasi.
+
+### ✅ Konfirmasi SW auto-update — SUDAH AKTIF
+
+- `pwa.js`: register `updateViaCache:'none'` (selalu cek sw.js ke jaringan); cek update saat load + tiap 60 dtk + saat tab fokus/visible; `SKIP_WAITING` saat SW baru terpasang; auto-reload saat `controllerchange`/pesan `ASJ_FORCE_RELOAD` (ditunda kalau user sedang interaksi); jaring pengaman self-check VERSION (fetch `/sw.js?v=` per session, reload sekali kalau berubah).
+- `sw.js`: `self.skipWaiting()` PALING AWAL di install; `VERSION` di-patch otomatis tiap build; cache lama di-purge saat activate.
+- Catatan: di localhost & host preview Freebuff SW sengaja TIDAK didaftarkan (anti cache nyangkut) — auto-update berlaku di production Netlify.
+
+### ✅ Verifikasi
+
+prettier bersih · lint 0 error (12 warning eqeqeq lama) · **149/149 vitest** · check:globals nol kolisi · check:i18n OK · build → bundel `app-e185a7dd30.js` · preview: chip versi tampil di footer, `tandaiDibacaForm` tidak lagi "Aksi tidak dikenal".
 
 ---
 

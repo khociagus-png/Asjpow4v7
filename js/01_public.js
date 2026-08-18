@@ -67,7 +67,14 @@ export function renderLanguage() {
   document.querySelectorAll('[data-lang]').forEach((el) => {
     const key = el.dataset.lang;
     const text = window.tr(key);
-    if (text !== key) el.innerHTML = text;
+    if (text !== key) {
+      // Pertahankan penanda versi (asj-ver-badge) yang ditempel pwa.js ke
+      // [data-lang="footer.copyright"] — innerHTML pengganti bahasa akan
+      // menghapusnya (chip versi hilang dari footer, 2026-08-18).
+      const badge = el.querySelector('.asj-ver-badge');
+      el.innerHTML = text;
+      if (badge) el.appendChild(badge);
+    }
   });
 
   document.querySelectorAll('[data-lang-placeholder]').forEach((el) => {
