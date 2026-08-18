@@ -48,11 +48,16 @@
       (6 partial; marker region `<!--XXX_START/END-->`; byte-compat 7 halaman
       terverifikasi + build idempotent; `?v=` CSS di-bump `ed681b7b61`;
       light theme kini global di `main.css`).
+- [x] **Fase 5 lanjutan** — duplikat di halaman standalone di-partial-kan —
+      ✅ 2026-08-18 (`partials/head-shared.html` fonts trio + token
+      INDENT/FA_ATTR; `partials/theme-init.html`; byte-compat + idempotent).
 - [x] **Fase 6** — `build-js.mjs` entry/modul eksplisit (hapus STACK concat) —
       ✅ selesai 2026-08-18 (`bundleModules()` dari import `js/main.js`;
       47 modul incl. `cloudinary.js` yang dulu tertinggal; CI + step
       `e2e:share` conditional pada secrets Supabase).
-- [ ] Sourcemap bundel opsional (Fase 6, prioritas rendah).
+- [x] **Sourcemap bundel** — ✅ 2026-08-18 (`build-js` 2-pass,
+      `assets/app-*.js.map` external 1.0 MB; `bun run bundle:size` = laporan
+      per-modul; kandidat lazy-load terbesar: i18n locale ui/form ≈ 97 KB).
 - [ ] Pastikan semua modul backend pakai `supabase.*` helper (bukan fetch mentah).
 - [ ] (Opsional) cache admin TTL pendek; cek region Supabase.
 

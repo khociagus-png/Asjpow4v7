@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-18 — Fase 5 lanjutan (partial head standalone) + sourcemap/laporan bundel
+
+### Ringkasan
+
+- Partial baru `head-shared.html` (fonts trio ber-token INDENT/FA_ATTR) + `theme-init.html` (identik 5×) untuk halaman standalone; marker `HEAD_SHARED`/`THEME_INIT`; byte-compat + idempotent.
+- `build-js` 2-pass + sourcemap external (`app-*.js.map`, tidak di-precache); `bun run bundle:size` = laporan per-modul (kandidat lazy-load: i18n locale ≈ 97 KB, CV builders, admin_ops, ai_copilot).
+- Verifikasi: prettier · lint 0 error · 148/148 vitest · build idempotent · E2E login+share lulus.
+
+---
+
 ## 2026-08-18 — Fase 5 (HTML partial) + Fase 6 (build/CI)
 
 ### Ringkasan

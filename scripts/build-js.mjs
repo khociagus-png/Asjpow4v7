@@ -16,7 +16,14 @@
 // i18n, atau pwa — lihat WORKFLOW.md)
 // =============================================================================
 
-import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  unlinkSync,
+  existsSync,
+  statSync,
+} from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
 // Struktur modul (daftar modul bundel + daftar halaman) — satu sumber
@@ -44,6 +51,7 @@ for (const src of MODULES) {
     process.exit(1);
   }
 }
+// Pass 1 — kode + hash (write:false, tanpa sourcemap — perilaku lama).
 const result = await build({
   entryPoints: [`${ROOT}/js/main.js`],
   bundle: true,
@@ -57,9 +65,26 @@ const code = result.outputFiles[0].text;
 const hash = createHash('sha1').update(code).digest('hex').slice(0, 10);
 const bundleName = `app-${hash}.js`;
 const bundlePath = `${ROOT}/assets/${bundleName}`;
-writeFileSync(bundlePath, code);
+
+// Pass 2 — tulis bundel + sourcemap EXTERNAL (Fase 6 2026-08-18). sourcemap
+// 'linked' butuh output path (esbuild menolak external map dengan write:false),
+// jadi pass 2 memakai write:true + outfile; esbuild menyisipkan komentar
+// sourceMappingURL sendiri. .map tidak di-precache SW — hanya untuk DevTools.
+await build({
+  entryPoints: [`${ROOT}/js/main.js`],
+  bundle: true,
+  format: 'iife',
+  treeShaking: false,
+  minify: true,
+  sourcemap: 'linked',
+  outfile: bundlePath,
+  logLevel: 'silent',
+});
+const writtenSize = statSync(bundlePath).size;
+const mapSize = existsSync(`${bundlePath}.map`) ? statSync(`${bundlePath}.map`).size : 0;
 console.log(
-  `[build-js] Bundel: assets/${bundleName} (${(code.length / 1024).toFixed(1)} KB, ${MODULES.length} modul via js/main.js)`,
+  `[build-js] Bundel: assets/${bundleName} (${(writtenSize / 1024).toFixed(1)} KB, ${MODULES.length} modul via js/main.js)` +
+    (mapSize ? ` · sourcemap ${(mapSize / 1024).toFixed(1)} KB` : ''),
 );
 
 // 2. admin.html & index.html: stack 20 tag -> 1 tag bundel (idempotent, dan
@@ -146,11 +171,15 @@ sw = sw.replace(/const VERSION = '[^']*';/, `const VERSION = 'asj-portal-app-${h
 writeFileSync(swPath, sw);
 console.log(`[build-js] sw.js: VERSION asj-portal-app-${hash}${modHash}`);
 
-// 5. Hapus bundel lama (assets/app-*.js selain yang baru).
+// 5. Hapus bundel lama (assets/app-*.js + sourcemap-nya, selain yang baru).
 for (const f of readdirSync(`${ROOT}/assets`)) {
   if (/^app-[a-f0-9]+\.js$/.test(f) && f !== bundleName) {
     unlinkSync(`${ROOT}/assets/${f}`);
     console.log(`[build-js] Hapus bundel lama: assets/${f}`);
+  }
+  if (/^app-[a-f0-9]+\.js\.map$/.test(f) && f !== `${bundleName}.map`) {
+    unlinkSync(`${ROOT}/assets/${f}`);
+    console.log(`[build-js] Hapus sourcemap lama: assets/${f}`);
   }
 }
 

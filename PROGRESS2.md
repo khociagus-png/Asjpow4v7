@@ -5,7 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 5 (HTML partial) + Fase 6 (build tooling) tuntas.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — Fase 5 lanjutan (partial head standalone) + sourcemap & laporan ukuran bundel.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — Fase 5 lanjutan + sourcemap/laporan bundel
+
+### 🧩 Fase 5 lanjutan — duplikat head/theme-init halaman standalone di-partial-kan
+
+- **`partials/head-shared.html`** — fonts trio (font-awesome + fonts.css + preload) yang duplikat di 5 halaman standalone, dengan token `{{INDENT}}`/`{{FA_ATTR}}`/`{{FA_ATTR2}}` (satu-satunya varian antar halaman: indent 2/4 spasi + urutan atribut link FA di share). **`partials/theme-init.html`** — script inisialisasi tema (identik 5×, tanpa token). Marker `<!--HEAD_SHARED_START/END-->` + `<!--THEME_INIT_START/END-->`; `build:html` meregenerasi per build (byte-compat + idempotent terverifikasi). Sisa head (title/meta/PWA/style inline) sengaja tetap per-halaman — konten memang berbeda (kendala byte-compat).
+
+### ⚙️ Sourcemap bundel + laporan ukuran per-modul
+
+- **`build-js.mjs` 2-pass**: pass 1 = kode+hash (write:false, perilaku lama), pass 2 = `sourcemap:'linked'` dengan write:true → `assets/app-216286d90f.js.map` external (**1.0 MB**, 81 sumber; tidak di-precache SW; bundel tetap 422 KB + komentar `sourceMappingURL`). Cleanup lama juga menghapus `app-*.js.map` usang.
+- **`scripts/bundle-size-report.mjs`** (`bun run bundle:size`): esbuild metafile → laporan per-modul (minified bytes) ke `.freebuff/bundle-size-report.md` (gitignored). **Temuan kandidat lazy-load**: `i18n/locales/{id,jp}/{ui,form}.js` ≈ **97 KB / 23% bundel** (terbesar — hanya satu bahasa yang aktif dipakai runtime), CV builders (`10b_cv_builders` 22.3 KB + `10_cv_rirekisho` + `helpers_cv` ≈ 28 KB), `admin_ops/*` ≈ 30 KB (admin-only), `ai_copilot/*` ≈ 18 KB (admin-only), `08_wa_pintar` 13.6 KB, `13_rincian_builder` 10.1 KB.
+
+### ✅ Verifikasi
+
+format:check bersih · lint 0 error · 148/148 vitest · check:globals nol kolisi · build idempotent (md5 index/admin sama) · E2E login-check & share-view lulus · preview: apply-full render (theme-dark, fonts trio + main.css ter-load dari partial).
 
 ---
 

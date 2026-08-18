@@ -18,11 +18,13 @@
 ### Fase 5 — HTML & partial (SELESAI 2026-08-18)
 
 - [x] **SELESAI** — Ekstrak head/header/footer/social/bottom-nav ke `partials/` (6 partial baru: `head.html` [token `{{ADMIN_SCRIPT}}`], `header.html` [token hamburger/nav margin], `footer.html` + `social.html`, `bottom-nav.html`, `scripts-shared.html` [token `{{PAGE_MODULES}}`/`{{AFTER_PWA}}`]); normalisasi stack `<script>` standalone; style inline (fade-in, print CV, light theme) dipindah → `src/main.css` (light theme kini global, dulu hanya inline di index).
+- [x] **Lanjutan 2026-08-18** — duplikat di 5 halaman standalone ikut di-partial-kan: `partials/head-shared.html` (fonts trio: font-awesome + fonts.css + preload; token `{{INDENT}}`/`{{FA_ATTR}}`/`{{FA_ATTR2}}` — satu-satunya varian antar halaman: indent 2/4 spasi & urutan atribut link FA di share) + `partials/theme-init.html` (script inisialisasi tema, identik 5×, tanpa token). Marker `<!--HEAD_SHARED_START/END-->` + `<!--THEME_INIT_START/END-->`; build:html regenerate per build (byte-compat + idempotent terverifikasi). Sisa head (title/meta/PWA inline style) sengaja dibiarkan per-halaman — kontennya memang beda (byte-compat).
 - [x] **Verifikasi** — `build:html` byte-compatible: 7 halaman = snapshot ± marker region ± style removal ± bump `?v=` CSS (`c1e5a9f34b`→`ed681b7b61`), semua byte lain identik; build idempotent (2× = md5 sama).
 
 ### Fase 6 — build/tooling (SELESAI 2026-08-18)
 
 - [x] **SELESAI** — `build-js.mjs` pakai daftar modul eksplisit dari import `js/main.js` (`bundleModules()` di module-registry — STACK concat dihapus; bonus: daftar sekarang memuat `js/cloudinary.js` yang dulu tertinggal di STACK); CI diperluas dengan step **e2e:share** (bootstrap server + conditional pada secrets Supabase, di-skip kalau belum dikonfigurasi).
+- [x] **Sourcemap + laporan ukuran** — `build-js.mjs` kini 2-pass (pass 1 hash tanpa sourcemap, pass 2 `sourcemap:'linked'` write:true) → `assets/app-<hash>.js.map` external (1.0 MB, tidak di-precache SW); bundel bersih dari inline map. `scripts/bundle-size-report.mjs` (`bun run bundle:size`) — esbuild metafile, laporan per-modul ke `.freebuff/bundle-size-report.md`; temuan: **i18n/locales (ui+form) ≈ 97 KB / 23% bundel** (kandidat lazy-load terbesar), CV builders (10b+10c+helpers ≈ 28 KB), admin_ops ≈ 30 KB, ai_copilot ≈ 18 KB (fitur admin-only), 08_wa_pintar 13.6 KB, 13_rincian_builder 10.1 KB.
 
 ### Backend & keputusan terbuka
 

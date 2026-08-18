@@ -68,6 +68,9 @@ export const PARTIALS = {
   social: 'partials/social.html',
   bottomNav: 'partials/bottom-nav.html',
   scriptsShared: 'partials/scripts-shared.html',
+  // Fase 5 lanjutan (2026-08-18): duplikat di 5 halaman standalone
+  headShared: 'partials/head-shared.html',
+  themeInit: 'partials/theme-init.html',
 };
 
 // Region marker per halaman bundel (index/admin): region dibungkus marker ini
@@ -80,10 +83,32 @@ export const BUNDLE_REGIONS = {
   bottomNav: { start: '<!--BOTTOM_NAV_START-->', end: '<!--BOTTOM_NAV_END-->' },
 };
 
-// Region marker halaman standalone (stack <script> akhir body).
+// Region marker halaman standalone — tiga region per halaman:
+//  - scripts-shared : stack <script> akhir body
+//  - head-shared    : fonts trio di <head> (font-awesome + fonts.css + preload)
+//  - theme-init     : script inisialisasi tema tepat setelah <body>
 export const STANDALONE_REGION = {
   start: '<!--SCRIPTS_SHARED_START-->',
   end: '<!--SCRIPTS_SHARED_END-->',
+};
+export const STANDALONE_HEAD_REGION = {
+  start: '<!--HEAD_SHARED_START-->',
+  end: '<!--HEAD_SHARED_END-->',
+};
+export const STANDALONE_THEME_INIT_REGION = {
+  start: '<!--THEME_INIT_START-->',
+  end: '<!--THEME_INIT_END-->',
+};
+
+// Token per-halaman untuk partials/head-shared.html — satu-satunya variasi
+// fonts trio antar halaman standalone: INDENT (2/4 spasi) & urutan atribut
+// link font-awesome (share: href dulu, sisanya rel dulu).
+export const HEAD_TOKENS = {
+  'apply-full.html': { INDENT: '  ', FA_ATTR: ' rel="stylesheet"', FA_ATTR2: '' },
+  'master-full.html': { INDENT: '  ', FA_ATTR: ' rel="stylesheet"', FA_ATTR2: '' },
+  'share.html': { INDENT: '    ', FA_ATTR: '', FA_ATTR2: ' rel="stylesheet"' },
+  'siswa-baru.html': { INDENT: '    ', FA_ATTR: ' rel="stylesheet"', FA_ATTR2: '' },
+  'ai_form.html': { INDENT: '    ', FA_ATTR: ' rel="stylesheet"', FA_ATTR2: '' },
 };
 
 // Token per-halaman untuk partial bundle (beda index vs admin — lihat

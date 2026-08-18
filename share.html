@@ -20,10 +20,12 @@
     <meta name="apple-mobile-web-app-title" content="ASJ Portal">
     
     
+<!--HEAD_SHARED_START-->
     <link href="/vendor/font-awesome/css/all.min.css?v=8230c4590e" rel="stylesheet">
     <link rel="stylesheet" href="/fonts/fonts.css?v=1dd324a9c7">
     <!-- Preload font kritis (Montserrat, UI font) — href & url() di fonts.css memakai ?v yang sama. -->
     <link rel="preload" as="font" type="font/woff2" href="/fonts/montserrat-latin.woff2?v=9b1446d51c" crossorigin>
+<!--HEAD_SHARED_END-->
     <style>
         /* Urutan layer Tailwind dideklarasikan DI SINI: blok <style> inline ini
            muncul sebelum CSS main.css yang di-inject Vite. Tanpa deklarasi ini,
@@ -50,7 +52,9 @@
   <link rel="stylesheet" crossorigin href="/assets/main.css?v=ed681b7b61">
 </head>
 <body data-page="share" class="min-h-screen bg-slate-950 overflow-x-hidden selection:bg-pink-500/30 text-slate-100 relative">
+<!--THEME_INIT_START-->
 <script>try{var _t=localStorage.getItem('asj_theme');document.body.classList.add(_t==='SAKURA'?'theme-light':'theme-dark')}catch(e){document.body.classList.add('theme-dark')}</script>
+<!--THEME_INIT_END-->
   <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
   <a href="#main-content" id="skip-link" class="skip-link">Lewati ke konten utama</a>
     

@@ -27,8 +27,11 @@ import {
   PARTIALS,
   BUNDLE_REGIONS,
   STANDALONE_REGION,
+  STANDALONE_HEAD_REGION,
+  STANDALONE_THEME_INIT_REGION,
   BUNDLE_TOKENS,
   SCRIPT_TOKENS,
+  HEAD_TOKENS,
 } from './module-registry.mjs';
 
 const ROOT = process.cwd();
@@ -259,19 +262,29 @@ for (const page of BUNDLE_PAGES) {
   writeFileSync(path, html);
 }
 
-// Halaman standalone: stack <script> akhir body dari scripts-shared partial.
+// Halaman standalone: stack <script> akhir body (scripts-shared) + fonts trio
+// di head (head-shared) + theme-init setelah <body>.
+const STANDALONE_REGIONS = [
+  { region: STANDALONE_REGION, partial: 'scriptsShared', tokensKey: 'SCRIPT_TOKENS' },
+  { region: STANDALONE_HEAD_REGION, partial: 'headShared', tokensKey: 'HEAD_TOKENS' },
+  { region: STANDALONE_THEME_INIT_REGION, partial: 'themeInit', tokensKey: null },
+];
+const TOKEN_MAPS = { SCRIPT_TOKENS, HEAD_TOKENS };
 for (const page of STANDALONE_PAGES) {
   const path = `${ROOT}/${page}`;
-  const html = readFileSync(path, 'utf8');
-  const tokens = SCRIPT_TOKENS[page] || {};
-  const content = expandPartial(`${ROOT}/${PARTIALS.scriptsShared}`, tokens);
-  const next = replaceRegion(html, STANDALONE_REGION.start, STANDALONE_REGION.end, content);
-  if (next !== html) {
-    writeFileSync(path, next);
-    console.log(`[build-html] ${page}: region scripts-shared <- partials/scripts-shared.html`);
-  } else {
-    writeFileSync(path, html);
+  let html = readFileSync(path, 'utf8');
+  for (const { region, partial, tokensKey } of STANDALONE_REGIONS) {
+    const tokens = tokensKey ? TOKEN_MAPS[tokensKey][page] || {} : {};
+    const content = expandPartial(`${ROOT}/${PARTIALS[partial]}`, tokens);
+    const next = replaceRegion(html, region.start, region.end, content);
+    if (next !== html) {
+      html = next;
+      console.log(
+        `[build-html] ${page}: region ${region.start.slice(2, -2).toLowerCase()} <- partials/${PARTIALS[partial].split('/').pop()}`,
+      );
+    }
   }
+  writeFileSync(path, html);
 }
 
 console.log('[build-html] Selesai ✅');
