@@ -33,6 +33,9 @@ export function renderWaTemplates() {
       '</p>' +
       '</div>' +
       '<div class="flex gap-2 border-t border-slate-700 pt-3">' +
+      '<button onclick="kirimTemplateKelas(\'' +
+      t.id +
+      '\')" class="flex-1 py-1.5 bg-emerald-900/50 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-paper-plane"></i> Kirim</button>' +
       '<button onclick="editWaTemplate(\'' +
       t.id +
       '\')" class="flex-1 py-1.5 bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-edit"></i> Edit</button>' +
@@ -95,6 +98,29 @@ export function batalEditWa() {
   if (form) form.reset();
   document.getElementById('wa-id').value = '';
   document.getElementById('wa-form-title').innerText = 'Buat Template Baru';
+}
+
+// Kirim template WA dengan MODEL yang SAMA seperti fitur Undang Grup Kelas
+// (paste daftar Nama|WA + link grup + jeda + varian pesan) — seragam, sesuai
+// permintaan pemilik 2026-08-18. Reuse modal-undangan-kelas + kirimUndanganKelas
+// (kirimTawaranMassal + customMessage); template tinggal di-prefill ke textarea.
+export function kirimTemplateKelas(id) {
+  var t = ALL_WA_TEMPLATES.find((x) => x.id === id);
+  if (!t) return;
+  var pesan = document.getElementById('input-pesan-kelas');
+  if (pesan) pesan.value = String(t.isi || '');
+  // Prefill link grup dari kiriman terakhir (kalau masih kosong).
+  var link = document.getElementById('input-link-grup-kelas');
+  if (link && !link.value) {
+    try {
+      link.value = localStorage.getItem('asj_link_grup_kelas') || '';
+    } catch (e) {
+      /* private mode */
+    }
+  }
+  if (typeof window.previewUndanganKelas === 'function') window.previewUndanganKelas();
+  var modal = document.getElementById('modal-undangan-kelas');
+  if (modal) modal.classList.remove('hidden');
 }
 
 export async function prosesHapusWa(id) {
@@ -476,6 +502,7 @@ registerSeamAliases({
   editWaTemplate,
   batalEditWa,
   prosesHapusWa,
+  kirimTemplateKelas,
   injectModalWaPintar,
   bukaModalWaPintar,
   terapkanTemplateWa,

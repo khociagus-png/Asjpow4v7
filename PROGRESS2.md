@@ -35,9 +35,14 @@
 - `sw.js`: `self.skipWaiting()` PALING AWAL di install; `VERSION` di-patch otomatis tiap build; cache lama di-purge saat activate.
 - Catatan: di localhost & host preview Freebuff SW sengaja TIDAK didaftarkan (anti cache nyangkut) — auto-update berlaku di production Netlify.
 
+### ➕ WA Pintar seragam dengan model Undang Grup Kelas (permintaan pemilik)
+
+- Setiap kartu template WA Pintar kini punya tombol **Kirim** (`kirimTemplateKelas`) yang membuka **modal yang sama persis dengan fitur Undang Grup Kelas** (paste daftar Nama|WA + link grup + jeda + preview varian) — pesan template di-prefill ke textarea, dikirim via `kirimTawaranMassal` + `customMessage`. Model pengiriman jadi seragam di semua template.
+- Terverifikasi di preview: 2 kartu template (WA-001 + PEMBERITAHUAN) punya tombol Kirim; klik → modal terbuka, isi template ter-prefill, `{nama}`/`{link_grup}` ke-preview.
+
 ### ✅ Verifikasi
 
-prettier bersih · lint 0 error (12 warning eqeqeq lama) · **149/149 vitest** · check:globals nol kolisi · check:i18n OK · build → bundel `app-e185a7dd30.js` · preview: chip versi tampil di footer, `tandaiDibacaForm` tidak lagi "Aksi tidak dikenal".
+prettier bersih · lint 0 error (12 warning eqeqeq lama) · **149/149 vitest** · check:globals nol kolisi · check:i18n OK · build → bundel `app-15ef889ffb.js` · preview: chip versi tampil di footer, `tandaiDibacaForm` tidak lagi "Aksi tidak dikenal", tombol Kirim template WA Pintar berfungsi.
 
 ---
 

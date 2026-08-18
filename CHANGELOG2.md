@@ -14,7 +14,7 @@
 - **Chip versi footer hilang**: `pasangPenandaVersi` menempel badge ke `[data-lang="footer.copyright"]`, tapi `renderLanguage`/`renderLanguageLight` menimpa elemen dengan `innerHTML` → badge terhapus tiap render bahasa. Fix: kedua fungsi mempertahankan child `.asj-ver-badge` — terverifikasi `ve185a7dd30` tampil di footer.
 - **Investigasi "Undangan Wali"**: "undang wali" = FITUR Undang Grup Kelas (commit `10a45bc`, pesan default hardcoded di `js/admin_ops/candidates.js`, kirim via `kirimTawaranMassal` + `customMessage`) — TIDAK membaca tabel `wa_templates`. Template seed "Undangan Wali" (isi karangan, 2026-08-18) **DIHAPUS dari DB** (`WA1787018018630169`) — DB kembali ke 2 template asli (`WA-001` "Undangan Grup Default" + "PEMBERITAHUAN GA LOLOS SCREENING"); `scripts/seed-wa-templates.mjs` dihapus.
 - **SW auto-update KONFIRMASI AKTIF**: `updateViaCache:'none'` + cek 60 dtk + focus/visibility + SKIP_WAITING + auto-reload (controllerchange/ASJ_FORCE_RELOAD) + self-check VERSION; sw.js `skipWaiting()` di install + purge cache lama. (Tidak aktif di localhost/preview — by design.)
-- Build → bundel `app-e185a7dd30.js` · preview bersih.
+- **WA Pintar seragam**: kartu template WA Pintar + tombol **Kirim** → membuka modal Undang Grup Kelas yang sama (paste Nama|WA + link + jeda + preview), pesan template di-prefill, kirim via `kirimTawaranMassal`. Build → bundel `app-15ef889ffb.js` · preview bersih.
 
 ---
 
