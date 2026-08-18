@@ -27,7 +27,7 @@
 
 - **"Undang Wali" = FITUR Undang Grup Kelas** (commit `10a45bc`): modal di admin, pesan default **HARDCODED** di `js/admin_ops/candidates.js` (`DEFAULT_PESAN_UNDANGAN_KELAS` — "pengurus LPK AMANAH SAKURA JAPAN PONOROGO … bergabung ke grup WhatsApp resmi kelas … {link_grup}"), dikirim via `kirimTawaranMassal` (`customMessage`). Fitur ini TIDAK membaca tabel `wa_templates`.
 - **Template DB "Undangan Wali"** (di-seed 2026-08-18 atas permintaan awal pemilik, `wa_templates` 2→3) isinya BEDA ("PT Amanah Sakura Japan … hadir dalam pertemuan orang tua/wali") dan HANYA dipakai panel **Kelola Template WA Pintar** (kirim pesan manual via template). Jadi isi berbeda karena memang dua hal yang berbeda.
-- **Menunggu keputusan pemilik**: (a) hapus row template "Undangan Wali" dari DB, (b) samakan isinya dengan default fitur, atau (c) biarkan sebagai template WA Pintar. Tidak ada yang dihapus/diubah di DB tanpa konfirmasi.
+- **Resolusi (setelah pertanyaan lanjutan pemilik "kok gak sama fitur wa undang wali")**: template seed "Undangan Wali" **DIHAPUS dari DB** (`WA1787018018630169` — isi karangan saya, tidak dipakai fitur mana pun, cuma bikin dobel dengan legacy `WA-001`). DB `wa_templates` kembali ke 2 template asli (`WA-001` "Undangan Grup Default" — dipakai tombol "Undang Grup" via fallback server, dan "PEMBERITAHUAN GA LOLOS SCREENING"). `scripts/seed-wa-templates.mjs` ikut dihapus (anti `--apply` ulang).
 
 ### ✅ Konfirmasi SW auto-update — SUDAH AKTIF
 

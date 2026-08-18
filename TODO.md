@@ -27,8 +27,13 @@
 
 ## 🗄️ Data & DB
 
-- [x] **Apply seed template WA "Undangan Wali"** — ✅ di-apply 2026-08-18
-      (konfirmasi pemilik); DB `wa_templates` sekarang 3 template (sebelumnya 2).
+- [x] ~~**Apply seed template WA "Undangan Wali"**~~ — ⚠️ **DIREVERT 2026-08-18**: ternyata
+      "undang wali" adalah FITUR (Undang Grup Kelas, commit `10a45bc` — pesan default
+      hardcoded di `js/admin_ops/candidates.js`, dikirim via `kirimTawaranMassal` +
+      `customMessage`), BUKAN template DB. Isi template seed saya karang sendiri → tidak
+      dipakai fitur mana pun & bikin bingung (muncul dobel dengan legacy `WA-001`
+      "Undangan Grup Default"). Row dihapus (`WA1787018018630169`), DB kembali ke
+      2 template asli, `scripts/seed-wa-templates.mjs` dihapus.
 - [ ] **Dedupe kandidat duplikat**: `bun run dedupe` (dry-run) → kalau ada,
       `bun run dedupe:apply` (backup otomatis ke `.freebuff/`).
 
