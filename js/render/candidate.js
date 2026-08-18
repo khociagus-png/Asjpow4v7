@@ -77,12 +77,13 @@ export async function filterKandidat() {
     : 'all';
 
   var arr = ALL_CANDIDATES.filter(function (c) {
-    // Text Search
+    // Text Search (semua field di-`|| ''` — 1 kandidat dengan field null
+    // tidak boleh mematikan seluruh filter dengan TypeError).
     let matchText =
-      c.nama.toLowerCase().includes(val) ||
-      c.idKandidat.toLowerCase().includes(val) ||
-      c.tahapan.toLowerCase().includes(val) ||
-      (c.idLoker && c.idLoker.toLowerCase().includes(val));
+      (c.nama || '').toLowerCase().includes(val) ||
+      (c.idKandidat || '').toLowerCase().includes(val) ||
+      (c.tahapan || '').toLowerCase().includes(val) ||
+      ((c.idLoker || '') + '').toLowerCase().includes(val);
     if (!matchText) return false;
 
     // Gender Filter
