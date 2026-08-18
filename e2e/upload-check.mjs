@@ -84,8 +84,12 @@ async function storageDelete(path) {
 }
 
 // ---- File dummy --------------------------------------------------------------
+// PDF MINIMAL VALID (xref offset benar) — wajib, karena sejak migrasi Cloudinary
+// (2026-08-17) file diupload langsung dari browser ke Cloudinary yang
+// MEMVALIDASI isi file (PDF palsu ditolak HTTP 400 "Invalid image file").
 const PDF_BYTES = Buffer.from(
-  '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n',
+  'JVBERi0xLjQKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj4KZW5kb2JqCjMgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAyIDAgUiAvTWVkaWFCb3ggWzAgMCA2MTIgNzkyXSAvQ29udGVudHMgNCAwIFIgL1Jlc291cmNlcyA8PCAvRm9udCA8PCAvRjEgNSAwIFIgPj4gPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwgL0xlbmd0aCA0NCA+PgpzdHJlYW0KQlQgL0YxIDEyIFRmIDcyIDcyMCBUZCAoRTJFIFRFU1QgUERGKSBUaiBFVAplbmRzdHJlYW0KZW5kb2JqCjUgMCBvYmoKPDwgL1R5cGUgL0ZvbnQgL1N1YnR5cGUgL1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+CmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1OCAwMDAwMCBuIAowMDAwMDAwMTE1IDAwMDAwIG4gCjAwMDAwMDAyNDEgMDAwMDAgbiAKMDAwMDAwMDMzNCAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDYgL1Jvb3QgMSAwIFIgPj4Kc3RhcnR4cmVmCjQwNAolJUVPRgo=',
+  'base64',
 );
 const browser = await launchBrowser();
 console.log(`\nTarget: ${BASE} | Kandidat tes: ${TEST_WA}\n`);
@@ -268,9 +272,8 @@ try {
         const c = (window.ALL_CANDIDATES || [])[0];
         return c && c.berkas ? c.berkas : null;
       });
-      return (
-        !!b && String(b.ktp || '').includes('KTP.pdf') && String(b.kk || '').includes('KK.pdf')
-      );
+      // URL Cloudinary: nama file dipertahankan + suffix acak (KTP_xmrtee.pdf).
+      return !!b && String(b.ktp || '').includes('KTP_') && String(b.kk || '').includes('KK_');
     }, 30000);
     check('Berkas tersinkron ke data kandidat (DB + fetch ulang)', berkasSynced);
 
@@ -305,14 +308,14 @@ try {
     });
     const pRow = (Array.isArray(pRows) ? pRows : []).find((r) => r.wa === TEST_WA);
     check(
-      'pemberkasan_checklist.ktp_url tersimpan (Storage)',
-      !!pRow && String(pRow.ktp_url || '').includes('KTP.pdf'),
-      JSON.stringify(pRow && pRow.ktp_url).slice(0, 150),
+      'pemberkasan_checklist.ktp_url tersimpan (Cloudinary)',
+      !!pRow && String(pRow.ktp_url || '').includes('KTP_'),
+      (JSON.stringify(pRow && pRow.ktp_url) || '').slice(0, 150),
     );
     check(
-      'pemberkasan_checklist.kk_url tersimpan (Storage)',
-      !!pRow && String(pRow.kk_url || '').includes('KK.pdf'),
-      JSON.stringify(pRow && pRow.kk_url).slice(0, 150),
+      'pemberkasan_checklist.kk_url tersimpan (Cloudinary)',
+      !!pRow && String(pRow.kk_url || '').includes('KK_'),
+      (JSON.stringify(pRow && pRow.kk_url) || '').slice(0, 150),
     );
 
     const mRows = await sbReq('GET', 'master_database_candidate', {
@@ -323,8 +326,8 @@ try {
     const mRow = (Array.isArray(mRows) ? mRows : []).find((r) => String(r.no_wa || '') === TEST_WA);
     check(
       'master_database_candidate.ktp_url ikut tersimpan',
-      !!mRow && String(mRow.ktp_url || '').includes('KTP.pdf'),
-      JSON.stringify(mRow && mRow.ktp_url).slice(0, 150),
+      !!mRow && String(mRow.ktp_url || '').includes('KTP_'),
+      (JSON.stringify(mRow && mRow.ktp_url) || '').slice(0, 150),
     );
   }
 } finally {

@@ -66,3 +66,14 @@
 
 - Pastikan preset unsigned `asjportal` ada di dashboard Cloudinary (Settings → Upload → Unsigned upload preset).
 - Deploy Netlify menunggu izin eksplisit pemilik (DEPLOY.md) — keep-alive & Cloudinary baru live setelah deploy.
+
+---
+
+## 2026-08-18 — `a679c35` + E2E fix `upload-check` — .gitattributes eol=lf & asersi Cloudinary
+
+### Ringkasan
+
+- **`.gitattributes` (`* text=auto eol=lf`)** — di Windows (`core.autocrlf=true`) checkout menghasilkan CRLF sementara build script (Node/Bun) menulis LF, jadi 4 file (admin.html, index.html, assets/*) tampil "modified" padahal isi identik. `eol=lf` membuat checkout selalu LF, konsisten dengan isi repo (sudah LF via prettier `dcb6938`, `endOfLine: "lf"` di `.prettierrc.json`) dan output build. Verifikasi: `git add --renormalize` = 0 perubahan blob (repo sudah LF semua) + `bun run build` → `git status` bersih.
+- **Audit staleness bundle**: bundle `assets/app-23d620bb08.js` pertama dibuat di commit `26f2a91` (sebelum prettier `dcb6938`), tapi KARENA esbuild `minify:true` (hash = sha1 output minified), reformat prettier yang hanya mengubah whitespace menghasilkan output byte-identik → bundle committed TIDAK basi, reproducible dari sumber `3134395` (dibuktikan rebuild idempoten di 2 worktree, `git diff` kosong). Warning LF→CRLF murni artefak autocrlf Windows, bukan bukti staleness.
+- **Fix E2E `upload-check.mjs`** — setelah migrasi Cloudinary, E2E gagal 6 asersi karena: (1) PDF dummy `%PDF-1.4` minimal DITOLAK Cloudinary (HTTP 400 "Invalid image file" — Cloudinary memvalidasi isi, Supabase Storage tidak); (2) asersi masih mengharapkan URL berisi `KTP.pdf` persis, padahal Cloudinary menghasilkan `KTP_<acak>.pdf`; (3) bug laten `JSON.stringify(undefined).slice()` di argumen diagnostik `check()`. Fix: PDF minimal VALID (xref offset benar, 587 B), asersi pakai `KTP_`/`KK_`, dan `(JSON.stringify(x)||'')` defensif. Hasil: E2E upload **SEMUA LULUS** di preview lokal `3134395` (11 asersi).
+- **E2E regresi penuh di preview lokal**: `login-check` LULUS, `biodata-check` LULUS, `upload-check` LULUS, `undang-grup-kelas` LULUS (20 asersi). Unit test vitest `296/296` lulus.

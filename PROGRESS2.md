@@ -5,7 +5,18 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-17 — dikerjakan oleh **codebuff** (via Freebuff) — 🔒 Pengaman format: pre-commit hook + CI check GitHub.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `a679c35` .gitattributes eol=lf + fix E2E upload-check (Cloudinary) + regresi penuh di preview lokal.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — commit `a679c35` + E2E fix
+
+### 🔧 Line ending Windows & kualitas E2E
+
+- **`.gitattributes` eol=lf** — hapus artefak "M" palsu di Windows pasca-build (CRLF vs LF); repo terverifikasi sudah LF semua (`--renormalize` 0 perubahan), build idempoten `app-23d620bb08.js`.
+- **Audit bundle** — `app-23d620bb08.js` dari `26f2a91` TIDAK basi: minify esbuild membuat prettier (whitespace-only) tidak mengubah output; reproducible dari sumber `3134395`.
+- **E2E upload-check diperbaiki** — PDF valid (Cloudinary menolak PDF palsu) + asersi URL Cloudinary `KTP_`/`KK_` + fix crash `JSON.stringify().slice()`.
+- **Regresi penuh preview lokal**: login · biodata · upload · undang-grup-kelas SEMUA LULUS; vitest 296/296.
 
 ---
 
