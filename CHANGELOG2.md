@@ -122,6 +122,18 @@
 
 ---
 
+## 2026-08-18 — 🔍 audit mail: label update biodata mentah + update admin tidak sync ke mail
+
+### Ringkasan
+
+- **Kasus AGUS KHOCI (mail id 263)**: update biodata sudah sync ke mail (`feedback_berkas` `[BIODATA] …`) tapi label tampil mentah (`ukuranbaju`, `kenalan_di_jepang_alamat`) karena `MASTER_FIELD_LABEL` hanya punya ~16 dari ~60 kolom `MASTER_COLUMN_MAP`.
+- **Kasus ANIS AGUSTIN (mail id 141)**: `feedback_berkas` KOSONG — update lewat `updateKandidatSuper` (admin edit kandidat) yang TIDAK pernah memanggil `syncBiodataKeMail` (hanya `submitMasterForm` sisi kandidat yang sync).
+- **Fix 1** (`actions-master.js`): `MASTER_FIELD_LABEL` dilengkapi ke 64 label (fisik/ukuran baju-sepatu-topi, kontak darurat, kenalan di Jepang, paspor, harapan gaji, dll).
+- **Fix 2** (`actions-candidate.js`): `handleUpdateKandidatSuper` bandingkan body vs baris lama → `syncBiodataKeMail` dengan label yang benar-benar berubah (gender/usia/tinggi/berat/JFT/SSW/loker) → badge UPDATE + `[BIODATA] …` muncul seperti update kandidat. Non-fatal.
+- Data lama dinormalisasi di DB (`feedback_berkas` Agus → "ukuran baju, alamat kenalan di Jepang"). Verifikasi: 149/149 vitest · lint 0 error · preview mail rapi.
+
+---
+
 ## 2026-08-18 — `57eb79e` 📋 TODO list + env terbaru + seed template WA
 
 ### Ringkasan

@@ -5,11 +5,20 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix bug `tandaiDibacaForm` + chip versi footer + investigasi "Undangan Wali" & konfirmasi SW auto-update.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — audit mail: label update biodata mentah + update admin tidak sync ke mail.
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — fix bug tandaiDibacaForm + chip versi footer + investigasi Undangan Wali
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — audit mail: label update biodata mentah + update admin tidak sync ke mail
+
+### 🔍 Audit mail — "Agus update ukuran baju kok beda, Anis update kok gak keluar tulisan update"
+
+- **Kasus AGUS KHOCI (mail id 263, status LULUS)**: update biodata SUDAH sync ke mail (`feedback_berkas` berisi `[BIODATA] …`), tapi **label tampil mentah** — `ukuranbaju` bukan "ukuran baju", `kenalan_di_jepang_alamat` bukan "alamat kenalan di Jepang". Akar: `MASTER_FIELD_LABEL` di `actions-master.js` hanya punya ~16 label untuk ~60 kolom `MASTER_COLUMN_MAP` → fallback nama kolom mentah.
+- **Kasus ANIS AGUSTIN (mail id 141, status LULUS)**: `feedback_berkas` KOSONG walau data kandidat berubah hari itu. Akar: update lewat `updateKandidatSuper` (modal edit kandidat / admin) — jalur itu **tidak pernah memanggil `syncBiodataKeMail`**, jadi tidak ada badge UPDATE/tulisan `[BIODATA]` sama sekali (hanya `submitMasterForm` dari sisi kandidat yang sync).
+- **Fix 1 — label lengkap** (`actions-master.js`): `MASTER_FIELD_LABEL` dilengkapi ke 64 label (fisik/ukuran baju/sepatu/topi, kontak darurat, kenalan di Jepang, paspor, harapan gaji, dll) → `ukuranbaju` → "ukuran baju".
+- **Fix 2 — admin edit sync mail** (`actions-candidate.js`): `handleUpdateKandidatSuper` kini membandingkan field body vs baris lama dan memanggil `syncBiodataKeMail` dengan label yang BENAR-BENAR berubah (gender/usia/tinggi/berat/JFT/SSW/loker) → mail kandidat dapat badge UPDATE + `[BIODATA] …` seperti update dari sisi kandidat. Non-fatal (kegagalan sync tidak menggagalkan update).
+- **Data lama dirapikan**: `feedback_berkas` Agus dinormalisasi di DB (`[BIODATA] ukuran baju, alamat kenalan di Jepang`) — 1 baris.
+- Verifikasi: 149/149 vitest · lint 0 error · preview: mail Agus tampil rapi.
 
 ### 🐛 Fix "Gagal! Aksi tidak dikenal: tandaiDibacaForm" (dari screenshot pemilik)
 
