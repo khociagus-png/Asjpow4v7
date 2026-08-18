@@ -5,7 +5,20 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `a679c35` .gitattributes eol=lf + fix E2E upload-check (Cloudinary) + regresi penuh di preview lokal.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — `57eb79e` TODO list + env terbaru ke .env.local + seed template WA "Undangan Wali".
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — commit `57eb79e`
+
+### 📋 TODO list + update env 2026-08-18 + seed template WA
+
+- **`TODO.md` (baru)** — daftar gabungan semua pekerjaan belum selesai (deploy Netlify pending, `SESSION_SECRET` & `ASJ_ADMINS` belum di-set, seed WA, refactor Fase 3.5–6, K1, E2E Node ≥22) — sumber: `REFACTOR_TODO.md` / `REVIEW.md` / `PROGRESS2.md` / `DEPLOY.md`.
+- **`DEPLOY.md` §3** — tambah `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` ke daftar env + catatan refresh 2026-08-18.
+- **Env terbaru pemilik ditulis ke `.env.local`** (gitignored): 12 key (Supabase ×4, `ADMIN_MASTER_PIN`, `PIN_KHOCI`, `ADMIN_NUMBERS`, `FONNTE_TOKEN`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`) — verifikasi hash sha256 semua cocok; preview lokal kini pakai kredensial terbaru.
+- **Seed template WA "Undangan Wali" di-apply** — `bun scripts/seed-wa-templates.mjs --apply` (konfirmasi pemilik): tabel `wa_templates` 2 → 3 template.
+- Catatan: `SESSION_SECRET` & `ASJ_ADMINS` masih belum ada; `ADMIN_NUMBERS` angka `0082229020129` dicurigai typo; `ADMIN_NUMBERS` / `GROQ_API_KEY` / `LOG_DRAIN_TOKEN` sudah di whitelist `env.js` tapi belum dipakai kode.
+- Alur kerja (keputusan pemilik): **tanpa branch** — kerja langsung di `main` local → GitHub.
 
 ---
 

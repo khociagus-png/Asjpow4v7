@@ -69,6 +69,18 @@
 
 ---
 
+## 2026-08-18 — `57eb79e` 📋 TODO list + env terbaru + seed template WA
+
+### Ringkasan
+
+- `TODO.md` (baru): daftar gabungan pekerjaan belum selesai (deploy Netlify pending, `SESSION_SECRET` & `ASJ_ADMINS` belum di-set, seed WA, refactor Fase 3.5–6, K1, E2E Node ≥22).
+- `DEPLOY.md` §3: tambah `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` + status refresh env 2026-08-18.
+- Env terbaru pemilik (12 key) ditulis ke `.env.local` (gitignored) — verifikasi hash cocok semua; preview lokal pakai kredensial baru.
+- Seed template WA "Undangan Wali" di-apply ke DB (`wa_templates` 2 → 3).
+- Keputusan pemilik: tanpa branch — kerja langsung di `main` local → GitHub.
+
+---
+
 ## 2026-08-18 — `a679c35` + E2E fix `upload-check` — .gitattributes eol=lf & asersi Cloudinary
 
 ### Ringkasan
