@@ -7,8 +7,8 @@
 
 ### Fase 3.5 — selesaikan jembatan `window.*` → import nyata
 
-- [ ] Selesaikan Langkah 6: fasad `PortalBridge` (sebagian sudah — sentralisasi seam + dispatcher `data-action` selesai; tersisa pembersihan alias `window.X = X` per-simbol).
-- Kriteria tiap langkah: scan `window\.\w+\s*=` di `js/` menurun · `no-undef` 0 error · `check:globals` nol kolisi · E2E lulus.
+- [x] **SELESAI 2026-08-18** — Langkah 6: fasad `PortalBridge` (sentralisasi seam + dispatcher `data-action` + pembersihan alias per-simbol di `js/`). Blok alias terakhir (`helpers_cv.js`: getPath/isGood/makeV/fmtMonthYearJp/mergeArrRiwayat) dipindah ke registry seam via `registerSeamAliases` di `js/main.js` — modul tetap murni (unit-test node tanpa window). Catatan: alias core di ROOT (`api-client.js`, `i18n.js`, `pwa.js`) tetap ada by design — itu lapisan seam yang sudah di-re-export lewat `PortalBridge`.
+- Kriteria terverifikasi: scan `window\.\w+\s*=` di `js/` 112→108 menurun · `no-undef` 0 error · `check:globals` nol kolisi · 148/148 vitest · bundle `app-698fbe088a.js` (E2E Playwright butuh node — lihat baris Infra E2E).
 
 ### Fase 4 lanjutan — i18n split per domain
 
@@ -27,7 +27,7 @@
 
 - [ ] Pastikan semua modul pakai `supabase.*` helper (bukan fetch mentah).
 - [ ] Keputusan entry per halaman standalone (ESM sudah dipilih — dokumentasikan).
-- [ ] Hapus alias `window.*` per-simbol (tercakup Fase 3.5 L6).
+- [x] Hapus alias `window.*` per-simbol di `js/` (selesai di Fase 3.5 L6, 2026-08-18).
 
 ### Performa opsional (prioritas rendah)
 

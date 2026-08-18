@@ -24,7 +24,7 @@ import '../i18n.js';
 // (registrasi alias seam HTML↔JS terpusat) tersedia di SEMUA halaman, bundel
 // admin/index sekalipun. Hanya import core (api-client + i18n — di-dedupe
 // esbuild), tidak meng-import modul halaman → aman di bundel.
-import './core/bridge.js';
+import { registerSeamAliases } from './core/bridge.js';
 
 // Guard upload + publik (langkah 13 + 12)
 import './upload-guard.js';
@@ -92,9 +92,18 @@ import './12_esign_match.js';
 import './13_rincian_builder.js';
 
 // CV helpers + builders + rirekisho (langkah 12)
-import './helpers_cv.js';
+import { getPath, isGood, makeV, fmtMonthYearJp, mergeArrRiwayat } from './helpers_cv.js';
 import './10b_cv_builders.js';
 import './10_cv_rirekisho.js';
+
+// Fase 3.5 Langkah 6 — alias helpers CV lewat registry seam terpusat
+// (bukan window.X = X per-simbol di helpers_cv.js). Bundel admin/index
+// SAJA: halaman standalone tidak butuh helper CV; helpers_cv tetap murni
+// sehingga unit-test node (vitest) tidak perlu stub window.
+registerSeamAliases(
+  { getPath, isGood, makeV, fmtMonthYearJp, mergeArrRiwayat },
+  { source: 'main:helpers_cv' },
+);
 
 // PWA helper (langkah 13)
 import '../pwa.js';

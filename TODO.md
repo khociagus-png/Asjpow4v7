@@ -18,9 +18,10 @@
       env Netlify; fallback publik di `session.js` hanya untuk sandbox.
 - [ ] **`ASJ_ADMINS`** (`"Nama:pin,Nama:pin"`) — belum diberikan; dipakai
       `handleCheckAdminPersonal` (`actions-auth.js`).
-- [ ] **Konfirmasi `ADMIN_NUMBERS`** — ada di whitelist `env.js` tapi **belum
-      dipakai kode mana pun** (legacy). Nilai `0082229020129` dicurigai typo
-      (yang lain format `08xx` 12 digit — cek nomor sebenarnya).
+- [x] **Konfirmasi `ADMIN_NUMBERS`** — ✅ typo dikonfirmasi & diperbaiki
+      2026-08-18: `0082229020129` → `082229020129` (kelebihan satu 0) di
+      `.env.local`. Masih ada di whitelist `env.js` tapi **belum dipakai kode
+      mana pun** (legacy — konfirmasi apakah masih dibutuhkan).
 - [ ] (Opsional) hapus file uji Cloudinary `DOKUMENASJ/asj-preset-test_*.txt`
       dari akun Cloudinary (preset `asjportal` sudah terverifikasi OK).
 
@@ -33,8 +34,11 @@
 
 ## ♻️ Refactor kode (`REFACTOR_TODO.md`)
 
-- [ ] **Fase 3.5 L6** — selesaikan fasad `PortalBridge` + hapus alias
-      `window.X = X` per-simbol (seam & dispatcher `data-action` sudah selesai).
+- [x] **Fase 3.5 L6** — fasad `PortalBridge` + hapus alias `window.X = X`
+      per-simbol di `js/` — ✅ selesai 2026-08-18 (blok terakhir
+      `helpers_cv.js` dipindah ke registry seam via `js/main.js`; scan
+      `window.\w+=` di `js/` 112→108; no-undef 0; check:globals nol kolisi;
+      148/148 test; bundle `app-698fbe088a.js`).
 - [ ] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain (`common`, `auth`,
       `public`, …) + lint key duplikat lintas file.
 - [ ] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/`;
@@ -72,9 +76,8 @@ preview lokal pakai kredensial terbaru. **Belum di-set ke dashboard Netlify**
   `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`, `NETLIFY_AUTH_TOKEN`, deploy key SSH,
   `CLOUDINARY_URL`.
 - ❌ Belum: `SESSION_SECRET`, `ASJ_ADMINS`.
-- ⚠️ Perlu dicek saat set: `SUPABASE_ANON_KEY` terpecah baris (whitespace besar)
-  — pastikan nilai utuh tanpa spasi; `ADMIN_NUMBERS` nomor `0082229020129`
-  (lihat 🔴 di atas).
+- ✅ `SUPABASE_ANON_KEY` sudah disatukan (tanpa whitespace) & `ADMIN_NUMBERS`
+  typo `0082229020129` → `082229020129` diperbaiki di `.env.local` (2026-08-18).
 - ℹ️ `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` sudah di whitelist `env.js` tapi belum
   dipakai kode (siap pakai). `CLOUDINARY_URL`/deploy key/auth token bukan env
   aplikasi — untuk CLI deploy (`cloud ybzzbw9i` sudah hardcoded di

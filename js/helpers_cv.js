@@ -2,12 +2,13 @@
 // HELPERS CV RIREKISHO (pure logic — tanpa DOM)
 // ==========================================
 // Dipisah dari renderCVAjaib (10_cv_rirekisho.js) supaya bisa di-unit-test
-// tanpa jsdom/global. Memuat di window sebagai global (helpers_cv, getPath,
-// isGood, makeV, fmtMonthYearJp) dan dipakai renderCVAjaib.
+// tanpa jsdom/global.
 //
-// ESM (Fase 3 langkah 12): file ini modul ES — export murni untuk vitest +
-// alias window.* untuk pemakai classic/bundel (10b_cv_builders.js &
-// 10_cv_rirekisho.js memanggil via window.*).
+// ESM (Fase 3 langkah 12): export murni untuk vitest. Pemakai classic/bundel
+// (10b_cv_builders.js & 10_cv_rirekisho.js memanggil via window.*) — alias
+// window.*-nya diregistrasikan TERPUSAT lewat registerSeamAliases di
+// js/main.js (Fase 3.5 Langkah 6), bukan per-simbol di file ini, supaya
+// modul tetap murni (unit-test node tanpa window).
 
 export function getPath(obj, path) {
   return path.split('.').reduce((o, k) => (o || {})[k], obj);
@@ -103,14 +104,6 @@ export function fmtMonthYearJp(str) {
 
 export const helpers_cv = { getPath, isGood, makeV, fmtMonthYearJp, asArr, mergeArrRiwayat };
 
-// BRIDGE ESM → classic (bundel): pemakai classic memanggil via window.*
-// (10b_cv_builders.js: isGood/fmtMonthYearJp; 10_cv_rirekisho.js:
-// makeV/mergeArrRiwayat/getPath). Alias data property — helper ini pure &
-// tidak pernah di-reassign. Guard window utk test (vitest jalan di node).
-if (typeof window !== 'undefined') {
-  window.getPath = getPath;
-  window.isGood = isGood;
-  window.makeV = makeV;
-  window.fmtMonthYearJp = fmtMonthYearJp;
-  window.mergeArrRiwayat = mergeArrRiwayat;
-}
+// BRIDGE ESM → classic (bundel): alias window.* (getPath/isGood/makeV/
+// fmtMonthYearJp/mergeArrRiwayat) diregistrasikan dari js/main.js via
+// registerSeamAliases (Fase 3.5 Langkah 6) — file ini tetap murni.
