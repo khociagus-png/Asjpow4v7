@@ -118,6 +118,7 @@ export const ui = {
     interview_sim: '面接シミュレーター',
     invite_group: 'グループ招待',
     invite_class_group: 'クラスグループ招待',
+    featured_badge: '特別機能',
     invite_class_title: 'クラス WhatsApp グループ招待',
     invite_class_desc:
       '保護者リスト（名前|WA番号）を貼り付け、グループリンクと間隔を入力して送信します。招待リンク付きメッセージがFonnte経由で1件ずつ送信されます（BAN防止）。',

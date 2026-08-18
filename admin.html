@@ -744,6 +744,19 @@
   <!-- ========================================== -->
   <div id="admin-wa" class="hidden bg-slate-900 rounded-xl border border-emerald-900/50 p-6 shadow-xl">
      <h2 class="text-emerald-400 font-bold mb-6 border-b border-emerald-900/50 pb-3 text-lg"><i class="fab fa-whatsapp mr-2"></i><span data-lang="ui.manage_wa_templates"> Kelola Template WA Pintar</span></h2>
+
+     <!-- UNDANGAN GRUP KELAS (Orang Tua/Wali) — di PUNCAK tab WA Pintar supaya selalu ketemu pertama kali -->
+     <div class="mb-6 bg-emerald-950/60 p-5 rounded-2xl border-2 border-emerald-500/70 shadow-[0_0_25px_rgba(16,185,129,0.3)] flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="flex-1">
+           <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-[9px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded-full px-2.5 py-1"><i class="fas fa-star text-amber-400 mr-1"></i><span data-lang="ui.featured_badge">Fitur Khusus</span></span>
+           </div>
+           <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-widest mb-1"><i class="fab fa-whatsapp text-emerald-400 mr-1"></i><span data-lang="ui.invite_class_title">Undangan Grup WhatsApp Kelas (Orang Tua/Wali)</span></h3>
+           <p class="text-xs text-slate-300 leading-relaxed" data-lang="ui.invite_class_wa_desc">Kirim undangan Grup WA ke Orang Tua/Wali secara massal — tempel daftar <span class="font-mono text-emerald-400">Nama|WA</span>, isi link grup + pesan (varian dipisah <span class="font-mono text-emerald-400">---</span> bergilir anti-ban), lalu kirim.</p>
+        </div>
+        <button data-action="bukaModalUndanganKelas" class="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold text-center rounded-xl shadow-lg shadow-emerald-900/60 transition hover:-translate-y-0.5 shrink-0" title="Kirim Undangan Grup WA ke Orang Tua/Wali (tempel daftar Nama|WA)"><i class="fab fa-whatsapp text-white text-lg mr-1"></i><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
+     </div>
+
      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- KIRI: FORM TEMPLATE -->
         <div class="lg:col-span-1 bg-black/40 p-5 rounded-2xl border border-slate-700 flex flex-col h-fit">
@@ -779,14 +792,6 @@
         </div>
      </div>
 
-     <!-- UNDANGAN GRUP KELAS (Orang Tua/Wali) — dipindah ke panel WA Pintar supaya satu tempat -->
-     <div class="mt-6 bg-black/40 p-5 rounded-2xl border border-emerald-600/40 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div class="flex-1">
-           <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-widest mb-1"><i class="fab fa-whatsapp text-emerald-400 mr-1"></i><span data-lang="ui.invite_class_title">Undangan Grup WhatsApp Kelas (Orang Tua/Wali)</span></h3>
-           <p class="text-xs text-slate-400 leading-relaxed" data-lang="ui.invite_class_wa_desc">Kirim undangan Grup WA ke Orang Tua/Wali secara massal — tempel daftar <span class="font-mono text-emerald-400">Nama|WA</span>, isi link grup + pesan (varian dipisah <span class="font-mono text-emerald-400">---</span> bergilir anti-ban), lalu kirim.</p>
-        </div>
-        <button data-action="bukaModalUndanganKelas" class="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold text-center rounded-xl shadow-md transition hover:-translate-y-0.5 shrink-0" title="Kirim Undangan Grup WA ke Orang Tua/Wali (tempel daftar Nama|WA)"><i class="fab fa-whatsapp text-white text-lg mr-1"></i><span data-lang="ui.start_invite">Mulai Kirim Undangan</span></button>
-     </div>
   </div>
 
   <!-- ========================================== -->
@@ -1144,7 +1149,7 @@
   <!-- MODAL REJECT MAIL -->
   
   <script src="/vendor/qrcode-generator.min.js"></script>
-<script src="/assets/app-0d473e8141.js"></script>
+<script src="/assets/app-d473519c0b.js"></script>
 <!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
        adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
        tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah

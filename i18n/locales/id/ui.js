@@ -121,6 +121,7 @@ export const ui = {
     interview_sim: 'Simulator 面接 (Mentsetsu)',
     invite_group: 'Undang Grup',
     invite_class_group: 'Undang Grup Kelas',
+    featured_badge: 'Fitur Khusus',
     invite_class_title: 'Undangan Grup WhatsApp Kelas',
     invite_class_desc:
       'Tempel daftar orang tua/wali (Nama|WA), isi link grup & jeda, lalu kirim. Pesan berisi link undangan dikirim satu per satu via Fonnte — aman dari banned.',
