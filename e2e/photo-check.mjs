@@ -108,6 +108,20 @@ console.log(`\nTarget: ${BASE}\n`);
     if (/\.(png|jpe?g|webp|gif)(\?|$)/i.test(r.url())) failedReqs.push(r.url().slice(0, 150));
   });
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache (host non-localhost: controllerchange bisa
+  // me-reload halaman di tengah tes — sama seperti upload-check/biodata-check).
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   await page.evaluate(() => window.bukaModalKandidat('login'));
   await waitFor(async () => await page.locator('#form-login-kandidat').isVisible());
   await page.fill('#log-wa', WA);
@@ -151,6 +165,19 @@ console.log(`\nTarget: ${BASE}\n`);
     if (/\.(png|jpe?g|webp|gif)(\?|$)/i.test(r.url())) failedReqs.push(r.url().slice(0, 150));
   });
   await page.goto(BASE + '/admin.html', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache — lihat komentar di TEST 2.
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   await waitFor(async () => await page.locator('#modal-admin').isVisible());
   await page.fill('#admin-pin-master', ADMIN_MASTER_PIN);
   await page.click('#btn-login-master');

@@ -109,18 +109,19 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
             // (guard sessionStorage anti-loop). Ini jaring pengaman terkuat
             // "selalu auto-update": tidak bergantung sama sekali pada siklus
             // hidup service worker, jalan tiap kali portal dibuka.
+            // Hash bundel yang BENAR-BENAR TERMUAT di halaman ini (bukan
+            // yang di-sw.js). HANYA untuk halaman bundel (/assets/app-<hash>.js).
+            // Halaman standalone (ai_form/master-full/apply-full/dll) memuat
+            // modul ESM langsung dengan cache-buster ?v=esm<rev> — query itu
+            // BUKAN hash bundel, jadi membandingkannya dengan swHash selalu
+            // beda → purge+reload palsu tiap buka (bug 2026-08-18). Untuk
+            // halaman standalone, jaring pengaman SW (skipWaiting + activate
+            // purge + ASJ_FORCE_RELOAD) + soft-reload di bawah sudah cukup.
             var loadedHash = '';
             var app = document.querySelector('script[src*="/assets/app-"]');
             if (app) {
               var am = app.getAttribute('src').match(/app-([a-f0-9]+)\.js/);
               if (am) loadedHash = am[1];
-            }
-            if (!loadedHash) {
-              var pw = document.querySelector('script[src*="/pwa.js"]');
-              if (pw) {
-                var q = (pw.getAttribute('src') || '').match(/[?&]v=([^&]+)/);
-                if (q) loadedHash = q[1];
-              }
             }
             if (loadedHash && swHash && loadedHash !== swHash && !refreshing) {
               var purged = sessionStorage.getItem('asj_sw_purged');

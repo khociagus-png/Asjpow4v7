@@ -30,6 +30,21 @@ console.log(`\nTarget: ${BASE}\n`);
   page.on('pageerror', (e) => jsErrors.push(String(e)));
 
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache (kalau host bukan localhost, SW aktif dan
+  // controllerchange bisa me-reload halaman di tengah tes — sama seperti
+  // upload-check/biodata-check).
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   const rendered = await waitFor(
     async () => (await page.locator('#public-table-body tr').count()) > 0,
   );
@@ -50,6 +65,19 @@ console.log(`\nTarget: ${BASE}\n`);
   page.on('pageerror', (e) => jsErrors.push(String(e)));
 
   await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache — lihat komentar di TEST 1.
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   await page.evaluate(() => window.bukaModalKandidat('login'));
   const modalVisible = await waitFor(
     async () => await page.locator('#form-login-kandidat').isVisible(),
@@ -97,6 +125,19 @@ console.log(`\nTarget: ${BASE}\n`);
   page.on('pageerror', (e) => jsErrors.push(String(e)));
 
   await page.goto(BASE + '/admin.html', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache — lihat komentar di TEST 1.
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   // Modal admin auto-buka di admin.html (IS_ADMIN_PORTAL + belum login)
   const modalOpen = await waitFor(async () => await page.locator('#modal-admin').isVisible());
   if (!modalOpen) await page.evaluate(() => window.showLoginAdminMaster());

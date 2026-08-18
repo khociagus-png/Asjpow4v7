@@ -52,6 +52,20 @@ if (browser) {
   // 1. Login admin
   // -------------------------------------------------------------
   await page.goto(BASE + '/admin.html', { waitUntil: 'domcontentloaded' });
+  // Matikan Service Worker + cache (host non-localhost: controllerchange bisa
+  // me-reload halaman di tengah tes — sama seperti upload-check/biodata-check).
+  await page
+    .evaluate(async () => {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    })
+    .catch(() => {});
   const modalOpen = await waitFor(async () => await page.locator('#modal-admin').isVisible());
   if (!modalOpen) await page.evaluate(() => window.showLoginAdminMaster());
   check('Modal login admin terbuka', await page.locator('#modal-admin').isVisible());
