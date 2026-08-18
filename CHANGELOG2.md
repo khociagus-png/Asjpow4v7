@@ -18,6 +18,16 @@
 
 ---
 
+## 2026-08-18 — 🚀 Env Netlify di-update + DEPLOY (izin eksplisit pemilik) — live bundle `app-0d473e8141.js`
+
+### Ringkasan
+
+- Pemilik kirim PIN admin (SACHOU=1111, AYOK=2222, KHOLIS=3333, KHOCI=4444) + env lengkap + izin "set env Netlify … dan redeploy".
+- **Env produksi (14 var) via Netlify Envelope API**: `ASJ_ADMINS` dibetulkan ke `SACHOU:1111,AYOK:2222,KHOLIS:3333,KHOCI:4444` (sebelumnya salah — berisi nomor WA, login admin non-KHOCI mati); `ADMIN_NUMBERS` typo `0082229020129`→`082229020129`; `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` dibuat. `SESSION_SECRET` (64-hex) dipertahankan. Verifikasi API: ASJ_ADMINS format `Nama:pin` ×4, ADMIN_NUMBERS 12 digit ×5.
+- **Deploy** `acb299b` via `scripts/deploy-netlify.mjs` (SKIP_INSTALL=1): 202 file + 19 functions, Deploy ID `6a83e314edaee8348ce2f907`. Live: bundle `app-0d473e8141.js` + sw.js VERSION `asj-portal-app-0d473e8141-m886a44dc` — HP otomatis beralih ke versi baru (anti-cache-nyangkut live). Verifikasi: homepage 200, getAppData jobs=132, login `SACHOU:1111` + `refreshAdminSession` → success.
+
+---
+
 ## 2026-08-18 — `acb299b` 🔁 Refresh token kandidat + audit env Netlify
 
 ### Ringkasan

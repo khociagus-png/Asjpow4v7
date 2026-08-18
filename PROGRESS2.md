@@ -44,6 +44,13 @@
 - ⚠️ **`ASJ_ADMINS` salah format**: isinya daftar 5 nomor WA (salinan `ADMIN_NUMBERS`), bukan `Nama:pin,Nama:pin` → kode melewati item tanpa `:` → login admin personal via env tidak pernah match; praktis hanya KHOCI (via `PIN_KHOCI`) yang bisa login. Tidak ada tabel admin di Supabase sebagai fallback (`findAdmins` hanya menemukan `user_sessions`). **Butuh aksi pemilik**: kasih daftar `Nama:pin` untuk diisi.
 - ⚠️ `ADMIN_NUMBERS` di produksi masih typo 13-digit `0082229020129` (sudah dibetulkan di `.env.local`). `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` belum dipasang di produksi tapi juga belum dipakai kode — opsional.
 
+### 🚀 Eksekusi — env Netlify di-update + DEPLOY (izin eksplisit pemilik 2026-08-18)
+
+- Pemilik kirim PIN admin baru: **SACHOU=1111, AYOK=2222, KHOLIS=3333, KHOCI=4444** + daftar env lengkap, dan minta "set env Netlify (ASJ_ADMINS benar + fix typo ADMIN_NUMBERS) dan redeploy".
+- **Env produksi di-update via Netlify Envelope API** (`/accounts/{id}/env?site_id=…`): `ASJ_ADMINS` = `SACHOU:1111,AYOK:2222,KHOLIS:3333,KHOCI:4444` (format benar), `ADMIN_NUMBERS` typo diperbaiki, `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` dibuat — total **14 var**; `SESSION_SECRET` (64-hex) dipertahankan. Terverifikasi via API: semua key ada, ASJ_ADMINS format `Nama:pin` ×4, ADMIN_NUMBERS 12 digit ×5.
+- **Deploy `acb299b`** via `scripts/deploy-netlify.mjs` (SKIP_INSTALL=1) — 202 file + 19 functions, Deploy ID `6a83e314edaee8348ce2f907`. **Live kini bundle `app-0d473e8141.js` + sw.js VERSION `asj-portal-app-0d473e8141-m886a44dc`** → HP yang masih pegang versi lama otomatis pindah ke versi baru (mekanisme anti-cache-nyangkut sudah live).
+- Verifikasi live: homepage 200 · bundle baru 200 · getAppData jobs=132 · **login `SACHOU:1111` → success + refreshAdminSession → success** (ASJ_ADMINS kini benar-benar berfungsi).
+
 ---
 
 ## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — lanjutan audit mail: AI form & jalur upload sync
