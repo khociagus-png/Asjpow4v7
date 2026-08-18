@@ -5,7 +5,20 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — self-review scanner: cakupan event handler diperluas (keydown/keypress/error dkk) + parser seam key/value presisi (commit `9e3b7c5`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — overhaul scanner `check-handlers.mjs`: self-check cakupan event + parser seam brace-balanced + lookahead `window.X =` (commit `c6f7b46`).
+
+---
+
+## 🆕 Sesi 2026-08-18 (lanjutan) — dikerjakan oleh: codebuff (via Freebuff) — OVERHAUL scanner `check-handlers.mjs`: self-validating (bukti cakupan sendiri) + presisi parsing
+
+### Ringkasan
+
+- **Self-check cakupan event (baru)**: SEMUA atribut `onXXX` yang dipakai di repo harus ada di daftar `EVENT_NAMES` — kalau event baru dipakai tapi belum didaftarkan, skrip GAGAL (bukan diam-diam tidak di-scan). Atribut HTML berawalan `on` selalu event handler (konvensi HTML), jadi daftar ini satu-satunya titik pemeliharaan. Terbukti: `onwheel="x()"` di file scratch → GAGAL dengan pesan `onwheel (dipakai di: ...)`; dihapus → LULUS.
+- **`findObjectEnd` brace-balanced** (ganti `indexOf('}')` yang mengasumsikan nilai seam "flat") + **`collectSeamKeys` sadar-kedalaman** (koma di dalam nilai bersarang `() => ({...})` tidak memisah entri; hanya kunci yang terdaftar).
+- **Lookahead `(?!=)` pada `window.X =`**: `typeof window.X === 'function'` tidak lagi dianggap registrasi. Terbukti 15 nama yang cuma muncul di `===` (showToast, tr, XLSX, mammoth, dll) semuanya tetap terdaftar lewat jalur lain — tidak ada yang hilang nyata (304 → 303, yang dibuang murni registrasi palsu).
+- **String masking pada sisi terdaftar DIHAPUS** setelah terbukti salah: regex literal JS berisi tanda kutip (`/['"]/`) membuat masker menelan blok registrasi asli (40 nama hilang = false negative, lebih buruk dari yang diperbaiki). Presisi diandalkan ke parser kunci + lookahead.
+- **Jaring pengaman `refs.size === 0`** — skrip tidak bisa lulus vakum kalau scope scan rusak.
+- **Status**: 184 referensi (sama persis baseline) / 10 event / 303 terdaftar = 0 missing; uji regresi hapus-alias GAGAL persis; vitest 156/156; build lulus (bundle tetap `app-6080598722` — guard bukan bagian bundel).
 
 ---
 

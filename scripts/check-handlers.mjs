@@ -1,42 +1,37 @@
 // =============================================================================
-// check-handlers.mjs — Guard handler inline TIDAK boleh missing di window
+// check-handlers.mjs — Guard: SEMUA handler inline harus terdaftar di window
 // -----------------------------------------------------------------------------
-// Kelas bug yang sudah dua kali terjadi (2026-08-18):
-//   - filterKelolaLoker / filterCbx / cariKandidatManual dipanggil HTML inline
-//     (onkeyup/onclick) tapi TIDAK didaftarkan ke registerSeamAliases ->
-//     ReferenceError tiap ketik (regresi refactor ESM Fase 3.5: dulu global
-//     otomatis saat STACK concat, sekarang harus explicit window.*).
-//   - Bug ini TIDAK terdeteksi lint/tes biasa: fungsi ada sebagai export,
-//     tapi alias window-nya hilang.
+// Kelas bug yang sudah beberapa kali terjadi (2026-08-18): fungsi dipanggil
+// dari atribut HTML inline (onclick/onkeyup/...) tapi TIDAK terdaftar sebagai
+// alias window (regresi refactor ESM Fase 3.5 — dulu global otomatis saat
+// STACK concat, sekarang harus lewat registerSeamAliases) -> ReferenceError
+// diam-diam tiap interaksi. Lint/tes biasa tidak menangkap: fungsi ada sebagai
+// export, hanya alias window-nya yang hilang.
 //
-// Skrip ini adalah jaring pengaman permanen:
-//   1. Kumpulkan SEMUA nama fungsi yang DIPANGGIL dari handler inline:
-//      - HTML statis (index/admin/partials + halaman standalone)
-//      - string HTML yang di-generate JS (onclick="..." di dalam template)
-//   2. Bandingkan dengan SEMUA nama yang didaftarkan ke window:
-//      - kunci registerSeamAliases({...}) di seluruh js/
-//      - assignment window.X = ... di seluruh js/
-//   3. GAGAL (exit 1) kalau ada nama yang dipanggil tapi tidak terdaftar.
+// Cara kerja:
+//   1. REFERENSI — kumpulkan nama fungsi yang dipanggil dari atribut event
+//      (on*="...") dan data-action="...", di HTML statis (semua halaman +
+//      partials) dan string HTML yang di-generate JS (template literal).
+//   2. SELF-CHECK CAKUPAN — SEMUA atribut onXXX yang dipakai di repo harus ada
+//      di daftar EVENT_NAMES. Kalau ada event baru yang belum didaftarkan,
+//      skrip GAGAL (bukan diam-diam tidak di-scan — blind spot yang dulu
+//      bikin keydown/keypress/error lolos).
+//   3. TERDAFTAR — nama yang benar-benar jadi property window: kunci
+//      registerSeamAliases({...}) (di-parse tepat key/value, bukan regex kasar)
+//      + assignment window.X = dengan lookahead (?!=) supaya `typeof window.X
+//      === 'function'` tidak dianggap registrasi.
+//   4. DIFF — exit 1 kalau ada referensi yang tidak terdaftar.
 //
-// Detail akurasi:
-//   - Komentar (//, /* */, <!-- -->) di-strip dulu — jangan sampai contoh
-//     di komentar dianggap referensi nyata.
-//   - Property access (document.getElementById, this.select, event.stopPropagation)
-//     di-skip — itu API DOM/JS, bukan alias seam.
-//   - window.NAME(...) dihitung perlu terdaftar (kalau window.X dipanggil,
-//     X harus ADA di window).
-//
-// Jalankan: bun run check:handlers  (otomatis di `bun run build`)
+// Jalankan: bun run check:handlers  (otomatis di `bun run build` + CI)
 // =============================================================================
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const ROOT = process.cwd();
+// ---- Scope file -------------------------------------------------------------
+
 const SKIP_DIRS = new Set(['node_modules', '.git', 'assets', '.freebuff', 'coverage', 'dist']);
 const SKIP_FILES = /\.(map|test\.js|spec\.js)$/;
-
-// ---- Utilitas ---------------------------------------------------------------
 
 function walk(dir) {
   const out = [];
@@ -49,8 +44,11 @@ function walk(dir) {
   return out;
 }
 
-// Strip komentar: /* */ dan // (baris, hanya kalau diawali spasi/awal-baris —
-// aman untuk kode prettier yang selalu spasi sebelum //) dan <!-- -->.
+// ---- Utilitas teks ----------------------------------------------------------
+
+// Strip komentar: /* */, // (baris, hanya kalau diawali spasi/awal-baris —
+// aman untuk kode prettier), dan <!-- -->. Contoh kode di komentar jangan
+// dianggap referensi nyata.
 function stripComments(text) {
   text = text.replace(/\/\*[\s\S]*?\*\//g, ' ');
   text = text.replace(/(^|\s)\/\/[^\n]*/g, '$1 ');
@@ -58,24 +56,97 @@ function stripComments(text) {
   return text;
 }
 
+// Ganti isi string literal '...' dan "..." dengan spasi, sisakan kode di luar
+// string. Dipakai pada NILAI handler: string di dalamnya (mis. teks natural
+// seperti '... Save as PDF ...') jangan dianggap panggilan fungsi. Backtick
+// sengaja TIDAK di-mask — handler yang di-generate JS hidup di template
+// literal, jadi justru harus terlihat.
+function maskStrings(text) {
+  let out = '';
+  let quote = null;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quote) {
+      if (ch === '\\') {
+        i++;
+        continue;
+      }
+      if (ch === quote) {
+        quote = null;
+        out += ' ';
+        continue;
+      }
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      out += ' ';
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
 // ---- 1. Referensi handler ---------------------------------------------------
 
-// Handler inline: onXXX="...". Nilai diambil sampai kutip penutup.
-// Daftar event diperluas (2026-08-18, self-review): keydown/keypress/error dkk
-// ternyata dipakai nyata di kode (rbAddChip, handleEnter, kirimPesanAdminAi,
-// gateLogin) tapi sebelumnya TIDAK di-scan — lubang di jaring pengaman.
-// Sengaja daftar eksplisit (bukan on[a-z]+) supaya atribut seperti `content=`
-// tidak ketarik (regex `on[a-z]+` cocok dengan akhiran `content`).
-const ON_RE =
-  /on(?:click|dblclick|change|input|keyup|keydown|keypress|blur|focus|submit|reset|load|error|select|search|paste|scroll|mouseenter|mouseleave|mouseover|mouseout|mousedown|mouseup|touchstart|touchend|contextmenu|dragover|drop|dragstart|dragend|animationend|transitionend|pointerdown|pointerup|pointermove|pointerenter|pointerleave)="([^"]*)"/g;
-// data-action="nama" (dispatcher delegasi bridge — resolve dari seam/window;
-// kalau missing: console.warn + klik tidak melakukan apa-apa).
+// Atribut event handler content attribute yang didukung. Wajib lengkap —
+// self-check di bagian bawah GAGAL kalau ada onXXX yang dipakai tapi belum di
+// daftar ini. Atribut HTML yang namanya diawali "on" SELALU event handler
+// (konvensi HTML), jadi tidak ada pengecualian selain melengkapi daftar ini.
+const EVENT_NAMES = [
+  'click',
+  'dblclick',
+  'change',
+  'input',
+  'keyup',
+  'keydown',
+  'keypress',
+  'blur',
+  'focus',
+  'submit',
+  'reset',
+  'load',
+  'error',
+  'select',
+  'search',
+  'paste',
+  'scroll',
+  'mouseenter',
+  'mouseleave',
+  'mouseover',
+  'mouseout',
+  'mousedown',
+  'mouseup',
+  'touchstart',
+  'touchend',
+  'contextmenu',
+  'dragover',
+  'drop',
+  'dragstart',
+  'dragend',
+  'animationend',
+  'transitionend',
+  'pointerdown',
+  'pointerup',
+  'pointermove',
+  'pointerenter',
+  'pointerleave',
+];
+const EVENT_SET = new Set(EVENT_NAMES);
+// Ekstraksi nilai handler. \b mencegah kata seperti `content=` ketarik
+// (batas kata gagal di `on` yang ada di tengah kata).
+const EVENT_RE = new RegExp(`\\bon(?:${EVENT_NAMES.join('|')})="([^"]*)"`, 'g');
+// Self-check cakupan: SEMUA atribut onXXX yang dipakai (nama event apa pun).
+const ANY_EVENT_RE = /\bon([a-z]+)="/g;
+// data-action="nama" (dispatcher delegasi bridge — kalau missing: console.warn
+// + klik tidak melakukan apa-apa).
 const ACTION_RE = /data-action="([A-Za-z_$][A-Za-z0-9_$]*)"/g;
 // Panggilan fungsi di dalam nilai handler: (window.)?NAME(
 const CALL_RE = /(window\.)?([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/g;
 
-// Nama yang dipanggil dari handler tapi berasal dari global standard browser/JS —
-// bukan alias seam (encodeURIComponent, scrollTo, open, alert, dsb).
+// Nama yang dipanggil dari handler tapi berasal dari global standard browser/JS
+// (encodeURIComponent, scrollTo, open, alert, dsb) — bukan alias seam.
 const STD_GLOBALS = new Set([
   'encodeURIComponent',
   'decodeURIComponent',
@@ -154,8 +225,8 @@ const STD_GLOBALS = new Set([
   'Event',
 ]);
 
-// Kata kunci JS yang muncul sebagai `if(...)`, `for(...)` dll di handler inline
-// (mis. onkeypress="if(event.key==='Enter'){...}") — bukan panggilan fungsi.
+// Kata kunci JS yang muncul sebagai `if(...)`, `for(...)` dll di handler
+// inline (mis. onkeypress="if(event.key==='Enter'){...}") — bukan panggilan.
 const JS_KEYWORDS = new Set([
   'if',
   'for',
@@ -193,42 +264,15 @@ const JS_KEYWORDS = new Set([
   'debugger',
 ]);
 
-const refs = new Map(); // name -> contoh file pertama
-
-// Kembalikan bagian handler yang ADA DI LUAR string literal (ganti string dengan
-// spasi). Mencegah teks natural seperti '... Simpan sebagai PDF (Save as PDF) ...'
-// dianggap panggilan fungsi. Alternasi: indeks genap = luar string.
-function outsideStrings(handler) {
-  let out = '';
-  let quote = null;
-  for (let i = 0; i < handler.length; i++) {
-    const ch = handler[i];
-    if (quote) {
-      if (ch === '\\') {
-        i++;
-        continue;
-      }
-      if (ch === quote) {
-        quote = null;
-        out += ' ';
-        continue;
-      }
-      continue;
-    }
-    if (ch === "'" || ch === '"') {
-      quote = ch;
-      out += ' ';
-      continue;
-    }
-    out += ch;
-  }
-  return out;
-}
+const refs = new Map(); // nama fungsi -> file pertama (untuk laporan)
+const eventUsage = new Map(); // nama event -> file pertama (self-check cakupan)
 
 function collect(text, file) {
   let m;
-  while ((m = ON_RE.exec(text))) {
-    const outside = outsideStrings(m[1]);
+  while ((m = EVENT_RE.exec(text))) {
+    // Nilai handler bisa berisi string literal ('...'/ "...") — teks natural
+    // di dalamnya jangan dianggap panggilan fungsi.
+    const outside = maskStrings(m[1]);
     let c;
     CALL_RE.lastIndex = 0;
     while ((c = CALL_RE.exec(outside))) {
@@ -237,48 +281,62 @@ function collect(text, file) {
       const before = outside[c.index - 1];
       if (!prefix && before === '.') continue; // document./this./event. — property access
       if (STD_GLOBALS.has(name)) continue; // global standard browser/JS
-      if (JS_KEYWORDS.has(name)) continue; // if(...)/for(...) — control flow, bukan fungsi
+      if (JS_KEYWORDS.has(name)) continue; // if(...)/for(...) — control flow
       if (!refs.has(name)) refs.set(name, file);
     }
   }
   while ((m = ACTION_RE.exec(text))) {
     if (!refs.has(m[1])) refs.set(m[1], file);
   }
+  while ((m = ANY_EVENT_RE.exec(text))) {
+    if (!eventUsage.has(m[1])) eventUsage.set(m[1], file);
+  }
 }
 
 const htmlFiles = walk('.').filter((p) => p.endsWith('.html'));
-for (const f of htmlFiles) collect(stripComments(readFileSync(f, 'utf8')), f);
-// Modul ESM: seluruh js/ + file JS di root (pwa.js, api-client.js, i18n.js, upload-guard.js)
+// Modul ESM: seluruh js/ + file JS di root (pwa.js, api-client.js, i18n.js, ...)
 const jsFiles = [...walk('js'), ...walk('.').filter((p) => /^[^\\/]+\.js$/.test(p))];
-for (const f of jsFiles) collect(stripComments(readFileSync(f, 'utf8')), f);
+const srcFiles = [...htmlFiles, ...jsFiles];
+
+for (const f of srcFiles) collect(stripComments(readFileSync(f, 'utf8')), f);
 
 // ---- 2. Nama terdaftar di window --------------------------------------------
 
-// Kunci objek dari registerSeamAliases({...}) — state machine kecil key/value.
-// Parser regex lama salah daftarkan NILAI (mis. { a: b, c } -> 'b' ikut
-// terdaftar padahal bukan alias) — membuat jaring punya false negative.
-// Nilai seam di proyek ini selalu flat (identifier/property access, tanpa
-// arrow/nested) — terbukti dari scan semua registerSeamAliases({ di js/.
+// Temukan '}' penutup objek mulai dari posisi '{' (start). Sadar-string
+// (termasuk backtick) — komentar sudah di-strip oleh pemanggil. Tidak lagi
+// mengasumsikan nilai objek "flat": nilai boleh berisi {}/[]/()/=>.
+function findObjectEnd(src, start) {
+  let depth = 0;
+  for (let i = start; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === "'" || ch === '"' || ch === '`') {
+      const q = ch;
+      let j = i + 1;
+      while (j < src.length && src[j] !== q) j++;
+      i = j;
+      continue;
+    }
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+// Kunci objek dari registerSeamAliases({...}) — state machine key/value.
+// Parser regex lama salah mendaftarkan NILAI sebagai alias ({ a: b, c } -> 'b'
+// ikut terdaftar padahal bukan alias) = false negative di jaring. State
+// machine ini hanya mendaftarkan kunci; koma di dalam nilai bersarang
+// (objek/array/arrow) tidak dianggap pemisah entri.
 function collectSeamKeys(body) {
   const keys = new Set();
   let i = 0;
-  let expectKey = true; // posisi key: setelah '{' atau ','
+  let expectKey = true; // posisi key: setelah '{' atau koma level-0
+  let depth = 0; // kedalaman ( [ { di posisi value
   while (i < body.length) {
     const ch = body[i];
-    if (/\s/.test(ch)) {
-      i++;
-      continue;
-    }
-    if (ch === ',') {
-      expectKey = true;
-      i++;
-      continue;
-    }
-    if (ch === ':') {
-      expectKey = false;
-      i++;
-      continue;
-    }
     if (ch === "'" || ch === '"') {
       const q = ch;
       let j = i + 1;
@@ -288,6 +346,10 @@ function collectSeamKeys(body) {
       continue;
     }
     if (expectKey) {
+      if (/\s/.test(ch)) {
+        i++;
+        continue;
+      }
       const m = /^[A-Za-z_$][A-Za-z0-9_$]*/.exec(body.slice(i));
       if (m) {
         keys.add(m[0]);
@@ -297,8 +359,18 @@ function collectSeamKeys(body) {
       i++;
       continue;
     }
-    // posisi value: lewati sampai koma/} (nilai flat)
-    if (ch === '}' || ch === ',') {
+    // posisi value: telusuri sampai koma level-0 / tutup objek
+    if (ch === '{' || ch === '[' || ch === '(') {
+      depth++;
+      i++;
+      continue;
+    }
+    if (ch === '}' || ch === ']' || ch === ')') {
+      depth--;
+      i++;
+      continue;
+    }
+    if (ch === ',' && depth === 0) {
       expectKey = true;
       i++;
       continue;
@@ -310,33 +382,63 @@ function collectSeamKeys(body) {
 
 const registered = new Set();
 for (const f of jsFiles) {
+  // Sisi terdaftar TIDAK di-mask string: regex literal JS bisa memuat tanda
+  // kutip (/['"]/) dan masking naif justru menyembunyikan blok registrasi
+  // asli (false negative — lebih buruk daripada registrasi palsu). Yang
+  // diandalkan untuk presisi: collectSeamKeys (hanya kunci) + lookahead (?!=)
+  // (menolak ===/== pada window.X =).
   const src = stripComments(readFileSync(f, 'utf8'));
   // registerSeamAliases({ ... }) — kunci normal (a: b), string ('a': b), atau shorthand (a,)
   const seamRe = /registerSeamAliases\(\s*\{/g;
   let sm;
   while ((sm = seamRe.exec(src))) {
-    // ambil blok objek pertama sampai } seimbang (cukup: sampai } yang menutup,
-    // nilai shorthand tidak pernah berisi kurung kurawal)
-    const start = sm.index + sm[0].length;
-    const end = src.indexOf('}', start);
+    const start = sm.index + sm[0].length - 1; // posisi '{'
+    const end = findObjectEnd(src, start);
     if (end < 0) continue;
-    const body = src.slice(start, end);
-    for (const k of collectSeamKeys(body)) registered.add(k);
+    for (const k of collectSeamKeys(src.slice(start + 1, end))) registered.add(k);
   }
-  // window.X = ... (assignment global lain)
-  const winRe = /window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/g;
+  // window.X = ... (assignment global lain). Lookahead (?!=) menolak === dan ==
+  // — `typeof window.X === 'function'` bukan registrasi.
+  const winRe = /window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=(?!=)/g;
   let w;
   while ((w = winRe.exec(src))) registered.add(w[1]);
 }
 
-// ---- 3. Diff -----------------------------------------------------------------
+// ---- 3. Self-check cakupan event --------------------------------------------
+
+const uncoveredEvents = [...eventUsage.keys()].filter((e) => !EVENT_SET.has(e)).sort();
+if (uncoveredEvents.length > 0) {
+  console.log(
+    '❌ ATRIBUT EVENT DIPAKAI TAPI TIDAK TERDAFTAR DI EVENT_NAMES (' +
+      uncoveredEvents.length +
+      '):',
+  );
+  for (const e of uncoveredEvents)
+    console.log('  - on' + e + '  (dipakai di: ' + eventUsage.get(e) + ')');
+  console.log(
+    '\nCara fix: tambahkan nama event tsb ke daftar EVENT_NAMES di scripts/check-handlers.mjs ' +
+      '— kalau tidak, handler-nya tidak pernah di-scan.',
+  );
+  process.exit(1);
+}
+
+// ---- 4. Diff -----------------------------------------------------------------
+
+if (refs.size === 0) {
+  console.error(
+    '❌ check-handlers: tidak ada referensi handler ditemukan — cek scope scan (cwd?).',
+  );
+  process.exit(1);
+}
 
 const missing = [...refs.keys()].filter((n) => !registered.has(n)).sort();
 
 console.log(
   'check-handlers: ' +
     refs.size +
-    ' referensi handler unik, ' +
+    ' referensi handler unik (' +
+    eventUsage.size +
+    ' event), ' +
     registered.size +
     ' nama terdaftar di window.',
 );

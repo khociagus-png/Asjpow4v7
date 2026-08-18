@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-18 — 🛡 Overhaul scanner check-handlers.mjs: self-check cakupan event + parser seam brace-balanced + lookahead window.X =
+
+### Ringkasan
+
+- Self-check baru: SEMUA atribut `onXXX` yang dipakai harus ada di `EVENT_NAMES` — event baru yang belum didaftarkan membuat CI GAGAL (blind spot kelas "event tidak di-scan" mati). Terbukti dengan `onwheel` di file scratch → GAGAL; pulihkan → LULUS.
+- `findObjectEnd` brace-balanced (bukan `indexOf('}')` flat) + `collectSeamKeys` sadar-kedalaman — hanya kunci `registerSeamAliases` yang terdaftar, koma dalam nilai bersarang tidak memisah entri.
+- Lookahead `(?!=)` pada scan `window.X =`: `typeof window.X === 'function'` tidak lagi jadi registrasi palsu (15 nama terbukti tetap terdaftar lewat jalur lain; 304→303 = hanya palsu yang dibuang).
+- String masking sisi terdaftar dihapus — terbukti false negative (regex literal berisi kutip `/['"]/` menelan blok registrasi, 40 nama hilang).
+- 184 ref / 10 event / 303 terdaftar = 0 missing, uji hapus-alias GAGAL persis, vitest 156/156, build lulus (bundle tetap `app-6080598722`).
+
 ## 2026-08-18 — 🛡 Self-review scanner check-handlers.mjs: perluas cakupan event (keydown/keypress/error dkk) + parser seam key/value presisi
 
 ### Ringkasan
