@@ -2198,3 +2198,322 @@ button:not(:disabled),
     max-height: 62mm !important;
   }
 }
+
+/* ============================================================
+   Fase 5 (2026-08-18) — style inline yang dipindah dari
+   index.html/admin.html ke sini (satu sumber CSS).
+   ============================================================ */
+
+/* ---- fade-in animasi (dulu inline di index.html & admin.html) ---- */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} /* ---- print CV preview (dulu inline di index.html & admin.html) ---- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #modal-preview-cv,
+  #modal-preview-cv * {
+    visibility: visible;
+  }
+  #modal-preview-cv {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 0 !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  .cv-table {
+    page-break-inside: auto;
+  }
+  .cv-tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+.cv-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid black;
+  font-size: 11px;
+  margin-bottom: 16px;
+}
+.cv-table th,
+.cv-table td {
+  border: 1px solid black;
+  padding: 6px;
+}
+.cv-table th {
+  background-color: #f9fafb;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ---- light theme (dulu inline HANYA di index.html; kini global) ---- */
+/* ============================================================
+   LIGHT THEME (SAKURA): kartu & tabel jadi TERANG, bukan gelap.
+   Di-scope ke section publik (loker + layanan + pill tab) supaya
+   modal & panel admin tetap seperti desain aslinya.
+   ============================================================ */
+/* --- Permukaan kartu: gelap -> putih/terang --- */
+body.theme-light #public-loker-section .bg-slate-900,
+body.theme-light #public-loker-section .bg-slate-900\/90,
+body.theme-light #public-loker-section .bg-slate-900\/80,
+body.theme-light #public-loker-section .bg-slate-900\/50,
+body.theme-light #public-layanan-section .bg-slate-900,
+body.theme-light #public-layanan-section .bg-slate-900\/90,
+body.theme-light #public-layanan-section .bg-slate-900\/80,
+body.theme-light #public-layanan-section .bg-slate-900\/50 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+body.theme-light #public-loker-section .bg-slate-800,
+body.theme-light #public-loker-section .bg-slate-800\/50,
+body.theme-light #public-loker-section .bg-slate-800\/80,
+body.theme-light #public-layanan-section .bg-slate-800,
+body.theme-light #public-layanan-section .bg-slate-800\/50,
+body.theme-light #public-layanan-section .bg-slate-800\/80 {
+  background-color: rgba(247, 236, 237, 0.95) !important;
+}
+body.theme-light #public-loker-section .bg-slate-700,
+body.theme-light #public-loker-section .bg-slate-600,
+body.theme-light #public-layanan-section .bg-slate-700,
+body.theme-light #public-layanan-section .bg-slate-600 {
+  background-color: #f1e4e5 !important;
+}
+body.theme-light #public-loker-section .bg-slate-950,
+body.theme-light #public-loker-section .bg-slate-950\/90,
+body.theme-light #public-layanan-section .bg-slate-950,
+body.theme-light #public-layanan-section .bg-slate-950\/90 {
+  background-color: #fbf6f6 !important;
+}
+body.theme-light #public-loker-section .bg-black\/30,
+body.theme-light #public-loker-section .bg-black\/40,
+body.theme-light #public-loker-section .bg-black\/50,
+body.theme-light #public-loker-section .bg-black\/60,
+body.theme-light #public-layanan-section .bg-black\/30,
+body.theme-light #public-layanan-section .bg-black\/40,
+body.theme-light #public-layanan-section .bg-black\/50,
+body.theme-light #public-layanan-section .bg-black\/60 {
+  background-color: rgba(255, 255, 255, 0.55) !important;
+}
+body.theme-light .inline-flex.bg-slate-900\/80 {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* --- Border: gelap -> rose terang --- */
+body.theme-light #public-loker-section .border-slate-600,
+body.theme-light #public-loker-section .border-slate-700,
+body.theme-light #public-loker-section .border-slate-700\/50,
+body.theme-light #public-loker-section .border-slate-800,
+body.theme-light #public-layanan-section .border-slate-600,
+body.theme-light #public-layanan-section .border-slate-700,
+body.theme-light #public-layanan-section .border-slate-700\/50,
+body.theme-light #public-layanan-section .border-slate-800,
+body.theme-light .inline-flex.bg-slate-900\/80 {
+  border-color: #ebd9da !important;
+}
+
+/* --- Teks utama: terang -> gelap --- */
+body.theme-light #public-loker-section .text-white,
+body.theme-light #public-layanan-section .text-white {
+  color: #292524 !important;
+}
+body.theme-light #public-loker-section .text-slate-100,
+body.theme-light #public-layanan-section .text-slate-100 {
+  color: #292524 !important;
+}
+body.theme-light #public-loker-section .text-slate-200,
+body.theme-light #public-layanan-section .text-slate-200 {
+  color: #44403c !important;
+}
+body.theme-light #public-loker-section .text-slate-300,
+body.theme-light #public-layanan-section .text-slate-300 {
+  color: #57534e !important;
+}
+body.theme-light #public-loker-section .text-slate-400,
+body.theme-light #public-layanan-section .text-slate-400 {
+  color: #78716c !important;
+}
+body.theme-light #public-loker-section .text-slate-500,
+body.theme-light #public-layanan-section .text-slate-500 {
+  color: #a8a29e !important;
+}
+body.theme-light .inline-flex.bg-slate-900\/80 .text-slate-400 {
+  color: #78716c !important;
+}
+
+/* --- Warna aksen (heading/ikon) di atas kartu terang: pekatkan --- */
+body.theme-light #public-loker-section .text-emerald-400,
+body.theme-light #public-layanan-section .text-emerald-400 {
+  color: #047857 !important;
+}
+body.theme-light #public-loker-section .text-sky-400,
+body.theme-light #public-layanan-section .text-sky-400 {
+  color: #0369a1 !important;
+}
+body.theme-light #public-loker-section .text-amber-400,
+body.theme-light #public-layanan-section .text-amber-400 {
+  color: #b45309 !important;
+}
+body.theme-light #public-loker-section .text-pink-400,
+body.theme-light #public-layanan-section .text-pink-400 {
+  color: #be185d !important;
+}
+body.theme-light #public-loker-section .text-rose-400,
+body.theme-light #public-layanan-section .text-rose-400 {
+  color: #be123c !important;
+}
+body.theme-light #public-loker-section .text-violet-400,
+body.theme-light #public-layanan-section .text-violet-400 {
+  color: #6d28d9 !important;
+}
+body.theme-light #public-loker-section .text-red-400,
+body.theme-light #public-layanan-section .text-red-400 {
+  color: #b91c1c !important;
+}
+body.theme-light #public-loker-section .text-blue-400,
+body.theme-light #public-layanan-section .text-blue-400 {
+  color: #1d4ed8 !important;
+}
+body.theme-light #public-loker-section .text-purple-400,
+body.theme-light #public-layanan-section .text-purple-400 {
+  color: #9333ea !important;
+}
+body.theme-light #public-loker-section .text-teal-400,
+body.theme-light #public-layanan-section .text-teal-400 {
+  color: #0f766e !important;
+}
+body.theme-light #public-loker-section .text-amber-300,
+body.theme-light #public-layanan-section .text-amber-300 {
+  color: #d97706 !important;
+}
+
+/* --- Hover tombol slate di kartu terang --- */
+body.theme-light #public-loker-section .hover\:bg-slate-700:hover,
+body.theme-light #public-layanan-section .hover\:bg-slate-700:hover,
+body.theme-light #public-loker-section .hover\:bg-slate-600:hover,
+body.theme-light #public-layanan-section .hover\:bg-slate-600:hover {
+  background-color: #ece0e1 !important;
+}
+
+/* --- Tombol berwarna (hijau/biru/amber/dll): teks putih TETAP putih --- */
+body.theme-light #public-loker-section .bg-sky-600.text-white,
+body.theme-light #public-loker-section .bg-sky-500.text-white,
+body.theme-light #public-loker-section .bg-emerald-600.text-white,
+body.theme-light #public-loker-section .bg-emerald-500.text-white,
+body.theme-light #public-loker-section .bg-amber-600.text-white,
+body.theme-light #public-loker-section .bg-amber-500.text-white,
+body.theme-light #public-loker-section .bg-amber-400.text-white,
+body.theme-light #public-loker-section .bg-red-600.text-white,
+body.theme-light #public-loker-section .bg-rose-600.text-white,
+body.theme-light #public-loker-section .bg-pink-600.text-white,
+body.theme-light #public-loker-section .bg-blue-600.text-white,
+body.theme-light #public-loker-section .bg-teal-600.text-white,
+body.theme-light #public-loker-section .bg-violet-600.text-white,
+body.theme-light #public-loker-section .bg-indigo-600.text-white,
+body.theme-light #public-loker-section .bg-cyan-600.text-white,
+body.theme-light #public-loker-section .bg-orange-600.text-white,
+body.theme-light #public-loker-section .bg-green-600.text-white,
+body.theme-light #public-layanan-section .bg-sky-600.text-white,
+body.theme-light #public-layanan-section .bg-sky-500.text-white,
+body.theme-light #public-layanan-section .bg-emerald-600.text-white,
+body.theme-light #public-layanan-section .bg-emerald-500.text-white,
+body.theme-light #public-layanan-section .bg-amber-600.text-white,
+body.theme-light #public-layanan-section .bg-amber-500.text-white,
+body.theme-light #public-layanan-section .bg-amber-400.text-white,
+body.theme-light #public-layanan-section .bg-red-600.text-white,
+body.theme-light #public-layanan-section .bg-rose-600.text-white,
+body.theme-light #public-layanan-section .bg-pink-600.text-white,
+body.theme-light #public-layanan-section .bg-blue-600.text-white,
+body.theme-light #public-layanan-section .bg-teal-600.text-white,
+body.theme-light #public-layanan-section .bg-violet-600.text-white,
+body.theme-light #public-layanan-section .bg-indigo-600.text-white,
+body.theme-light #public-layanan-section .bg-cyan-600.text-white,
+body.theme-light #public-layanan-section .bg-orange-600.text-white,
+body.theme-light #public-layanan-section .bg-green-600.text-white,
+body.theme-light .inline-flex.bg-slate-900\/80 .bg-sky-600.text-white {
+  color: #fff !important;
+}
+
+/* ---- style inline admin.html (fade) — dipindah ke sini oleh _gen-partials.mjs ---- */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- style inline admin.html (print) — dipindah ke sini oleh _gen-partials.mjs ---- */
+e > @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #modal-preview-cv,
+  #modal-preview-cv * {
+    visibility: visible;
+  }
+  #modal-preview-cv {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 0 !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  .cv-table {
+    page-break-inside: auto;
+  }
+  .cv-tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+.cv-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid black;
+  font-size: 11px;
+  margin-bottom: 16px;
+}
+.cv-table th,
+.cv-table td {
+  border: 1px solid black;
+  padding: 6px;
+}
+.cv-table th {
+  background-color: #f9fafb;
+  font-weight: bold;
+  text-align: center;
+}

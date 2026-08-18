@@ -35,3 +35,27 @@ jobs:
 
       - name: Build lengkap
         run: bun run build
+
+      # E2E share-view (API + best-effort browser). Butuh env Supabase asli —
+      # step di-skip otomatis kalau secrets belum dikonfigurasi di repo.
+      # Browser check di dalam skrip best-effort (dilewati kalau chromium
+      # tidak ter-install); yang dijamin adalah API check share-data.
+      - name: E2E share-view
+        if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_ANON_KEY != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
+          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
+        run: |
+          bun serve-static.mjs >/tmp/serve.log 2>&1 &
+          SRV=$!
+          for i in $(seq 1 30); do
+            curl -sf "http://127.0.0.1:3000/.netlify/functions/app?action=ping" >/dev/null 2>&1 && break
+            sleep 1
+          done
+          BASE_URL="http://127.0.0.1:3000" node e2e/share-view.mjs
+          RC=$?
+          kill $SRV 2>/dev/null || true
+          exit $RC

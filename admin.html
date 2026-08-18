@@ -1,3 +1,4 @@
+<!--HEAD_START-->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -39,8 +40,9 @@
   
   
 <script>window.IS_ADMIN_PORTAL = true;</script>
-  <link rel="stylesheet" crossorigin href="/assets/main.css?v=c1e5a9f34b">
+  <link rel="stylesheet" crossorigin href="/assets/main.css?v=ed681b7b61">
 </head>  <body id="asj-body" class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-500 flow-root">
+<!--HEAD_END-->
   <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
   <a href="#main-content" class="skip-link" data-lang="a11y.skip_to_content">Lewati ke konten utama</a>
 
@@ -54,6 +56,7 @@
     <button onclick="document.getElementById('global-loader').style.display='none'" class="px-6 py-2.5 bg-red-600 hover:bg-red-500 border border-red-500 rounded-full text-sm font-bold text-white transition-colors shadow-lg"><i class="fas fa-times mr-1"></i> <span data-lang="button.force_close">Tutup Paksa Loading</span></button>
   </div>
 
+<!--HEADER_START-->
   <header id="asj-header" class="max-w-7xl mx-auto px-4 mt-6 relative text-white border border-white/10 shadow-2xl h-auto min-h-[14rem] md:h-56 flex items-end p-6 md:p-8 bg-cover bg-center transition-colors duration-700">
     <div id="asj-header-overlay" class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
     
@@ -123,6 +126,7 @@
          </div>
      </div>
    </header>
+<!--HEADER_END-->
 
    <!-- MOBILE NAVIGATION OVERLAY -->
    <div id="mobile-nav-overlay" class="hidden fixed inset-0 bg-black/70 z-[35]" data-action="toggleMobileMenu"></div>
@@ -401,13 +405,7 @@
 <!-- MODAL CEK DATA SISWA BARU -->
 
 
-<style>
-  .animate-fade-in { animation: fadeIn 0.4s ease-in-out; }
-  @keyframes fadeIn { 
-      from { opacity: 0; transform: translateY(10px); } 
-      to { opacity: 1; transform: translateY(0); } 
-  }
-</style>
+
 
 </div>
     <div id="page-admin" class="hidden w-full">
@@ -982,6 +980,7 @@
     </div>
   </main>
 
+<!--FOOTER_START-->
   <footer class="max-w-7xl mx-auto px-4 mt-12 mb-8">
     <div id="asj-footer" class="relative overflow-hidden border border-white/10 shadow-2xl bg-cover bg-center transition-colors duration-700">
         <div id="asj-footer-overlay" class="absolute inset-0 bg-black/85"></div>
@@ -1000,6 +999,7 @@
         </div>
     </div>
   </footer>
+<!--FOOTER_END-->
 
   
 
@@ -1061,6 +1061,7 @@
   <!-- MOBILE BOTTOM NAVIGATION (HANYA MUNCUL DI HP) -->
   <!-- ========================================== -->
   
+<!--BOTTOM_NAV_START-->
   <!-- BOTTOM NAV ADMIN -->
   <div id="bottom-nav-admin" class="md:hidden hidden fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800 z-[90] pb-safe">
     <div class="flex justify-between items-center px-6 py-3">
@@ -1110,6 +1111,7 @@
         </button>
     </div>
   </div>
+<!--BOTTOM_NAV_END-->
 
   <!-- MODAL TUTORIAL INSTALL APLIKASI (PWA) -->
   <!-- MODAL RINCIAN BIAYA BUILDER (Admin: klik-klik include/exclude/tahapan) -->
@@ -1135,20 +1137,7 @@
   <!-- MODAL PREVIEW RIREKISHO LENGKAP -->
   
   
-  <style>
-      @media print {
-          @page { size: A4 portrait; margin: 10mm; }
-          body * { visibility: hidden; }
-          #modal-preview-cv, #modal-preview-cv * { visibility: visible; }
-          #modal-preview-cv { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 0 !important; }
-          .print\:hidden { display: none !important; }
-          .cv-table { page-break-inside: auto; }
-          .cv-tr { page-break-inside: avoid; page-break-after: auto; }
-      }
-      .cv-table { width: 100%; border-collapse: collapse; border: 2px solid black; font-size: 11px; margin-bottom: 16px; }
-      .cv-table th, .cv-table td { border: 1px solid black; padding: 6px; }
-      .cv-table th { background-color: #f9fafb; font-weight: bold; text-align: center; }
-  </style>
+
 
   <!-- MODAL AI MATCHMAKING (DENGAN FILTER CERDAS) -->
   

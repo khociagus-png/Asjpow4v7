@@ -1,27 +1,35 @@
 // =============================================================================
-// build-html.mjs — Modal shared dimuat runtime (on-demand), bukan inline
+// build-html.mjs — Modal shared + partial region halaman
 // -----------------------------------------------------------------------------
-// Semua modal bersama admin.html & index.html disimpan di
+// Bagian 1 (modal): semua modal bersama admin.html & index.html disimpan di
 // `partials/modals-shared.html` (single source of truth). Skrip ini:
 //   1. Menyalin partial ke `assets/modals-shared.html` (URL statis yang
 //      di-fetch browser saat runtime; ikut ter-deploy & di-precache SW)
-//   2. Menghapus blok modal shared yang masih inline di halaman (mis. sisa
-//      git reset / kerja manual — idempotent)
-//   3. Menyisipkan loader runtime kecil (sinkron, sebelum DOMContentLoaded)
-//      di antara marker <!--SHARED_MODALS_START/END--> yang memuat
-//      `/assets/modals-shared.html` ke `#modal-root`.
+//   2. Menghapus blok modal shared yang masih inline di halaman (idempotent)
+//   3. Menyisipkan loader runtime kecil di antara marker SHARED_MODALS.
 //
-// Efek: admin.html/index.html turun ~150 KB (tanpa markup modal), modal tetap
-// tersedia SEBELUM kode aplikasi berjalan (loader sinkron saat parse), dan
-// halaman lain (share, ai_form, dll) tidak tersentuh.
+// Bagian 2 (Fase 5): region bersama (head/header/footer/bottom-nav di
+// index.html & admin.html; stack <script> standalone) diregenerasi dari
+// partials/*.html setiap build — marker <!--XXX_START/END--> tetap tinggal di
+// halaman, isi region di antara keduanya diganti dari partial (idempotent,
+// byte-exact: partial = byte persis region asli, token {{...}} untuk beda
+// index vs admin / per-halaman standalone).
 //
 // Jalankan: bun run build:html  (bagian dari `bun run build`)
 // =============================================================================
 
 import { readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
-// Halaman bundel + partial modal — satu sumber kebenaran:
-// scripts/module-registry.mjs.
-import { BUNDLE_PAGES, MODAL_PARTIAL } from './module-registry.mjs';
+// Halaman bundel + partial — satu sumber kebenaran: scripts/module-registry.mjs.
+import {
+  BUNDLE_PAGES,
+  STANDALONE_PAGES,
+  MODAL_PARTIAL,
+  PARTIALS,
+  BUNDLE_REGIONS,
+  STANDALONE_REGION,
+  BUNDLE_TOKENS,
+  SCRIPT_TOKENS,
+} from './module-registry.mjs';
 
 const ROOT = process.cwd();
 const PAGES = BUNDLE_PAGES;
@@ -189,6 +197,81 @@ for (const page of PAGES) {
   }
 
   writeFileSync(path, html);
+}
+
+// =============================================================================
+// Bagian 2 (Fase 5) — expand region partial per halaman
+// =============================================================================
+
+// Token {{SOCIAL}} selalu diisi dari partials/social.html (sama utk semua
+// halaman). Token lain diambil dari map token per-halaman (BUNDLE_TOKENS /
+// SCRIPT_TOKENS). Token yang tidak dikenal dibiarkan apa adanya ({{...}}).
+function expandPartial(partialPath, tokens) {
+  let tpl = readFileSync(partialPath, 'utf8');
+  if (tpl.includes('{{SOCIAL}}')) {
+    tpl = tpl.split('{{SOCIAL}}').join(readFileSync(PARTIALS.social, 'utf8'));
+  }
+  return tpl.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in tokens ? tokens[k] : m));
+}
+
+// Ganti isi region di antara marker start/end dengan konten baru (dari
+// partial). Konten di-trim trailing newline — newline disediakan oleh baris
+// marker — sehingga idempotent (build berulang = byte sama).
+function replaceRegion(html, startMarker, endMarker, content) {
+  const s = html.indexOf(startMarker);
+  if (s === -1) {
+    console.warn(`[build-html] marker ${startMarker} tidak ditemukan — dilewati`);
+    return html;
+  }
+  const e = html.indexOf(endMarker, s);
+  if (e === -1) {
+    console.warn(`[build-html] marker ${endMarker} tidak ditemukan — dilewati`);
+    return html;
+  }
+  const trimmed = content.replace(/\n+$/, '');
+  return (
+    html.slice(0, s) +
+    startMarker +
+    '\n' +
+    trimmed +
+    '\n' +
+    endMarker +
+    html.slice(e + endMarker.length)
+  );
+}
+
+// Halaman bundel: head/header/footer/bottom-nav dari partial.
+for (const page of BUNDLE_PAGES) {
+  const path = `${ROOT}/${page}`;
+  let html = readFileSync(path, 'utf8');
+  const tokens = BUNDLE_TOKENS[page] || {};
+  for (const [name, region] of Object.entries(BUNDLE_REGIONS)) {
+    if (!PARTIALS[name]) continue;
+    const content = expandPartial(`${ROOT}/${PARTIALS[name]}`, tokens);
+    const next = replaceRegion(html, region.start, region.end, content);
+    if (next !== html) {
+      html = next;
+      console.log(
+        `[build-html] ${page}: region ${name} <- partials/${PARTIALS[name].split('/').pop()}`,
+      );
+    }
+  }
+  writeFileSync(path, html);
+}
+
+// Halaman standalone: stack <script> akhir body dari scripts-shared partial.
+for (const page of STANDALONE_PAGES) {
+  const path = `${ROOT}/${page}`;
+  const html = readFileSync(path, 'utf8');
+  const tokens = SCRIPT_TOKENS[page] || {};
+  const content = expandPartial(`${ROOT}/${PARTIALS.scriptsShared}`, tokens);
+  const next = replaceRegion(html, STANDALONE_REGION.start, STANDALONE_REGION.end, content);
+  if (next !== html) {
+    writeFileSync(path, next);
+    console.log(`[build-html] ${page}: region scripts-shared <- partials/scripts-shared.html`);
+  } else {
+    writeFileSync(path, html);
+  }
 }
 
 console.log('[build-html] Selesai ✅');

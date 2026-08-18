@@ -2,7 +2,8 @@
 // build-js.mjs — Bundel JS aplikasi (ASJ Portal)
 // -----------------------------------------------------------------------------
 // admin.html & index.html memuat bundel 1 file dari ENTRY js/main.js yang
-// meng-import SEMUA modul domain (urutan STACK di bawah). Skrip ini:
+// meng-import SEMUA modul domain (daftar modul = bundleModules di
+// module-registry — diturunkan dari import js/main.js, Fase 6). Skrip ini:
 //   1. Bundle + minify (esbuild, entry js/main.js → IIFE) jadi assets/app-<hash>.js
 //   2. Mengganti tag <script> bundel di admin.html & index.html (atau mengganti
 //      bundel lama kalau hash berubah)
@@ -18,9 +19,11 @@
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
-// Struktur modul (STACK bundel + daftar halaman) — satu sumber kebenaran:
-// scripts/module-registry.mjs. Jangan definisikan ulang daftar di sini.
-import { STACK, STANDALONE_PAGES } from './module-registry.mjs';
+// Struktur modul (daftar modul bundel + daftar halaman) — satu sumber
+// kebenaran: scripts/module-registry.mjs. Fase 6: daftar modul bundel
+// diturunkan dari import eksplisit js/main.js (bundleModules), bukan STACK
+// concat yang bisa melenceng dari entry asli.
+import { bundleModules, STANDALONE_PAGES } from './module-registry.mjs';
 
 const ROOT = process.cwd();
 const PAGES = STANDALONE_PAGES;
@@ -33,8 +36,9 @@ const PAGES = STANDALONE_PAGES;
 //    - Semua file sudah ESM (Fase 3 tuntas langkah 13): tidak ada lagi concat
 //      classic / ESM_CORE — entry meng-import modul, esbuild menjaga scope tiap
 //      modul tetap privat, alias window.* dijalankan oleh modul itu sendiri.
-// Validasi dulu: semua file STACK harus ada (sumber kebenaran urutan).
-for (const src of STACK) {
+// Validasi dulu: semua modul yang di-import js/main.js harus ada.
+const MODULES = bundleModules();
+for (const src of MODULES) {
   if (!existsSync(ROOT + src)) {
     console.error(`[build-js] File tidak ada: ${src}`);
     process.exit(1);
@@ -55,7 +59,7 @@ const bundleName = `app-${hash}.js`;
 const bundlePath = `${ROOT}/assets/${bundleName}`;
 writeFileSync(bundlePath, code);
 console.log(
-  `[build-js] Bundel: assets/${bundleName} (${(code.length / 1024).toFixed(1)} KB, ${STACK.length} file via js/main.js)`,
+  `[build-js] Bundel: assets/${bundleName} (${(code.length / 1024).toFixed(1)} KB, ${MODULES.length} modul via js/main.js)`,
 );
 
 // 2. admin.html & index.html: stack 20 tag -> 1 tag bundel (idempotent, dan

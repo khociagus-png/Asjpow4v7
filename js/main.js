@@ -2,10 +2,11 @@
 // js/main.js — Entry bundel admin.html & index.html (Fase 3 langkah 14)
 // -----------------------------------------------------------------------------
 // Semua file frontend sudah ES Modules (Fase 3 tuntas di langkah 13). Entry ini
-// meng-import SEMUA modul domain secara side-effect (urutan = STACK di
-// scripts/build-js.mjs — sumber kebenaran urutan canonical). Setiap modul
-// mengekspos window.* sendiri (bridge §3.2/§5 ESM_BRIDGE.md), jadi tidak ada
-// exposure tambahan di sini.
+// meng-import SEMUA modul domain secara side-effect — dan import eksplisit DI
+// SINI adalah satu-satunya sumber kebenaran daftar modul bundel (Fase 6:
+// bundleModules() di scripts/module-registry.mjs mem-parse file ini; STACK
+// concat sudah dihapus). Setiap modul mengekspos window.* sendiri (bridge
+// §3.2/§5 ESM_BRIDGE.md), jadi tidak ada exposure tambahan di sini.
 //
 // Boot aplikasi TIDAK dipicu dari sini: js/init/boot.js mendaftarkan listener
 // DOMContentLoaded (di dalam bundel ikut jalan saat evaluasi), yang memanggil

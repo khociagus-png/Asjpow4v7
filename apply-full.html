@@ -119,7 +119,7 @@
     
     .hidden { display: none !important; }
   </style>
-  <link rel="stylesheet" crossorigin href="/assets/main.css?v=c1e5a9f34b">
+  <link rel="stylesheet" crossorigin href="/assets/main.css?v=ed681b7b61">
 </head><body data-page="apply-full">
 <script>try{var _t=localStorage.getItem('asj_theme');document.body.classList.add(_t==='SAKURA'?'theme-light':'theme-dark')}catch(e){document.body.classList.add('theme-dark')}</script>
   <!-- Skip link: lompat langsung ke konten utama (WCAG 2.4.1) -->
@@ -330,11 +330,13 @@
   <!-- SCRIPT ENGINE -->
   <!-- Fase 3.5 L6: js/pages/apply_full.js = entry ESM — meng-import core sendiri
        lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
+<!--SCRIPTS_SHARED_START-->
   <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
   <script type="module" src="/js/apply-docs.js?v=esm13"></script>
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script dipindah ke js/pages/apply_full.js (isi byte-identik) -->
   <script type="module" src="/js/pages/apply_full.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm15"></script>
+<!--SCRIPTS_SHARED_END-->
 </body>
 </html>

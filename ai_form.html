@@ -63,7 +63,7 @@
        lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
   <!-- Fase 2: inline script (konteks URL) dipindah ke js/pages/ai_form.js (isi byte-identik) -->
-  <link rel="stylesheet" crossorigin href="/assets/main.css?v=c1e5a9f34b">
+  <link rel="stylesheet" crossorigin href="/assets/main.css?v=ed681b7b61">
 </head>
 <body data-page="ai-form" class="flex flex-col md:flex-row h-screen w-full relative" style="height:100vh;height:100dvh" onload="initApp()">
 <script>try{var _t=localStorage.getItem('asj_theme');document.body.classList.add(_t==='SAKURA'?'theme-light':'theme-dark')}catch(e){document.body.classList.add('theme-dark')}</script>
@@ -356,9 +356,11 @@
     </div>
   </div>
 
+<!--SCRIPTS_SHARED_START-->
     <!-- Fase 2: inline script utama dipindah ke js/pages/ai_form.js (isi byte-identik) -->
   <script type="module" src="/js/pages/ai_form.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm15"></script>
+<!--SCRIPTS_SHARED_END-->
 </body>
 </html>
 

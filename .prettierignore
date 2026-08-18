@@ -4,7 +4,7 @@ vendor/
 node_modules/
 dist/
 
-# Halaman HTML raksasa (250KB+) — belum diformat karena masih menunggu
-# pemecahan partial (langkah refactor berikutnya). JS di dalamnya ditangani
-# lewat bundel build:js.
+# Halaman HTML + partial — byte-sensitive: region dibangun ulang dari partial
+# oleh build:html (Fase 5), jadi diformat ulang oleh prettier bisa mengubah
+# byte dan mematahkan idempotensi build. JS di dalamnya ditangani bundel.
 *.html

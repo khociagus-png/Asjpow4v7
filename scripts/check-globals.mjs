@@ -1,8 +1,8 @@
 // =============================================================================
 // check-globals.mjs — Guard kolisi global (prasyarat Fase 3 ESM)
 // -----------------------------------------------------------------------------
-// Sebelum konversi ES Modules bisa dimulai, bundel admin/index (STACK di
-// build-js.mjs) HARUS bebas kolisi deklarasi top-level. Kenapa:
+// Sebelum konversi ES Modules bisa dimulai, bundel admin/index HARUS bebas
+// kolisi deklarasi top-level. Kenapa:
 //   - esbuild bundle mode RENAMES deklarasi top-level saat ada nama yang
 //     bentrok lintas modul, dan rename itu TIDAK konsisten dengan referensi
 //     global implisit dari modul lain → ReferenceError diam-diam.
@@ -11,19 +11,19 @@
 //   - konversi bertahap ke ESM butuh jaminan "nol kolisi" supaya setiap simbol
 //     yang di-export tidak punya kembaran deklarasi lain.
 //
-// Skrip ini membaca STACK dari scripts/build-js.mjs (satu-satunya sumber
-// kebenaran urutan bundel), mengekstrak deklarasi top-level tiap file, dan
-// GAGAL (exit 1) kalau ada nama yang dideklarasikan di 2+ file STACK.
-// Juga melaporkan (warning) kalau nama STACK muncul di js/pages/* (risiko
-// saat halaman standalone ikut dibundel).
+// Skrip ini membaca daftar modul bundel dari import eksplisit js/main.js
+// (bundleModules di module-registry — Fase 6), mengekstrak deklarasi
+// top-level tiap file, dan GAGAL (exit 1) kalau ada nama yang dideklarasikan
+// di 2+ modul. Juga melaporkan (warning) kalau nama modul bundel muncul di
+// js/pages/* (risiko saat halaman standalone ikut dibundel).
 //
 // Jalankan: bun run check:globals  (juga dijalankan otomatis di `bun run build`)
 // =============================================================================
 
 import { readFileSync, existsSync } from 'node:fs';
-// STACK dibaca dari registry (bukan di-parse dari build-js via regex) —
-// satu sumber kebenaran struktur modul.
-import { STACK, PAGE_JS } from './module-registry.mjs';
+// Daftar modul dibaca dari registry (dari import js/main.js — satu sumber
+// kebenaran struktur modul, bukan daftar concat duplikat).
+import { bundleModules, PAGE_JS } from './module-registry.mjs';
 
 const ROOT = process.cwd();
 
@@ -46,7 +46,8 @@ function topLevelDecls(filePath) {
 
 const byName = new Map(); // name -> [file...]
 let missing = 0;
-for (const p of STACK) {
+const MODULES = bundleModules();
+for (const p of MODULES) {
   const file = ROOT + p;
   if (!existsSync(file)) {
     console.error(`[check-globals] FILE HILANG: ${p}`);
@@ -65,13 +66,13 @@ for (const [name, files] of byName) {
   if (uniq.length > 1) {
     errors++;
     console.error(
-      `[check-globals] ✖ KOLISI GLOBAL: ${name} dideklarasikan di ${uniq.length} file STACK:`,
+      `[check-globals] ✖ KOLISI GLOBAL: ${name} dideklarasikan di ${uniq.length} modul bundel:`,
     );
     for (const f of uniq) console.error(`    ${f}`);
   }
 }
 
-// Warning: nama STACK juga dipakai js/pages/* (saat halaman standalone
+// Warning: nama modul bundel juga dipakai js/pages/* (saat halaman standalone
 // dijadikan entry ESM, kolisi dengan bundel admin/index harus dihindari).
 const pageFiles = PAGE_JS;
 let pageWarn = 0;
@@ -82,14 +83,14 @@ for (const p of pageFiles) {
     if (byName.has(name)) {
       pageWarn++;
       console.warn(
-        `[check-globals] ⚠ nama STACK "${name}" juga dideklarasikan di ${p} — hati-hati saat bundling per-halaman.`,
+        `[check-globals] ⚠ nama modul bundel "${name}" juga dideklarasikan di ${p} — hati-hati saat bundling per-halaman.`,
       );
     }
   }
 }
 
 console.log(
-  `[check-globals] ${STACK.length} file STACK · ${byName.size} simbol top-level unik · ` +
+  `[check-globals] ${MODULES.length} modul bundel · ${byName.size} simbol top-level unik · ` +
     `${errors === 0 ? 'nol kolisi ✓' : errors + ' kolisi ✖'} · ${pageWarn} warning page`,
 );
 
