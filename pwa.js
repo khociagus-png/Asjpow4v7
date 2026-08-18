@@ -9,6 +9,11 @@
    file; standalone: <script type="module"> yang dieksekusi setelah parse,
    sebelum DOMContentLoaded/onload).
 */
+// Alias window.* (cobaInstallApp/bersihkanDraftLamaBase64) dipasang via
+// registry seam terpusat (Fase 3.5 L6) — pwa.js hanya dimuat lewat main.js
+// (bundel admin/index), tempat bridge.js sudah dievaluasi lebih dulu.
+import { registerSeamAliases } from './js/core/bridge.js';
+
 // 0. MODE DEV (localhost) & PREVIEW Freebuff — preview SELALU fresh, tanpa
 // chance versi lama.
 // Service worker memakai strategi stale-while-revalidate: di production VERSION
@@ -313,10 +318,10 @@ export function bersihkanDraftLamaBase64() {
   }
 }
 
-// BRIDGE ESM → classic/bundel & HTML onclick: alias window.*.
-window.cobaInstallApp = cobaInstallApp;
-window.bersihkanDraftLamaBase64 = bersihkanDraftLamaBase64; // Jalankan migrasi begitu pwa.js termuat (semua halaman, sebelum
-// onload/initApp halaman mana pun).
+// BRIDGE ESM → classic/bundel & HTML onclick: alias window.* dipasang via
+// registry seam (Fase 3.5 L6). Jalankan migrasi begitu pwa.js termuat
+// (semua halaman, sebelum onload/initApp halaman mana pun).
+registerSeamAliases({ cobaInstallApp, bersihkanDraftLamaBase64 }, { source: 'pwa' });
 bersihkanDraftLamaBase64();
 
 // 6. PENANDA VERSI (verifikasi cepat): tempel versi bundel ke baris

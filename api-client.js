@@ -339,8 +339,8 @@ export function escJs(x) {
     .replace(/[\r\n\u2028\u2029]/g, ' ');
 }
 
-window.esc = esc;
-window.escJs = escJs;
+// Alias window.* (esc/escJs/dst) dipasang via registry seam di
+// js/core/bridge.js (Fase 3.5 L6) — file ini murni ESM.
 
 // ============================================================
 // resolveSelfUrl(url) — paksa URL form bridge ke origin aplikasi
@@ -365,12 +365,9 @@ export function resolveSelfUrl(url) {
   return url;
 }
 
-window.resolveSelfUrl = resolveSelfUrl;
-
 // callAPI() adalah kontrak global utama — dipakai ~40 file frontend (js/*,
-// js/pages/*, upload-guard) sebagai bare global. Alias window.* wajib supaya
-// pemakai classic tetap jalan setelah file ini jadi modul ES (IIFE di bundel).
-window.callAPI = callAPI;
+// js/pages/*, upload-guard) sebagai bare global. Alias window.* dipasang via
+// registry seam di js/core/bridge.js (Fase 3.5 L6) — file ini murni ESM.
 
 // Semua pemanggilan di frontend memakai callAPI() langsung ke Netlify Functions
 // + Supabase — tidak ada lagi jalur Google Apps Script / callGAS.

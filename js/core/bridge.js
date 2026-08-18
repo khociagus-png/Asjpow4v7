@@ -7,11 +7,13 @@
 //   - file classic js/*.js yang belum di-ESM (bundel admin/index)
 //   - halaman standalone (ai_form, apply-full, master-full, share, siswa-baru)
 //
-// Efek samping import: i18n.js & api-client.js MENGEKSEKUSI alias window.*
-// klasik mereka sendiri (window.tr, window.LANG, window.CURRENT_LANG,
-// window.callAPI, window.esc, window.escJs, window.resolveSelfUrl, ...), jadi
-// SEMUA pemakai lama tetap jalan tanpa perubahan — window.PortalBridge hanya
-// tambahan namespaced yang rapi untuk kode baru / migrasi bertahap.
+// Efek samping import: api-client.js & i18n.js kini MURNI ESM (tidak lagi
+// menulis window.* sendiri) — alias classic (window.tr, window.LANG,
+// window.CURRENT_LANG, window.callAPI, window.esc, window.escJs,
+// window.resolveSelfUrl, ...) dipasang DI SINI lewat registerSeamAliases
+// (lihat bagian registrasi core di bawah), jadi SEMUA pemakai lama tetap
+// jalan tanpa perubahan. window.PortalBridge adalah namespace tambahan yang
+// rapi untuk kode baru / migrasi bertahap.
 //
 // CARA LOAD:
 //   - Halaman standalone: js/pages/* adalah ENTRY ESM — tiap halaman
@@ -230,6 +232,34 @@ export function initSeamDispatcher() {
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
 initSeamDispatcher();
+
+// =============================================================================
+// Fase 3.5 L6 lanjutan — alias core ROOT (api-client.js & i18n.js) TIDAK lagi
+// menulis window.* sendiri (kini murni ESM); alias dipasang lewat registry
+// seam TERPUSAT di sini. Bridge dimuat di SEMUA halaman (bundel admin/index +
+// halaman standalone), jadi pemakai classic tetap dapat window.callAPI/tr/
+// LANG/dst persis seperti dulu — hanya jalur pemasangannya yang berubah.
+// =============================================================================
+registerSeamAliases(
+  {
+    callAPI: api.callAPI,
+    esc: api.esc,
+    escJs: api.escJs,
+    resolveSelfUrl: api.resolveSelfUrl,
+  },
+  { source: 'bridge:api-client' },
+);
+registerSeamAliases(
+  {
+    tr: i18n.tr,
+    trOption: i18n.trOption,
+    trOptionId: i18n.trOptionId,
+    renderLanguageLight: i18n.renderLanguageLight,
+    toggleFormLanguage: i18n.toggleFormLanguage,
+    LANG: i18n.LANG,
+  },
+  { source: 'bridge:i18n', allowNonFunction: true },
+);
 
 // ESM-only: modul lain bisa `import { PortalBridge, registerSeamAliases } from './bridge.js'`.
 export default PortalBridge;
