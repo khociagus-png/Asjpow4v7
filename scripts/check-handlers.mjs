@@ -61,7 +61,13 @@ function stripComments(text) {
 // ---- 1. Referensi handler ---------------------------------------------------
 
 // Handler inline: onXXX="...". Nilai diambil sampai kutip penutup.
-const ON_RE = /on(?:click|keyup|input|change|blur|load|submit|focus|dblclick)="([^"]*)"/g;
+// Daftar event diperluas (2026-08-18, self-review): keydown/keypress/error dkk
+// ternyata dipakai nyata di kode (rbAddChip, handleEnter, kirimPesanAdminAi,
+// gateLogin) tapi sebelumnya TIDAK di-scan — lubang di jaring pengaman.
+// Sengaja daftar eksplisit (bukan on[a-z]+) supaya atribut seperti `content=`
+// tidak ketarik (regex `on[a-z]+` cocok dengan akhiran `content`).
+const ON_RE =
+  /on(?:click|dblclick|change|input|keyup|keydown|keypress|blur|focus|submit|reset|load|error|select|search|paste|scroll|mouseenter|mouseleave|mouseover|mouseout|mousedown|mouseup|touchstart|touchend|contextmenu|dragover|drop|dragstart|dragend|animationend|transitionend|pointerdown|pointerup|pointermove|pointerenter|pointerleave)="([^"]*)"/g;
 // data-action="nama" (dispatcher delegasi bridge — resolve dari seam/window;
 // kalau missing: console.warn + klik tidak melakukan apa-apa).
 const ACTION_RE = /data-action="([A-Za-z_$][A-Za-z0-9_$]*)"/g;
@@ -148,6 +154,45 @@ const STD_GLOBALS = new Set([
   'Event',
 ]);
 
+// Kata kunci JS yang muncul sebagai `if(...)`, `for(...)` dll di handler inline
+// (mis. onkeypress="if(event.key==='Enter'){...}") — bukan panggilan fungsi.
+const JS_KEYWORDS = new Set([
+  'if',
+  'for',
+  'while',
+  'switch',
+  'return',
+  'typeof',
+  'instanceof',
+  'new',
+  'delete',
+  'void',
+  'do',
+  'else',
+  'in',
+  'of',
+  'function',
+  'class',
+  'const',
+  'let',
+  'var',
+  'this',
+  'super',
+  'yield',
+  'await',
+  'import',
+  'export',
+  'default',
+  'throw',
+  'try',
+  'catch',
+  'finally',
+  'case',
+  'break',
+  'continue',
+  'debugger',
+]);
+
 const refs = new Map(); // name -> contoh file pertama
 
 // Kembalikan bagian handler yang ADA DI LUAR string literal (ganti string dengan
@@ -192,6 +237,7 @@ function collect(text, file) {
       const before = outside[c.index - 1];
       if (!prefix && before === '.') continue; // document./this./event. — property access
       if (STD_GLOBALS.has(name)) continue; // global standard browser/JS
+      if (JS_KEYWORDS.has(name)) continue; // if(...)/for(...) — control flow, bukan fungsi
       if (!refs.has(name)) refs.set(name, file);
     }
   }
@@ -208,6 +254,60 @@ for (const f of jsFiles) collect(stripComments(readFileSync(f, 'utf8')), f);
 
 // ---- 2. Nama terdaftar di window --------------------------------------------
 
+// Kunci objek dari registerSeamAliases({...}) — state machine kecil key/value.
+// Parser regex lama salah daftarkan NILAI (mis. { a: b, c } -> 'b' ikut
+// terdaftar padahal bukan alias) — membuat jaring punya false negative.
+// Nilai seam di proyek ini selalu flat (identifier/property access, tanpa
+// arrow/nested) — terbukti dari scan semua registerSeamAliases({ di js/.
+function collectSeamKeys(body) {
+  const keys = new Set();
+  let i = 0;
+  let expectKey = true; // posisi key: setelah '{' atau ','
+  while (i < body.length) {
+    const ch = body[i];
+    if (/\s/.test(ch)) {
+      i++;
+      continue;
+    }
+    if (ch === ',') {
+      expectKey = true;
+      i++;
+      continue;
+    }
+    if (ch === ':') {
+      expectKey = false;
+      i++;
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      const q = ch;
+      let j = i + 1;
+      while (j < body.length && body[j] !== q) j++;
+      if (expectKey) keys.add(body.slice(i + 1, j));
+      i = j + 1;
+      continue;
+    }
+    if (expectKey) {
+      const m = /^[A-Za-z_$][A-Za-z0-9_$]*/.exec(body.slice(i));
+      if (m) {
+        keys.add(m[0]);
+        i += m[0].length;
+        continue;
+      }
+      i++;
+      continue;
+    }
+    // posisi value: lewati sampai koma/} (nilai flat)
+    if (ch === '}' || ch === ',') {
+      expectKey = true;
+      i++;
+      continue;
+    }
+    i++;
+  }
+  return keys;
+}
+
 const registered = new Set();
 for (const f of jsFiles) {
   const src = stripComments(readFileSync(f, 'utf8'));
@@ -221,9 +321,7 @@ for (const f of jsFiles) {
     const end = src.indexOf('}', start);
     if (end < 0) continue;
     const body = src.slice(start, end);
-    const keyRe = /(?:'([^']+)'|"([^"]+)"|([A-Za-z_$][A-Za-z0-9_$]*))\s*(?::|,|\})/g;
-    let k;
-    while ((k = keyRe.exec(body))) registered.add(k[1] || k[2] || k[3]);
+    for (const k of collectSeamKeys(body)) registered.add(k);
   }
   // window.X = ... (assignment global lain)
   const winRe = /window\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/g;

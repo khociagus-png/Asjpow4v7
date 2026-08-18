@@ -5,7 +5,20 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix AKAR masalah kelas bug handler: scanner permanen `check-handlers.mjs` (terpasang di build + CI) + bug nyata ke-4 `cekRiwayat` ketemu & diperbaiki (commit `e3abe0f`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — self-review scanner: cakupan event handler diperluas (keydown/keypress/error dkk) + parser seam key/value presisi (commit `9e3b7c5`).
+
+---
+
+## 🆕 Sesi 2026-08-18 (lanjutan) — dikerjakan oleh: codebuff (via Freebuff) — SELF-REVIEW scanner `check-handlers.mjs`: tutup lubang cakupan event + parser seam presisi
+
+### Ringkasan
+
+- **Self-review kritis (receiving-code-review)** atas scanner yang baru dibuat menemukan 2 lubang:
+  1. **Lubang nyata**: daftar event `ON_RE` tidak mencakup `keydown`/`keypress`/`error` dkk — padahal dipakai nyata: `onkeydown="...rbAddChip(...)"` (modals-shared), `onkeypress="handleEnter(event)"` (ai_form), `onkeypress="kirimPesanAdminAi(event)"` (modals-shared), `onkeypress="if(...)gateLogin(event)"` (master-full). Kalau alias salah satu dari itu regresi, scanner lama tidak menangkap. Daftar event diperluas ke ~40 event umum (tetap daftar eksplisit, bukan `on[a-z]+` — supaya atribut `content=` tidak ketarik).
+  2. **Lubang laten**: parser kunci seam (regex) salah mendaftarkan NILAI objek sebagai alias (`{ a: b, c }` → `b` ikut terdaftar) — false negative di jaring. Saat ini 0 dampak (file nyata flat), tapi rapuh. Diganti state machine key/value `collectSeamKeys()` — hanya kunci yang terdaftar.
+  3. **False positive baru dari perluasan**: `if(` di `onkeypress="if(event.key==='Enter'){...}"` — ditambah daftar `JS_KEYWORDS` yang di-skip.
+- **Terbukti menangkap regresi**: hapus `rbAddChip` dari seam sementara → scanner GAGAL persis `rbAddChip (dipakai di: partials\modals-shared.html)` (atribut yang SEBELUMNYA tidak di-scan); pulihkan → LULUS.
+- **Status**: 184 referensi = 0 missing, vitest 156/156, lint 0 error, prettier rapi, build lulus (bundle tetap `app-6080598722` — guard bukan bagian bundel). Commit `9e3b7c5`.
 
 ---
 

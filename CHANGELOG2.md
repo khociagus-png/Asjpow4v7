@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🛡 Self-review scanner check-handlers.mjs: perluas cakupan event (keydown/keypress/error dkk) + parser seam key/value presisi
+
+### Ringkasan
+
+- Cakupan event handler diperluas dari 9 → ~40 (termasuk keydown/keypress/error yang ternyata dipakai nyata: rbAddChip, handleEnter, kirimPesanAdminAi, gateLogin — sebelumnya TIDAK di-scan = lubang di jaring). Daftar eksplisit (bukan `on[a-z]+`) agar `content=` tidak ketarik.
+- Parser kunci `registerSeamAliases` diganti state machine key/value (`collectSeamKeys`) — regex lama salah daftarkan nilai objek sebagai alias (false negative laten).
+- Skip `JS_KEYWORDS` (`if(` di onkeypress) — false positive baru dari perluasan.
+- Terbukti menangkap regresi: hapus `rbAddChip` → GAGAL dengan pesan persis; pulihkan → LULUS. 184 ref = 0 missing, vitest 156/156, lint 0 error.
+
 ## 2026-08-18 — 🛡 Fix akar masalah: scanner check-handlers.mjs (build+CI) + bug ke-4 cekRiwayat (apply-full)
 
 ### Ringkasan
