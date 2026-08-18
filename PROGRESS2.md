@@ -5,7 +5,7 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix AKAR masalah kelas bug handler: scanner permanen `check-handlers.mjs` (terpasang di build + CI) + bug nyata ke-4 `cekRiwayat` ketemu & diperbaiki (commit `…`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fix AKAR masalah kelas bug handler: scanner permanen `check-handlers.mjs` (terpasang di build + CI) + bug nyata ke-4 `cekRiwayat` ketemu & diperbaiki (commit `e3abe0f`).
 
 ---
 
