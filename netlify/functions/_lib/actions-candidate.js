@@ -11,6 +11,7 @@ const { requireAdmin } = require('./actions-auth');
 const { findCandidateByWa } = require('./candidate-helpers');
 const { stripRaw, loadCandidatesUnik } = require('./actions-public');
 const { cacheClear } = require('./cache');
+const { syncBiodataKeMail } = require('./actions-mail');
 
 async function handleUpdateCatatanKandidat(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
@@ -32,6 +33,21 @@ async function handleUpdateCatatanKandidat(payload, sessionToken) {
     return { success: false, error: 'Gagal simpan catatan: ' + e.message };
   }
 }
+
+// Label kolom yang boleh diubah admin via modal edit kandidat — dipakai untuk
+// ringkasan mail ("[BIODATA] gender, usia diubah") supaya admin tahu bagian
+// mana yang berubah, sama seperti update biodata dari sisi kandidat.
+const SUPER_MAIL_LABELS = {
+  gender: 'gender',
+  usia: 'usia',
+  tempat_lahir: 'tempat lahir',
+  tgl_lahir: 'tgl lahir',
+  tb: 'tinggi',
+  bb: 'berat',
+  nilai_jft_text: 'JFT',
+  bidang_ssw_text: 'SSW',
+  id_loker_pilihan: 'loker',
+};
 
 async function handleUpdateKandidatSuper(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
@@ -61,6 +77,28 @@ async function handleUpdateKandidatSuper(payload, sessionToken) {
       body,
       headers: { Prefer: 'return=minimal' },
     });
+    // Ringkasan perubahan ke mail (badge UPDATE + "[BIODATA] …"): hanya field
+    // yang nilainya BENAR-BENAR berubah dari baris lama, supaya admin edit
+    // kandidat juga tercatat di inbox seperti update biodata dari kandidat.
+    try {
+      const labels = [];
+      for (const k of Object.keys(body)) {
+        const label = SUPER_MAIL_LABELS[k];
+        if (!label) continue;
+        const oldVal = row[k] !== undefined && row[k] !== null ? String(row[k]).trim() : '';
+        const newVal = String(body[k] === null || body[k] === undefined ? '' : body[k]).trim();
+        if (newVal !== oldVal) labels.push(label);
+      }
+      if (labels.length) {
+        await syncBiodataKeMail(
+          data.wa,
+          String(row.nama_lengkap || row.nama || 'KANDIDAT'),
+          labels,
+        );
+      }
+    } catch (e) {
+      /* sync mail opsional — jangan gagalkan update kandidat */
+    }
     return { success: true };
   } catch (e) {
     return { success: false, error: 'Gagal update kandidat: ' + e.message };
