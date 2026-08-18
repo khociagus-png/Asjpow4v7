@@ -9,7 +9,18 @@
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — audit mail: label update biodata mentah + update admin tidak sync ke mail
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — lanjutan audit mail: AI form & jalur upload sync
+
+### 🔍 Lanjutan — AI form (`submitDataAsj`) TIDAK sync mail → DISAMAKAN
+
+- **Jalur AI terpetakan**: `processAIChat` hanya generate teks (tidak menulis DB); `parseDokumenBiodata` (admin parse dokumen) & `ai_copilot/results.js` (apply hasil AI) memanggil `submitMasterForm` → **sudah sync mail** (`syncBiodataKeMail`). Yang TIDAK sync: **`submitDataAsj`** (ai_form.html SIMPAN DB — kandidat simpan biodata AI) — hanya menulis `ai_form_submissions` + `master.ai_data_json`, tanpa menyentuh mail.
+- **Fix** (`ai/cv.js`): `handleSubmitDataAsj` kini membandingkan `ai_data_json` lama vs baru per seksi (`AI_SEKSI_LABEL`: identitas, fisik & ukuran, medis, pendidikan, pekerjaan, sertifikasi, keluarga, wawancara) lalu memanggil `syncBiodataKeMail` dengan label yang BENAR-BENAR berubah → mail kandidat mendapat badge UPDATE + `[BIODATA] fisik & ukuran, medis` (hanya kalau ada perubahan nyata — simpan berulang tanpa perubahan tidak menulis apa-apa). Non-fatal.
+- **Test baru** (`actions-mail.test.js`): `AI_SEKSI_LABEL` mencakup semua seksi + label terbaca (tanpa `_`) — sekaligus membuktikan tidak ada circular require (ai/cv → actions-mail). **151/151 vitest**.
+
+### 🔍 Jalur upload dokumen — SUDAH LENGKAP sync (audit, tidak perlu ubah)
+
+- `simpanBerkasTahapan` (line 618) & `simpanRevisiKandidat` (line 722) memanggil `syncFormMailDariUpload` untuk SEMUA jenis dokumen → status UPDATE (kalau sudah diproses admin) + feedback `[UPLOAD <JENIS>]` terbaca. `submitApply`/`simpanKandidatDanUpload` = lamaran/kandidat BARU (status MENUNGGU, wajar tanpa feedback).
+- **11 baris mail feedback kosong** (semua status LULUS, updated 08-15/08-16) = baris yang di-approve admin tanpa ada update lanjutan — NORMAL, bukan bug. Frontend sudah fallback menampilkan "Lamaran disetujui".
 
 ### 🔍 Audit mail — "Agus update ukuran baju kok beda, Anis update kok gak keluar tulisan update"
 

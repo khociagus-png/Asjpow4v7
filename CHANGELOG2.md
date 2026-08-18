@@ -134,6 +134,17 @@
 
 ---
 
+## 2026-08-18 — 🔍 lanjutan audit mail: AI form sync ke mail + audit jalur upload
+
+### Ringkasan
+
+- **AI form (`submitDataAsj`) kini sync mail**: bandingkan `ai_data_json` lama vs baru per seksi (`AI_SEKSI_LABEL`: identitas, fisik & ukuran, medis, pendidikan, pekerjaan, sertifikasi, keluarga, wawancara) → `syncBiodataKeMail` dengan label yang benar-benar berubah → badge UPDATE + `[BIODATA] …` di mail kandidat. Sebelumnya jalur ini hanya menulis `ai_form_submissions` + `ai_data_json` tanpa menyentuh mail. Non-fatal; simpan tanpa perubahan tidak menulis feedback.
+- Jalur AI lain sudah sync lewat `submitMasterForm` (`parseDokumenBiodata` admin + `results.js` apply hasil AI). `processAIChat` hanya generate teks (tidak menulis DB).
+- **Audit upload**: `simpanBerkasTahapan` & `simpanRevisiKandidat` sudah memanggil `syncFormMailDariUpload` (UPDATE + `[UPLOAD <JENIS>]`) — lengkap. 11 baris mail feedback kosong = baris LULUS tanpa update lanjutan (normal, frontend fallback "Lamaran disetujui").
+- **Test**: `AI_SEKSI_LABEL` di-export dari `ai/cv.js` + test baru (cakupan seksi + label terbaca, bukti tanpa circular require) — **151/151 vitest**, lint 0 error.
+
+---
+
 ## 2026-08-18 — `57eb79e` 📋 TODO list + env terbaru + seed template WA
 
 ### Ringkasan
