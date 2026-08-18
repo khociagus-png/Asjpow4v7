@@ -5,7 +5,7 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — item opsional: dedupe 0 duplikat, refactor backend ke helper terpusat (supabasePaged/storageRequest), hapus file uji Cloudinary, build hook ke GitHub secret.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — **DEPLOY `aaac6ac` LIVE** (deploy ID `6a841baec747d7187ea615a8`, bundle `app-699dfb4a86`): paket 8 fix + refactor backend sudah di domain asli, verifikasi live penuh.
 
 ---
 

@@ -9,13 +9,13 @@
 ## 🔴 Deploy & live (butuh izin eksplisit pemilik — `DEPLOY.md` §2)
 
 Paket fix terverifikasi di preview tapi **belum live** (live `app-0d473e8141`,
-lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
+lokal `app-699dfb4a86`) — semua siap deploy sekaligus:- [x] **Deploy Netlify** — ✅ SELESAI 2026-08-18 (`aaac6ac`, deploy ID
+`6a841baec747d7187ea615a8`): paket 8 fix (pwa.js reload palsu, 3 filter
+seam, cekRiwayat, kartu Undangan Grup Kelas → puncak, hardening
+filterKandidat, scanner check-handlers, guard runtime bridge, E2E SW) + refactor backend supabasePaged/storageRequest. Live kini
+`app-699dfb4a86` — verifikasi: homepage 200, login SACHOU success,
+getAppData admin candidatesTotal 223. Detail: DEPLOY.md §4.
 
-- [ ] **Deploy Netlify** — paket 8 fix sejak deploy `acb299b`: 1. `pwa.js` — reload palsu halaman standalone (ai_form/master-full dkk
-      purge+reload tiap buka di live). 2. 3 fix filter seam: `filterKelolaLoker`, `filterCbx` (auto-search
-      LOKASI/SYARAT Tambah Job), `cariKandidatManual`. 3. `cekRiwayat` (apply-full) — radar "WA sudah pernah daftar". 4. Kartu Undangan Grup Kelas → PUNCAK tab WA Pintar + badge
-      "Fitur Khusus". 5. Hardening `filterKandidat` (guard NULL). 6. Guard `check-handlers.mjs` (scanner CI + build). 7. Guard runtime handler (`bridge.js` — dev/preview only, non-produksi). 8. E2E anti-race service worker (login-check, undang-grup-kelas,
-      photo-check).
 - [x] **Hapus file uji Cloudinary** — ✅ 2026-08-18: `DOKUMENASJ/
  e2e-cloudinary-check_w1whnt` dihapus (API delete → `deleted`); folder
       `DOKUMENASJ/e2e` kini kosong. ⚠️ Catatan: 9 file `KK_*`/`KTP_*` (587 B)

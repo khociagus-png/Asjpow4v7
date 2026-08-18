@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🚀 DEPLOY LIVE: paket 8 fix + refactor backend (aaac6ac → app-699dfb4a86)
+
+### Ringkasan
+
+- Izin eksplisit pemilik ("deploy") — `scripts/deploy-netlify.mjs` (SKIP_INSTALL/SKIP_BUILD=1, build lokal identik repo, tree bersih). Deploy ID `6a841baec747d7187ea615a8`; 375 file + 19 functions.
+- Isi: fix pwa.js reload palsu standalone, 3 fix filter seam, cekRiwayat, kartu Undangan Grup Kelas → puncak WA Pintar, hardening filterKandidat, scanner check-handlers, guard runtime bridge, E2E anti-race SW, refactor backend supabasePaged/storageRequest.
+- **Live kini `app-699dfb4a86.js` + sw VERSION `asj-portal-app-699dfb4a86-m886a44dc`**.
+- Verifikasi live: homepage 200, getAppData jobs=140, login SACHOU:1111 success:true, getAppData admin sessionInvalid:false candidatesTotal:223 dbJobs:140. DEPLOY.md §4 dicatat.
+
 ## 2026-08-18 — 🧹 Item opsional: dedupe dry-run, audit backend supabase.*, bersihkan file uji Cloudinary, build hook ke GitHub secret
 
 ### Ringkasan
