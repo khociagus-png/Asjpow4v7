@@ -62,8 +62,22 @@ boleh deploy ke mana**. Baca sebelum commit, push, atau deploy.
 ```
 SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY, SUPABASE_STORAGE_BUCKET,
 ADMIN_MASTER_PIN, PIN_KHOCI, ASJ_ADMINS, ADMIN_NUMBERS, SESSION_SECRET,
-GEMINI_API_KEY, FONNTE_TOKEN, NETLIFY_SITE_URL
+GEMINI_API_KEY, FONNTE_TOKEN, NETLIFY_SITE_URL,
+GROQ_API_KEY, LOG_DRAIN_TOKEN    # ditambahkan 2026-08-18 (whitelist env.js sudah ada)
 ```
+
+> **Update env terbaru 2026-08-18** (nilai diberikan pemilik via chat): semua key
+> di daftar atas sudah punya nilai **kecuali `ASJ_ADMINS` dan `SESSION_SECRET`** —
+> dua ini wajib di-set. Nilai secret tidak ditulis di repo; set di dashboard
+> Netlify lalu **redeploy** (env baru baru terpasang setelah redeploy).
+> Status 2026-08-18: nilai sudah di-apply ke `.env.local` (preview lokal,
+> gitignored — 12 key terverifikasi hash cocok); **dashboard Netlify masih
+> menunggu**.
+> `ADMIN_NUMBERS` sudah di whitelist `env.js` tapi belum dipakai kode mana pun
+> (legacy — konfirmasi apakah masih dibutuhkan). `CLOUDINARY_URL`,
+> `NETLIFY_AUTH_TOKEN`, dan deploy key SSH bukan env aplikasi — simpan di
+> Keys/API keys Freebuff untuk CLI deploy (cloud `ybzzbw9i` sudah hardcoded di
+> `js/cloudinary.js`). Daftar tugas terbuka: lihat `TODO.md`.
 
 ---
 
