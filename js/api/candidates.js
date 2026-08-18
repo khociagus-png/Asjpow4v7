@@ -1021,6 +1021,8 @@ registerSeamAliases({
   prosesUploadRevisi,
   aksiGenerateQr,
   tutupModalQr,
+  filterCbx,
+  cariKandidatManual,
   ensureAllCandidates,
   muatLebihKandidat,
 });

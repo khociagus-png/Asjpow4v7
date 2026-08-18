@@ -304,4 +304,5 @@ export function filterKelolaLoker() {
 registerSeamAliases({
   filterPublicData,
   renderPublicFiltered,
+  filterKelolaLoker,
 });
