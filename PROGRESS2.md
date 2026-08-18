@@ -5,7 +5,7 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — A+C+D: commit overhaul scanner (`e90f53a`), verifikasi env Netlify, guard runtime handler di browser + deploy otomatis via build hook (commit menunggu).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — item opsional: dedupe 0 duplikat, refactor backend ke helper terpusat (supabasePaged/storageRequest), hapus file uji Cloudinary, build hook ke GitHub secret.
 
 ---
 

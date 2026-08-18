@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🧹 Item opsional: dedupe dry-run, audit backend supabase.*, bersihkan file uji Cloudinary, build hook ke GitHub secret
+
+### Ringkasan
+
+- **Dedupe** — `bun run dedupe` dry-run: **0 duplikat** di ketiga tabel (tidak perlu `--apply`).
+- **Audit backend `supabase.*`** — `fetchPagedAll` (db/candidates.js) & `queryPaged` (db/misc.js) direfactor ke helper terpusat baru `supabasePaged` (db/client.js, Range+Content-Range); `listStorageFolder` (db/berkas.js) pakai `storageRequest` (storage.js). Sisa fetch = 3 helper pusat + API eksternal sah (Fonnte, AI provider). Terverifikasi via preview: admin getAppData `candidatesTotal: 223` (jalur fetchPagedAll), `formInbox: 13`, `dbJobs: 140`, `sessionInvalid: false`; share-data 200 (jalur listStorageFolder).
+- **File uji Cloudinary** — `DOKUMENASJ/e2e-cloudinary-check_w1whnt` dihapus via API (folder `e2e` kosong). 9 file `KK_*`/`KTP_*` 587 B mencurigakan tapi tak terkonfirmasi (cek dashboard); `638_-644_*` + `WhatsApp_Image_*` = dokumen asli (dibiarkan).
+- **Build hook → GitHub secret** — `NETLIFY_BUILD_HOOK_URL` di-set via GitHub REST API (libsodium sealed box, token dari git credential manager; HTTP 201, terverifikasi terdaftar). Workflow `deploy-netlify.yml` kini baca `${{ secrets.NETLIFY_BUILD_HOOK_URL }}` + guard error kalau kosong. DEPLOY.md §2.5 di-update.
+
 ## 2026-08-18 — 🛡 Guard runtime handler inline (bridge.js) + deploy otomatis via build hook Netlify
 
 ### Ringkasan

@@ -2,9 +2,10 @@
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 'use strict';
 
-const { supabaseJson, pick, toText, findTable, supabaseUrl, supabaseKey } = require('./client');
+const { supabaseJson, supabasePaged, pick, toText, findTable } = require('./client');
 
-// Query paginated dengan Range header + total dari Content-Range.
+// Query paginated dengan Range header + total dari Content-Range. Pakai
+// helper terpusat supabasePaged (client.js).
 async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
   const start = (page - 1) * pageSize;
   const end = start + pageSize - 1;
@@ -15,22 +16,7 @@ async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
     params.or = `(nama_lengkap.ilike.*${needle}*,no_wa.ilike.*${needle}*)`;
   }
   const qs = new URLSearchParams(params).toString();
-  const res = await fetch(supabaseUrl().replace(/\/$/, '') + '/rest/v1/' + table + '?' + qs, {
-    method: 'GET',
-    headers: {
-      apikey: supabaseKey(),
-      Authorization: 'Bearer ' + supabaseKey(),
-      Range: start + '-' + end,
-      Prefer: 'count=exact',
-    },
-  });
-  if (!res.ok) {
-    throw new Error(table + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
-  }
-  const rows = await res.json();
-  const cr = res.headers.get('content-range') || '';
-  const total = parseInt(String(cr).split('/')[1] || '0', 10) || rows.length;
-  return { rows, total };
+  return supabasePaged(table, qs, { start, end });
 }
 
 async function findAdmins() {

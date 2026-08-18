@@ -2,7 +2,8 @@
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 'use strict';
 
-const { supabaseJson, toText, pick, normalizeWa, supabaseUrl, supabaseKey } = require('./client');
+const { supabaseJson, toText, pick, normalizeWa } = require('./client');
+const { storageRequest, bucket } = require('../storage');
 const { fetchMasterLightByWa } = require('./master');
 
 // ---------------------------------------------------------------------------
@@ -166,25 +167,16 @@ async function attachBerkasBio(candidates) {
 // share-data untuk menampilkan dokumen folder master (KK/KTP/ijazah/dll),
 // persis perilaku backend lama (produksi). Non-fatal: error → daftar kosong.
 async function listStorageFolder(prefix) {
-  const base = supabaseUrl();
-  const key = supabaseKey();
-  if (!base || !key || !prefix) return [];
+  if (!prefix) return [];
   try {
-    const res = await fetch(base.replace(/\/$/, '') + '/storage/v1/object/list/asj-files', {
-      method: 'POST',
-      headers: {
-        apikey: key,
-        Authorization: 'Bearer ' + key,
-        'Content-Type': 'application/json',
-      },
+    const j = await storageRequest('POST', 'object/list/' + bucket(), {
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         prefix,
         limit: 200,
         sortBy: { column: 'name', order: 'asc' },
       }),
     });
-    if (!res.ok) return [];
-    const j = await res.json();
     return Array.isArray(j)
       ? j.filter((f) => f && f.name && !String(f.name).endsWith('/')).map((f) => String(f.name))
       : [];

@@ -16,8 +16,12 @@ lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
       LOKASI/SYARAT Tambah Job), `cariKandidatManual`. 3. `cekRiwayat` (apply-full) — radar "WA sudah pernah daftar". 4. Kartu Undangan Grup Kelas → PUNCAK tab WA Pintar + badge
       "Fitur Khusus". 5. Hardening `filterKandidat` (guard NULL). 6. Guard `check-handlers.mjs` (scanner CI + build). 7. Guard runtime handler (`bridge.js` — dev/preview only, non-produksi). 8. E2E anti-race service worker (login-check, undang-grup-kelas,
       photo-check).
-- [ ] (Opsional) hapus file uji Cloudinary `DOKUMENASJ/e2e-*` dari akun
-      Cloudinary (preset `asjportal` sudah terverifikasi OK).
+- [x] **Hapus file uji Cloudinary** — ✅ 2026-08-18: `DOKUMENASJ/
+ e2e-cloudinary-check_w1whnt` dihapus (API delete → `deleted`); folder
+      `DOKUMENASJ/e2e` kini kosong. ⚠️ Catatan: 9 file `KK_*`/`KTP_*` (587 B)
+      mencurigakan sebagai placeholder uji tapi asal-usul tak terkonfirmasi
+      — cek di dashboard Cloudinary sebelum dihapus; `638_-644_*` &
+      `WhatsApp_Image_2026-08-18…` ukurannya dokumen asli (biarkan).
 
 ## ✅ Env Netlify — SELESAI & TERVERIFIKASI (via Netlify API 2026-08-18)
 
@@ -41,8 +45,9 @@ lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
       "undang wali" adalah FITUR (Undang Grup Kelas, commit `10a45bc`), BUKAN
       template DB. Row seed dihapus (`WA1787018018630169`), DB kembali ke
       2 template asli, `scripts/seed-wa-templates.mjs` dihapus.
-- [ ] **Dedupe kandidat duplikat**: `bun run dedupe` (dry-run) → kalau ada,
-      `bun run dedupe:apply` (backup otomatis ke `.freebuff/`).
+- [x] **Dedupe kandidat duplikat** — ✅ dry-run 2026-08-18: **0 duplikat** di
+      `database_asj_form`, `database_candidate`, `pemberkasan_checklist`
+      (tidak perlu `--apply`).
 
 ## ♻️ Refactor kode (`REFACTOR_TODO.md`)
 
@@ -59,7 +64,12 @@ lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
 - [x] **Guard kelas bug handler inline** — ✅ 2026-08-18: scanner statis
       `scripts/check-handlers.mjs` (self-check cakupan event, build+CI) +
       guard runtime `bridge.js` (dev/preview).
-- [ ] Pastikan semua modul backend pakai `supabase.*` helper (bukan fetch mentah).
+- [x] **Modul backend pakai helper terpusat** — ✅ audit 2026-08-18:
+      `fetchPagedAll` (candidates.js) & `queryPaged` (misc.js) kini pakai
+      `supabasePaged` baru di `client.js`; `listStorageFolder` (berkas.js)
+      pakai `storageRequest` (storage.js). Sisa fetch = 3 helper pusat +
+      API eksternal sah (Fonnte, AI provider). Terverifikasi live-check via
+      preview: admin getAppData (223 kandidat total) + share-data 200.
 - [ ] (Opsional) cache admin TTL pendek; cek region Supabase.
 
 ## 🔐 Keamanan (`REVIEW.md`)
@@ -83,7 +93,10 @@ lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
       `6a84142ec210682c643028b8` + `.github/workflows/deploy-netlify.yml`
       (manual `workflow_dispatch`; auto-on-push tinggal buka komentar).
       DEPLOY.md §2.5. **Belum ada deploy yang dipicu.**
-- [ ] (Opsional) pindahkan URL build hook ke GitHub secret untuk lebih ketat.
+- [x] **Pindahkan URL build hook ke GitHub secret** — ✅ 2026-08-18:
+      secret `NETLIFY_BUILD_HOOK_URL` di-set via API (libsodium sealed box,
+      token dari git credential; terverifikasi terdaftar); workflow kini baca
+      `${{ secrets.NETLIFY_BUILD_HOOK_URL }}`.
 
 ---
 

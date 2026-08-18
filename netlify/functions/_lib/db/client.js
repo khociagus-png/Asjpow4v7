@@ -43,6 +43,32 @@ async function supabaseJson(method, pathname, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+// Query paginated via header Range + total dari Content-Range. Tempat TUNGGAL
+// untuk fetch REST dengan Range — pemakai: fetchPagedAll (candidates.js) &
+// queryPaged (misc.js). supabaseJson biasa tidak bisa dipakai di sini (butuh
+// header Range/Prefer + baca Content-Range, bukan auto-JSON + throw).
+async function supabasePaged(table, qs, { start, end } = {}) {
+  const url = supabaseUrl();
+  const key = supabaseKey();
+  if (!url || !key) throw new Error('SUPABASE_URL / key belum dikonfigurasi');
+  const res = await fetch(url.replace(/\/$/, '') + '/rest/v1/' + table + (qs ? '?' + qs : ''), {
+    method: 'GET',
+    headers: {
+      apikey: key,
+      Authorization: 'Bearer ' + key,
+      Range: start + '-' + end,
+      Prefer: 'count=exact',
+    },
+  });
+  if (!res.ok) {
+    throw new Error(table + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
+  }
+  const rows = await res.json();
+  const cr = res.headers.get('content-range') || '';
+  const total = parseInt(String(cr).split('/')[1] || '0', 10) || rows.length;
+  return { rows, total };
+}
+
 // Coba daftar nama tabel sampai satu yang benar-benar ada & mengembalikan baris.
 async function findTable(candidates, limit = 300) {
   for (const t of candidates) {
@@ -138,6 +164,7 @@ module.exports = {
   supabaseKey,
   hasBackend,
   supabaseJson,
+  supabasePaged,
   findTable,
   pick,
   toText,

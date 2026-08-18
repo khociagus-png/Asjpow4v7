@@ -2,15 +2,7 @@
 // attach lamaran. MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 'use strict';
 
-const {
-  supabaseJson,
-  pick,
-  toText,
-  normalizeWa,
-  findTable,
-  supabaseUrl,
-  supabaseKey,
-} = require('./client');
+const { supabaseJson, supabasePaged, pick, toText, normalizeWa, findTable } = require('./client');
 
 // Kolom asli tabel database_candidate:
 //   id, id_kandidat, nama_lengkap, nik, gender, usia, tb, bb, pendidikan,
@@ -95,28 +87,18 @@ async function findCandidates() {
 }
 
 // Fetch SEMUA baris satu tabel via header Range (loop 1000/halaman) — tanpa
-// batas `limit` query (PostgREST default maks 1000). Lempar error bila != 200.
+// batas `limit` query (PostgREST default maks 1000). Pakai helper terpusat
+// supabasePaged (client.js).
 async function fetchPagedAll(table, select) {
   const qs = new URLSearchParams({ select }).toString();
   const all = [];
   const pageSize = 1000;
   for (let start = 0; ; start += pageSize) {
-    const res = await fetch(supabaseUrl().replace(/\/$/, '') + '/rest/v1/' + table + '?' + qs, {
-      method: 'GET',
-      headers: {
-        apikey: supabaseKey(),
-        Authorization: 'Bearer ' + supabaseKey(),
-        Range: start + '-' + (start + pageSize - 1),
-        Prefer: 'count=exact',
-      },
+    const { rows, total } = await supabasePaged(table, qs, {
+      start,
+      end: start + pageSize - 1,
     });
-    if (!res.ok) {
-      throw new Error(table + ' → HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
-    }
-    const rows = await res.json();
     all.push(...rows);
-    const cr = res.headers.get('content-range') || '';
-    const total = parseInt(String(cr).split('/')[1] || '0', 10);
     if (rows.length === 0 || start + rows.length >= total) break;
   }
   return all;
