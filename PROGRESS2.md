@@ -5,11 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — kartu Undangan Grup Kelas dipindah ke puncak tab WA Pintar (buktikan fitur sudah live).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — live check menyeluruh: semua E2E & tes lulus, tarikan data OK, responsif OK, Cloudinary OK; fix bug self-check versi pwa.js (reload palsu di halaman standalone) + guard SW di E2E (commit `…`).
 
 ---
 
-## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — fitur Undangan Wali sudah LIVE, kartunya dipindah ke puncak tab WA Pintar (commit `8769ef5`)
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — LIVE CHECK menyeluruh (E2E + tes + responsif + data + Cloudinary) + fix pwa.js self-check & guard SW E2E
+
+### Ringkasan
+
+- **Live check lengkap terhadap `asjportal.netlify.app`** (semua dijalankan ke domain asli, bukan preview):
+  - `vitest` **156/156** lulus.
+  - Tarikan data live: `getAppData` publik **132 jobs** (6 OPEN); admin (login KHOCI) **223 kandidat total** (50 termuat), **13 formInbox**, **132 dbJobs**, 2 template WA (`PEMBERITAHUAN GA LOLOS SCREENING` + `Undangan Grup Default` — isi lengkap tampil), pengumuman berjalan (JP). Login admin baru `ASJ_ADMINS` (SACHOU:1111 dll) terverifikasi sukses di live.
+  - E2E live lulus: **share-view** (22 kandidat, dokumen ekstra), **login-check** (publik + kandidat + admin), **undang-grup-kelas** (20/20), **photo-check** (0 foto gagal di publik/kandidat/admin), **upload-check** (KTP/KK ter-upload via Cloudinary, `ktp_url`/`kk_url` tersimpan, cleanup bersih), **biodata-check** (simpan biodata + sync DB).
+  - **Responsif live** (Playwright, 390/768/1280px): 0 overflow horizontal di publik & admin, tabel render, chip versi footer, bottom-nav admin benar mobile-only.
+  - **Cloudinary OK**: upload uji ke `preset asjportal` → HTTP 200 + `secure_url`; upload KTP/KK end-to-end live terbukti. Catatan: `CLOUDINARY_URL` di `.env.local`/Netlify formatnya `cloudinary://<key><secret>@ybzzbw9i` (placeholder `< >`) — tidak dipakai kode (alur unsigned client-side), jadi tidak berdampak fungsional.
+- **Bug ditemukan & diperbaiki (pwa.js, commit ini)**: self-check versi `cekVersiSw` membandingkan cache-buster `?v=esm15` (halaman standalone) dengan hash bundel sw.js → selalu beda → **purge + reload PALSU tiap buka ai_form/master-full/dll** di live (bikin E2E standalone flaky + flash reload di HP). Fix: hard-check hanya untuk halaman bundel (`/assets/app-<hash>.js`); standalone cukup jaring SW + soft-reload. Terverifikasi: standalone-smoke 15/15 ×2 di lokal.
+- **E2E di-hardening untuk host non-localhost**: `login-check`, `undang-grup-kelas`, `photo-check` sekarang unregister SW + bersihkan cache setelah goto (sama seperti upload/biodata-check) — SW lifecycle reload (skipWaiting/controllerchange) bisa memotong tes di tengah (race nyata yang bikin login-check gagal konsisten di live).
+
+## Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — fitur Undangan Wali sudah LIVE, kartunya dipindah ke puncak tab WA Pintar (commit `8769ef5`)
 
 ### 🔎 Investigasi "Undangan Wali hilang di live" — ternyata tidak hilang
 

@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-18 — 🟢 LIVE CHECK menyeluruh (E2E + tes + responsif + data + Cloudinary) + fix pwa.js self-check & guard SW E2E
+
+### Ringkasan
+
+- **Live check lengkap ke `asjportal.netlify.app`**: vitest **156/156**; tarikan data publik 132 jobs & admin 223 kandidat/13 inbox/2 template WA; E2E live lulus `share-view` (22 kandidat), `login-check`, `undang-grup-kelas` (20/20), `photo-check` (0 foto gagal), `upload-check` (Cloudinary KTP/KK tersimpan), `biodata-check` (sync DB). Responsif 390/768/1280px: 0 overflow, bottom-nav mobile-only benar. Cloudinary preset `asjportal` → upload uji 200 + `secure_url`.
+- **Fix pwa.js (`cekVersiSw`)**: fallback `?v=esm<rev>` di halaman standalone dibandingkan dengan hash bundel sw.js → selalu beda → **purge+reload palsu tiap buka ai_form/master-full/dll** di live. Hard-check sekarang hanya untuk halaman bundel (`/assets/app-<hash>.js`); standalone pakai jaring SW + soft-reload. Bukti: standalone-smoke 15/15 ×2 di lokal (sebelumnya flaky di live).
+- **Hardening E2E non-localhost**: `login-check`, `undang-grup-kelas`, `photo-check` unregister SW + bersihkan cache setelah `goto` (menyamakan upload/biodata-check) — mencegah SW lifecycle reload memotong tes (penyebab login-check gagal konsisten saat dijalankan ke live).
+
 ## 2026-08-18 — `8769ef5` 🟢 Undangan Wali terbukti LIVE + kartu dipindah ke puncak tab WA Pintar
 
 ### Ringkasan
