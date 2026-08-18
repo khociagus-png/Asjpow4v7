@@ -97,6 +97,7 @@ export function logoutApp() {
     'asj_kandidat_name',
     'asj_kandidat_wa',
     'asj_kandidat_session',
+    'asj_kandidat_refresh',
     'asj_session_token',
   ].forEach(function (k) {
     try {

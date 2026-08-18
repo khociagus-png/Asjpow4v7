@@ -152,10 +152,43 @@ async function handleLoginKandidat(payload) {
       nama,
       wa,
       sessionToken: session.signToken({ role: 'kandidat', wa }),
+      // Refresh token "ingat saya" kandidat (role kandidat + kind refresh):
+      // dipakai boot untuk memulihkan sesi tanpa modal login selama user
+      // tidak logout — setara dengan fitur admin (8511014).
+      refreshToken: session.signToken({ role: 'kandidat', wa, kind: 'refresh' }),
     };
   } catch (e) {
     return { success: false, error: 'Gagal memeriksa kandidat: ' + e.message };
   }
+}
+
+// Pemulihan sesi kandidat diam-diam (refresh token) — mirror dari
+// handleRefreshAdminSession: refresh token sah → sessionToken baru. Nama
+// diambil ulang dari DB (fallback ke WA kalau DB sedang tidak bisa diakses),
+// sesi kandidat sendiri tetap valid tanpa DB.
+async function handleRefreshKandidatSession(payload) {
+  const rt = String((payload && payload[0]) || '');
+  const t = session.verifyToken(rt);
+  if (!t || t.role !== 'kandidat' || t.kind !== 'refresh') {
+    return { success: false, sessionInvalid: true, message: 'Sesi kandidat tidak valid' };
+  }
+  const wa = normalizeWa(String(t.wa || ''));
+  if (!wa) return { success: false, sessionInvalid: true, message: 'Sesi kandidat tidak valid' };
+  let nama = wa;
+  try {
+    const row = await findCandidateByWa(wa);
+    if (row) {
+      nama = toText(pick(row, ['nama_lengkap', 'nama', 'name', 'full_name'])) || wa;
+    }
+  } catch (e) {
+    /* DB tidak bisa diakses — nama fallback ke WA, sesi tetap valid */
+  }
+  return {
+    success: true,
+    nama,
+    wa,
+    sessionToken: session.signToken({ role: 'kandidat', wa }),
+  };
 }
 
 async function handleDaftarKandidat(payload) {
@@ -227,7 +260,7 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
     return { success: false, error: 'Password baru 6-20 karakter tanpa spasi.' };
   }
   const t = session.verifyToken(sessionToken);
-  if (!t || t.role !== 'kandidat' || normalizeWa(t.wa) !== wa) {
+  if (!t || t.role !== 'kandidat' || t.kind === 'refresh' || normalizeWa(t.wa) !== wa) {
     return { success: false, sessionInvalid: true, message: 'Sesi kandidat tidak valid' };
   }
   if (!hasBackend()) {
@@ -275,7 +308,9 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
 // tidak ada dobel definisi (dulu ada di actions-extra.js juga).
 function requireRole(sessionToken, role) {
   const t = session.verifyToken(sessionToken);
-  if (!t || t.role !== role) {
+  // Token kind 'refresh' HANYA sah untuk action refresh (refreshAdminSession /
+  // refreshKandidatSession) — tidak boleh dipakai sebagai sesi aksi lain.
+  if (!t || t.role !== role || t.kind === 'refresh') {
     return {
       error: { success: false, sessionInvalid: true, message: 'Sesi ' + role + ' tidak valid' },
     };
@@ -292,7 +327,7 @@ function requireAdmin(sessionToken) {
 // actions-extra.js; dipakai master + upload/apply.
 function isOwnerOrAdmin(sessionToken, wa) {
   const t = session.verifyToken(sessionToken);
-  if (!t) return false;
+  if (!t || t.kind === 'refresh') return false;
   if (t.role === 'admin') return true;
   if (t.role === 'kandidat' && normalizeWa(t.wa || '') === normalizeWa(wa)) {
     return true;
@@ -309,6 +344,7 @@ module.exports = {
   handleCheckAdminMaster,
   handleCheckAdminPersonal,
   handleRefreshAdminSession,
+  handleRefreshKandidatSession,
   handleLoginKandidat,
   handleDaftarKandidat,
   handleGantiPasswordKandidat,

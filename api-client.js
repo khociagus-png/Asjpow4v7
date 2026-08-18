@@ -135,6 +135,7 @@ const NETLIFY_FUNCTIONS = {
   checkAdminMaster: 'auth',
   checkAdminPersonal: 'auth',
   refreshAdminSession: 'auth',
+  refreshKandidatSession: 'auth',
   gantiPasswordKandidat: 'auth',
   logout: 'auth',
   // Lamaran publik (apply-full.html)

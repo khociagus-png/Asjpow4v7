@@ -43,6 +43,38 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
+  // PEMULIHAN SESI KANDIDAT DIAM-DIAM — sama seperti admin di atas:
+  // kalau flag login kandidat hilang tapi refresh token masih ada, tukar
+  // refresh token dengan sessionToken baru TANPA modal login. Berlaku di
+  // semua halaman bundel (index.html — tempat kandidat login). Refresh
+  // token hanya diberikan saat login berhasil dan dicabut saat logout.
+  if (localStorage.getItem('asj_kandidat_login') !== 'sukses') {
+    var refreshKandidat = null;
+    try {
+      refreshKandidat = localStorage.getItem('asj_kandidat_refresh');
+    } catch (e) {
+      /* localStorage tidak tersedia */
+    }
+    if (refreshKandidat) {
+      var rr = await callAPI('refreshKandidatSession', [refreshKandidat]).catch(function () {
+        return null;
+      });
+      if (rr && rr.success) {
+        localStorage.setItem('asj_kandidat_login', 'sukses');
+        if (rr.nama) localStorage.setItem('asj_kandidat_name', rr.nama);
+        if (rr.wa) localStorage.setItem('asj_kandidat_wa', rr.wa);
+        localStorage.setItem('asj_kandidat_session', rr.sessionToken || '');
+      } else {
+        // Refresh token basi/ditolak → cabut supaya tidak dicoba tiap buka.
+        try {
+          localStorage.removeItem('asj_kandidat_refresh');
+        } catch (e) {
+          /* abaikan */
+        }
+      }
+    }
+  }
+
   // Terapkan tema SEKARANG — per identitas aktif (admin/kandidat/guest),
   // lihat getSavedTheme di theme.js. Banner/footer/panel sinkron sejak
   // awal, tidak menunggu respons backend yang bisa lambat/gagal; initApp

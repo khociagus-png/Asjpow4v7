@@ -7,8 +7,39 @@ import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const auth = require('./actions-auth.js');
-const { isValidWaFormat, handleRefreshAdminSession } = auth;
+const { isValidWaFormat, handleRefreshAdminSession, handleRefreshKandidatSession } = auth;
 const session = require('./session.js');
+
+describe('refreshKandidatSession — pemulihan sesi kandidat diam-diam', () => {
+  it('refresh token kandidat yang sah → sessionToken baru + wa', async () => {
+    const rt = session.signToken({ role: 'kandidat', wa: '6281234567890', kind: 'refresh' });
+    const res = await handleRefreshKandidatSession([rt]);
+    expect(res.success).toBe(true);
+    expect(res.wa).toBe('6281234567890');
+    const t = session.verifyToken(res.sessionToken);
+    expect(t.role).toBe('kandidat');
+    expect(t.wa).toBe('6281234567890');
+    expect(t.kind).toBeUndefined(); // token sesi biasa, bukan refresh
+  });
+
+  it('menolak token non-refresh (sesi biasa / role lain / rusak)', async () => {
+    const st = session.signToken({ role: 'kandidat', wa: '6281234567890' });
+    expect((await handleRefreshKandidatSession([st])).sessionInvalid).toBe(true);
+    const adm = session.signToken({ role: 'admin', name: 'AGUS', kind: 'refresh' });
+    expect((await handleRefreshKandidatSession([adm])).sessionInvalid).toBe(true);
+    expect((await handleRefreshKandidatSession(['bogus.token'])).sessionInvalid).toBe(true);
+    expect((await handleRefreshKandidatSession([''])).sessionInvalid).toBe(true);
+  });
+
+  it('refresh token TIDAK bisa dipakai sebagai sesi aksi lain (guard kind)', async () => {
+    // requireRole & isOwnerOrAdmin harus menolak token kind 'refresh'.
+    const rt = session.signToken({ role: 'kandidat', wa: '6281234567890', kind: 'refresh' });
+    expect(auth.requireRole(rt, 'kandidat').error).toBeTruthy();
+    expect(auth.isOwnerOrAdmin(rt, '6281234567890')).toBe(false);
+    const rtAdm = session.signToken({ role: 'admin', name: 'AGUS', kind: 'refresh' });
+    expect(auth.requireAdmin(rtAdm).error).toBeTruthy();
+  });
+});
 
 describe('refreshAdminSession — pemulihan sesi admin diam-diam', () => {
   it('refresh token admin yang sah → sessionToken baru + nama', async () => {

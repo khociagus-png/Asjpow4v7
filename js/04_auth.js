@@ -167,6 +167,9 @@ export async function prosesLoginKandidat() {
     // semua aksi kandidat (getAppData mode kandidat, simpanUpdateMaster,
     // ganti password, dll). Bukan lagi token acak buatan client.
     localStorage.setItem('asj_kandidat_session', res.sessionToken || '');
+    // Refresh token "ingat saya" kandidat (key terpisah): dipakai boot
+    // untuk memulihkan sesi tanpa modal login selama tidak logout.
+    if (res.refreshToken) localStorage.setItem('asj_kandidat_refresh', res.refreshToken);
     localStorage.setItem(
       'asj_session_token',
       Date.now().toString(36) + Math.random().toString(36).substr(2),
