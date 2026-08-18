@@ -1,38 +1,45 @@
 # TODO.md — Daftar Pekerjaan Belum Selesai (ASJ Portal)
 
 > Daftar gabungan semua item terbuka dari `REFACTOR_TODO.md`, `REVIEW.md`,
-> `PROGRESS2.md`/`CHANGELOG2.md`, dan `DEPLOY.md`. Update: **2026-08-18**.
+> `PROGRESS2.md`/`CHANGELOG2.md`, dan `DEPLOY.md`. Update: **2026-08-18 (malam)**.
 > Coret `[x]` saat selesai. Detail & konteks ada di dokumen sumber masing-masing.
 
 ---
 
 ## 🔴 Deploy & live (butuh izin eksplisit pemilik — `DEPLOY.md` §2)
 
-- [ ] **Deploy Netlify terbaru** — semua kerjaan sejak deploy terakhir `83f5ebf`
-      (17/8) **belum live**: keep-alive `ping`, migrasi upload → Cloudinary penuh
-      (master-full, apply-full, ai_form, siswa-baru, loker admin), i18n JP fix,
-      `.gitattributes` eol=lf, fix E2E upload-check.
-- [ ] **Set env update 2026-08-18** di dashboard Netlify, lalu **redeploy**
-      (env baru baru terpasang setelah redeploy).
-- [ ] **`SESSION_SECRET`** — belum di-set (REVIEW.md K1). Wajib acak panjang di
-      env Netlify; fallback publik di `session.js` hanya untuk sandbox.
-- [ ] **`ASJ_ADMINS`** (`"Nama:pin,Nama:pin"`) — belum diberikan; dipakai
-      `handleCheckAdminPersonal` (`actions-auth.js`).
-- [x] **Konfirmasi `ADMIN_NUMBERS`** — ✅ typo dikonfirmasi & diperbaiki
-      2026-08-18: `0082229020129` → `082229020129` (kelebihan satu 0) di
-      `.env.local`. Masih ada di whitelist `env.js` tapi **belum dipakai kode
-      mana pun** (legacy — konfirmasi apakah masih dibutuhkan).
-- [ ] (Opsional) hapus file uji Cloudinary `DOKUMENASJ/asj-preset-test_*.txt`
-      dari akun Cloudinary (preset `asjportal` sudah terverifikasi OK).
+Paket fix terverifikasi di preview tapi **belum live** (live `app-0d473e8141`,
+lokal `app-699dfb4a86`) — semua siap deploy sekaligus:
+
+- [ ] **Deploy Netlify** — paket 8 fix sejak deploy `acb299b`: 1. `pwa.js` — reload palsu halaman standalone (ai_form/master-full dkk
+      purge+reload tiap buka di live). 2. 3 fix filter seam: `filterKelolaLoker`, `filterCbx` (auto-search
+      LOKASI/SYARAT Tambah Job), `cariKandidatManual`. 3. `cekRiwayat` (apply-full) — radar "WA sudah pernah daftar". 4. Kartu Undangan Grup Kelas → PUNCAK tab WA Pintar + badge
+      "Fitur Khusus". 5. Hardening `filterKandidat` (guard NULL). 6. Guard `check-handlers.mjs` (scanner CI + build). 7. Guard runtime handler (`bridge.js` — dev/preview only, non-produksi). 8. E2E anti-race service worker (login-check, undang-grup-kelas,
+      photo-check).
+- [ ] (Opsional) hapus file uji Cloudinary `DOKUMENASJ/e2e-*` dari akun
+      Cloudinary (preset `asjportal` sudah terverifikasi OK).
+
+## ✅ Env Netlify — SELESAI & TERVERIFIKASI (via Netlify API 2026-08-18)
+
+- [x] **Env update 2026-08-18** — 14 var terpasang di dashboard Netlify
+      (site `asjportal`, project `7e433a31-…`), diverifikasi langsung via API:
+      `SUPABASE_URL/SERVICE_ROLE_KEY/ANON_KEY/STORAGE_BUCKET`,
+      `ADMIN_MASTER_PIN`, `PIN_KHOCI`, `FONNTE_TOKEN`, `GEMINI_API_KEY`,
+      `GROQ_API_KEY`, `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`, `SESSION_SECRET`,
+      `ASJ_ADMINS`, `ADMIN_NUMBERS`.
+- [x] **`SESSION_SECRET`** — ✅ terisi (64-hex kuat), diverifikasi via API.
+- [x] **`ASJ_ADMINS`** — ✅ terisi format benar `SACHOU:1111,AYOK:2222,
+ KHOLIS:3333,KHOCI:4444` (login SACHOU:1111 live `success:true`).
+- [x] **`ADMIN_NUMBERS`** — ✅ typo diperbaiki `0082229020129` →
+      `082229020129`. Legacy — belum dipakai kode mana pun.
+- [x] **`CLOUDINARY_URL`** — tidak perlu: alur upload unsigned client-side,
+      cloud `ybzzbw9i` hardcoded di `js/cloudinary.js`.
 
 ## 🗄️ Data & DB
 
-- [x] ~~**Apply seed template WA "Undangan Wali"**~~ — ⚠️ **DIREVERT 2026-08-18**: ternyata
-      "undang wali" adalah FITUR (Undang Grup Kelas, commit `10a45bc` — pesan default
-      hardcoded di `js/admin_ops/candidates.js`, dikirim via `kirimTawaranMassal` +
-      `customMessage`), BUKAN template DB. Isi template seed saya karang sendiri → tidak
-      dipakai fitur mana pun & bikin bingung (muncul dobel dengan legacy `WA-001`
-      "Undangan Grup Default"). Row dihapus (`WA1787018018630169`), DB kembali ke
+- [x] ~~**Apply seed template WA "Undangan Wali"**~~ — ⚠️ **DIREVERT 2026-08-18**:
+      "undang wali" adalah FITUR (Undang Grup Kelas, commit `10a45bc`), BUKAN
+      template DB. Row seed dihapus (`WA1787018018630169`), DB kembali ke
       2 template asli, `scripts/seed-wa-templates.mjs` dihapus.
 - [ ] **Dedupe kandidat duplikat**: `bun run dedupe` (dry-run) → kalau ada,
       `bun run dedupe:apply` (backup otomatis ke `.freebuff/`).
@@ -40,64 +47,58 @@
 ## ♻️ Refactor kode (`REFACTOR_TODO.md`)
 
 - [x] **Fase 3.5 L6** — fasad `PortalBridge` + hapus alias `window.X = X`
-      per-simbol di `js/` — ✅ selesai 2026-08-18 (blok terakhir
-      `helpers_cv.js` dipindah ke registry seam via `js/main.js`; scan
-      `window.\w+=` di `js/` 112→108; no-undef 0; check:globals nol kolisi;
-      148/148 test; bundle `app-698fbe088a.js`).
-- [x] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain — ✅ selesai
-      2026-08-18 (15 domain/bahasa di `i18n/locales/{id,jp}/` + lint
-      `scripts/check-i18n.mjs` untuk duplikat lintas file, ikut `bun run lint`).
-- [x] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/`;
-      `partials/scripts-shared.html`; pindah `<style>` inline → `src/`;
-      verifikasi `build:html` byte-compatible — ✅ selesai 2026-08-18
-      (6 partial; marker region `<!--XXX_START/END-->`; byte-compat 7 halaman
-      terverifikasi + build idempotent; `?v=` CSS di-bump `ed681b7b61`;
-      light theme kini global di `main.css`).
-- [x] **Fase 5 lanjutan** — duplikat di halaman standalone di-partial-kan —
-      ✅ 2026-08-18 (`partials/head-shared.html` fonts trio + token
-      INDENT/FA_ATTR; `partials/theme-init.html`; byte-compat + idempotent).
-- [x] **Fase 6** — `build-js.mjs` entry/modul eksplisit (hapus STACK concat) —
-      ✅ selesai 2026-08-18 (`bundleModules()` dari import `js/main.js`;
-      47 modul incl. `cloudinary.js` yang dulu tertinggal; CI + step
-      `e2e:share` conditional pada secrets Supabase).
-- [x] **Sourcemap bundel** — ✅ 2026-08-18 (`build-js` 2-pass,
-      `assets/app-*.js.map` external 1.0 MB; `bun run bundle:size` = laporan
-      per-modul; kandidat lazy-load terbesar: i18n locale ui/form ≈ 97 KB).
+      per-simbol di `js/` — ✅ selesai 2026-08-18.
+- [x] **Fase 4** — pecah `i18n/locales/{id,jp}.js` per domain — ✅ 2026-08-18
+      (15 domain/bahasa + lint `scripts/check-i18n.mjs`).
+- [x] **Fase 5** — ekstrak head/header/footer/bottom-nav/social ke `partials/` + `scripts-shared.html` + style inline → `src/` — ✅ 2026-08-18.
+- [x] **Fase 5 lanjutan** — partial head/theme-init halaman standalone — ✅
+      2026-08-18 (`partials/head-shared.html`, `partials/theme-init.html`).
+- [x] **Fase 6** — `build-js.mjs` entry/modul eksplisit (hapus STACK concat) + CI `e2e:share` — ✅ 2026-08-18 (47 modul via `js/main.js`).
+- [x] **Sourcemap bundel** — ✅ 2026-08-18 (`bun run bundle:size` per-modul;
+      kandidat lazy-load terbesar: i18n locale ui/form ≈ 97 KB).
+- [x] **Guard kelas bug handler inline** — ✅ 2026-08-18: scanner statis
+      `scripts/check-handlers.mjs` (self-check cakupan event, build+CI) +
+      guard runtime `bridge.js` (dev/preview).
 - [ ] Pastikan semua modul backend pakai `supabase.*` helper (bukan fetch mentah).
 - [ ] (Opsional) cache admin TTL pendek; cek region Supabase.
 
 ## 🔐 Keamanan (`REVIEW.md`)
 
-- [ ] **K1** — set `SESSION_SECRET` (baris di atas) + verifikasi token admin
-      tidak bisa dipalsukan.
+- [x] **K1 — `SESSION_SECRET`** — ✅ terisi (lihat bagian env di atas).
+      Verifikasi token admin tidak bisa dipalsukan: jalankan sesi berikutnya.
 - [ ] (Opsional) token sekali pakai di link `generateFormBridge` bila nanti ada
       halaman publik butuh prefill penuh tanpa sesi.
 
 ## 🧪 Infra E2E
 
-- [x] **Jalankan E2E Playwright dengan Node ≥22** — ✅ selesai 2026-08-18:
-      Node v22.23.2 ter-install user-local (tanpa admin); login-check,
-      upload-check, share-view SEMUA lulus; pre-commit hook jalan penuh.
-      CI tetap pakai Node ≥22 (bukan bun) untuk Playwright.
+- [x] **Jalankan E2E Playwright dengan Node ≥22** — ✅ 2026-08-18 (Node
+      v22.23.2 user-local; login-check, upload-check, share-view lulus).
+- [x] **Live check menyeluruh 2026-08-18** — ✅ E2E share/login/
+      undang-grup-kelas/photo/upload/biodata + responsif 390/768/1280 +
+      Cloudinary preset `asjportal`; vitest 156/156, lint 0 error.
+
+## 🚀 Infra deploy (2026-08-18)
+
+- [x] **Deploy otomatis via build hook** — ✅ build hook Netlify
+      `6a84142ec210682c643028b8` + `.github/workflows/deploy-netlify.yml`
+      (manual `workflow_dispatch`; auto-on-push tinggal buka komentar).
+      DEPLOY.md §2.5. **Belum ada deploy yang dipicu.**
+- [ ] (Opsional) pindahkan URL build hook ke GitHub secret untuk lebih ketat.
 
 ---
 
-## 📋 Catatan env terbaru (2026-08-18)
+## 📋 Catatan env (status per 2026-08-18 malam — autoritatif: Netlify API)
 
-Nilai lengkap sudah diberikan pemilik via chat dan **sudah ditulis ke
-`.env.local` (gitignored) — 12 key terverifikasi cocok hash 2026-08-18**, jadi
-preview lokal pakai kredensial terbaru. **Belum di-set ke dashboard Netlify**
-(nilai secret tidak ditulis di repo ini — set di dashboard Netlify, lalu redeploy).
+Nilai lengkap sudah diberikan pemilik via chat, ditulis ke `.env.local`
+(gitignored), **dan sudah terpasang di dashboard Netlify** (diverifikasi via
+API — 14 var, lihat tabel `DEPLOY.md` §3).
 
-- ✅ Diberikan: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`,
-  `SUPABASE_STORAGE_BUCKET` (asj-files), `ADMIN_MASTER_PIN`, `PIN_KHOCI`,
-  `ADMIN_NUMBERS`, `FONNTE_TOKEN`, `GEMINI_API_KEY`, `GROQ_API_KEY`,
-  `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`, `NETLIFY_AUTH_TOKEN`, deploy key SSH,
-  `CLOUDINARY_URL`.
-- ❌ Belum: `SESSION_SECRET`, `ASJ_ADMINS`.
-- ✅ `SUPABASE_ANON_KEY` sudah disatukan (tanpa whitespace) & `ADMIN_NUMBERS`
-  typo `0082229020129` → `082229020129` diperbaiki di `.env.local` (2026-08-18).
+- ✅ Terpasang & terverifikasi: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `SUPABASE_ANON_KEY`, `SUPABASE_STORAGE_BUCKET` (asj-files),
+  `ADMIN_MASTER_PIN`, `PIN_KHOCI`, `ADMIN_NUMBERS`, `FONNTE_TOKEN`,
+  `GEMINI_API_KEY`, `GROQ_API_KEY`, `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`,
+  `SESSION_SECRET`, `ASJ_ADMINS`.
 - ℹ️ `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` sudah di whitelist `env.js` tapi belum
   dipakai kode (siap pakai). `CLOUDINARY_URL`/deploy key/auth token bukan env
-  aplikasi — untuk CLI deploy (`cloud ybzzbw9i` sudah hardcoded di
+  aplikasi — untuk CLI deploy (`cloud ybzzbw9i` hardcoded di
   `js/cloudinary.js`).
