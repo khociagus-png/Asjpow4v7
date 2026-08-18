@@ -38,6 +38,13 @@ boleh deploy ke mana**. Baca sebelum commit, push, atau deploy.
    **backend/API** aplikasi — **bukan** izin otomatis untuk deploy ke Netlify.
 4. Situs live **tidak otomatis sinkron dengan repo**. Setelah commit+push, live
    hanya berubah setelah deploy yang diizinkan.
+5. **Jalur otomatis (2026-08-18)** — build hook Netlify
+   `https://api.netlify.com/build_hooks/6a84142ec210682c643028b8` dipicu dari
+   GitHub Actions (`.github/workflows/deploy-netlify.yml`). Workflow **sengaja
+   manual** (`workflow_dispatch`) — deploy tetap butuh keputusan eksplisit
+   pemilik (klik tombol **Run workflow**). Auto-deploy tiap push ke `main`
+   tinggal membuka komentar blok `push:` di workflow — hanya setelah pemilik
+   setuju. Setiap deploy yang jadi tetap dicatat di tabel §4.
 
 ---
 

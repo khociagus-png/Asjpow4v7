@@ -87,6 +87,10 @@ export const PortalBridge = {
 
   // --- Dispatcher delegasi data-action (Fase 3.5 Langkah 6 lanjutan) ---
   dispatchSeamAction,
+
+  // --- Guard runtime handler inline (dev/preview, lihat bagian bawah) ---
+  checkInlineHandlers,
+  flushGuardWarnings,
 };
 
 // =============================================================================
@@ -229,9 +233,198 @@ export function initSeamDispatcher() {
   document.addEventListener('change', (e) => handleDelegatedAction(e, 'change'));
 }
 
+// =============================================================================
+// Guard runtime handler inline (dev/preview) — pelengkap check-handlers.mjs
+// -----------------------------------------------------------------------------
+// Scanner statis (CI) membaca teks sumber dan butuh daftar EVENT_NAMES yang
+// dirawat manual. Guard ini membaca atribut event APA PUN langsung dari DOM
+// (getAttributeNames) — tanpa daftar event, jadi tidak bisa ketinggalan event
+// baru, dan juga menangkap handler yang di-generate dinamis.
+//
+// Temuan penting saat implementasi (2026-08-18): kalau warning dicetak
+// langsung saat scan, terjadi FALSE POSITIVE — modul lain (mis. admin) baru
+// menjalankan registerSeamAliases SETELAH bridge selesai di-evaluasi, jadi
+// window.X belum ada saat scan pertama. Solusi: scan menumpuk temuan ke
+// guardPending; flushGuardWarnings() baru mencetak nama yang MASIH hilang
+// saat flush (di-load +3 detik) — nama yang terdaftar belakangan otomatis
+// lolos, nama yang benar-benar missing di-warn sekali.
+//
+// Hanya console.warn (tidak mengubah perilaku) dan hanya aktif di host
+// non-produksi supaya tidak berisik di domain asli.
+// =============================================================================
+
+// Panggilan fungsi di nilai handler: (window.)?NAME(
+const INLINE_CALL_RE = /(window\.)?([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/g;
+// Kata kunci yang muncul sebagai if(...)/for(...)/new ... — bukan panggilan.
+const INLINE_KEYWORDS = new Set([
+  'if',
+  'for',
+  'while',
+  'switch',
+  'return',
+  'typeof',
+  'instanceof',
+  'new',
+  'delete',
+  'void',
+  'do',
+  'else',
+  'in',
+  'of',
+  'function',
+  'class',
+  'const',
+  'let',
+  'var',
+  'this',
+  'super',
+  'yield',
+  'await',
+  'import',
+  'export',
+  'default',
+  'throw',
+  'try',
+  'catch',
+  'finally',
+  'case',
+  'break',
+  'continue',
+  'debugger',
+]);
+
+function isPreviewHost() {
+  if (typeof location === 'undefined') return false;
+  const h = location.hostname;
+  return (
+    h === 'localhost' ||
+    h === '127.0.0.1' ||
+    h.endsWith('.local') ||
+    h.startsWith('192.168.') ||
+    h.startsWith('10.')
+  );
+}
+
+// Mask string '...' dan "..." di nilai handler — teks natural seperti
+// 'foo(bar)' jangan dianggap panggilan fungsi.
+function maskInlineStrings(src) {
+  let out = '';
+  let quote = null;
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (quote) {
+      if (ch === '\\') {
+        i++;
+        continue;
+      }
+      if (ch === quote) {
+        quote = null;
+        out += ' ';
+        continue;
+      }
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      out += ' ';
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
+function elLabel(el) {
+  let label = '<' + el.tagName.toLowerCase();
+  if (el.id) label += '#' + el.id;
+  const cls = typeof el.className === 'string' && el.className.trim();
+  if (cls) label += '.' + cls.split(/\s+/)[0];
+  return label + '>';
+}
+
+// Temuan sementara: attr|nama|lokasi -> { attr, name, label }. Baru dicetak
+// saat flush kalau nama-nya MASIH tidak resolve.
+const guardPending = new Map();
+
+/**
+ * Periksa SEMUA handler inline di DOM (atribut on* + data-action) — pastikan
+ * nama yang dipanggil benar-benar resolve ke fungsi di window. Hasilnya
+ * ditumpuk ke guardPending; cetak lewat flushGuardWarnings().
+ * @param {ParentNode} [root] Akar DOM yang diperiksa (default: document).
+ */
+export function checkInlineHandlers(root = document) {
+  if (!isPreviewHost()) return;
+  if (!root || typeof root.querySelectorAll !== 'function') return;
+  for (const el of root.querySelectorAll('*')) {
+    for (const attr of el.getAttributeNames()) {
+      let name = null;
+      let label = elLabel(el);
+      if (attr === 'data-action') {
+        name = el.getAttribute('data-action');
+        if (name && typeof window[name] === 'function') continue;
+      } else if (attr.startsWith('on')) {
+        const src = maskInlineStrings(el.getAttribute(attr) || '');
+        INLINE_CALL_RE.lastIndex = 0;
+        let m;
+        let found = null;
+        while ((m = INLINE_CALL_RE.exec(src))) {
+          const prefix = m[1];
+          const candidate = m[2];
+          const before = src[m.index - 1];
+          if (!prefix && before === '.') continue; // this./event./document.
+          if (INLINE_KEYWORDS.has(candidate)) continue; // if(...)/for(...)
+          if (typeof window[candidate] !== 'function') {
+            found = candidate;
+            break;
+          }
+        }
+        if (!found) continue;
+        name = found;
+      } else {
+        continue;
+      }
+      const key = attr + '|' + name + '|' + label;
+      if (!guardPending.has(key)) {
+        guardPending.set(key, { attr, name, label });
+      }
+    }
+  }
+}
+
+/**
+ * Cetak temuan guard yang MASIH valid (nama masih tidak resolve ke window),
+ * sekali per temuan, lalu bersihkan antrean. Dipanggil otomatis di load+3s;
+ * bisa juga manual setelah render dinamis (PortalBridge.flushGuardWarnings()).
+ */
+export function flushGuardWarnings() {
+  for (const { attr, name, label } of guardPending.values()) {
+    if (typeof window[name] === 'function') continue; // terdaftar belakangan — bukan bug
+    if (attr === 'data-action') {
+      console.warn(
+        `[guard] data-action="${name}" tidak resolve ke window — tombol mati diam-diam (${label})`,
+      );
+    } else {
+      console.warn(`[guard] ${attr} memanggil "${name}" tapi tidak ada di window (${label})`);
+    }
+  }
+  guardPending.clear();
+}
+
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
 initSeamDispatcher();
+
+// Scan bertahap (semua modul sudah registerSeamAliases saat load), lalu flush
+// di load+3 detik — menangkap render dinamis yang selesai sebentar setelah
+// load, dan memberi waktu modul lain mendaftarkan alias-nya.
+checkInlineHandlers();
+window.addEventListener('load', () => {
+  checkInlineHandlers();
+  setTimeout(() => {
+    checkInlineHandlers();
+    flushGuardWarnings();
+  }, 3000);
+});
 
 // =============================================================================
 // Fase 3.5 L6 lanjutan — alias core ROOT (api-client.js & i18n.js) TIDAK lagi

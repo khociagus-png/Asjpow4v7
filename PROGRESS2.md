@@ -5,7 +5,19 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — overhaul scanner `check-handlers.mjs`: self-check cakupan event + parser seam brace-balanced + lookahead `window.X =` (commit `c6f7b46`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — A+C+D: commit overhaul scanner (`e90f53a`), verifikasi env Netlify, guard runtime handler di browser + deploy otomatis via build hook (commit menunggu).
+
+---
+
+## 🆕 Sesi 2026-08-18 (lanjutan) — dikerjakan oleh: codebuff (via Freebuff) — GUARD RUNTIME HANDLER + DEPLOY OTOMATIS (A+C+D)
+
+### Ringkasan
+
+- **A — commit overhaul scanner** (`e90f53a`): `check-handlers.mjs` self-validating + header sesi PROGRESS2/CHANGELOG2 + todolist (`docs/superpowers/plans/2026-08-18-todolist.md`).
+- **C — env Netlify diverifikasi langsung via API** (site `7e433a31…`): `ADMIN_NUMBERS` sudah benar (`082229020129`, typo `0082229020129` sudah diperbaiki), `ASJ_ADMINS` lengkap `SACHOU:1111,AYOK:2222,KHOLIS:3333,KHOCI:4444`, `SESSION_SECRET` 64-hex terisi. `CLOUDINARY_URL` memang tidak dipakai kode (unsigned client-side).
+- **D1 — guard runtime handler inline di browser** (`js/core/bridge.js`): `checkInlineHandlers()` + `flushGuardWarnings()` — scan atribut event APA PUN via `getAttributeNames` (tanpa daftar event → blind spot statis mati), hanya di host non-produksi, hanya console.warn. **Desain deferred-flush penting**: warning dicetak di load+3s hanya untuk nama yang MASIH tidak resolve — scan awal menemukan false positive (modul admin register alias SETELAH bridge dievaluasi: `adminSwitchTab` dkk belum di window saat module-eval). Terverifikasi di preview: halaman sehat 0 warning, handler rusak yang di-injeksi di-warn tepat 1×. Bundle lokal `app-699dfb4a86`.
+- **D2 — audit cakupan event**: self-check `EVENT_NAMES` di scanner sudah memaksa + guard runtime menghapus blind spot sepenuhnya.
+- **D3 — deploy otomatis**: build hook Netlify `6a84142ec210682c643028b8` + `.github/workflows/deploy-netlify.yml` (manual `workflow_dispatch`, auto-on-push tinggal buka komentar) + DEPLOY.md §2.5. **Belum ada deploy yang dipicu.**
 
 ---
 

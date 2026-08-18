@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-08-18 — 🛡 Guard runtime handler inline (bridge.js) + deploy otomatis via build hook Netlify
+
+### Ringkasan
+
+- `js/core/bridge.js` + `checkInlineHandlers()`/`flushGuardWarnings()`: scan atribut event APA PUN di DOM (getAttributeNames — tanpa daftar event), cek resolve ke window, hanya console.warn + hanya host non-produksi. Deferred-flush di load+3s — scan awal false positive karena modul admin register alias SETELAH bridge dievaluasi; flush hanya mencetak nama yang MASIH hilang. Terverifikasi preview: 0 false positive, handler rusak di-injeksi di-warn 1×. Bundle lokal `app-699dfb4a86`.
+- Deploy otomatis: build hook Netlify `6a84142ec210682c643028b8` + `.github/workflows/deploy-netlify.yml` (workflow_dispatch manual; auto-on-push tinggal buka komentar) + DEPLOY.md §2.5. Belum ada deploy dipicu.
+- Env Netlify diverifikasi via API: ADMIN_NUMBERS sudah benar, ASJ_ADMINS lengkap, SESSION_SECRET terisi.
+- Vitest 156/156, lint 0 error, scanner 184 ref = 0 missing, build lulus.
+
 ## 2026-08-18 — 🛡 Overhaul scanner check-handlers.mjs: self-check cakupan event + parser seam brace-balanced + lookahead window.X =
 
 ### Ringkasan
