@@ -5,7 +5,32 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — audit mail: label update biodata mentah + update admin tidak sync ke mail.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fitur selalu-login admin (refresh token) + theme per user + auto-update versi anti-cache.
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — sesi admin selalu login + theme per user + auto-update versi (commit `8511014`)
+
+### 🔑 Sesi admin: "selama tidak logout, selalu login walau buka besok"
+
+- **Akar masalah**: token sesi HMAC tidak punya expiry, jadi server tidak pernah logout sendiri — yang terjadi di lapangan adalah key sesi di localStorage hilang/terhapus sebagian (atau pembersihan storage browser), lalu modal login muncul lagi.
+- **Fix**: refresh token terpisah (`checkAdminPersonal` kini mengembalikan `refreshToken` = HMAC `{role:'admin', name, kind:'refresh'}`). Action baru **`refreshAdminSession`** menukar refresh token → `sessionToken` baru tanpa PIN ulang (terdaftar di `action-registry` LOGIN_ACTIONS + kontrak test). Frontend boot (`js/init/boot.js`) memanggilnya SEBELUM data dimuat: kalau key sesi utama hilang tapi refresh token masih ada, sesi dipulihkan diam-diam — tidak ada modal login. Refresh token dicabut saat logout.
+- **`logoutApp`** tidak lagi `localStorage.clear()` (dulu menghapus SEMUA termasuk preferensi theme & draft CV) — sekarang hanya menghapus key sesi/auth.
+- **Terverifikasi di preview**: simulasikan key sesi hilang + reload → `isAdmin=true`, `currentAdminName=KHOCI`, modal login TIDAK muncul; logout → semua key sesi hilang, theme tetap.
+
+### 🎨 Theme per user
+
+- `js/init/theme.js`: `getThemeKey()` → key per identitas: `asj_theme_admin` (admin), `asj_theme_<wa>` (kandidat), `asj_theme` (guest). `getSavedTheme()` + migrasi sekali: kalau key per-user belum ada, pakai nilai key global lama supaya pilihan lama tidak hilang.
+- `applyTheme` menyimpan ke `getThemeKey()`; boot + `initApp` membaca via `getSavedTheme()`. Terverifikasi: admin theme SAKURA tersimpan di `asj_theme_admin`, guest `asj_theme` tidak tersentuh, `applyTheme` saat login admin menulis ke key admin.
+
+### 🔄 Auto-update versi anti-cache (pwa.js)
+
+- Self-check versi diperkuat: setiap buka portal, hash bundel yang BENAR-BENAR termuat (`app-<hash>.js`) dibandingkan dengan VERSION di `sw.js` server (fetch `cache:'no-store'`). Kalau beda → SEMUA cache dibersihkan + SW di-unregister + reload SEKALI (guard `sessionStorage asj_sw_purged` anti-loop). Tidak bergantung siklus hidup service worker lagi — jaring pengaman terkuat melawan cache basi.
+- Netlify headers sudah no-cache untuk `sw.js` & HTML (sudah ada sebelumnya) — lengkap.
+
+### Verifikasi
+
+- 153/153 vitest (tambah 2 test `refreshAdminSession`) · lint 0 error · prettier rapi · audit-globals: tidak ada global baru bermasalah · bundel `app-160ec775b8.js` · preview sehat (PID 18744).
 
 ---
 

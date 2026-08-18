@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-08-18 — `8511014` 🔑 Sesi admin selalu login (refresh token) + theme per user + auto-update versi
+
+### Ringkasan
+
+- **Sesi admin "selalu login selama tidak logout"**: token HMAC tidak punya expiry (server tidak pernah logout sendiri) — yang terjadi di lapangan adalah key sesi localStorage hilang/terhapus sebagian → modal login muncul lagi. Fix: `checkAdminPersonal` kini mengembalikan **refreshToken** (HMAC `{role:'admin', name, kind:'refresh'}`); action baru **`refreshAdminSession`** menukar refresh token → `sessionToken` baru tanpa PIN ulang (terdaftar di `action-registry` LOGIN_ACTIONS). Boot (`js/init/boot.js`) memanggilnya SEBELUM data dimuat — kalau key sesi utama hilang tapi refresh token masih ada, sesi dipulihkan diam-diam, tanpa modal login. Terverifikasi di preview: hapus key sesi + reload → `isAdmin=true`, `currentAdminName=KHOCI`, modal login tidak muncul.
+- **`logoutApp` tidak lagi `localStorage.clear()`**: hanya menghapus key sesi/auth (`asj_admin_*`, `asj_kandidat_*`, `asj_session_token`) — preferensi theme per user & draft CV tidak ikut terhapus; `asj_admin_refresh` ikut dicabut saat logout.
+- **Theme per user** (`js/init/theme.js`): `getThemeKey()` → `asj_theme_admin` / `asj_theme_<wa>` / `asj_theme` (guest); `getSavedTheme()` + migrasi sekali dari key global lama; `applyTheme` menyimpan ke key per-user; boot + `initApp` membaca via `getSavedTheme()`. Terverifikasi: toggle theme saat admin login menulis `asj_theme_admin`, key guest tidak tersentuh.
+- **Auto-update versi anti-cache** (`pwa.js`): self-check diperkuat — tiap buka portal, hash bundel yang termuat dibandingkan dengan VERSION `sw.js` di server (`cache:'no-store'`); kalau beda → SEMUA cache dibersihkan + SW di-unregister + reload sekali (guard `sessionStorage asj_sw_purged` anti-loop). Tidak bergantung siklus hidup SW lagi.
+- **Test**: +2 vitest `refreshAdminSession` (valid → token baru; tolak token sesi biasa/role lain/rusak) — **153/153 vitest**, lint 0 error, prettier rapi, audit-globals bersih. Bundel `app-160ec775b8.js` · preview sehat.
+
+---
+
 ## 2026-08-18 — 🐛 fix `tandaiDibacaForm` + chip versi footer + investigasi Undangan Wali
 
 ### Ringkasan
