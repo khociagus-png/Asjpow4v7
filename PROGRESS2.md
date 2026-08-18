@@ -5,7 +5,27 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — fitur selalu-login admin (refresh token) + theme per user + auto-update versi anti-cache.
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — kartu Undangan Grup Kelas dipindah ke puncak tab WA Pintar (buktikan fitur sudah live).
+
+---
+
+## 🆕 Sesi 2026-08-18 — dikerjakan oleh: codebuff (via Freebuff) — fitur Undangan Wali sudah LIVE, kartunya dipindah ke puncak tab WA Pintar (commit `8769ef5`)
+
+### 🔎 Investigasi "Undangan Wali hilang di live" — ternyata tidak hilang
+
+- Pemilik melapor fitur **Undangan Grup WhatsApp Kelas (Orang Tua/Wali)** hilang di live (`asjportal.netlify.app`) walau sudah hard reload (ctrl+shift+r / ctrl+F5) dan logout.
+- **Penyelidikan tuntas** (Playwright/Chromium nyata terhadap domain live, login KHOCI:4444):
+  - Live `admin.html` byte-identik dengan lokal — kartu ADA di baris ~788 (sudah diverifikasi sejak deploy `6a83e314`).
+  - Browser test di viewport 390×844 & 797×959: kartu **tampil** (`cardVisible=true`), tombol "Mulai Kirim Undangan" tampil, modal `#modal-undangan-kelas` **terbuka** dengan semua field (daftar Nama|WA, link grup, jeda/delay, template pesan) — 0 error konsol.
+  - `sw.js` sudah network-first + no-cache untuk navigasi, jadi bukan cache SW.
+- **Akar masalah sebenarnya: discoverability.** Kartu berada di BAWAH grid template (posisi y≈2309 di HP — di bawah lipatan) dan bergaya gelap di atas latar gelap, sehingga mudah terlewat/terkesan hilang (screenshot pemilik: kartu ada tepat di antara kartu template dan editor pengumuman, tapi tidak terbaca).
+
+### 🔧 Fix: kartu dipindah ke PUNCAK tab WA Pintar + styling mencolok
+
+- Kartu sekarang elemen **pertama** di `#admin-wa` (di atas manajemen template) — begitu admin membuka tab WA, langsung terlihat.
+- Styling: `bg-emerald-950/60` + `border-2 border-emerald-500/70` + glow `shadow-[0_0_25px_rgba(16,185,129,0.3)]` + badge "Fitur Khusus" (key i18n baru `ui.featured_badge`, id & jp).
+- Verifikasi lokal (Playwright): `cardIsFirst=true` (y=1160 vs 2309 sebelumnya), modal tetap terbuka dengan semua field.
+- Test: vitest **156/156**, lint 0 error, prettier rapi, i18n paritas id↔jp OK. Bundel baru `app-d473519c0b.js`.
 
 ---
 

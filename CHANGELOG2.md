@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-08-18 — `8769ef5` 🟢 Undangan Wali terbukti LIVE + kartu dipindah ke puncak tab WA Pintar
+
+### Ringkasan
+
+- **Investigasi "WA Grup Wali hilang di live"**: dibuktikan dengan Playwright/Chromium nyata ke `asjportal.netlify.app` (login KHOCI) bahwa fitur **tidak pernah hilang** — kartu "Undangan Grup WhatsApp Kelas (Orang Tua/Wali)" + tombol "Mulai Kirim Undangan" tampil di viewport 390px & 797px, modal terbuka lengkap (daftar Nama|WA, link grup, jeda/delay, pesan), 0 error konsol. Live `admin.html` byte-identik dengan lokal; SW network-first + no-cache untuk navigasi.
+- **Akar masalah = discoverability**: kartu ada di bawah grid template (y≈2309 di HP, di bawah lipatan) dan gelap di atas gelap — mudah terlewat.
+- **Fix**: kartu dipindah ke PUNCAK `#admin-wa` (elemen pertama, di atas manajemen template) + styling mencolok (`bg-emerald-950/60`, `border-2 border-emerald-500/70`, glow, badge "Fitur Khusus"). Key i18n baru `ui.featured_badge` (id/jp). Bundel baru `app-d473519c0b.js`.
+- Verifikasi: vitest 156/156, lint 0 error, prettier OK, Playwright lokal `cardIsFirst=true` + modal jalan.
+
+---
+
 ## 2026-08-18 — `8511014` 🔑 Sesi admin selalu login (refresh token) + theme per user + auto-update versi
 
 ### Ringkasan
