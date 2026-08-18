@@ -24,7 +24,8 @@
     "build:html": "node scripts/build-html.mjs",
     "deploy": "bun scripts/deploy-netlify.mjs",
     "check:globals": "node scripts/check-globals.mjs",
-    "build": "bun run check:globals && bun run build:css && bun run build:html && bun run build:js"
+    "check:handlers": "node scripts/check-handlers.mjs",
+    "build": "bun run check:globals && bun run check:handlers && bun run build:css && bun run build:html && bun run build:js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3"

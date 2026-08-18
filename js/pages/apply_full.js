@@ -607,6 +607,7 @@ window.onload = function () {
 registerSeamAliases({
   formatInputWA,
   handleExtraFile,
+  cekRiwayat,
   changeStep,
   submitApply,
 });

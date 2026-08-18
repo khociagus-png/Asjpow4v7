@@ -30,6 +30,12 @@ jobs:
       - name: Lint (ESLint)
         run: bun run lint
 
+      # Guard handler inline (onclick/onkeyup) vs registry seam alias —
+      # mencegah regresi ReferenceError "X is not defined" saat refactor ESM
+      # (kasus filterKelolaLoker/filterCbx/cekRiwayat 2026-08-18).
+      - name: Check handler aliases (seam)
+        run: bun run check:handlers
+
       - name: Unit test (Vitest)
         run: bun run test
 
