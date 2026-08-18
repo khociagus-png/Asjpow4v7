@@ -5,7 +5,7 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — perburuan bug menyeluruh selesai: audit handler lintas SEMUA halaman/state + smoke click-through admin/kandidat/publik = 0 error; hardening `filterKandidat` (commit `…`).
+**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — perburuan bug menyeluruh selesai: audit handler lintas SEMUA halaman/state + smoke click-through admin/kandidat/publik = 0 error; hardening `filterKandidat` (commit `8c008ed`).
 
 ---
 
