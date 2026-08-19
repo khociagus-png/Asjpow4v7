@@ -70,14 +70,18 @@ getAppData admin candidatesTotal 223. Detail: DEPLOY.md §4.
       pakai `storageRequest` (storage.js). Sisa fetch = 3 helper pusat +
       API eksternal sah (Fonnte, AI provider). Terverifikasi live-check via
       preview: admin getAppData (223 kandidat total) + share-data 200.
-- [ ] (Opsional) cache admin TTL pendek; cek region Supabase.
+- [x] **Cache admin TTL** — ✅ terimplementasi (2026-08-19): `cache.js` (20s public / 25s candidates), `loadPublicBase()` & `loadCandidatesUnik()` cached dengan TTL, `cacheClear()` dipanggil di 14 lokasi (register/mail/candidate/job/upload/master/drive). Schedules/tasks/WA templates fetch inline dalam handler → cache public base sudah cukup. Tidak perlu tambahan.
 
 ## 🔐 Keamanan (`REVIEW.md`)
 
 - [x] **K1 — `SESSION_SECRET`** — ✅ terisi (lihat bagian env di atas).
       Verifikasi token admin tidak bisa dipalsukan: jalankan sesi berikutnya.
 - [ ] (Opsional) token sekali pakai di link `generateFormBridge` bila nanti ada
-      halaman publik butuh prefill penuh tanpa sesi.
+      halaman publik butuh prefill penuh tanpa sesi. Diassessment 2026-08-19:
+      implementasi membutuhkan token store backend (stateful) — lebih baik di-
+      deferred ke sesi khusus karena: (a) link dipakai admin & kandidat login
+      (session valid), (b) data yang ter-expose di URL = nama/WA/bidang (non-
+      sensitive), (c) risiko rendah karena hanya prefill form, bukan aksi mutasi.
 
 ## 🧪 Infra E2E
 
@@ -86,6 +90,13 @@ getAppData admin candidatesTotal 223. Detail: DEPLOY.md §4.
 - [x] **Live check menyeluruh 2026-08-18** — ✅ E2E share/login/
       undang-grup-kelas/photo/upload/biodata + responsif 390/768/1280 +
       Cloudinary preset `asjportal`; vitest 156/156, lint 0 error.
+
+## 🔒 Security headers (2026-08-19)
+
+- [x] **HSTS + security headers di netlify.toml** — ✅ 2026-08-19:
+      HSTS (max-age=6mo), X-Content-Type-Options (nosniff),
+      Referrer-Policy, Permissions-Policy, CSP (HTML pages) ditambahkan.
+      CSP memakai safe defaults + allowlist Supabase/Cloudinary/G Fonts.
 
 ## 🚀 Infra deploy (2026-08-18)
 

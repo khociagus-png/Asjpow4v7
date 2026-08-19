@@ -19,6 +19,17 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 | **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |
 | **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |
 | **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama        |
+| **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md` | Agent skills library (dari davidondrej/skills) — progressive disclosure, load saat relevan | Saat butuh pola pikir/ops/research         |
+
+> **Agent Skills (dari [davidondrej/skills](https://github.com/davidondrej/skills)):**
+> Library instruksi terstruktur yang dimuat agent hanya saat task cocok.
+> Lihat `skills/SKILLS.md` untuk daftar lengkap. Skills utama:
+> - `before-building` — 🔥 Wajib sebelum bangun fitur: surface pilihan tersembunyi
+> - `risky-changes` — ⚠️ Wajib sebelum ship perubahan risiko tinggi
+> - `stop-overthinking` — Paksa keputusan praktis
+> - `decisions` / `next-decision` — Review & drill keputusan
+> - `effective-agent-skills` — 📘 Guide menulis SKILL.md yang efektif
+> - `global-agent-guardrails` — Denylist shell command berbahaya (lihat `hooks/`)
 
 ---
 
@@ -43,6 +54,8 @@ root/
 ├── scripts/build-*.mjs  # build pipeline (css, html, js)
 ├── scripts/dedupe-duplicates.mjs  # dedupe kandidat duplikat (dry-run / --apply)
 ├── e2e/*.mjs            # test end-to-end Playwright
+├── hooks/               # dangerous-patterns.txt + deny-dangerous.sh (dari davidondrej/skills)
+├── skills/              # Agent skills library (dari davidondrej/skills) — lihat skills/SKILLS.md
 └── serve-static.mjs     # preview server (port 3000, backend handler jalan in-process)
 ```
 
@@ -185,7 +198,8 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 4. ✅ E2E regresi (upload + biodata) kalau menyentuh alur kandidat/upload
 5. ✅ Update `PROGRESS.md` (header sesi: **tanggal + pengerja + hash commit** — lihat WORKFLOW.md §7.3)
 6. ✅ Cek `git config user.name/email` benar sesuai pengerja (WORKFLOW.md §7.2)
-7. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`8. ✅ Ingatkan user soal kebijakan deploy (lihat **DEPLOY.md**): Netlify **hanya**
+7. ✅ `git add -A && git commit -m "pesan Indonesia, jelas" && git push origin main`
+8. ✅ Ingatkan user soal kebijakan deploy (lihat **DEPLOY.md**): Netlify **hanya**
    boleh di-deploy bila diizinkan eksplisit oleh pemilik — tanpa izin, jangan deploy
 
 ---
@@ -198,3 +212,4 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 - ❌ Menghapus/menimpa data user yang sudah ada tanpa diminta.
 - ❌ Edit hasil build (`assets/*`, `sw.js`, region `SHARED_MODALS`) dengan tangan.
 - ❌ Membuat kandidat/lamaran dengan WA yang tidak lolos normalisasi/gate.
+- ❌ Copy-paste skill dari external repo tanpa audit isi `scripts/` dan `references/` — skill bisa executed arbitrary code.
