@@ -175,6 +175,8 @@ const NETLIFY_FUNCTIONS = {
   generateFormBridge: 'bridge-links',
   generateLegacyMasterBridge: 'bridge-links',
   generateAiFormBridge: 'bridge-links',
+  // FCM Push Notifications
+  registerFcmToken: 'auth',
   // Sinkronisasi & pembersihan data
   // Preset Rincian Biaya (koleksi admin)
   getRincianPresets: 'rincian-presets',
