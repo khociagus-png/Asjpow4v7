@@ -158,7 +158,7 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 ### Tier 3: DX & MAINTAINABILITY (1-2 bulan)
 
 - [x] **T3.1 — TypeScript migration (gradual)** — ✅ SELESAI (2026-08-19). `tsconfig.json` dikonfigurasi: `checkJs: true`, `allowJs: true`, `module: node16`, `noEmit: true`. Phase 1: 3 file backend ditambahkan JSDoc types (`rate-limit.js`, `session.js`, `db/client.js`). `typescript@7.0.2` + `@types/node@26.2.0` terinstall. `tsc --noEmit` = 0 errors, 181 tests pass. Gradual adoption: tambah JSDoc ke file backend lainnya secara bertahap.
-- [ ] **T3.2 — API documentation (OpenAPI/Swagger)** — ❌ BELUM - Action list di `action-registry.js` (code-only) - Generate OpenAPI spec dari registry
+- [x] **T3.2 — API documentation (OpenAPI)** — ✅ SELESAI (2026-08-19). `scripts/generate-api-docs.mjs` auto-generate OpenAPI 3.1 spec dari `action-registry.js`. Output: `docs/api.json` (74 actions, 1 endpoint dispatcher, rate limit groups, auth docs). `bun run generate-api-docs`. Valid JSON, 181 tests pass.
 - [x] **T3.3 — E2E test expansion** — ✅ SUDAH BAIK. 14 E2E file:
       login, upload, biodata, share-view, undang-grup-kelas, photo,
       backend-fast-path, standalone-smoke, modal-runtime-check,
@@ -192,6 +192,6 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 | --------- | -------- | ----- | ---------- |
 | Tier 1    | 2/2      | 0     | 100%       |
 | Tier 2    | 3/3      | 0     | 100%       |
-| Tier 3    | 2/3      | 1     | 67%        |
+| Tier 3    | 3/3      | 0     | 100%       |
 | Tier 4    | 1/3      | 2     | 33%        |
-| **Total** | **8/11** | **3** | **73%**    |
+| **Total** | **9/11** | **2** | **82%**    |

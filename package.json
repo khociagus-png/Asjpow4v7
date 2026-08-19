@@ -13,6 +13,7 @@
     "test": "vitest run",
     "lint": "eslint . && bun run check:i18n",
     "bundle:size": "node scripts/bundle-size-report.mjs",
+    "generate-api-docs": "node scripts/generate-api-docs.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
     "ship": "bash scripts/ship.sh",
     "format": "prettier --write .",
