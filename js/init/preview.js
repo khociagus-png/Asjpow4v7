@@ -121,10 +121,19 @@ export async function previewFileInFrame(frame, url) {
   var isImage =
     /[.](jpe?g|png|gif|webp|bmp|svg)([?#].*)?$/i.test(lower) || lower.includes('pas_photo');
   var isPdf = /[.]pdf([?#].*)?$/i.test(lower);
-  if (isImage || isPdf) {
+  if (isImage) {
     frame.classList.remove('hidden');
     frame.removeAttribute('srcdoc');
     frame.src = u;
+    return;
+  }
+  if (isPdf) {
+    frame.classList.remove('hidden');
+    frame.removeAttribute('srcdoc');
+    // FIX 2026-08-19: PDF di iframe tidak render di mobile browser.
+    // Pakai Google Docs Viewer sebagai wrapper — jalan di desktop & HP.
+    var viewerUrl = 'https://docs.google.com/gview?url=' + encodeURIComponent(u) + '&embedded=true';
+    frame.src = viewerUrl;
     return;
   }
   frame.classList.remove('hidden');

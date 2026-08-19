@@ -142,7 +142,11 @@ export function previewFinalUrl(url) {
   var isImage =
     /[.](jpe?g|png|gif|webp|bmp|svg)([?#].*)?$/i.test(lower) || lower.includes('pas_photo');
   var isPdf = /[.]pdf([?#].*)?$/i.test(lower);
-  if (isImage || isPdf) return u;
+  if (isImage) return u;
+  if (isPdf) {
+    // FIX 2026-08-19: Google Docs Viewer untuk PDF — jalan di mobile & desktop.
+    return 'https://docs.google.com/gview?url=' + encodeURIComponent(u) + '&embedded=true';
+  }
   var isOffice = /[.](doc|docx|xls|xlsx|ppt|pptx)([?#].*)?$/i.test(lower);
   if (isOffice) {
     return 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(u);

@@ -35,7 +35,7 @@ messaging.onBackgroundMessage(function (payload) {
   // if you send `notification` payload in HTTP v1.
 });
 
-const VERSION = 'asj-portal-app-d74730f28a-m886a44dc';
+const VERSION = 'asj-portal-app-f2b8faf11c-m886a44dc';
 const SHELL = [
   '/',
   '/index.html',
@@ -45,7 +45,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-d74730f28a.js',
+  '/assets/app-f2b8faf11c.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',
