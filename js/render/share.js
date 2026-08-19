@@ -33,7 +33,10 @@ var SHARE_DOC_CHIPS = [
 ];
 
 export function shareLinkFor(jobCode) {
-  var domain = window.location.origin + window.location.pathname.replace('index.html', '');
+  // Strip semua halaman .html dari pathname — admin.html, index.html, dll.
+  // Hasil: origin + '/' (atau origin + '/subdir/' kalau deploy di subfolder).
+  var path = window.location.pathname.replace(/\/[^\/]*\.html$/, '/');
+  var domain = window.location.origin + path;
   return domain + 'share.html?job=' + encodeURIComponent(jobCode);
 }
 
