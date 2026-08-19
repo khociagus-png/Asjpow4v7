@@ -56,6 +56,197 @@ export function jobDilamarCell(c) {
   );
 }
 
+// Mode tampilan tabel kandidat: false = lengkap (default), true = sederhana
+// (mirip portal mitra Act Job: kolom minim supaya cepat di-scan & mudah
+// dibaca admin di HP). Label tombol toggle + <thead> ikut mode ini.
+// Preferensi per-admin disimpan di localStorage supaya tidak reset tiap reload.
+let viewKandidatSimple = false;
+try {
+  viewKandidatSimple = window.localStorage.getItem('asj_view_kandidat_simple') === '1';
+} catch (e) {}
+
+// Header tabel kandidat mengikuti mode tampilan (lengkap vs sederhana).
+export function renderKandidatHead() {
+  var head = document.getElementById('admin-kandidat-head');
+  if (!head) return;
+  var cols = viewKandidatSimple
+    ? [
+        ['table.full_name', 'Nama'],
+        ['table.wa_num', 'No. WA'],
+        ['table.email', 'Email'],
+        ['table.applied_job', 'Job'],
+        ['table.stage_status', 'Tahapan'],
+        ['table.tanggal', 'Tanggal'],
+      ]
+    : [
+        ['table.candidate_id', 'ID'],
+        ['table.full_name', 'Nama'],
+        ['table.applied_job', 'Job'],
+        ['table.stage_status', 'Tahapan'],
+        ['table.admin_note', 'Catatan'],
+        ['table.action_candidate', 'Aksi'],
+      ];
+  head.innerHTML =
+    '<tr>' +
+    cols
+      .map(function (c) {
+        return '<th class="p-4" data-lang="' + c[0] + '">' + tr(c[0]) + '</th>';
+      })
+      .join('') +
+    '</tr>';
+}
+
+// Sinkronkan label tombol + <thead> dengan mode aktif (dipanggil tiap render
+// supaya mode persist dari localStorage konsisten sejak boot).
+function syncViewKandidatUi() {
+  var btn = document.getElementById('btn-view-kandidat');
+  if (btn) {
+    var span = btn.querySelector('span[data-lang]');
+    var key = viewKandidatSimple ? 'admin.view_full' : 'admin.view_simple';
+    if (span) {
+      span.setAttribute('data-lang', key);
+      span.textContent = tr(key);
+    } else {
+      btn.textContent = tr(key);
+    }
+  }
+  renderKandidatHead();
+}
+
+// Toggle Tampilan Sederhana ↔ Lengkap (tombol di header Data Pelamar).
+export function toggleViewKandidat() {
+  viewKandidatSimple = !viewKandidatSimple;
+  try {
+    window.localStorage.setItem('asj_view_kandidat_simple', viewKandidatSimple ? '1' : '0');
+  } catch (e) {}
+  syncViewKandidatUi();
+  filterKandidat();
+}
+
+// Baris sederhana (mode Act Job): Nama, WA (link wa.me), Email, Job, Tahapan,
+// Tanggal — tanpa aksi, murni untuk dibaca cepat.
+function renderKandidatTableSimple(tb, arr) {
+  var html = '';
+  for (var i = 0; i < Math.min(arr.length, limitKan); i++) {
+    var c = arr[i];
+    var waNum = String(c.wa || '').replace(/\D/g, '');
+    var waLink = waNum ? 'https://wa.me/' + waNum : '#';
+    var tgl = String(c.tanggalDaftar || c.createdAt || '').slice(0, 10) || '-';
+    html +=
+      '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
+      '<td data-label="' +
+      tr('table.full_name') +
+      '" class="p-4 font-bold text-white">' +
+      window.esc(c.nama || '-') +
+      '</td>' +
+      '<td data-label="' +
+      tr('table.wa_num') +
+      '" class="p-4 font-mono text-emerald-300 text-xs"><a href="' +
+      waLink +
+      '" target="_blank" rel="noopener" class="hover:underline">' +
+      window.esc(waNum || '-') +
+      '</a></td>' +
+      '<td data-label="' +
+      tr('table.email') +
+      '" class="p-4 text-slate-300 text-xs break-all">' +
+      window.esc(c.email || '-') +
+      '</td>' +
+      '<td data-label="' +
+      tr('table.applied_job') +
+      '" class="p-4 font-mono text-amber-300 text-xs">' +
+      window.esc(c.idLoker && c.idLoker !== '-' ? c.idLoker : 'Umum') +
+      '</td>' +
+      '<td data-label="' +
+      tr('table.stage_status') +
+      '" class="p-4 text-xs font-bold text-sky-400">' +
+      window.esc(window.trOption(c.tahapan)) +
+      '</td>' +
+      '<td data-label="' +
+      tr('table.tanggal') +
+      '" class="p-4 text-[11px] text-slate-400 whitespace-nowrap">' +
+      window.esc(tgl) +
+      '</td></tr>';
+  }
+  if (arr.length > limitKan) {
+    html +=
+      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      tr('form.txt_lebih_banyak') +
+      '</button></td></tr>';
+  }
+  tb.innerHTML = html;
+}
+
+// Escaping sel CSV: kutip + gandakan quote kalau ada koma/kutip/newline.
+function csvCell(v) {
+  var s = v === null || v === undefined ? '' : String(v);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+// Export SEMUA kandidat (muat penuh dulu) ke CSV — kolom baku database,
+// BOM UTF-8 supaya Excel membuka nama/WA dengan benar.
+export async function exportKandidatCsv() {
+  try {
+    try {
+      await ensureAllCandidates();
+    } catch (e) {}
+    var rows = ALL_CANDIDATES || [];
+    var head = [
+      'ID Kandidat',
+      'Nama',
+      'No WA',
+      'Email',
+      'Gender',
+      'Usia',
+      'Job ID',
+      'Tahapan',
+      'Status',
+      'Tanggal Daftar',
+    ];
+    var lines = [head.join(',')];
+    rows.forEach(function (c) {
+      var g = String(c.gender || '').toUpperCase();
+      var gender = g.includes('PEREMPUAN') ? 'P' : g.includes('LAKI') ? 'L' : c.gender || '';
+      lines.push(
+        [
+          c.idKandidat,
+          c.nama,
+          c.wa,
+          c.email,
+          gender,
+          c.usia,
+          c.idLoker,
+          window.trOption(c.tahapan),
+          c.status,
+          c.tanggalDaftar || c.createdAt || '',
+        ]
+          .map(csvCell)
+          .join(','),
+      );
+    });
+    var csv = '\uFEFF' + lines.join('\r\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'asj-kandidat-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 5000);
+    window.showToast(
+      window.tr('admin.toast_csv_downloaded').replace('{n}', String(rows.length)),
+      'success',
+    );
+  } catch (err) {
+    window.showToast(
+      window.tr('ui.toast_failed_prefix') + ' ' + String((err && err.message) || err),
+      'error',
+    );
+  }
+}
+
 export async function filterKandidat() {
   // Pencarian admin butuh daftar penuh - pastikan semua halaman sudah dimuat.
   if (typeof ensureAllCandidates === 'function') {
@@ -117,6 +308,11 @@ export async function filterKandidat() {
 export function renderKandidatTable(arr) {
   var tb = document.getElementById('admin-kandidat-body');
   if (!tb) return;
+  syncViewKandidatUi();
+  if (viewKandidatSimple) {
+    renderKandidatTableSimple(tb, arr);
+    return;
+  }
   var html = '';
   for (var i = 0; i < Math.min(arr.length, limitKan); i++) {
     var c = arr[i];
@@ -220,4 +416,6 @@ export function renderKandidatTable(arr) {
 // HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
 registerSeamAliases({
   filterKandidat,
+  toggleViewKandidat,
+  exportKandidatCsv,
 });

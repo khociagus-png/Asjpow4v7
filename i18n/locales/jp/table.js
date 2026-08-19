@@ -28,6 +28,8 @@ export const table = {
     category: 'カテゴリ',
     applicant_name: '応募者名',
     wa_num: 'WA番号',
+    email: 'メール',
+    tanggal: '登録日',
     doc_folder: '書類フォルダ',
     action_review: 'レビュー',
   },

@@ -28,6 +28,8 @@ export const table = {
     category: 'Kategori',
     applicant_name: 'Nama Pelamar',
     wa_num: 'No. WA',
+    email: 'Email',
+    tanggal: 'Tanggal Daftar',
     doc_folder: 'Folder Berkas',
     action_review: 'Aksi Review',
   },
