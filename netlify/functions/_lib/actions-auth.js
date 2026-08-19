@@ -348,4 +348,39 @@ module.exports = {
   handleLoginKandidat,
   handleDaftarKandidat,
   handleGantiPasswordKandidat,
+  registerFcmToken,
 };
+
+async function registerFcmToken(payload, sessionToken) {
+  const [waStr, token, deviceInfo] = payload;
+  const waRaw = String(waStr || '').trim();
+  let wa = normalizeWa(waRaw);
+  if (waRaw === 'ADMIN') wa = 'ADMIN'; // bypass for admin
+
+  if (!wa || !token) return { success: false, message: 'Invalid data' };
+
+  // Validasi sesi
+  if (sessionToken) {
+    const ident = session.verifyToken(sessionToken);
+    // Boleh admin atau kandidat (yang WA-nya sesuai)
+    if (ident && ident.role === 'kandidat' && ident.wa !== wa) {
+      return { success: false, message: 'Unauthorized FCM registration' };
+    }
+  }
+
+  try {
+    // Insert/upsert ke tabel fcm_tokens (jika token sama, update last_used_at)
+    await supabaseJson('POST', 'fcm_tokens', {
+      query: { on_conflict: 'token' },
+      body: {
+        wa: wa,
+        token: token,
+        device_info: String(deviceInfo || '').substring(0, 200),
+        last_used_at: new Date().toISOString(),
+      },
+    });
+    return { success: true };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+}

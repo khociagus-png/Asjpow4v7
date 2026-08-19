@@ -49,6 +49,7 @@
 // =============================================================================
 import * as api from '../../api-client.js';
 import * as i18n from '../../i18n.js';
+import * as fcmClient from '../fcm-client.js';
 
 // Namespace tunggal untuk kode legacy. Property CURRENT_LANG memakai getter
 // supaya SELALU membaca nilai terbaru (toggleFormLanguage me-reassign
@@ -439,6 +440,9 @@ registerSeamAliases(
     esc: api.esc,
     escJs: api.escJs,
     resolveSelfUrl: api.resolveSelfUrl,
+    cekValidasiWali: publicLogic.cekValidasiWali,
+    renderSiswaBaru: publicLogic.renderSiswaBaru,
+    requestNotificationPermission: fcmClient.requestNotificationPermission,
   },
   { source: 'bridge:api-client' },
 );

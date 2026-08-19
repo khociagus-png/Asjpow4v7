@@ -293,7 +293,32 @@ async function handleSubmitApply(payload) {
     } catch (e) {
       /* carry-over opsional — jangan gagalkan lamaran */
     }
-    return { success: true, message: 'Lamaran berhasil dikirim.' };
+
+    // --- PUSH NOTIFICATION KE ADMIN ---
+    // Jangan biarkan error notif membatalkan submit
+    try {
+      const fcm = require('./fcm-server');
+      // Ambil token semua admin
+      const { rows: adminTokens } = await supabaseJson('GET', 'fcm_tokens', {
+        query: { select: 'token', wa: 'eq.ADMIN' },
+      });
+      if (adminTokens && adminTokens.length > 0) {
+        const tokens = adminTokens.map((r) => r.token);
+        fcm
+          .sendMulticast(
+            tokens,
+            'Lamaran Baru!',
+            `${d.nama} baru saja melamar posisi ${code}.`,
+            '/admin.html',
+          )
+          .catch(console.error);
+      }
+    } catch (e) {
+      console.error('FCM Error:', e);
+    }
+    // ----------------------------------
+
+    return { success: true, message: 'Lamaran berhasil dikirim. Terima kasih.' };
   } catch (e) {
     return { success: false, message: 'Gagal simpan lamaran: ' + e.message };
   }

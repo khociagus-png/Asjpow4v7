@@ -16,7 +16,26 @@
      terbaru (tanpa perlu reload manual).
    - SHELL/VERSION di-patch otomatis oleh scripts/build-js.mjs tiap build.
 */
-const VERSION = 'asj-portal-app-a5a77f2f49-m886a44dc';
+
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: 'AIzaSyDQVyjXmiF1M5bnwJciIptZTWn8RcnyViE',
+  projectId: 'khoci-7a81c',
+  messagingSenderId: '1090676733378',
+  appId: '1:1090676733378:web:3c0aa57a7ef133fc34925b',
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage(function (payload) {
+  console.log('[sw.js] Received background message ', payload);
+  // Customize notification here if needed, but FCM usually handles it automatically
+  // if you send `notification` payload in HTTP v1.
+});
+
+const VERSION = 'asj-portal-app-106d758543-m886a44dc';
 const SHELL = [
   '/',
   '/index.html',
@@ -26,7 +45,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-a5a77f2f49.js',
+  '/assets/app-106d758543.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',

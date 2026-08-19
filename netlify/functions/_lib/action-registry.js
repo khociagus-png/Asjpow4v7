@@ -41,6 +41,7 @@ const ACTION_HANDLERS = {
   loginKandidat: auth.handleLoginKandidat,
   daftarKandidat: auth.handleDaftarKandidat,
   gantiPasswordKandidat: auth.handleGantiPasswordKandidat,
+  registerFcmToken: auth.registerFcmToken,
   logout: () => ({ success: true }),
   // Kelola lowongan
   simpanJobBaru: jobActions.handleSimpanJobBaru,
