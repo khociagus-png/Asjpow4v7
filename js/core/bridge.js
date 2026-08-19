@@ -440,8 +440,6 @@ registerSeamAliases(
     esc: api.esc,
     escJs: api.escJs,
     resolveSelfUrl: api.resolveSelfUrl,
-    cekValidasiWali: publicLogic.cekValidasiWali,
-    renderSiswaBaru: publicLogic.renderSiswaBaru,
     requestNotificationPermission: fcmClient.requestNotificationPermission,
   },
   { source: 'bridge:api-client' },
