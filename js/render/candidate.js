@@ -68,8 +68,31 @@ try {
 // ── Column filter state (Excel-style) ──────────────────────────────────
 // Keys: 'id', 'nama', 'job', 'tahapan', 'catatan'. Nilai = string (text)
 // atau 'all' (dropdown). Dipakai oleh filterKandidat + renderKandidatHead.
-const columnFilters = { id: '', nama: '', job: 'all', tahapan: 'all', catatan: '' };
+// State dipersist per-admin di localStorage supaya tidak reset tiap reload.
+const COL_FILTER_DEFAULTS = { id: '', nama: '', job: 'all', tahapan: 'all', catatan: '' };
+const columnFilters = { ...COL_FILTER_DEFAULTS };
 let _colFilterUniques = { job: [], tahapan: [] }; // cache unik value dari data
+
+// Load column filters dari localStorage.
+function loadColumnFilters() {
+  try {
+    var raw = window.localStorage.getItem('asj_col_filters');
+    if (raw) {
+      var saved = JSON.parse(raw);
+      Object.keys(COL_FILTER_DEFAULTS).forEach(function (k) {
+        if (saved[k] !== undefined) columnFilters[k] = saved[k];
+      });
+    }
+  } catch (e) {}
+}
+// Simpan column filters ke localStorage.
+function saveColumnFilters() {
+  try {
+    window.localStorage.setItem('asj_col_filters', JSON.stringify(columnFilters));
+  } catch (e) {}
+}
+// Load saat modul di-eval (pertama kali).
+loadColumnFilters();
 
 // Bangun daftar unik per kolom dropdown dari data kandidat + simpan ke cache.
 function buildColumnUniques() {
@@ -92,6 +115,7 @@ export function clearColumnFilters() {
   columnFilters.job = 'all';
   columnFilters.tahapan = 'all';
   columnFilters.catatan = '';
+  saveColumnFilters();
   // Clear input/select UI
   ['col-filter-id', 'col-filter-nama', 'col-filter-catatan'].forEach(function (elId) {
     var el = document.getElementById(elId);
@@ -118,6 +142,7 @@ function syncClearBtn() {
 // Handler perubahan filter kolom (dipanggil dari onchange/oninput di thead).
 export function onColumnFilterChange(colKey, value) {
   columnFilters[colKey] = value;
+  saveColumnFilters();
   syncClearBtn();
   filterKandidat();
 }
@@ -323,14 +348,90 @@ function csvCell(v) {
   return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
-// Export SEMUA kandidat (muat penuh dulu) ke CSV — kolom baku database,
-// BOM UTF-8 supaya Excel membuka nama/WA dengan benar.
+// Export kandidat ke CSV — kalau ada filter aktif (search/gender/age/JFT/column),
+// hanya baris yang match; kalau tidak, export semua. BOM UTF-8 untuk Excel.
 export async function exportKandidatCsv() {
   try {
     try {
       await ensureAllCandidates();
     } catch (e) {}
-    var rows = ALL_CANDIDATES || [];
+    // Kumpulkan semua filter aktif (persis sama dengan filterKandidat)
+    var el = document.getElementById('search-kandidat');
+    var val = el ? el.value.toLowerCase() : '';
+    var genF = document.getElementById('filter-db-gender')
+      ? document.getElementById('filter-db-gender').value
+      : 'all';
+    var ageF = document.getElementById('filter-db-age')
+      ? document.getElementById('filter-db-age').value
+      : 'all';
+    var jftF = document.getElementById('filter-db-jft')
+      ? document.getElementById('filter-db-jft').value
+      : 'all';
+    var hasAnyFilter =
+      val ||
+      genF !== 'all' ||
+      ageF !== 'all' ||
+      jftF !== 'all' ||
+      columnFilters.id ||
+      columnFilters.nama ||
+      columnFilters.job !== 'all' ||
+      columnFilters.tahapan !== 'all' ||
+      columnFilters.catatan;
+    var rows = (ALL_CANDIDATES || []).filter(function (c) {
+      if (!hasAnyFilter) return true;
+      // Global search
+      if (val) {
+        var matchText =
+          (c.nama || '').toLowerCase().includes(val) ||
+          (c.idKandidat || '').toLowerCase().includes(val) ||
+          (c.tahapan || '').toLowerCase().includes(val) ||
+          ((c.idLoker || '') + '').toLowerCase().includes(val);
+        if (!matchText) return false;
+      }
+      if (genF !== 'all') {
+        var g = (c.gender || '').toUpperCase().includes('PEREMPUAN') ? 'p' : 'l';
+        if (g !== genF) return false;
+      }
+      if (ageF !== 'all') {
+        var usia = parseInt(String(c.usia).replace(/\D/g, '')) || 0;
+        if (ageF === 'under20' && (usia === 0 || usia >= 20)) return false;
+        if (ageF === '20to25' && (usia < 20 || usia > 25)) return false;
+        if (ageF === 'over25' && usia <= 25) return false;
+      }
+      if (jftF !== 'all') {
+        var jftText = (c.jft || c.nilai_jft || c.bahasa || c.catatanInt || '').toUpperCase();
+        if (jftF === 'a2' && !jftText.includes('A2') && !jftText.includes('N4')) return false;
+        if (jftF === 'b1' && !jftText.includes('B1') && !jftText.includes('N3')) return false;
+      }
+      // Column filters (full mode)
+      if (!viewKandidatSimple) {
+        if (
+          columnFilters.id &&
+          !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
+        )
+          return false;
+        if (
+          columnFilters.nama &&
+          !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
+        )
+          return false;
+        if (columnFilters.job !== 'all' && String(c.idLoker || '').trim() !== columnFilters.job)
+          return false;
+        if (
+          columnFilters.tahapan !== 'all' &&
+          String(c.tahapan || '').trim() !== columnFilters.tahapan
+        )
+          return false;
+        if (
+          columnFilters.catatan &&
+          !(c.catatanExt || c.catatan || '')
+            .toLowerCase()
+            .includes(columnFilters.catatan.toLowerCase())
+        )
+          return false;
+      }
+      return true;
+    });
     var head = [
       'ID Kandidat',
       'Nama',
@@ -376,10 +477,10 @@ export async function exportKandidatCsv() {
     setTimeout(function () {
       URL.revokeObjectURL(url);
     }, 5000);
-    window.showToast(
-      window.tr('admin.toast_csv_downloaded').replace('{n}', String(rows.length)),
-      'success',
-    );
+    var filtered = hasAnyFilter && rows.length < (ALL_CANDIDATES || []).length;
+    var msg = window.tr('admin.toast_csv_downloaded').replace('{n}', String(rows.length));
+    if (filtered) msg += ' (' + tr('admin.view_simple') + ')';
+    window.showToast(msg, 'success');
   } catch (err) {
     window.showToast(
       window.tr('ui.toast_failed_prefix') + ' ' + String((err && err.message) || err),
