@@ -12,9 +12,15 @@
 //     setelah `lockoutAfter` kegagalan dalam window → lockout `lockoutMs`.
 'use strict';
 
+/** @typedef {{ count: number, fails: number, resetAt: number, lockUntil: number }} Bucket */
+/** @typedef {{ limit?: number, windowMs?: number, lockoutAfter?: number, lockoutMs?: number }} RateLimitOpts */
+/** @typedef {{ ok: true, retryAfter?: undefined, locked?: undefined } | { ok: false, retryAfter: number, locked?: boolean }} RateLimitResult */
+
+/** @type {Map<string, Bucket>} */
 const buckets = new Map();
 const MAX_BUCKETS = 20000;
 
+/** @param {number} now */
 function prune(now) {
   if (buckets.size < MAX_BUCKETS) return;
   for (const [k, b] of buckets) {
@@ -22,6 +28,7 @@ function prune(now) {
   }
 }
 
+/** @param {string} key @param {number} now @returns {Bucket} */
 function getBucket(key, now) {
   let b = buckets.get(key);
   if (!b) {
@@ -32,6 +39,7 @@ function getBucket(key, now) {
   return b;
 }
 
+/** @param {string} key @param {RateLimitOpts} opts @returns {RateLimitResult} */
 function check(key, opts) {
   const now = Date.now();
   const limit = opts.limit || 5;
@@ -53,6 +61,7 @@ function check(key, opts) {
   return { ok: true };
 }
 
+/** @param {string} key @param {RateLimitOpts} opts @returns {void} */
 function fail(key, opts) {
   const now = Date.now();
   const windowMs = opts.windowMs || 60000;

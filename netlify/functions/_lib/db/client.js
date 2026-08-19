@@ -8,23 +8,35 @@ const { env } = require('../env');
 // (dipakai frontend js/04_auth.js juga). Jangan definisikan ulang di sini.
 const { normalizeWa } = require('../../../../shared/wa-rules');
 
+/** @typedef {{ query?: Record<string, string | number>, headers?: Record<string, string>, body?: unknown }} JsonOpts */
+/** @typedef {{ rows: Record<string, unknown>[], total: number }} PagedResult */
+/** @typedef {{ table: string | null, rows: Record<string, unknown>[] }} FindTableResult */
+/** @typedef {{ paths?: Record<string, unknown>, components?: { schemas?: Record<string, { properties?: Record<string, unknown> }> } }} OpenApiSpec */
+
+/** @returns {string} */
 function supabaseUrl() {
   return env('SUPABASE_URL');
 }
 
+/** @returns {string} */
 function supabaseKey() {
   return env('SUPABASE_SERVICE_ROLE_KEY') || env('SUPABASE_ANON_KEY') || env('SUPABASE_KEY');
 }
 
+/** @returns {boolean} */
 function hasBackend() {
   return !!(supabaseUrl() && supabaseKey());
 }
 
+/** @param {string} method @param {string} pathname @param {JsonOpts} [opts] @returns {Promise<unknown>} */
 async function supabaseJson(method, pathname, opts = {}) {
   const url = supabaseUrl();
   const key = supabaseKey();
   if (!url || !key) throw new Error('SUPABASE_URL / key belum dikonfigurasi');
-  const qs = opts.query ? '?' + new URLSearchParams(opts.query).toString() : '';
+  const qs = opts.query
+    ? '?' +
+      new URLSearchParams(Object.entries(opts.query).map(([k, v]) => [k, String(v)])).toString()
+    : '';
   const res = await fetch(url.replace(/\/$/, '') + '/rest/v1/' + pathname + qs, {
     method,
     headers: {
@@ -47,6 +59,7 @@ async function supabaseJson(method, pathname, opts = {}) {
 // untuk fetch REST dengan Range — pemakai: fetchPagedAll (candidates.js) &
 // queryPaged (misc.js). supabaseJson biasa tidak bisa dipakai di sini (butuh
 // header Range/Prefer + baca Content-Range, bukan auto-JSON + throw).
+/** @param {string} table @param {string} [qs] @param {{ start?: number, end?: number }} [range] @returns {Promise<PagedResult>} */
 async function supabasePaged(table, qs, { start, end } = {}) {
   const url = supabaseUrl();
   const key = supabaseKey();
@@ -70,6 +83,7 @@ async function supabasePaged(table, qs, { start, end } = {}) {
 }
 
 // Coba daftar nama tabel sampai satu yang benar-benar ada & mengembalikan baris.
+/** @param {string[]} candidates @param {number} [limit] @returns {Promise<FindTableResult>} */
 async function findTable(candidates, limit = 300) {
   for (const t of candidates) {
     try {
@@ -84,6 +98,7 @@ async function findTable(candidates, limit = 300) {
   return { table: null, rows: [] };
 }
 
+/** @param {Record<string, unknown>} row @param {string[]} keys @returns {unknown} */
 function pick(row, keys) {
   for (const k of keys) {
     if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
@@ -91,6 +106,7 @@ function pick(row, keys) {
   return null;
 }
 
+/** @param {unknown} v @returns {string} */
 function toText(v) {
   if (v == null) return '';
   if (typeof v === 'object') return JSON.stringify(v);
@@ -101,6 +117,7 @@ function toText(v) {
 // Status asli di DB campur: "✅ OPEN", "❌ CLOSE", "SELESAI / CLOSE",
 // "PENCARIAN KANDIDAT", "PEMBERKASAN", "APPROVED", "" — yang berarti masih
 // rekrutmen hanya yang eksplisit tertutup; sisanya dianggap OPEN.
+/** @param {unknown} v @returns {'OPEN'|'CLOSE'|'URGENT'} */
 function normalizeStatus(v) {
   const s = toText(v).toUpperCase();
   if (s.includes('URGENT')) return 'URGENT';
@@ -115,6 +132,7 @@ function normalizeStatus(v) {
 // lama (normalizeGenderValue di js/03_candidate.js): LAKI-LAKI / PEREMPUAN.
 // CV AI dan render L/P mengecek format ini (includes('PEREMPUAN') dsb), jadi
 // jangan tambah varian normalisasi lain di jalur mana pun.
+/** @param {unknown} v @returns {'LAKI-LAKI'|'PEREMPUAN'|''} */
 function normalizeGender(v) {
   const s = toText(v).trim().toUpperCase();
   if (!s || s === '-') return '';
@@ -137,6 +155,7 @@ function normalizeGender(v) {
 
 // Baca skema OpenAPI (daftar tabel + kolom) — dipakai untuk penemuan tabel
 // adaptif saat nama tabel tidak cocok dengan tebakan.
+/** @returns {Promise<OpenApiSpec | null>} */
 async function getSchema() {
   if (!hasBackend()) return null;
   try {
@@ -146,6 +165,7 @@ async function getSchema() {
   }
 }
 
+/** @param {OpenApiSpec} spec @returns {string[]} */
 function tablesFromSchema(spec) {
   if (!spec || !spec.paths) return [];
   return Object.keys(spec.paths)
@@ -153,6 +173,7 @@ function tablesFromSchema(spec) {
     .filter(Boolean);
 }
 
+/** @param {OpenApiSpec} spec @param {string} table @returns {string[]} */
 function columnsFromSchema(spec, table) {
   if (!spec || !spec.components || !spec.components.schemas) return [];
   const s = spec.components.schemas[table];

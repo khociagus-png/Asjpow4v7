@@ -1,4 +1,26 @@
 {
-  "files": [],
-  "references": []
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "netlify/functions/_lib/rate-limit.js",
+    "netlify/functions/_lib/session.js",
+    "netlify/functions/_lib/db/client.js",
+    "netlify/functions/_lib/env.js"
+  ],
+  "exclude": ["node_modules", "assets", "skills", "hooks"]
 }

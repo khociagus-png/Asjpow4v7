@@ -8,6 +8,9 @@
 const crypto = require('crypto');
 const { env } = require('./env');
 
+/** @typedef {{ role: string, wa?: string, name?: string, kind?: string }} SessionPayload */
+
+/** @returns {string} */
 function secret() {
   return (
     env('SESSION_SECRET') ||
@@ -21,12 +24,14 @@ function secret() {
   );
 }
 
+/** @param {SessionPayload} payload @returns {string} */
 function signToken(payload) {
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = crypto.createHmac('sha256', secret()).update(body).digest('base64url');
   return body + '.' + sig;
 }
 
+/** @param {string} token @returns {SessionPayload | null} */
 function verifyToken(token) {
   if (!token || typeof token !== 'string') return null;
   const parts = token.split('.');
