@@ -63,8 +63,8 @@ export function renderSysConfig() {
             : '';
         chipHtml += `<span class="inline-flex items-center px-3 py-1 bg-${cat.color}-900/30 text-${cat.color}-300 border border-${cat.color}-500/30 rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap">
                         ${num}${window.esc(window.trOption(item))}
-                        <button onclick="pindahConfigItem('${cat.key}', ${index}, -1)" aria-label="${window.tr('ui.move_up')}" title="${window.tr('ui.move_up')}" class="ml-1.5 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === 0 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-up" style="font-size: 7px;"></i></button>
-                        <button onclick="pindahConfigItem('${cat.key}', ${index}, 1)" aria-label="${window.tr('ui.move_down')}" title="${window.tr('ui.move_down')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === items.length - 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-${cat.color}-600 hover:text-white'} transition-colors"><i class="fas fa-chevron-down" style="font-size: 7px;"></i></button>
+                        <button onclick="pindahConfigItem('${cat.key}', ${index}, -1)" aria-label="${window.tr('ui.move_up')}" title="${window.tr('ui.move_up')}" class="ml-1.5 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === 0 ? 'opacity-30 pointer-events-none' : `hover:bg-${cat.color}-600 hover:text-white`} transition-colors"><i class="fas fa-chevron-up" style="font-size: 7px;"></i></button>
+                        <button onclick="pindahConfigItem('${cat.key}', ${index}, 1)" aria-label="${window.tr('ui.move_down')}" title="${window.tr('ui.move_down')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/30 text-${cat.color}-300 ${index === items.length - 1 ? 'opacity-30 pointer-events-none' : `hover:bg-${cat.color}-600 hover:text-white`} transition-colors"><i class="fas fa-chevron-down" style="font-size: 7px;"></i></button>
                         <button onclick="hapusConfigItem('${cat.key}', ${index})" aria-label="${window.tr('table.delete')}" title="${window.tr('table.delete')}" class="ml-1 w-4 h-4 inline-flex items-center justify-center rounded-full bg-black/40 border border-${cat.color}-500/50 text-${cat.color}-300 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-colors"><i class="fas fa-times" style="font-size: 8px;"></i></button>
                     </span>`;
       });
@@ -148,9 +148,11 @@ export async function simpanConfigKeServer(key, arrayData) {
 // === FUNGSI SIMPAN PENGUMUMAN BERJALAN ===
 export async function simpanPengumuman() {
   let teks = document.getElementById('input-pengumuman').value;
-  let btn = window.event.currentTarget;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.saving') + '';
-  btn.disabled = true;
+  let btn = document.querySelector('button[data-action="simpanPengumuman"]');
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ' + window.tr('ui.saving') + '';
+    btn.disabled = true;
+  }
 
   try {
     const res = await window.callAPI('updateSysConfig', ['pengumuman', [teks], currentAdminName]);
@@ -169,8 +171,10 @@ export async function simpanPengumuman() {
   } catch (err) {
     window.showToast(window.tr('ui.toast_network_error'), 'error');
   } finally {
-    btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_publish') + '';
-    btn.disabled = false;
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-save mr-1"></i> ' + window.tr('ui.save_publish') + '';
+      btn.disabled = false;
+    }
   }
 }
 

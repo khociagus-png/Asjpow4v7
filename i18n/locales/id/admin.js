@@ -24,6 +24,7 @@ export const admin = {
     view_full: 'Tampilan Lengkap',
     export_csv: 'Export CSV',
     toast_csv_downloaded: '{n} kandidat diunduh ke CSV.',
+    filtered: 'terfilter',
     tab_schedule: 'Jadwal Agenda',
     tab_mail: 'Mail Inbox',
     history_internal: 'Histori Job Internal',

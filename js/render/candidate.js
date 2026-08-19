@@ -170,6 +170,8 @@ export function renderKandidatHead() {
         })
         .join('') +
       '</tr>';
+    // Bug 6 fix: pastikan tombol reset filter disembunyikan di mode sederhana.
+    syncClearBtn();
     return;
   }
 
@@ -262,8 +264,13 @@ export function renderKandidatHead() {
   syncClearBtn();
 }
 
-// Sinkronkan label tombol + <thead> dengan mode aktif (dipanggil tiap render
+// Sinkronkan label tombol dengan mode aktif (dipanggil tiap render
 // supaya mode persist dari localStorage konsisten sejak boot).
+// CATATAN: TIDAK boleh memanggil renderKandidatHead() di sini — fungsi ini
+// dipanggil dari renderKandidatTable() yang dipicu tiap keystroke filter.
+// Memanggil renderKandidatHead() akan menghancurkan input filter di <thead>
+// dan menyebabkan focus hilang (bug 2026-08-19). Head hanya di-render saat
+// init (pertama kali) atau toggle tampilan (toggleViewKandidat).
 function syncViewKandidatUi() {
   var btn = document.getElementById('btn-view-kandidat');
   if (btn) {
@@ -276,7 +283,6 @@ function syncViewKandidatUi() {
       btn.textContent = tr(key);
     }
   }
-  renderKandidatHead();
 }
 
 // Toggle Tampilan Sederhana ↔ Lengkap (tombol di header Data Pelamar).
@@ -286,6 +292,7 @@ export function toggleViewKandidat() {
     window.localStorage.setItem('asj_view_kandidat_simple', viewKandidatSimple ? '1' : '0');
   } catch (e) {}
   syncViewKandidatUi();
+  renderKandidatHead(); // Render ulang head karena mode berubah
   filterKandidat();
 }
 
@@ -442,6 +449,7 @@ export async function exportKandidatCsv() {
       'Job ID',
       'Tahapan',
       'Status',
+      'Catatan Admin',
       'Tanggal Daftar',
     ];
     var lines = [head.join(',')];
@@ -459,6 +467,7 @@ export async function exportKandidatCsv() {
           c.idLoker,
           window.trOption(c.tahapan),
           c.status,
+          c.catatanExt || c.catatan || '',
           c.tanggalDaftar || c.createdAt || '',
         ]
           .map(csvCell)
@@ -479,7 +488,7 @@ export async function exportKandidatCsv() {
     }, 5000);
     var filtered = hasAnyFilter && rows.length < (ALL_CANDIDATES || []).length;
     var msg = window.tr('admin.toast_csv_downloaded').replace('{n}', String(rows.length));
-    if (filtered) msg += ' (' + tr('admin.view_simple') + ')';
+    if (filtered) msg += ' (' + tr('admin.filtered') + ')';
     window.showToast(msg, 'success');
   } catch (err) {
     window.showToast(
@@ -576,10 +585,18 @@ export async function filterKandidat() {
   renderKandidatTable(arr);
 }
 
+let _headInitialized = false;
+
 export function renderKandidatTable(arr) {
   var tb = document.getElementById('admin-kandidat-body');
   if (!tb) return;
   syncViewKandidatUi();
+  // Head hanya di-render sekali saat pertama kali (init). Setelahnya, head
+  // dikelola oleh toggleViewKandidat/clearColumnFilters — BUKAN tiap keystroke.
+  if (!_headInitialized) {
+    renderKandidatHead();
+    _headInitialized = true;
+  }
   if (viewKandidatSimple) {
     renderKandidatTableSimple(tb, arr);
     return;

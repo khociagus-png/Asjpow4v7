@@ -24,6 +24,7 @@ export const admin = {
     view_full: '詳細表示',
     export_csv: 'CSV出力',
     toast_csv_downloaded: '{n}名の候補者をCSV出力しました。',
+    filtered: 'フィルター済み',
     tab_schedule: 'スケジュール',
     tab_mail: 'メール受信箱',
     history_internal: '内部求人履歴',

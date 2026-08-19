@@ -32,8 +32,8 @@ export async function bukaModalListKandidat(code) {
       html += `<div class="p-3 bg-black/40 border border-slate-700 rounded-lg flex justify-between items-center mb-2">
                         <div class="font-bold text-white text-xs">${i + 1}. ${window.esc(c.nama)}</div>
                         <div class="flex items-center gap-2">
-                        <button onclick="bukaDigitalCV('${window.escJs(c.idKandidat)}')" aria-label="' + window.tr('ui.peek_cv') + '" class="w-7 h-7 flex items-center justify-center bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded-full transition shadow" title="' + window.tr('ui.peek_cv') + '"><i class="fas fa-eye text-xs"></i></button>
-                        <button onclick="keluarkanKandidatDariJob('${window.escJs(c.wa)}', '${window.escJs(code)}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="' + window.tr('ui.remove_from_job') + '">Gagal</button>
+                        <button onclick="bukaDigitalCV('${window.escJs(c.idKandidat)}')" aria-label="${window.tr('ui.peek_cv')}" class="w-7 h-7 flex items-center justify-center bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded-full transition shadow" title="${window.tr('ui.peek_cv')}"><i class="fas fa-eye text-xs"></i></button>
+                        <button onclick="keluarkanKandidatDariJob('${window.escJs(c.wa)}', '${window.escJs(code)}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="${window.tr('ui.remove_from_job')}">Gagal</button>
                         </div></div>`;
       txt += i + 1 + '. ' + c.nama + ' - WA: ' + c.wa + '\n';
     });
