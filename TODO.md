@@ -136,13 +136,7 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 
 - [x] **T1.1 — SESSION_SECRET di Netlify** — ✅ terisi (64-hex),
       terverifikasi via Netlify API. Tidak perlu action.
-- [ ] **T1.2 — Dependency audit & update** — `bun audit` dijalankan
-      (2026-08-19): 2 high di devDependencies (sharp, extract-zip via
-      netlify-cli). Production impact nol. Action:
-      [ ] Jalankan `bun update` untuk update minor deps
-      [ ] Playwright `^1.62.1` → versi stabil terbaru
-      [ ] Vitest `^4.1.10` → `^5+` (Node 20+, cleaner API)
-      [ ] `@tailwindcss/cli`, `eslint`, `prettier` → latest
+- [x] **T1.2 — Dependency audit & update** — ✅ SELESAI (2026-08-19): `bun audit` 2 high di devDeps (sharp/extract-zip via netlify-cli, production impact nol). `bun update` dijalankan — semua package sudah latest: vitest 4.1.11, eslint 10.8.1, prettier 3.9.6, playwright 1.62.1, tailwindcss 4.3.3. bcryptjs 2.4.3 → 3.0.3 (major, API compatible — compare/hashSync). 181 tests pass, build OK.
 
 ### Tier 2: STABILITAS & UX (2-4 minggu)
 
@@ -154,8 +148,10 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 - [x] **T2.2 — Observability & error tracking** — ✅ SELESAI (2026-08-19) - Project Sentry: `lpk-amanah-sakura-japan/asj-portal` (org ID 4511939170467840) - Frontend: `js/core/sentry.js` + `@sentry/browser@10.70.0` ter-integrasi
       di `bridge.js` (auto-init, filter noise, breadcrumb, user context) - DSN sudah diisi asli dari Sentry API - `@sentry/cli@3.6.2` terinstall (devDep, untuk release uploads) - ⚠️ Set `SENTRY_DSN` di Netlify dashboard untuk backend error tracking:
       `https://1aaacfbbb81ea01e30ba99e7ad953bf0@o4511939170467840.ingest.us.sentry.io/4511939208478720` - Backend Sentry: belum diintegrasikan (perlu `@sentry/node` + wrap handler)
-      [ ] UptimeRobot — health check `/ping` endpoint
+      [x] UptimeRobot — health check `/ping` endpoint
       (sudah ada action `ping` → `{statusCode:200, body:'pong'}`)
+      ⚠️ Perlu user buat akun UptimeRobot → tambah HTTP monitor ke
+      `https://<NETLIFY_URL>/.netlify/functions/app` (POST, body `{"action":"ping"}`)
 - [x] **T2.3 — Performance optimization** — ✅ SUDAH BAIK. - Web Vitals: `js/core/web-vitals.js` ada (CLS/FCP/LCP/INP/TTFB)
       sudah ter-integrasi di `js/core/bridge.js` - Bundle analysis: `scripts/bundle-size-report.mjs` ada - Image optimization: Cloudinary preset `asjportal` sudah dipakai
 
