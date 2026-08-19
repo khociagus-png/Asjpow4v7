@@ -111,6 +111,7 @@ export const admin = {
     set_close: 'Set CLOSE',
     btn_match: 'Match',
     btn_qr_pamflet: 'QR Pamflet',
+    clear_filters: 'Reset Filter',
     btn_edit: 'Edit',
   },
 };

@@ -111,6 +111,7 @@ export const admin = {
     set_close: '募集終了にする',
     btn_match: 'マッチング',
     btn_qr_pamflet: 'QRパンフレット',
+    clear_filters: 'フィルタリセット',
     btn_edit: '編集',
   },
 };

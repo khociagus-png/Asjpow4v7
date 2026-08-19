@@ -16,7 +16,7 @@
      terbaru (tanpa perlu reload manual).
    - SHELL/VERSION di-patch otomatis oleh scripts/build-js.mjs tiap build.
 */
-const VERSION = 'asj-portal-app-7059daf36e-m886a44dc';
+const VERSION = 'asj-portal-app-dea3bead9c-m886a44dc';
 const SHELL = [
   '/',
   '/index.html',
@@ -26,7 +26,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-7059daf36e.js',
+  '/assets/app-dea3bead9c.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',
