@@ -32,6 +32,7 @@ const WHITELIST = new Set([
   'NETLIFY_SITE_URL',
   'SESSION_SECRET',
   'ASJ_ADMINS',
+  'SENTRY_DSN',
 ]);
 
 // Nama scope pada tabel env Netlify yang ditempel. Nilai pada baris scope ini

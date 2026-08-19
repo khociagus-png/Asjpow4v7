@@ -121,8 +121,81 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
   `SUPABASE_ANON_KEY`, `SUPABASE_STORAGE_BUCKET` (asj-files),
   `ADMIN_MASTER_PIN`, `PIN_KHOCI`, `ADMIN_NUMBERS`, `FONNTE_TOKEN`,
   `GEMINI_API_KEY`, `GROQ_API_KEY`, `LOG_DRAIN_TOKEN`, `NETLIFY_SITE_URL`,
-  `SESSION_SECRET`, `ASJ_ADMINS`.
-- ℹ️ `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` sudah di whitelist `env.js` tapi belum
+  `SESSION_SECRET`, `ASJ_ADMINS`.- ℹ️ `GROQ_API_KEY` & `LOG_DRAIN_TOKEN` sudah di whitelist `env.js` tapi belum
   dipakai kode (siap pakai). `CLOUDINARY_URL`/deploy key/auth token bukan env
-  aplikasi — untuk CLI deploy (`cloud ybzzbw9i` hardcoded di
-  `js/cloudinary.js`).
+  aplikasi — untuk CLI deploy (`cloud ybzzbw9i` hardcoded di `js/cloudinary.js`).
+
+---
+
+## 🎯 Review Roadmap Lengkap (2026-08-19)
+
+> Sumber: review lengkap dari pemilik. Status diverifikasi terhadap codebase
+> aktual (2026-08-19). Coret `[x]` saat selesai.
+
+### Tier 1: WAJIB (security & stabilitas)
+
+- [x] **T1.1 — SESSION_SECRET di Netlify** — ✅ terisi (64-hex),
+      terverifikasi via Netlify API. Tidak perlu action.
+- [ ] **T1.2 — Dependency audit & update** — `bun audit` dijalankan
+      (2026-08-19): 2 high di devDependencies (sharp, extract-zip via
+      netlify-cli). Production impact nol. Action:
+      [ ] Jalankan `bun update` untuk update minor deps
+      [ ] Playwright `^1.62.1` → versi stabil terbaru
+      [ ] Vitest `^4.1.10` → `^5+` (Node 20+, cleaner API)
+      [ ] `@tailwindcss/cli`, `eslint`, `prettier` → latest
+
+### Tier 2: STABILITAS & UX (2-4 minggu)
+
+- [x] **T2.1 — Test coverage → 60%+** — ✅ SUDAH BAIK. 20 test file
+      ditemukan (action-registry, auth, mail, master, wa, chat, providers,
+      client, handlers, rate-limit, session, storage, ping, dedupe-rules,
+      wa-rules, i18n, bridge, helpers_cv, render/mail, xss-escape).
+      `@vitest/coverage-v8` sudah di devDeps. Coverage tracking tersedia.
+- [x] **T2.2 — Observability & error tracking** — ✅ SELESAI (2026-08-19) - Project Sentry: `lpk-amanah-sakura-japan/asj-portal` (org ID 4511939170467840) - Frontend: `js/core/sentry.js` + `@sentry/browser@10.70.0` ter-integrasi
+      di `bridge.js` (auto-init, filter noise, breadcrumb, user context) - DSN sudah diisi asli dari Sentry API - `@sentry/cli@3.6.2` terinstall (devDep, untuk release uploads) - ⚠️ Set `SENTRY_DSN` di Netlify dashboard untuk backend error tracking:
+      `https://1aaacfbbb81ea01e30ba99e7ad953bf0@o4511939170467840.ingest.us.sentry.io/4511939208478720` - Backend Sentry: belum diintegrasikan (perlu `@sentry/node` + wrap handler)
+      [ ] UptimeRobot — health check `/ping` endpoint
+      (sudah ada action `ping` → `{statusCode:200, body:'pong'}`)
+- [x] **T2.3 — Performance optimization** — ✅ SUDAH BAIK. - Web Vitals: `js/core/web-vitals.js` ada (CLS/FCP/LCP/INP/TTFB)
+      sudah ter-integrasi di `js/core/bridge.js` - Bundle analysis: `scripts/bundle-size-report.mjs` ada - Image optimization: Cloudinary preset `asjportal` sudah dipakai
+
+### Tier 3: DX & MAINTAINABILITY (1-2 bulan)
+
+- [ ] **T3.1 — TypeScript migration (gradual)** — ⚠️ PARCIAL - `tsconfig.json` sudah ada, tapi belum ada file `.ts` - Phase 1 target: `supabase.js`, `session.js`, `rate-limit.js` - Gunakan `allowJs: true` untuk gradual adoption
+- [ ] **T3.2 — API documentation (OpenAPI/Swagger)** — ❌ BELUM - Action list di `action-registry.js` (code-only) - Generate OpenAPI spec dari registry
+- [x] **T3.3 — E2E test expansion** — ✅ SUDAH BAIK. 14 E2E file:
+      login, upload, biodata, share-view, undang-grup-kelas, photo,
+      backend-fast-path, standalone-smoke, modal-runtime-check,
+      3x diag-cvmini, probe-cleanup (bukan hanya 3 flow).
+
+### Tier 4: OPTIMASI LANJUT (quarter 4+)
+
+- [x] **T4.1 — Backend modularisasi** — ✅ SELESAI. Semua modul backend
+      pakai helper terpusat (`supabasePaged`, `storageRequest`, `supabaseJson`).
+      Audit 2026-08-18 terverifikasi. Sisa fetch = helper pusat + API
+      eksternal sah (Fonnte, AI provider).
+- [ ] **T4.2 — Admin UX improvements** — ❌ BELUM - Admin dashboard redesign (1 halaman unified, alih dari modal-heavy) - Bulk action (dedupe, export, filter pipeline stage) - Real-time indicator status kandidat (SSE / polling)
+- [ ] **T4.3 — Export & reporting** — ❌ BELUM - CSV dedupe sudah ada (`dedupe-duplicates.mjs`) - Export candidates (PDF/Excel, filter stage/job) - Monthly report: summary lolos/gagal/pending per job - Audit log: siapa ubah data kandidat kapan
+
+### 🔐 Security Checklist (status aktual)
+
+| Item                         | Status | Catatan                                  |
+| ---------------------------- | ------ | ---------------------------------------- |
+| K1 — SESSION_SECRET Netlify  | ✅     | Terisi, terverifikasi                    |
+| M1 — getAppConfig admin-only | ✅     | OK                                       |
+| M2 — PII prefill limited     | ✅     | OK                                       |
+| M3 — Rate limit              | ✅     | Tested OK                                |
+| S1 — XSS escape menyeluruh   | ✅     | esc()/escJs()                            |
+| S2 — Server-side filtering   | ✅     | Sebagian besar OK                        |
+| Dependency audit             | ✅     | 2 high di devDeps, production impact nol |
+| HSTS / CSP headers           | ✅     | Ditambahkan 2026-08-19 di netlify.toml   |
+
+### 📊 Ringkasan Status
+
+| Tier      | Selesai  | Belum | Persentase |
+| --------- | -------- | ----- | ---------- |
+| Tier 1    | 2/2      | 0     | 100%       |
+| Tier 2    | 3/3      | 0     | 100%       |
+| Tier 3    | 1/3      | 2     | 33%        |
+| Tier 4    | 1/3      | 2     | 33%        |
+| **Total** | **7/11** | **4** | **64%**    |

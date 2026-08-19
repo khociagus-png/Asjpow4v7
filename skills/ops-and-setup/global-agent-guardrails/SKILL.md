@@ -45,28 +45,43 @@ Password managers are also a hard NO (pattern group 10): agents must never use t
 
 ## Per-agent wiring (user-global)
 
-| Agent | Config | Event | Blocks via |
-|---|---|---|---|
-| Claude Code | `~/.claude/settings.json` | `PreToolUse` matcher `Bash` | shared script, exit 2 |
-| Codex CLI/app/IDE | `~/.codex/hooks.json` | `PreToolUse` matcher `Bash` | shared script, exit 2 |
-| Cursor IDE + CLI | `~/.cursor/hooks.json` | `beforeShellExecution` | shared script with `cursor` arg, deny JSON |
-| Grok (xAI) | auto-loads Claude + Cursor hook files (compat on by default); native option `~/.grok/hooks/*.json` | `PreToolUse` | shared script (reads `.toolInput.command`) |
-| OpenCode | `~/.config/opencode/plugins/command-guard.ts` | `tool.execute.before` | adapter throws Error |
-| Pi | `~/.pi/agent/extensions/command-guard.ts` | `pi.on("tool_call")` | adapter returns `{block:true}` |
-| Hermes | `~/.hermes/plugins/command-guard/` (`plugin.yaml` + `__init__.py`) | `pre_tool_call` hook | plugin returns `{"action":"block"}` |
-| Droid (Factory) | `~/.factory/settings.json` | native `commandBlocklist` | hard-block, no approval possible |
-| Devin CLI | `~/.config/devin/config.json` | `PreToolUse` matcher `^exec$` | shared script, exit 2 |
+| Agent             | Config                                                                                             | Event                         | Blocks via                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------ |
+| Claude Code       | `~/.claude/settings.json`                                                                          | `PreToolUse` matcher `Bash`   | shared script, exit 2                      |
+| Codex CLI/app/IDE | `~/.codex/hooks.json`                                                                              | `PreToolUse` matcher `Bash`   | shared script, exit 2                      |
+| Cursor IDE + CLI  | `~/.cursor/hooks.json`                                                                             | `beforeShellExecution`        | shared script with `cursor` arg, deny JSON |
+| Grok (xAI)        | auto-loads Claude + Cursor hook files (compat on by default); native option `~/.grok/hooks/*.json` | `PreToolUse`                  | shared script (reads `.toolInput.command`) |
+| OpenCode          | `~/.config/opencode/plugins/command-guard.ts`                                                      | `tool.execute.before`         | adapter throws Error                       |
+| Pi                | `~/.pi/agent/extensions/command-guard.ts`                                                          | `pi.on("tool_call")`          | adapter returns `{block:true}`             |
+| Hermes            | `~/.hermes/plugins/command-guard/` (`plugin.yaml` + `__init__.py`)                                 | `pre_tool_call` hook          | plugin returns `{"action":"block"}`        |
+| Droid (Factory)   | `~/.factory/settings.json`                                                                         | native `commandBlocklist`     | hard-block, no approval possible           |
+| Devin CLI         | `~/.config/devin/config.json`                                                                      | `PreToolUse` matcher `^exec$` | shared script, exit 2                      |
 
 Hook entry shape for Claude/Codex/Devin (merge into existing `hooks` object, never overwrite):
 
 ```json
-{"hooks": {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": "/ABSOLUTE/HOME/.agents/hooks/deny-dangerous.sh"}]}]}}
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "/ABSOLUTE/HOME/.agents/hooks/deny-dangerous.sh" }
+        ]
+      }
+    ]
+  }
+}
 ```
 
 Cursor entry (payload has `.command`, so pass the `cursor` arg):
 
 ```json
-{"beforeShellExecution": [{"command": "/ABSOLUTE/HOME/.agents/hooks/deny-dangerous.sh cursor", "failClosed": false}]}
+{
+  "beforeShellExecution": [
+    { "command": "/ABSOLUTE/HOME/.agents/hooks/deny-dangerous.sh cursor", "failClosed": false }
+  ]
+}
 ```
 
 Use absolute paths in configs (`~` expansion is inconsistent across agents).

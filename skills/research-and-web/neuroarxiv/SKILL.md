@@ -45,8 +45,8 @@ Ask yourself three questions. If the answer to any is no, ABORT.
 If all three checks pass, proceed to Phase 1.
 
 If any fails, ABORT and proceed with the direct implementation. Optionally
-append one sentence: *"If you want this checked against arXiv prior art
-first, run `/neuroarxiv <your problem>`."*
+append one sentence: _"If you want this checked against arXiv prior art
+first, run `/neuroarxiv <your problem>`."_
 
 ## The loop
 
@@ -61,28 +61,28 @@ search terms (the technical mechanism words — "cache invalidation", not
 "caching system"). Pick from the table below, or name another category id
 if you're confident of it.
 
-| Category | Covers |
-|---|---|
-| cs.AI | general AI systems, agents, planning, knowledge representation |
-| cs.LG | learning algorithms, training methods, model architectures |
-| cs.CL | NLP, language models, text processing |
-| cs.CV | image/video understanding, generation, perception |
-| cs.IR | search, ranking, recommendation, retrieval-augmented systems |
-| cs.DC | distributed systems, consensus, sharding, replication, scheduling |
-| cs.DB | storage engines, query processing, indexing, transactions, consistency |
-| cs.SE | development practices, testing, program analysis, tooling |
-| cs.PL | language design, type systems, compilers, runtimes |
-| cs.CR | protocols, authentication, adversarial robustness, privacy |
-| cs.NI | routing, congestion control, edge/CDN |
-| cs.OS | kernels, schedulers, memory management, virtualization |
-| cs.HC | interface design, usability, interaction models |
-| cs.MA | coordination, negotiation, emergent behavior among agents |
-| cs.RO | control, perception, manipulation, motion planning |
-| cs.DS | algorithmic techniques, complexity, data structure design |
-| cs.GT | mechanism design, auctions, incentive-compatible systems |
-| stat.ML | statistical learning theory, probabilistic models |
-| eess.SP / eess.SY | signal processing / control theory |
-| math.OC | optimization, scheduling, resource allocation |
+| Category          | Covers                                                                 |
+| ----------------- | ---------------------------------------------------------------------- |
+| cs.AI             | general AI systems, agents, planning, knowledge representation         |
+| cs.LG             | learning algorithms, training methods, model architectures             |
+| cs.CL             | NLP, language models, text processing                                  |
+| cs.CV             | image/video understanding, generation, perception                      |
+| cs.IR             | search, ranking, recommendation, retrieval-augmented systems           |
+| cs.DC             | distributed systems, consensus, sharding, replication, scheduling      |
+| cs.DB             | storage engines, query processing, indexing, transactions, consistency |
+| cs.SE             | development practices, testing, program analysis, tooling              |
+| cs.PL             | language design, type systems, compilers, runtimes                     |
+| cs.CR             | protocols, authentication, adversarial robustness, privacy             |
+| cs.NI             | routing, congestion control, edge/CDN                                  |
+| cs.OS             | kernels, schedulers, memory management, virtualization                 |
+| cs.HC             | interface design, usability, interaction models                        |
+| cs.MA             | coordination, negotiation, emergent behavior among agents              |
+| cs.RO             | control, perception, manipulation, motion planning                     |
+| cs.DS             | algorithmic techniques, complexity, data structure design              |
+| cs.GT             | mechanism design, auctions, incentive-compatible systems               |
+| stat.ML           | statistical learning theory, probabilistic models                      |
+| eess.SP / eess.SY | signal processing / control theory                                     |
+| math.OC           | optimization, scheduling, resource allocation                          |
 
 If the problem is pure product/business framing with no obvious technical
 mechanism, say so plainly — but still commit to a best-effort technical

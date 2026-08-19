@@ -51,6 +51,7 @@ import * as api from '../../api-client.js';
 import * as i18n from '../../i18n.js';
 import * as fcmClient from '../fcm-client.js';
 import { initWebVitals } from './web-vitals.js';
+import { initSentry } from './sentry.js';
 
 // Namespace tunggal untuk kode legacy. Property CURRENT_LANG memakai getter
 // supaya SELALU membaca nilai terbaru (toggleFormLanguage me-reassign
@@ -415,6 +416,9 @@ export function flushGuardWarnings() {
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
 initSeamDispatcher();
+
+// Sentry error tracking (auto-init saat module dimuat)
+initSentry();
 
 // Web Vitals tracking (auto-init saat module dimuat)
 initWebVitals();

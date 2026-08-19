@@ -4,7 +4,7 @@ description: Ask the agent to list all choices it made during the current work t
 disable-model-invocation: true
 ---
 
-While working on this, which important decisions / choices did you make, that you are not confident about? 
+While working on this, which important decisions / choices did you make, that you are not confident about?
 
 Think about this deeply, reason about all the important decisions made, and think whether these decisions have any other great alternatives that we have not considered.
 

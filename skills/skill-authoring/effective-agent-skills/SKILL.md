@@ -29,12 +29,12 @@ Skills are an open standard (agentskills.io), originally created by Anthropic an
 
 Base LLMs are generalists. Real work requires procedural knowledge, organizational context, and repeatable workflows. Every prior alternative had a failure mode:
 
-| Approach | Problem |
-|---|---|
-| Stuff it into the system prompt | Always loaded → context bloat at scale |
-| Re-paste instructions each session | No version control, no consistency |
-| Fine-tuning | Slow, expensive, opaque, vendor-locked |
-| MCP servers alone | Give the agent tools but no workflows for using them |
+| Approach                           | Problem                                              |
+| ---------------------------------- | ---------------------------------------------------- |
+| Stuff it into the system prompt    | Always loaded → context bloat at scale               |
+| Re-paste instructions each session | No version control, no consistency                   |
+| Fine-tuning                        | Slow, expensive, opaque, vendor-locked               |
+| MCP servers alone                  | Give the agent tools but no workflows for using them |
 
 Skills solve four problems at once:
 
@@ -75,19 +75,24 @@ description: What this skill does AND when to use it. Include trigger phrases th
 # Skill Name
 
 ## Quick start
+
 [Minimal working example]
 
 ## Workflow
+
 [Step-by-step procedure with checklists]
 
 ## Output format
+
 [What the user/agent should expect back]
 
 ## Advanced
+
 [Link to references/ for rarely-needed detail]
 ```
 
 Frontmatter constraints:
+
 - `name` is lowercase, hyphens only, 1–64 chars, **exactly matches the parent folder name**
 - Avoid `<` and `>` in frontmatter (they can inject into the system prompt)
 - Invalid YAML silently prevents loading
@@ -113,6 +118,7 @@ For a manual-only skill shared across Claude Code, VS Code/Copilot, and Codex, i
 Skills tend to fall into one of two patterns. Both are valid; they solve different problems.
 
 ### Pattern A — Capability primitives (tool wrappers)
+
 The skill is a thin wrapper over a deterministic CLI or script. Logic lives in code. SKILL.md teaches the agent how to invoke it.
 
 - **Adds**: new capabilities (search, email, browser, API access)
@@ -121,6 +127,7 @@ The skill is a thin wrapper over a deterministic CLI or script. Logic lives in c
 - **Use when**: the bottleneck is "the agent can't do X"
 
 ### Pattern B — Process primitives (cognitive disciplines)
+
 The skill encodes a methodology the agent should follow. Pure prompt engineering — no scripts needed.
 
 - **Adds**: structured workflows (TDD, code review, design alignment, debugging loops)
@@ -134,33 +141,41 @@ A mature setup uses both. Pattern A gives the agent better tools. Pattern B give
 ## 6. How to write effective skills — do this
 
 ### Description as routing contract
+
 The description is the only thing the agent sees before deciding to load the skill. If your skill doesn't trigger, the description is wrong 95% of the time, not the body.
 
 Include three elements:
+
 1. **What** the skill does (one phrase)
 2. **When** to use it (trigger phrases, situations)
 3. **Differentiator** vs related skills (prevents routing conflicts)
 
 Pattern: `"X via Y. Use for [situations]. [Differentiator: no Z required / faster than W / handles edge case V]."`
 
-**Never summarize the full workflow in the description.** If the description contains a step-by-step summary of *how* the skill works, the agent tends to follow that summary and skip loading the body. Describe *what* and *when*, never *how*. The description answers "should I open this skill now?" — not "what are the steps?"
+**Never summarize the full workflow in the description.** If the description contains a step-by-step summary of _how_ the skill works, the agent tends to follow that summary and skip loading the body. Describe _what_ and _when_, never _how_. The description answers "should I open this skill now?" — not "what are the steps?"
 
 ### Keep SKILL.md lean
+
 - Beyond a certain length, you're usually encoding logic that should be in a script or referenced file
 
 ### Bash-first, prose-second
+
 Concrete command examples with inline comments beat prose explanations. The agent pattern-matches on syntax. Show, don't describe.
 
 ### Push determinism into code
+
 Anything fragile, repetitive, or where variation is a bug → script. Use markdown only for tasks requiring judgment.
 
 ### Match strictness to task fragility (degrees of freedom)
+
 Scale instruction rigidity to how costly a wrong move is:
+
 - **Loose natural-language heuristics** when many approaches are valid (e.g. code review).
 - **Pseudocode or templates** when there's a preferred pattern but variation is acceptable (e.g. report format).
 - **Exact scripts and strict step lists** when the workflow is fragile, error-prone, or consistency-critical (e.g. migrations, document patching).
 
 ### Build validation loops
+
 The single biggest output quality improvement: state a verify → fix → re-verify loop explicitly.
 
 - Document skills: visual QA pass before delivery
@@ -168,35 +183,45 @@ The single biggest output quality improvement: state a verify → fix → re-ver
 - Data skills: schema validation before output
 
 ### State-check before action
+
 Don't assume setup is done. Instruct the agent to verify state, then branch:
+
 ```
 First check if X is configured: [command]
 If not, walk the user through setup: [steps]
 ```
 
 ### Just-in-time loading with explicit pointers
+
 Tell the agent exactly when to read each referenced file:
+
 ```
 For standard cases, follow the steps below.
 For [specific edge case], read references/edge-cases.md first.
 ```
 
 ### Keep references one level deep
+
 Link referenced files directly from SKILL.md. Never build chains (SKILL.md → advanced.md → details.md → actual.md) — the agent may preview nested files only partially and miss critical instructions. Add a table of contents to any reference file longer than 100 lines.
 
 ### Document output formats
+
 If your script returns structured data, show the agent what it looks like. Enables reliable downstream parsing.
 
 ### Defer to --help for completeness
+
 List the 80% common operations in SKILL.md. Tell the agent to run `tool --help` for the rest. Keeps SKILL.md small without losing functionality.
 
 ### Compose primitives, don't bundle workflows
+
 One skill = one capability or one discipline. Resist bundling concerns into "the X workflow." Multiple small skills combine at runtime; one large skill is rigid.
 
 ### Cite established principles when applicable
+
 If your skill encodes a known engineering methodology (TDD, DDD, red-green-refactor), name the source. Gives the agent a coherent model to align with and gives users a way to verify the design.
 
 ### Persistent artifacts for cross-session memory
+
 Skills can write to repo-level files (CONTEXT.md, ADRs, decision logs) that future agent sessions read. This is how you fight the "agents have no memory" problem at the architecture level.
 
 ---
@@ -204,39 +229,51 @@ Skills can write to repo-level files (CONTEXT.md, ADRs, decision logs) that futu
 ## 7. What not to do — anti-patterns
 
 ### Don't re-teach what the model already knows
+
 Every line in SKILL.md should provide context the model doesn't already have. No Python syntax tutorials. No "what is git." Challenge every paragraph.
 
 ### Don't include human-facing docs
+
 No README.md, no CHANGELOG.md, no INSTALLATION_GUIDE.md inside the skill folder. Skills are for agents.
 
 ### Don't write vague descriptions
+
 - Bad: "A helpful skill for documents"
 - Good: "Fill PDF form fields, extract form data, flatten completed PDFs. Use when the user mentions PDF forms, fillable forms, or programmatic field population."
 
 ### Don't bundle library code
+
 If you need a parsing library, install via npm/pip. Don't paste source into the skill.
 
 ### Don't write monolithic mega-skills
+
 If one skill does design + planning + implementation + testing + deployment, you've built a framework, not a skill. Split it.
 
 ### Don't assume the agent will infer
+
 Be explicit about every step that matters.
+
 - Bad: "Then deploy it."
 - Good: "Run `npm run deploy:staging` and wait for HTTP 200 from /healthz before reporting success."
 
 ### Don't write style-only variants
+
 A skill that just changes tone or formatting belongs in user preferences or a system prompt, not a skill.
 
 ### Don't ignore failure modes
+
 For every workflow step that can fail, document what failure looks like and what to do. Happy-path-only skills break in production.
 
 ### Don't include time-sensitive information
+
 "As of Q4 2024..." rots fast. Fetch live data via script or omit.
 
 ### Don't use absolute paths
+
 Always relative. Forward slashes regardless of OS. Use runtime placeholders for skill-directory references.
 
 ### Don't trust unfamiliar skills
+
 Skills can execute arbitrary code and steer agent behavior. A malicious skill is a data exfiltration vector. Audit `scripts/` for unexpected network calls, file access outside expected scope, or hidden instructions in references. Watch for typosquatted skill names. Sandbox execution environments.
 
 ---

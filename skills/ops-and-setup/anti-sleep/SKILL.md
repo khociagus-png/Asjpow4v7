@@ -49,10 +49,10 @@ Only report success when verification returns `STATUS=running` and `ASSERTIONS=a
 
 The default is `-d -i`: keep the display on and prevent idle system sleep. Pass explicit flags after the duration or PID when needed:
 
-| Flags | Effect |
-|---|---|
-| `-i` | Prevent idle system sleep; display may dim |
-| `-d` | Prevent display sleep |
+| Flags      | Effect                                      |
+| ---------- | ------------------------------------------- |
+| `-i`       | Prevent idle system sleep; display may dim  |
+| `-d`       | Prevent display sleep                       |
 | `-d -i -s` | Also prevent system sleep while on AC power |
 
 Example:

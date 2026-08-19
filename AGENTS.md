@@ -12,18 +12,19 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 ## 1. Urutan dokumen yang wajib dibaca
 
-| Dokumen                                                                                        | Isi                                                                                     | Kapan dibaca                             |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                        | Setiap sesi                              |
-| **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                       | Setiap sesi                              |
-| **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |
-| **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |
-| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama        |
-| **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md` | Agent skills library (dari davidondrej/skills) — progressive disclosure, load saat relevan | Saat butuh pola pikir/ops/research         |
+| Dokumen                                                                                        | Isi                                                                                        | Kapan dibaca                             |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                           | Setiap sesi                              |
+| **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                          | Setiap sesi                              |
+| **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**      | Sebelum menyentuh fitur tahapan kandidat |
+| **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                               | Saat kerja di backend/keamanan           |
+| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit**    | Saat butuh konteks perubahan lama        |
+| **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md`                            | Agent skills library (dari davidondrej/skills) — progressive disclosure, load saat relevan | Saat butuh pola pikir/ops/research       |
 
 > **Agent Skills (dari [davidondrej/skills](https://github.com/davidondrej/skills)):**
 > Library instruksi terstruktur yang dimuat agent hanya saat task cocok.
 > Lihat `skills/SKILLS.md` untuk daftar lengkap. Skills utama:
+>
 > - `before-building` — 🔥 Wajib sebelum bangun fitur: surface pilihan tersembunyi
 > - `risky-changes` — ⚠️ Wajib sebelum ship perubahan risiko tinggi
 > - `stop-overthinking` — Paksa keputusan praktis

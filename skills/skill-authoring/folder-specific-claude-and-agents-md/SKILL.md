@@ -13,17 +13,20 @@ Background reference: `library/claude-code/claude-and-agents-md.md`.
 ## Process
 
 ### Step 1: Confirm the target folder + sanity-check it deserves a file
+
 Ask the user which folder. Use absolute path under the user's workspace directory.
 
 **Only create a file if the folder has context needed across multiple sessions** — active evolving work, specific conventions, ongoing decisions. A folder of static reference files does NOT need one (agents can read on demand). If unsure, ask the user.
 
 ### Step 2: Read every file in the folder IN FULL
+
 - Use `ls -la` first to enumerate files and subfolders.
 - Read every markdown, config, and key source file.
 - For large tldraw/Vite subprojects: read `package.json`, `src/App.tsx`, one representative module file, and the folder's own `module-details.md`-style files.
 - Do NOT skim. Do NOT skip. The user's later edits depend on you having full context.
 
 ### Step 3: Draft a bullet list of candidate content
+
 Before writing the file, give the user a bullet list grouped by section — let them react first. Candidate sections (skip any that don't apply):
 
 - **Product / Purpose** — what this folder/project is, current state, key metrics
@@ -38,11 +41,13 @@ Before writing the file, give the user a bullet list grouped by section — let 
 - **Top Insights** — 3-5 most glaring signals from research (if research exists)
 
 ### Step 4: Iterate with the user
+
 - Keep answers short. The user will edit directly in the IDE.
 - When they edit the file, RE-READ it and flag: contradictions, typos, missing rules, wrong categorization.
 - Do not revert their edits unless asked.
 
 ### Step 5: Write the file
+
 - Path: `<folder>/CLAUDE.md`
 - Start with a one-line header explaining the file's purpose.
 - **Subdir file marker:** if this is a subdirectory file (parent folder already has its own CLAUDE.md), open with `Apply root CLAUDE.md first, then this file.`
@@ -58,6 +63,7 @@ cd <folder> && ln -s CLAUDE.md AGENTS.md
 Verify with `ls -la CLAUDE.md AGENTS.md`.
 
 ### Step 7: Commit only when asked
+
 Do NOT stage or push unless the user says to. When they do: `git add -A`, commit with a `Day N:` style message, push.
 
 ## Rules

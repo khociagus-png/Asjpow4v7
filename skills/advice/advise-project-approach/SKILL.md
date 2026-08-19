@@ -341,41 +341,53 @@ Use the contract that matches the operating mode.
 ## Project Approach: <Project Name>
 
 ### TL;DR
+
 <Recommended approach and why.>
 
 ### Project Frame
+
 <Goal, users, constraints, assumptions, success criteria, and evidence status.>
 
 ### Evidence Reviewed
+
 <Compact evidence ledger: local/user evidence, external sources, observed dates, and research gaps.>
 
 ### Decision Methodology
+
 <Constraints considered, decision criteria, and how comparables influenced or did not influence the recommendation.>
 
 ### Comparable Projects and References
+
 1. **<Name>** - <URL>; <maintenance/adoption signal>; <why relevant>; <what transfers>; <what should not be copied>.
 
 ### Recommended Stack
+
 <Frontend, backend, data, auth, hosting, testing, observability, and any key libraries.>
 
 ### Cost and Vendor Reality
+
 <Pricing/limits checked, unverified cost assumptions, likely cost growth, lock-in, and lower-cost/self-hosted alternatives when relevant.>
 
 ### Architecture Direction
+
 <How the project should be structured. Include a Mermaid or ASCII diagram when helpful.>
 
 ### Alternatives Considered
+
 1. **<Option>** - <what you gain, what you give up, what becomes harder later, when it is wrong>.
 
 ### Build Plan
+
 1. <First useful vertical slice>
 2. <Next slice>
 3. <Hardening/deploy/testing step>
 
 ### Risks and Unknowns
+
 - <What could change the recommendation.>
 
 ### References
+
 - <URL>
 ```
 
@@ -387,12 +399,15 @@ For a vague pre-build request, include an `Intake Summary` before `Project Frame
 ## Project Approach Review: <Project Name>
 
 ### TL;DR
+
 <Verdict, most important course correction, and what to keep.>
 
 ### Project Summary
+
 <What it appears to do, who it serves, current stack, architecture shape, and maturity.>
 
 ### Evidence Reviewed
+
 - Commands run: <short list>
 - Files inspected: <short list of the most important files>
 - External references: <count or "not performed">
@@ -400,37 +415,49 @@ For a vague pre-build request, include an `Intake Summary` before `Project Frame
 - Inspection scope: <mapped / deeply inspected / sampled / skipped>
 
 ### Decision Methodology
+
 <Constraints, criteria, comparable influence, transferable patterns, and limits of the recommendation.>
 
 ### What Is Working
+
 - <Only real strengths, with evidence.>
 
 ### Comparable Projects or Benchmarks
+
 1. **<Name>** - <URL>; <maintenance/adoption signal>; <why comparable>; <what transfers>; <what should not be copied>.
 
 ### Gap Analysis
+
 <Specific gaps between this project, its goals, and credible comparables or ecosystem practice.>
 
 ### Recommended Changes
+
 #### High Priority
+
 1. **<Change>** - <why, where, and expected impact>
 
 #### Medium Priority
+
 1. **<Change>** - <why, where, and expected impact>
 
 #### Low Priority
+
 1. **<Change>** - <why, where, and expected impact>
 
 ### Stack and Architecture Verdict
+
 <Keep, adjust, or reconsider. Name tradeoffs and migration cost if relevant.>
 
 ### Cost and Vendor Reality
+
 <Pricing/limits checked, unverified cost assumptions, likely cost growth, lock-in, and lower-cost/self-hosted alternatives when relevant.>
 
 ### Risks, Assumptions, and Unknowns
+
 - <What could change the verdict.>
 
 ### References
+
 - <URL or local file reference>
 ```
 
