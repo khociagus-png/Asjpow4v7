@@ -232,6 +232,7 @@ async function handleSubmitApply(payload) {
         .trim()
         .toUpperCase(),
       no_wa: wa,
+      email: String(d.email || '').trim(),
       gender: String(d.gender || ''),
       usia: String(d.usia || ''),
       tb: String(d.tb || ''),

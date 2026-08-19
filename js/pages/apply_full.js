@@ -67,6 +67,7 @@ function cekRiwayat() {
 
       // Isi data secara elegan jika belum terisi
       if (res.nama && !$('nama').value) $('nama').value = res.nama;
+      if (res.email && !$('email').value) $('email').value = res.email;
       if (res.gender) {
         // DB menyimpan 'perempuan'/'laki-laki' (huruf kecil) — cocokkan
         // case-insensitive dgn opsi select (LAKI-LAKI/PEREMPUAN).
@@ -198,6 +199,12 @@ function validateStep1() {
   if (!$('nama').value.trim()) {
     alert('Nama Lengkap wajib diisi.');
     $('nama').focus();
+    return false;
+  }
+  const emailVal = $('email').value.trim();
+  if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    alert('Alamat Email wajib diisi dengan format yang valid.');
+    $('email').focus();
     return false;
   }
   if (!$('wa').value.trim()) {
@@ -512,6 +519,7 @@ export async function submitApply() {
       bidang: $('bidang').value,
       nama: $('nama').value.trim().toUpperCase(),
       wa: $('wa').value.trim(),
+      email: $('email').value.trim(),
       gender: $('gender').value,
       usia: $('usia').value,
       tb: $('tb').value,

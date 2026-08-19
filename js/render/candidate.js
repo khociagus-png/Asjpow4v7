@@ -69,7 +69,15 @@ try {
 // Keys: 'id', 'nama', 'job', 'tahapan', 'catatan'. Nilai = string (text)
 // atau 'all' (dropdown). Dipakai oleh filterKandidat + renderKandidatHead.
 // State dipersist per-admin di localStorage supaya tidak reset tiap reload.
-const COL_FILTER_DEFAULTS = { id: '', nama: '', job: 'all', tahapan: 'all', catatan: '' };
+const COL_FILTER_DEFAULTS = {
+  id: '',
+  nama: '',
+  job: 'all',
+  tahapan: 'all',
+  catatan: '',
+  wa: '',
+  email: '',
+};
 const columnFilters = { ...COL_FILTER_DEFAULTS };
 let _colFilterUniques = { job: [], tahapan: [] }; // cache unik value dari data
 
@@ -115,9 +123,17 @@ export function clearColumnFilters() {
   columnFilters.job = 'all';
   columnFilters.tahapan = 'all';
   columnFilters.catatan = '';
+  columnFilters.wa = '';
+  columnFilters.email = '';
   saveColumnFilters();
   // Clear input/select UI
-  ['col-filter-id', 'col-filter-nama', 'col-filter-catatan'].forEach(function (elId) {
+  [
+    'col-filter-id',
+    'col-filter-nama',
+    'col-filter-catatan',
+    'col-filter-wa',
+    'col-filter-email',
+  ].forEach(function (elId) {
     var el = document.getElementById(elId);
     if (el) el.value = '';
   });
@@ -153,29 +169,6 @@ export function renderKandidatHead() {
   var head = document.getElementById('admin-kandidat-head');
   if (!head) return;
 
-  if (viewKandidatSimple) {
-    var cols = [
-      ['table.full_name', 'Nama'],
-      ['table.wa_num', 'No. WA'],
-      ['table.email', 'Email'],
-      ['table.applied_job', 'Job'],
-      ['table.stage_status', 'Tahapan'],
-      ['table.tanggal', 'Tanggal'],
-    ];
-    head.innerHTML =
-      '<tr>' +
-      cols
-        .map(function (c) {
-          return '<th class="p-4" data-lang="' + c[0] + '">' + tr(c[0]) + '</th>';
-        })
-        .join('') +
-      '</tr>';
-    // Bug 6 fix: pastikan tombol reset filter disembunyikan di mode sederhana.
-    syncClearBtn();
-    return;
-  }
-
-  // ── Mode Lengkap: header + filter row ──
   buildColumnUniques();
   var inputCls =
     'w-full bg-black/50 border border-slate-600 text-white text-[11px] px-2 py-1 rounded focus:border-sky-500 outline-none transition placeholder-slate-500';
@@ -201,6 +194,67 @@ export function renderKandidatHead() {
       window.esc(window.trOption(t)) +
       '</option>';
   });
+
+  if (viewKandidatSimple) {
+    var cols = [
+      ['table.full_name', 'Nama'],
+      ['table.wa_num', 'No. WA'],
+      ['table.email', 'Email'],
+      ['table.applied_job', 'Job'],
+      ['table.stage_status', 'Tahapan'],
+      ['table.tanggal', 'Tanggal'],
+    ];
+    var headerRowSimple =
+      '<tr>' +
+      cols
+        .map(function (c) {
+          return '<th class="p-4" data-lang="' + c[0] + '">' + tr(c[0]) + '</th>';
+        })
+        .join('') +
+      '</tr>';
+
+    var filterRowSimple =
+      '<tr class="border-b border-slate-700">' +
+      '<th class="px-3 pb-2"><input id="col-filter-nama" type="text" placeholder="' +
+      tr('table.full_name') +
+      '…" value="' +
+      window.esc(columnFilters.nama) +
+      '" oninput="window.onColumnFilterChange(\'nama\', this.value)" class="' +
+      inputCls +
+      '"></th>' +
+      '<th class="px-3 pb-2"><input id="col-filter-wa" type="text" placeholder="' +
+      tr('table.wa_num') +
+      '…" value="' +
+      window.esc(columnFilters.wa) +
+      '" oninput="window.onColumnFilterChange(\'wa\', this.value)" class="' +
+      inputCls +
+      '"></th>' +
+      '<th class="px-3 pb-2"><input id="col-filter-email" type="text" placeholder="' +
+      tr('table.email') +
+      '…" value="' +
+      window.esc(columnFilters.email) +
+      '" oninput="window.onColumnFilterChange(\'email\', this.value)" class="' +
+      inputCls +
+      '"></th>' +
+      '<th class="px-3 pb-2"><select id="col-filter-job" onchange="window.onColumnFilterChange(\'job\', this.value)" class="' +
+      selectCls +
+      '">' +
+      jobOpts +
+      '</select></th>' +
+      '<th class="px-3 pb-2"><select id="col-filter-tahapan" onchange="window.onColumnFilterChange(\'tahapan\', this.value)" class="' +
+      selectCls +
+      '">' +
+      tahOpts +
+      '</select></th>' +
+      '<th class="px-3 pb-2"></th>' +
+      '</tr>';
+
+    head.innerHTML = headerRowSimple + filterRowSimple;
+    syncClearBtn();
+    return;
+  }
+
+  // ── Mode Lengkap: header + filter row ──
 
   var headerRow =
     '<tr>' +
@@ -551,34 +605,37 @@ export async function filterKandidat() {
       if (jftF === 'b1' && !jftText.includes('B1') && !jftText.includes('N3')) return false;
     }
 
-    // ── Column filters (Excel-style, full mode only) ──
-    if (!viewKandidatSimple) {
-      if (
-        columnFilters.id &&
-        !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
-      )
-        return false;
-      if (
-        columnFilters.nama &&
-        !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
-      )
-        return false;
-      if (columnFilters.job !== 'all') {
-        var cJob = String(c.idLoker || '').trim();
-        if (cJob !== columnFilters.job) return false;
-      }
-      if (columnFilters.tahapan !== 'all') {
-        var cStage = String(c.tahapan || '').trim();
-        if (cStage !== columnFilters.tahapan) return false;
-      }
-      if (
-        columnFilters.catatan &&
-        !(c.catatanExt || c.catatan || '')
-          .toLowerCase()
-          .includes(columnFilters.catatan.toLowerCase())
-      )
-        return false;
+    // ── Column filters (Excel-style, berlaku di kedua mode) ──
+    if (
+      columnFilters.id &&
+      !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
+    )
+      return false;
+    if (
+      columnFilters.nama &&
+      !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
+    )
+      return false;
+    if (columnFilters.wa && !(c.wa || '').toLowerCase().includes(columnFilters.wa.toLowerCase()))
+      return false;
+    if (
+      columnFilters.email &&
+      !(c.email || '').toLowerCase().includes(columnFilters.email.toLowerCase())
+    )
+      return false;
+    if (columnFilters.job !== 'all') {
+      var cJob = String(c.idLoker || '').trim();
+      if (cJob !== columnFilters.job) return false;
     }
+    if (columnFilters.tahapan !== 'all') {
+      var cStage = String(c.tahapan || '').trim();
+      if (cStage !== columnFilters.tahapan) return false;
+    }
+    if (
+      columnFilters.catatan &&
+      !(c.catatanExt || c.catatan || '').toLowerCase().includes(columnFilters.catatan.toLowerCase())
+    )
+      return false;
 
     return true;
   });
