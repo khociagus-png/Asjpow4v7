@@ -42,6 +42,9 @@ jobs:
       - name: Build lengkap
         run: bun run build
 
+      - name: Bundle size report
+        run: bun run bundle:size
+
       # E2E share-view (API + best-effort browser). Butuh env Supabase asli —
       # step di-skip otomatis kalau secrets belum dikonfigurasi di repo.
       # Browser check di dalam skrip best-effort (dilewati kalau chromium

@@ -50,6 +50,7 @@
 import * as api from '../../api-client.js';
 import * as i18n from '../../i18n.js';
 import * as fcmClient from '../fcm-client.js';
+import { initWebVitals } from './web-vitals.js';
 
 // Namespace tunggal untuk kode legacy. Property CURRENT_LANG memakai getter
 // supaya SELALU membaca nilai terbaru (toggleFormLanguage me-reassign
@@ -414,6 +415,9 @@ export function flushGuardWarnings() {
 // Pasang ke window untuk pemakai classic.
 window.PortalBridge = PortalBridge;
 initSeamDispatcher();
+
+// Web Vitals tracking (auto-init saat module dimuat)
+initWebVitals();
 
 // Scan bertahap (semua modul sudah registerSeamAliases saat load), lalu flush
 // di load+3 detik — menangkap render dinamis yang selesai sebentar setelah

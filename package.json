@@ -28,7 +28,8 @@
     "build": "bun run check:globals && bun run check:handlers && bun run build:css && bun run build:html && bun run build:js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "web-vitals": "^6.1.1"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",

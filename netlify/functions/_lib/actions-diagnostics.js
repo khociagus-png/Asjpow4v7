@@ -107,4 +107,20 @@ async function handleGetAppConfig(sessionToken) {
   return diag;
 }
 
-module.exports = { handleGetAppConfig };
+/**
+ * Web Vitals reporting — menerima metric dari frontend (CLS/FCP/LCP/INP/TTFB).
+ * Catat ke console untuk observability. Tidak perlu auth (public metric).
+ * @param {Object} payload - { name, value, rating, delta, id, navigationType }
+ */
+function handleReportWebVital(payload) {
+  if (!payload || !payload.name) return { success: false, error: 'invalid payload' };
+  const { name, value, rating, delta, id, navigationType } = payload;
+  console.log(
+    `[web-vitals] ${rating === 'good' ? '✅' : rating === 'needs-improvement' ? '⚠️' : '❌'} ` +
+      `${name}: ${typeof value === 'number' ? value.toFixed(name === 'CLS' ? 4 : 0) : value}ms ` +
+      `(${rating}) delta=${delta} nav=${navigationType} id=${id}`,
+  );
+  return { success: true };
+}
+
+module.exports = { handleGetAppConfig, handleReportWebVital };

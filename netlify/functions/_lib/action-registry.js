@@ -33,6 +33,7 @@ const ACTION_HANDLERS = {
   // Data publik & diagnostik
   getAppData: publicData.handleGetAppData,
   getAppConfig: diagnostics.handleGetAppConfig,
+  reportWebVital: diagnostics.handleReportWebVital,
   // Auth
   checkAdminMaster: auth.handleCheckAdminMaster,
   checkAdminPersonal: auth.handleCheckAdminPersonal,

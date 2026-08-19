@@ -124,6 +124,7 @@ const NETLIFY_FUNCTIONS = {
   // Konfigurasi sistem
   getAppConfig: 'config',
   updateSysConfig: 'config',
+  reportWebVital: 'config',
   // File generik (Supabase Storage) - hanya getUploadUrls (upload/list/delete
   // generik dihapus dari files.ts karena tidak dipakai & tanpa gerbang admin)
   getUploadUrls: 'files',
