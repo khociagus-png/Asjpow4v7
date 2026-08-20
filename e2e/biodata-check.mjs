@@ -15,9 +15,8 @@
 //   (butuh Supabase keys di .env.local / env — dibaca _lib/supabase.js)
 // =============================================================
 import { check, waitFor as harnessWaitFor, launchBrowser, finish, BASE } from './harness.mjs';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
+// client.ts is ESM (TS) — use dynamic import
+const { supabaseKey, supabaseUrl } = await import('../netlify/functions/_lib/db/client.ts');
 
 // Update biodata butuh sinkronisasi DB — default waitFor 30s.
 const waitFor = (c, t, i) => harnessWaitFor(c, t ?? 30000, i);

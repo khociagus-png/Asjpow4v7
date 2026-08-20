@@ -18,8 +18,23 @@ import { readFile, stat } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { transform } from 'esbuild';
 
 const require = createRequire(import.meta.url);
+
+// Cache for transpiled TS → JS to avoid re-transpiling on every request
+const tsCache = new Map();
+async function transpileTs(content, filePath) {
+  if (tsCache.has(filePath)) return tsCache.get(filePath);
+  const result = await transform(content, {
+    loader: 'ts',
+    format: 'esm',
+    target: 'es2022',
+    sourcemap: 'inline',
+  });
+  tsCache.set(filePath, result.code);
+  return result.code;
+}
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -37,6 +52,8 @@ const ROOT = existsSync(join(HERE, 'index.html')) ? HERE : normalize(process.cwd
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.ts': 'text/javascript; charset=utf-8',
+  '.mts': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
@@ -227,8 +244,12 @@ createServer(async (req, res) => {
     }
 
     const file = await resolveFile(pathname);
-    const body = await readFile(file);
+    let body = await readFile(file);
     const ext = extname(file).toLowerCase();
+    // Transpile .ts/.mts to JS on-the-fly for browser modules
+    if (ext === '.ts' || ext === '.mts') {
+      body = Buffer.from(await transpileTs(body.toString(), file));
+    }
     const headers = {
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

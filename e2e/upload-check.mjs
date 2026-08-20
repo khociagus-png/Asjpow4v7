@@ -20,9 +20,8 @@
 //   (butuh Supabase keys di .env.local / env — dibaca oleh _lib/supabase.js)
 // =============================================================
 import { check, waitFor as harnessWaitFor, launchBrowser, finish, BASE } from './harness.mjs';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { supabaseKey, supabaseUrl } = require('../netlify/functions/_lib/db/client');
+// client.ts is ESM (TS) — use dynamic import
+const { supabaseKey, supabaseUrl } = await import('../netlify/functions/_lib/db/client.ts');
 
 // Upload butuh waktu lebih lama (base64 + Storage) — default waitFor 40s.
 const waitFor = (c, t, i) => harnessWaitFor(c, t ?? 40000, i);
