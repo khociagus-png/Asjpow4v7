@@ -146,7 +146,37 @@ async function handleCekDataPelamar(payload) {
       }))
       .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
     const myRows = rows.filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want);
-    if (!myRows.length) return { found: false, applications: apps };
+    if (!myRows.length) {
+      // Fallback ke database_candidate: kandidat mungkin ditambah admin
+      // (punya photo/CV/JFT di database_candidate) tapi belum pernah apply.
+      try {
+        const cands = await findCandidates();
+        const candRow = (Array.isArray(cands?.rows) ? cands.rows : []).find(
+          (r) => normalizeWa(String(pick(r, ['no_wa', 'wa', 'whatsapp']) || '')) === want,
+        );
+        if (candRow) {
+          const cPhoto = toText(pick(candRow, ['pas_photo', 'pasPhoto', 'photo']));
+          const cJft = toText(pick(candRow, ['jft', 'file_jft']));
+          const cSsw = toText(pick(candRow, ['ssw', 'file_ssw']));
+          return {
+            found: true,
+            nama: toText(pick(candRow, ['nama_lengkap', 'nama'])),
+            gender: toText(pick(candRow, ['gender', 'jenis_kelamin'])),
+            usia: toText(pick(candRow, ['usia', 'umur'])),
+            tb: toText(pick(candRow, ['tb'])),
+            bb: toText(pick(candRow, ['bb'])),
+            pasPhoto: cPhoto && cPhoto !== '-' ? cPhoto : '-',
+            photoUrl: cPhoto && cPhoto !== '-' ? cPhoto : '-',
+            jftUrl: cJft && cJft !== '-' ? cJft : '-',
+            sswUrl: cSsw && cSsw !== '-' ? cSsw : '-',
+            applications: apps,
+          };
+        }
+      } catch {
+        /* non-fatal */
+      }
+      return { found: false, applications: apps };
+    }
 
     // Scan SEMUA baris lamaran kandidat — ambil nilai non-empty terbaru
     // untuk tiap field. Sebelumnya hanya mengambil dari baris PERTAMA
@@ -181,6 +211,34 @@ async function handleCekDataPelamar(payload) {
       });
     });
 
+    // Fallback ke database_candidate jika database_asj_form tidak punya photo.
+    // Kasus: kandidat ditambah admin (photo di database_candidate) tapi belum
+    // pernah apply → cekDataPelamar hanya baca database_asj_form → photo '-'.
+    let finalPhoto = bestPasPhoto;
+    let finalJft = bestJft;
+    let finalSsw = bestSsw;
+    if (finalPhoto === '-') {
+      try {
+        const cands = await findCandidates();
+        const candRow = (Array.isArray(cands?.rows) ? cands.rows : []).find(
+          (r) => normalizeWa(String(pick(r, ['no_wa', 'wa', 'whatsapp']) || '')) === want,
+        );
+        if (candRow) {
+          const cPhoto = toText(pick(candRow, ['pas_photo', 'pasPhoto', 'photo']));
+          if (cPhoto && cPhoto !== '-') finalPhoto = cPhoto;
+          if (finalJft === '-') {
+            const cJft = toText(pick(candRow, ['jft', 'file_jft']));
+            if (cJft && cJft !== '-') finalJft = cJft;
+          }
+          if (finalSsw === '-') {
+            const cSsw = toText(pick(candRow, ['ssw', 'file_ssw']));
+            if (cSsw && cSsw !== '-') finalSsw = cSsw;
+          }
+        }
+      } catch {
+        /* fallback non-fatal */
+      }
+    }
     return {
       found: true,
       nama: toText(pick(first, ['nama_lengkap', 'nama'])),
@@ -188,10 +246,10 @@ async function handleCekDataPelamar(payload) {
       usia: toText(pick(first, ['usia', 'umur'])),
       tb: toText(pick(first, ['tb'])),
       bb: toText(pick(first, ['bb'])),
-      pasPhoto: bestPasPhoto,
-      photoUrl: bestPasPhoto,
-      jftUrl: bestJft,
-      sswUrl: bestSsw,
+      pasPhoto: finalPhoto,
+      photoUrl: finalPhoto,
+      jftUrl: finalJft,
+      sswUrl: finalSsw,
       applications: apps,
     };
   } catch (e) {

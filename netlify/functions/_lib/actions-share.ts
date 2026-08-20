@@ -1,8 +1,8 @@
-import { normalizeWa, pick, supabaseUrl, toText } from './db/client.ts';
+import { normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client.ts';
 import { findJobByCodeFiltered, findJobs } from './db/jobs.ts';
 import { findForms, findFormsByWaList, parseDocs } from './db/forms.ts';
 import { findCandidates, findCandidatesByJobFiltered, mapCandidate } from './db/candidates.ts';
-import { listStorageFolder } from './db/berkas.ts';
+import { listStorageFolder, BERKAS_COLUMNS } from './db/berkas.ts';
 // actions-share.js — viewer TSK publik (share.html?job=KODE). Dipanggil
 // LANGSUNG via GET dari netlify/functions/share-data.js (redirect /api/
 // share-data), bukan lewat dispatch POST. MODUL BARU (Fase 1.1d
@@ -53,6 +53,38 @@ async function handleShareData(jobCode) {
       if (!byWa.has(w)) byWa.set(w, []);
       for (const d of parseDocs(toText(f.keterangan))) byWa.get(w).push(d);
     }
+    // Jalur cepat: tarik pemberkasan_checklist + master_database_candidate
+    // untuk WA kandidat job ini — dokumen pemberkasan (KK/KTP/ijazah/dll)
+    // harus ikut tampil di share view meskipun tidak ada di folder Storage.
+    let pemberkasanRows: any[] = [];
+    let masterRows: any[] = [];
+    try {
+      const [pRes, mRes] = await Promise.all([
+        waList.length > 0 && waList.length <= 150
+          ? supabaseJson('GET', 'pemberkasan_checklist', {
+              query: { select: '*', wa: 'in.(' + waList.join(',') + ')' },
+            }).catch(() => null)
+          : Promise.resolve(null),
+        waList.length > 0 && waList.length <= 150
+          ? supabaseJson('GET', 'master_database_candidate', {
+              query: { select: '*', no_wa: 'in.(' + waList.join(',') + ')' },
+            }).catch(() => null)
+          : Promise.resolve(null),
+      ]);
+      pemberkasanRows = Array.isArray(pRes) ? pRes : [];
+      masterRows = Array.isArray(mRes) ? mRes : [];
+    } catch {
+      /* non-fatal */
+    }
+    const pByWa = new Map();
+    for (const r of pemberkasanRows) {
+      pByWa.set(normalizeWa(String(r.wa || '')), r);
+    }
+    const mByWa = new Map();
+    for (const r of masterRows) {
+      mByWa.set(normalizeWa(String(r.no_wa || r.wa || '')), r);
+    }
+
     const candidates = [];
     for (const c of mapped) {
       const folder =
@@ -113,6 +145,29 @@ async function handleShareData(jobCode) {
         if (!seenUrl.has(String(d.url))) {
           seenUrl.add(String(d.url));
           extraDocs.push(d);
+        }
+      }
+      // Gabungkan dokumen dari pemberkasan_checklist & master_database_candidate
+      // — upload via modal pemberkasan / admin super-edit tersimpan di kolom
+      // *_url, bukan di folder Storage. Tanpa ini, share view tidak menampilkan
+      // KK/KTP/ijazah/dll yang diupload via modal pemberkasan.
+      const pRow = pByWa.get(normalizeWa(String(c.wa || '')));
+      const mRow = mByWa.get(normalizeWa(String(c.wa || '')));
+      const pemberkasanSources = [pRow, mRow].filter(Boolean);
+      for (const src of pemberkasanSources) {
+        for (const [key, cols] of BERKAS_COLUMNS) {
+          let v = '';
+          for (const col of cols) {
+            if (src[col]) {
+              v = String(src[col]);
+              break;
+            }
+          }
+          if (v && v !== '-' && v.startsWith('http') && !seenUrl.has(v)) {
+            seenUrl.add(v);
+            const label = String(key).toUpperCase();
+            extraDocs.push({ name: label, url: v });
+          }
         }
       }
       // Foto: kalau pas_photo kandidat kosong/basi (404), pakai file foto dari

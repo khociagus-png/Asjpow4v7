@@ -185,4 +185,4 @@ async function listStorageFolder(prefix) {
   }
 }
 
-export { attachBerkasBio, listStorageFolder };
+export { attachBerkasBio, listStorageFolder, BERKAS_COLUMNS };
