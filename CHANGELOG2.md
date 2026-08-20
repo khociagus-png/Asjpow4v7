@@ -4,6 +4,13 @@
 > entri per commit dicatat di sini supaya file riwayat tidak membengkak.
 > Format: paling lama di atas (paling baru di bawah).
 
+## `17f09ac` — TypeScript migration
+
+- Konversi 136+ file JS→TS (frontend, backend, scripts, tests)
+- Infra: tsconfig.json, types/supabase.ts, types/globals.d.ts, vitest.config.ts
+- Pipeline: esbuild TS loader, tsc --noEmit di pre-commit + CI
+- 181/181 tests, tsc 0 errors, build idempoten
+
 ---
 
 ## 2026-08-18 — 🚀 DEPLOY LIVE: paket 8 fix + refactor backend (aaac6ac → app-699dfb4a86)

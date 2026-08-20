@@ -5,7 +5,24 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-18 — dikerjakan oleh **codebuff** (via Freebuff) — **DEPLOY `aaac6ac` LIVE** (deploy ID `6a841baec747d7187ea615a8`, bundle `app-699dfb4a86`): paket 8 fix + refactor backend sudah di domain asli, verifikasi live penuh.
+**Update terakhir:** sesi 2026-08-20 — dikerjakan oleh **codebuff** (via Freebuff) — **TypeScript migration** (`17f09ac`)
+
+---
+
+## Sesi 2026-08-20 — TypeScript Migration
+
+### Ringkasan
+
+- Konversi 136+ file dari JS ke TypeScript: frontend (51), backend (35), scripts (21), tests, root files
+- Infra baru: `tsconfig.json`, `types/supabase.ts` (5 tabel), `types/globals.d.ts` (window.*), `vitest.config.ts`
+- Pipeline: esbuild `loader: .ts`, `serve-static.mts` resolve .js→.ts, `tsc --noEmit` di pre-commit + CI
+- 73 file pakai `@ts-nocheck` (gradual migration — bisa dihapus bertahap)
+- **181/181 tests, tsc 0 errors, build idempoten, lint clean, format clean**
+- `sw.js` tetap .js (service worker browser requirement), Netlify entry points tetap CommonJS
+
+---
+
+Sesi sebelumnya → dikerjakan oleh **codebuff** (via Freebuff) — **DEPLOY `aaac6ac` LIVE** (deploy ID `6a841baec747d7187ea615a8`, bundle `app-699dfb4a86`): paket 8 fix + refactor backend sudah di domain asli, verifikasi live penuh.
 
 ---
 
