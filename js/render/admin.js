@@ -39,12 +39,18 @@ export function adminSwitchTab(t) {
     var p = document.getElementById('admin-' + x);
     if (p) p.classList.add('hidden');
     var b = document.getElementById('tab-' + x);
-    if (b) b.className = SIDEBAR_INACTIVE;
+    if (b) {
+      b.className = SIDEBAR_INACTIVE;
+      b.removeAttribute('aria-current');
+    }
   });
   var tgtP = document.getElementById('admin-' + t);
   if (tgtP) tgtP.classList.remove('hidden');
   var tgtT = document.getElementById('tab-' + t);
-  if (tgtT) tgtT.className = SIDEBAR_ACTIVE;
+  if (tgtT) {
+    tgtT.className = SIDEBAR_ACTIVE;
+    tgtT.setAttribute('aria-current', 'page');
+  }
   // Hash-based routing (shareable links, browser back button)
   if (window.location && t) {
     var newHash = '#' + t;
