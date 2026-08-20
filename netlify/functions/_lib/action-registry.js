@@ -32,6 +32,7 @@ const aiCv = require('./ai/cv');
 const ACTION_HANDLERS = {
   // Data publik & diagnostik
   getAppData: publicData.handleGetAppData,
+  getMonthlyReport: publicData.handleGetMonthlyReport,
   getAppConfig: diagnostics.handleGetAppConfig,
   reportWebVital: diagnostics.handleReportWebVital,
   // Auth

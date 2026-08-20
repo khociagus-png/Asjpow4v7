@@ -130,6 +130,7 @@ const NETLIFY_FUNCTIONS = {
   getUploadUrls: 'files',
   // Data utama aplikasi
   getAppData: 'get-app-data',
+  getMonthlyReport: 'get-app-data',
   // Auth & akun
   daftarKandidat: 'auth',
   loginKandidat: 'auth',

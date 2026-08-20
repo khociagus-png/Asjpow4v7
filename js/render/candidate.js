@@ -757,6 +757,116 @@ export function renderKandidatTable(arr) {
   tb.innerHTML = html;
 }
 
+// Laporan bulanan: panggil backend getMonthlyReport, tampilkan di toast.
+async function showMonthlyReport() {
+  try {
+    const res = await window.callAPI('getMonthlyReport');
+    if (!res || !res.success) {
+      window.showToast(
+        window.tr('ui.toast_failed_prefix') + ' ' + ((res && res.error) || ''),
+        'error',
+      );
+      return;
+    }
+    const report = res.report || [];
+    let html = '<div class="text-left max-h-[60vh] overflow-y-auto">';
+    html +=
+      '<p class="text-xs text-slate-400 mb-3">' +
+      window.tr('admin.report_total') +
+      ': <b class="text-white">' +
+      res.totalCandidates +
+      '</b>' +
+      ' &middot; ' +
+      res.generatedAt.slice(0, 10) +
+      '</p>';
+    if (report.length === 0) {
+      html += '<p class="text-slate-500 text-sm">Tidak ada data kandidat.</p>';
+    }
+    for (const r of report) {
+      html += '<div class="mb-4 p-3 bg-slate-800/60 rounded-lg border border-slate-700/50">';
+      html += '<div class="flex items-center justify-between mb-2">';
+      html += '<span class="text-sm font-bold text-sky-300">' + window.esc(r.loker) + '</span>';
+      html +=
+        '<span class="text-xs font-bold text-white bg-sky-600/30 px-2 py-0.5 rounded">' +
+        r.total +
+        '</span>';
+      html += '</div>';
+      // Tahapan
+      const tahapEntries = Object.entries(r.tahapan).sort((a, b) => b[1] - a[1]);
+      if (tahapEntries.length > 0) {
+        html +=
+          '<div class="text-[10px] text-slate-400 mb-1">' +
+          window.tr('admin.report_by_stage') +
+          ':</div>';
+        html += '<div class="flex flex-wrap gap-1">';
+        for (const [t, n] of tahapEntries) {
+          html +=
+            '<span class="text-[10px] px-1.5 py-0.5 bg-slate-700/60 rounded text-slate-300">' +
+            window.esc(t) +
+            ': ' +
+            n +
+            '</span>';
+        }
+        html += '</div>';
+      }
+      // Status
+      const statEntries = Object.entries(r.status).sort((a, b) => b[1] - a[1]);
+      if (statEntries.length > 0) {
+        html +=
+          '<div class="text-[10px] text-slate-400 mt-1 mb-1">' +
+          window.tr('admin.report_by_status') +
+          ':</div>';
+        html += '<div class="flex flex-wrap gap-1">';
+        for (const [s, n] of statEntries) {
+          html +=
+            '<span class="text-[10px] px-1.5 py-0.5 bg-slate-700/60 rounded text-slate-300">' +
+            window.esc(s) +
+            ': ' +
+            n +
+            '</span>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    window.showToast(window.tr('admin.report_title'), 'info', 8000);
+    // Tampilkan sebagai modal sederhana
+    var existing = document.getElementById('modal-monthly-report');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'modal-monthly-report';
+    overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/70';
+    var box = document.createElement('div');
+    box.className =
+      'bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-lg w-full mx-4';
+    var header = document.createElement('div');
+    header.className = 'flex items-center justify-between mb-4';
+    var title = document.createElement('h3');
+    title.className = 'text-lg font-bold text-white';
+    title.textContent = window.tr('admin.report_title');
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'text-slate-400 hover:text-white text-xl';
+    closeBtn.textContent = '\u00d7';
+    closeBtn.addEventListener('click', function () {
+      overlay.remove();
+    });
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    var content = document.createElement('div');
+    content.innerHTML = html;
+    box.appendChild(header);
+    box.appendChild(content);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+  } catch (e) {
+    window.showToast(window.tr('ui.toast_failed_prefix') + ' ' + String(e.message || e), 'error');
+  }
+}
+
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
 registerSeamAliases({
@@ -765,4 +875,5 @@ registerSeamAliases({
   exportKandidatCsv,
   clearColumnFilters,
   onColumnFilterChange,
+  showMonthlyReport,
 });

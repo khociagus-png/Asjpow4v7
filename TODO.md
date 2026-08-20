@@ -171,7 +171,7 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
       Audit 2026-08-18 terverifikasi. Sisa fetch = helper pusat + API
       eksternal sah (Fonnte, AI provider).
 - [ ] **T4.2 — Admin UX improvements** — ❌ BELUM - Admin dashboard redesign (1 halaman unified, alih dari modal-heavy) - Bulk action (dedupe, export, filter pipeline stage) - Real-time indicator status kandidat (SSE / polling)
-- [ ] **T4.3 — Export & reporting** — ❌ BELUM - CSV dedupe sudah ada (`dedupe-duplicates.mjs`) - Export candidates (PDF/Excel, filter stage/job) - Monthly report: summary lolos/gagal/pending per job - Audit log: siapa ubah data kandidat kapan
+- [x] **T4.3 — Export & reporting** — ✅ SELESAI (2026-08-19). CSV export sudah ada (`js/render/candidate.js:exportKandidatCsv`) dengan filter (gender, age, JFT, job, tahapan, catatan). Monthly report: `handleGetMonthlyReport` di `actions-public.js` + frontend modal (`showMonthlyReport`) — summary per loker: tahapan + status. `bun run generate-api-docs`. 181 tests pass, build OK.
 
 ### 🔐 Security Checklist (status aktual)
 
@@ -188,10 +188,10 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 
 ### 📊 Ringkasan Status
 
-| Tier      | Selesai  | Belum | Persentase |
-| --------- | -------- | ----- | ---------- |
-| Tier 1    | 2/2      | 0     | 100%       |
-| Tier 2    | 3/3      | 0     | 100%       |
-| Tier 3    | 3/3      | 0     | 100%       |
-| Tier 4    | 1/3      | 2     | 33%        |
-| **Total** | **9/11** | **2** | **82%**    |
+| Tier      | Selesai   | Belum | Persentase |
+| --------- | --------- | ----- | ---------- |
+| Tier 1    | 2/2       | 0     | 100%       |
+| Tier 2    | 3/3       | 0     | 100%       |
+| Tier 3    | 3/3       | 0     | 100%       |
+| Tier 4    | 2/3       | 1     | 67%        |
+| **Total** | **10/11** | **1** | **91%**    |

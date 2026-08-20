@@ -479,8 +479,48 @@ async function handleGetAppData(payload, sessionToken) {
   }
 }
 
+// Laporan ringkas per loker: jumlah kandidat per tahapan + status.
+async function handleGetMonthlyReport(payload, sessionToken) {
+  const guard = requireAdmin(sessionToken);
+  if (guard.error) return guard.error;
+  try {
+    // Ambil semua kandidat unik
+    const { rows: candRows } = await loadCandidatesUnik('', {
+      page: 1,
+      pageSize: 5000,
+    });
+    const cands = candRows.map(mapCandidate);
+    // Aggregate by loker
+    const byLoker = {};
+    for (const c of cands) {
+      const loker = String(c.idLoker || 'UNKNOWN').trim();
+      if (!byLoker[loker]) {
+        byLoker[loker] = { total: 0, tahapan: {}, status: {} };
+      }
+      byLoker[loker].total++;
+      const tahap = String(c.tahapan || '-').trim() || '-';
+      byLoker[loker].tahapan[tahap] = (byLoker[loker].tahapan[tahap] || 0) + 1;
+      const stat = String(c.status || '-').trim() || '-';
+      byLoker[loker].status[stat] = (byLoker[loker].status[stat] || 0) + 1;
+    }
+    // Sort by total desc
+    const report = Object.entries(byLoker)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([loker, data]) => ({ loker, ...data }));
+    return {
+      success: true,
+      report,
+      totalCandidates: cands.length,
+      generatedAt: new Date().toISOString(),
+    };
+  } catch (e) {
+    return { success: false, error: 'Gagal generate laporan: ' + e.message };
+  }
+}
+
 module.exports = {
   handleGetAppData,
+  handleGetMonthlyReport,
   // Helper yang masih dipakai handler lain di handlers.js (getCandidatesPage,
   // getJobMapped, dll) — export supaya tidak dobel definisi.
   loadCandidatesUnik,
