@@ -229,6 +229,13 @@
     </div>
 
 <!--SCRIPTS_SHARED_START-->
+<script type="importmap">
+{
+  "imports": {
+    "@sentry/browser": "/js/core/sentry-dummy.js"
+  }
+}
+</script>
     <!-- Fase 2: inline script dipindah ke js/pages/share.js (isi byte-identik) -->
     <script type="module" src="/js/pages/share.js?v=esm14"></script>
   <script type="module" src="/pwa.js?v=esm15"></script>

@@ -342,6 +342,13 @@
   <!-- Fase 3.5 L6: js/pages/apply_full.js = entry ESM — meng-import core sendiri
        lewat bridge.js (i18n + api-client), jadi tag core terpisah tidak perlu lagi -->
 <!--SCRIPTS_SHARED_START-->
+<script type="importmap">
+{
+  "imports": {
+    "@sentry/browser": "/js/core/sentry-dummy.js"
+  }
+}
+</script>
   <!-- Logika murni model dokumen upload (di-unit-test: scripts/__tests__/apply-docs.test.js) -->
   <script type="module" src="/js/apply-docs.js?v=esm13"></script>
   <script type="module" src="/js/upload-guard.js?v=esm13"></script>
