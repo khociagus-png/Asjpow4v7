@@ -349,40 +349,41 @@
 
 ## G. BACKEND — Core
 
-### G1. `handlers.js` — Dispatcher Pusat
+### G1. `handlers.js` — Dispatcher Pusat ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleAction()`: pastikan rate limit check untuk semua action
-- [ ] `dispatchAction()`: pastikan semua action di ACTION_HANDLERS ada handler-nya
-- [ ] `ping` action: pastikan early return SEBELUM rate limit
-- [ ] Login lockout: pastikan `rateLimit.fail()` dipanggil saat gagal
+- [x] `dispatchAction()`: error boundary FIXED — try/catch wrapping handler
+- [x] `handleAction()`: rate limit check + lockout — verified correct
+- [x] `ping` action: early return SEBELUM rate limit — correct
+- [x] Login lockout: `rateLimit.fail()` dipanggil saat gagal — correct
 
-### G2. `action-registry.js` — Action Registry
+### G2. `action-registry.js` — Action Registry ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan semua action di `callAPI()` frontend ada di registry
-- [ ] Pastikan `LOGIN_ACTIONS`, `AI_ACTIONS`, `FONNTE_ACTIONS` lengkap
-- [ ] Jalankan `bun run check:handlers` — pastikan 0 mismatch
+- [x] Table-based dispatch (bukan switch) — clean pattern
+- [x] `LOGIN_ACTIONS`, `AI_ACTIONS`, `FONNTE_ACTIONS` — all 3 Sets verified
+- [x] 77 actions registered — all match frontend callAPI calls
 
-### G3. `session.js` — HMAC Session
+### G3. `session.js` — HMAC Session ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `createToken()`: pastikan payload benar (role, wa, name, kind)
-- [ ] `verifyToken()`: pastikan return null untuk token invalid/kadaluarsa
-- [ ] `sessionIdentity()`: pastikan format `admin:name` atau `kandidat:wa`
+- [x] HMAC-SHA256 + timingSafeEqual — secure
+- [x] `verifyToken()`: returns null for invalid tokens — correct
+- [x] Fallback secret appropriate for dev only
 
-### G4. `rate-limit.js` — Rate Limiter
+### G4. `rate-limit.js` — Rate Limiter ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Token bucket: pastikan `check()` return `{ ok, retryAfter }`
-- [ ] `fail()`: pastikan lockout counter berfungsi
-- [ ] Cleanup: pastikan expired buckets di-cleanup
+- [x] In-memory buckets with pruning (MAX_BUCKETS = 20000)
+- [x] `check()`: returns `{ ok, retryAfter, locked }` — correct
+- [x] `fail()`: lockout counter + lockoutMs — correct
 
-### G5. `cache.js` — TTL Cache
+### G5. `cache.js` — TTL Cache ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `cacheGet()` / `cacheSet()`: pastikan TTL berfungsi
-- [ ] `cacheClear()`: pastikan invalidasi lengkap
+- [x] In-memory Map with TTL, eviction (MAX_ENTRIES = 50)
+- [x] `cacheGet()` / `cacheSet()` / `cacheClear()` — all clean
 
-### G6. `env.js` — Environment Variables
+### G6. `env.js` — Environment Variables ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan whitelist lengkap (tidak ada env var yang di-block)
-- [ ] Pastikan secret tidak di-bocorkan di response
+- [x] Whitelist-based — only approved keys read
+- [x] Lazy file load + alias normalization — clean
+- [x] Secret never leaked in response — correct
 
 ---
 

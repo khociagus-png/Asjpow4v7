@@ -159,7 +159,14 @@ async function dispatchAction(action, payload, sessionToken) {
   if (!handler) {
     return { success: false, message: NOT_IMPLEMENTED + ' (action: ' + action + ')' };
   }
-  return handler(payload, sessionToken);
+  try {
+    return await handler(payload, sessionToken);
+  } catch (err) {
+    console.error(
+      '[handler-error] action=' + action + ' error=' + (err && err.message ? err.message : err),
+    );
+    return { success: false, message: 'Terjadi kesalahan saat memproses permintaan.' };
+  }
 }
 
 // Fase 1.1d (2026-08-16): handleShareData, docTypeOf, docAge, TYPE_ALIAS,
