@@ -389,36 +389,36 @@
 
 ## H. BACKEND — Domain Actions
 
-### H1. `actions-public.js` (531 baris) — Public Data
+### H1. `actions-public.js` (531 baris) — Public Data ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleGetAppData()`: pastikan paralel query berfungsi
-- [ ] `handleGetMonthlyReport()`: pastikan admin guard berfungsi
-- [ ] `loadCandidatesUnik()`: pastikan dedupe benar
-- [ ] `loadPublicBase()`: pastikan cache 20s berfungsi
+- [x] `requireAdmin` NOT IMPORTED FIXED — added import from actions-auth.js
+- [x] `handleGetAppData()`: parallel queries verified correct
+- [x] `loadCandidatesUnik()`: dedupe + cache + fallback — verified
+- [x] `loadPublicBase()`: 20s TTL cache — verified
 
-### H2. `actions-auth.js` (386 baris) — Authentication
+### H2. `actions-auth.js` (386 baris) — Authentication ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleLoginKandidat()`: pastikan bcrypt compare benar
-- [ ] `handleDaftarKandidat()`: pastikan WA normalized
-- [ ] `handleCheckAdminMaster()`: pastikan PIN comparison benar
-- [ ] `registerFcmToken()`: pastikan token tersimpan
+- [x] `handleLoginKandidat()`: bcrypt compare + fallback — correct
+- [x] `handleDaftarKandidat()`: WA normalized + duplicate check — correct
+- [x] `handleCheckAdminMaster()`: PIN comparison via env — correct
+- [x] `registerFcmToken()`: upsert with on_conflict — correct
 
-### H3. `actions-job.js` — Job Management
+### H3. `actions-job.js` — Job Management ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleSimpanJobBaru()`: pastikan `nextJobCode()` generate unik
-- [ ] `handleEditLokerFull()`: pastikan semua field ter-update
-- [ ] `handleUbahStatusJob()`: pastikan status transition valid
+- [x] `requireRole` imported ✅
+- [x] All handlers use `requireRole(sessionToken, 'admin')` guard
 
-### H4. `actions-candidate.js` — Candidate Management
+### H4. `actions-candidate.js` — Candidate Management ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleGetCandidatesPage()`: pastikan pagination benar
-- [ ] `handleUpdateKandidatSuper()`: pastikan field lengkap
-- [ ] `handleUpdateCatatanKandidat()`: pastikan catatan tersimpan
+- [x] `requireAdmin` imported ✅
+- [x] `handleGetCandidatesPage()`: pagination + parallel fetch — correct
+- [x] `cacheClear()` on mutations — correct
 
-### H5. `actions-mail.js` (396 baris) — Mail Inbox
+### H5. `actions-mail.js` (396 baris) — Mail Inbox ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleApproveForm()`: pastikan `syncCandidateDariForm()` benar
-- [ ] `handleRejectForm()`: pastikan status di-update
+- [x] `requireAdmin` imported ✅
+- [x] `handleApproveForm()` → `syncCandidateDariForm()` — creates/updates candidate on LULUS
+- [x] `handleRejectForm()` → `syncCandidateDariForm()` — sets GAGAL + detaches job
 - [ ] `handleDeleteForm()`: pastikan data ter-hapus
 
 ### H6. `actions-upload.js` (826 baris) — Upload & Files

@@ -36,6 +36,7 @@ const {
 const { attachBerkasBio } = require('./db/berkas');
 const { findAssets, findSettings } = require('./db/misc');
 const session = require('./session');
+const { requireAdmin } = require('./actions-auth');
 const demo = require('./demo');
 const { cacheGet, cacheSet } = require('./cache');
 
