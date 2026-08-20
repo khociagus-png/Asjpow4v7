@@ -174,7 +174,7 @@ async function handleGetAdminAiContext(payload, sessionToken) {
     if (!row) return { success: true, data: null };
     return { success: true, data: buildMasterNested(row) };
   } catch (e) {
-    return { success: false, error: e.message };
+    return { success: false, error: 'Terjadi kesalahan saat mengambil data kandidat.' };
   }
 }
 
@@ -322,7 +322,7 @@ async function handleSubmitDataAsj(payload, sessionToken) {
     }
     return { success: true };
   } catch (e) {
-    return { success: false, message: 'Gagal simpan data: ' + e.message };
+    return { success: false, message: 'Gagal menyimpan data. Silakan coba lagi.' };
   }
 }
 
@@ -380,7 +380,7 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
     }
     return { success: true };
   } catch (e) {
-    return { success: false, error: e.message };
+    return { success: false, error: 'Terjadi kesalahan saat menyimpan tanda tangan.' };
   }
 }
 

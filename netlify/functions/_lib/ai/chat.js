@@ -428,7 +428,7 @@ async function handleGenerateWawancaraModel(payload, sessionToken) {
     console.error('[AI] generateWawancaraModel error:', e && e.message ? e.message : e);
     return {
       success: false,
-      error: 'Gagal membuat model wawancara: ' + (e && e.message ? e.message : 'AI sibuk'),
+      error: 'Gagal membuat model wawancara. Coba lagi beberapa saat ya!',
     };
   }
 }
@@ -472,7 +472,7 @@ async function handleSelesaikanWawancara(payload, sessionToken) {
     console.error('[AI] selesaikanWawancara error:', e && e.message ? e.message : e);
     return {
       success: false,
-      error: 'Gagal merangkum hasil: ' + (e && e.message ? e.message : 'AI sibuk'),
+      error: 'Gagal merangkum hasil wawancara. Coba lagi beberapa saat ya!',
     };
   }
 }
@@ -529,7 +529,7 @@ async function handleSimpanHasilWawancara(payload, sessionToken) {
     }
     return { success: true };
   } catch (e) {
-    return { success: false, message: 'Gagal simpan hasil wawancara: ' + e.message };
+    return { success: false, message: 'Gagal menyimpan hasil wawancara. Silakan coba lagi.' };
   }
 }
 
@@ -582,7 +582,7 @@ async function handleGetHasilWawancara(payload, sessionToken) {
       nama: String(row.nama_lengkap || (hasil.biodata && hasil.biodata.nama) || ''),
     };
   } catch (e) {
-    return { success: false, error: e.message };
+    return { success: false, error: 'Terjadi kesalahan. Silakan coba lagi.' };
   }
 }
 

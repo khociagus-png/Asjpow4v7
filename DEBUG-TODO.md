@@ -477,6 +477,9 @@
 - [x] `handleProcessAdminAIChat()`: requireRole admin ✅
 - [x] `handleProcessAiInterview()`: requireRole kandidat ✅
 - [x] Interview model per bidang SSW — 7 bidang + default ✅
+- [x] **FIXED**: 4 error handlers leaked `e.message` → replaced with generic messages ✅
+- [x] **FIXED**: `handleGetHasilWawancara` error now generic ✅
+- [x] Detailed audit: `docs/evals/2026-08-20-i-backend-ai-reaudit.md`
 
 ### I2. `ai/classify.js` (155 baris) — Document Classification ✅ RE-AUDITED (2026-08-20)
 
@@ -489,6 +492,7 @@
 - [x] requireRole on admin endpoints ✅
 - [x] buildRingkasData for AI context injection ✅
 - [x] submitDataAsj persistence with mail sync ✅
+- [x] **FIXED**: 3 error handlers leaked `e.message` → replaced with generic messages ✅
 
 ### I4. `ai/providers.js` (136 baris) — AI Providers ✅ RE-AUDITED (2026-08-20)
 
