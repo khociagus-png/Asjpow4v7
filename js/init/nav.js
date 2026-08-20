@@ -80,6 +80,11 @@ export function toggleMobileMenu() {
 }
 
 export function logoutApp() {
+  // Bersihkan auto-refresh timer (hindari interval jalan tanpa sesi)
+  if (window.AUTO_REFRESH_TIMER) {
+    clearInterval(window.AUTO_REFRESH_TIMER);
+    window.AUTO_REFRESH_TIMER = null;
+  }
   // Cabut session di SERVER (hapus row user_sessions) - best-effort, tidak
   // menunda logout: callAPI membaca localStorage secara sinkron saat
   // membangun body, jadi token sudah terambil sebelum clear di bawah.

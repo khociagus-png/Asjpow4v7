@@ -522,8 +522,8 @@ export async function exportKandidatCsv() {
     ];
     var lines = [head.join(',')];
     rows.forEach(function (c) {
-      var g = String(c.gender || '').toUpperCase();
-      var gender = g.includes('PEREMPUAN') ? 'P' : g.includes('LAKI') ? 'L' : c.gender || '';
+      var safeGender = String(c.gender || '').toUpperCase();
+      var gender = safeGender.includes('PEREMPUAN') ? 'P' : safeGender.includes('LAKI') ? 'L' : '';
       lines.push(
         [
           c.idKandidat,

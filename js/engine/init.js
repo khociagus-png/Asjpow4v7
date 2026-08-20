@@ -289,12 +289,7 @@ export function initApp(res, isSilent = false) {
       dlLoker.innerHTML = htmlDl;
     }
 
-    let dlKodeJob = document.getElementById('list-kode-job');
-    if (dlKodeJob) {
-      dlKodeJob.innerHTML = ALL_JOBS.map((j) => '<option value="' + window.esc(j.code) + '">').join(
-        '',
-      );
-    }
+    // dlKodeJob dihapus - sudah di-render lengkap di atas (dlLoker: code + pekerjaan)
 
     let dlLokasi = document.getElementById('list-lokasi');
     if (dlLokasi) {
