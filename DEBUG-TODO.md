@@ -21,14 +21,12 @@
 - [x] Session attachment: admin priority saat dual login — benar
 - [x] `sessionInvalid` handling: toast + clear + reload — benar
 - [x] `esc()` dan `escJs()`: tested via `xss-escape.test.js` — benar
-- [x] **Audit detail**: `docs/evals/2026-08-20-api-client-debug.md`
-
-### A2. `i18n.js` + `i18n/` — Terjemahan
-
-- [ ] Pastikan `tr()` fallback ke `id` kalau key belum diterjemahkan
-- [ ] Cek `LANG.id` & `LANG.jp` tidak ada key duplikat
-- [ ] Cek `trOption()` / `trOptionId()` handle undefined/null input
-- [ ] Jalankan `bun run check:i18n` — pastikan 0 missing keys
+- [x] **Audit detail**: `docs/evals/2026-08-20-api-client-debug.md`### A2. `i18n.js` + `i18n/` — Terjemahan ✅ DIVERIFIKASI (2026-08-20)
+- [x] `tr()` fallback ke key mentah — benar, tidak crash
+- [x] `LANG.id` & `LANG.jp` 1160 keys, parity perfect 1:1
+- [x] `trOption()` handle undefined/null + fuzzy matching (emoji, casing)
+- [x] `bun run check:i18n` — 0 missing keys, 15 domain
+- [x] **Audit detail**: `docs/evals/2026-08-20-i18n-debug.md`
 
 ### A3. `js/core/bridge.js` (468 baris) — ESM→Legacy Bridge
 
@@ -616,7 +614,7 @@
 ## Summary Counter
 
 | Domain | Total Parts | Status |
-| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 1/5 |
+| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 2/5 |
 | B. Frontend Core | 5 parts | ⏳ 0/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
@@ -628,7 +626,7 @@
 | J. Backend DB | 8 parts | ⏳ 0/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
-| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 1/92** |
+| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 2/92** |
 
 ---
 
