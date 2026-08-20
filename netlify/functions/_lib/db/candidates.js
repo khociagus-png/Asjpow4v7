@@ -107,7 +107,7 @@ async function fetchPagedAll(table, select) {
 // Kolom RINGAN untuk daftar admin — cukup untuk dedupe by WA + filter kata
 // kunci + urut updated_at (TIDAK membawa kolom berat seperti catatan/nik/email).
 const CAND_LIGHT_COLS =
-  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,updated_at,created_at,tanggal_daftar';
+  'id,id_kandidat,nama_lengkap,no_wa,status_kandidat,id_loker_pilihan,tahapan_seleksi,updated_at,created_at,tanggal_daftar';
 
 // Semua baris kandidat bentuk RINGAN (proyeksi) — paginasi penuh TANPA batas
 // 300 baris (admin list sebelumnya diam-diam terpotong saat >300 kandidat).
