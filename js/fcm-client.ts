@@ -1,4 +1,3 @@
-// @ts-nocheck
 // =============================================================================
 // fcm-client.js — Frontend Firebase Cloud Messaging & Service Worker
 // =============================================================================
@@ -31,10 +30,13 @@ export async function initFCM() {
       await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
     }
 
+    // @ts-expect-error JS→TS migration
     if (!window.firebase.apps.length) {
+      // @ts-expect-error JS→TS migration
       window.firebase.initializeApp(firebaseConfig);
     }
 
+    // @ts-expect-error JS→TS migration
     messaging = window.firebase.messaging();
 
     // Tangkap notifikasi saat aplikasi sedang terbuka (foreground)

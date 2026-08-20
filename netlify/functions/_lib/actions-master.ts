@@ -1,4 +1,4 @@
-// @ts-nocheck
+import { APPLY_WA_COLS } from './ai/cv.ts';
 import { normalizeWa, pick, supabaseJson, toText } from './db/client.ts';
 import { findCandidateByWaFiltered, findCandidates } from './db/candidates.ts';
 import { fetchMasterByWa } from './db/master.ts';
@@ -250,9 +250,9 @@ function buildAiOverflow(d) {
   const set = (obj, k, v) => {
     if (v !== undefined && v !== null && String(v).trim() !== '') obj[k] = String(v).trim();
   };
-  const out = {};
+  const out: Record<string, unknown> = {};
   // Kenalan (nama/hubungan punya kolom; pekerjaan/usia/alamat tidak)
-  const ken = {};
+  const ken: Record<string, unknown> = {};
   set(ken, 'nama_id', d.kenalanNama);
   set(ken, 'hubungan_id', d.kenalanHubungan);
   set(ken, 'pekerjaan_id', d.kenalanPekerjaan);
@@ -267,7 +267,7 @@ function buildAiOverflow(d) {
       const p = d.pendidikan[i] || {};
       const jur = p.jurusan !== undefined && p.jurusan !== null ? p.jurusan : p.jurusan_id;
       if (jur === undefined || jur === null || String(jur).trim() === '') continue;
-      const e = {};
+      const e: Record<string, unknown> = {};
       set(e, 'tingkat', p.tingkat);
       set(e, 'sekolah', p.nama_sekolah || p.namaSekolah || p.sekolah);
       set(e, 'jurusan_id', jur);
@@ -282,7 +282,7 @@ function buildAiOverflow(d) {
       const p = d.pekerjaan[i] || {};
       const gaji = p.gaji !== undefined && p.gaji !== null ? p.gaji : p.pendapatan;
       if (gaji === undefined || gaji === null || String(gaji).trim() === '') continue;
-      const e = {};
+      const e: Record<string, unknown> = {};
       set(e, 'perusahaan', p.nama_perusahaan || p.namaPt || p.perusahaan);
       set(e, 'gaji', gaji);
       pek.push({ slot: i, entry: e });
@@ -294,7 +294,7 @@ function buildAiOverflow(d) {
   if (Array.isArray(d.keluarga)) {
     for (let i = 0; i < 5; i++) {
       const p = d.keluarga[i] || {};
-      const e = {};
+      const e: Record<string, unknown> = {};
       set(e, 'nama', p.nama);
       set(e, 'umur', p.usia !== undefined && p.usia !== null ? p.usia : p.umur);
       set(e, 'usia', p.usia !== undefined && p.usia !== null ? p.usia : p.umur);
@@ -405,7 +405,7 @@ function mergeRiwayatArrays(columns, aiArr, keyFn) {
 // Buat objek nested (identitas/fisik/medis/...) dari baris master untuk
 // getDrafCvMaster & CV builder.
 function buildMasterNested(row) {
-  const v = (col, fallback) => {
+  const v = (col, fallback = '') => {
     const x = row[col];
     return x !== undefined && x !== null && x !== ''
       ? toText(x)
@@ -823,11 +823,17 @@ async function handleGetDrafCvMaster(payload, sessionToken) {
     const i = nested.identitas || {};
     return {
       identitas: {
+        // @ts-expect-error JS→TS migration
         nama_lengkap: i.nama_lengkap || '',
+        // @ts-expect-error JS→TS migration
         katakana: i.katakana || '',
+        // @ts-expect-error JS→TS migration
         gender: i.gender || '',
+        // @ts-expect-error JS→TS migration
         tempat_lahir: i.tempat_lahir || '',
+        // @ts-expect-error JS→TS migration
         tgl_lahir: i.tgl_lahir || '',
+        // @ts-expect-error JS→TS migration
         umur: i.umur || '',
       },
       limited: true,
@@ -859,7 +865,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     // Upload file (jika ada): nilai URL string (Cloudinary, dikirim langsung
     // dari browser) dipakai apa adanya; base64 (jalur lama) tetap fallback ke
     // Supabase Storage via resolveFileUrl.
-    const fileUrls = {};
+    const fileUrls: Record<string, any> = {};
     for (const [from, col] of Object.entries(MASTER_FILE_COLUMNS)) {
       if (d[from]) {
         const prefix = from.replace(/File$/, '').toUpperCase();
@@ -899,7 +905,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     // round-trip (sebelumnya diabaikan diam-diam juga).
     const pendidikanStr =
       typeof d.pendidikan === 'string' && d.pendidikan.trim() !== '' ? d.pendidikan.trim() : null;
-    const body = { no_wa: wa, updated_at: new Date().toISOString() };
+    const body: Record<string, any> = { no_wa: wa, updated_at: new Date().toISOString() };
     for (const [from, col] of Object.entries(MASTER_COLUMN_MAP)) {
       if (d[from] !== undefined && d[from] !== null && d[from] !== '') body[col] = String(d[from]);
     }

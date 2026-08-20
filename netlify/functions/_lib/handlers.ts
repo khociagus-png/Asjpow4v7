@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as session from './session.ts';
 import * as rateLimit from './rate-limit.ts';
 import { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } from './action-registry.ts';
@@ -148,6 +147,7 @@ async function handleAction(action, payload, sessionToken, meta) {
   // Lockout login: catat kegagalan (PIN/WA/password salah) sesuai REVIEW M3.
   if (out && out.success === false && !out.rateLimited && LOGIN_ACTIONS.has(action)) {
     for (const c of checks) {
+      // @ts-expect-error JS→TS migration
       if (c.opts.lockoutAfter) rateLimit.fail(c.key, c.opts);
     }
   }

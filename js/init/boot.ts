@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body listener byte-identik
 // dari 02_init.js — perilaku tidak berubah.
@@ -100,7 +99,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 document.addEventListener('click', function (e) {
+  // @ts-expect-error JS→TS migration
   if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+    // @ts-expect-error JS→TS migration
     e.target.classList.add('hidden');
   }
 });

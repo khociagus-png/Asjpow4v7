@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ASSETS, CURRENT_THEME } from './state.ts';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.ts';
 import { registerSeamAliases } from '../core/bridge.ts';

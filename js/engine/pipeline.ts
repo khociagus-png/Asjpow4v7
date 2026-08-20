@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DROPDOWNS } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →

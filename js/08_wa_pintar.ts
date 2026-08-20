@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   ALL_CANDIDATES,
   ALL_RIWAYAT_KANDIDAT,
@@ -268,6 +267,7 @@ export function renderRiwayatKandidat() {
     // Update Angka Lonceng Notifikasi
     if (badge) {
       badge.classList.remove('hidden');
+      // @ts-expect-error JS→TS migration
       badge.innerText = ALL_RIWAYAT_KANDIDAT.length;
       badge.classList.add('animate-bounce'); // Efek mental saat load
       setTimeout(() => badge.classList.remove('animate-bounce'), 2000);
@@ -275,6 +275,7 @@ export function renderRiwayatKandidat() {
 
     // Urutkan dari yang terbaru
     let sorted = ALL_RIWAYAT_KANDIDAT.slice().sort(
+      // @ts-expect-error JS→TS migration
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
     );
 

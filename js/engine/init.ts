@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { callAPI } from '../../api-client.ts';
 import { setSentryUser } from '../core/sentry.ts';
 import { tr } from '../../i18n.ts';
@@ -312,6 +311,7 @@ export function initApp(res, isSilent = false) {
   }
 
   if (localStorage.getItem('asj_admin_login') === 'sukses') {
+    // @ts-expect-error JS→TS migration
     window.isAdmin = true;
     window.currentAdminName = localStorage.getItem('asj_admin_name');
     setSentryUser({ role: 'admin', name: window.currentAdminName });

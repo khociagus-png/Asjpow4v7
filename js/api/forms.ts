@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_CANDIDATES, ALL_FORM, currentAdminName } from '../init/state.ts';
 import { renderFormInbox } from '../render/mail.ts';
 import { registerSeamAliases } from '../core/bridge.ts';

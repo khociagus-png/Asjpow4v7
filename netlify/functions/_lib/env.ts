@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 // env.js — akses env var untuk fungsi backend.
@@ -208,7 +207,7 @@ function debugFileStructure() {
     // Rincian per key: jumlah kemunculan, panjang nilai, apakah nilainya
     // mengandung pipe (tanda multi-kolom ikut tersalin). Nilai TIDAK pernah
     // ditampilkan.
-    const keyStats = {};
+    const keyStats: Record<string, any> = {};
     for (const line of rawLines) {
       const parsed = parseLine(line);
       if (!parsed) continue;
@@ -218,9 +217,10 @@ function debugFileStructure() {
       if (parsed.value.includes('|')) s.valueHasPipe = true;
       keyStats[parsed.key] = s;
     }
+    // @ts-expect-error JS→TS migration
     info.keyStats = Object.entries(keyStats).map(([k, s]) => ({ key: k, ...s }));
     // Klasifikasi baris "other" berdasarkan prefix (tanpa isi):
-    const prefixCount = {};
+    const prefixCount: Record<string, any> = {};
     for (const line of rawLines) {
       const trimmed = line.trim();
       if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
@@ -236,6 +236,7 @@ function debugFileStructure() {
               : 'lainnya';
       prefixCount[cls] = (prefixCount[cls] || 0) + 1;
     }
+    // @ts-expect-error JS→TS migration
     info.otherPrefix = prefixCount;
     // Bentuk baris "other": klasifikasi tiap field pipa (TANPA nilai).
     // Dipakai untuk mengenali layout tabel yang ditempel (mis. value-first).
@@ -249,7 +250,7 @@ function debugFileStructure() {
       if (t === '') return 'empty';
       return 'mixed(' + t.length + ')';
     }
-    const shapeCount = {};
+    const shapeCount: Record<string, any> = {};
     for (const line of rawLines) {
       const trimmed = line.trim();
       if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith(';')) continue;
@@ -258,6 +259,7 @@ function debugFileStructure() {
       const pat = fields.join(' | ');
       shapeCount[pat] = (shapeCount[pat] || 0) + 1;
     }
+    // @ts-expect-error JS→TS migration
     info.otherFieldShapes = Object.entries(shapeCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
@@ -280,6 +282,7 @@ function debugFileStructure() {
         if (!masked.includes(mask)) masked.push(mask);
       }
     }
+    // @ts-expect-error JS→TS migration
     info.otherMaskedKeys = masked.slice(0, 12);
     // Dump 30 baris pertama: NAMA KEY (atau bentuk baris) + nilai ter-mask
     // (3 karakter awal + 3 akhir + panjang). Nilai penuh TIDAK pernah tampil.
@@ -307,6 +310,7 @@ function debugFileStructure() {
         linesDump.push(i + 1 + ': [' + fields.map((f) => maskVal(f.trim())).join(' | ') + ']');
       }
     }
+    // @ts-expect-error JS→TS migration
     info.linesDump = linesDump;
     // Semua nama variabel (baris komentar), unik — hanya nama, bukan nilai.
     const allComments = [];
@@ -314,6 +318,7 @@ function debugFileStructure() {
       const m = line.match(/^\s*#+\s*(.+?)\s*$/);
       if (m) allComments.push(m[1]);
     }
+    // @ts-expect-error JS→TS migration
     info.comments = [...new Set(allComments)];
   } catch {
     /* file tidak ada / tidak terbaca */

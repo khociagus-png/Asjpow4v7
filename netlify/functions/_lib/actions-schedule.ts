@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabaseJson, toText } from './db/client.ts';
 import { requireRole } from './actions-auth.ts';
 // actions-schedule.js — jadwal (database_schedule) & tugas (database_tugas).
@@ -124,6 +123,7 @@ async function handleSetTugasStatus(payload, sessionToken) {
       return { success: false, error: 'Tugas tidak ditemukan.' };
     }
     const body = { status: st, updated_at: new Date().toISOString() };
+    // @ts-expect-error JS→TS migration
     if (st === 'SELESAI') body.waktu_selesai = new Date().toISOString();
     await supabaseJson('PATCH', 'database_tugas', {
       query: { id: 'eq.' + row.id },

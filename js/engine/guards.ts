@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tr } from '../../i18n.ts';
 import { showToast } from '../init/util.ts';
 import { ALL_FORM, PREV_MAIL_COUNT } from '../init/state.ts';
@@ -59,6 +58,7 @@ export function updateMailBadge() {
   let notifBadge = document.getElementById('admin-notif-badge');
   if (notifBadge) {
     if (pendingMails > 0) {
+      // @ts-expect-error JS→TS migration
       notifBadge.innerText = pendingMails;
       notifBadge.classList.remove('hidden');
     } else {

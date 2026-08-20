@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { normalizeWa, pick, supabaseJson } from '../db/client.ts';
 import { requireRole } from '../actions-auth.ts';
 import { buildRingkasData, findMasterByWa, APPLY_WA_COLS } from './cv.ts';
@@ -568,7 +567,7 @@ async function handleGetHasilWawancara(payload, sessionToken) {
         normalizeWa(String(r.wa || '')) === wa && String(r.submitted_via || '') === 'interview',
     );
     if (!row) return { success: true, hasil: null };
-    let hasil = {};
+    let hasil: Record<string, any> = {};
     try {
       hasil = JSON.parse(row.ai_data_json || '{}');
     } catch (e) {

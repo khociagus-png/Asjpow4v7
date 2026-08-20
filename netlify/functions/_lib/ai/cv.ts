@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { normalizeWa, pick, supabaseJson } from '../db/client.ts';
 import { requireRole } from '../actions-auth.ts';
 import * as buildMasterNested from '../actions-master.ts';
@@ -172,6 +171,7 @@ async function handleGetAdminAiContext(payload, sessionToken) {
       if (cand) row = await findMasterByWa(String(cand.no_wa || ''));
     }
     if (!row) return { success: true, data: null };
+    // @ts-expect-error JS→TS migration
     return { success: true, data: buildMasterNested(row) };
   } catch (e) {
     return { success: false, error: 'Terjadi kesalahan saat mengambil data kandidat.' };
@@ -181,6 +181,7 @@ async function handleGetAdminAiContext(payload, sessionToken) {
 async function handleBuildAdminAiCandidateSummary(payload, sessionToken) {
   const ctx = await handleGetAdminAiContext(payload, sessionToken);
   if (!ctx.success) return ctx;
+  // @ts-expect-error JS→TS migration
   const data = ctx.data;
   const summary = data
     ? data.identitas.nama_lengkap +
@@ -281,6 +282,7 @@ async function handleSubmitDataAsj(payload, sessionToken) {
               ? JSON.parse(prevRaw)
               : null;
           if (prev && typeof prev === 'object') {
+            // @ts-expect-error JS→TS migration
             aiOut = {};
             for (const k of Object.keys(prev)) {
               if (!AI_MANAGED_KEYS.has(k)) aiOut[k] = prev[k];

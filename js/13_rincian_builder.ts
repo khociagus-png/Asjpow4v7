@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { registerSeamAliases } from './core/bridge.ts';
 // ESM (Fase 3 langkah 12): modul ES — alias window.* sudah ada di bawah
 // (openRincianBuilder/rbSimpan/dll utk HTML onclick & api/jobs.js
@@ -402,6 +401,7 @@ export function rbSeedFromText(text) {
       var v = String(x).trim();
       if (!v) return;
       if (existing.indexOf(v.toUpperCase()) < 0) {
+        // @ts-expect-error JS→TS migration
         rbEl('rb-' + sec).appendChild(rbChipEl(sec, v));
       }
     });

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_CANDIDATES, currentKandidatWa, isAdmin } from './init/state.ts';
 import { ensureAllCandidates } from './api/candidates.ts';
 import { registerSeamAliases } from './core/bridge.ts';
@@ -109,7 +108,7 @@ export async function prosesBukaRirekisho(waTarget) {
 
 export function renderCVAjaib(d, fotoUrl, waTarget) {
   // 1. TARIK MEMORI JSON AI JEKLIN
-  let ai = {};
+  let ai: Record<string, any> = {};
   try {
     if (d.AIDATAJSON && d.AIDATAJSON !== '-') ai = JSON.parse(d.AIDATAJSON);
   } catch (e) {}
@@ -148,6 +147,7 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
         .replace(/[^a-z0-9]/g, ''),
   };
   const getArr = (key) =>
+    // @ts-expect-error JS→TS migration
     window.mergeArrRiwayat(window.getPath(d, key), window.getPath(ai, key), keyOf[key]);
   let eduList = getArr('pendidikan');
   let jobList = getArr('pekerjaan');
@@ -157,6 +157,7 @@ export function renderCVAjaib(d, fotoUrl, waTarget) {
   let tglFormat = '-';
   if (tglAsli !== '-') {
     let dt = new Date(tglAsli);
+    // @ts-expect-error JS→TS migration
     if (!isNaN(dt)) {
       tglFormat =
         dt.getFullYear() +

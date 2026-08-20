@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ==========================================
 // HELPERS CV RIREKISHO (pure logic — tanpa DOM)
 // ==========================================
@@ -99,6 +98,7 @@ export function fmtMonthYearJp(str) {
   let m = s.match(/^(\d{4})[-/](\d{1,2})/);
   if (m) return m[1] + '年' + parseInt(m[2], 10) + '月';
   let dt = new Date(s);
+  // @ts-expect-error JS→TS migration
   if (isNaN(dt)) return s;
   return dt.getFullYear() + '年' + (dt.getMonth() + 1) + '月';
 }

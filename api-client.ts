@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ============================================================
 // api-client.js — Bridge ke Netlify Functions + Supabase
 // ============================================================
@@ -235,7 +234,7 @@ export async function callAPI(action, payload) {
   }
 
   const url = NETLIFY_API_BASE + '/' + funcName;
-  const body = { action: action, payload: payload };
+  const body: Record<string, unknown> = { action: action, payload: payload };
 
   if (action === 'logout') {
     // Logout dipakai admin DAN kandidat - kirim token yang sedang aktif

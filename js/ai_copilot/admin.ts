@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { currentAdminName, isAdmin } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
@@ -45,7 +44,7 @@ export function tutupAdminAi() {
   if (modalClose) modalClose.classList.add('hidden');
 }
 
-export async function kirimPesanAdminAi(event) {
+export async function kirimPesanAdminAi(event?: any) {
   if (event && event.type === 'keypress' && event.key !== 'Enter') return;
   const input = document.getElementById('admin-ai-input');
   const msg = input.value.trim();
@@ -166,6 +165,7 @@ export function simpanKandidatDariAi() {
   // Transfer to the main upload modal for final file attachments  var elKNama = document.getElementById('k-nama');
   var elKWa = document.getElementById('k-wa');
   var elKLoker = document.getElementById('k-loker');
+  // @ts-expect-error JS→TS migration
   if (elKNama) elKNama.value = nama;
   if (elKWa) elKWa.value = wa;
   if (elKLoker) elKLoker.value = loker;

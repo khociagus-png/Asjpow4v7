@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_DB_JOBS, ALL_JOBS, currentAdminName } from '../init/state.ts';
 import { renderAdminFull } from '../render/admin.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
@@ -93,9 +92,12 @@ export async function downscaleImageFile(file, maxWidth, quality) {
       const i = new Image();
       i.onload = () => resolve(i);
       i.onerror = () => reject(new Error('decode fail'));
+      // @ts-expect-error JS→TS migration
       i.src = dataUrl;
     });
+    // @ts-expect-error JS→TS migration
     let w = img.width,
+      // @ts-expect-error JS→TS migration
       h = img.height;
     const MAX = maxWidth || 800;
     if (w > MAX) {
@@ -105,12 +107,15 @@ export async function downscaleImageFile(file, maxWidth, quality) {
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
+    // @ts-expect-error JS→TS migration
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, 'image/jpeg', quality || 0.8),
     );
+    // @ts-expect-error JS→TS migration
     if (!blob || blob.size >= file.size) return file; // hasil tak lebih kecil → kirim asli
     const base = String(file.name || 'image').replace(/\.[^/.]+$/, '') || 'image';
+    // @ts-expect-error JS→TS migration
     return new File([blob], base + '.jpg', { type: 'image/jpeg' });
   } catch (e) {
     return file;
@@ -120,15 +125,16 @@ export async function downscaleImageFile(file, maxWidth, quality) {
 export async function uploadFilesDirectly(filesObj, folder) {
   // Downscale dulu (foto/pamflet → max 800px jpeg) supaya byte di Cloudinary
   // kecil; non-gambar dibiarkan utuh oleh downscaleImageFile.
-  const files = {};
+  const files: Record<string, any> = {};
   for (const k of Object.keys(filesObj))
     files[k] = filesObj[k] ? await downscaleImageFile(filesObj[k], 800, 0.8) : null;
   const toUpload = Object.keys(files).filter((k) => files[k]);
   if (toUpload.length === 0) return {};
   // Upload LANGSUNG ke Cloudinary — backend hanya menerima string URL hasil
   // upload (tidak ada lagi getUploadUrls / PUT ke Supabase Storage).
-  const uploadedUrls = {};
+  const uploadedUrls: Record<string, any> = {};
   for (const key of toUpload) {
+    // @ts-expect-error JS→TS migration
     uploadedUrls[key] = await uploadToCloudinary(files[key]);
   }
   return uploadedUrls;
@@ -171,7 +177,7 @@ export async function submitFormAdmin(e) {
   }
 
   try {
-    var filesToUpload = {};
+    var filesToUpload: Record<string, any> = {};
     if (document.getElementById('input-template').files[0])
       filesToUpload.formatCv = document.getElementById('input-template').files[0];
     if (document.getElementById('input-pamflet').files[0])
@@ -294,14 +300,14 @@ export async function submitEditFullLoker(e) {
   }
 
   try {
-    var filesToUpload = {};
+    var filesToUpload: Record<string, any> = {};
     if (document.getElementById('ef-template').files[0])
       filesToUpload.formatCv = document.getElementById('ef-template').files[0];
     if (document.getElementById('ef-pamflet').files[0])
       filesToUpload.pamflet = document.getElementById('ef-pamflet').files[0];
 
     var jobCode = document.getElementById('ef-code').value;
-    var uploadedUrls = {};
+    var uploadedUrls: Record<string, any> = {};
     if (Object.keys(filesToUpload).length > 0) {
       var folderName = 'jobs/' + jobCode;
       uploadedUrls = await uploadFilesDirectly(filesToUpload, folderName);

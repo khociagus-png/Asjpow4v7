@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { handleAction } from './handlers.ts';
 // netlify-wrapper.js — factory handler Netlify standar.
 //
@@ -16,7 +15,7 @@ function clientIp(event) {
 
 function makeHandler() {
   return async (event) => {
-    let body = {};
+    let body: Record<string, any> = {};
     try {
       body = JSON.parse(event.body || '{}');
     } catch {

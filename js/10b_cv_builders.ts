@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { registerSeamAliases } from './core/bridge.ts';
 // 10b. PEMBANGUN SECTION CV RIREKISHO (BAGIAN MURNI HTML)
 // Dipisah dari renderCVAjaib (10_cv_rirekisho.js) saat god-object refactor.

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import bcrypt from 'bcryptjs';
 import { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client.ts';
 import { findJobByCodeFiltered, findJobs } from './db/jobs.ts';
@@ -46,7 +45,7 @@ const PUBLIC_PREFILL_FIELDS = new Set([
 // true jika session valid: admin (bebas) ATAU kandidat pemilik `wa` tsb.
 // Potong objek kandidat (hasil mapCandidate) hanya ke field prefill aman.
 function pickPrefill(data) {
-  const safe = {};
+  const safe: Record<string, any> = {};
   for (const k of Object.keys(data || {})) {
     if (PUBLIC_PREFILL_FIELDS.has(k)) safe[k] = data[k];
   }
@@ -63,7 +62,7 @@ async function handleGetUploadUrls(payload, sessionToken) {
   const files = Array.isArray(body.files) ? body.files : [];
   const folder = String(body.folder || 'misc').replace(/^\/+|\/+$/g, '');
   if (files.length === 0) return { success: false, error: 'Tidak ada file untuk diupload.' };
-  const urls = {};
+  const urls: Record<string, any> = {};
   try {
     for (const f of files) {
       const key = String(f.key || '').trim();
@@ -167,7 +166,7 @@ async function handleCekDataPelamar(payload) {
     const bestJft = pickFirstNonEmpty(['jft', 'jft_url']);
     const bestSsw = pickFirstNonEmpty(['ssw', 'ssw_url']);
 
-    const extraFilesMap = {};
+    const extraFilesMap: Record<string, any> = {};
     myRows.forEach((r) => {
       const ket = toText(pick(r, ['keterangan'])) || '';
       ket.split(';').forEach((p) => {
@@ -306,7 +305,7 @@ async function handleSubmitApply(payload) {
     try {
       const mRow = await findMasterByWa(wa);
       if (mRow && mRow.id !== undefined) {
-        const masterPatch = {};
+        const masterPatch: Record<string, any> = {};
         (d.extraFiles || []).forEach((x) => {
           const label = String((x && x.name) || '')
             .trim()
@@ -470,7 +469,7 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
     const uploaded = [];
 
     const files = Array.isArray(d.files) ? d.files : [];
-    const fileUrls = {};
+    const fileUrls: Record<string, any> = {};
     for (const f of files) {
       if (!f) continue;
       const label = String(f.label || '').toUpperCase();

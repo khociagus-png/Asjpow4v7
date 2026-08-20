@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { env, debugFileEnvKeys, debugFileStructure } from './env.ts';
 import { findJobs } from './db/jobs.ts';
 import { findCandidates } from './db/candidates.ts';
@@ -24,7 +23,7 @@ async function handleGetAppConfig(sessionToken) {
   // Tidak ada halaman publik yang memanggilnya; frontend mengirim token admin.
   const guard = requireAdmin(sessionToken);
   if (guard.error) return guard.error;
-  const diag = {
+  const diag: Record<string, any> = {
     success: true,
     backend: 'netlify-functions-rebuild',
     supabaseConfigured: hasBackend(),
@@ -49,7 +48,7 @@ async function handleGetAppConfig(sessionToken) {
     const names = tablesFromSchema(spec);
     diag.tables.all = names;
     // Kolom per tabel (hanya NAMA kolom — tanpa data).
-    const columns = {};
+    const columns: Record<string, any> = {};
     for (const name of names) {
       columns[name] = columnsFromSchema(spec, name);
     }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script share.html dipindah ke
 // js/pages/share.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline
@@ -87,7 +86,7 @@ let currentLang = localStorage.getItem('asj_lang') === 'jp' ? 'jp' : 'id';
 let allCandidates = [];
 let currentJob = null;
 let selectedIds = new Set();
-let selectedNames = {};
+let selectedNames: Record<string, any> = {};
 
 export function toggleLang() {
   currentLang = currentLang === 'id' ? 'jp' : 'id';
@@ -161,6 +160,7 @@ export function toggleSelection(id, name) {
 function updateSelectionBar() {
   const bar = document.getElementById('selection-bar');
   const count = document.getElementById('selection-count');
+  // @ts-expect-error JS→TS migration
   count.innerText = selectedIds.size;
   if (selectedIds.size > 0) {
     bar.classList.remove('translate-y-full');
@@ -175,6 +175,7 @@ export function submitSelection() {
   let msg = l.wa_greet + ' *' + currentJob.code + ' - ' + currentJob.name + '*:\n\n';
   let i = 1;
   for (let id of selectedIds) {
+    // @ts-expect-error JS→TS migration
     msg += i + '. ' + selectedNames[id] + ' (ID: ' + id + ')\n';
     i++;
   }
@@ -219,10 +220,12 @@ function renderExcelKeFrame(frame, url) {
       return res.arrayBuffer();
     })
     .then(function (buf) {
+      // @ts-expect-error JS→TS migration
       var wb = window.XLSX.read(buf, { type: 'array' });
       if (!wb || !wb.SheetNames || !wb.SheetNames.length) throw new Error('no sheet');
       var sheet = wb.Sheets[wb.SheetNames[0]];
       if (!sheet) throw new Error('empty sheet');
+      // @ts-expect-error JS→TS migration
       var html = window.XLSX.utils.sheet_to_html(sheet);
       var nama = decodeURIComponent(String(url).split('/').pop() || 'spreadsheet');
       var doc =
@@ -254,6 +257,7 @@ function renderDocxKeFrame(frame, url) {
       return res.arrayBuffer();
     })
     .then(function (buf) {
+      // @ts-expect-error JS→TS migration
       return window.mammoth.convertToHtml({ arrayBuffer: buf });
     })
     .then(function (result) {
@@ -292,6 +296,7 @@ function renderPptxKeDiv(host, url) {
     .then(function (buf) {
       host.classList.remove('hidden');
       host.innerHTML = '';
+      // @ts-expect-error JS→TS migration
       var p = window.pptxPreview.init(host, { width: 960, height: 540 });
       p.preview(buf);
       return true;

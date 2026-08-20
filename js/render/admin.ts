@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tr } from '../../i18n.ts';
 import { safeSet } from '../init/util.ts';
 import {
@@ -77,6 +76,7 @@ export function renderAdminFull() {
   safeSet('dash-admin-name', currentAdminName);
   // FIX 2026-08-12: renderReport() dihapus — renderer Report Log dihapus total (migrasi 017) tapi call site-nya tertinggal,
   // menyebabkan ReferenceError "renderReport is not defined" di tiap render dashboard admin.
+  // @ts-expect-error JS→TS migration
   renderAdmin();
   renderDbFilters();
   filterDbJob();
@@ -196,7 +196,7 @@ export function filterDbJob() {
     return matchSearch && matchBidang && matchTahapan;
   });
   // Pre-compute candidate count per job code (avoid O(n²) filter in sort)
-  var _candCountMap = {};
+  var _candCountMap: Record<string, any> = {};
   ALL_CANDIDATES.forEach(function (c) {
     _candCountMap[c.idLoker] = (_candCountMap[c.idLoker] || 0) + 1;
   });

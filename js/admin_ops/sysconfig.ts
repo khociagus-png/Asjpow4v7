@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DROPDOWNS, currentAdminName } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →

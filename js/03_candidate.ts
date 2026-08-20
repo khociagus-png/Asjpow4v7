@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   ACTIVE_PEMBERKASAN_NAMA,
   ACTIVE_PEMBERKASAN_WA,
@@ -351,6 +350,7 @@ export function compressImage(file, callback) {
     img.onerror = function () {
       callback(String(dataUrl || '').split(',')[1] || '');
     };
+    // @ts-expect-error JS→TS migration
     img.src = dataUrl;
   };
   reader.readAsDataURL(file);
@@ -393,6 +393,7 @@ export function bacaFileBase64(inputEl, label) {
           done({
             name: file.name,
             mimeType: file.type,
+            // @ts-expect-error JS→TS migration
             data: e.target.result.split(',')[1],
             label: label,
             seq: '1',
@@ -671,6 +672,7 @@ export async function prosesUploadPemberkasan(tahap) {
 
   btn.innerHTML =
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' +
+    // @ts-expect-error JS→TS migration
     window.tr('ui.uploading_files').replace('{n}', filesToUpload.length);
 
   // Upload tiap berkas ke Cloudinary secara SEKUENSIAL dengan retry
@@ -721,6 +723,7 @@ export async function prosesUploadPemberkasan(tahap) {
   btn.disabled = false;
 
   window.showToast(
+    // @ts-expect-error JS→TS migration
     window.tr('ui.toast_uploaded_n').replace('{n}', successCount) +
       window.tr('ui.toast_docs_exclaim'),
     'success',

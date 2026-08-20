@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_CANDIDATES, ALL_DB_JOBS } from '../init/state.ts';
 import { renderAdminFull } from '../render/admin.ts';
 import { ensureAllCandidates } from '../api/candidates.ts';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_CANDIDATES, currentKandidatName, currentKandidatWa } from '../init/state.ts';
 import { ensureAllCandidates } from '../api/candidates.ts';
 import { registerSeamAliases } from '../core/bridge.ts';

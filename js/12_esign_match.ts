@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_CANDIDATES, currentKandidatWa, isAdmin, isKandidat } from './init/state.ts';
 import { ensureAllCandidates, buatQrDataUrl } from './api/candidates.ts';
 import { registerSeamAliases } from './core/bridge.ts';

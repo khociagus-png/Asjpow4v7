@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_JOBS, ASSETS, CURRENT_THEME, isAdmin } from './init/state.ts';
 import { renderPublicFilterUI, renderPublicFiltered } from './render/public.ts';
 import { renderAdminFull } from './render/admin.ts';
@@ -180,7 +179,7 @@ export function renderRincianSections(sections) {
   // Kelompokkan section: TAHAPAN full-width, lalu INCLUDE+EXCLUDE dan
   // BENEFIT+PERSYARATAN saling berdampingan (grid 2 kolom) supaya tampilan
   // popup Detail proporsional & tidak timpang (kiri-kanan seimbang).
-  var byType = {};
+  var byType: Record<string, any> = {};
   for (var i = 0; i < sections.length; i++) {
     var t = sections[i].type;
     if (t === 'TAHAPAN_PEMBAYARAN') t = 'TAHAPAN';

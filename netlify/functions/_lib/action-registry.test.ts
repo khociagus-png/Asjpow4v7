@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ==========================================
 // TESTS: action-registry — kontrak action backend.
 // Registry (action-registry.js) adalah SATU-SATUNYA sumber kebenaran nama
@@ -99,6 +98,7 @@ describe('kontrak frontend → registry', () => {
   });
 
   it('setiap callAPI frontend ADA di registry backend', () => {
+    // @ts-expect-error JS→TS migration
     const missing = front.filter((a) => !(a in ACTION_HANDLERS));
     expect(
       missing,

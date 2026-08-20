@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script apply-full.html dipindah
 // ke js/pages/apply_full.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline
@@ -124,7 +123,7 @@ function cekRiwayat() {
       // Dedupe per kode job — baris duplikat di mail tidak boleh
       // membuat kode yang sama muncul berkali-kali di peringatan.
       var lulusLain = [];
-      var seenWarnCode = {};
+      var seenWarnCode: Record<string, any> = {};
       ((res && res.applications) || []).forEach(function (a) {
         if (
           a &&
@@ -367,9 +366,12 @@ async function downscaleImageFile(file, maxWidth, quality) {
       const i = new Image();
       i.onload = () => resolve(i);
       i.onerror = () => reject(new Error('decode fail'));
+      // @ts-expect-error JS→TS migration
       i.src = dataUrl;
     });
+    // @ts-expect-error JS→TS migration
     let w = img.width,
+      // @ts-expect-error JS→TS migration
       h = img.height;
     const MAX = maxWidth || 800;
     if (w > MAX) {
@@ -379,12 +381,15 @@ async function downscaleImageFile(file, maxWidth, quality) {
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
+    // @ts-expect-error JS→TS migration
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
     const blob = await new Promise((resolve) =>
       canvas.toBlob(resolve, 'image/jpeg', quality || 0.8),
     );
+    // @ts-expect-error JS→TS migration
     if (!blob || blob.size >= file.size) return file; // hasil tak lebih kecil → kirim asli
     const base = String(file.name || 'image').replace(/\.[^/.]+$/, '') || 'image';
+    // @ts-expect-error JS→TS migration
     return new File([blob], base + '.jpg', { type: 'image/jpeg' });
   } catch (e) {
     return file;
@@ -394,7 +399,7 @@ async function downscaleImageFile(file, maxWidth, quality) {
 async function uploadFilesDirectly(filesObj, folder) {
   // Downscale dulu (foto → max 800px jpeg) supaya byte di Cloudinary kecil;
   // non-gambar (cv/jft/ssw pdf) dibiarkan utuh oleh downscaleImageFile.
-  const files = {};
+  const files: Record<string, any> = {};
   for (const k of Object.keys(filesObj))
     files[k] = filesObj[k] ? await downscaleImageFile(filesObj[k], 800, 0.8) : null;
   const toUpload = Object.keys(files).filter((k) => files[k]);
@@ -404,8 +409,9 @@ async function uploadFilesDirectly(filesObj, folder) {
   // upload (tidak ada lagi request getUploadUrls / PUT ke Supabase Storage).
   // Cloudinary memberi public_id unik per upload, jadi tidak ada risiko
   // menimpa file lama (dulu CV per loker butuh prefix JOB<code>_CV).
-  const uploadedUrls = {};
+  const uploadedUrls: Record<string, any> = {};
   for (const key of toUpload) {
+    // @ts-expect-error JS→TS migration
     uploadedUrls[key] = await uploadToCloudinary(files[key]);
   }
   return uploadedUrls;
@@ -483,7 +489,7 @@ export async function submitApply() {
   $('btnPrev').disabled = true;
 
   try {
-    const filesToUpload = {};
+    const filesToUpload: Record<string, any> = {};
     if ($('photo').files.length > 0) filesToUpload.photoFile = $('photo').files[0];
     if (!$('card-cv').classList.contains('hidden') && $('cv').files.length > 0)
       filesToUpload.cvFile = $('cv').files[0];
@@ -587,6 +593,7 @@ export async function submitApply() {
 window.onload = function () {
   // Logika murni model dokumen ada di /js/apply-docs.js (applyDocsPlan) —
   // di-unit-test supaya bug JFT/SSW tidak muncul diam-diam lagi.
+  // @ts-expect-error JS→TS migration
   const plan = window.applyDocsPlan(window.dynamicReqStr);
 
   // Kartu upload default hidden — tampilkan HANYA yang diminta model loker.
@@ -621,7 +628,9 @@ window.onload = function () {
   // 2. Jika pelamar dikirim dari Portal ASJ (sudah login), auto-fill datanya & panggil file lamanya!
   if ($('wa').value) {
     formatInputWA($('wa'));
+    // @ts-expect-error JS→TS migration
     $('wa').setAttribute('readonly', true); // Kunci WA biar tidak bisa dirubah
+    // @ts-expect-error JS→TS migration
     if ($('nama').value) $('nama').setAttribute('readonly', true); // Kunci NAMA
     cekRiwayat(); // Panggil radar pengecek ke Database!
   }

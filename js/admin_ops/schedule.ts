@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_SCHEDULES, limitJad } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
@@ -12,9 +11,11 @@ export function getStatusWaktu(waktuStr) {
   if (!waktuStr || waktuStr === '-')
     return { text: '-', color: 'text-slate-400', bg: 'bg-slate-800' };
   let t = new Date(waktuStr.replace(' ', 'T'));
+  // @ts-expect-error JS→TS migration
   if (isNaN(t)) return { text: waktuStr, color: 'text-slate-400', bg: 'bg-slate-800' };
 
   let now = new Date();
+  // @ts-expect-error JS→TS migration
   let diff = t - now;
   let diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
   let diffHours = diff / (1000 * 60 * 60);
@@ -35,9 +36,11 @@ export function renderDashboardAgenda() {
   var list = document.getElementById('dash-agenda-list');
   if (!list) return;
   var upcoming = ALL_SCHEDULES.filter((s) => {
+    // @ts-expect-error JS→TS migration
     let diff = new Date(s.waktu.replace(' ', 'T')) - new Date();
     return !isNaN(diff) && diff > -86400000;
   })
+    // @ts-expect-error JS→TS migration
     .sort((a, b) => new Date(a.waktu.replace(' ', 'T')) - new Date(b.waktu.replace(' ', 'T')))
     .slice(0, 5);
 

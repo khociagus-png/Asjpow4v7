@@ -1,4 +1,3 @@
-// @ts-nocheck
 // 6. SISTEM LOGIN & AUTHENTICATION
 // ==========================================
 // REFACTOR: seluruh alur auth kini async/await + try/catch/finally.
@@ -265,6 +264,7 @@ export async function prosesLoginPersonal() {
     // memulihkan sesi admin tanpa modal login selama tidak logout.
     if (res.refreshToken) localStorage.setItem('asj_admin_refresh', res.refreshToken);
     document.getElementById('modal-admin').classList.add('hidden');
+    // @ts-expect-error JS→TS migration
     window.isAdmin = true;
     window.currentAdminName = name;
     document.getElementById('nav-mode').classList.add('hidden');

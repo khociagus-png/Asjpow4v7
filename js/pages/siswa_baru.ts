@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script siswa-baru.html dipindah
 // ke js/pages/siswa_baru.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline (body
@@ -18,7 +17,7 @@ export function $(id) {
   return document.getElementById(id);
 }
 var chatHistory = [];
-var candidateData = {};
+var candidateData: Record<string, any> = {};
 var uploadedFiles = { ktp: null, kk: null, ijazah: null };
 var urlJeklin =
   'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png';
@@ -312,6 +311,7 @@ function downscaleScanImage(file, maxWidth, quality, callback) {
     callback({ data: '', name: file.name, mime: file.type || 'application/octet-stream' });
   };
   reader.onload = function (e) {
+    // @ts-expect-error JS→TS migration
     var asli = e.target.result.split(',')[1];
     if (
       !file.type ||
@@ -359,6 +359,7 @@ function downscaleScanImage(file, maxWidth, quality, callback) {
     img.onerror = function () {
       callback({ data: asli, name: file.name, mime: file.type || 'application/octet-stream' });
     };
+    // @ts-expect-error JS→TS migration
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
@@ -403,7 +404,7 @@ async function uploadFilesDirectlyBase64(filesObj, folder) {
   // Upload LANGSUNG ke Cloudinary: base64 diubah kembali jadi File, lalu
   // dikirim ke Cloudinary. Backend hanya menerima string URL hasil upload
   // (tidak ada lagi getUploadUrls / Supabase Storage).
-  var uploadedUrls = {};
+  var uploadedUrls: Record<string, any> = {};
   for (var i = 0; i < toUpload.length; i++) {
     var key = toUpload[i];
     var file = filesObj[key];
@@ -411,6 +412,7 @@ async function uploadFilesDirectlyBase64(filesObj, folder) {
     var f = new File([blob], file.name || key + '.jpg', {
       type: file.mime || 'application/octet-stream',
     });
+    // @ts-expect-error JS→TS migration
     uploadedUrls[key] = await uploadToCloudinary(f);
   }
   return uploadedUrls;

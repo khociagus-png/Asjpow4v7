@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script ai_form.html dipindah ke
 // js/pages/ai_form.js — sekarang ESM (Fase 3 langkah 13): diload type=module.
 // State (chatHistory, latestCandidateData, *Base64/*File, dll) PRIVATE modul;
@@ -40,7 +39,7 @@ function $(id) {
   return document.getElementById(id);
 }
 var chatHistory = [];
-var latestCandidateData = {};
+var latestCandidateData: Record<string, any> = {};
 var currentPhotoBase64 = '';
 var currentJftBase64 = '';
 var currentSswBase64 = '';
@@ -56,7 +55,7 @@ var urlLogo =
   'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png';
 var urlJeklin =
   'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png';
-var formContext = window.AI_FORM_CONTEXT || {};
+var formContext: Record<string, any> = window.AI_FORM_CONTEXT || {};
 var fieldPaths = {
   // 1. Identitas & Kontak
   f_nama: 'identitas.nama_lengkap',
@@ -215,7 +214,7 @@ function mergeCandidateData(current, incoming) {
   }
   if (incoming && typeof incoming === 'object') {
     var base = current && typeof current === 'object' && !Array.isArray(current) ? current : {};
-    var result = {};
+    var result: Record<string, any> = {};
     Object.keys(base).forEach(function (key) {
       result[key] = base[key];
     });
@@ -265,7 +264,7 @@ export function addArrayItem(type) {
   latestCandidateData =
     latestCandidateData && typeof latestCandidateData === 'object' ? latestCandidateData : {};
   if (!Array.isArray(latestCandidateData[type])) latestCandidateData[type] = [];
-  var item = {};
+  var item: Record<string, any> = {};
   arrayFields[type].forEach(function (definition) {
     item[definition[0]] = '';
   });
@@ -927,6 +926,7 @@ export function compressImage(event) {
   reader.readAsDataURL(file);
   reader.onload = function (e) {
     var img = new Image();
+    // @ts-expect-error JS→TS migration
     img.src = e.target.result;
     img.onload = function () {
       var canvas = document.createElement('canvas'),
@@ -963,6 +963,7 @@ function downscaleScanImage(file, maxWidth, quality, callback) {
     callback({ data: '', name: file.name, mime: file.type || 'application/octet-stream' });
   };
   reader.onload = function (e) {
+    // @ts-expect-error JS→TS migration
     var asli = e.target.result.split(',')[1];
     if (
       !file.type ||
@@ -1010,6 +1011,7 @@ function downscaleScanImage(file, maxWidth, quality, callback) {
     img.onerror = function () {
       callback({ data: asli, name: file.name, mime: file.type || 'application/octet-stream' });
     };
+    // @ts-expect-error JS→TS migration
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
@@ -1078,7 +1080,7 @@ async function uploadFilesDirectlyBase64(filesObj, folder) {
   // Upload LANGSUNG ke Cloudinary: base64 hasil downscaleScanImage diubah
   // kembali jadi File, lalu dikirim ke Cloudinary. Backend hanya menerima
   // string URL hasil upload (tidak ada lagi getUploadUrls / Supabase).
-  var uploadedUrls = {};
+  var uploadedUrls: Record<string, any> = {};
   for (var i = 0; i < toUpload.length; i++) {
     var key = toUpload[i];
     var file = filesObj[key];
@@ -1086,6 +1088,7 @@ async function uploadFilesDirectlyBase64(filesObj, folder) {
     var f = new File([blob], file.name || key + '.jpg', {
       type: file.mime || 'application/octet-stream',
     });
+    // @ts-expect-error JS→TS migration
     uploadedUrls[key] = await uploadToCloudinary(f);
   }
   return uploadedUrls;

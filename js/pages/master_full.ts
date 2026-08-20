@@ -1,4 +1,3 @@
-// @ts-nocheck
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script master-full.html dipindah
 // ke js/pages/master_full.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline
@@ -54,7 +53,7 @@ const formatDate = (ds) => {
   if (!ds) return '';
   try {
     let d = new Date(ds);
-    if (isNaN(d.getTime())) return ds;
+    if (isNaN(d.getTime() as number)) return ds;
     return d.toISOString().split('T')[0];
   } catch (e) {
     return ds;
@@ -639,39 +638,48 @@ export async function submitMaster(isDraft) {
     // hanya menerima string URL hasil upload (resolveFileUrl).
     let filePhoto =
       getEl('photo') && getEl('photo').files.length > 0
-        ? await uploadToCloudinary(getEl('photo').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('photo').files[0])
         : null;
     let fileJft =
       getEl('jft') && getEl('jft').files.length > 0
-        ? await uploadToCloudinary(getEl('jft').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('jft').files[0])
         : null;
     let fileSsw =
       getEl('ssw') && getEl('ssw').files.length > 0
-        ? await uploadToCloudinary(getEl('ssw').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('ssw').files[0])
         : null;
     let fileIjazahSd =
       getEl('ijazahSd') && getEl('ijazahSd').files.length > 0
-        ? await uploadToCloudinary(getEl('ijazahSd').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('ijazahSd').files[0])
         : null;
     let fileIjazahSmp =
       getEl('ijazahSmp') && getEl('ijazahSmp').files.length > 0
-        ? await uploadToCloudinary(getEl('ijazahSmp').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('ijazahSmp').files[0])
         : null;
     let fileIjazahSma =
       getEl('ijazahSma') && getEl('ijazahSma').files.length > 0
-        ? await uploadToCloudinary(getEl('ijazahSma').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('ijazahSma').files[0])
         : null;
     let fileUniv =
       getEl('univ') && getEl('univ').files.length > 0
-        ? await uploadToCloudinary(getEl('univ').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('univ').files[0])
         : null;
     let fileKtp =
       getEl('ktpFile') && getEl('ktpFile').files.length > 0
-        ? await uploadToCloudinary(getEl('ktpFile').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('ktpFile').files[0])
         : null;
     let fileKk =
       getEl('kk') && getEl('kk').files.length > 0
-        ? await uploadToCloudinary(getEl('kk').files[0])
+        ? // @ts-expect-error JS→TS migration
+          await uploadToCloudinary(getEl('kk').files[0])
         : null;
 
     const payload = {

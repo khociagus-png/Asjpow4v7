@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { env } from '../env.ts';
 import { normalizeWa } from '../../../../shared/wa-rules.ts';
 // db/client.js — klien REST Supabase (PostgREST) + normalisasi data.
@@ -33,8 +32,10 @@ async function supabaseJson(method, pathname, opts = {}) {
   const url = supabaseUrl();
   const key = supabaseKey();
   if (!url || !key) throw new Error('SUPABASE_URL / key belum dikonfigurasi');
+  // @ts-expect-error JS→TS migration
   const qs = opts.query
     ? '?' +
+      // @ts-expect-error JS→TS migration
       new URLSearchParams(Object.entries(opts.query).map(([k, v]) => [k, String(v)])).toString()
     : '';
   const res = await fetch(url.replace(/\/$/, '') + '/rest/v1/' + pathname + qs, {
@@ -43,8 +44,10 @@ async function supabaseJson(method, pathname, opts = {}) {
       apikey: key,
       Authorization: 'Bearer ' + key,
       'Content-Type': 'application/json',
+      // @ts-expect-error JS→TS migration
       ...(opts.headers || {}),
     },
+    // @ts-expect-error JS→TS migration
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
   if (!res.ok) {
@@ -60,6 +63,7 @@ async function supabaseJson(method, pathname, opts = {}) {
 // queryPaged (misc.js). supabaseJson biasa tidak bisa dipakai di sini (butuh
 // header Range/Prefer + baca Content-Range, bukan auto-JSON + throw).
 /** @param {string} table @param {string} [qs] @param {{ start?: number, end?: number }} [range] @returns {Promise<PagedResult>} */
+// @ts-expect-error JS→TS migration
 async function supabasePaged(table, qs, { start, end } = {}) {
   const url = supabaseUrl();
   const key = supabaseKey();

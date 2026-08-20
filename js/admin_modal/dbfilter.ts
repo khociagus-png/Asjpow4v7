@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DROPDOWNS, dbFilterBidang, dbFilterTahapan } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →

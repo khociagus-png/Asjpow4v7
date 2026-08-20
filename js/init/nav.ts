@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { AUTO_REFRESH_TIMER } from './state.ts';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
@@ -83,6 +82,7 @@ export function toggleMobileMenu() {
 export function logoutApp() {
   // Bersihkan auto-refresh timer (hindari interval jalan tanpa sesi)
   if (window.AUTO_REFRESH_TIMER) {
+    // @ts-expect-error JS→TS migration
     clearInterval(window.AUTO_REFRESH_TIMER);
     window.AUTO_REFRESH_TIMER = null;
   }
@@ -128,6 +128,7 @@ export function logoutApp() {
   if (mAd) mAd.classList.add('hidden');
   var mKa = document.getElementById('mobile-nav-kandidat');
   if (mKa) mKa.classList.add('hidden');
+  // @ts-expect-error JS→TS migration
   window.isAdmin = false;
   window.isKandidat = false;
   window.currentAdminName = '';

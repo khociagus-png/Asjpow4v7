@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { hasBackend, normalizeWa, pick, supabaseJson, toText } from './db/client.ts';
 import { findForms, findFormsByWa, mapForm } from './db/forms.ts';
 import { findCandidates, mapCandidate } from './db/candidates.ts';
@@ -40,7 +39,7 @@ const JOB_COLUMNS = {
 };
 
 function mapJobPayloadToRow(data) {
-  const row = {};
+  const row: Record<string, unknown> = {};
   for (const [from, to] of Object.entries(JOB_COLUMNS)) {
     if (data[from] !== undefined && data[from] !== null) row[to] = data[from];
   }
@@ -173,7 +172,7 @@ async function handleUpdateTahapanDbJob(payload, sessionToken) {
   if (guard.error) return guard.error;
   const [code, tahapan, status] = payload || [];
   if (!code) return { success: false, error: 'Kode loker tidak ditemukan.' };
-  const body = {};
+  const body: Record<string, unknown> = {};
   if (tahapan !== undefined && tahapan !== null) body.tahapan = tahapan;
   if (status !== undefined && status !== null) body.status = status;
   try {

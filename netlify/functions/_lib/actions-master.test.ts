@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ==========================================
 // TESTS: actions-master — kolom master yang TIDAK ada di tabel + penyimpanan
 // overflow ke ai_data_json. Latar: skema master_database_candidate (154 kolom)

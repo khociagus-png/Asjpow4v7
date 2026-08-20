@@ -1,4 +1,3 @@
-// @ts-nocheck
 import bcrypt from 'bcryptjs';
 import { env } from './env.ts';
 import { normalizeWa, isValidWaFormat } from '../../../shared/wa-rules.ts';
@@ -291,6 +290,7 @@ async function handleGantiPasswordKandidat(payload, sessionToken) {
         : String(stored || '') === lama;
     if (!okLama) return { success: false, error: 'Password lama salah.' };
     const body = { [colPass]: bcrypt.hashSync(baru, 10) };
+    // @ts-expect-error JS→TS migration
     if ('password_diubah' in row) body.password_diubah = true;
     await supabaseJson('PATCH', table, {
       query: { [colWa]: 'eq.' + row[colWa] },

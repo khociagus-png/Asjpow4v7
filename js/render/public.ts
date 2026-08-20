@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tr } from '../../i18n.ts';
 import { ALL_JOBS, CURRENT_THEME, currentPublicFilter, limitPub } from '../init/state.ts';
 import { renderAdmin } from './admin.ts';

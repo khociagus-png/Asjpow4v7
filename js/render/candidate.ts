@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tr } from '../../i18n.ts';
 import { ALL_CANDIDATES, ASSETS, limitKan } from '../init/state.ts';
 import { ensureAllCandidates } from '../api/candidates.ts';
@@ -105,8 +104,8 @@ loadColumnFilters();
 
 // Bangun daftar unik per kolom dropdown dari data kandidat + simpan ke cache.
 function buildColumnUniques() {
-  var jobs = {};
-  var stages = {};
+  var jobs: Record<string, any> = {};
+  var stages: Record<string, any> = {};
   (ALL_CANDIDATES || []).forEach(function (c) {
     var j = String(c.idLoker || '').trim();
     if (j && j !== '-') jobs[j] = 1;
@@ -239,6 +238,7 @@ export function onColumnFilterChange(colKey, value) {
   columnFilters[colKey] = value;
   saveColumnFilters();
   syncClearBtn();
+  // @ts-expect-error JS→TS migration
   debouncedFilterKandidat();
 }
 
@@ -739,6 +739,7 @@ function setupInfiniteScroll() {
     _kanObserver = new IntersectionObserver(
       function (entries) {
         if (entries[0].isIntersecting) {
+          // @ts-expect-error JS→TS migration
           window.limitKan += 25;
           window.filterKandidat();
         }
@@ -784,6 +785,7 @@ async function showMonthlyReport() {
         '</span>';
       html += '</div>';
       // Tahapan
+      // @ts-expect-error JS→TS migration
       const tahapEntries = Object.entries(r.tahapan).sort((a, b) => b[1] - a[1]);
       if (tahapEntries.length > 0) {
         html +=
@@ -802,6 +804,7 @@ async function showMonthlyReport() {
         html += '</div>';
       }
       // Status
+      // @ts-expect-error JS→TS migration
       const statEntries = Object.entries(r.status).sort((a, b) => b[1] - a[1]);
       if (statEntries.length > 0) {
         html +=
@@ -822,6 +825,7 @@ async function showMonthlyReport() {
       html += '</div>';
     }
     html += '</div>';
+    // @ts-expect-error JS→TS migration
     window.showToast(window.tr('admin.report_title'), 'info', 8000);
     // Tampilkan sebagai modal sederhana
     var existing = document.getElementById('modal-monthly-report');

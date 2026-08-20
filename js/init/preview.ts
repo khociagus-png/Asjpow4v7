@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { registerSeamAliases } from '../core/bridge.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
@@ -21,7 +20,7 @@ import { registerSeamAliases } from '../core/bridge.ts';
 // VENDOR_V) — update vendor tetap memicu cache invalidation. Gagal dimuat
 // -> return false -> pesan error + tombol unduh.
 var VENDOR_V = { xlsx: '7f749f81a4' }; // diisi bump-cache-versions.cjs
-var _vendorPromises = {};
+var _vendorPromises: Record<string, any> = {};
 export function muatVendorLib(nama) {
   var src = '/vendor/' + { xlsx: 'xlsx.full.min.js' }[nama] + '?v=' + (VENDOR_V[nama] || '');
   if (!_vendorPromises[nama]) {
@@ -52,10 +51,12 @@ export async function renderExcelKeFrame(frame, url) {
     var res = await fetch(url);
     if (!res || !res.ok) return false;
     var buf = await res.arrayBuffer();
+    // @ts-expect-error JS→TS migration
     var wb = window.XLSX.read(buf, { type: 'array' });
     if (!wb || !wb.SheetNames || !wb.SheetNames.length) return false;
     var sheet = wb.Sheets[wb.SheetNames[0]];
     if (!sheet) return false;
+    // @ts-expect-error JS→TS migration
     var html = window.XLSX.utils.sheet_to_html(sheet);
     var nama = decodeURIComponent(String(url).split('/').pop() || 'spreadsheet');
     var doc =

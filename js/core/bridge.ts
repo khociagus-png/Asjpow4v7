@@ -1,4 +1,3 @@
-// @ts-nocheck
 // =============================================================================
 // js/core/bridge.js — Bridge ESM → legacy (Fase 3 ESM migration)
 // -----------------------------------------------------------------------------
@@ -133,6 +132,7 @@ const SEAM_SOURCES = new Map();
 export function registerSeamAliases(aliases, opts = {}) {
   for (const [name, value] of Object.entries(aliases || {})) {
     const isFn = typeof value === 'function';
+    // @ts-expect-error JS→TS migration
     if (!isFn && !opts.allowNonFunction) {
       console.warn(
         `[bridge] registerSeamAliases: "${name}" bukan fungsi — dilewati. ` +
@@ -152,6 +152,7 @@ export function registerSeamAliases(aliases, opts = {}) {
         );
       }
     } else {
+      // @ts-expect-error JS→TS migration
       SEAM_SOURCES.set(name, opts.source || 'modul lain');
     }
     SEAM_ALIASES.set(name, value);

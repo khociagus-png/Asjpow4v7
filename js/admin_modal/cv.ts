@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   ALL_CANDIDATES,
   ALL_DB_JOBS,
@@ -101,6 +100,7 @@ export async function bukaDigitalCV(id) {
     let umurLive = '-';
     if (c.tglLahir && c.tglLahir !== '-' && c.tglLahir.trim() !== '') {
       let dob = new Date(c.tglLahir);
+      // @ts-expect-error JS→TS migration
       if (!isNaN(dob)) {
         let today = new Date();
         let age = today.getFullYear() - dob.getFullYear();
@@ -234,7 +234,9 @@ export async function bukaDigitalCV(id) {
         // alternatif (Drive), lalu tampilkan ikon no-foto.
         img.onerror = function () {
           var alt = window.getDirectDownloadUrl(c.pasPhoto);
+          // @ts-expect-error JS→TS migration
           if (alt && alt !== finalUrl && !img._fotoRetry) {
+            // @ts-expect-error JS→TS migration
             img._fotoRetry = true;
             img.src = alt;
           } else {
@@ -498,6 +500,7 @@ export function isiEditCepatCv(c) {
 export function toDateInputValue(tgl) {
   if (!tgl || tgl === '-' || String(tgl).trim() === '') return '';
   var d = new Date(tgl);
+  // @ts-expect-error JS→TS migration
   if (isNaN(d)) return '';
   var mm = String(d.getMonth() + 1).padStart(2, '0');
   var dd = String(d.getDate()).padStart(2, '0');
@@ -515,6 +518,7 @@ export async function simpanEditCepatCv() {
     window.showToast(window.tr('ui.toast_data_not_found'), 'error');
     return;
   }
+  // @ts-expect-error JS→TS migration
   var wa = window.normalizePhone(c.wa);
   if (!wa) {
     window.showToast(window.tr('ui.toast_data_not_found'), 'error');

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabaseJson, supabasePaged, pick, toText, findTable } from './client.ts';
 // db/misc.js — repo misc: admins, settings/assets, pengumuman, query paginated.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
@@ -12,6 +11,7 @@ async function queryPaged(table, { page = 1, pageSize = 50, q = '' } = {}) {
   if (q && q.trim()) {
     const needle = q.trim().replace(/'/g, "''");
     // PostgREST or= wajib dibungkus kurung, kalau tidak gagal (HTTP 400).
+    // @ts-expect-error JS→TS migration
     params.or = `(nama_lengkap.ilike.*${needle}*,no_wa.ilike.*${needle}*)`;
   }
   const qs = new URLSearchParams(params).toString();

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabaseJson, toText, pick, normalizeWa } from './client.ts';
 import { storageRequest, bucket } from '../storage.ts';
 import { fetchMasterLightByWa } from './master.ts';
@@ -127,7 +126,7 @@ async function attachBerkasBio(candidates) {
       // untuk data lama yang belum pernah ditulis ke pemberkasan_checklist.
       const sources = [pr, mr].filter(Boolean);
       if (sources.length) {
-        const berkas = {};
+        const berkas: Record<string, any> = {};
         for (const [key, cols] of BERKAS_COLUMNS) {
           let v = '';
           for (const src of sources) {
@@ -139,6 +138,7 @@ async function attachBerkasBio(candidates) {
             }
             if (v) break;
           }
+          // @ts-expect-error JS→TS migration
           berkas[key] = v && v !== '-' ? toText(v) : '';
         }
         c.berkas = berkas;
@@ -146,9 +146,10 @@ async function attachBerkasBio(candidates) {
         c.berkas = {};
       }
       if (mr) {
-        const bio = {};
+        const bio: Record<string, any> = {};
         for (const [key, cols] of BIO_COLUMNS) {
           const v = pick(mr, cols);
+          // @ts-expect-error JS→TS migration
           bio[key] = v && v !== '-' ? toText(v) : '';
         }
         c.bio = bio;

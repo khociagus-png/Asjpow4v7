@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { supabaseKey, supabaseUrl } from './db/client.ts';
 import { env } from './env.ts';
 // storage.js — helper Supabase Storage (upload base64, hapus varian lama,
@@ -19,8 +18,10 @@ async function storageRequest(method, pathname, opts = {}) {
     headers: {
       apikey: key,
       Authorization: 'Bearer ' + key,
+      // @ts-expect-error JS→TS migration
       ...(opts.headers || {}),
     },
+    // @ts-expect-error JS→TS migration
     body: opts.body,
   });
   if (!res.ok) {
@@ -142,6 +143,7 @@ async function uploadBase64(data, folder, fileName) {
   const path = String(folder).replace(/^\/+|\/+$/g, '') + '/' + cleanName;
   await storageRequest('POST', 'object/' + bucket() + '/' + path, {
     headers: {
+      // @ts-expect-error JS→TS migration
       'Content-Type': mimeFromName(cleanName),
       'x-upsert': 'true',
     },

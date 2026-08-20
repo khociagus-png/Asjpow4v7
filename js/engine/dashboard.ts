@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { tr } from '../../i18n.ts';
 import { ASSETS } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';

@@ -13,18 +13,18 @@
 // modul, jadi satu sumber kebenaran TIDAK PERNAH basi/desync.
 // js/init/* TIDAK dimuat halaman standalone — bridge cukup untuk bundel.
 // ==========================================
-export var ALL_JOBS = [];
-export var ALL_DB_JOBS = [];
-export var ALL_CANDIDATES = [];
+export var ALL_JOBS: Record<string, any>[] = [];
+export var ALL_DB_JOBS: Record<string, any>[] = [];
+export var ALL_CANDIDATES: Record<string, any>[] = [];
 export var ALL_CANDIDATES_TOTAL = 0; // phantom global lama — kini dideklarasikan resmi (dipakai pagination candidates.js + render admin)
-export var ALL_SCHEDULES = [];
-export var ALL_TUGAS = [];
-export var ALL_FORM = [];
-export var ALL_WA_TEMPLATES = [];
-export var ALL_RIWAYAT_KANDIDAT = [];
-export var ASSETS = {};
+export var ALL_SCHEDULES: Record<string, any>[] = [];
+export var ALL_TUGAS: Record<string, any>[] = [];
+export var ALL_FORM: Record<string, any>[] = [];
+export var ALL_WA_TEMPLATES: Record<string, any>[] = [];
+export var ALL_RIWAYAT_KANDIDAT: Record<string, any>[] = [];
+export var ASSETS: Record<string, any> = {};
 export var CURRENT_THEME = 'TOKYO';
-export var DROPDOWNS = {};
+export var DROPDOWNS: Record<string, any> = {};
 export var isAdmin = false;
 export var isKandidat = false;
 export var currentAdminName = '';

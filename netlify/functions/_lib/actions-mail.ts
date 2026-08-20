@@ -1,4 +1,3 @@
-// @ts-nocheck
 import bcrypt from 'bcryptjs';
 import { normalizeWa, pick, supabaseJson } from './db/client.ts';
 import { mapCandidate } from './db/candidates.ts';
@@ -39,6 +38,7 @@ async function handleFormStatus(rowIndex, status, reason) {
     }
     if (!f) return { success: false, error: 'Form tidak ditemukan.' };
     const body = { status };
+    // @ts-expect-error JS→TS migration
     if (reason !== null && reason !== undefined) body.keterangan = reason;
     await supabaseJson('PATCH', 'database_asj_form', {
       query: { id: 'eq.' + f.id },
@@ -93,7 +93,7 @@ async function syncCandidateDariForm(f, status) {
   const row = await findCandidateByWa(wa);
   if (status === 'LULUS') {
     const now = new Date().toISOString();
-    const base = {
+    const base: Record<string, any> = {
       nama_lengkap: String(f.nama_lengkap || ''),
       gender: String(f.gender || ''),
       usia: String(f.usia || ''),
@@ -133,6 +133,7 @@ async function syncCandidateDariForm(f, status) {
   } else if (status === 'GAGAL' && row && row.id !== undefined) {
     const upd = { status_kandidat: 'GAGAL', updated_at: new Date().toISOString() };
     if (codeJob && String(pick(row, ['id_loker_pilihan', 'id_loker']) || '') === codeJob) {
+      // @ts-expect-error JS→TS migration
       upd.id_loker_pilihan = null;
     }
     await supabaseJson('PATCH', 'database_candidate', {
@@ -275,6 +276,7 @@ async function syncBiodataKeMail(wa, nama, labels) {
       updated_at: new Date().toISOString(),
       feedback_berkas: appendFeedback(r.feedback_berkas, entry),
     };
+    // @ts-expect-error JS→TS migration
     if (isUpdate) body.status = 'UPDATE';
     await supabaseJson('PATCH', 'database_asj_form', {
       query: { id: 'eq.' + r.id },
@@ -333,7 +335,7 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
 
   for (const existing of targets) {
     // Baca dokumen lama dari keterangan baris ini, lalu gabung dengan yang baru.
-    const docs = {};
+    const docs: Record<string, any> = {};
     const raw = String((existing && existing.keterangan) || '');
     raw.split(';').forEach((chunk) => {
       const i = chunk.indexOf(':');
@@ -364,9 +366,13 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
       updated_at: new Date().toISOString(),
     };
     // Kolom utama kalau jenis dokumennya dikenali (foto/CV/JFT/SSW).
+    // @ts-expect-error JS→TS migration
     if (label === 'PAS_PHOTO' || label === 'PHOTO') body.pas_photo = String(url || '');
+    // @ts-expect-error JS→TS migration
     if (label === 'CV' || label === 'CV_REVISI') body.file_cv = String(url || '');
+    // @ts-expect-error JS→TS migration
     if (label === 'JFT') body.jft = String(url || '');
+    // @ts-expect-error JS→TS migration
     if (label === 'SSW') body.ssw = String(url || '');
     if (existing && existing.id !== undefined) {
       await supabaseJson('PATCH', 'database_asj_form', {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { callAPI } from '../../api-client.ts';
 import { tr } from '../../i18n.ts';
 import { showToast } from '../init/util.ts';

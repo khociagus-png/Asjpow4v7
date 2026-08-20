@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   ALL_CANDIDATES,
   ALL_CANDIDATES_TOTAL,
@@ -48,7 +47,7 @@ export function cariKandidatManual(query) {
     return;
   }
 
-  var seenWa = {};
+  var seenWa: Record<string, any> = {};
   var hasil = (ALL_CANDIDATES || [])
     .filter(function (c) {
       if (!c.wa || seenWa[c.wa]) return false;
@@ -671,6 +670,7 @@ export function bukaSuperEditKandidat(idKan) {
   let umur = '';
   if (c.tglLahir && c.tglLahir !== '-' && c.tglLahir.trim() !== '') {
     let dob = new Date(c.tglLahir);
+    // @ts-expect-error JS→TS migration
     if (!isNaN(dob)) {
       let today = new Date();
       let age = today.getFullYear() - dob.getFullYear();
@@ -678,6 +678,7 @@ export function bukaSuperEditKandidat(idKan) {
       if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
         age--;
       }
+      // @ts-expect-error JS→TS migration
       umur = age > 0 ? age : '';
     }
   }
@@ -853,7 +854,7 @@ export async function prosesUploadRevisi() {
 // QR di-generate LOKAL (vendor/qrcode-generator.min.js) — tanpa layanan eksternal
 // (api.qrserver.com) supaya offline/PWA tetap jalan dan 100% mandiri.
 // Kembalikan data URL gambar QR dari teks; '' bila lib tidak termuat.
-export function buatQrDataUrl(text, targetPx) {
+export function buatQrDataUrl(text: string, targetPx?: number) {
   if (typeof window.qrcode !== 'function' || !text) return '';
   try {
     var qr = window.qrcode(0, 'M');

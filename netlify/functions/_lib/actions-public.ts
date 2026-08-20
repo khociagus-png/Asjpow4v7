@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { findJobs, mapJob } from './db/jobs.ts';
 import { findForms, findFormsByWa, findFormsLight, mapForm } from './db/forms.ts';
 import { attachBerkasBio } from './db/berkas.ts';
@@ -195,7 +194,9 @@ function saringKandidatUnik(uniq, q) {
 const CAND_CACHE_TTL_MS = 25_000;
 
 async function loadCandidatesUnik(q, opts = {}) {
+  // @ts-expect-error JS→TS migration
   const page = Number(opts.page) || 1;
+  // @ts-expect-error JS→TS migration
   const pageSize = Number(opts.pageSize) || 50;
   const cacheKey = 'cand:' + String(q || '') + '|p' + page + '|s' + pageSize;
   const cached = cacheGet(cacheKey);
@@ -218,7 +219,10 @@ async function loadCandidatesUnik(q, opts = {}) {
       // Semua id halaman harus ter-resolve ke baris penuh; kalau ada yang
       // tidak (data legacy tanpa id) → fallback scan penuh biar aman.
       if (slice.every((r) => byId.has(String(r.id)))) {
-        const result = { rows: slice.map((r) => byId.get(String(r.id))), total };
+        const result: Record<string, any> = {
+          rows: slice.map((r) => byId.get(String(r.id))),
+          total,
+        };
         cacheSet(cacheKey, result, CAND_CACHE_TTL_MS);
         return result;
       }
@@ -276,7 +280,7 @@ async function loadPublicBase(mode) {
   const jobs = foundTable.rows.map(mapJob).filter((j) => j.pekerjaan && j.pekerjaan !== '');
 
   // dropdowns + pengumuman dari sys_config (list_*, broadcast).
-  const dropdowns = {};
+  const dropdowns: Record<string, any> = {};
   let pengumuman = '';
   if (settings.table) {
     for (const row of settings.rows) {
@@ -358,7 +362,7 @@ async function handleGetAppData(payload, sessionToken) {
     const pub = results[0];
     if (pub.notFound) return pub.base;
 
-    const result = {
+    const result: Record<string, any> = {
       success: true,
       activeTheme: '',
       sessionInvalid: false,
@@ -492,7 +496,7 @@ async function handleGetMonthlyReport(payload, sessionToken) {
     });
     const cands = candRows.map(mapCandidate);
     // Aggregate by loker
-    const byLoker = {};
+    const byLoker: Record<string, any> = {};
     for (const c of cands) {
       const loker = String(c.idLoker || 'UNKNOWN').trim();
       if (!byLoker[loker]) {

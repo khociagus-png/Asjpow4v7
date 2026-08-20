@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ALL_SCHEDULES, ALL_TUGAS, currentAdminName } from '../init/state.ts';
 import { renderJadwal } from '../admin_ops/schedule.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
