@@ -1092,14 +1092,14 @@ async function uploadFilesDirectlyBase64(filesObj, folder) {
 
 export async function saveToDatabase() {
   if (!latestCandidateData.identitas || !latestCandidateData.identitas.nama_lengkap) {
-    alert('⚠️ Wah, datanya masih kosong! Yuk ngobrol sama Jeklin dulu di Tab Chat.');
+    window.showToast(window.tr('form.ai_empty_chat_hint'), 'info');
     if (window.innerWidth < 768) switchTab('chat');
     return;
   }
 
   var btn = $('btnSaveDB');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> NYIMPEN…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.ai_saving_db') + '…';
 
   // Guard ekstensi: cek SEMUA file dokumen SEBELUM kirim — format baku
   // (2026-08-12, rev): JFT/SSW/ijazah/UNIV wajib PDF; KTP/KK boleh foto HP
@@ -1126,11 +1126,10 @@ export async function saveToDatabase() {
     var ok = extCheck[ei].t === 'foto' ? ['pdf', 'jpg', 'jpeg', 'png'] : ['pdf'];
     if (ok.indexOf(nm) === -1) {
       btn.disabled = false;
-      btn.innerHTML = 'SIMPAN KE DATABASE';
-      alert(
-        'Dokumen ' +
-          (extCheck[ei].f.name || 'file') +
-          ' format tidak sesuai (JFT/ijazah/UNIV wajib PDF; KTP/KK boleh PDF atau JPG/PNG).',
+      btn.innerHTML = window.tr('form.ai_save_db');
+      window.showToast(
+        window.tr('form.ai_ext_check_bad').replace('{file}', extCheck[ei].f.name || 'file'),
+        'error',
       );
       return;
     }
@@ -1181,23 +1180,23 @@ export async function saveToDatabase() {
       .then(function (res) {
         btn.disabled = false;
         if (res.success) {
-          btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!';
+          btn.innerHTML = '<i class="fas fa-check"></i> ' + window.tr('form.ai_save_success_btn');
           btn.classList.replace('bg-emerald-600', 'bg-sky-600');
-          alert('✅ CV & Sertifikat berhasil diamankan ke Server ASJ! Good Job!');
+          window.showToast(window.tr('form.ai_save_success'), 'success');
         } else {
-          alert('❌ Gagal: ' + res.message);
-          btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SIMPAN DB';
+          window.showToast(window.tr('form.ai_save_failed') + ' ' + (res.message || ''), 'error');
+          btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> ' + window.tr('form.ai_save_db');
         }
       })
       .catch(function (err) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SIMPAN DB';
-        alert('Sinyal error nih kak. Coba lagi!');
+        window.showToast(window.tr('form.ai_chat_error'), 'error');
       });
   } catch (e) {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SIMPAN DB';
-    alert('Gagal mengunggah dokumen: ' + e.message);
+    window.showToast(window.tr('form.ai_upload_failed') + ' ' + (e.message || ''), 'error');
   }
 }
 

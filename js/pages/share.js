@@ -509,7 +509,9 @@ export function renderGrid() {
     // Thumbnail storage (kartu 72-84px): gunakan aslinya agar tidak pecah/blur
     // karena Supabase Image Transformation mungkin memotong/compress terlalu agresif.
     let photoThumb = photoUrl;
-    let safeName = namaLengkap.replace(/'/g, "\\'");
+    // XSS: namaLengkap di-inject ke onclick string — wajib escape
+    // kutip tunglu & ganda + backslash supaya aman di atribut HTML.
+    let safeName = namaLengkap.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
     // Tombol aksi kompak & proporsional: ikon kecil di atas label
     // (grid 1:2:1 di semua ukuran), tidak lagi membentang penuh.

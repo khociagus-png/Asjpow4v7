@@ -292,45 +292,49 @@
 
 ## F. FRONTEND — Public Pages
 
-### F1. `js/01_public.js` (622 baris) — Public Dashboard ✅ DIVERIFIKASI (2026-08-20)
+### F1. `js/01_public.js` (622 baris) — Public Dashboard ✅ RE-AUDITED (2026-08-20)
 
-- [x] 622 lines, job listing + language toggle + marquee
-- [x] All syntax OK, well i18n'd
+- [x] `switchPublicTab()`: DOM elements exist in HTML
+- [x] `renderRincianSections()`: local esc() helper — XSS-safe
+- [x] `bukaDetailLoker()`: all dynamic values use window.esc()/window.escJs()
+- [x] i18n: all labels via window.tr()
 
-### F2. `js/render/public.js` (308 baris) — Public Render ✅ DIVERIFIKASI (2026-08-20)
+### F2. `js/render/public.js` (308 baris) — Public Render ✅ RE-AUDITED (2026-08-20)
 
-- [x] 308 lines, job cards + responsive
-- [x] All syntax OK
+- [x] `renderPublicFiltered()`: XSS-safe — window.esc() on code/pekerjaan
+- [x] `renderPublicFilterUI()`: DOM null checks on all btns
+- [x] i18n: all labels via tr()
 
-### F3. `js/render/share.js` — Share View ✅ DIVERIFIKASI (2026-08-20)
+### F3. `js/render/share.js` — Share View ✅ RE-AUDITED (2026-08-20)
 
-- [x] 275 lines, share data rendering
-- [x] All syntax OK
+- [x] `bukaModalShare()`: DOM null checks
+- [x] `templateShareWa()`: no innerHTML — plain text
+- [x] i18n: tr() via bridge import
 
-### F4. `js/pages/apply_full.js` (643 baris) — Apply Page ✅ DIVERIFIKASI (2026-08-20)
+### F4. `js/pages/share.js` (581 baris) — Share Page ✅ RE-AUDITED (2026-08-20)
 
-- [x] 643 lines, form validation + submit
-- [x] All syntax OK
+- [x] XSS FIXED: safeName now escapes backslash + single quote + double quote
+- [x] `renderGrid()`: uses escapeHtml() for onclick attributes
+- [x] Local SHARE_LANG fallback (not dependent on main i18n.js)
 
-### F5. `js/pages/ai_form.js` (1220 baris) — AI Form Page ✅ DIVERIFIKASI (2026-08-20)
+### F5. `js/pages/ai_form.js` (1220 baris) — AI Form Page ✅ RE-AUDITED (2026-08-20)
 
-- [x] 1220 lines, chat flow + VIP guard + form submission
-- [x] All syntax OK
+- [x] Hardcoded alert() FIXED → showToast() + tr() keys (8 new i18n keys)
+- [x] `appendHTML()`: XSS-safe — escapeHtml() + template literal escaping
+- [x] `sendMessage()`: DOM null checks on inputEl/btnEl
+- [x] `saveToDatabase()`: ext validation with proper error messages
 
-### F6. `js/pages/master_full.js` (803 baris) — Master Form ✅ DIVERIFIKASI (2026-08-20)
+### F6. `js/pages/master_full.js` (803 baris) — Master Form
 
-- [x] 803 lines, biodata form + submit
-- [x] All syntax OK
+- [ ] Pending re-audit
 
-### F7. `js/pages/share.js` (701 baris) — Share Page ✅ DIVERIFIKASI (2026-08-20)
+### F7. `js/pages/share.js` (701 baris) — Share Page
 
-- [x] 701 lines, share rendering
-- [x] All syntax OK
+- [ ] Pending re-audit
 
-### F8. `js/pages/siswa_baru.js` (503 baris) — Siswa Baru Page ✅ DIVERIFIKASI (2026-08-20)
+### F8. `js/pages/siswa_baru.js` (503 baris) — Siswa Baru Page
 
-- [x] 503 lines, registration form + submit
-- [x] All syntax OK
+- [ ] Pending re-audit
 
 ---
 
