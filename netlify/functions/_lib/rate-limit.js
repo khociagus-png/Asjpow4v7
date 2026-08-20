@@ -10,7 +10,6 @@
 //     → { ok: true } atau { ok: false, retryAfter, locked }
 //   fail(key, { lockoutAfter, lockoutMs }) — catat kegagalan (mis. PIN salah);
 //     setelah `lockoutAfter` kegagalan dalam window → lockout `lockoutMs`.
-'use strict';
 
 /** @typedef {{ count: number, fails: number, resetAt: number, lockUntil: number }} Bucket */
 /** @typedef {{ limit?: number, windowMs?: number, lockoutAfter?: number, lockoutMs?: number }} RateLimitOpts */
@@ -80,4 +79,4 @@ function fail(key, opts) {
   }
 }
 
-module.exports = { check, fail };
+export { check, fail };

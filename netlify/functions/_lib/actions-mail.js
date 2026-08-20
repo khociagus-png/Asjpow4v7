@@ -1,23 +1,22 @@
+import bcrypt from 'bcryptjs';
+import { normalizeWa, pick, supabaseJson } from './db/client.js';
+import { mapCandidate } from './db/candidates.js';
+import { attachBerkasBio } from './db/berkas.js';
+import { requireAdmin } from './actions-auth.js';
+import { findCandidateByWa, nextCandidateId } from './candidate-helpers.js';
+import { stripRaw } from './actions-public.js';
+import { cacheClear } from './cache.js';
 // actions-mail.js — Mail inbox (database_asj_form): review/approve/reject/
 // delete/tandai dibaca + sinkronisasi kandidat. MODUL BARU (Fase 1.1c
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
-'use strict';
 
-const bcrypt = require('bcryptjs');
-const { normalizeWa, pick, supabaseJson } = require('./db/client');
-const {
+import {
   findFormByIndexFiltered,
   findForms,
   findFormsByWa,
   mapForm,
   upsertFormRow,
-} = require('./db/forms');
-const { mapCandidate } = require('./db/candidates');
-const { attachBerkasBio } = require('./db/berkas');
-const { requireAdmin } = require('./actions-auth');
-const { findCandidateByWa, nextCandidateId } = require('./candidate-helpers');
-const { stripRaw } = require('./actions-public');
-const { cacheClear } = require('./cache');
+} from './db/forms.js';
 
 // Frontend mengirim rowIndex (posisi di array formInbox). Urutan harus sama
 // dengan findForms() yang dipakai getAppData.
@@ -383,7 +382,7 @@ async function syncFormMailDariUpload(wa, nama, docLabel, url, jobCode) {
   }
 }
 
-module.exports = {
+export {
   handleReviewForm,
   handleApproveForm,
   handleRejectForm,

@@ -1,12 +1,10 @@
+import crypto from 'crypto';
+import { env } from './env.js';
 // session.js — token sesi bertanda tangan (HMAC-SHA256).
 //
 // Pengganti "createSession" di auth.ts asli. Token { role, wa?, name? }
 // ditandatangani dengan secret dari env; semua aksi admin/kandidat
 // memvalidasinya kembali. Tidak ada penyimpanan status server-side.
-'use strict';
-
-const crypto = require('crypto');
-const { env } = require('./env');
 
 /** @typedef {{ role: string, wa?: string, name?: string, kind?: string }} SessionPayload */
 
@@ -48,4 +46,4 @@ function verifyToken(token) {
   }
 }
 
-module.exports = { signToken, verifyToken };
+export { signToken, verifyToken };

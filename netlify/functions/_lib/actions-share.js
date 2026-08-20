@@ -1,14 +1,12 @@
+import { normalizeWa, pick, supabaseUrl, toText } from './db/client.js';
+import { findJobByCodeFiltered, findJobs } from './db/jobs.js';
+import { findForms, findFormsByWaList, parseDocs } from './db/forms.js';
+import { findCandidates, findCandidatesByJobFiltered, mapCandidate } from './db/candidates.js';
+import { listStorageFolder } from './db/berkas.js';
 // actions-share.js — viewer TSK publik (share.html?job=KODE). Dipanggil
 // LANGSUNG via GET dari netlify/functions/share-data.js (redirect /api/
 // share-data), bukan lewat dispatch POST. MODUL BARU (Fase 1.1d
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
-'use strict';
-
-const { normalizeWa, pick, supabaseUrl, toText } = require('./db/client');
-const { findJobByCodeFiltered, findJobs } = require('./db/jobs');
-const { findForms, findFormsByWaList, parseDocs } = require('./db/forms');
-const { findCandidates, findCandidatesByJobFiltered, mapCandidate } = require('./db/candidates');
-const { listStorageFolder } = require('./db/berkas');
 
 async function handleShareData(jobCode) {
   const code = String(jobCode || '').trim();
@@ -229,4 +227,4 @@ function docAge(name) {
   return m ? Number(m[1]) : 0;
 }
 
-module.exports = { handleShareData, docTypeOf };
+export { handleShareData, docTypeOf };

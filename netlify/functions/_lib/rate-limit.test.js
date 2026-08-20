@@ -6,10 +6,8 @@
 // - Bucket pruning: max 20000 buckets.
 // ==========================================
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
 
-const { check, fail } = require('./rate-limit.js');
+import { check, fail } from './rate-limit.js';
 
 describe('rate-limit — check()', () => {
   it('first request within limit → ok', () => {

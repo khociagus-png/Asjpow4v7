@@ -1,8 +1,6 @@
+import { supabaseJson, supabasePaged, pick, toText, findTable } from './client.js';
 // db/misc.js — repo misc: admins, settings/assets, pengumuman, query paginated.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson, supabasePaged, pick, toText, findTable } = require('./client');
 
 // Query paginated dengan Range header + total dari Content-Range. Pakai
 // helper terpusat supabasePaged (client.js).
@@ -104,11 +102,4 @@ async function findPengumuman() {
   return '';
 }
 
-module.exports = {
-  queryPaged,
-  findAdmins,
-  findSettings,
-  findAnnouncements,
-  findAssets,
-  findPengumuman,
-};
+export { queryPaged, findAdmins, findSettings, findAnnouncements, findAssets, findPengumuman };

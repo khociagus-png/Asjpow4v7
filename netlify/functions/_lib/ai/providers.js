@@ -1,9 +1,7 @@
+import { env } from '../env.js';
 // ai/providers.js — lapisan PROVIDER AI (Gemini) + helper parsing output AI.
 // MODUL BARU (Fase 1.4 REFACTOR_TODO.md) — dipindah dari actions-ai.js,
 // body fungsi byte-identik (perilaku tidak berubah).
-'use strict';
-
-const { env } = require('../env');
 
 // ---------------------------------------------------------------------------
 // Gemini
@@ -129,8 +127,4 @@ function parseJsonLoose(text) {
   }
 }
 
-module.exports = {
-  geminiGenerate,
-  geminiParseFile,
-  parseJsonLoose,
-};
+export { geminiGenerate, geminiParseFile, parseJsonLoose };

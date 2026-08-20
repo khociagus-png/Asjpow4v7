@@ -1,9 +1,8 @@
-'use strict';
+import crypto from 'crypto';
 
 // =============================================================================
 // fcm-server.js — Helper untuk mengirim Push Notification via FCM HTTP v1 API
 // =============================================================================
-const crypto = require('crypto');
 
 // Cache token untuk performa
 let _oauthToken = null;
@@ -152,7 +151,4 @@ async function sendMulticast(tokens, title, body, url = '/') {
   return { successCount: tokens.length - invalidTokens.length, invalidTokens };
 }
 
-module.exports = {
-  sendPushNotification,
-  sendMulticast,
-};
+export { sendPushNotification, sendMulticast };

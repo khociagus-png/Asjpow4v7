@@ -3,9 +3,7 @@
 // JSON murni: ada teks di sekitar, atau dibungkus markdown fence).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { parseJsonLoose } = require('./providers.js');
+import { parseJsonLoose } from './providers.js';
 
 describe('parseJsonLoose — output AI → objek', () => {
   it('JSON murni langsung diparse', () => {

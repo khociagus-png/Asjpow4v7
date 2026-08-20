@@ -1,10 +1,8 @@
+import { supabaseJson, toText } from './db/client.js';
+import { requireRole } from './actions-auth.js';
 // actions-schedule.js — jadwal (database_schedule) & tugas (database_tugas).
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js
 // (2.549 baris), perilaku TIDAK berubah.
-'use strict';
-
-const { supabaseJson, toText } = require('./db/client');
-const { requireRole } = require('./actions-auth');
 
 async function handleSimpanJadwalBaru(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
@@ -171,7 +169,7 @@ async function handleHapusTugas(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleSimpanJadwalBaru,
   handleHapusJadwal,
   handleTambahTugasBaru,

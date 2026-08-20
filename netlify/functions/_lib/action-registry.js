@@ -1,4 +1,18 @@
-'use strict';
+import * as publicData from './actions-public.js';
+import * as diagnostics from './actions-diagnostics.js';
+import * as auth from './actions-auth.js';
+import * as jobActions from './actions-job.js';
+import * as aiChat from './ai/chat.js';
+import * as aiClassify from './ai/classify.js';
+import * as candidateActions from './actions-candidate.js';
+import * as mailActions from './actions-mail.js';
+import * as upload from './actions-upload.js';
+import * as master from './actions-master.js';
+import * as schedule from './actions-schedule.js';
+import * as wa from './actions-wa.js';
+import * as config from './actions-config.js';
+import * as register from './actions-register.js';
+import * as aiCv from './ai/cv.js';
 // =============================================================================
 // action-registry.js — SATU-SATUNYA sumber kebenaran kontrak action backend.
 // -----------------------------------------------------------------------------
@@ -9,22 +23,6 @@
 //   - grup rate limit (LOGIN/AI/FONNTE) hanya berisi action yang terdaftar.
 // Tambah action baru = tambah 1 baris DI SINI (jangan di switch lagi).
 // =============================================================================
-
-const publicData = require('./actions-public');
-const diagnostics = require('./actions-diagnostics');
-const auth = require('./actions-auth');
-const jobActions = require('./actions-job');
-const aiChat = require('./ai/chat');
-const aiClassify = require('./ai/classify');
-const candidateActions = require('./actions-candidate');
-const mailActions = require('./actions-mail');
-const upload = require('./actions-upload');
-const master = require('./actions-master');
-const schedule = require('./actions-schedule');
-const wa = require('./actions-wa');
-const config = require('./actions-config');
-const register = require('./actions-register');
-const aiCv = require('./ai/cv');
 
 // nama action → handler(payload, sessionToken). Handler dengan arity lebih
 // kecil aman (argumen ekstra diabaikan JS).
@@ -141,4 +139,4 @@ const AI_ACTIONS = new Set([
 ]);
 const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
 
-module.exports = { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS };
+export { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS };

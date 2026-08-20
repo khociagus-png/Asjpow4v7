@@ -5,18 +5,18 @@
 // - Edge cases: null/undefined/malformed token.
 // ==========================================
 import { describe, it, expect, vi } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
 
 // Override env() supaya SESSION_SECRET bisa dikontrol test
 vi.mock('./env.js', () => {
   const SECRET = 'test-secret-for-session-' + process.env.TEST_SESSION_SECRET;
   return {
     env: (key) => (key === 'SESSION_SECRET' ? SECRET : ''),
+    debugFileEnvKeys: () => ({}),
+    debugFileStructure: () => ({}),
   };
 });
 
-const { signToken, verifyToken } = require('./session.js');
+import { signToken, verifyToken } from './session.js';
 
 describe('session — signToken + verifyToken', () => {
   it('roundtrip: sign → verify mengembalikan payload asli', () => {

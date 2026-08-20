@@ -10,8 +10,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
 const {
   ACTION_HANDLERS,
   LOGIN_ACTIONS,

@@ -1,4 +1,3 @@
-'use strict';
 // =============================================================================
 // shared/wa-rules.js — SATU-SATUNYA sumber kebenaran aturan nomor WA.
 // -----------------------------------------------------------------------------
@@ -27,4 +26,4 @@ function isValidWaFormat(wa) {
   return /^628\d{9,10}$/.test(normalizeWa(wa));
 }
 
-module.exports = { normalizeWa, isValidWaFormat };
+export { normalizeWa, isValidWaFormat };

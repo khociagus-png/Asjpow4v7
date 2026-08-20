@@ -1,13 +1,11 @@
+import { normalizeWa, pick, normalizeGender } from '../db/client.js';
+import { findCandidateByIdFiltered, findCandidates } from '../db/candidates.js';
+import { requireRole } from '../actions-auth.js';
+import { findMasterByWa } from './cv.js';
+import { geminiParseFile, parseJsonLoose } from './providers.js';
 // ai/classify.js — domain AI klasifikasi & parse dokumen biodata/CV admin
 // (PDF/Excel/Word/CSV/TXT/gambar → Gemini → JSON). MODUL BARU (Fase 1.4
 // REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
-'use strict';
-
-const { normalizeWa, pick, normalizeGender } = require('../db/client');
-const { findCandidateByIdFiltered, findCandidates } = require('../db/candidates');
-const { requireRole } = require('../actions-auth');
-const { findMasterByWa } = require('./cv');
-const { geminiParseFile, parseJsonLoose } = require('./providers');
 
 // ---------------------------------------------------------------------------
 // parseDokumenBiodata — admin upload file CV (PDF/Excel/Word/CSV/TXT/gambar)
@@ -150,6 +148,4 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
   }
 }
 
-module.exports = {
-  handleParseDokumenBiodata,
-};
+export { handleParseDokumenBiodata };

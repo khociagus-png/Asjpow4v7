@@ -1,7 +1,6 @@
 // demo.js — data DEMO untuk preview, dipakai getAppData selama key Supabase
 // asli belum dikonfigurasi. Isinya contoh lowongan realistis supaya halaman
 // publik tetap bisa dilihat sebelum backend asli tersambung.
-'use strict';
 
 const DEMO_PREVIEW_NOTE =
   '⚠ MODE PREVIEW — Data loker di bawah adalah CONTOH DEMO. Backend asli (Supabase) belum dikonfigurasi: isi SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY di Keys/API keys.';
@@ -274,4 +273,4 @@ function demoGetAppData(mode) {
   };
 }
 
-module.exports = { DEMO_JOBS, DEMO_ASSETS, DEMO_PREVIEW_NOTE, demoGetAppData };
+export { DEMO_JOBS, DEMO_ASSETS, DEMO_PREVIEW_NOTE, demoGetAppData };

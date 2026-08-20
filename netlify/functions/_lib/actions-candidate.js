@@ -1,17 +1,15 @@
+import { normalizeWa, supabaseJson } from './db/client.js';
+import { findForms, findFormsByWaList } from './db/forms.js';
+import { attachApplications, mapCandidate } from './db/candidates.js';
+import { attachBerkasBio } from './db/berkas.js';
+import { requireAdmin } from './actions-auth.js';
+import { findCandidateByWa } from './candidate-helpers.js';
+import { stripRaw, loadCandidatesUnik } from './actions-public.js';
+import { cacheClear } from './cache.js';
+import { syncBiodataKeMail } from './actions-mail.js';
 // actions-candidate.js — kelola kandidat (database_candidate): catatan,
 // update super (admin), halaman daftar kandidat. MODUL BARU (Fase 1.1c
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
-'use strict';
-
-const { normalizeWa, supabaseJson } = require('./db/client');
-const { findForms, findFormsByWaList } = require('./db/forms');
-const { attachApplications, mapCandidate } = require('./db/candidates');
-const { attachBerkasBio } = require('./db/berkas');
-const { requireAdmin } = require('./actions-auth');
-const { findCandidateByWa } = require('./candidate-helpers');
-const { stripRaw, loadCandidatesUnik } = require('./actions-public');
-const { cacheClear } = require('./cache');
-const { syncBiodataKeMail } = require('./actions-mail');
 
 async function handleUpdateCatatanKandidat(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);
@@ -139,8 +137,4 @@ async function handleGetCandidatesPage(payload, sessionToken) {
   }
 }
 
-module.exports = {
-  handleUpdateCatatanKandidat,
-  handleUpdateKandidatSuper,
-  handleGetCandidatesPage,
-};
+export { handleUpdateCatatanKandidat, handleUpdateKandidatSuper, handleGetCandidatesPage };

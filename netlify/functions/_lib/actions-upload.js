@@ -1,20 +1,19 @@
+import bcrypt from 'bcryptjs';
+import { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client.js';
+import { findJobByCodeFiltered, findJobs } from './db/jobs.js';
+import { findForms, findFormsByWa, upsertFormRow } from './db/forms.js';
+import { findCandidateByWaFiltered, findCandidates, mapCandidate } from './db/candidates.js';
+import * as session from './session.js';
+import { requireRole, isOwnerOrAdmin } from './actions-auth.js';
+import { findMasterByWa } from './actions-master.js';
+import { cacheClear } from './cache.js';
+import { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } from './storage.js';
+import { syncFormMailDariUpload } from './actions-mail.js';
+import { nextCandidateId } from './candidate-helpers.js';
+import * as fcm from './fcm-server.js';
 // actions-upload.js — upload & apply (apply-full.html, admin pemberkasan,
 // upload langsung). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah
 // dari actions-extra.js, perilaku TIDAK berubah.
-'use strict';
-
-const bcrypt = require('bcryptjs');
-const { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } = require('./db/client');
-const { findJobByCodeFiltered, findJobs } = require('./db/jobs');
-const { findForms, findFormsByWa, upsertFormRow } = require('./db/forms');
-const { findCandidateByWaFiltered, findCandidates, mapCandidate } = require('./db/candidates');
-const session = require('./session');
-const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
-const { findMasterByWa } = require('./actions-master');
-const { cacheClear } = require('./cache');
-const { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } = require('./storage');
-const { syncFormMailDariUpload } = require('./actions-mail');
-const { nextCandidateId } = require('./candidate-helpers');
 
 const PUBLIC_PREFILL_FIELDS = new Set([
   'idKandidat',
@@ -331,7 +330,6 @@ async function handleSubmitApply(payload) {
     // --- PUSH NOTIFICATION KE ADMIN ---
     // Jangan biarkan error notif membatalkan submit
     try {
-      const fcm = require('./fcm-server');
       // Ambil token semua admin
       const { rows: adminTokens } = await supabaseJson('GET', 'fcm_tokens', {
         query: { select: 'token', wa: 'eq.ADMIN' },
@@ -812,7 +810,7 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleGetUploadUrls,
   handleCekDataPelamar,
   handleIsJobRequiresCv,

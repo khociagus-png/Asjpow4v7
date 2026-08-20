@@ -5,9 +5,8 @@
 // baru, supaya tombol KK/KTP/CV di share view tidak pernah dobel.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { isVarianOf, stemAliases } = require('./storage.js');
+import { isVarianOf, stemAliases } from './storage.js';
+import { buildRingkasData } from './ai/cv.js';
 
 describe('isVarianOf', () => {
   it('varian bertimestamp terdeteksi (KK_1786….pdf milik stem KK)', () => {
@@ -58,8 +57,6 @@ describe('stemAliases', () => {
 });
 
 describe('buildRingkasData (konteks AI chat)', () => {
-  const { buildRingkasData } = require('./ai/cv.js');
-
   it('memuat TB/BB & ukuran yang terisi, tanpa data kosong', () => {
     const out = buildRingkasData({
       identitas: { nama_lengkap: 'AGUS KHOCI', ktp: '', paspor: '' },

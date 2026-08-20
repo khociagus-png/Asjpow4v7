@@ -4,7 +4,6 @@
 // assets/pengumuman) supaya request berikutnya tidak perlu roundtrip ke
 // Supabase. Cache per-instance function (Netlify: per warm instance; preview:
 // 1 proses) — cukup untuk skala ASJ, tanpa Redis.
-'use strict';
 
 const store = new Map();
 const DEFAULT_TTL_MS = 20_000;
@@ -33,4 +32,4 @@ function cacheClear() {
   store.clear();
 }
 
-module.exports = { cacheGet, cacheSet, cacheClear };
+export { cacheGet, cacheSet, cacheClear };

@@ -1,12 +1,11 @@
+import { env } from '../env.js';
+import { normalizeWa } from '../../../../shared/wa-rules.js';
 // db/client.js — klien REST Supabase (PostgREST) + normalisasi data.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js,
 // perilaku TIDAK berubah.
-'use strict';
 
-const { env } = require('../env');
 // Aturan WA (normalisasi + gate) — satu sumber kebenaran: shared/wa-rules.js
 // (dipakai frontend js/04_auth.js juga). Jangan definisikan ulang di sini.
-const { normalizeWa } = require('../../../../shared/wa-rules');
 
 /** @typedef {{ query?: Record<string, string | number>, headers?: Record<string, string>, body?: unknown }} JsonOpts */
 /** @typedef {{ rows: Record<string, unknown>[], total: number }} PagedResult */
@@ -180,7 +179,7 @@ function columnsFromSchema(spec, table) {
   return s && s.properties ? Object.keys(s.properties) : [];
 }
 
-module.exports = {
+export {
   supabaseUrl,
   supabaseKey,
   hasBackend,

@@ -1,12 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 // env.js — akses env var untuk fungsi backend.
 //
 // Prioritas: process.env (Netlify production / Freebuff Keys UI) lalu fallback
 // ke .env.local di repo (hanya untuk preview sandbox). Hanya kunci whitelist
 // yang dibaca dari file — secret lain tidak pernah disentuh.
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
 
 const WHITELIST = new Set([
   'SUPABASE_URL',
@@ -322,4 +320,4 @@ function debugFileStructure() {
   return info;
 }
 
-module.exports = { env, debugFileEnvKeys, debugFileStructure };
+export { env, debugFileEnvKeys, debugFileStructure };

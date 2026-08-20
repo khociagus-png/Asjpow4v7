@@ -4,9 +4,7 @@
 // normalisasi = kandidat duplikat (kasus SATRIA 6223 vs 6282, 2026-08-15).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { normalizeWa, normalizeStatus, normalizeGender } = require('./client.js');
+import { normalizeWa, normalizeStatus, normalizeGender } from './client.js';
 
 describe('normalizeWa — format baku 628…', () => {
   it('0xx… dikonversi ke 62xx… (awalan HP)', () => {

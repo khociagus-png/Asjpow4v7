@@ -1,11 +1,9 @@
+import { handleAction } from './handlers.js';
 // netlify-wrapper.js — factory handler Netlify standar.
 //
 // Setiap file di netlify/functions/<nama>.js hanyalah:
 //   exports.handler = makeHandler();
 // dan seluruh logika dipusatkan di _lib/handlers.js (dispatch per action).
-'use strict';
-
-const { handleAction } = require('./handlers');
 
 // Ambil IP klien dari header standar proxy/Netlify untuk rate limit (M3).
 function clientIp(event) {
@@ -66,4 +64,4 @@ function makeHandler() {
   };
 }
 
-module.exports = { makeHandler };
+export { makeHandler };

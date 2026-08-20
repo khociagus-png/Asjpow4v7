@@ -1,8 +1,6 @@
+import { supabaseJson, toText, normalizeWa } from './client.js';
 // db/forms.js — repo mail inbox (database_asj_form): mapForm, findForms, query per WA.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson, toText, normalizeWa } = require('./client');
 
 // ===== Mail inbox (database_asj_form) =====
 // Kolom asli: id, timestamp, code_job, kategory, nama_lengkap, no_wa, gender,
@@ -184,7 +182,7 @@ async function findFormsByWaList(waList) {
   return tryQuery({ limit: '500', no_wa: 'in.(' + inList + ')' });
 }
 
-module.exports = {
+export {
   mapForm,
   parseDocs,
   findForms,

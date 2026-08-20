@@ -1,8 +1,6 @@
+import { supabaseJson } from './client.js';
 // db/master.js — repo master biodata/CV (master_database_candidate).
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson } = require('./client');
 
 // Kolom RINGAN master_database_candidate — hanya kolom yang benar-benar
 // dibaca attachBerkasBio (BERKAS_COLUMNS *_url + BIO_COLUMNS + pencocok WA).
@@ -70,7 +68,4 @@ async function fetchMasterLightByWa(waList) {
   return tryQuery({ limit: '500', no_wa: 'in.(' + inList + ')' });
 }
 
-module.exports = {
-  fetchMasterByWa,
-  fetchMasterLightByWa,
-};
+export { fetchMasterByWa, fetchMasterLightByWa };

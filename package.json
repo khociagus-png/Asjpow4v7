@@ -1,6 +1,7 @@
 {
   "name": "asj-portal",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "PT Amanah Sakura Japan - Portal Lowongan (static frontend + rebuilt Netlify Functions backend)",
   "scripts": {

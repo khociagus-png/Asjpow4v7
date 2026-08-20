@@ -1,3 +1,11 @@
+import { findJobs, mapJob } from './db/jobs.js';
+import { findForms, findFormsByWa, findFormsLight, mapForm } from './db/forms.js';
+import { attachBerkasBio } from './db/berkas.js';
+import { findAssets, findSettings } from './db/misc.js';
+import * as session from './session.js';
+import { requireAdmin } from './actions-auth.js';
+import * as demo from './demo.js';
+import { cacheGet, cacheSet } from './cache.js';
 // actions-public.js — data publik & dashboard utama (getAppData).
 //
 // MODUL BARU (Fase 1.1 REFACTOR_TODO.md): kode dipindah dari handlers.js
@@ -10,9 +18,8 @@
 //   - Data publik di-cache TTL 20 dtk di memori (cache.js) — getAppData
 //     publik berikutnya terlayani tanpa roundtrip DB (versi "Redis" tanpa
 //     Redis, cukup untuk skala ASJ).
-'use strict';
 
-const {
+import {
   columnsFromSchema,
   findTable,
   getSchema,
@@ -22,23 +29,15 @@ const {
   supabaseJson,
   tablesFromSchema,
   toText,
-} = require('./db/client');
-const { findJobs, mapJob } = require('./db/jobs');
-const { findForms, findFormsByWa, findFormsLight, mapForm } = require('./db/forms');
-const {
+} from './db/client.js';
+import {
   attachApplications,
   findAllCandidatesLight,
   findCandidateByWaFiltered,
   findCandidates,
   findCandidatesByIds,
   mapCandidate,
-} = require('./db/candidates');
-const { attachBerkasBio } = require('./db/berkas');
-const { findAssets, findSettings } = require('./db/misc');
-const session = require('./session');
-const { requireAdmin } = require('./actions-auth');
-const demo = require('./demo');
-const { cacheGet, cacheSet } = require('./cache');
+} from './db/candidates.js';
 
 // sys_config.config_type -> key dropdown yang dikirim ke frontend
 // (kunci ekstra statusLoker/lokasiZoom/dst. ikut dikirim persis seperti
@@ -519,7 +518,7 @@ async function handleGetMonthlyReport(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleGetAppData,
   handleGetMonthlyReport,
   // Helper yang masih dipakai handler lain di handlers.js (getCandidatesPage,

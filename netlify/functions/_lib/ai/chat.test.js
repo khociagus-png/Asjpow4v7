@@ -4,9 +4,7 @@
 // salah map = kandidat dapat model wawancara bidang yang salah.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { normalizeBidang } = require('./chat.js');
+import { normalizeBidang } from './chat.js';
 
 describe('normalizeBidang — pilih model wawancara per bidang SSW', () => {
   it('7 bidang resmi dikenali (case-insensitive)', () => {

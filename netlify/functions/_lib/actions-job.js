@@ -1,23 +1,22 @@
+import { hasBackend, normalizeWa, pick, supabaseJson, toText } from './db/client.js';
+import { findForms, findFormsByWa, mapForm } from './db/forms.js';
+import { findCandidates, mapCandidate } from './db/candidates.js';
+import { attachBerkasBio } from './db/berkas.js';
+import { requireAdmin } from './actions-auth.js';
+import { findCandidateByWa } from './candidate-helpers.js';
+import { cacheClear } from './cache.js';
+import { stripRaw } from './actions-public.js';
 // actions-job.js — kelola lowongan (job_database): simpan/edit/status/hapus/
 // tahapan/dokumen share/tandai gagal. MODUL BARU (Fase 1.1c REFACTOR_TODO.md)
 // — kode dipindah dari handlers.js, perilaku TIDAK berubah.
-'use strict';
 
-const { hasBackend, normalizeWa, pick, supabaseJson, toText } = require('./db/client');
-const {
+import {
   countCandidatesForJob,
   findJobByCodeFiltered,
   findJobs,
   mapJob,
   maxJobCodeNumber,
-} = require('./db/jobs');
-const { findForms, findFormsByWa, mapForm } = require('./db/forms');
-const { findCandidates, mapCandidate } = require('./db/candidates');
-const { attachBerkasBio } = require('./db/berkas');
-const { requireAdmin } = require('./actions-auth');
-const { findCandidateByWa } = require('./candidate-helpers');
-const { cacheClear } = require('./cache');
-const { stripRaw } = require('./actions-public');
+} from './db/jobs.js';
 
 // Pemetaan payload frontend -> kolom tabel job_database (snake_case).
 const JOB_COLUMNS = {
@@ -275,7 +274,7 @@ async function handleTandaiGagalJob(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleSimpanJobBaru,
   handleEditLokerFull,
   handleUbahStatusJob,

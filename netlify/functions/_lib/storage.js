@@ -1,10 +1,8 @@
+import { supabaseKey, supabaseUrl } from './db/client.js';
+import { env } from './env.js';
 // storage.js — helper Supabase Storage (upload base64, hapus varian lama,
 // public URL). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari
 // actions-extra.js, perilaku TIDAK berubah.
-'use strict';
-
-const { supabaseKey, supabaseUrl } = require('./db/client');
-const { env } = require('./env');
 
 function bucket() {
   return env('SUPABASE_STORAGE_BUCKET') || 'asj-files';
@@ -161,7 +159,7 @@ async function resolveFileUrl(value, folder, fileName) {
   return uploadBase64(value, folder, fileName);
 }
 
-module.exports = {
+export {
   bucket,
   storageRequest,
   publicUrl,

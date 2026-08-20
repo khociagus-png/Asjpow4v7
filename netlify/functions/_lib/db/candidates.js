@@ -1,8 +1,6 @@
+import { supabaseJson, supabasePaged, pick, toText, normalizeWa, findTable } from './client.js';
 // db/candidates.js — repo kandidat (database_candidate): mapCandidate, query WA/ID,
 // attach lamaran. MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson, supabasePaged, pick, toText, normalizeWa, findTable } = require('./client');
 
 // Kolom asli tabel database_candidate:
 //   id, id_kandidat, nama_lengkap, nik, gender, usia, tb, bb, pendidikan,
@@ -268,7 +266,7 @@ function attachApplications(candidates, forms) {
   return candidates;
 }
 
-module.exports = {
+export {
   mapCandidate,
   findCandidates,
   findAllCandidatesLight,

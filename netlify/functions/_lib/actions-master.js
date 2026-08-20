@@ -1,17 +1,15 @@
+import { normalizeWa, pick, supabaseJson, toText } from './db/client.js';
+import { findCandidateByWaFiltered, findCandidates } from './db/candidates.js';
+import { fetchMasterByWa } from './db/master.js';
+import * as session from './session.js';
+import { requireRole, isOwnerOrAdmin } from './actions-auth.js';
+import { syncBiodataKeMail } from './actions-mail.js';
+import { nextCandidateId } from './candidate-helpers.js';
+import { cacheClear } from './cache.js';
+import { resolveFileUrl } from './storage.js';
 // actions-master.js — master biodata/CV (master_database_candidate) untuk
 // master-full.html + preview CV + ai_form. MODUL BARU (Fase 1.2 REFACTOR_TODO.md)
 // — kode dipindah dari actions-extra.js, perilaku TIDAK berubah.
-'use strict';
-
-const { normalizeWa, pick, supabaseJson, toText } = require('./db/client');
-const { findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
-const { fetchMasterByWa } = require('./db/master');
-const session = require('./session');
-const { requireRole, isOwnerOrAdmin } = require('./actions-auth');
-const { syncBiodataKeMail } = require('./actions-mail');
-const { nextCandidateId } = require('./candidate-helpers');
-const { cacheClear } = require('./cache');
-const { resolveFileUrl } = require('./storage');
 
 // Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
 // Dipakai handleSimpanUpdateMaster untuk mencatat "[BIODATA] … diubah" ke mail
@@ -1148,7 +1146,7 @@ async function handleSimpanUpdateMaster(payload, sessionToken) {
   return handleSubmitMasterForm(payload, sessionToken);
 }
 
-module.exports = {
+export {
   findMasterByWa,
   handleGetMasterDataByWa,
   handleGetDrafCvMaster,

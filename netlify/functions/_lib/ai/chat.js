@@ -1,18 +1,17 @@
+import { normalizeWa, pick, supabaseJson } from '../db/client.js';
+import { requireRole } from '../actions-auth.js';
+import { buildRingkasData, findMasterByWa, APPLY_WA_COLS } from './cv.js';
+import { geminiGenerate, parseJsonLoose } from './providers.js';
 // ai/chat.js — domain AI chat & wawancara: Qween Jeklin (chat kandidat master),
 // Jeklin copilot admin, Dede Jeklin (siswa baru), wawancara kerja (mensetsu)
 // per bidang SSW + hasil wawancara. MODUL BARU (Fase 1.4 REFACTOR_TODO.md) —
 // dipindah dari actions-ai.js, body fungsi byte-identik.
-'use strict';
 
-const { normalizeWa, pick, supabaseJson } = require('../db/client');
-const {
+import {
   findCandidateByIdFiltered,
   findCandidateByWaFiltered,
   findCandidates,
-} = require('../db/candidates');
-const { requireRole } = require('../actions-auth');
-const { buildRingkasData, findMasterByWa, APPLY_WA_COLS } = require('./cv');
-const { geminiGenerate, parseJsonLoose } = require('./providers');
+} from '../db/candidates.js';
 
 // Tag VIP di catatan internal kandidat (satu-satunya sumber kebenaran — sama
 // persis dengan isVipCatatan di js/03_candidate.js & js/pages/ai_form.js).
@@ -586,7 +585,7 @@ async function handleGetHasilWawancara(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   buildInterviewSystem,
   normalizeBidang,
   resolveProfilKandidat,

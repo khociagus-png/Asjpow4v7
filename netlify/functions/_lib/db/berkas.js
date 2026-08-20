@@ -1,10 +1,8 @@
+import { supabaseJson, toText, pick, normalizeWa } from './client.js';
+import { storageRequest, bucket } from '../storage.js';
+import { fetchMasterLightByWa } from './master.js';
 // db/berkas.js — repo pemberkasan_checklist + attach berkas/bio kandidat + list folder Storage.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson, toText, pick, normalizeWa } = require('./client');
-const { storageRequest, bucket } = require('../storage');
-const { fetchMasterLightByWa } = require('./master');
 
 // ---------------------------------------------------------------------------
 // Lampirkan berkas (pemberkasan_checklist) & bio (master_database_candidate)
@@ -185,7 +183,4 @@ async function listStorageFolder(prefix) {
   }
 }
 
-module.exports = {
-  attachBerkasBio,
-  listStorageFolder,
-};
+export { attachBerkasBio, listStorageFolder };

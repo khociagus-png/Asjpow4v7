@@ -1,21 +1,20 @@
+import { normalizeWa, pick, supabaseJson } from '../db/client.js';
+import { requireRole } from '../actions-auth.js';
+import * as buildMasterNested from '../actions-master.js';
+import { syncBiodataKeMail } from '../actions-mail.js';
 // ai/cv.js — domain AI master/CV: auto-fill data kandidat (buildMasterNested /
 // buildRingkasData), konteks admin AI copilot, & penyimpanan data AI form
 // (ai_form_submissions + master_database_candidate). MODUL BARU (Fase 1.4
 // REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
-'use strict';
 
-const { normalizeWa, pick, supabaseJson } = require('../db/client');
-const {
+import {
   findCandidateByIdFiltered,
   findCandidateByWaFiltered,
   findCandidates,
-} = require('../db/candidates');
-const { requireRole } = require('../actions-auth');
+} from '../db/candidates.js';
 // Satu sumber buildMasterNested (dari actions-master.js) supaya konteks AI
 // admin tidak pakai salinan lama yang belum merge ai_data_json (kenalan JP/
 // alamat & array riwayat tampil kosong di copilot admin).
-const { buildMasterNested } = require('../actions-master');
-const { syncBiodataKeMail } = require('../actions-mail');
 
 // Label seksi AI form untuk ringkasan mail ("[BIODATA] fisik & ukuran, medis") —
 // samakan dengan fix sync biodata (submitMasterForm/updateKandidatSuper) supaya
@@ -384,7 +383,7 @@ async function handleSimpanDataTtdNaitei(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   APPLY_WA_COLS,
   AI_SEKSI_LABEL,
   buildMasterNested,

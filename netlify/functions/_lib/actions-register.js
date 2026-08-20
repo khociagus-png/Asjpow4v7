@@ -1,12 +1,10 @@
+import { normalizeGender, supabaseJson } from './db/client.js';
+import { env } from './env.js';
+import { cacheClear } from './cache.js';
 // actions-register.js — daftar siswa baru (respon_siswa_baru) + link & bridge
 // form (QR / apply-full / master-full / ai_form).
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.
-'use strict';
-
-const { normalizeGender, supabaseJson } = require('./db/client');
-const { env } = require('./env');
-const { cacheClear } = require('./cache');
 
 // ---------------------------------------------------------------------------
 // Siswa baru (respon_siswa_baru)
@@ -148,7 +146,7 @@ async function handleGenerateAiFormBridge(payload) {
   return { formUrl };
 }
 
-module.exports = {
+export {
   handleGetDaftarSiswaBaru,
   handleSubmitDaftarSiswa,
   handleGetLinkSiswaBaru,

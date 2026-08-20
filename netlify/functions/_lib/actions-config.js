@@ -1,11 +1,9 @@
+import { supabaseJson } from './db/client.js';
+import { findSettings } from './db/misc.js';
+import { requireRole } from './actions-auth.js';
 // actions-config.js — konfigurasi sistem (sys_config) + preset rincian biaya.
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.
-'use strict';
-
-const { supabaseJson } = require('./db/client');
-const { findSettings } = require('./db/misc');
-const { requireRole } = require('./actions-auth');
 
 const CONFIG_TYPE_MAP = {
   kategori: 'list_kategori',
@@ -139,7 +137,7 @@ async function handleRunMigration(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleUpdateSysConfig,
   handleGetRincianPresets,
   handleSaveRincianPreset,

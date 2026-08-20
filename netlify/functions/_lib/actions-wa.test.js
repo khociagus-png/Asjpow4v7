@@ -7,9 +7,7 @@
 // identik massal berisiko kena banned Fonnte/WA.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { buildPesanTawaranMassal } = require('./actions-wa.js');
+import { buildPesanTawaranMassal } from './actions-wa.js';
 
 const V = [
   'Pesan A untuk {nama} ({link_grup})',

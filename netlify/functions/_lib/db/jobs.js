@@ -1,8 +1,6 @@
+import { supabaseJson, pick, toText, findTable } from './client.js';
 // db/jobs.js — repo lowongan (job_database/loker): mapJob, findJobs, lookup by kode.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
-'use strict';
-
-const { supabaseJson, pick, toText, findTable } = require('./client');
 
 // Kolom asli tabel job_database (hasil introspeksi):
 //   code_job, tsk, kategori, pekerjaan, lokasi, gender, kuota, jumlah_kandidat,
@@ -135,10 +133,4 @@ async function maxJobCodeNumber() {
   }
 }
 
-module.exports = {
-  mapJob,
-  findJobs,
-  countCandidatesForJob,
-  findJobByCodeFiltered,
-  maxJobCodeNumber,
-};
+export { mapJob, findJobs, countCandidatesForJob, findJobByCodeFiltered, maxJobCodeNumber };

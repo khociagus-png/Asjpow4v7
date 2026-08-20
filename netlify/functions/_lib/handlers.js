@@ -1,3 +1,7 @@
+import * as session from './session.js';
+import * as rateLimit from './rate-limit.js';
+import { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } from './action-registry.js';
+import * as shareActions from './actions-share.js';
 // handlers.js — dispatcher pusat backend rebuild.
 //
 // Frontend mengirim { action, payload, sessionToken } ke /.netlify/functions/*
@@ -7,14 +11,9 @@
 //
 // Sebagian besar action belum diimplementasi ulang (skema Supabase asli belum
 // diketahui) — handler default membalas pesan yang jelas, bukan error mentah.
-'use strict';
 
-const session = require('./session');
-const rateLimit = require('./rate-limit');
 // Kontrak action (nama → handler + grup rate limit) — satu sumber kebenaran:
 // action-registry.js. Dispatcher di bawah memakai tabel, bukan switch.
-const { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } = require('./action-registry');
-const shareActions = require('./actions-share');
 
 const NOT_IMPLEMENTED =
   'Fungsi ini belum diimplementasi di backend rebuild (repo GitHub hanya berisi frontend).';
@@ -175,9 +174,6 @@ async function dispatchAction(action, payload, sessionToken) {
 
 // handleShareData & docTypeOf di-re-export dari actions-share supaya wrapper
 // lama (netlify/functions/share-data.js, serve-static.mjs) tetap kompat.
-module.exports = {
-  handleAction,
-  NOT_IMPLEMENTED,
-  handleShareData: shareActions.handleShareData,
-  docTypeOf: shareActions.docTypeOf,
-};
+export { handleAction, NOT_IMPLEMENTED };
+export const handleShareData = shareActions.handleShareData;
+export const docTypeOf = shareActions.docTypeOf;

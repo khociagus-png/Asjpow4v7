@@ -1,11 +1,9 @@
+import { normalizeWa, supabaseJson } from './db/client.js';
+import { env } from './env.js';
+import { requireRole } from './actions-auth.js';
 // actions-wa.js — template WA (wa_templates) + pengiriman WhatsApp via Fonnte.
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.
-'use strict';
-
-const { normalizeWa, supabaseJson } = require('./db/client');
-const { env } = require('./env');
-const { requireRole } = require('./actions-auth');
 
 async function handleSimpanWaTemplate(payload, sessionToken) {
   const guard = requireRole(sessionToken, 'admin');
@@ -188,7 +186,7 @@ async function handleKirimTawaranMassal(payload, sessionToken) {
   }
 }
 
-module.exports = {
+export {
   handleSimpanWaTemplate,
   handleHapusWaTemplate,
   handleKirimSatuPesanFonnte,

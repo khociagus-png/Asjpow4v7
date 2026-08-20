@@ -1,3 +1,12 @@
+import bcrypt from 'bcryptjs';
+import { env } from './env.js';
+import { normalizeWa, isValidWaFormat } from '../../../shared/wa-rules.js';
+import { hasBackend, pick, supabaseJson, toText } from './db/client.js';
+import { findCandidateByWaFiltered, findCandidates } from './db/candidates.js';
+import { findAdmins } from './db/misc.js';
+import * as session from './session.js';
+import { cacheClear } from './cache.js';
+import { findCandidateByWa, CAND_WA_COLS } from './candidate-helpers.js';
 // actions-auth.js — autentikasi & otorisasi backend.
 //
 // MODUL BARU (Fase 1.1b REFACTOR_TODO.md): kode dipindah dari handlers.js —
@@ -5,19 +14,9 @@
 // handleLoginKandidat, handleDaftarKandidat, handleGantiPasswordKandidat.
 // findCandidateByWa & CAND_WA_COLS dipakai lintas domain → ada di
 // candidate-helpers.js (bukan di sini).
-'use strict';
 
-const bcrypt = require('bcryptjs');
-const { env } = require('./env');
 // Aturan WA (normalisasi + gate) — satu sumber kebenaran: shared/wa-rules.js
 // (frontend js/04_auth.js memakai yang sama).
-const { normalizeWa, isValidWaFormat } = require('../../../shared/wa-rules');
-const { hasBackend, pick, supabaseJson, toText } = require('./db/client');
-const { findCandidateByWaFiltered, findCandidates } = require('./db/candidates');
-const { findAdmins } = require('./db/misc');
-const session = require('./session');
-const { cacheClear } = require('./cache');
-const { findCandidateByWa, CAND_WA_COLS } = require('./candidate-helpers');
 
 function masterPins() {
   return [
@@ -335,7 +334,7 @@ function isOwnerOrAdmin(sessionToken, wa) {
   return false;
 }
 
-module.exports = {
+export {
   masterPins,
   requireAdmin,
   isOwnerOrAdmin,
@@ -350,7 +349,6 @@ module.exports = {
   handleGantiPasswordKandidat,
   registerFcmToken,
 };
-
 async function registerFcmToken(payload, sessionToken) {
   const [waStr, token, deviceInfo] = payload;
   const waRaw = String(waStr || '').trim();

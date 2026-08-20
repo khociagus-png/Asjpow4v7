@@ -1,22 +1,21 @@
+import { env, debugFileEnvKeys, debugFileStructure } from './env.js';
+import { findJobs } from './db/jobs.js';
+import { findCandidates } from './db/candidates.js';
+import { findAdmins, findSettings } from './db/misc.js';
+import { requireAdmin, masterPins } from './actions-auth.js';
 // actions-diagnostics.js — diagnostik koneksi backend (getAppConfig).
 // MODUL BARU (Fase 1.1d REFACTOR_TODO.md) — kode dipindah dari handlers.js,
 // perilaku TIDAK berubah. Endpoint ini mengembalikan info SENSITIF (skema DB,
 // klasifikasi hash password kandidat, daftar env key) — wajib sesi admin.
-'use strict';
 
-const { env, debugFileEnvKeys, debugFileStructure } = require('./env');
-const {
+import {
   columnsFromSchema,
   hasBackend,
   supabaseJson,
   supabaseUrl,
   tablesFromSchema,
   toText,
-} = require('./db/client');
-const { findJobs } = require('./db/jobs');
-const { findCandidates } = require('./db/candidates');
-const { findAdmins, findSettings } = require('./db/misc');
-const { requireAdmin, masterPins } = require('./actions-auth');
+} from './db/client.js';
 
 async function handleGetAppConfig(sessionToken) {
   // Endpoint ini mengembalikan info SENSITIF (skema DB, klasifikasi hash
@@ -123,4 +122,4 @@ function handleReportWebVital(payload) {
   return { success: true };
 }
 
-module.exports = { handleGetAppConfig, handleReportWebVital };
+export { handleGetAppConfig, handleReportWebVital };
