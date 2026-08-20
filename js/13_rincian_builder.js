@@ -186,7 +186,7 @@ export async function rbSavePreset(sec, val, chip, star) {
       if (typeof window.showToast === 'function')
         window.showToast(window.tr('ui.toast_fav_added'), 'success');
     } else if (typeof window.showToast === 'function') {
-      window.showToast((res && res.error) || 'Gagal simpan ke koleksi', 'error');
+      window.showToast((res && res.error) || window.tr('ui.toast_fav_save_failed'), 'error');
     }
   } catch (err) {
     if (typeof window.showToast === 'function')
@@ -209,7 +209,7 @@ export async function rbUnsavePreset(sec, dbId, chip, star) {
       if (typeof window.showToast === 'function')
         window.showToast(window.tr('ui.toast_fav_removed'), 'success');
     } else if (typeof window.showToast === 'function') {
-      window.showToast((res && res.error) || 'Gagal hapus dari koleksi', 'error');
+      window.showToast((res && res.error) || window.tr('ui.toast_fav_remove_failed'), 'error');
     }
   } catch (err) {
     if (typeof window.showToast === 'function')
