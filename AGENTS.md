@@ -20,6 +20,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 | **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |
 | **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama        |
 | **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md`                            | Agent skills library (dari davidondrej/skills) — **WAJIB per §10 untuk setiap task**    | Setiap sesi (§10 dispatch)               |
+| **DEBUG-TODO.md**                                                                              | Checklist debug semua kode (92 parts) — **WAJIB update per §11 saat ada fitur baru**    | Setiap sesi debug + saat tambah fitur    |
 
 > **Agent Skills (dari [davidondrej/skills](https://github.com/davidondrej/skills)):**
 > Library instruksi terstruktur yang dimuat agent hanya saat task cocok.
@@ -224,6 +225,7 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 - ❌ Edit hasil build (`assets/*`, `sw.js`, region `SHARED_MODALS`) dengan tangan.
 - ❌ Membuat kandidat/lamaran dengan WA yang tidak lolos normalisasi/gate.
 - ❌ Copy-paste skill dari external repo tanpa audit isi `scripts/` dan `references/` — skill bisa executed arbitrary code.
+- ❌ **Menambah fitur baru TANPA update DEBUG-TODO.md & test** (lihat §11) — fitur tanpa debug trail = tech debt permanen.
 
 ---
 
@@ -315,4 +317,98 @@ skills/
 │   └── global-agent-guardrails/     🚫 Shell denylist
 └── advice/
     └── advise-project-approach/     🔥 Research & advise
+```
+
+---
+
+## 11. Fitur Baru → Debug & Test Rule 📋
+
+> **ATURAN INTI:** Setiap kali menambah fitur baru (atau mengubah fitur signifikan),
+> AGENT WAJIB memperbarui `DEBUG-TODO.md` DAN menambah test sesuai standar project.
+> Tidak ada fitur baru tanpa dokumentasi debug & test — ini mencegah regressi dan
+> menghindari pengulangan kerja di sesi berikutnya.
+
+### 11.1 Checklist Wajib Saat Tambah Fitur Baru
+
+```
+SEBELUM mulai coding:
+1. Baca §10 (Mandatory Skill Dispatch) → load skill yang sesuai
+2. Baca DEBUG-TODO.md → identifikasi domain mana yang terpengaruh
+
+SETELAH coding & sebelum commit:
+3. ✅ Update DEBUG-TODO.md → tambah item debug untuk fitur baru
+4. ✅ Tambah unit test (minimal happy path + 1 edge case)
+5. ✅ Tambah i18n keys kalau ada teks UI baru (lihat §4)
+6. ✅ Jalankan `bun run test` → pastikan semua pass
+7. ✅ Jalankan `node --check` pada semua file JS yang diubah
+8. ✅ Jalankan `bun run check:handlers` kalau ada action baru
+9. ✅ Jalankan `bun run check:i18n` kalau ada teks baru
+10. ✅ Update PROGRESS.md (header sesi: tanggal + pengerja + hash)
+```
+
+### 11.2 Format Update DEBUG-TODO.md
+
+Saat menambah fitur baru, tambah item di domain yang sesuai dengan format:
+
+```markdown
+### X1. `nama-file.js` — Deskripsi Fitur
+
+- [ ] Happy path: pastikan [fungsi inti] berfungsi
+- [ ] Edge case: pastikan [error scenario] di-handle
+- [ ] Guard: pastikan [auth/validation] berfungsi
+- [ ] i18n: pastikan semua teks UI lewat `tr()`
+- [ ] Integration: pastikan [action backend] terdaftar + rate limit benar
+```
+
+**Contoh — Fitur baru "Export PDF":**
+
+```markdown
+### D11. `js/pdf-export.js` — Export PDF Kandidat
+
+- [ ] `exportPdf()`: pastikan generate PDF benar
+- [ ] `exportPdf()`: pastikan data kandidat lengkap
+- [ ] Guard: pastikan admin session valid
+- [ ] i18n: judul PDF, nama kolom lewat `tr()`
+- [ ] Rate limit: pastikan tidak ada abuse (opsional)
+```
+
+### 11.3 Test Standards per Tipe Fitur
+
+| Tipe Fitur              | Unit Test Wajib                                | E2E Test (jika applicable)          |
+| ----------------------- | ---------------------------------------------- | ----------------------------------- |
+| **Backend action baru** | Happy path + invalid payload + unauthorized    | `e2e/` flow yang menggunakan action |
+| **Frontend component**  | Render benar + edge case (null, empty)         | Visual check di preview             |
+| **Auth/Security**       | Valid token + invalid token + expired          | Login/logout flow                   |
+| **Upload/File**         | File valid + file terlalu besar + type salah   | Upload flow                         |
+| **AI/Chat**             | Prompt valid + response malformed + rate limit | AI chat flow                        |
+| **i18n**                | Semua new keys ada di `LANG.id` + `LANG.jp`    | —                                   |
+
+### 11.4 Debug Session Protocol
+
+Saat mulai sesi debug (atau sesi kerja baru):
+
+```
+1. Baca AGENTS.md §10 → identifikasi tipe task
+2. Baca DEBUG-TODO.md → cari part yang belum ✅
+3. Ambil 1-2 part → kerjakan → centang ✅
+4. Update header log sesi di DEBUG-TODO.md
+5. Commit + push
+6. Sesi berikutnya: lanjut dari part berikutnya
+```
+
+### 11.5 Anti-Regressi Rules
+
+- ❌ **JANGAN** hapus item debug dari DEBUG-TODO.md (meskipun sudah ✅) — histori penting
+- ❌ **JANGAN** skip test karena "sudah test manual" — automated test = safety net
+- ❌ **JANGAN** commit fitur baru tanpa update DEBUG-TODO.md
+- ✅ **WAJIB** update DEBUG-TODO.md SEBELUM commit (bukan sesudah)
+- ✅ **WAJIB** test pass SEBELUM push (bukan sesudah)
+- ✅ **WAJIB** i18n keys lengkap SEBELUM push
+
+### 11.6 Quick Reference
+
+```
+Fitur baru → SKILL (§10) → CODE → DEBUG-TODO (§11.2) → TEST (§11.3) → i18n → BUILD → COMMIT → PUSH
+                                                                                      ↑
+                                                                              JANGAN skip step ini
 ```
