@@ -1,4 +1,5 @@
 import { callAPI } from '../../api-client.js';
+import { setSentryUser } from '../core/sentry.js';
 import { tr } from '../../i18n.js';
 import { showToast, safeSet } from '../init/util.js';
 import {
@@ -312,6 +313,7 @@ export function initApp(res, isSilent = false) {
   if (localStorage.getItem('asj_admin_login') === 'sukses') {
     window.isAdmin = true;
     window.currentAdminName = localStorage.getItem('asj_admin_name');
+    setSentryUser({ role: 'admin', name: window.currentAdminName });
 
     if (!isSilent) {
       if (document.getElementById('nav-mode'))
@@ -378,6 +380,11 @@ export function initApp(res, isSilent = false) {
     window.isKandidat = true;
     window.currentKandidatName = localStorage.getItem('asj_kandidat_name');
     window.currentKandidatWa = localStorage.getItem('asj_kandidat_wa');
+    setSentryUser({
+      role: 'kandidat',
+      name: window.currentKandidatName,
+      wa: window.currentKandidatWa,
+    });
 
     if (!isSilent) {
       if (document.getElementById('nav-mode'))
