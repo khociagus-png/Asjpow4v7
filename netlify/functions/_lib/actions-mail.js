@@ -184,7 +184,7 @@ async function handleDeleteForm(payload, sessionToken) {
     });
     return { success: true, rowIndex: idx };
   } catch (e) {
-    return { success: false, error: 'Gagal hapus form: ' + e.message };
+    return { success: false, error: 'Gagal menghapus form. Silakan coba lagi.' };
   }
 }
 

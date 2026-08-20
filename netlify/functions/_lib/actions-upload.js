@@ -94,7 +94,7 @@ async function handleGetUploadUrls(payload, sessionToken) {
     }
     return { success: true, urls };
   } catch (e) {
-    return { success: false, error: 'Gagal membuat link upload: ' + e.message };
+    return { success: false, error: 'Gagal membuat link upload. Silakan coba lagi.' };
   }
 }
 
@@ -724,7 +724,7 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     }
     return { success: true };
   } catch (e) {
-    return { success: false, error: 'Gagal simpan berkas: ' + e.message };
+    return { success: false, error: 'Gagal menyimpan berkas. Silakan coba lagi.' };
   }
 }
 

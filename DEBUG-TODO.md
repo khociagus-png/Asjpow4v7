@@ -48,15 +48,15 @@
 
 ## B. FRONTEND — Core Pages
 
-### B1. `js/engine/init.js` (505 baris) — Engine Utama
+### B1. `js/engine/init.js` (518 baris) — Engine Utama ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `refreshDataDinamis()`: retry 1x sebelum error toast
-- [ ] `initApp()`: pastikan mode admin/kandidat/public switch benar
-- [ ] Auto-refresh 30s: pastikan interval cleanup saat logout
-- [ ] `visibilitychange` listener: pastikan tidak duplicate
-- [ ] Datalist `list-kode-job`: pastikan render 1x saja (bukan 2x)
-- [ ] Hash-based routing: pastikan `hashchange` listener berfungsi
-- [ ] Session check: pastikan token kosong → clear + reload### B2. `js/04_auth.js` (319 baris) — Authentication ✅ DIVERIFIKASI (2026-08-20)
+- [x] `refreshDataDinamis()`: retry 1x via `muatData(percobaan)` before error toast ✅
+- [x] `initApp()`: admin priority wins over kandidat (lines 54-56) ✅
+- [x] Auto-refresh 30s: `AUTO_REFRESH_TIMER` cleared on session invalid ✅
+- [x] `visibilitychange`: guarded by `_visibilityChangeInit` flag ✅
+- [x] Datalist `list-kode-job`: rendered once, duplicate removed (FIX 2026-08-20) ✅
+- [x] Hash-based routing: guarded by `_hashChangeInit` flag ✅
+- [x] Session check: token kosong → clear + reload with toast ✅### B2. `js/04_auth.js` (319 baris) — Authentication ✅ DIVERIFIKASI (2026-08-20)
 - [x] `normalizeWaInput()` → shared/wa-rules.js → 628xxx format — benar
 - [x] `isValidWaInput()` → regex `/^628\d{9,10}$/` — benar
 - [x] Login flow: admin 3-step + kandidat WA+PIN — benar
@@ -75,7 +75,7 @@
 - [x] `applyTheme()`: guard `if (!cfg) return` — benar
 - [x] Per-user theme storage (admin/kandidat/guest) — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-theme-debug.md`
-- [ ] CSS class injection: pastikan tidak ada style leak
+- [x] CSS class injection: all classes from hardcoded THEMES config, no user input ✅
 
 ### B5. `js/init/util.js` (298 baris) — Utilities ✅ DIVERIFIKASI (2026-08-20)
 
@@ -186,8 +186,8 @@
 - [x] No callAPI, no DOM refs — minimal file
 - [x] **Audit detail**: `docs/evals/2026-08-20-job-modal-debug.md`
 
-- [ ] Create/Edit job: pastikan field mapped ke `job_database` columns
-- [ ] Status change: pastikan `ubahStatusJob` berfungsi
+- [x] Create/Edit job: mapped via `mapJob()` in db/jobs.js (25+ columns) ✅
+- [x] Status change: via `aksiAdmin()` in admin_ops.js ✅
 
 ---
 
@@ -419,13 +419,13 @@
 - [x] `requireAdmin` imported ✅
 - [x] `handleApproveForm()` → `syncCandidateDariForm()` — creates/updates candidate on LULUS
 - [x] `handleRejectForm()` → `syncCandidateDariForm()` — sets GAGAL + detaches job
-- [ ] `handleDeleteForm()`: pastikan data ter-hapus
+- [x] `handleDeleteForm()`: requireAdmin + findFormByIndexFiltered + DELETE ✅
 
 ### H6. `actions-upload.js` (826 baris) — Upload & Files
 
-- [ ] `handleSubmitApply()`: pastikan application ter-create
-- [ ] `handleSimpanBerkasTahapan()`: pastikan file URL tersimpan
-- [ ] `handleGetUploadUrls()`: pastikan signed URL valid
+- [x] `handleSubmitApply()`: validates wa/code/nama + dokumen_share check + INSERT ✅
+- [x] `handleSimpanBerkasTahapan()`: session verify + WA ownership + Cloudinary/base64 + mail sync ✅
+- [x] `handleGetUploadUrls()`: signed URL via storageRequest + anti-duplicate cleanup ✅
 
 ### H7. `actions-master.js` (1161 baris) — Master Data ✅ RE-AUDITED (2026-08-20)
 
