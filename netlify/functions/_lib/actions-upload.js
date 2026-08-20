@@ -146,37 +146,53 @@ async function handleCekDataPelamar(payload) {
         timestamp: toText(r.timestamp || r.created_at || ''),
       }))
       .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
-    const row = rows.find((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
-    if (!row) return { found: false, applications: apps };
+    const myRows = rows.filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want);
+    if (!myRows.length) return { found: false, applications: apps };
+
+    // Scan SEMUA baris lamaran kandidat — ambil nilai non-empty terbaru
+    // untuk tiap field. Sebelumnya hanya mengambil dari baris PERTAMA
+    // (rows.find), jadi kalau baris pertama kosong (job lama tidak
+    // mewajibkan JFT/SSW/foto), auto-fill gagal padahal file sudah ada
+    // di lamaran lain. Sekarang konsisten dengan extraFilesMap yang juga
+    // scan semua baris.
+    const first = myRows[0];
+    const pickFirstNonEmpty = (fields) => {
+      for (const r of myRows) {
+        const v = toText(pick(r, fields));
+        if (v && v !== '-' && v !== 'null' && v !== 'undefined') return v;
+      }
+      return '-';
+    };
+    const bestPasPhoto = pickFirstNonEmpty(['pas_photo', 'pasPhoto', 'photo']);
+    const bestJft = pickFirstNonEmpty(['jft', 'jft_url']);
+    const bestSsw = pickFirstNonEmpty(['ssw', 'ssw_url']);
 
     const extraFilesMap = {};
-    rows
-      .filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want)
-      .forEach((r) => {
-        const ket = toText(pick(r, ['keterangan'])) || '';
-        ket.split(';').forEach((p) => {
-          const parts = p.split(':');
-          if (parts.length >= 2) {
-            const key = parts[0].trim().toUpperCase();
-            const val = parts.slice(1).join(':').trim();
-            if (key && val.startsWith('http') && !extraFilesMap[key]) {
-              extraFilesMap[key] = val;
-            }
+    myRows.forEach((r) => {
+      const ket = toText(pick(r, ['keterangan'])) || '';
+      ket.split(';').forEach((p) => {
+        const parts = p.split(':');
+        if (parts.length >= 2) {
+          const key = parts[0].trim().toUpperCase();
+          const val = parts.slice(1).join(':').trim();
+          if (key && val.startsWith('http') && !extraFilesMap[key]) {
+            extraFilesMap[key] = val;
           }
-        });
+        }
       });
+    });
 
     return {
       found: true,
-      nama: toText(pick(row, ['nama_lengkap', 'nama'])),
-      gender: toText(pick(row, ['gender', 'jenis_kelamin'])),
-      usia: toText(pick(row, ['usia', 'umur'])),
-      tb: toText(pick(row, ['tb'])),
-      bb: toText(pick(row, ['bb'])),
-      pasPhoto: toText(pick(row, ['pas_photo', 'pasPhoto', 'photo'])) || '-',
-      photoUrl: toText(pick(row, ['pas_photo', 'pasPhoto', 'photo'])) || '-',
-      jftUrl: toText(pick(row, ['jft', 'jft_url'])) || '-',
-      sswUrl: toText(pick(row, ['ssw', 'ssw_url'])) || '-',
+      nama: toText(pick(first, ['nama_lengkap', 'nama'])),
+      gender: toText(pick(first, ['gender', 'jenis_kelamin'])),
+      usia: toText(pick(first, ['usia', 'umur'])),
+      tb: toText(pick(first, ['tb'])),
+      bb: toText(pick(first, ['bb'])),
+      pasPhoto: bestPasPhoto,
+      photoUrl: bestPasPhoto,
+      jftUrl: bestJft,
+      sswUrl: bestSsw,
       applications: apps,
     };
   } catch (e) {
