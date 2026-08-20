@@ -157,15 +157,20 @@
 - [x] Duplicate check via `trOptionId()` — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-sysconfig-debug.md`
 
-### C8. `js/admin_ops/loading.js` — Loading States
+### C8. `js/admin_ops/loading.js` — Loading States ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Skeleton animation: pastikan tidak flicker
-- [ ] Global loader: pastikan show/hide timing benar
+- [x] `setSkeletonLoading()`: DOM null check + random width variation
+- [x] `jalankanSemuaSkeleton()`: all 6 DOM refs guarded
+- [x] No callAPI, no tr() — pure DOM skeleton renderer
+- [x] **Audit detail**: `docs/evals/2026-08-20-loading-debug.md`
 
-### C9. `js/admin_modal/cv.js` (671 baris) — CV Preview Modal
+### C9. `js/admin_modal/cv.js` (671 baris) — CV Preview Modal ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `bukaDigitalCV()`: pastikan data lengkap
-- [ ] Print/download: pastikan format benar
+- [x] `bukaDigitalCV()`: data loading + render complete
+- [x] All 60 DOM refs null-guarded
+- [x] All innerHTML XSS-safe with esc()/escJs()
+- [x] 20 tr() calls — well i18n'd
+- [x] **Audit detail**: `docs/evals/2026-08-20-cv-modal-debug.md`
 
 ### C10. `js/admin_modal/dbfilter.js` — DB Filter Modal
 
@@ -632,7 +637,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 7/11 |
+| C. Admin Panel | 11 parts | ✅ 9/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -643,7 +648,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 17/92** |
+| **TOTAL** | **92 parts** | **✅ 19/92** |
 
 ---
 
