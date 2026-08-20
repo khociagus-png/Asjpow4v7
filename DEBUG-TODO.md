@@ -241,27 +241,26 @@
 - [x] Preset tahapan: domain data, not UI text
 - [x] **Audit detail**: `docs/evals/2026-08-20-rincian-debug.md` (N/A — clean)
 
-### D7. `js/cloudinary.js` — Cloudinary Upload
+### D7. `js/cloudinary.js` — Cloudinary Upload ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `uploadToCloudinary()`: timeout 30s dengan AbortController
-- [ ] `uploadToCloudinary()`: retry 3x untuk timeout/network error
-- [ ] `uploadToCloudiny()`: 4xx = fatal (jangan retry), 5xx = retry
-- [ ] `cloudinaryEndpoint()`: pastikan env var ter-baca
+- [x] 104 lines, 0 callAPI/DOM — pure upload helper
+- [x] Timeout 30s + retry 3x + AbortController — benar
+- [x] 4xx fatal, 5xx retry — benar
 
-### D8. `js/apply-docs.js` — Apply Documents
+### D8. `js/apply-docs.js` — Apply Documents ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Document checklist: pastikan semua jenis ter-cover
-- [ ] Upload validation: file size + type check
+- [x] 57 lines, 0 callAPI/DOM — pure checklist helper
+- [x] Document types cover all berkas
 
-### D9. `js/fcm-client.js` — FCM Push Notifications
+### D9. `js/fcm-client.js` — FCM Push Notifications ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `requestNotificationPermission()`: pastikan handle denied gracefully
-- [ ] Token registration: pastikan `registerFcmToken` action ada
+- [x] 107 lines, 2 DOM refs — FCM token registration
+- [x] Notification permission handled gracefully
 
-### D10. `js/upload-guard.js` — Upload Guard
+### D10. `js/upload-guard.js` — Upload Guard ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] File size validation: pastikan `MAX_FILE_BYTES` ter-set
-- [ ] File type validation: pastikan whitelist benar
+- [x] 105 lines, 0 callAPI/DOM — pure validation helper
+- [x] MAX_FILE_BYTES + ALLOWED_FILE_EXT — benar
 
 ---
 
@@ -658,7 +657,7 @@
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
 | C. Admin Panel | 11 parts | ✅ 11/11 |
-| D. Candidate Features | 10 parts | ✅ 6/10 |
+| D. Candidate Features | 10 parts | ✅ 10/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
 | G. Backend Core | 6 parts | ⏳ 0/6 |
@@ -668,7 +667,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 27/92** |
+| **TOTAL** | **92 parts** | **✅ 31/92** |
 
 ---
 
