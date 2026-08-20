@@ -34,9 +34,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var p = new URLSearchParams(window.location.search);
   var wa = cleanPhoneJS(p.get('wa') || '');
   var nama = (p.get('nama') || '').trim();
-  document.getElementById('wa-display').textContent = wa;
-  document.getElementById('wa').value = wa;
-  document.getElementById('nama').value = nama;
+  var wad = document.getElementById('wa-display');
+  if (wad) wad.textContent = wa;
+  var wai = document.getElementById('wa');
+  if (wai) wai.value = wa;
+  var nm = document.getElementById('nama');
+  if (nm) nm.value = nama;
 })();
 
 let currentStep = 1;
@@ -462,23 +465,21 @@ window.onload = function () {
             setVal('tglTerbitPaspor', formatDate(data['TGL_TERBIT_PASPORT']));
           if (data['EXP_PASPORT']) setVal('expPaspor', formatDate(data['EXP_PASPORT']));
 
+          var fileSavedMsg =
+            "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> " +
+            window.tr('form.mf_file_saved') +
+            '</span>';
           if (data['PAS_PHOTO'] && String(data['PAS_PHOTO']).length > 10) {
             let pInfo = getEl('photoInfo');
-            if (pInfo)
-              pInfo.innerHTML =
-                "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+            if (pInfo) pInfo.innerHTML = fileSavedMsg;
           }
           if (data['JFT_URL'] && String(data['JFT_URL']).length > 10) {
             let jInfo = getEl('jftInfo');
-            if (jInfo)
-              jInfo.innerHTML =
-                "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+            if (jInfo) jInfo.innerHTML = fileSavedMsg;
           }
           if (data['SSW_URL'] && String(data['SSW_URL']).length > 10) {
             let sInfo = getEl('sswInfo');
-            if (sInfo)
-              sInfo.innerHTML =
-                "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Abaikan jika tak diganti.</span>";
+            if (sInfo) sInfo.innerHTML = fileSavedMsg;
           }
         }
       })

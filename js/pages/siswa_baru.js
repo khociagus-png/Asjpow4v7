@@ -159,8 +159,7 @@ function handleResize() {
 }
 
 function sendWelcomeMessage() {
-  var welcome =
-    'Yatta! Halo kak! Kenalin aku Qween Jeklin 👑. Mau daftar jadi siswa ASJ ya? Biar gampang, kita ngobrol aja yuk! Boleh sebutin **Nama Lengkap** kakak dulu?';
+  var welcome = window.tr('form.siswa_welcome');
   appendHTML('ai', welcome);
   // Format sama dengan pesan lain ({role, content}) supaya restore draft
   // dan history yang dikirim ke server konsisten.
@@ -246,9 +245,11 @@ export function sendMessage() {
   btnEl.disabled = true;
 
   // PERBAIKAN: Ubah teks loading saat chat dikirim agar tidak "tersangkut" teks lama
-  $('aiTypingStatus').innerHTML =
-    '<i class="fas fa-magic fa-spin mr-2"></i> Qween Jeklin sedang memikirkan balasan…';
-  $('aiTypingStatus').classList.remove('hidden');
+  var typingEl = $('aiTypingStatus');
+  if (typingEl)
+    typingEl.innerHTML =
+      '<i class="fas fa-magic fa-spin mr-2"></i> ' + window.tr('form.ai_chat_typing');
+  if ($('aiTypingStatus')) $('aiTypingStatus').classList.remove('hidden');
 
   var payloadToAI = { history: chatHistory, currentData: candidateData };
 
@@ -258,7 +259,8 @@ export function sendMessage() {
       inputEl.disabled = false;
       btnEl.disabled = false;
       inputEl.focus();
-      $('aiTypingStatus').classList.add('hidden');
+      var tsEl = $('aiTypingStatus');
+      if (tsEl) tsEl.classList.add('hidden');
 
       if (res.reply) {
         var finalReply = res.reply;
@@ -293,8 +295,9 @@ export function sendMessage() {
     .catch(function (err) {
       inputEl.disabled = false;
       btnEl.disabled = false;
-      $('aiTypingStatus').classList.add('hidden');
-      appendHTML('ai', 'Sinyal muter-muter kak. Coba kirim ulang ya!');
+      var tsEl2 = $('aiTypingStatus');
+      if (tsEl2) tsEl2.classList.add('hidden');
+      appendHTML('ai', window.tr('form.ai_chat_error'));
     });
 }
 
@@ -367,12 +370,13 @@ export function handleDocUpload(event, type) {
   if (!window.cekUploadFile(event.target, { maxMb: 3 })) return;
   var statusEl = $('status_' + type);
   statusEl.classList.remove('hidden');
-  statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-amber-400"></i> Membaca…';
+  statusEl.innerHTML =
+    '<i class="fas fa-spinner fa-spin text-amber-400"></i> ' + window.tr('ui.uploading_shard');
 
   // Downscale scan gambar dulu; pdf & gagal-decode dibiarkan utuh oleh helper.
   downscaleScanImage(file, 800, 0.8, function (hasil) {
     uploadedFiles[type] = hasil;
-    statusEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + hasil.name;
+    statusEl.innerHTML = '<i class="fas fa-check-circle"></i> ' + escapeHtml(hasil.name);
     saveToLocal(); // Auto-save file upload
   });
 }
@@ -415,33 +419,32 @@ export async function saveToDatabase() {
   // === VALIDASI WAJIB ISI SEMUA KOLOM ===
   let missingFields = [];
 
-  if (!candidateData.nama) missingFields.push('Nama Lengkap');
-  if (!candidateData.ttl) missingFields.push('Tempat & Tgl Lahir');
-  if (!candidateData.gender) missingFields.push('Gender (Laki-laki/Perempuan)');
-  if (!candidateData.agama) missingFields.push('Agama');
-  if (!candidateData.alamat) missingFields.push('Alamat Lengkap');
-  if (!candidateData.email) missingFields.push('Email Aktif');
-  if (!candidateData.pendidikan) missingFields.push('Pendidikan Terakhir');
-  if (!candidateData.wa_siswa) missingFields.push('Nomor WA Siswa');
-  if (!candidateData.wa_ortu) missingFields.push('Nomor WA Ortu/Wali');
+  if (!candidateData.nama) missingFields.push(window.tr('form.siswa_field_nama'));
+  if (!candidateData.ttl) missingFields.push(window.tr('form.siswa_field_ttl'));
+  if (!candidateData.gender) missingFields.push(window.tr('form.siswa_field_gender'));
+  if (!candidateData.agama) missingFields.push(window.tr('form.siswa_field_agama'));
+  if (!candidateData.alamat) missingFields.push(window.tr('form.siswa_field_alamat'));
+  if (!candidateData.email) missingFields.push(window.tr('form.siswa_field_email'));
+  if (!candidateData.pendidikan) missingFields.push(window.tr('form.siswa_field_pendidikan'));
+  if (!candidateData.wa_siswa) missingFields.push(window.tr('form.siswa_field_wa_siswa'));
+  if (!candidateData.wa_ortu) missingFields.push(window.tr('form.siswa_field_wa_ortu'));
 
-  if (!uploadedFiles.ktp) missingFields.push('Upload Scan KTP');
-  if (!uploadedFiles.kk) missingFields.push('Upload Scan KK');
-  if (!uploadedFiles.ijazah) missingFields.push('Upload Scan Ijazah');
+  if (!uploadedFiles.ktp) missingFields.push(window.tr('form.siswa_field_ktp'));
+  if (!uploadedFiles.kk) missingFields.push(window.tr('form.siswa_field_kk'));
+  if (!uploadedFiles.ijazah) missingFields.push(window.tr('form.siswa_field_ijazah'));
 
   if (missingFields.length > 0) {
-    let msg = '⚠️ Dede Jeklin lihat ada data yang belum lengkap nih kak:\n\n';
+    let msg = window.tr('form.siswa_missing_header') + '\n\n';
     missingFields.forEach((f) => (msg += '- ' + f + '\n'));
-    msg +=
-      '\nYuk dilengkapi dulu! Boleh diisi manual di kotak kanan, atau ngobrol lagi sama Jeklin.';
-    alert(msg);
+    msg += '\n' + window.tr('form.siswa_missing_footer');
+    window.showToast(msg, 'error');
     if (window.innerWidth < 768) switchTab('form'); // Bawa ke tab form biar kelihatan
     return;
   }
 
   var btn = $('btnSaveDB');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENGIRIM…';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.siswa_sending') + '…';
 
   try {
     var folderName =
@@ -462,27 +465,28 @@ export async function saveToDatabase() {
       .then(function (res) {
         btn.disabled = false;
         if (res.success) {
-          btn.innerHTML = '<i class="fas fa-check"></i> BERHASIL!';
+          btn.innerHTML = '<i class="fas fa-check"></i> ' + window.tr('form.siswa_success_btn');
           btn.classList.replace('bg-emerald-600', 'bg-sky-600');
 
           // BERSIHKAN CACHE KARENA SUDAH BERHASIL DAFTAR
           localStorage.removeItem(DRAFT_KEY);
 
-          alert('✅ Pendaftaran berhasil masuk ke sistem ASJ! Harap tunggu info selanjutnya ya.');
+          window.showToast(window.tr('form.siswa_success'), 'success');
         } else {
-          alert('❌ Gagal: ' + res.message);
-          btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DATA';
+          window.showToast(window.tr('form.siswa_failed') + ' ' + (res.message || ''), 'error');
+          btn.innerHTML =
+            '<i class="fas fa-paper-plane"></i> ' + window.tr('form.siswa_submit_btn');
         }
       })
       .catch(function (err) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DATA';
-        alert('Sinyal error nih kak. Pastikan internet lancar dan coba lagi!');
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> ' + window.tr('form.siswa_submit_btn');
+        window.showToast(window.tr('form.siswa_network_error'), 'error');
       });
   } catch (e) {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-paper-plane"></i> SUBMIT DATA';
-    alert('Gagal mengunggah dokumen: ' + e.message);
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> ' + window.tr('form.siswa_submit_btn');
+    window.showToast(window.tr('form.siswa_upload_failed') + ' ' + (e.message || ''), 'error');
   }
 }
 

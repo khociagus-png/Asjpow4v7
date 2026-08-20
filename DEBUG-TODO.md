@@ -324,17 +324,26 @@
 - [x] `sendMessage()`: DOM null checks on inputEl/btnEl
 - [x] `saveToDatabase()`: ext validation with proper error messages
 
-### F6. `js/pages/master_full.js` (803 baris) — Master Form
+### F6. `js/pages/master_full.js` (803 baris) — Master Form ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pending re-audit
+- [x] Hardcoded "File Tersimpan" FIXED → `tr('form.mf_file_saved')` + extracted variable
+- [x] Missing DOM null checks FIXED — wa-display/wa/nama IIFE guarded
+- [x] `submitMaster()`: all field reads use `valSafe()` (null-safe) ✅
+- [x] `changeStep()`: alert() in catch — acceptable error boundary
 
-### F7. `js/pages/share.js` (701 baris) — Share Page
+### F7. `js/pages/share.js` (581 baris) — Share Page ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pending re-audit
+- [x] XSS FIXED in Sesi 21: safeName escapes \, ', "
+- [x] `renderGrid()`: uses `escapeHtml()` for onclick ✅
+- [x] Local SHARE_LANG fallback ✅
 
-### F8. `js/pages/siswa_baru.js` (503 baris) — Siswa Baru Page
+### F8. `js/pages/siswa_baru.js` (503 baris) — Siswa Baru Page ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pending re-audit
+- [x] XSS FIXED: `hasil.name` in `handleDocUpload()` now uses `escapeHtml()`
+- [x] Hardcoded alert() FIXED → `showToast()` + `tr()` keys (18 new i18n keys)
+- [x] Hardcoded button labels FIXED → `tr()` keys (MENGIRIM/BERHASIL/SUBMIT DATA)
+- [x] Missing null check FIXED — `$('aiTypingStatus')` guarded
+- [x] Welcome message FIXED → `tr('form.siswa_welcome')`
 
 ---
 

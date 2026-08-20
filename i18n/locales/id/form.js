@@ -143,6 +143,7 @@ export const form = {
     mf_sesi_berakhir: 'Sesi berakhir atau tidak cocok dengan nomor WA ini. Silakan masuk ulang.',
     mf_sesi_simpan: 'Sesi berakhir atau tidak cocok. Silakan masuk ulang.',
     mf_mode_preview: 'Mode Preview: Nomor WA tidak ditemukan di URL, auto-fill dilewati.',
+    mf_file_saved: 'File Tersimpan. Abaikan jika tak diganti.',
     mf_pilih_tempat: 'Pilih',
     mf_bulan_masuk: 'Cth: IPA / Teknik Mesin',
     // Placeholder statis form master (mf_ph_*)
@@ -360,5 +361,30 @@ export const form = {
     txt_done: 'Done',
     txt_belum_data: 'Belum ada data.',
     txt_pilih: 'Pilih',
+    // --- siswa baru form ---
+    siswa_welcome:
+      'Yatta! Halo kak! Kenalin aku Qween Jeklin 👑. Mau daftar jadi siswa ASJ ya? Biar gampang, kita ngobrol aja yuk! Boleh sebutin **Nama Lengkap** kakak dulu?',
+    siswa_field_nama: 'Nama Lengkap',
+    siswa_field_ttl: 'Tempat & Tgl Lahir',
+    siswa_field_gender: 'Gender (Laki-laki/Perempuan)',
+    siswa_field_agama: 'Agama',
+    siswa_field_alamat: 'Alamat Lengkap',
+    siswa_field_email: 'Email Aktif',
+    siswa_field_pendidikan: 'Pendidikan Terakhir',
+    siswa_field_wa_siswa: 'Nomor WA Siswa',
+    siswa_field_wa_ortu: 'Nomor WA Ortu/Wali',
+    siswa_field_ktp: 'Upload Scan KTP',
+    siswa_field_kk: 'Upload Scan KK',
+    siswa_field_ijazah: 'Upload Scan Ijazah',
+    siswa_missing_header: '⚠️ Dede Jeklin lihat ada data yang belum lengkap nih kak:',
+    siswa_missing_footer:
+      'Yuk dilengkapi dulu! Boleh diisi manual di kotak kanan, atau ngobrol lagi sama Jeklin.',
+    siswa_sending: 'MENGIRIM',
+    siswa_success_btn: 'BERHASIL!',
+    siswa_success: '✅ Pendaftaran berhasil masuk ke sistem ASJ! Harap tunggu info selanjutnya ya.',
+    siswa_failed: 'Gagal:',
+    siswa_submit_btn: 'SUBMIT DATA',
+    siswa_network_error: 'Sinyal error nih kak. Pastikan internet lancar dan coba lagi!',
+    siswa_upload_failed: 'Gagal mengunggah dokumen:',
   },
 };
