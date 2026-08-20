@@ -349,8 +349,13 @@ function syncViewKandidatUi() {
 }
 
 // Toggle Tampilan Sederhana ↔ Lengkap (tombol di header Data Pelamar).
+// Di mobile (≤768px), otomatis pakai mode sederhana.
 export function toggleViewKandidat() {
   viewKandidatSimple = !viewKandidatSimple;
+  // Force simple di mobile supaya tabel tidak overflow
+  if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+    viewKandidatSimple = true;
+  }
   try {
     window.localStorage.setItem('asj_view_kandidat_simple', viewKandidatSimple ? '1' : '0');
   } catch (e) {}
@@ -405,7 +410,7 @@ function renderKandidatTableSimple(tb, arr) {
   }
   if (arr.length > limitKan) {
     html +=
-      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
@@ -769,7 +774,7 @@ export function renderKandidatTable(arr) {
   }
   if (arr.length > limitKan) {
     html +=
-      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=10; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
@@ -887,7 +892,7 @@ async function showMonthlyReport() {
 }
 
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
-// HTML inline onclick (window.filterKandidat, window.limitKan+=10;...).
+// HTML inline onclick (window.filterKandidat, window.limitKan+=25;...).
 registerSeamAliases({
   filterKandidat,
   toggleViewKandidat,
