@@ -17,9 +17,11 @@ export function bukaAdminAiCopilot(candidateId) {
     return;
   }
   currentAiCandidateId = candidateId || null;
-  document.getElementById('modal-admin-ai').classList.remove('hidden');
+  var modalAi = document.getElementById('modal-admin-ai');
+  if (modalAi) modalAi.classList.remove('hidden');
   window.pastikanBarParseAdminAi();
   const chatBox = document.getElementById('admin-ai-chat');
+  if (!chatBox) return;
 
   chatBox.innerHTML = `
         <div class="flex items-start gap-3 mt-4">
@@ -38,7 +40,8 @@ export function bukaAdminAiCopilot(candidateId) {
 }
 
 export function tutupAdminAi() {
-  document.getElementById('modal-admin-ai').classList.add('hidden');
+  var modalClose = document.getElementById('modal-admin-ai');
+  if (modalClose) modalClose.classList.add('hidden');
 }
 
 export async function kirimPesanAdminAi(event) {
@@ -49,7 +52,8 @@ export async function kirimPesanAdminAi(event) {
 
   tambahPesanAdminAi(msg, 'user');
   input.value = '';
-  document.getElementById('admin-ai-suggestions').innerHTML = '';
+  var sugEl = document.getElementById('admin-ai-suggestions');
+  if (sugEl) sugEl.innerHTML = '';
 
   const typingId = 'typing-' + Date.now();
   const chatBox = document.getElementById('admin-ai-chat');
@@ -113,24 +117,28 @@ export function autoFillFormDariAi(data) {
   if (!data) return;
 
   // Fill text fields
-  if (data.nama_lengkap) document.getElementById('ai-k-nama').value = data.nama_lengkap;
-  if (data.no_whatsapp) document.getElementById('ai-k-wa').value = data.no_whatsapp;
-  if (data.job_dilamar) document.getElementById('ai-k-loker').value = data.job_dilamar;
-  if (data.usia) document.getElementById('ai-k-usia').value = data.usia;
+  var elNama = document.getElementById('ai-k-nama');
+  var elWa = document.getElementById('ai-k-wa');
+  var elLoker = document.getElementById('ai-k-loker');
+  var elUsia = document.getElementById('ai-k-usia');
+  if (data.nama_lengkap && elNama) elNama.value = data.nama_lengkap;
+  if (data.no_whatsapp && elWa) elWa.value = data.no_whatsapp;
+  if (data.job_dilamar && elLoker) elLoker.value = data.job_dilamar;
+  if (data.usia && elUsia) elUsia.value = data.usia;
 
   // Fill dual-language fields
   if (data.gender) {
-    if (data.gender.id_indonesia)
-      document.getElementById('ai-k-gender-id').value = data.gender.id_indonesia;
-    if (data.gender.id_jepang)
-      document.getElementById('ai-k-gender-jp').value = data.gender.id_jepang;
+    var elGId = document.getElementById('ai-k-gender-id');
+    var elGJp = document.getElementById('ai-k-gender-jp');
+    if (data.gender.id_indonesia && elGId) elGId.value = data.gender.id_indonesia;
+    if (data.gender.id_jepang && elGJp) elGJp.value = data.gender.id_jepang;
   }
 
   if (data.status_nikah) {
-    if (data.status_nikah.id_indonesia)
-      document.getElementById('ai-k-nikah-id').value = data.status_nikah.id_indonesia;
-    if (data.status_nikah.id_jepang)
-      document.getElementById('ai-k-nikah-jp').value = data.status_nikah.id_jepang;
+    var elNId = document.getElementById('ai-k-nikah-id');
+    var elNJp = document.getElementById('ai-k-nikah-jp');
+    if (data.status_nikah.id_indonesia && elNId) elNId.value = data.status_nikah.id_indonesia;
+    if (data.status_nikah.id_jepang && elNJp) elNJp.value = data.status_nikah.id_jepang;
   }
 
   // Flash the form to show it updated
@@ -154,10 +162,12 @@ export function simpanKandidatDariAi() {
     return;
   }
 
-  // Transfer to the main upload modal for final file attachments
-  document.getElementById('k-nama').value = nama;
-  document.getElementById('k-wa').value = wa;
-  document.getElementById('k-loker').value = loker;
+  // Transfer to the main upload modal for final file attachments  var elKNama = document.getElementById('k-nama');
+  var elKWa = document.getElementById('k-wa');
+  var elKLoker = document.getElementById('k-loker');
+  if (elKNama) elKNama.value = nama;
+  if (elKWa) elKWa.value = wa;
+  if (elKLoker) elKLoker.value = loker;
 
   tutupAdminAi();
   document.getElementById('modal-tambah-kandidat').classList.remove('hidden');
@@ -167,6 +177,7 @@ export function simpanKandidatDariAi() {
 
 export function tambahPesanAdminAi(text, sender) {
   const chatBox = document.getElementById('admin-ai-chat');
+  if (!chatBox) return;
   const isUser = sender === 'user';
 
   let cleanText = window.esc(text);
@@ -202,6 +213,7 @@ export function tambahPesanAdminAi(text, sender) {
 
 export function tampilkanSaranAdminAi(actions) {
   const cont = document.getElementById('admin-ai-suggestions');
+  if (!cont) return;
   cont.innerHTML = '';
   actions.forEach((act) => {
     const btn = document.createElement('button');

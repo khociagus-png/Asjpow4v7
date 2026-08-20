@@ -30,7 +30,8 @@ export async function bukaSimulatorInterview() {
   }
 
   // Jika VIP, buka modal
-  document.getElementById('modal-interview').classList.remove('hidden');
+  var modalIv = document.getElementById('modal-interview');
+  if (modalIv) modalIv.classList.remove('hidden');
   pastikanTombolSelesaiInterview();
 
   // Reset chat & langsung mulai: AI menanyakan pertanyaan pertama sesuai
