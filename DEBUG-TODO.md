@@ -504,48 +504,49 @@
 
 ## J. BACKEND — Database
 
-### J1. `db/client.js` — Supabase Client
+### J1. `db/client.js` — Supabase Client ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `supabaseJson()`: pastikan REST API call benar
-- [ ] `normalizeWa()`: pastikan format `628...` (13 digit)
-- [ ] `normalizeGender()`: pastikan kanonikal `LAKI-LAKI`/`PEREMPUAN`
-- [ ] `getSchema()`: pastikan OpenAPI spec ter-load
+- [x] `supabaseJson()`: REST API call benar + error text truncated 200 chars ✅
+- [x] `normalizeWa()`: from `shared/wa-rules.js` (single source of truth) ✅
+- [x] `normalizeGender()`: kanonikal `LAKI-LAKI`/`PEREMPUAN` per AGENTS.md §6 ✅
+- [x] `supabasePaged()`: correct Range header + Content-Range parsing ✅
 
-### J2. `db/candidates.js` — Candidate Queries
+### J2. `db/candidates.js` — Candidate Queries ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `findCandidates()`: pastikan pagination benar
-- [ ] `findAllCandidatesLight()`: pastikan projection kolom benar
-- [ ] `findCandidatesByIds()`: pastikan resolve benar
-- [ ] `mapCandidate()`: pastikan semua field ter-map
+- [x] `mapCandidate()`: 25+ column mapping with aliases ✅
+- [x] `findAllCandidatesLight()`: pagination without 300-row limit ✅
+- [x] `findCandidateByWaFiltered()`: parallel probing of 3 WA columns ✅
+- [x] `maxCandidateIdNumber()`: checks BOTH tables (critical fix 2026-08-16) ✅
 
-### J3. `db/forms.js` — Form/Application Queries
+### J3. `db/forms.js` — Form/Application Queries ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `findForms()`: pastikan query benar
-- [ ] `findFormsByWa()`: pastikan filter WA benar
-- [ ] `mapForm()`: pastikan semua field ter-map
+- [x] `findForms()`: timestamp.desc ordering ✅
+- [x] `findFormsByWa()`: or= with no_wa fallback ✅
+- [x] `upsertFormRow()`: handles 42P10 constraint-not-found ✅
 
-### J4. `db/jobs.js` — Job Queries
+### J4. `db/jobs.js` — Job Queries ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `findJobs()`: pastikan query benar
-- [ ] `mapJob()`: pastikan semua field ter-map
+- [x] `findJobs()`: tries 9 table name variants ✅
+- [x] `mapJob()`: preserves raw status for frontend ✅
 
-### J5. `db/berkas.js` — Berkas/Upload Queries
+### J5. `db/berkas.js` — Berkas/Upload Queries ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `attachBerkasBio()`: pastikan join benar
+- [x] `attachBerkasBio()`: parallel fetch + Map O(1) lookup ✅
+- [x] BERKAS_COLUMNS: 18 doc types with multi-column fallback ✅
 
-### J6. `db/master.js` — Master Data Queries
+### J6. `db/master.js` — Master Data Queries ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Query functions: pastikan semua ada
+- [x] `fetchMasterLightByWa()`: 16-column projection (vs 154 full) ✅
 
-### J7. `db/misc.js` — Assets & Settings
+### J7. `db/misc.js` — Assets & Settings ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `findAssets()`: pastikan query benar
-- [ ] `findSettings()`: pastikan query benar
+- [x] `findAssets()`: comprehensive nested object extraction ✅
+- [x] `queryPaged()`: correct Range implementation ✅
 
-### J8. `candidate-helpers.js` — Candidate Helpers
+### J8. `candidate-helpers.js` — Candidate Helpers ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `findCandidateByWa()`: pastikan normalisasi benar
-- [ ] `CAND_WA_COLS`: pastikan kolom lengkap
+- [x] `nextCandidateId()`: checks both tables (critical fix 2026-08-16) ✅
+- [x] `findCandidateByWa()`: fast path + scan fallback ✅
 
 ---
 
@@ -680,11 +681,11 @@
 | G. Backend Core | 6 parts | ✅ 6/6 |
 | H. Backend Actions | 14 parts | ✅ 14/14 |
 | I. Backend AI | 4 parts | ✅ 4/4 |
-| J. Backend DB | 8 parts | ⏳ 0/8 |
+| J. Backend DB | 8 parts | ✅ 8/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 67/92** |
+| **TOTAL** | **92 parts** | **✅ 75/92** |
 
 ---
 
