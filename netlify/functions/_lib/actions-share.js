@@ -124,6 +124,28 @@ async function handleShareData(jobCode) {
         const photoFile = names.find((n) => docTypeOf(n) === 'PHOTO');
         if (photoFile) pasPhoto = pubBase + folder + encodeURIComponent(photoFile);
       }
+
+      let finalCv = c.fileCv;
+      let finalJft = c.jft;
+      let finalSsw = c.ssw;
+
+      // Extract newest CV/JFT/SSW dari extraDocs (folder master & history)
+      // jika kandidat melamar tanpa dokumen tersebut di loker baru.
+      for (let i = extraDocs.length - 1; i >= 0; i--) {
+        const doc = extraDocs[i];
+        const t = docTypeOf(doc.name);
+        if (t === 'CV' && (!finalCv || finalCv === '-')) {
+          finalCv = doc.url;
+          extraDocs.splice(i, 1);
+        } else if (t === 'JFT' && (!finalJft || finalJft === '-')) {
+          finalJft = doc.url;
+          extraDocs.splice(i, 1);
+        } else if (t === 'SSW' && (!finalSsw || finalSsw === '-')) {
+          finalSsw = doc.url;
+          extraDocs.splice(i, 1);
+        }
+      }
+
       candidates.push({
         id_kandidat: c.idKandidat,
         no_wa: c.wa,
@@ -133,9 +155,9 @@ async function handleShareData(jobCode) {
         tb: c.tb,
         bb: c.bb,
         pas_photo: pasPhoto,
-        file_cv: c.fileCv,
-        jft: c.jft,
-        ssw: c.ssw,
+        file_cv: finalCv,
+        jft: finalJft,
+        ssw: finalSsw,
         nilai_jft_text: c.jftText,
         bidang_ssw_text: c.sswText,
         extraDocs,

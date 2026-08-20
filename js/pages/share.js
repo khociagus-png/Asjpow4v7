@@ -506,14 +506,9 @@ export function renderGrid() {
         : 'https://ui-avatars.com/api/?name=' +
           encodeURIComponent(namaLengkap) +
           '&background=0D8ABC&color=fff';
-    // Thumbnail storage (kartu 72-84px): versi kecil + lazy; preview zoom tetap full.
+    // Thumbnail storage (kartu 72-84px): gunakan aslinya agar tidak pecah/blur
+    // karena Supabase Image Transformation mungkin memotong/compress terlalu agresif.
     let photoThumb = photoUrl;
-    if (
-      photoUrl.indexOf('ui-avatars') === -1 &&
-      /^https?:\/\/[^/]+\/storage\/v1\/object\/public\//i.test(photoUrl)
-    ) {
-      photoThumb = photoUrl + (photoUrl.indexOf('?') >= 0 ? '&' : '?') + 'width=200&quality=80';
-    }
     let safeName = namaLengkap.replace(/'/g, "\\'");
 
     // Tombol aksi kompak & proporsional: ikon kecil di atas label
