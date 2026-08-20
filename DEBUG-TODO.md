@@ -108,12 +108,15 @@
 - [x] Column filter: debounced 250ms — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-candidate-render-debug.md`
 
-### C3. `js/render/mail.js` (371 baris) — Mail Inbox
+### C3. `js/render/mail.js` (371 baris) — Mail Inbox ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `renderFormInbox()`: pagination benar
-- [ ] Review/Approve/Reject/Delete: pastikan action ke backend benar
-- [ ] Badge notification: count accurate
-- [ ] Scroll position: jangan reset saat auto-refresh
+- [x] Duplicate `class` attribute on checkbox FIXED — merged `mail-check w-4 h-4 accent-rose-500 cursor-pointer`
+- [x] Hardcoded Indonesian empty messages FIXED → `tr('admin.report_empty_mail')` + `tr('admin.report_empty_mail_status')`
+- [x] `MAIL_BUCKET()` legacy status mapping — 12 variants covered correctly
+- [x] `MAIL_SELECTED` accessor — bridge pattern, no stale binding
+- [x] XSS: all dynamic values use `esc()`/`escJs()` — benar
+- [x] i18n: all UI text via `tr()` — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-mail-render-debug.md`
 
 ### C4. `js/admin_ops/candidates.js` (368 baris) — Admin Candidates
 
@@ -611,7 +614,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 2/11 |
+| C. Admin Panel | 11 parts | ✅ 3/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |

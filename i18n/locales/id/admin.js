@@ -30,6 +30,8 @@ export const admin = {
     report_by_stage: 'Per Tahapan',
     report_by_status: 'Per Status',
     report_empty: 'Tidak ada data kandidat.',
+    report_empty_mail: 'TIDAK ADA DATA MAIL',
+    report_empty_mail_status: 'TIDAK ADA DATA MAIL DENGAN STATUS',
     filtered: 'terfilter',
     tab_schedule: 'Jadwal Agenda',
     tab_mail: 'Mail Inbox',

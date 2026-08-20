@@ -30,6 +30,8 @@ export const admin = {
     report_by_stage: '選考段階別',
     report_by_status: 'ステータス別',
     report_empty: '候補者データがありません。',
+    report_empty_mail: 'メールデータがありません。',
+    report_empty_mail_status: 'ステータスのメールデータがありません。',
     filtered: 'フィルター済み',
     tab_schedule: 'スケジュール',
     tab_mail: 'メール受信箱',

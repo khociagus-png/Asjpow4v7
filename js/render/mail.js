@@ -269,11 +269,11 @@ export function renderFormInbox() {
     var ck = MAIL_SELECTED[f.rowIndex] ? ' checked' : '';
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
-      '<td class="p-4 text-center"><input type="checkbox" class="mail-check" data-idx="' +
+      '<td class="p-4 text-center"><input type="checkbox" class="mail-check w-4 h-4 accent-rose-500 cursor-pointer" data-idx="' +
       f.rowIndex +
       '" onclick="toggleMailSelect(this)" ' +
       ck +
-      ' aria-label="Pilih" class="w-4 h-4 accent-rose-500 cursor-pointer"></td>' +
+      ' aria-label="Pilih"></td>' +
       '<td data-label="' +
       tr('table.timestamp') +
       '" class="p-4 text-[10px] text-slate-400 whitespace-nowrap">' +
@@ -340,8 +340,9 @@ export function renderFormInbox() {
   if (arr.length === 0) {
     var emptyMsg =
       mailFilterStatus === 'ALL'
-        ? 'TIDAK ADA DATA MAIL'
-        : 'TIDAK ADA DATA MAIL DENGAN STATUS ' +
+        ? tr('admin.report_empty_mail')
+        : tr('admin.report_empty_mail_status') +
+          ' ' +
           (MAIL_STATUS_LABEL[mailFilterStatus] || mailFilterStatus);
     html =
       '<tr><td colspan="9" class="p-4 text-center text-slate-500 font-bold">' +
