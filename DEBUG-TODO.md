@@ -427,48 +427,45 @@
 - [ ] `handleSimpanBerkasTahapan()`: pastikan file URL tersimpan
 - [ ] `handleGetUploadUrls()`: pastikan signed URL valid
 
-### H7. `actions-master.js` (1161 baris) — Master Data
+### H7. `actions-master.js` (1161 baris) — Master Data ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleSubmitMasterForm()`: pastikan semua field ter-map
-- [ ] `handleGetMasterDataByWa()`: pastikan data lengkap
-- [ ] `handleSimpanUpdateMaster()`: pastikan partial update benar
+- [x] `requireRole` imported ✅
+- [x] `handleSubmitMasterForm()`: column mapping complete
+- [x] `handleSimpanUpdateMaster()`: partial update with mail sync
 
-### H8. `actions-share.js` — Share View
+### H8. `actions-schedule.js` (180 baris) — Schedule & Tasks ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleShareData()`: pastikan public access tanpa session
-- [ ] `docTypeOf()`: pastikan mapping file type benar
+- [x] `requireRole` imported ✅
+- [x] All CRUD operations guarded by admin role
 
-### H9. `actions-wa.js` — WhatsApp (Fonnte)
+### H9. `actions-wa.js` (197 baris) — WhatsApp (Fonnte) ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleKirimSatuPesanFonnte()`: pastikan rate limit 2/min
-- [ ] `handleKirimTawaranMassal()`: pastikan batch processing
-- [ ] `handleSimpanWaTemplate()`: pastikan template tersimpan
+- [x] `requireRole` imported ✅
+- [x] Template CRUD + Fonnte send verified
 
-### H10. `actions-schedule.js` — Schedule & Tasks
+### H10. `actions-config.js` (148 baris) — System Config ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleSimpanJadwalBaru()`: pastikan data lengkap
-- [ ] `handleTambahTugasBaru()`: pastikan task tersimpan
-- [ ] `handleSetTugasStatus()`: pastikan status toggle
+- [x] `requireRole` imported ✅
+- [x] sys_config update + rincian presets clean
 
-### H11. `actions-config.js` — System Config
+### H11. `actions-register.js` (158 baris) — Siswa Baru ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleUpdateSysConfig()`: pastikan admin guard
-- [ ] `handleGetRincianPresets()`: pastikan data lengkap
+- [x] Public endpoints (no auth needed) ✅
+- [x] `cacheClear()` on registration ✅
 
-### H12. `actions-register.js` — Siswa Baru
+### H12. `actions-share.js` (232 baris) — Share View ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleSubmitDaftarSiswa()`: pastikan registration benar
-- [ ] `handleGenerateFormBridge()`: pastikan URL benar
+- [x] Public share view (no auth needed) ✅
+- [x] Storage folder listing + doc type mapping
 
-### H13. `actions-drive.js` — Drive Migration
+### H13. `actions-drive.js` — DIHAPUS (Sesi 16)
 
-- [ ] `handleGetDriveLinkCandidates()`: pastikan scan benar
-- [ ] `handleUploadDriveReplacement()`: pastikan file ter-upload
+- [x] Feature removed, code deleted
 
-### H14. `actions-diagnostics.js` — Diagnostics
+### H14. `actions-diagnostics.js` (126 baris) — Diagnostics ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleGetAppConfig()`: pastikan tidak bocorkan secret
-- [ ] `handleReportWebVital()`: pastikan data tersimpan
+- [x] `requireAdmin` imported ✅
+- [x] Returns sensitive DB info — admin-only, correct
 
 ---
 
