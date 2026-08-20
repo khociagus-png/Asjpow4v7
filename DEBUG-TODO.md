@@ -64,12 +64,13 @@
 - [x] Auto-login guard: clear + reload — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-auth-debug.md`
 
-### B3. `js/init/nav.js` — Navigation & Logout
+### B3. `js/init/nav.js` — Navigation & Logout ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `logoutApp()`: pastikan `AUTO_REFRESH_TIMER` di-cleanup
-- [ ] `logoutApp()`: pastikan semua localStorage key dihapus
-- [ ] Mobile nav toggle: pastikan responsive
-- [ ] `changePage()`: pastikan page switch benar
+- [x] `logoutApp()`: AUTO_REFRESH_TIMER cleanup — benar
+- [x] `logoutApp()`: 10 localStorage keys dihapus — benar
+- [x] Mobile nav toggle: CSS class + requestAnimationFrame — benar
+- [x] `changePage()`: page switch + re-render public — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-nav-debug.md`
 
 ### B4. `js/init/theme.js` (291 baris) — Theme System
 
@@ -607,7 +608,7 @@
 
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
-| B. Frontend Core | 5 parts | ✅ 2/5 |
+| B. Frontend Core | 5 parts | ✅ 3/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
@@ -619,7 +620,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 7/92** |
+| **TOTAL** | **92 parts** | **✅ 8/92** |
 
 ---
 
