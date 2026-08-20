@@ -28,14 +28,14 @@
 
 ### Backend & keputusan terbuka
 
-- [ ] Pastikan semua modul pakai `supabase.*` helper (bukan fetch mentah).
-- [ ] Keputusan entry per halaman standalone (ESM sudah dipilih — dokumentasikan).
+- [x] Semua modul pakai `supabase.*` helper — ✅ audit 2026-08-18: `supabasePaged`/`supabaseJson` di `db/client.js`, `storageRequest` di `storage.js`. Sisa fetch = API eksternal sah (Fonnte, AI, FCM).
+- [x] Entry per halaman standalone — ✅ ESM dipilih, terdokumentasi di `js/main.js` (47 modul via import).
 - [x] Hapus alias `window.*` per-simbol di `js/` (selesai di Fase 3.5 L6, 2026-08-18).
 
 ### Performa opsional (prioritas rendah)
 
-- [ ] Cache admin TTL pendek; cek region Supabase.
+- [x] Cache admin TTL — ✅ terimplementasi 2026-08-19: `cache.js` (20s public / 25s candidates).
 
 ### Infra E2E
 
-- [ ] E2E Playwright butuh runtime Node ≥22 — playwright-core macet di Bun/Windows; developer/CI pakai Node ≥22, bukan bun.
+- [x] E2E Playwright Node ≥22 — ✅ Node v22.23.2 ter-install, semua E2E lulus.

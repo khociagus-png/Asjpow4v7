@@ -198,4 +198,4 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 
 ## 🔧 Future Refactor (Deferred)
 
-- [ ] **ESM Bridge Refactor** — Konversi file classic JS ke ESM imports, minimalisasi `window.*` aliases di `bridge.js`. Scope: convert 5-10 file terbesar ke ESM (candidate.js, admin.js, init.js), register semua alias di bridge, test 181 tests + manual check. **Timing: next quarter** (setelah semua fitur selesai). Risk: HIGH (40+ file berubah).
+- [x] **ESM Bridge Refactor** — ✅ SELESAI (2026-08-18, Fase 3.5 L6). 50/50 file `js/` sudah ESM (punya `export`). `bridge.js` hanya 1 `window.X =` (`window.PortalBridge` — namespace). Tidak ada lagi `window.funcName = func` per-simbol di luar bridge. Semua alias terdaftar via `registerSeamAliases()`. Terverifikasi: 181 tests ✅, check:globals 0 kolisi ✅, eslint no-undef 0 error ✅.
