@@ -52,9 +52,11 @@ export function pastikanTombolSelesaiInterview() {
   btn.onclick = selesaikanWawancaraInterview;
   btn.className =
     'w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl flex flex-col items-center justify-center shadow-lg transition active:scale-95 flex-shrink-0';
-  btn.title = 'Selesai & Kirim Hasil ke Admin';
+  btn.title = window.tr('ui.ai_interview_done_btn');
   btn.innerHTML =
-    '<i class="fas fa-check-double text-lg"></i><span class="text-[7px] font-black leading-none mt-0.5">SELESAI</span>';
+    '<i class="fas fa-check-double text-lg"></i><span class="text-[7px] font-black leading-none mt-0.5">' +
+    window.tr('ui.ai_interview_done_text') +
+    '</span>';
   sendBtn.parentElement.appendChild(btn);
 }
 
@@ -67,7 +69,7 @@ export async function selesaikanWawancaraInterview() {
   const doneBtn = document.getElementById('btn-done-interview');
   const typingEl = document.getElementById('interview-typing');
   if (interviewHistory.length === 0) {
-    window.showToast('Wawancara belum dimulai — jawab dulu beberapa pertanyaan ya', 'info');
+    window.showToast(window.tr('ui.ai_interview_not_started'), 'info');
     return;
   }
   if (doneBtn) doneBtn.disabled = true;
@@ -75,7 +77,7 @@ export async function selesaikanWawancaraInterview() {
   if (inputEl) inputEl.disabled = true;
   if (typingEl) {
     typingEl.classList.remove('hidden');
-    typingEl.textContent = '📝 Jeklin merangkum hasil wawancara…';
+    typingEl.textContent = window.tr('ui.ai_interview_summarizing');
   }
   try {
     const res = await window.callAPI('selesaikanWawancara', [
@@ -86,7 +88,7 @@ export async function selesaikanWawancaraInterview() {
     }
     await kirimHasilWawancaraKeAdmin(res.hasil);
     if (typeof window.showToast === 'function') {
-      window.showToast('Hasil wawancara terkirim ke admin ✅', 'success');
+      window.showToast(window.tr('ui.ai_interview_sent'), 'success');
     }
   } catch (err) {
     console.error('[AI] selesaikan wawancara:', err);

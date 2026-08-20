@@ -23,13 +23,13 @@ export async function generateWawancaraModelAdmin() {
   const bidangInput = document.getElementById('admin-ai-bidang');
   const bidang = bidangInput ? bidangInput.value.trim() : '';
   if (!wa && !window.currentAiCandidateId) {
-    window.showToast('Isi WA kandidat dulu atau pilih kandidatnya', 'error');
+    window.showToast(window.tr('ui.ai_fill_wa_first'), 'error');
     return;
   }
   const statusEl = document.getElementById('admin-ai-parse-status');
   if (statusEl) {
     statusEl.classList.remove('hidden');
-    statusEl.textContent = '⏳ Jeklin menyusun model wawancara sesuai bidang SSW…';
+    statusEl.textContent = window.tr('ui.ai_generating_model');
   }
   try {
     const res = await window.callAPI('generateWawancaraModel', [
@@ -58,7 +58,7 @@ export async function generateWawancaraModelAdmin() {
     );
     if (waInput && res.wa) waInput.value = res.wa;
     if (typeof window.showToast === 'function') {
-      window.showToast('Model wawancara ' + (res.nama || '') + ' siap disalin', 'success');
+      window.showToast(window.tr('ui.ai_model_ready'), 'success');
     }
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {
@@ -88,13 +88,13 @@ export async function lihatHasilWawancaraAdmin() {
   const waInput = document.getElementById('admin-ai-wa');
   const wa = waInput ? waInput.value.trim() : '';
   if (!wa && !window.currentAiCandidateId) {
-    window.showToast('Isi WA kandidat dulu atau pilih kandidatnya', 'error');
+    window.showToast(window.tr('ui.ai_fill_wa_first'), 'error');
     return;
   }
   const statusEl = document.getElementById('admin-ai-parse-status');
   if (statusEl) {
     statusEl.classList.remove('hidden');
-    statusEl.textContent = '⏳ Mengambil hasil wawancara…';
+    statusEl.textContent = window.tr('ui.ai_fetching_results');
   }
   try {
     const res = await window.callAPI('getHasilWawancara', [
@@ -104,10 +104,7 @@ export async function lihatHasilWawancaraAdmin() {
       throw new Error((res && res.error) || 'Gagal ambil hasil wawancara');
     }
     if (!res.hasil) {
-      window.tambahPesanAdminAi(
-        'ℹ️ Belum ada hasil wawancara untuk kandidat ini — kandidat harus menyelesaikan Simulator Wawancara dulu.',
-        'ai',
-      );
+      window.tambahPesanAdminAi(window.tr('ui.ai_no_results'), 'ai');
       if (statusEl) statusEl.classList.add('hidden');
       return;
     }
@@ -160,19 +157,19 @@ export async function updateBiodataDariHasilAdmin() {
       ? lastAdminHasil.hasil.biodata
       : null;
   if (!bio || Object.keys(bio).length === 0) {
-    window.showToast('Tidak ada biodata dari hasil wawancara — klik Hasil Wawancara dulu', 'error');
+    window.showToast(window.tr('ui.ai_no_biodata'), 'error');
     return;
   }
   const waInput = document.getElementById('admin-ai-wa');
   const wa = lastAdminHasil.wa || (waInput ? waInput.value.trim() : '');
   if (!wa) {
-    window.showToast('Isi WA kandidat dulu', 'error');
+    window.showToast(window.tr('ui.ai_fill_wa_first'), 'error');
     return;
   }
   const statusEl = document.getElementById('admin-ai-parse-status');
   if (statusEl) {
     statusEl.classList.remove('hidden');
-    statusEl.textContent = '⏳ Meng-update biodata dari hasil wawancara…';
+    statusEl.textContent = window.tr('ui.ai_updating_biodata');
   }
   try {
     const res = await window.callAPI('submitMasterForm', [Object.assign({ wa }, bio)]);
@@ -188,7 +185,7 @@ export async function updateBiodataDariHasilAdmin() {
       'ai',
     );
     if (typeof window.showToast === 'function') {
-      window.showToast('Biodata ter-update dari hasil wawancara', 'success');
+      window.showToast(window.tr('ui.ai_biodata_updated'), 'success');
     }
     if (statusEl) statusEl.classList.add('hidden');
   } catch (err) {

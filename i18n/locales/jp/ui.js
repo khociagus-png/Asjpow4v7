@@ -300,6 +300,22 @@ export const ui = {
     ai_sug3: '丁寧なお断りのメッセージを作成する',
     ai_welcome:
       'こんにちは、管理者さん！AI人事コパイロットのQween Jeklinです。応募者データの集計、書類の確認、WhatsAppメッセージの下書き作成をお手伝いします。今日は何かお手伝いしましょうか？',
+    ai_interview_done_btn: '完了＆結果を管理者に送信',
+    ai_interview_done_text: '完了',
+    ai_interview_not_started: '面接がまだ始まっていません — まずいくつかの質問に答えてください',
+    ai_interview_summarizing: '\ud83d\udd0d Jeklinが面接結果をまとめています\u2026',
+    ai_interview_sent: '面接結果が管理者に送信されました \u2705',
+    ai_pick_file_first: 'まずファイルを選択してください（PDF/Excel/Word/CSV/TXT/画像）',
+    ai_fill_wa_first: 'まず候補者のWAを入力するか、候補者を選択してください',
+    ai_generating_model: '\u23f3 JeklinがSSW分野に合わせた面接モデルを作成中\u2026',
+    ai_model_ready: '面接モデルのコピー準備完了',
+    ai_fetching_results: '\u23f3 面接結果を取得中\u2026',
+    ai_no_results:
+      '\u2139\ufe0f この候補者の面接結果はまだありません — 候補者がシミュレーターを完了する必要があります',
+    ai_no_biodata:
+      '面接結果からバイオデータがありません — まず「結果を見る」をクリックしてください',
+    ai_updating_biodata: '\u23f3 面接結果からバイオデータを更新中\u2026',
+    ai_biodata_updated: '面接結果からバイオデータが更新されました',
     all_on_storage: '全候補者がStorageを利用しています',
     badge_bronze: '登録確認済み（ブロンズ）',
     badge_gold: 'マスタープロフィール完了（ゴールドクラウン）',

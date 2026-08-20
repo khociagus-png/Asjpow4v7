@@ -12,6 +12,7 @@ export function pastikanBarParseAdminAi() {
   if (document.getElementById('admin-ai-parse-bar')) return;
   const chatBox = document.getElementById('admin-ai-chat');
   if (!chatBox || !chatBox.parentElement) return;
+  // parentElement already checked above
   const div = document.createElement('div');
   div.id = 'admin-ai-parse-bar';
   div.className = 'px-4 py-2.5 bg-slate-900/70 border-t border-slate-800 z-10';
@@ -66,7 +67,7 @@ export async function uploadDokumenBiodataAdmin(input) {
     if (fi && fi.files && fi.files[0]) el = fi;
   }
   if (!el) {
-    window.showToast('Pilih file dulu (PDF/Excel/Word/CSV/TXT/gambar)', 'error');
+    window.showToast(window.tr('ui.ai_pick_file_first'), 'error');
     return;
   }
   const file = el.files[0];
@@ -75,7 +76,7 @@ export async function uploadDokumenBiodataAdmin(input) {
   if (nameEl) nameEl.textContent = file.name;
   if (statusEl) {
     statusEl.classList.remove('hidden');
-    statusEl.textContent = '⏳ Parsing ' + file.name + ' — AI membaca biodata…';
+    statusEl.textContent = '\u23f3 Parsing ' + file.name + ' — AI membaca biodata\u2026';
   }
   try {
     const data = await bacaFileBase64Front(file);
@@ -89,7 +90,9 @@ export async function uploadDokumenBiodataAdmin(input) {
       },
     ]);
     if (!res || res.success === false) {
-      throw new Error((res && res.error) || 'Gagal parse dokumen');
+      throw new Error(
+        (res && res.error) || window.tr('ui.ai_parse_failed') || 'Gagal parse dokumen',
+      );
     }
     // Simpan ke biodata master (backend sudah izinkan admin panggil submitMasterForm).
     const simpan = await window.callAPI('submitMasterForm', [
