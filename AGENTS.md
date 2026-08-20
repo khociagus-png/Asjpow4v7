@@ -12,14 +12,14 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 ## 1. Urutan dokumen yang wajib dibaca
 
-| Dokumen                                                                                        | Isi                                                                                        | Kapan dibaca                             |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                           | Setiap sesi                              |
-| **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                          | Setiap sesi                              |
-| **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**      | Sebelum menyentuh fitur tahapan kandidat |
-| **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                               | Saat kerja di backend/keamanan           |
-| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit**    | Saat butuh konteks perubahan lama        |
-| **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md`                            | Agent skills library (dari davidondrej/skills) — progressive disclosure, load saat relevan | Saat butuh pola pikir/ops/research       |
+| Dokumen                                                                                        | Isi                                                                                     | Kapan dibaca                             |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                        | Setiap sesi                              |
+| **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                       | Setiap sesi                              |
+| **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |
+| **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |
+| **PROGRESS2.md / CHANGELOG2.md** (PROGRESS.md / CHANGELOG.md = legacy, ada pointer di atasnya) | Riwayat kerja & keputusan — **wajib ada header sesi: tanggal + pengerja + hash commit** | Saat butuh konteks perubahan lama        |
+| **skills/SKILLS.md** (index) + `skills/<category>/<skill>/SKILL.md`                            | Agent skills library (dari davidondrej/skills) — **WAJIB per §10 untuk setiap task**    | Setiap sesi (§10 dispatch)               |
 
 > **Agent Skills (dari [davidondrej/skills](https://github.com/davidondrej/skills)):**
 > Library instruksi terstruktur yang dimuat agent hanya saat task cocok.
@@ -224,3 +224,95 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 - ❌ Edit hasil build (`assets/*`, `sw.js`, region `SHARED_MODALS`) dengan tangan.
 - ❌ Membuat kandidat/lamaran dengan WA yang tidak lolos normalisasi/gate.
 - ❌ Copy-paste skill dari external repo tanpa audit isi `scripts/` dan `references/` — skill bisa executed arbitrary code.
+
+---
+
+## 10. Mandatory Skill Dispatch — DISIPLIN WAJIB SETIAP TASK 🧠
+
+> **ATURAN INTI:** Setiap kali menerima prompt dari user (apapun isinya), AGENT WAJIB
+> memuat dan menjalankan skill yang sesuai **SEBELUM mulai coding/fix/research**.
+> Tidak ada exception. Skill = otak, coding = tangan. Otak duluan, tangan belakangan.
+
+### 10.1 Dispatch Table — Skill Wajib per Tipe Task
+
+| Tipe Task                           | Skill WAJIB (wajib dibaca sebelum coding)                  | Skill OPSIONAL (jika relevan) |
+| ----------------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| **Bangun fitur baru**               | 🔥 `before-building` → `stop-overthinking`                 | `decisions`, `next-decision`  |
+| **Revisi / Edit kode**              | `stop-overthinking` → `risky-changes` (jika risiko tinggi) | `decisions`                   |
+| **Debug / Fix bug**                 | `risky-changes` → `stop-overthinking`                      | `decisions`                   |
+| **Refactor**                        | `risky-changes` → `stop-overthinking`                      | `decisions`, `next-decision`  |
+| **Optimasi performa**               | `risky-changes` → `stop-overthinking`                      | `decisions`                   |
+| **Security / Auth**                 | 🔥 `risky-changes` (WAJIB) → `before-building`             | `decisions`                   |
+| **UI / Responsive**                 | `before-building` → `stop-overthinking`                    | —                             |
+| **Backend action baru**             | `before-building` → `risky-changes`                        | `decisions`                   |
+| **Database schema change**          | 🔥 `risky-changes` (WAJIB) → `before-building`             | `decisions`                   |
+| **Deploy**                          | 🔥 `risky-changes` (WAJIB)                                 | —                             |
+| **Research / Arsitektur**           | `advise-project-approach` → `research-prompt`              | `neuroarxiv`                  |
+| **Multi-step complex task**         | `before-building` → `decisions` → `next-decision`          | `stop-overthinking`           |
+| **User bilang "lanjut"/"continue"** | `stop-overthinking` (cek progress, lanjut dari mana)       | —                             |
+| **User bilang "review"/"audit"**    | `risky-changes` → `decisions`                              | `before-building`             |
+
+### 10.2 Skill Execution Flow (WAJIB DIIKUTI)
+
+```
+1. BACA prompt user
+2. IDENTIFIKASI tipe task (pakai tabel §10.1)
+3. LOAD skill wajib dari skills/<category>/<skill>/SKILL.md
+4. JALANKAN instruksi skill (surface choices, validate assumptions, dll)
+5. PRESENT opsi/keputusan ke user (jika skill mensyaratkan)
+6. TUNGGU keputusan user (jika ada pilihan)
+7. BARU mulai coding/fix/research
+8. SEBELUM commit: jalankan risky-changes jika perubahan signifikan
+9. SEBELUM push: verifikasi (syntax, build, test)
+```
+
+### 10.3 Skill-Specific Rules
+
+**`before-building`** — MUNCULKAN hidden choices dalam 1-3 detik:
+
+- ❌ JANGAN langsung coding tanpa surface choices
+- ✅ 1-3 consequential choices + rekomendasi → STOP → tunggu user
+- ✅ Skip minor choices, fokus yang besar (scope, risk, approach)
+
+**`risky-changes`** — VALIDATE sebelum ship:
+
+- ❌ JANGAN ship tanpa naming assumptions explicitly
+- ❌ JANGAN bilang "unit tests pass" sebagai bukti aman
+- ✅ Write assumptions → research → live measurement → sign-off → verify after
+- ✅ Jika tidak ada data live, bilang jujur: "belum terverifikasi di data production"
+
+**`stop-overthinking`** — PRAKTIS, cepat:
+
+- ❌ JANGAN analisis berlebihan
+- ✅ Critical issues? Sebutkan. Tidak ada? Proceed.
+- ✅ Next steps yang jelas, singkat
+
+**`decisions` / `next-decision`** — REKAM keputusan:
+
+- ❌ JANGAN list decisions yang sudah jelas terbaik
+- ✅ Hanya decisions yang BENAR-BENAR tidak yakin
+- ✅ next-decision: satu per satu, 4 opsi, rekomendasi, tunggu user
+
+### 10.4 Discipline Enforcement
+
+- **Setiap response** harusmulai dengan identifikasi skill yang dipakai (contoh: "🔥 Loading `before-building`...")
+- **Jika skip skill** wajib jelaskan kenapa (contoh: "Skip `risky-changes` — perubahan 1 baris, risiko nol")
+- **Jika user minta "lanjut"** → baca TODO.md/PROGRESS.md, identifikasi posisi, jalankan skill sesuai tipe task berikutnya
+- **Jika ragu** → default ke `risky-changes` (lebih baik over-verify daripada under-verify)
+
+### 10.5 Quick Reference: Skill Files
+
+```
+skills/
+├── thinking-and-docs/
+│   ├── before-building/SKILL.md     🔥 Fitur baru
+│   ├── stop-overthinking/SKILL.md   ⚡ Praktis
+│   ├── decisions/SKILL.md           📊 Review decisions
+│   ├── next-decision/SKILL.md       🔍 Drill decisions
+│   └── ask-then-build/SKILL.md      ❓ Scope → build
+├── ops-and-setup/
+│   ├── risky-changes/SKILL.md       ⚠️ Ship validation
+│   └── global-agent-guardrails/     🚫 Shell denylist
+└── advice/
+    └── advise-project-approach/     🔥 Research & advise
+```
