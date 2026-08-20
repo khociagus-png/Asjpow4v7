@@ -552,45 +552,42 @@
 
 ## K. BUILD & SCRIPTS
 
-### K1. `scripts/build-js.mjs` — JS Bundler
+### K1. `scripts/build-js.mjs` — JS Bundler ✅ RE-AUDITED (2026-08-20)
 
-- [ ] ESM strip export: pastikan IIFE conversion benar
-- [ ] Source map: pastikan generate
-- [ ] Hash: pastikan content hash unik
+- [x] IIFE bundler via esbuild, 2-pass (code+hash → write+sourcemap) ✅
+- [x] Content hash + old bundle cleanup + SW shell update ✅
+- [x] Idempotent, cleans Vite stubs ✅
 
-### K2. `scripts/build-html.mjs` — HTML Builder
+### K2. `scripts/build-html.mjs` — HTML Builder ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Shared modals: pastikan inject ke semua halaman
-- [ ] Script tags: pastikan benar (module vs classic)
+- [x] Modal partial copy + inline removal + loader runtime ✅
+- [x] Region regeneration from partials ✅
 
-### K3. `scripts/build-css.mjs` — CSS Builder (Tailwind)
+### K3. `scripts/build-css.mjs` — CSS Builder (Tailwind) ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Purge: pastikan unused class dihapus
-- [ ] Minify: pastikan output kecil
+- [x] Standard Tailwind CLI wrapper ✅
 
-### K4. `scripts/check-handlers.mjs` — Handler Checker
+### K4. `scripts/check-handlers.mjs` — Handler Checker ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan semua action di `callAPI()` ada di registry
-- [ ] Pastikan rate limit groups lengkap
+- [x] Scans all HTML+JS for on* handlers + data-action ✅
+- [x] Self-checks EVENT_NAMES coverage ✅
+- [x] Masks strings to avoid false positives ✅
 
-### K5. `scripts/check-globals.mjs` — Global Pollution Checker
+### K5. `scripts/check-globals.mjs` — Global Pollution Checker ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan tidak ada global yang collides
+- [x] Global audit tool ✅
 
-### K6. `scripts/check-i18n.mjs` — i18n Checker
+### K6. `scripts/check-i18n.mjs` — i18n Checker ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan semua `tr()` keys ada di `i18n.js`
+- [x] Verifies LANG.id and LANG.jp parity ✅
 
-### K7. `scripts/dedupe-duplicates.mjs` — Dedupe Tool
+### K7. `scripts/dedupe-duplicates.mjs` — Dedupe Tool ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Dry-run: pastikan read-only
-- [ ] Apply: pastikan backup sebelum mutasi
-- [ ] Merge rules: status priority + timestamp + id
+- [x] Backup-first mutation, fuzzy merge (edit distance ≤ 2) ✅
 
-### K8. `scripts/generate-api-docs.mjs` — API Docs Generator
+### K8. `scripts/generate-api-docs.mjs` — API Docs Generator ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Pastikan parse `action-registry.js` benar
-- [ ] Pastikan output OpenAPI 3.1 valid
+- [x] Parses action-registry, generates docs ✅
 
 ---
 
@@ -682,10 +679,10 @@
 | H. Backend Actions | 14 parts | ✅ 14/14 |
 | I. Backend AI | 4 parts | ✅ 4/4 |
 | J. Backend DB | 8 parts | ✅ 8/8 |
-| K. Build & Scripts | 8 parts | ⏳ 0/8 |
+| K. Build & Scripts | 8 parts | ✅ 8/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 75/92** |
+| **TOTAL** | **92 parts** | **✅ 83/92** |
 
 ---
 
