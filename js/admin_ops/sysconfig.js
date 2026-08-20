@@ -88,6 +88,7 @@ export function renderSysConfig() {
 
 export function tambahConfigItem(key) {
   let input = document.getElementById('input-cfg-' + key);
+  if (!input) return;
   let val = input.value.trim();
   if (!val) return;
 
