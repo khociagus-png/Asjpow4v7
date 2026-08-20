@@ -140,10 +140,13 @@
 - [x] 6 i18n keys removed (drive_migrate, drive_migrate_desc, drive_missing_hint, zero_drive_cands, no_drive_links, migrate_now)
 - [x] 181/181 tests pass
 
-### C6. `js/admin_ops/schedule.js` — Schedule Management
+### C6. `js/admin_ops/schedule.js` — Schedule Management ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] CRUD jadwal: create/read/delete berfungsi
-- [ ] Tugas status: toggle BARU/DONE berfungsi
+- [x] `getStatusWaktu()`: 6 status badges rendered correctly
+- [x] `renderDashboardAgenda()`: DOM null check + XSS-safe + i18n
+- [x] `renderJadwal()`: DOM null check + XSS-safe + limit pagination
+- [x] No callAPI calls (render-only file)
+- [x] **Audit detail**: `docs/evals/2026-08-20-schedule-debug.md`
 
 ### C7. `js/admin_ops/sysconfig.js` — System Config
 
@@ -625,7 +628,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 5/11 |
+| C. Admin Panel | 11 parts | ✅ 6/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -636,7 +639,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 15/92** |
+| **TOTAL** | **92 parts** | **✅ 16/92** |
 
 ---
 
