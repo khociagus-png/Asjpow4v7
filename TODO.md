@@ -195,3 +195,7 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 | Tier 3    | 3/3       | 0     | 100%       |
 | Tier 4    | 3/3       | 0     | 100%       |
 | **Total** | **11/11** | **0** | **100%**   |
+
+## 🔧 Future Refactor (Deferred)
+
+- [ ] **ESM Bridge Refactor** — Konversi file classic JS ke ESM imports, minimalisasi `window.*` aliases di `bridge.js`. Scope: convert 5-10 file terbesar ke ESM (candidate.js, admin.js, init.js), register semua alias di bridge, test 181 tests + manual check. **Timing: next quarter** (setelah semua fitur selesai). Risk: HIGH (40+ file berubah).

@@ -26,15 +26,13 @@
 - [x] `LANG.id` & `LANG.jp` 1160 keys, parity perfect 1:1
 - [x] `trOption()` handle undefined/null + fuzzy matching (emoji, casing)
 - [x] `bun run check:i18n` — 0 missing keys, 15 domain
-- [x] **Audit detail**: `docs/evals/2026-08-20-i18n-debug.md`
-
-### A3. `js/core/bridge.js` (468 baris) — ESM→Legacy Bridge
-
-- [ ] `registerSeamAliases()`: pastikan tidak ada tabrakan nama yang silent
-- [ ] `dispatchSeamAction()`: pastikan `data-action` resolve ke fungsi yang benar
-- [ ] `checkInlineHandlers()`: pastikan guard tidak false positive
-- [ ] `initSentry()`: pastikan tidak crash kalau Sentry DSN belum di-set
-- [ ] `initWebVitals()`: pastikan tidak crash di environment tanpa Performance API
+- [x] **Audit detail**: `docs/evals/2026-08-20-i18n-debug.md`### A3. `js/core/bridge.js` (468 baris) — ESM→Legacy Bridge ✅ DIVERIFIKASI (2026-08-20)
+- [x] `registerSeamAliases()`: collision guard + idempotent — benar
+- [x] `dispatchSeamAction()`: registry + window fallback — benar
+- [x] `checkInlineHandlers()`: lazy flush +3detik, preview-only — benar
+- [x] `initSentry()`: tidak crash kalau DSN kosong — benar
+- [x] `initWebVitals()`: tidak crash di environment tanpa Performance API — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-bridge-debug.md`
 
 ### A4. `js/core/sentry.js` + `js/core/sentry-dummy.js` — Error Tracking
 
@@ -614,7 +612,7 @@
 ## Summary Counter
 
 | Domain | Total Parts | Status |
-| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 2/5 |
+| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 3/5 |
 | B. Frontend Core | 5 parts | ⏳ 0/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
@@ -626,7 +624,7 @@
 | J. Backend DB | 8 parts | ⏳ 0/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
-| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 2/92** |
+| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 3/92** |
 
 ---
 
