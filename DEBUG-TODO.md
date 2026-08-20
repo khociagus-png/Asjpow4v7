@@ -56,15 +56,13 @@
 - [ ] `visibilitychange` listener: pastikan tidak duplicate
 - [ ] Datalist `list-kode-job`: pastikan render 1x saja (bukan 2x)
 - [ ] Hash-based routing: pastikan `hashchange` listener berfungsi
-- [ ] Session check: pastikan token kosong → clear + reload
-
-### B2. `js/04_auth.js` (319 baris) — Authentication
-
-- [ ] `normalizeWaInput()`: pastikan hanya terima `/^628\d{9,10}$/`
-- [ ] `isValidWaInput()`: pastikan reject WA typo
-- [ ] Login flow: admin PIN check + kandidat WA+PIN check
-- [ ] Session storage: pastikan semua key ter-set/hapus konsisten
-- [ ] Auto-login guard: flag login tapi token hilang → clear + reload
+- [ ] Session check: pastikan token kosong → clear + reload### B2. `js/04_auth.js` (319 baris) — Authentication ✅ DIVERIFIKASI (2026-08-20)
+- [x] `normalizeWaInput()` → shared/wa-rules.js → 628xxx format — benar
+- [x] `isValidWaInput()` → regex `/^628\d{9,10}$/` — benar
+- [x] Login flow: admin 3-step + kandidat WA+PIN — benar
+- [x] Session storage: server-generated HMAC token — benar
+- [x] Auto-login guard: clear + reload — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-auth-debug.md`
 
 ### B3. `js/init/nav.js` — Navigation & Logout
 
@@ -609,7 +607,7 @@
 
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
-| B. Frontend Core | 5 parts | ⏳ 0/5 |
+| B. Frontend Core | 5 parts | ✅ 2/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
@@ -620,7 +618,8 @@
 | J. Backend DB | 8 parts | ⏳ 0/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
-| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 5/92** |
+| M. HTML Pages | 7 parts | ⏳ 0/7 |
+| **TOTAL** | **92 parts** | **✅ 7/92** |
 
 ---
 
