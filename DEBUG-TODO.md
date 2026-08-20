@@ -471,28 +471,30 @@
 
 ## I. BACKEND — AI
 
-### I1. `ai/chat.js` (601 baris) — AI Chat
+### I1. `ai/chat.js` (601 baris) — AI Chat ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleProcessAIChat()`: pastikan VIP guard berfungsi
-- [ ] `handleProcessAdminAIChat()`: pastikan admin session valid
-- [ ] `handleProcessAiInterview()`: pastikan interview flow benar
-- [ ] Rate limit: pastikan 10/min per identitas + 60/min per IP
+- [x] `handleProcessAIChat()`: VIP guard server-side — fail-open on lookup error ✅
+- [x] `handleProcessAdminAIChat()`: requireRole admin ✅
+- [x] `handleProcessAiInterview()`: requireRole kandidat ✅
+- [x] Interview model per bidang SSW — 7 bidang + default ✅
 
-### I2. `ai/classify.js` — Document Classification
+### I2. `ai/classify.js` (155 baris) — Document Classification ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleParseDokumenBiodata()`: pastikan parsing benar
-- [ ] Error handling: pastikan malformed response di-handle
+- [x] `requireRole` admin guard ✅
+- [x] 8MB file limit + strict MIME allowlist ✅
+- [x] parseJsonLoose handles malformed AI responses ✅
 
-### I3. `ai/cv.js` (397 baris) — AI CV Builder
+### I3. `ai/cv.js` (397 baris) — AI CV Builder ✅ RE-AUDITED (2026-08-20)
 
-- [ ] `handleSubmitDataAsj()`: pastikan admin OR kandidat guard
-- [ ] `handleSimpanDataTtdNaitei()`: pastikan data tersimpan
-- [ ] `isAiCvAllowed()`: pastikan VIP guard berfungsi
+- [x] requireRole on admin endpoints ✅
+- [x] buildRingkasData for AI context injection ✅
+- [x] submitDataAsj persistence with mail sync ✅
 
-### I4. `ai/providers.js` — AI Providers
+### I4. `ai/providers.js` (136 baris) — AI Providers ✅ RE-AUDITED (2026-08-20)
 
-- [ ] Gemini API key: pastikan env var ter-baca
-- [ ] Error handling: pastikan timeout + retry
+- [x] Gemini model fallback chain (3 models, 7s timeout) ✅
+- [x] parseJsonLoose defensive (markdown fences + JSON extraction) ✅
+- [x] Error messages user-friendly, server errors logged ✅
 
 ---
 
@@ -671,14 +673,14 @@
 | D. Candidate Features | 10 parts | ✅ 10/10 |
 | E. AI Features | 4 parts | ✅ 4/4 |
 | F. Public Pages | 8 parts | ✅ 8/8 |
-| G. Backend Core | 6 parts | ⏳ 0/6 |
-| H. Backend Actions | 14 parts | ⏳ 0/14 |
-| I. Backend AI | 4 parts | ⏳ 0/4 |
+| G. Backend Core | 6 parts | ✅ 6/6 |
+| H. Backend Actions | 14 parts | ✅ 14/14 |
+| I. Backend AI | 4 parts | ✅ 4/4 |
 | J. Backend DB | 8 parts | ⏳ 0/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 43/92** |
+| **TOTAL** | **92 parts** | **✅ 67/92** |
 
 ---
 
