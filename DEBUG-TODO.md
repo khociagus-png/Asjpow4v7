@@ -212,26 +212,34 @@
 - [x] Hardcoded action button FIXED → `tr('ui.wa_open_send')`
 - [x] **Audit detail**: `docs/evals/2026-08-20-wa-pintar-debug.md`
 
-### D3. `js/10_cv_rirekisho.js` — CV Rirekisho Builder
+### D3. `js/10_cv_rirekisho.js` — CV Rirekisho Builder ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Form fields: pastikan mapped ke master_database
-- [ ] PDF generation: pastikan format benar
+- [x] 5 exports, all verified
+- [x] Error handling: backend error shown to user
+- [x] Photo URL: uses master data (not stale candidate data)
+- [x] **Audit detail**: `docs/evals/2026-08-20-rirekisho-debug.md`
 
-### D4. `js/10b_cv_builders.js` (496 baris) — CV Builders
+### D4. `js/10b_cv_builders.js` (496 baris) — CV Builders ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `buildCVMini()`: pastikan data lengkap
-- [ ] `buildCVFull()`: pastikan format konsisten
+- [x] Pure HTML builder (0 callAPI, 0 DOM, 0 tr())
+- [x] 5 builder functions: edu/job/fam/identitas/kertasA4
+- [x] Gender canonical per AGENTS.md §6
+- [x] **Audit detail**: `docs/evals/2026-08-20-cv-builders-debug.md`
 
-### D5. `js/12_esign_match.js` (583 baris) — E-Sign & Naitei
+### D5. `js/12_esign_match.js` (583 baris) — E-Sign & Naitei ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `bukaModalTtd()`: pastikan tahapan gate berfungsi (regex check)
-- [ ] `renderStudentCard()`: pastikan data kandidat lengkap
-- [ ] VIP/KELAS guard: pastikan non-VIP di-block
+- [x] Tahapan gate regex per AGENTS.md §6 — 20+ statuses covered
+- [x] `renderStudentCard()`: VIP/KELAS guard per AGENTS.md §6
+- [x] Hardcoded canvas hint FIXED → `tr('ui.draw_hint')`
+- [x] **Audit detail**: `docs/evals/2026-08-20-esign-debug.md`
 
-### D6. `js/13_rincian_builder.js` (516 baris) — Rincian Biaya Builder
+### D6. `js/13_rincian_builder.js` (516 baris) — Rincian Biaya Builder ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `bukaRincianBiaya()`: pastikan presets ter-load
-- [ ] Calculation: pastikan akurat
+- [x] 7 callAPI calls (preset CRUD + save)
+- [x] 17 tr() calls — well i18n'd
+- [x] Previous fix: favorite save/remove FAILED → tr() (commit a6efd79)
+- [x] Preset tahapan: domain data, not UI text
+- [x] **Audit detail**: `docs/evals/2026-08-20-rincian-debug.md` (N/A — clean)
 
 ### D7. `js/cloudinary.js` — Cloudinary Upload
 
@@ -650,7 +658,7 @@
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
 | C. Admin Panel | 11 parts | ✅ 11/11 |
-| D. Candidate Features | 10 parts | ✅ 2/10 |
+| D. Candidate Features | 10 parts | ✅ 6/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
 | G. Backend Core | 6 parts | ⏳ 0/6 |
@@ -660,7 +668,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 23/92** |
+| **TOTAL** | **92 parts** | **✅ 27/92** |
 
 ---
 

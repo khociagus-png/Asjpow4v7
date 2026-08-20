@@ -113,7 +113,7 @@ export function bukaLayarCanvas(type, title) {
   } else {
     // Mode Tanda Tangan Normal
     isLandscapeMode = false;
-    document.getElementById('fs-canvas-hint').innerText = 'Gunakan jari di area putih.';
+    document.getElementById('fs-canvas-hint').innerText = window.tr('ui.draw_hint');
 
     fsCanvas.width = 800;
     fsCanvas.height = 400;
