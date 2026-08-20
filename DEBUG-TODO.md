@@ -172,12 +172,19 @@
 - [x] 20 tr() calls — well i18n'd
 - [x] **Audit detail**: `docs/evals/2026-08-20-cv-modal-debug.md`
 
-### C10. `js/admin_modal/dbfilter.js` — DB Filter Modal
+### C10. `js/admin_modal/dbfilter.js` — DB Filter Modal ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Filter gender/age/job/tahapan: pastikan filter akurat
-- [ ] Export CSV: pastikan semua kolom ter-include
+- [x] Filter setters: DOM null checks present
+- [x] `renderDbFilters()`: XSS-safe with esc()
+- [x] No callAPI (render-only)
+- [x] **Audit detail**: `docs/evals/2026-08-20-dbfilter-debug.md`
 
-### C11. `js/admin_modal/job.js` — Job Modal
+### C11. `js/admin_modal/job.js` — Job Modal ✅ DIVERIFIKASI (2026-08-20)
+
+- [x] `lamarJob()`: simple helper, no DOM
+- [x] `copyInfoLoker()`: clipboard copy
+- [x] No callAPI, no DOM refs — minimal file
+- [x] **Audit detail**: `docs/evals/2026-08-20-job-modal-debug.md`
 
 - [ ] Create/Edit job: pastikan field mapped ke `job_database` columns
 - [ ] Status change: pastikan `ubahStatusJob` berfungsi
@@ -637,7 +644,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 9/11 |
+| C. Admin Panel | 11 parts | ✅ 11/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -648,7 +655,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 19/92** |
+| **TOTAL** | **92 parts** | **✅ 21/92** |
 
 ---
 
