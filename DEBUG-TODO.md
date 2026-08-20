@@ -6,9 +6,9 @@
 
 ### Log Sesi
 
-| Tgl        | Pengerja | Part dikerjakan  | Hash commit |
-| ---------- | -------- | ---------------- | ----------- |
-| 2026-08-20 | Buffy    | A1 api-client.js | pending     |
+| Tgl        | Pengerja | Part dikerjakan      | Hash commit |
+| ---------- | -------- | -------------------- | ----------- |
+| 2026-08-20 | Buffy    | A1-A5 Core ESM (5/5) | pending     |
 
 ---
 
@@ -607,7 +607,7 @@
 
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
-| B. Frontend Core | 5 parts | ✅ 4/5 |
+| B. Frontend Core | 5 parts | ✅ 3/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
@@ -619,7 +619,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 9/92** |
+| **TOTAL** | **92 parts** | **✅ 10/92** |
 
 ---
 
