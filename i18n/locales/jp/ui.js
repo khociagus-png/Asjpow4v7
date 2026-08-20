@@ -389,6 +389,8 @@ export const ui = {
     uploading_files: '{n} ファイルをアップロード中…',
     uploading_server: 'サーバーへアップロード中…',
     uploading_short: 'アップロード中…',
+    upload_berkas_tahap_1: '書類をアップロード（第1段階）',
+    upload_berkas_tahap_2: '書類をアップロード（第2段階）',
     view_rireki: '履歴書を表示（PDF印刷）',
     waiting_label: '待機中: ',
     update_label: '更新: ',

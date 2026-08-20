@@ -650,8 +650,8 @@ export async function prosesUploadPemberkasan(tahap) {
       btn.disabled = false;
       btn.innerHTML =
         tahap === 1
-          ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1'
-          : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2';
+          ? '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_1')
+          : '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_2');
       document.getElementById('global-loader').style.display = 'none';
       return;
     }
@@ -661,8 +661,8 @@ export async function prosesUploadPemberkasan(tahap) {
     window.showToast(window.tr('ui.toast_pick_min_one'), 'error');
     btn.innerHTML =
       tahap === 1
-        ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1'
-        : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2';
+        ? '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_1')
+        : '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_2');
     btn.disabled = false;
     document.getElementById('global-loader').style.display = 'none';
     return;
@@ -715,8 +715,8 @@ export async function prosesUploadPemberkasan(tahap) {
   document.getElementById('global-loader').style.display = 'none';
   btn.innerHTML =
     tahap === 1
-      ? '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 1'
-      : '<i class="fas fa-cloud-upload-alt mr-2"></i> Upload Berkas Tahap 2';
+      ? '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_1')
+      : '<i class="fas fa-cloud-upload-alt mr-2"></i> ' + window.tr('ui.upload_berkas_tahap_2');
   btn.disabled = false;
 
   window.showToast(

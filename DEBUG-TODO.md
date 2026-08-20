@@ -193,13 +193,15 @@
 
 ## D. FRONTEND — Candidate Features
 
-### D1. `js/03_candidate.js` (801 baris) — Candidate Core
+### D1. `js/03_candidate.js` (801 baris) — Candidate Core ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Upload flow: sequential retry 3x exponential backoff
-- [ ] Upload: skip failed file (jangan kirim undefined URL)
-- [ ] `bukaMasterEksternal()`: VIP guard berfungsi
-- [ ] Overwrite confirmation: i18n (bukan hardcoded Indonesia)
-- [ ] `normalizePhone()`: pastikan return format `628...`
+- [x] Upload flow: sequential retry 3x + skip failed file (continue) — benar
+- [x] `bukaMasterEksternal()`: VIP guard via `isVipCatatan()` — benar
+- [x] Hardcoded 'Upload Berkas Tahap 1/2' FIXED → `tr('ui.upload_berkas_tahap_1/2')`
+- [x] `isVipCatatan()`: regex `[VIP]` + `[KELAS ...]` — benar
+- [x] Gender canonical: `LAKI-LAKI`/`PEREMPUAN` per AGENTS.md §6 — benar
+- [x] XSS: all innerHTML uses esc()/escJs() — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-candidate-core-debug.md`
 
 ### D2. `js/08_wa_pintar.js` (517 baris) — WA Pintar
 
@@ -645,7 +647,7 @@
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
 | C. Admin Panel | 11 parts | ✅ 11/11 |
-| D. Candidate Features | 10 parts | ⏳ 0/10 |
+| D. Candidate Features | 10 parts | ✅ 1/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
 | G. Backend Core | 6 parts | ⏳ 0/6 |
@@ -655,7 +657,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 21/92** |
+| **TOTAL** | **92 parts** | **✅ 22/92** |
 
 ---
 

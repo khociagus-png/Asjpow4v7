@@ -392,6 +392,8 @@ export const ui = {
     uploading_files: 'Mengunggah {n} File…',
     uploading_server: 'MENGUNGGAH KE SERVER…',
     uploading_short: 'Mengupload…',
+    upload_berkas_tahap_1: 'Upload Berkas Tahap 1',
+    upload_berkas_tahap_2: 'Upload Berkas Tahap 2',
     view_rireki: 'Lihat Rirekisho (Print PDF)',
     waiting_label: 'Menunggu: ',
     update_label: 'Update: ',
