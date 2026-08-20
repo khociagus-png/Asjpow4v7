@@ -6,7 +6,7 @@
 //
 // Dipanggil dari bridge.js saat load. Tidak mengubah perilaku UI.
 // =============================================================================
-import { onCLS, onFCP, onLCP, onINP, onTTFB } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onINP, onTTFB } from '../../vendor/web-vitals.js';
 
 const IS_PREVIEW =
   typeof location !== 'undefined' &&

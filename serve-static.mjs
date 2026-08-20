@@ -155,6 +155,7 @@ async function resolveFile(pathname) {
 
 createServer(async (req, res) => {
   try {
+    console.log(`[HTTP] ${req.method} ${req.url}`);
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
 
     // Preview-only backend: semua POST data/action diarahkan ke handler rebuild.
@@ -201,10 +202,19 @@ createServer(async (req, res) => {
 
     const file = await resolveFile(pathname);
     const body = await readFile(file);
-    res.writeHead(200, {
-      'Content-Type': MIME[extname(file).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-cache',
-    });
+    const ext = extname(file).toLowerCase();
+    const headers = {
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    };
+
+    // Hanya kirim Clear-Site-Data untuk dokumen HTML agar tidak error
+    // saat browser nge-fetch manifest/asset dengan mode 'omit credentials'.
+    if (ext === '.html' || ext === '') {
+      headers['Clear-Site-Data'] = '"cache"';
+    }
+
+    res.writeHead(200, headers);
     res.end(body);
   } catch {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
