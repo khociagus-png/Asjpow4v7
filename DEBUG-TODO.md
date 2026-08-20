@@ -70,12 +70,11 @@
 - [x] `logoutApp()`: 10 localStorage keys dihapus — benar
 - [x] Mobile nav toggle: CSS class + requestAnimationFrame — benar
 - [x] `changePage()`: page switch + re-render public — benar
-- [x] **Audit detail**: `docs/evals/2026-08-20-nav-debug.md`
-
-### B4. `js/init/theme.js` (291 baris) — Theme System
-
-- [ ] `getSavedTheme()`: fallback ke backend → default 'TOKYO'
-- [ ] `applyTheme()`: pastikan tidak error untuk theme unknown
+- [x] **Audit detail**: `docs/evals/2026-08-20-nav-debug.md`### B4. `js/init/theme.js` (291 baris) — Theme System ✅ DIVERIFIKASI (2026-08-20)
+- [x] `getSavedTheme()`: fallback ke global key → default null → TOKYO — benar
+- [x] `applyTheme()`: guard `if (!cfg) return` — benar
+- [x] Per-user theme storage (admin/kandidat/guest) — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-theme-debug.md`
 - [ ] CSS class injection: pastikan tidak ada style leak
 
 ### B5. `js/init/util.js` (298 baris) — Utilities
@@ -608,7 +607,7 @@
 
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
-| B. Frontend Core | 5 parts | ✅ 3/5 |
+| B. Frontend Core | 5 parts | ✅ 4/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
@@ -620,7 +619,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 8/92** |
+| **TOTAL** | **92 parts** | **✅ 9/92** |
 
 ---
 
