@@ -412,3 +412,129 @@ Fitur baru → SKILL (§10) → CODE → DEBUG-TODO (§11.2) → TEST (§11.3) �
                                                                                       ↑
                                                                               JANGAN skip step ini
 ```
+
+---
+
+## 12. Panduan Prompting AI untuk Coding yang Efektif 📝
+
+> Agar AI menghasilkan kode yang akurat, aman, dan berstandar industri,
+> diperlukan instruksi yang terstruktur. Bagian ini berisi panduan + template
+> yang bisa langsung digunakan untuk project ASJ Portal.
+
+### 12.1 Struktur Prompt yang Efektif (4 Elemen)
+
+| #   | Elemen               | Penjelasan                                                      | Contoh untuk ASJ Portal                                                                          |
+| --- | -------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 1   | **Peran (Role)**     | Identitas spesifik AI → gaya & kualitas kode lebih profesional  | "Bertindaklah sebagai Senior Fullstack Engineer untuk portal lowongan kerja"                     |
+| 2   | **Tech Stack**       | Bahasa, framework, versi spesifik → mencegah sintaks deprecated | "Vanilla JS (ESM), Node.js backend, Supabase DB, Tailwind CSS v4, Netlify Functions"             |
+| 3   | **Konteks & Tujuan** | Fitur spesifik + alur kerja fungsional                          | "Buat action backend baru untuk export kandidat ke PDF dengan filter tahapan"                    |
+| 4   | **Aturan & Batasan** | Best practices yang WAJIB dipatuhi                              | "Semua teks lewat tr(), WA harus normalize 628xxx, rate limit sesuai §7, jangan sentuh pipeline" |
+
+### 12.2 Template Prompt — Copy & Paste
+
+```text
+Bertindaklah sebagai Senior Fullstack Engineer untuk ASJ Portal
+(portal lowongan kerja ke Jepang PT Amanah Sakura Japan).
+
+**Tugas Utama:**
+Tolong buatkan [jelaskan tugas spesifik, misal:
+  "action backend baru handleExportPdf untuk export kandidat ke PDF"].
+
+**Tech Stack:**
+- Frontend: Vanilla JS (ESM), Tailwind CSS v4, i18n (tr())
+- Backend: Node.js, Netlify Functions, Supabase REST API
+- Database: Supabase (tabel: database_candidate, database_asj_form, jobs)
+- Auth: HMAC-SHA256 session token (lihat session.js)
+- Build: esbuild bundler, Tailwind CLI
+
+**Aturan & Batasan (WAJIB):**
+1. Ikuti AGENTS.md §4 (konvensi kode): callAPI() untuk backend, tr() untuk i18n
+2. Semua teks UI lewat tr('ui.key') — lihat i18n.js
+3. WA format: selalu 628xxxxxxxxxx (13 digit) — lihat §3 normalisasi WA
+4. Backend: tambah action di action-registry.js + register rate limit
+5. Frontend: registerSeamAliases() kalau ada fungsi baru yang dipanggil HTML
+6. Jangan sentuh: pipeline (PIPELINE.md), .env, deploy tanpa izin
+7. Error handling: wajib try-catch + user-facing toast message
+8. Performance: debounce 250ms untuk filter, sessionStorage cache untuk reads
+9. Security: admin guard (session verify), rate limit, input validation
+10. Update DEBUG-TODO.md (§11) + tambah test sebelum commit
+
+**Format Output:**
+1. Kode lengkap (bukan snippet) dengan komentar pada logika kompleks
+2. Penjelasan singkat apa yang dilakukan
+3. File mana yang perlu diubah + bagian mana yang perlu ditambah
+4. Test case minimal (happy path + 1 edge case)
+5. i18n keys yang perlu ditambah (kalau ada teks UI baru)
+```
+
+### 12.3 Prompt per Tipe Task (Contoh Siap Pakai)
+
+**Fitur Backend Baru:**
+
+```text
+Buat action backend baru: handleExportKandidatPdf.
+- File: netlify/functions/_lib/actions-candidate.js
+- Register: action-registry.js + handleGetMonthlyReport pattern
+- Input: payload = [filter tahapan, filter job]
+- Output: binary PDF (Content-Type: application/pdf)
+- Guard: admin session required (lihat handleGetMonthlyReport)
+- Rate limit: tambah ke adminCrud group
+- Test: happy path + invalid filter + unauthorized
+```
+
+**Fitur Frontend Baru:**
+
+```text
+Buat tombol "Export PDF" di admin panel pelamar.
+- File: js/render/candidate.js (tambah tombol di renderKandidatHead)
+- Action: callAPI('handleExportKandidatPdf', [filter])
+- UI: tombol biru di samping "Export CSV" yang sudah ada
+- Loading state: tampilkan spinner saat download berlangsung
+- Download: buat <a download> dari blob URL
+- i18n: tambah key admin.export_pdf + admin.export_pdf_loading
+- Guard: hanya muncul untuk admin (lihat admin.html pattern)
+```
+
+**Debug / Fix Bug:**
+
+```text
+Bug: filter kandidat tidak merespon setelah ketik 3+ karakter.
+- File: js/render/candidate.js → filterKandidat()
+- Symptom: UI freeze 500ms saat keystroke cepat
+- Current: debounce 250ms sudah ada, tapi ensureAllCandidates() dipanggil ulang
+- Expected: debounce apply, ensureAllCandidates() hanya 1x saat data belum loaded
+- Test: buka admin panel → ketik cepat di search → tidak boleh freeze
+```
+
+**Refactor:**
+
+```text
+Refactor: pindahkan fungsi renderKandidatTable ke file terpisah.
+- File sumber: js/render/candidate.js (930 baris, terlalu besar)
+- File tujuan: js/render/candidate-table.js (export renderKandidatTable)
+- Bridge: registerSeamAliases({ renderKandidatTable })
+- Import: import di js/render/candidate.js
+- Test: pastikan admin panel tetap render tabel benar
+- i18n: tidak berubah (sudah pakai tr())
+```
+
+### 12.4 Anti-Pattern yang Harus Dihindari
+
+| ❌ Jangan                             | ✅ Seharusnya                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------- |
+| "Buatkan fitur login" (terlalu vague) | "Buat action loginKandidat yang validasi WA 628xxx + PIN, return session token HMAC"  |
+| "Fix semua bug" (terlalu luas)        | "Fix bug di filterKandidat: debounce tidak apply setelah 3 karakter"                  |
+| "Optimize performa" (tidak spesifik)  | "Optimize renderKandidatTable: ganti string concat jadi Array.join(), limit 50 baris" |
+| "Tambah test" (tanpa konteks)         | "Tambah unit test untuk uploadToCloudinary: timeout 30s + retry 3x + abort error"     |
+| "Deploy ke production" (tanpa izin)   | Tidak boleh tanpa izin eksplisit pemilik (lihat §9)                                   |
+
+### 12.5 Checklist Prompt Sebelum Kirim ke AI
+
+```
+□ Apakah role sudah spesifik? (Senior Frontend/Backend Engineer)
+□ Apakah tech stack sudah disebutkan? (JS ESM, Supabase, Netlify)
+□ Apakah file target sudah disebutkan? (nama file + lokasi)
+□ Apakah constraints sudah ada? (AGENTS.md §3-§9)
+□ Apakah format output sudah jelas? (kode + test + i18n)
+□ Apakah ada referensi ke code yang sudah ada? (pattern yang sudah dipakai)
+```
