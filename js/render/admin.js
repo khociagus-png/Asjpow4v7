@@ -194,12 +194,14 @@ export function filterDbJob() {
     var matchTahapan = dbFilterTahapan === 'ALL' || db.tahapan === dbFilterTahapan;
     return matchSearch && matchBidang && matchTahapan;
   });
+  // Pre-compute candidate count per job code (avoid O(n²) filter in sort)
+  var _candCountMap = {};
+  ALL_CANDIDATES.forEach(function (c) {
+    _candCountMap[c.idLoker] = (_candCountMap[c.idLoker] || 0) + 1;
+  });
   arr.sort(function (a, b) {
     if (dbSortType === 'TERBANYAK') {
-      return (
-        ALL_CANDIDATES.filter((c) => c.idLoker === b.code).length -
-        ALL_CANDIDATES.filter((c) => c.idLoker === a.code).length
-      );
+      return (_candCountMap[b.code] || 0) - (_candCountMap[a.code] || 0);
     }
     let tA = new Date(a.createdAt || 0).getTime();
     let tB = new Date(b.createdAt || 0).getTime();
@@ -278,7 +280,7 @@ export function renderDbJobTable(arr) {
   var html = '';
   for (var i = 0; i < Math.min(arr.length, limitDb); i++) {
     var db = arr[i];
-    var cands = ALL_CANDIDATES.filter((c) => c.idLoker === db.code);
+    var cands = ALL_CANDIDATES.filter((c) => c.idLoker === db.code); // render-time count, reused below
     html +=
       '<tr class="rt-row border-b border-slate-800 hover:bg-white/5">' +
       '<td data-label="' +

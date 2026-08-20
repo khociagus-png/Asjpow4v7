@@ -89,12 +89,14 @@
 
 ## C. FRONTEND — Admin Panel
 
-### C1. `js/render/admin.js` (357 baris) — Admin Render
+### C1. `js/render/admin.js` (357 baris) — Admin Render ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `renderAdminFull()`: pastikan sidebar nav berfungsi
-- [ ] `adminSwitchTab()`: pastikan `aria-current="page"` ter-set/removed
-- [ ] Hash routing: `#kelola`, `#dbjob`, `#mail`, `#pelamar`, dll
-- [ ] `syncViewKandidatUi()`: pastikan mode simple/lengkap switch
+- [x] `adminSwitchTab()`: hash routing + `aria-current="page"` — benar
+- [x] `renderAdminFull()`: calls 10+ renderers, all guarded — benar
+- [x] XSS: all dynamic values use `esc()`/`escJs()` — benar
+- [x] i18n: all UI text via `tr()`/`trOption()` — benar
+- [x] `filterDbJob()`: O(n²) FIXED — pre-computed candidate count Map
+- [x] **Audit detail**: `docs/evals/2026-08-20-admin-render-debug.md`
 
 ### C2. `js/render/candidate.js` (930 baris) — Kandidat Table
 
@@ -609,7 +611,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ⏳ 0/11 |
+| C. Admin Panel | 11 parts | ✅ 1/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -620,7 +622,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 11/92** |
+| **TOTAL** | **92 parts** | **✅ 12/92** |
 
 ---
 
