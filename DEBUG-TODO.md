@@ -203,11 +203,14 @@
 - [x] XSS: all innerHTML uses esc()/escJs() — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-candidate-core-debug.md`
 
-### D2. `js/08_wa_pintar.js` (517 baris) — WA Pintar
+### D2. `js/08_wa_pintar.js` (517 baris) — WA Pintar ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `bukaModalWaPintar()`: pastikan template list ter-load
-- [ ] `kirimSatuPesanFonnte()`: pastikan rate limit 2/min
-- [ ] `kirimTawaranMassal()`: pastikan batch processing benar
+- [x] XSS in renderWaTemplates FIXED — `t.nama`/`t.isi` now use `esc()`
+- [x] Hardcoded button labels FIXED → `tr('ui.template_send/edit/delete')`
+- [x] Hardcoded empty state FIXED → `tr('ui.template_empty')`
+- [x] Hardcoded form title FIXED → `tr('ui.template_edit_title')`
+- [x] Hardcoded action button FIXED → `tr('ui.wa_open_send')`
+- [x] **Audit detail**: `docs/evals/2026-08-20-wa-pintar-debug.md`
 
 ### D3. `js/10_cv_rirekisho.js` — CV Rirekisho Builder
 
@@ -647,7 +650,7 @@
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
 | C. Admin Panel | 11 parts | ✅ 11/11 |
-| D. Candidate Features | 10 parts | ✅ 1/10 |
+| D. Candidate Features | 10 parts | ✅ 2/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
 | G. Backend Core | 6 parts | ⏳ 0/6 |
@@ -657,7 +660,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 22/92** |
+| **TOTAL** | **92 parts** | **✅ 23/92** |
 
 ---
 

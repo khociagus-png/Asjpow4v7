@@ -26,28 +26,36 @@ export function renderWaTemplates() {
       '<div class="bg-black/40 border border-slate-700 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/50 transition">' +
       '<div>' +
       '<h4 class="text-xs font-bold text-emerald-400 uppercase mb-2"><i class="fas fa-tag mr-1"></i> ' +
-      t.nama +
+      window.esc(t.nama) +
       '</h4>' +
       '<p class="text-[10px] text-slate-400 line-clamp-3 mb-4 whitespace-pre-wrap">' +
-      t.isi +
+      window.esc(t.isi) +
       '</p>' +
       '</div>' +
       '<div class="flex gap-2 border-t border-slate-700 pt-3">' +
       '<button onclick="kirimTemplateKelas(\'' +
       t.id +
-      '\')" class="flex-1 py-1.5 bg-emerald-900/50 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-paper-plane"></i> Kirim</button>' +
+      '\')" class="flex-1 py-1.5 bg-emerald-900/50 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-paper-plane"></i> ' +
+      window.tr('ui.template_send') +
+      '</button>' +
       '<button onclick="editWaTemplate(\'' +
       t.id +
-      '\')" class="flex-1 py-1.5 bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-edit"></i> Edit</button>' +
+      '\')" class="flex-1 py-1.5 bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-edit"></i> ' +
+      window.tr('ui.template_edit') +
+      '</button>' +
       '<button onclick="prosesHapusWa(\'' +
       t.id +
-      '\')" class="flex-1 py-1.5 bg-red-900/50 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-trash"></i> Hapus</button>' +
+      '\')" class="flex-1 py-1.5 bg-red-900/50 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition"><i class="fas fa-trash"></i> ' +
+      window.tr('ui.template_delete') +
+      '</button>' +
       '</div>' +
       '</div>';
   });
   if (ALL_WA_TEMPLATES.length === 0)
     html =
-      '<div class="col-span-2 text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">Belum ada template. Silakan buat di form sebelah kiri.</div>';
+      '<div class="col-span-2 text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">' +
+      window.tr('ui.template_empty') +
+      '</div>';
   list.innerHTML = html;
 }
 
@@ -89,7 +97,7 @@ export function editWaTemplate(id) {
   document.getElementById('wa-id').value = t.id;
   document.getElementById('wa-nama').value = t.nama;
   document.getElementById('wa-isi').value = t.isi;
-  document.getElementById('wa-form-title').innerText = 'Edit Template';
+  document.getElementById('wa-form-title').innerText = window.tr('ui.template_edit_title');
   document.getElementById('wa-nama').focus();
 }
 
@@ -168,7 +176,9 @@ export function injectModalWaPintar() {
     '<label class="block text-[10px] font-bold text-slate-400 mb-1">ISI PESAN (Bisa Diedit / Custom)</label>' +
     '<textarea id="wa-pintar-pesan" rows="6" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-emerald-500 transition leading-relaxed custom-scrollbar"></textarea>' +
     '</div>' +
-    '<button onclick="kirimWaPintar()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg transition text-base mt-2"><i class="fab fa-whatsapp mr-2"></i> Buka WhatsApp & Kirim</button>' +
+    '<button onclick="kirimWaPintar()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg transition text-base mt-2"><i class="fab fa-whatsapp mr-2"></i> ' +
+    window.tr('ui.wa_open_send') +
+    '</button>' +
     '</div>' +
     '</div>' +
     '</div>';
