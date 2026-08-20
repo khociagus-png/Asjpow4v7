@@ -29,6 +29,7 @@ export const admin = {
     report_total: '合計',
     report_by_stage: '選考段階別',
     report_by_status: 'ステータス別',
+    report_empty: '候補者データがありません。',
     filtered: 'フィルター済み',
     tab_schedule: 'スケジュール',
     tab_mail: 'メール受信箱',

@@ -98,15 +98,15 @@
 - [x] `filterDbJob()`: O(n²) FIXED — pre-computed candidate count Map
 - [x] **Audit detail**: `docs/evals/2026-08-20-admin-render-debug.md`
 
-### C2. `js/render/candidate.js` (930 baris) — Kandidat Table
+### C2. `js/render/candidate.js` (930 baris) — Kandidat Table ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `filterKandidat()`: debounce 250ms berfungsi
-- [ ] `filterKandidat()`: NULL guard pada semua field
-- [ ] `renderKandidatTable()`: `limitKan` = 50 awal, +25 increment
-- [ ] `toggleViewKandidat()`: auto-switch simple mode ≤768px
-- [ ] `exportKandidatCsv()`: gender NULL guard (consistent `''`)
-- [ ] `showMonthlyReport()`: modal render benar
-- [ ] Column filter: debounced 250ms
+- [x] `filterKandidat()`: debounce 250ms + NULL guard — benar
+- [x] `renderKandidatTable()`: `limitKan` = 50 awal, +25 increment — benar
+- [x] `toggleViewKandidat()`: auto-switch simple mode ≤768px — benar
+- [x] DRY: filter logic extracted to `matchesCandidateFilters()` — FIXED
+- [x] `showMonthlyReport()`: hardcoded string FIXED → `tr('admin.report_empty')`
+- [x] Column filter: debounced 250ms — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-candidate-render-debug.md`
 
 ### C3. `js/render/mail.js` (371 baris) — Mail Inbox
 
@@ -611,7 +611,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 1/11 |
+| C. Admin Panel | 11 parts | ✅ 2/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -622,7 +622,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 12/92** |
+| **TOTAL** | **92 parts** | **✅ 13/92** |
 
 ---
 

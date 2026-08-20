@@ -155,6 +155,75 @@ function syncClearBtn() {
   btn.classList.toggle('hidden', !hasFilter);
 }
 
+// Shared filter predicate — dipakai oleh filterKandidat() DAN exportKandidatCsv().
+// Mengembalikan true kalau kandidat cocok dengan semua filter aktif.
+function matchesCandidateFilters(c, val, genF, ageF, jftF) {
+  if (!c) return false;
+  // Text search
+  if (val) {
+    var matchText =
+      String(c.nama || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.idKandidat || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.tahapan || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.idLoker || '')
+        .toLowerCase()
+        .includes(val);
+    if (!matchText) return false;
+  }
+  // Gender
+  if (genF !== 'all') {
+    var g = (c.gender || '').toUpperCase().includes('PEREMPUAN') ? 'p' : 'l';
+    if (g !== genF) return false;
+  }
+  // Age
+  if (ageF !== 'all') {
+    var usia = parseInt(String(c.usia).replace(/\D/g, '')) || 0;
+    if (ageF === 'under20' && (usia === 0 || usia >= 20)) return false;
+    if (ageF === '20to25' && (usia < 20 || usia > 25)) return false;
+    if (ageF === 'over25' && usia <= 25) return false;
+  }
+  // JFT
+  if (jftF !== 'all') {
+    var jftText = (c.jft || c.nilai_jft || c.bahasa || c.catatanInt || '').toUpperCase();
+    if (jftF === 'a2' && !jftText.includes('A2') && !jftText.includes('N4')) return false;
+    if (jftF === 'b1' && !jftText.includes('B1') && !jftText.includes('N3')) return false;
+  }
+  // Column filters
+  if (
+    columnFilters.id &&
+    !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
+  )
+    return false;
+  if (
+    columnFilters.nama &&
+    !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
+  )
+    return false;
+  if (columnFilters.wa && !(c.wa || '').toLowerCase().includes(columnFilters.wa.toLowerCase()))
+    return false;
+  if (
+    columnFilters.email &&
+    !(c.email || '').toLowerCase().includes(columnFilters.email.toLowerCase())
+  )
+    return false;
+  if (columnFilters.job !== 'all' && String(c.idLoker || '').trim() !== columnFilters.job)
+    return false;
+  if (columnFilters.tahapan !== 'all' && String(c.tahapan || '').trim() !== columnFilters.tahapan)
+    return false;
+  if (
+    columnFilters.catatan &&
+    !(c.catatanExt || c.catatan || '').toLowerCase().includes(columnFilters.catatan.toLowerCase())
+  )
+    return false;
+  return true;
+}
+
 // Debounce timer untuk filter input (hindari render 223 baris tiap keystroke).
 let _filterDebounceTimer = null;
 function debouncedFilterKandidat(delay) {
@@ -454,58 +523,7 @@ export async function exportKandidatCsv() {
       columnFilters.catatan;
     var rows = (ALL_CANDIDATES || []).filter(function (c) {
       if (!hasAnyFilter) return true;
-      // Global search
-      if (val) {
-        var matchText =
-          (c.nama || '').toLowerCase().includes(val) ||
-          (c.idKandidat || '').toLowerCase().includes(val) ||
-          (c.tahapan || '').toLowerCase().includes(val) ||
-          ((c.idLoker || '') + '').toLowerCase().includes(val);
-        if (!matchText) return false;
-      }
-      if (genF !== 'all') {
-        var g = (c.gender || '').toUpperCase().includes('PEREMPUAN') ? 'p' : 'l';
-        if (g !== genF) return false;
-      }
-      if (ageF !== 'all') {
-        var usia = parseInt(String(c.usia).replace(/\D/g, '')) || 0;
-        if (ageF === 'under20' && (usia === 0 || usia >= 20)) return false;
-        if (ageF === '20to25' && (usia < 20 || usia > 25)) return false;
-        if (ageF === 'over25' && usia <= 25) return false;
-      }
-      if (jftF !== 'all') {
-        var jftText = (c.jft || c.nilai_jft || c.bahasa || c.catatanInt || '').toUpperCase();
-        if (jftF === 'a2' && !jftText.includes('A2') && !jftText.includes('N4')) return false;
-        if (jftF === 'b1' && !jftText.includes('B1') && !jftText.includes('N3')) return false;
-      }
-      // Column filters (full mode)
-      if (!viewKandidatSimple) {
-        if (
-          columnFilters.id &&
-          !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
-        )
-          return false;
-        if (
-          columnFilters.nama &&
-          !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
-        )
-          return false;
-        if (columnFilters.job !== 'all' && String(c.idLoker || '').trim() !== columnFilters.job)
-          return false;
-        if (
-          columnFilters.tahapan !== 'all' &&
-          String(c.tahapan || '').trim() !== columnFilters.tahapan
-        )
-          return false;
-        if (
-          columnFilters.catatan &&
-          !(c.catatanExt || c.catatan || '')
-            .toLowerCase()
-            .includes(columnFilters.catatan.toLowerCase())
-        )
-          return false;
-      }
-      return true;
+      return matchesCandidateFilters(c, val, genF, ageF, jftF);
     });
     var head = [
       'ID Kandidat',
@@ -587,81 +605,7 @@ export async function filterKandidat() {
     : 'all';
 
   var arr = (ALL_CANDIDATES || []).filter(function (c) {
-    // NULL guard: skip kandidat tanpa data minimal
-    if (!c) return false;
-    // Text Search (semua field di-`|| ''` — 1 kandidat dengan field null
-    // tidak boleh mematikan seluruh filter dengan TypeError).
-    let matchText =
-      String(c.nama || '')
-        .toLowerCase()
-        .includes(val) ||
-      String(c.idKandidat || '')
-        .toLowerCase()
-        .includes(val) ||
-      String(c.tahapan || '')
-        .toLowerCase()
-        .includes(val) ||
-      String(c.idLoker || '')
-        .toLowerCase()
-        .includes(val);
-    if (!matchText) return false;
-
-    // Gender Filter
-    if (genF !== 'all') {
-      let safeGender = (c.gender || '').toUpperCase();
-      let isP = safeGender.includes('PEREMPUAN');
-      let g = isP ? 'p' : 'l';
-      if (g !== genF) return false;
-    }
-
-    // Age Filter
-    if (ageF !== 'all') {
-      let usia = parseInt(String(c.usia).replace(/\D/g, '')) || 0;
-      if (ageF === 'under20' && (usia === 0 || usia >= 20)) return false;
-      if (ageF === '20to25' && (usia < 20 || usia > 25)) return false;
-      if (ageF === 'over25' && usia <= 25) return false;
-    }
-
-    // JFT Filter
-    if (jftF !== 'all') {
-      let jftText = (c.jft || c.nilai_jft || c.bahasa || c.catatanInt || '').toUpperCase();
-      if (jftF === 'a2' && !jftText.includes('A2') && !jftText.includes('N4')) return false;
-      if (jftF === 'b1' && !jftText.includes('B1') && !jftText.includes('N3')) return false;
-    }
-
-    // ── Column filters (Excel-style, berlaku di kedua mode) ──
-    if (
-      columnFilters.id &&
-      !(c.idKandidat || '').toLowerCase().includes(columnFilters.id.toLowerCase())
-    )
-      return false;
-    if (
-      columnFilters.nama &&
-      !(c.nama || '').toLowerCase().includes(columnFilters.nama.toLowerCase())
-    )
-      return false;
-    if (columnFilters.wa && !(c.wa || '').toLowerCase().includes(columnFilters.wa.toLowerCase()))
-      return false;
-    if (
-      columnFilters.email &&
-      !(c.email || '').toLowerCase().includes(columnFilters.email.toLowerCase())
-    )
-      return false;
-    if (columnFilters.job !== 'all') {
-      var cJob = String(c.idLoker || '').trim();
-      if (cJob !== columnFilters.job) return false;
-    }
-    if (columnFilters.tahapan !== 'all') {
-      var cStage = String(c.tahapan || '').trim();
-      if (cStage !== columnFilters.tahapan) return false;
-    }
-    if (
-      columnFilters.catatan &&
-      !(c.catatanExt || c.catatan || '').toLowerCase().includes(columnFilters.catatan.toLowerCase())
-    )
-      return false;
-
-    return true;
+    return matchesCandidateFilters(c, val, genF, ageF, jftF);
   });
   renderKandidatTable(arr);
 }
@@ -827,7 +771,7 @@ async function showMonthlyReport() {
       res.generatedAt.slice(0, 10) +
       '</p>';
     if (report.length === 0) {
-      html += '<p class="text-slate-500 text-sm">Tidak ada data kandidat.</p>';
+      html += '<p class="text-slate-500 text-sm">' + tr('admin.report_empty') + '</p>';
     }
     for (const r of report) {
       html += '<div class="mb-4 p-3 bg-slate-800/60 rounded-lg border border-slate-700/50">';
