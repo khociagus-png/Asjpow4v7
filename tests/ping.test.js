@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const { handler } = require('./ping.js');
+const { handler } = require('../netlify/functions/ping.js');
 
 describe('ping — health check endpoint', () => {
   it('returns status ok with required fields', async () => {

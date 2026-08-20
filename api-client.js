@@ -275,6 +275,11 @@ export async function callAPI(action, payload) {
     } catch (e) {
       parsed = { success: false, message: text };
     }
+    // FIX A1#1: Server error (500) → user-facing message bukan raw HTML
+    if (!res.ok && parsed && !parsed.success) {
+      parsed.message =
+        'Server error (' + res.status + '): ' + (parsed.message || text.slice(0, 200));
+    }
     if (parsed && parsed.sessionInvalid) {
       // Pesan jelas sebelum reload — dulu ini diam-diam (data kosong /
       // logout sendiri tanpa penjelasan). Sekarang beri tahu user sesi
@@ -306,17 +311,16 @@ export async function callAPI(action, payload) {
       const cacheKey = 'asj_cache_' + action + ':' + JSON.stringify(payload || []);
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify({ at: Date.now(), value: parsed }));
-      } catch (e) {}
+      } catch (e) {
+        // FIX A1#3: sessionStorage penuh → degrade ke non-cache (sudah aman)
+        console.warn('[api-client] Cache write gagal:', e.message);
+      }
     }
     return parsed;
   } catch (err) {
     console.error('[Netlify Error]', action, err);
     return { success: false, error: err.message || 'Network error' };
   }
-}
-
-function callNetlify(action, payload) {
-  return callAPI(action, payload);
 }
 
 // ============================================================
