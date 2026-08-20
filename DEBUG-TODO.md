@@ -129,10 +129,15 @@
 - [x] i18n: all UI text via `tr()` — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-admin-candidates-debug.md`
 
-### C5. `js/admin_ops/drive.js` — Drive Migration
+### C5. `js/admin_ops/drive.js` — Drive Migration ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] `muatMigrasiDrive()`: pastikan banner muncul untuk link Google Drive
-- [ ] `uploadDriveReplacement()`: pastikan file terupload ke Storage
+- [x] `typeof callAPI` guard FIXED → `typeof window.callAPI` (ESM context)
+- [x] Missing input null check FIXED → guard added in `uploadDriveField()`
+- [x] Hardcoded toast strings FIXED → `tr('ui.toast_upload_storage_ok')` + `tr('ui.toast_upload_failed')`
+- [x] `muatMigrasiDrive()`: banner shows/hides correctly
+- [x] `renderMigrasiDriveList()`: XSS-safe with `esc()`
+- [x] `driveBacaFileBase64()`: Promise-based, null-safe
+- [x] **Audit detail**: `docs/evals/2026-08-20-drive-debug.md`
 
 ### C6. `js/admin_ops/schedule.js` — Schedule Management
 
@@ -619,7 +624,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 4/11 |
+| C. Admin Panel | 11 parts | ✅ 5/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -630,7 +635,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 14/92** |
+| **TOTAL** | **92 parts** | **✅ 15/92** |
 
 ---
 

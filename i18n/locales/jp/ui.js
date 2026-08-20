@@ -507,6 +507,7 @@ export const ui = {
     toast_tsk_copied: 'TSKテキストをクリップボードにコピーしました！',
     toast_upload_failed: 'ファイルのアップロード失敗：',
     toast_upload_locked: '書類アップロードはロック中です。まだ求人の選考に合格していません。',
+    toast_upload_storage_ok: 'ストレージにアップロード完了 ✓',
     toast_uploaded_n: 'アップロード成功：{n}件の書類！',
     toast_wa_invalid: 'WA番号が無効です',
     toast_wa_format: 'WA番号が無効です。08xx または 628xx (12〜13桁) の形式で入力してください。',

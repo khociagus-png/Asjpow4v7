@@ -14,7 +14,7 @@ import { registerSeamAliases } from '../core/bridge.js';
 export var DRIVE_CANDIDATES = [];
 
 export async function muatMigrasiDrive() {
-  if (typeof callAPI !== 'function') return;
+  if (typeof window.callAPI !== 'function') return;
   try {
     const res = await window.callAPI('getDriveLinkCandidates', []);
     if (!res || !res.success) return;
@@ -185,6 +185,7 @@ export function driveBacaFileBase64(input) {
 export async function uploadDriveField(idKandidat, nama, field) {
   var safeId = (idKandidat + '_' + field).replace(/[^A-Z0-9_]/gi, '');
   var input = document.getElementById('dl-file-' + safeId);
+  if (!input) return;
   // Guard ekstensi: tolak SEBELUM baca base64 (format tak dikenal pasti
   // ditolak backend juga — user dapat toast lebih cepat).
   var extErr = window.cekEkstensiFile(input);
@@ -205,7 +206,10 @@ export async function uploadDriveField(idKandidat, nama, field) {
     ]);
     if (res && res.success) {
       driveSetStatus(safeId, labelNama, 'ok');
-      window.showToast(res.field + ' ' + idKandidat + ' terupload ke Storage ✓', 'success');
+      window.showToast(
+        res.field + ' ' + idKandidat + ' ' + window.tr('ui.toast_upload_storage_ok'),
+        'success',
+      );
       // Hapus field dari daftar kandidat (sudah termigrasi)
       var c = DRIVE_CANDIDATES.find(function (x) {
         return x.idKandidat === idKandidat;
@@ -225,7 +229,7 @@ export async function uploadDriveField(idKandidat, nama, field) {
       }, 1200);
     } else {
       driveSetStatus(safeId, labelNama, 'fail');
-      window.showToast((res && res.error) || 'Gagal upload', 'error');
+      window.showToast((res && res.error) || window.tr('ui.toast_upload_failed'), 'error');
     }
   } catch (err) {
     driveSetStatus(safeId, labelNama, 'fail');
