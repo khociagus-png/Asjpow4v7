@@ -148,6 +148,24 @@ async function handleCekDataPelamar(payload) {
       .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
     const row = rows.find((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want) || null;
     if (!row) return { found: false, applications: apps };
+
+    const extraFilesMap = {};
+    rows
+      .filter((r) => normalizeWa(String(r.no_wa || r.wa || '')) === want)
+      .forEach((r) => {
+        const ket = toText(pick(r, ['keterangan'])) || '';
+        ket.split(';').forEach((p) => {
+          const parts = p.split(':');
+          if (parts.length >= 2) {
+            const key = parts[0].trim().toUpperCase();
+            const val = parts.slice(1).join(':').trim();
+            if (key && val.startsWith('http') && !extraFilesMap[key]) {
+              extraFilesMap[key] = val;
+            }
+          }
+        });
+      });
+
     return {
       found: true,
       nama: toText(pick(row, ['nama_lengkap', 'nama'])),

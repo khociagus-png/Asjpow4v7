@@ -100,6 +100,20 @@ function cekRiwayat() {
           "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>";
         $('sswWarn').style.display = 'none';
       }
+
+      window.oldExtraFilesMap = res.extraFilesMap || {};
+      if (window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0) {
+        window.dynamicExtraFiles.forEach((docName, idx) => {
+          if (window.oldExtraFilesMap[docName.toUpperCase()]) {
+            const infoEl = $('extraInfo_' + idx);
+            const warnEl = $('extraWarn_' + idx);
+            if (infoEl)
+              infoEl.innerHTML =
+                "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>";
+            if (warnEl) warnEl.style.display = 'none';
+          }
+        });
+      }
     }
     // PERINGATAN MULTI-APPLY: WA sudah LULUS untuk job LAIN — tampilkan
     // riwayat supaya kandidat sadar sebelum mengirim lamaran baru.
@@ -264,12 +278,14 @@ function validateStep2() {
 
   if (window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0) {
     for (let i = 0; i < window.dynamicExtraFiles.length; i++) {
-      if ($('extra_' + i).files.length === 0) {
-        alert('Silakan Upload ' + window.dynamicExtraFiles[i] + ' Anda.');
+      const docName = window.dynamicExtraFiles[i];
+      const hasOldFile = window.oldExtraFilesMap && window.oldExtraFilesMap[docName.toUpperCase()];
+      if ($('extra_' + i).files.length === 0 && !hasOldFile) {
+        alert('Silakan Upload ' + docName + ' Anda.');
         return false;
       }
       if ($('extraWarn_' + i).style.display === 'block') {
-        alert('Gagal lanjut! Ukuran file ' + window.dynamicExtraFiles[i] + ' melebihi batas 2 MB.');
+        alert('Gagal lanjut! Ukuran file ' + docName + ' melebihi batas 2 MB.');
         return false;
       }
     }
@@ -509,8 +525,14 @@ export async function submitApply() {
       for (let idx = 0; idx < window.dynamicExtraFiles.length; idx++) {
         const docName = window.dynamicExtraFiles[idx];
         const key = docName.replace(/[^a-zA-Z0-9]/g, '_');
-        if (uploadedUrls[key])
+        if (uploadedUrls[key]) {
           extraFilesPayload.push({ name: docName.toUpperCase(), url: uploadedUrls[key] });
+        } else if (window.oldExtraFilesMap && window.oldExtraFilesMap[docName.toUpperCase()]) {
+          extraFilesPayload.push({
+            name: docName.toUpperCase(),
+            url: window.oldExtraFilesMap[docName.toUpperCase()],
+          });
+        }
       }
     }
 
