@@ -289,7 +289,8 @@ export function initApp(res, isSilent = false) {
       dlLoker.innerHTML = htmlDl;
     }
 
-    // dlKodeJob dihapus - sudah di-render lengkap di atas (dlLoker: code + pekerjaan)
+    // FIX 2026-08-20: REMOVE duplicate datalist render yang menghapus konten datalist di atas
+    // Blok berikut TIDAK DIPERLUKAN (sebelumnya render 2x, akhir hanya kode job)
 
     let dlLokasi = document.getElementById('list-lokasi');
     if (dlLokasi) {
@@ -447,14 +448,14 @@ export function initApp(res, isSilent = false) {
           mySchedules.forEach((j) => {
             let linkBtn =
               j.link && j.link !== '-'
-                ? `<a href="${window.esc(j.link)}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition"><i class="fas fa-external-link-alt mr-1.5"></i> ${tr('ui.open_link')}</a>`
+                ? `<a href="${window.esc(j.link)}" target="_blank" class="mt-2 inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold rounded-lg shadow-md transition">→ ${window.esc(window.trOption(j.link_label || 'open'))}</a>`
                 : '';
 
             htmlJadwal += `
                             <div class="bg-black/60 p-4 rounded-xl border border-amber-500/30 shadow-inner">
                                 <div class="flex justify-between items-start mb-2">
                                     <p class="text-amber-300 font-black text-sm uppercase">${window.esc(j.agenda)}</p>
-                                    <span class="text-[9px] px-2 py-1 rounded bg-rose-900/50 text-rose-300 font-bold border border-rose-500/30 whitespace-nowrap">${window.esc(window.trOption(j.status))}</span>
+                                    <span class="text-[9px] px-2 py-1 rounded bg-rose-900/50 text-rose-300 font-bold border border-rose-500/30 whitespace-nowrap">${window.esc(window.trOption(j.status || 'pending'))}</span>
                                 </div>
                                 <p class="text-xs text-slate-300 mb-1.5"><i class="fas fa-clock w-4 text-center mr-1 text-slate-400"></i> ${window.esc(j.waktu)}</p>
                                 <p class="text-xs text-slate-300 mb-1"><i class="fas fa-map-marker-alt w-4 text-center mr-1 text-rose-400"></i> ${window.esc(window.trOption(j.lokasi))}</p>
