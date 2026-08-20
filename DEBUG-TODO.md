@@ -37,14 +37,12 @@
 - [x] Filter noise (ResizeObserver, empty rejection) — benar
 - [x] User context (setSentryUser) — FIXED: tambah call di initApp() admin + kandidat
 - [x] sentry-dummy.js — FIXED: dihapus (dead code, tidak di-import)
-- [x] **Audit detail**: `docs/evals/2026-08-20-sentry-debug.md`
-
-### A5. `js/init/state.js` (310 baris) — Global State
-
-- [ ] Semua getter/setter berfungsi (tidak ada stale binding)
-- [ ] `limitKan` awal = 50 (bukan 10)
-- [ ] `AUTO_REFRESH_TIMER` bisa di-cleanup
-- [ ] Tidak ada global pollution (cek `bun run check:globals`)
+- [x] **Audit detail**: `docs/evals/2026-08-20-sentry-debug.md`### A5. `js/init/state.js` (310 baris) — Global State ✅ DIVERIFIKASI (2026-08-20)
+- [x] 29 state vars + 36 bridgeState accessor — benar, tidak ada stale binding
+- [x] `limitKan` awal = 50 — benar (updated dari 10)
+- [x] `AUTO_REFRESH_TIMER` bisa di-cleanup — benar (sudah ada di nav.js)
+- [x] `bun run check:globals` — 462 symbols, zero collisions
+- [x] **Audit detail**: `docs/evals/2026-08-20-state-debug.md`
 
 ---
 
@@ -610,7 +608,7 @@
 ## Summary Counter
 
 | Domain | Total Parts | Status |
-| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 4/5 |
+| --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ⏳ 0/5 |
 | C. Admin Panel | 11 parts | ⏳ 0/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
@@ -622,7 +620,7 @@
 | J. Backend DB | 8 parts | ⏳ 0/8 |
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
-| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 4/92** |
+| M. HTML Pages | 7 parts | ⏳ 0/7 || **TOTAL** | **92 parts** | **✅ 5/92** |
 
 ---
 
