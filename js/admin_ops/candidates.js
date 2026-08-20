@@ -33,7 +33,7 @@ export async function bukaModalListKandidat(code) {
                         <div class="font-bold text-white text-xs">${i + 1}. ${window.esc(c.nama)}</div>
                         <div class="flex items-center gap-2">
                         <button onclick="bukaDigitalCV('${window.escJs(c.idKandidat)}')" aria-label="${window.tr('ui.peek_cv')}" class="w-7 h-7 flex items-center justify-center bg-sky-900/50 hover:bg-sky-600 text-sky-400 hover:text-white rounded-full transition shadow" title="${window.tr('ui.peek_cv')}"><i class="fas fa-eye text-xs"></i></button>
-                        <button onclick="keluarkanKandidatDariJob('${window.escJs(c.wa)}', '${window.escJs(code)}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="${window.tr('ui.remove_from_job')}">Gagal</button>
+                        <button onclick="keluarkanKandidatDariJob('${window.escJs(c.wa)}', '${window.escJs(code)}')" class="px-2 py-1 bg-red-900/40 hover:bg-red-600 text-red-400 hover:text-white rounded text-[10px] font-bold transition shadow" title="${window.tr('ui.remove_from_job')}">${window.tr('ui.btn_gagal')}</button>
                         </div></div>`;
       txt += i + 1 + '. ' + c.nama + ' - WA: ' + c.wa + '\n';
     });
@@ -41,23 +41,18 @@ export async function bukaModalListKandidat(code) {
   var lc = document.getElementById('list-kandidat-content');
   if (lc) lc.innerHTML = html;
   window.currentCopyListTxt = txt;
-  document.getElementById('modal-list-kandidat').classList.remove('hidden');
+  var modalLk = document.getElementById('modal-list-kandidat');
+  if (modalLk) modalLk.classList.remove('hidden');
 }
 
 export async function keluarkanKandidatDariJob(wa, jobCode) {
-  if (
-    !confirm(
-      'Keluarkan kandidat ini dari Job ' +
-        jobCode +
-        '?\n(Data tidak dihapus, hanya merubah statusnya menjadi Gagal & hapus job code)',
-    )
-  )
-    return;
+  if (!confirm(window.tr('ui.confirm_remove_cand_from_job').replace('{job}', jobCode))) return;
   try {
     const res = await window.callAPI('tandaiGagalJob', [wa, jobCode]);
     if (res.success) {
       window.showToast(window.tr('ui.toast_cand_removed_job'), 'success');
-      document.getElementById('modal-list-kandidat').classList.add('hidden');
+      var modalLk2 = document.getElementById('modal-list-kandidat');
+      if (modalLk2) modalLk2.classList.add('hidden');
       // PATCH-IN-PLACE: backend mengembalikan kandidat & baris mail hasil
       // update — timpa di memori + render ulang, tanpa tarik ulang getAppData.
       upsertCandidateMemory(res.candidate);
@@ -70,9 +65,12 @@ export async function keluarkanKandidatDariJob(wa, jobCode) {
 }
 
 export async function mulaiKirimUndanganGrup() {
-  let linkGrup = document.getElementById('input-link-grup').value;
-  let interval = parseInt(document.getElementById('input-interval').value) || 5;
-  let jobCode = document.getElementById('list-job-code').innerText;
+  var linkEl = document.getElementById('input-link-grup');
+  var intervalEl = document.getElementById('input-interval');
+  var jobCodeEl = document.getElementById('list-job-code');
+  let linkGrup = linkEl ? linkEl.value : '';
+  let interval = parseInt(intervalEl ? intervalEl.value : '') || 5;
+  let jobCode = jobCodeEl ? jobCodeEl.innerText : '';
 
   if (!linkGrup) {
     window.showToast(window.tr('ui.toast_group_link_required'), 'error');
@@ -91,8 +89,10 @@ export async function mulaiKirimUndanganGrup() {
   }
 
   let btn = document.getElementById('btn-undang-grup');
-  btn.innerHTML = window.tr('ui.sending');
-  btn.disabled = true;
+  if (btn) {
+    btn.innerHTML = window.tr('ui.sending');
+    btn.disabled = true;
+  }
 
   // Loop client-side per kandidat (kirimSatuPesanFonnte) diganti satu
   // panggilan server: kirimTawaranMassal (whatsapp.ts). Jeda antar pesan
@@ -112,8 +112,10 @@ export async function mulaiKirimUndanganGrup() {
     );
   }
 
-  btn.innerHTML = window.tr('ui.start_send_invite');
-  btn.disabled = false;
+  if (btn) {
+    btn.innerHTML = window.tr('ui.start_send_invite');
+    btn.disabled = false;
+  }
 }
 
 // ==========================================
@@ -339,8 +341,9 @@ export async function bukaModalCekDataSiswa() {
                         </tr>`;
         });
       }
-      tb.innerHTML = html;
-      document.getElementById('modal-cek-siswa').classList.remove('hidden');
+      if (tb) tb.innerHTML = html;
+      var modalSiswa = document.getElementById('modal-cek-siswa');
+      if (modalSiswa) modalSiswa.classList.remove('hidden');
     } else {
       window.showToast(window.tr('ui.toast_load_data_failed_prefix') + res.error, 'error');
     }

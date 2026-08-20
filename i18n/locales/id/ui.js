@@ -372,6 +372,9 @@ export const ui = {
     registering: 'Mendaftar…',
     remove_fav: 'Hapus dari koleksi favorit',
     remove_from_job: 'Keluarkan/Gagalkan dari Job ini',
+    btn_gagal: 'Gagal',
+    confirm_remove_cand_from_job:
+      'Keluarkan kandidat ini dari Job {job}?\n(Data tidak dihapus, hanya merubah statusnya menjadi Gagal & hapus job code)',
     rotate_phone: 'Putar fisik HP Anda 90 derajat',
     rotate_phone_rest: 'agar lega menulis nama.',
     running: 'Menjalankan…',

@@ -369,6 +369,9 @@ export const ui = {
     registering: '登録中…',
     remove_fav: 'お気に入りから削除',
     remove_from_job: 'この求人から外す/不合格',
+    btn_gagal: '不合格',
+    confirm_remove_cand_from_job:
+      'この候補者を求人{job}から外しますか？\n（データは削除されません。ステータスが「不合格」に変更され、ジョブコードが削除されます）',
     rotate_phone: 'スマホを90度回してください',
     rotate_phone_rest: '名前を書きやすくなります。',
     running: '実行中…',

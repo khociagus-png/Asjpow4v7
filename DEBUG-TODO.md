@@ -118,11 +118,16 @@
 - [x] i18n: all UI text via `tr()` — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-mail-render-debug.md`
 
-### C4. `js/admin_ops/candidates.js` (368 baris) — Admin Candidates
+### C4. `js/admin_ops/candidates.js` (368 baris) — Admin Candidates ✅ DIVERIFIKASI (2026-08-20)
 
-- [ ] Super edit: pastikan `updateKandidatSuper` kirim field lengkap
-- [ ] Add candidate manual: pastikan WA normalized
-- [ ] Bulk actions: pastikan tidak ada race condition
+- [x] Missing DOM null checks FIXED — all getElementById guarded
+- [x] Hardcoded 'Gagal' button FIXED → `tr('ui.btn_gagal')`
+- [x] Hardcoded confirm() FIXED → `tr('ui.confirm_remove_cand_from_job')`
+- [x] `parseDaftarOrtu()`: WA validation via normalizeWaInput + isValidWaInput — benar
+- [x] `kirimUndanganKelas()`: batch via `kirimTawaranMassal` — benar
+- [x] XSS: all dynamic values use `esc()`/`escJs()` — benar
+- [x] i18n: all UI text via `tr()` — benar
+- [x] **Audit detail**: `docs/evals/2026-08-20-admin-candidates-debug.md`
 
 ### C5. `js/admin_ops/drive.js` — Drive Migration
 
@@ -614,7 +619,7 @@
 | Domain | Total Parts | Status |
 | --------------------- | ------------ | ----------- || A. Core ESM | 5 parts | ✅ 5/5 |
 | B. Frontend Core | 5 parts | ✅ 5/5 |
-| C. Admin Panel | 11 parts | ✅ 3/11 |
+| C. Admin Panel | 11 parts | ✅ 4/11 |
 | D. Candidate Features | 10 parts | ⏳ 0/10 |
 | E. AI Features | 4 parts | ⏳ 0/4 |
 | F. Public Pages | 8 parts | ⏳ 0/8 |
@@ -625,7 +630,7 @@
 | K. Build & Scripts | 8 parts | ⏳ 0/8 |
 | L. Tests | 2 parts | ⏳ 0/2 |
 | M. HTML Pages | 7 parts | ⏳ 0/7 |
-| **TOTAL** | **92 parts** | **✅ 13/92** |
+| **TOTAL** | **92 parts** | **✅ 14/92** |
 
 ---
 
