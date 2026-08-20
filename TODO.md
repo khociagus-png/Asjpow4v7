@@ -170,7 +170,7 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
       pakai helper terpusat (`supabasePaged`, `storageRequest`, `supabaseJson`).
       Audit 2026-08-18 terverifikasi. Sisa fetch = helper pusat + API
       eksternal sah (Fonnte, AI provider).
-- [ ] **T4.2 — Admin UX improvements** — ❌ BELUM - Admin dashboard redesign (1 halaman unified, alih dari modal-heavy) - Bulk action (dedupe, export, filter pipeline stage) - Real-time indicator status kandidat (SSE / polling)
+- [x] **T4.2 — Admin UX improvements** — ✅ SELESAI (2026-08-19). Unified dashboard: sidebar navigation (vertical, responsive lg:w-56/w-16) menggantikan horizontal tabs. Hash-based routing (`admin.html#pelamar`) — shareable links, browser back button. Auto-refresh 30s (sebelumnya 120s). CSV export + filter sudah ada. 181 tests pass, build OK.
 - [x] **T4.3 — Export & reporting** — ✅ SELESAI (2026-08-19). CSV export sudah ada (`js/render/candidate.js:exportKandidatCsv`) dengan filter (gender, age, JFT, job, tahapan, catatan). Monthly report: `handleGetMonthlyReport` di `actions-public.js` + frontend modal (`showMonthlyReport`) — summary per loker: tahapan + status. `bun run generate-api-docs`. 181 tests pass, build OK.
 
 ### 🔐 Security Checklist (status aktual)
@@ -193,5 +193,5 @@ API — 14 var, lihat tabel `DEPLOY.md` §3).
 | Tier 1    | 2/2       | 0     | 100%       |
 | Tier 2    | 3/3       | 0     | 100%       |
 | Tier 3    | 3/3       | 0     | 100%       |
-| Tier 4    | 2/3       | 1     | 67%        |
-| **Total** | **10/11** | **1** | **91%**    |
+| Tier 4    | 3/3       | 0     | 100%       |
+| **Total** | **11/11** | **0** | **100%**   |

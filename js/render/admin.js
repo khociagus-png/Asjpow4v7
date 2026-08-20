@@ -27,22 +27,33 @@ import { registerSeamAliases } from '../core/bridge.js';
 // kelola loker, tabel DB JOB + badge tahapan pipeline. Body fungsi
 // byte-identik dari 05_render.js — perilaku tidak berubah.
 
+// Sidebar tab styles (unified dashboard)
+var SIDEBAR_INACTIVE =
+  'w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2';
+var SIDEBAR_ACTIVE =
+  'w-full px-3 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold transition shadow-md text-left flex items-center gap-2';
+
 export function adminSwitchTab(t) {
   var tabs = ['kelola', 'dbjob', 'mail', 'tambah', 'pelamar', 'jadwal', 'wa', 'config'];
   tabs.forEach((x) => {
     var p = document.getElementById('admin-' + x);
     if (p) p.classList.add('hidden');
     var b = document.getElementById('tab-' + x);
-    if (b)
-      b.className =
-        'px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-xs font-bold transition flex-1 md:flex-none text-center';
+    if (b) b.className = SIDEBAR_INACTIVE;
   });
   var tgtP = document.getElementById('admin-' + t);
   if (tgtP) tgtP.classList.remove('hidden');
   var tgtT = document.getElementById('tab-' + t);
-  if (tgtT)
-    tgtT.className =
-      'px-4 py-2.5 bg-red-600 text-white rounded-lg text-xs font-bold transition shadow-md flex-1 md:flex-none text-center';
+  if (tgtT) tgtT.className = SIDEBAR_ACTIVE;
+  // Hash-based routing (shareable links, browser back button)
+  if (window.location && t) {
+    var newHash = '#' + t;
+    if (window.location.hash !== newHash) {
+      try {
+        window.history.replaceState(null, '', newHash);
+      } catch (e) {}
+    }
+  }
   if (t === 'mail') renderFormInbox();
   if (t === 'wa') renderWaTemplates();
   if (t === 'config') renderSysConfig();

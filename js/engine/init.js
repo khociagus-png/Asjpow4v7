@@ -324,6 +324,17 @@ export function initApp(res, isSilent = false) {
         document.getElementById('nav-admin-mode').classList.remove('hidden');
       window.changePage('admin');
       renderAdminFull();
+      // Hash-based routing: baca #tab dari URL saat load
+      var hashTab = (window.location.hash || '').replace('#', '').trim();
+      var validTabs = ['kelola', 'dbjob', 'mail', 'tambah', 'pelamar', 'jadwal', 'wa', 'config'];
+      if (hashTab && validTabs.indexOf(hashTab) !== -1) {
+        window.adminSwitchTab(hashTab);
+      }
+      // Dengarkan hashchange (browser back/forward)
+      window.addEventListener('hashchange', function () {
+        var h = (window.location.hash || '').replace('#', '').trim();
+        if (h && validTabs.indexOf(h) !== -1) window.adminSwitchTab(h);
+      });
       // Audit otomatis: kandidat yg masih pakai link Google Drive -> banner kuning
       if (typeof window.muatMigrasiDrive === 'function') window.muatMigrasiDrive();
 
@@ -357,7 +368,7 @@ export function initApp(res, isSilent = false) {
         if (document.hidden) return; // tab tidak terlihat → skip tarikan sia-sia
         if (window.adaModalTerbuka()) return; // modal terbuka → skip refresh
         refreshDataDinamis(null, true);
-      }, 120000);
+      }, 30000); // 30 detik untuk live dashboard
       // Tab kembali terlihat → refresh SEKALI segera (tanpa menunggu siklus
       // interval berikutnya) supaya data tidak basi saat user balik ke tab.
       document.addEventListener('visibilitychange', function () {
