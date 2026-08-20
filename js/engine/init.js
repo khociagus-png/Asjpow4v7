@@ -328,11 +328,24 @@ export function initApp(res, isSilent = false) {
       if (hashTab && validTabs.indexOf(hashTab) !== -1) {
         window.adminSwitchTab(hashTab);
       }
-      // Dengarkan hashchange (browser back/forward)
-      window.addEventListener('hashchange', function () {
-        var h = (window.location.hash || '').replace('#', '').trim();
-        if (h && validTabs.indexOf(h) !== -1) window.adminSwitchTab(h);
-      });
+      // Dengarkan hashchange (browser back/forward) — SEKALI SAJA
+      if (!window._hashChangeInit) {
+        window._hashChangeInit = true;
+        window.addEventListener('hashchange', function () {
+          var h = (window.location.hash || '').replace('#', '').trim();
+          var validTabs = [
+            'kelola',
+            'dbjob',
+            'mail',
+            'tambah',
+            'pelamar',
+            'jadwal',
+            'wa',
+            'config',
+          ];
+          if (h && validTabs.indexOf(h) !== -1) window.adminSwitchTab(h);
+        });
+      }
       // Audit otomatis: kandidat yg masih pakai link Google Drive -> banner kuning
       if (typeof window.muatMigrasiDrive === 'function') window.muatMigrasiDrive();
 
@@ -352,29 +365,24 @@ export function initApp(res, isSilent = false) {
       }
     }
 
-    window.updateMailBadge();
-
-    // AUTO-REFRESH PINTAR (120 detik, Fase 3 langkah 16): refresh hanya
-    // berjalan jika TIDAK ada modal yang terbuka (preview CV, form tambah/edit,
-    // pemberkasan, dst), supaya modal yang sedang dibaca admin tidak tertutup
-    // paksa. Guard scroll ada di refreshDataDinamis/initApp (skip render tabel
-    // yang sedang di-scroll). Kalau ada modal terbuka, refresh ditunda dan akan
-    // jalan di siklus berikutnya. Tab yang tidak terlihat (hidden) juga di-skip
-    // — tarikan sia-sia dikurangi (kandidat/admin buka tab lain).
+    window.updateMailBadge(); // AUTO-REFRESH PINTAR (30 detik): refresh hanya berjalan jika
+    // TIDAK ada modal yang terbuka. Tab hidden → skip.
     if (!AUTO_REFRESH_TIMER) {
       window.AUTO_REFRESH_TIMER = setInterval(() => {
-        if (document.hidden) return; // tab tidak terlihat → skip tarikan sia-sia
-        if (window.adaModalTerbuka()) return; // modal terbuka → skip refresh
-        refreshDataDinamis(null, true);
-      }, 30000); // 30 detik untuk live dashboard
-      // Tab kembali terlihat → refresh SEKALI segera (tanpa menunggu siklus
-      // interval berikutnya) supaya data tidak basi saat user balik ke tab.
-      document.addEventListener('visibilitychange', function () {
         if (document.hidden) return;
-        if (!AUTO_REFRESH_TIMER) return;
         if (window.adaModalTerbuka()) return;
         refreshDataDinamis(null, true);
-      });
+      }, 30000);
+      // Tab kembali terlihat → refresh SEKALI — SEKALI SAJA (idempotent)
+      if (!window._visibilityChangeInit) {
+        window._visibilityChangeInit = true;
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) return;
+          if (!AUTO_REFRESH_TIMER) return;
+          if (window.adaModalTerbuka()) return;
+          refreshDataDinamis(null, true);
+        });
+      }
     }
   } else if (localStorage.getItem('asj_kandidat_login') === 'sukses') {
     window.isKandidat = true;
