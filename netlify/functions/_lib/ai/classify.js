@@ -3,7 +3,7 @@
 // REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
 'use strict';
 
-const { normalizeWa, pick } = require('../db/client');
+const { normalizeWa, pick, normalizeGender } = require('../db/client');
 const { findCandidateByIdFiltered, findCandidates } = require('../db/candidates');
 const { requireRole } = require('../actions-auth');
 const { findMasterByWa } = require('./cv');
@@ -119,6 +119,12 @@ async function handleParseDokumenBiodata(payload, sessionToken) {
         error: 'AI tidak bisa mengekstrak data dari file ini. Coba file lain.',
       };
     }
+
+    if (parsed.gender) {
+      const g = normalizeGender(parsed.gender);
+      if (g) parsed.gender = g;
+    }
+
     const fields = Object.keys(parsed).filter(
       (k) => k !== 'pendidikan' && k !== 'pekerjaan' && k !== 'keluarga',
     );
