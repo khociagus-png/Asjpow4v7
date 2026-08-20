@@ -52,11 +52,20 @@ export async function uploadToCloudinary(file, opts) {
   fd.append('file', file);
   fd.append('upload_preset', preset);
 
+  // Timeout 30 detik supaya upload tidak hanging tanpa batas
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
   let res;
   try {
-    res = await fetch(endpoint, { method: 'POST', body: fd });
+    res = await fetch(endpoint, {
+      method: 'POST',
+      body: fd,
+      signal: controller ? controller.signal : undefined,
+    });
   } catch (e) {
     throw new Error('Gagal terhubung ke Cloudinary: ' + e.message);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
   if (!res.ok) {
     let detail = '';

@@ -672,12 +672,32 @@ export async function prosesUploadPemberkasan(tahap) {
     '<i class="fas fa-spinner fa-spin mr-2"></i> ' +
     window.tr('ui.uploading_files').replace('{n}', filesToUpload.length);
 
-  // Upload tiap berkas ke Cloudinary secara paralel (Promise.allSettled —
-  // satu berkas gagal tidak menggagalkan batch), lalu kirim URL hasil upload
-  // ke backend lewat payload JSON standar (simpanBerkasTahapan).
-  const results = await Promise.allSettled(
-    filesToUpload.map(async (f) => {
-      const url = await window.uploadToCloudinary(f.fileObj);
+  // Upload tiap berkas ke Cloudinary secara SEKUENSIAL dengan retry
+  // (sebelumnya paralel via allSettled — timeout/bagian rusak tanpa retry).
+  const MAX_RETRIES = 3;
+  const results = [];
+  for (const f of filesToUpload) {
+    let url = null;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        url = await window.uploadToCloudinary(f.fileObj);
+        break; // sukses
+      } catch (e) {
+        lastErr = e;
+        if (attempt < MAX_RETRIES) {
+          // Exponential backoff: 1s, 2s, 4s
+          await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+        }
+      }
+    }
+    if (!url) {
+      // Upload gagal setelah 3x retry — skip file ini, jangan kirim undefined ke backend
+      console.warn('[upload] Gagal upload ' + f.jenisBerkas + ': ' + (lastErr && lastErr.message));
+      results.push({ status: 'rejected', reason: lastErr });
+      continue;
+    }
+    try {
       const payload = {
         wa: ACTIVE_PEMBERKASAN_WA,
         nama: ACTIVE_PEMBERKASAN_NAMA,
@@ -685,9 +705,11 @@ export async function prosesUploadPemberkasan(tahap) {
         fileUrl: url,
       };
       const res = await window.callAPI('simpanBerkasTahapan', [payload]);
-      return !!(res && res.success);
-    }),
-  );
+      results.push({ status: 'fulfilled', value: !!(res && res.success) });
+    } catch (e) {
+      results.push({ status: 'rejected', reason: e });
+    }
+  }
   const successCount = results.filter((r) => r.status === 'fulfilled' && r.value).length;
 
   document.getElementById('global-loader').style.display = 'none';

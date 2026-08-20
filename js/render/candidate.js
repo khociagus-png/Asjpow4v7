@@ -155,12 +155,21 @@ function syncClearBtn() {
   btn.classList.toggle('hidden', !hasFilter);
 }
 
+// Debounce timer untuk filter input (hindari render 223 baris tiap keystroke).
+let _filterDebounceTimer = null;
+function debouncedFilterKandidat(delay) {
+  clearTimeout(_filterDebounceTimer);
+  _filterDebounceTimer = setTimeout(function () {
+    filterKandidat();
+  }, delay || 250);
+}
+
 // Handler perubahan filter kolom (dipanggil dari onchange/oninput di thead).
 export function onColumnFilterChange(colKey, value) {
   columnFilters[colKey] = value;
   saveColumnFilters();
   syncClearBtn();
-  filterKandidat();
+  debouncedFilterKandidat();
 }
 
 // Header tabel kandidat mengikuti mode tampilan (lengkap vs sederhana).
@@ -572,14 +581,24 @@ export async function filterKandidat() {
     ? document.getElementById('filter-db-jft').value
     : 'all';
 
-  var arr = ALL_CANDIDATES.filter(function (c) {
+  var arr = (ALL_CANDIDATES || []).filter(function (c) {
+    // NULL guard: skip kandidat tanpa data minimal
+    if (!c) return false;
     // Text Search (semua field di-`|| ''` — 1 kandidat dengan field null
     // tidak boleh mematikan seluruh filter dengan TypeError).
     let matchText =
-      (c.nama || '').toLowerCase().includes(val) ||
-      (c.idKandidat || '').toLowerCase().includes(val) ||
-      (c.tahapan || '').toLowerCase().includes(val) ||
-      ((c.idLoker || '') + '').toLowerCase().includes(val);
+      String(c.nama || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.idKandidat || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.tahapan || '')
+        .toLowerCase()
+        .includes(val) ||
+      String(c.idLoker || '')
+        .toLowerCase()
+        .includes(val);
     if (!matchText) return false;
 
     // Gender Filter
@@ -876,4 +895,8 @@ registerSeamAliases({
   clearColumnFilters,
   onColumnFilterChange,
   showMonthlyReport,
+  // Debounced filter untuk search input (hindari render 223 baris tiap keystroke)
+  _debouncedFilter: function () {
+    debouncedFilterKandidat(250);
+  },
 });
