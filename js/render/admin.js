@@ -211,6 +211,14 @@ export function filterDbJob() {
   renderDbJobTable(arr);
 }
 
+let _filterDbJobDebounceTimer = null;
+export function debouncedFilterDbJob(delay) {
+  clearTimeout(_filterDbJobDebounceTimer);
+  _filterDbJobDebounceTimer = setTimeout(function () {
+    filterDbJob();
+  }, delay || 250);
+}
+
 // Badge warna untuk tahapan pipeline (posisi = warna progres) & status loker.
 // Logika warna tetap pakai NILAI ASLI; label tampil sesuai bahasa (window.trOption).
 export function badgeTahapanDb(tahapan) {
@@ -344,5 +352,6 @@ registerSeamAliases({
   adminSwitchTab,
   renderAdmin,
   filterDbJob,
+  debouncedFilterDbJob,
   badgeTahapanDb,
 });

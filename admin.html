@@ -508,7 +508,7 @@
          <h2 class="text-purple-400 font-bold text-lg"><i class="fas fa-server mr-2"></i> <span data-lang="admin.history_internal">Histori Job Internal</span></h2>
          <div class="relative w-full md:w-72">
             <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
-            <input type="text" id="search-dbjob" onkeyup="filterDbJob()" data-lang-placeholder="admin.search_placeholder" placeholder="Cari ID, TSK, Pekerjaan…" class="w-full pl-9 p-2 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-purple-500 transition">
+            <input type="text" id="search-dbjob" oninput="window.debouncedFilterDbJob && window.debouncedFilterDbJob(250)" onkeyup="window.debouncedFilterDbJob && window.debouncedFilterDbJob(250)" data-lang-placeholder="admin.search_placeholder" placeholder="Cari ID, TSK, Pekerjaan…" class="w-full pl-9 p-2 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-purple-500 transition">
          </div>
       </div>
       
@@ -1162,7 +1162,7 @@
   <!-- MODAL REJECT MAIL -->
   
   <script src="/vendor/qrcode-generator.min.js"></script>
-<script src="/assets/app-c9c9a3e754.js"></script>
+<script src="/assets/app-d610c080d5.js"></script>
 <!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
        adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
        tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah

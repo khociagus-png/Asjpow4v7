@@ -24,7 +24,7 @@ export async function uploadToCloudinary(file, opts, maxRetries = 3) {
   const endpoint = (opts && opts.endpoint) || cloudinaryEndpoint();
 
   let lastError = null;
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     const fd = new FormData();
     fd.append('file', file);
@@ -32,7 +32,7 @@ export async function uploadToCloudinary(file, opts, maxRetries = 3) {
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeoutId = controller ? setTimeout(() => controller.abort(), 30000) : null;
-    
+
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -52,7 +52,8 @@ export async function uploadToCloudinary(file, opts, maxRetries = 3) {
           /* body bukan JSON — pakai status saja */
         }
 
-        const errMsg = 'Upload Cloudinary gagal (HTTP ' + res.status + ')' + (detail ? ': ' + detail : '');
+        const errMsg =
+          'Upload Cloudinary gagal (HTTP ' + res.status + ')' + (detail ? ': ' + detail : '');
 
         // 4xx = client error (validation, auth) → fatal, jangan retry
         if (res.status >= 400 && res.status < 500) {

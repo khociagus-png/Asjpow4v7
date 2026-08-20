@@ -190,7 +190,17 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
   → kanonikal `LAKI-LAKI`/`PEREMPUAN` (konvensi situs lama). Render L/P di UI
   (mis. modal siswa baru) pakai nilai kanonikal itu — JANGAN bikin varian baru.
 
-## 7. Checklist wajib sebelum selesai
+---
+
+## 7. Performance Guidelines (Mandatory) ⚡
+
+1. **Debounce Filter**: Semua input pencarian (seperti `search-kandidat`, `search-dbjob`) WAJIB menggunakan debounce minimal 250ms untuk menghindari UI _freeze_ saat mengetik.
+2. **Infinite Scroll (Bukan Virtual Scroll murni)**: Render tabel besar (kandidat) dilimitasi (misal 25 baris awal), selanjutnya di-trigger via `IntersectionObserver` di akhir scroll untuk meniru infinite scroll yang ringan tanpa overhead manipulasi DOM berlebih.
+3. **SessionStorage Cache (Bukan IndexedDB)**: Tarikan data utama (`getAppData`, `getCandidatesPage`) di-cache dalam memori tab (`sessionStorage`) dengan TTL ±5 menit. Mutasi (simpan/edit/delete) akan meng-invalidate cache ini. Hindari IndexedDB karena over-engineering untuk data relasional ini.
+
+---
+
+## 8. Checklist wajib sebelum selesai
 
 0. ✅ Format & syntax dijaga otomatis: pre-commit hook `.githooks/` (aktif via `bun install` / `bun run hook:install`) + CI `ci-check.yml` di GitHub. Darurat: `git commit --no-verify`.
 1. ✅ `node --check` semua file JS yang diubah
@@ -205,7 +215,7 @@ bun run dedupe:apply      # eksekusi (backup otomatis)
 
 ---
 
-## 8. Larangan mutlak
+## 9. Larangan mutlak
 
 - ❌ Edit `.env*` — minta user isi di Keys/API keys.
 - ❌ Deploy ke Netlify **tanpa izin eksplisit pemilik** (aturan & riwayat izin di `DEPLOY.md`).

@@ -410,7 +410,7 @@ function renderKandidatTableSimple(tb, arr) {
   }
   if (arr.length > limitKan) {
     html +=
-      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      '<tr id="load-more-kan-simple"><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
@@ -680,6 +680,7 @@ export function renderKandidatTable(arr) {
   }
   if (viewKandidatSimple) {
     renderKandidatTableSimple(tb, arr);
+    setupInfiniteScroll();
     return;
   }
   var html = '';
@@ -774,11 +775,33 @@ export function renderKandidatTable(arr) {
   }
   if (arr.length > limitKan) {
     html +=
-      '<tr><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
+      '<tr id="load-more-kan"><td colspan="6" class="p-4 text-center"><button onclick="window.limitKan+=25; window.filterKandidat();" class="text-xs text-sky-400 font-bold">' +
       tr('form.txt_lebih_banyak') +
       '</button></td></tr>';
   }
   tb.innerHTML = html;
+  setupInfiniteScroll();
+}
+
+let _kanObserver = null;
+function setupInfiniteScroll() {
+  if (_kanObserver) {
+    _kanObserver.disconnect();
+  }
+  let target =
+    document.getElementById('load-more-kan') || document.getElementById('load-more-kan-simple');
+  if (target) {
+    _kanObserver = new IntersectionObserver(
+      function (entries) {
+        if (entries[0].isIntersecting) {
+          window.limitKan += 25;
+          window.filterKandidat();
+        }
+      },
+      { rootMargin: '100px' },
+    );
+    _kanObserver.observe(target);
+  }
 }
 
 // Laporan bulanan: panggil backend getMonthlyReport, tampilkan di toast.

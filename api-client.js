@@ -196,18 +196,13 @@ function getApiUrl(action) {
   return NETLIFY_API_BASE + '/' + (funcName || action);
 }
 
-// ============================================================
 // SWR-lite cache (Fase 3 langkah 16) — kurangi tarikan data berulang.
-// Tarikan data utama (getAppData / getAppConfig) di-cache in-memory dengan
-// TTL pendek: navigasi antar-tab di SPA langsung render dari cache (0 ms)
-// tanpa fetch ulang; siklus auto-refresh 120 dtk + refresh saat tab kembali
-// terlihat memvalidasi ulang di background. Semua action BUKAN pembaca
-// (mutasi/login/logout) meng-invalidate cache — data basi setelah perubahan.
-// Cache in-memory SAJA (bukan localStorage): response getAppData bisa
-// ratusan KB, tidak aman untuk kuota localStorage 5 MB.
-const CACHEABLE_READS = new Set(['getAppData', 'getAppConfig']);
-const READ_CACHE_TTL_MS = 10000; // 10 dtk — cukup utk navigasi antar-tab
-const swrCache = new Map(); // key (action:payload) -> { at, value }
+// Tarikan data utama (getAppData / getAppConfig / getCandidatesPage) di-cache di sessionStorage dengan
+// TTL panjang (5 menit): repeat visits (reload halaman) akan memuat data instan (0 ms).
+// Semua action BUKAN pembaca (mutasi/login/logout) meng-invalidate cache.
+// Cache disimpan di sessionStorage (per-tab) supaya aman & auto-bersih.
+const CACHEABLE_READS = new Set(['getAppData', 'getAppConfig', 'getCandidatesPage']);
+const READ_CACHE_TTL_MS = 5 * 60 * 1000; // 5 menit — cocok untuk repeat visits
 
 export async function callAPI(action, payload) {
   const funcName = NETLIFY_FUNCTIONS[action];
@@ -218,14 +213,24 @@ export async function callAPI(action, payload) {
 
   // SWR-lite: pembaca yang masih fresh → balas dari cache tanpa jaringan.
   if (CACHEABLE_READS.has(action)) {
-    const cacheKey = action + ':' + JSON.stringify(payload || []);
-    const hit = swrCache.get(cacheKey);
-    if (hit && Date.now() - hit.at < READ_CACHE_TTL_MS) return hit.value;
-    swrCache.delete(cacheKey); // basi → buang, fetch ulang
+    const cacheKey = 'asj_cache_' + action + ':' + JSON.stringify(payload || []);
+    try {
+      const hitStr = sessionStorage.getItem(cacheKey);
+      if (hitStr) {
+        const hit = JSON.parse(hitStr);
+        if (Date.now() - hit.at < READ_CACHE_TTL_MS) return hit.value;
+        sessionStorage.removeItem(cacheKey); // basi → buang, fetch ulang
+      }
+    } catch (e) {}
   } else {
     // Bukan pembaca (mutasi/login/logout) → data yang di-cache berpeluang
-    // basi, invalidate semua.
-    swrCache.clear();
+    // basi, invalidate semua cache yang dibuat oleh kita.
+    try {
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith('asj_cache_')) sessionStorage.removeItem(key);
+      }
+    } catch (e) {}
   }
 
   const url = NETLIFY_API_BASE + '/' + funcName;
@@ -298,7 +303,10 @@ export async function callAPI(action, payload) {
     }
     // Simpan hasil pembaca yang valid utk cache SWR-lite (skip sessionInvalid).
     if (CACHEABLE_READS.has(action) && parsed && !parsed.sessionInvalid) {
-      swrCache.set(action + ':' + JSON.stringify(payload || []), { at: Date.now(), value: parsed });
+      const cacheKey = 'asj_cache_' + action + ':' + JSON.stringify(payload || []);
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ at: Date.now(), value: parsed }));
+      } catch (e) {}
     }
     return parsed;
   } catch (err) {

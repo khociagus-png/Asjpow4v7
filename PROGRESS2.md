@@ -9,6 +9,17 @@
 
 ---
 
+## ⚡ Sesi 2026-08-20 — dikerjakan oleh: Antigravity — PERFORMANCE OPTIMIZATIONS (Pending Commit)
+
+### Ringkasan
+
+- Menerapkan Debounce (250ms) pada filter pencarian tabel admin untuk menghindari re-render berat saat pengetikan.
+- Mengganti tombol "Muat Lebih" manual dengan Infinite Scroll berbasis IntersectionObserver.
+- Menambahkan SessionStorage Cache (TTL 5 menit) untuk `getAppData`, `getCandidatesPage`, dan `getAppConfig` agar memuat instan saat tab reload. Cache otomatis invalidasi pada semua action mutasi (POST non-reader).
+- Membakukan "Performance Guidelines" di `AGENTS.md` agar standar kecepatan tetap dijaga.
+- Membatalkan implementasi _Bundle Split_ (Dynamic Import) pada fungsionalitas UI modal karena `guards.js` milik project secara agresif memblokir _inline handler_ yang _asynchronous_.
+- Menjalankan `bun run build` sukses dan semua E2E test (upload, biodata, login) lulus lokal.
+
 ## 🆕 Sesi 2026-08-18 (lanjutan) — dikerjakan oleh: codebuff (via Freebuff) — GUARD RUNTIME HANDLER + DEPLOY OTOMATIS (A+C+D)
 
 ### Ringkasan
