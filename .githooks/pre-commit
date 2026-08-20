@@ -8,7 +8,7 @@
 #
 # Yang dicek:
 #   1. Format prettier seluruh repo (format:check) — kode wajib seragam.
-#   2. Syntax node --check untuk file .js/.mjs yang di-stage (ESM aman).
+#   2. TypeScript type-check (tsc --noEmit) — pastikan tidak ada type error.
 #
 # Melewati (bila memang terpaksa, CI tetap menangkap):
 #   git commit --no-verify      (cara standar git)
@@ -24,16 +24,16 @@ fi
 # lewati dengan peringatan — CI check di GitHub tetap menjaga repositori.
 if command -v bun >/dev/null 2>&1; then
   RUN_PRETTIER="bun run format:check"
-  RUN_NODE="node"
+  RUN_TSC="bun tsc --noEmit"
 elif command -v npx >/dev/null 2>&1 && command -v node >/dev/null 2>&1; then
   RUN_PRETTIER="npx prettier --check ."
-  RUN_NODE="node"
+  RUN_TSC="npx tsc --noEmit"
 else
   echo "⚠️  Pre-commit: bun/node tidak ditemukan — lewati cek lokal (CI tetap jalan)."
   exit 0
 fi
 
-echo "── Pre-commit: cek format + syntax ──"
+echo "── Pre-commit: cek format + typecheck ──"
 
 # 1) Format prettier
 if ! $RUN_PRETTIER >/dev/null 2>&1; then
@@ -42,20 +42,15 @@ if ! $RUN_PRETTIER >/dev/null 2>&1; then
   exit 1
 fi
 
-# 2) Syntax file JS/MJS yang di-stage (kecuali artefak build)
-STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.js' '*.mjs')
+# 2) TypeScript type-check (hanya kalau ada file .ts/.mts yang di-stage)
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.mts')
 if [ -n "$STAGED" ]; then
-  for f in $STAGED; do
-    case "$f" in
-      assets/* | vendor/*) continue ;;
-    esac
-    if [ -f "$f" ] && ! $RUN_NODE --check "$f" >/dev/null 2>&1; then
-      echo "❌ Syntax error di: $f"
-      $RUN_NODE --check "$f" 2>&1 | head -5
-      exit 1
-    fi
-  done
+  if ! $RUN_TSC >/dev/null 2>&1; then
+    echo "❌ Type error ditemukan. Jalankan: bun tsc --noEmit  (lalu perbaiki)."
+    $RUN_TSC 2>&1 | head -30
+    exit 1
+  fi
 fi
 
-echo "✅ Pre-commit lulus (format rapi + syntax OK)."
+echo "✅ Pre-commit lulus (format rapi + typecheck OK)."
 exit 0

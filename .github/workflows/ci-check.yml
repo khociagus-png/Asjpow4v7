@@ -24,6 +24,9 @@ jobs:
       - name: Install deps
         run: bun install
 
+      - name: TypeScript type-check
+        run: bun tsc --noEmit
+
       - name: Format check (prettier)
         run: bun run format:check
 
@@ -58,7 +61,7 @@ jobs:
           SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
           FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
         run: |
-          bun serve-static.mjs >/tmp/serve.log 2>&1 &
+          bun serve-static.mts >/tmp/serve.log 2>&1 &
           SRV=$!
           for i in $(seq 1 30); do
             curl -sf "http://127.0.0.1:3000/.netlify/functions/app?action=ping" >/dev/null 2>&1 && break

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* ASJ Portal - Service Worker
    Cache shell + update strategy:
    - Navigasi halaman: network-first (online selalu fresh, offline pakai cache)
