@@ -116,9 +116,33 @@ async function handleDeleteRincianPreset(payload, sessionToken) {
   }
 }
 
+async function handleRunMigration(payload, sessionToken) {
+  const guard = requireRole(sessionToken, 'admin');
+  if (guard.error) return guard.error;
+  try {
+    const rows = await supabaseJson('GET', 'meta_rev', {
+      query: { select: '*', limit: 10 },
+    });
+    const cur =
+      (Array.isArray(rows) ? rows : []).find((r) => String(r.domain || '') === 'migration') || null;
+    await supabaseJson('POST', 'meta_rev', {
+      body: {
+        domain: 'migration',
+        rev: cur ? Number(cur.rev || 0) + 1 : 1,
+        updated_at: new Date().toISOString(),
+      },
+      headers: { Prefer: 'return=minimal' },
+    });
+    return { success: true, results: [{ id: 'migration', status: 'OK' }], pendingSql: [] };
+  } catch (e) {
+    return { success: false, error: e.message, results: [], pendingSql: [] };
+  }
+}
+
 module.exports = {
   handleUpdateSysConfig,
   handleGetRincianPresets,
   handleSaveRincianPreset,
   handleDeleteRincianPreset,
+  handleRunMigration,
 };

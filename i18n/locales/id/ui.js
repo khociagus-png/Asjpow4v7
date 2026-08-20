@@ -94,11 +94,6 @@ export const ui = {
     preview_loading: 'Memuat pratinjau…',
     download_qr: 'DOWNLOAD GAMBAR QR',
     draw_hint: 'Gunakan jari di area putih.',
-    drive_migrate: 'Migrasi Berkas dari Google Drive',
-    drive_migrate_desc:
-      'Kandidat di bawah ini masih pakai <b class="text-amber-300">link folder Google Drive</b> — berkasnya belum ada di Storage, jadi foto/CV/JFT/SSW bisa tidak tampil. Pilih file dari perangkat lalu upload: otomatis masuk ke folder Storage kandidat dan semua kolom DB ikut ter-update.',
-    drive_missing_hint:
-      'Berkasnya belum ada di Storage — upload ulang biar foto/CV/JFT/SSW tampil normal di dashboard & modal CV kandidat.',
     education: 'PENDIDIKAN',
     email: 'Email',
     esign_docs: 'Dokumen E-Sign',
@@ -174,7 +169,6 @@ export const ui = {
       'Perbarui data Anda di bawah ini agar perusahaan tertarik. Lebih cepat dan mudah!',
     max_weight: 'BERAT (MAKSIMAL)',
     menu: 'Menu',
-    migrate_now: 'Migrasi Sekarang',
     min_education: 'PENDIDIKAN MINIMAL',
     min_height: 'TINGGI (MINIMAL)',
     name1: 'NAMA TERANG 1',
@@ -296,7 +290,6 @@ export const ui = {
     waiting: 'MENUNGGU',
     your_schedule: 'JADWAL ANDA',
     zero_candidates: '0 Kandidat',
-    zero_drive_cands: '0 kandidat masih pakai link Google Drive',
 
     add_fav: 'Simpan ke koleksi favorit',
     add_new: 'Tambah baru…',
@@ -355,7 +348,6 @@ export const ui = {
     manual_or_template: '-- Ketik Manual / Pilih Template --',
     match_hint: 'Sesuaikan filter di atas, lalu klik <b>"Mulai Pencarian"</b>.',
     migration_wait: 'Mohon tunggu, memproses migrasi…',
-    no_drive_links: 'Tidak ada lagi link Google Drive.',
     no_match:
       'Tidak ada kandidat yang memenuhi kriteria spesifik ini. Coba longgarkan rentang usia / fisiknya.',
     not_applied_general: 'Belum melamar job (Umum)',

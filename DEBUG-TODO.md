@@ -129,15 +129,16 @@
 - [x] i18n: all UI text via `tr()` — benar
 - [x] **Audit detail**: `docs/evals/2026-08-20-admin-candidates-debug.md`
 
-### C5. `js/admin_ops/drive.js` — Drive Migration ✅ DIVERIFIKASI (2026-08-20)
+### C5. `js/admin_ops/drive.js` — Drive Migration ✅ DIHAPUS (2026-08-20)
 
-- [x] `typeof callAPI` guard FIXED → `typeof window.callAPI` (ESM context)
-- [x] Missing input null check FIXED → guard added in `uploadDriveField()`
-- [x] Hardcoded toast strings FIXED → `tr('ui.toast_upload_storage_ok')` + `tr('ui.toast_upload_failed')`
-- [x] `muatMigrasiDrive()`: banner shows/hides correctly
-- [x] `renderMigrasiDriveList()`: XSS-safe with `esc()`
-- [x] `driveBacaFileBase64()`: Promise-based, null-safe
-- [x] **Audit detail**: `docs/evals/2026-08-20-drive-debug.md`
+- [x] Feature removed — one-time migration tool tidak dipakai lagi
+- [x] `js/admin_ops/drive.js` deleted (245 baris)
+- [x] `netlify/functions/_lib/actions-drive.js` deleted (~100 baris)
+- [x] `handleRunMigration` dipindah ke `actions-config.js` (generic DB migration)
+- [x] Banner HTML removed dari admin.html + index.html
+- [x] Modal removed dari partials/modals-shared.html
+- [x] 6 i18n keys removed (drive_migrate, drive_migrate_desc, drive_missing_hint, zero_drive_cands, no_drive_links, migrate_now)
+- [x] 181/181 tests pass
 
 ### C6. `js/admin_ops/schedule.js` — Schedule Management
 

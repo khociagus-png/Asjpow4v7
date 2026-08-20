@@ -346,8 +346,6 @@ export function initApp(res, isSilent = false) {
           if (h && validTabs.indexOf(h) !== -1) window.adminSwitchTab(h);
         });
       }
-      // Audit otomatis: kandidat yg masih pakai link Google Drive -> banner kuning
-      if (typeof window.muatMigrasiDrive === 'function') window.muatMigrasiDrive();
 
       var mLoggedOut = document.getElementById('mobile-nav-logged-out');
       var mAdmin = document.getElementById('mobile-nav-admin');

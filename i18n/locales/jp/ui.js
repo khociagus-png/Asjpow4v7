@@ -92,11 +92,6 @@ export const ui = {
     preview_loading: 'プレビューを読み込み中…',
     download_qr: 'QR画像をダウンロード',
     draw_hint: '白いエリアに指で書いてください。',
-    drive_migrate: 'Google Driveからの書類移行',
-    drive_migrate_desc:
-      '以下の候補者はまだ<b class="text-amber-300">Google Driveフォルダリンク</b>を使用しています — 書類がStorageにないため写真/CV/JFT/SSWが表示されない場合があります。端末からファイルを選択してアップロード：候補者のStorageフォルダに自動保存され、DBの全カラムも更新されます。',
-    drive_missing_hint:
-      '書類がStorageにありません — 写真/CV/JFT/SSWを候補者ダッシュボード＆CVモーダルで正常に表示するには再アップロードしてください。',
     education: '学歴',
     email: 'メール',
     esign_docs: 'Eサイン書類',
@@ -169,7 +164,6 @@ export const ui = {
     master_update_hint: '以下のデータを更新して企業にアピールしましょう。より早く、より簡単に！',
     max_weight: '体重（最大）',
     menu: 'メニュー',
-    migrate_now: '今すぐ移行',
     min_education: '最低学歴',
     min_height: '身長（最低）',
     name1: '氏名 1',
@@ -292,7 +286,6 @@ export const ui = {
     waiting: '待機中',
     your_schedule: 'あなたのスケジュール',
     zero_candidates: '候補者 0人',
-    zero_drive_cands: 'Google Driveリンクを使用中の候補者は0人です',
 
     add_fav: 'お気に入りに保存',
     add_new: '新規追加…',
@@ -351,7 +344,6 @@ export const ui = {
     manual_or_template: '-- 手動入力 / テンプレート選択 --',
     match_hint: '上部のフィルターを調整して、<b>「検索開始」</b>をクリックしてください。',
     migration_wait: 'お待ちください、移行処理中…',
-    no_drive_links: 'Google Driveリンクはもうありません。',
     no_match: 'この条件に該当する候補者がいません。年齢・身体条件の範囲を広げてみてください。',
     not_applied_general: '未応募（一般）',
     not_found: '見つかりません。',

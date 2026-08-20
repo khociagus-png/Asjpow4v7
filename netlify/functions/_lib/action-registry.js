@@ -24,7 +24,6 @@ const schedule = require('./actions-schedule');
 const wa = require('./actions-wa');
 const config = require('./actions-config');
 const register = require('./actions-register');
-const drive = require('./actions-drive');
 const aiCv = require('./ai/cv');
 
 // nama action → handler(payload, sessionToken). Handler dengan arity lebih
@@ -97,6 +96,7 @@ const ACTION_HANDLERS = {
   getRincianPresets: config.handleGetRincianPresets,
   saveRincianPreset: config.handleSaveRincianPreset,
   deleteRincianPreset: config.handleDeleteRincianPreset,
+  runMigration: config.handleRunMigration,
   // Siswa baru
   getDaftarSiswaBaru: register.handleGetDaftarSiswaBaru,
   submitDaftarSiswa: register.handleSubmitDaftarSiswa,
@@ -105,10 +105,6 @@ const ACTION_HANDLERS = {
   generateFormBridge: register.handleGenerateFormBridge,
   generateLegacyMasterBridge: register.handleGenerateLegacyMasterBridge,
   generateAiFormBridge: register.handleGenerateAiFormBridge,
-  // Drive links & migrasi
-  getDriveLinkCandidates: drive.handleGetDriveLinkCandidates,
-  uploadDriveReplacement: drive.handleUploadDriveReplacement,
-  runMigration: drive.handleRunMigration,
   // AI (Gemini) & submit AI form
   processAIChat: aiChat.handleProcessAIChat,
   processAdminAIChat: aiChat.handleProcessAdminAIChat,
