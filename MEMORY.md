@@ -1,8 +1,7 @@
-# MEMORY.md — AI Context Memory ASJ Portal
+# MEMORY.md — Detail History ASJ Portal
 
-> **FILE INI ADALAH OTAK AI** — Dibaca di AWAL setiap sesi kerja.
-> Update setelah SELESAI sesi (bukan sebelum).
-> Format: ringkas, bullet point, tidak perlu kalimat panjang.
+> **File ini untuk detail** — info singkat sudah ada di AGENTS.md §STATUS SEKARANG.
+> Baca hanya saat butuh konteks lengkap (history, decisions, known issues detail).
 
 **Terakhir diupdate:** 2026-08-21 — oleh Buffy (AI agent)
 
