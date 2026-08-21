@@ -152,7 +152,7 @@ describe('Sink render js/render/* (S1 coverage)', () => {
   // punya esc LOKAL sendiri di renderFormInbox (`esc(window.trOption(...))`).
   it('tabel mail (kategori & status) di-escape', () => {
     expect(renderSrc).toContain("esc(window.trOption(f.kategori || '-'))");
-    expect(renderSrc).toContain('esc(window.trOption(f.status))');
+    expect(renderSrc).toContain('esc(window.trOption(displayStatus))');
   });
 
   it('tabel kandidat (tahapan & status) di-escape', () => {
