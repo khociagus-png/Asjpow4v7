@@ -1157,10 +1157,12 @@
   <!-- MODAL REJECT MAIL -->
   
   <script src="/vendor/qrcode-generator.min.js"></script>
+<!-- ANTI-CACHE -->
 <script>
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
 (function(){var E="app-89d2bde3c8";if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})})();
 </script>
+<!-- /ANTI-CACHE -->
 <script src="/assets/app-89d2bde3c8.js"></script>
 <!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
        adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —

@@ -287,4 +287,41 @@ for (const page of STANDALONE_PAGES) {
   writeFileSync(path, html);
 }
 
+// =============================================================================
+// Bagian 3 — Anti-cache script injection (untuk SEMUA halaman)
+// -----------------------------------------------------------------------------
+// HP sering cache sw.js versi lama → bundle lama terus di-serve.
+// Anti-cache script di HTML (network-first) cek apakah bundle baru ada di cache.
+// Kalau TIDAK → unregister SW + force reload → langsung dapat versi baru.
+// Script ini di-inject otomatis oleh build supaya hash selalu akurat.
+// =============================================================================
+const ANTI_CACHE_RE = /<!--\s*ANTI-CACHE\s*-->[\s\S]*?<!--\s*\/ANTI-CACHE\s*-->/;
+const ALL_HTML = [...BUNDLE_PAGES, ...STANDALONE_PAGES];
+for (const page of ALL_HTML) {
+  const path = `${ROOT}/${page}`;
+  let html = readFileSync(path, 'utf8');
+  // Ekstrak hash bundle dari tag <script src="/assets/app-HASH.js">
+  const bundleMatch = html.match(/<script src="\/assets\/app-([^"\.]+)\.js">/);
+  if (!bundleMatch) {
+    console.warn(`[build-html] ${page}: bundle script tidak ditemukan, anti-cache dilewati`);
+    continue;
+  }
+  const bundleHash = bundleMatch[1];
+  const antiCacheScript = `<!-- ANTI-CACHE -->
+<script>
+// ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
+(function(){var E="app-${bundleHash}";if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})})();
+</script>
+<!-- /ANTI-CACHE -->`;
+  // Ganti anti-cache yang sudah ada (idempotent) atau sisipkan sebelum bundle script
+  if (ANTI_CACHE_RE.test(html)) {
+    html = html.replace(ANTI_CACHE_RE, antiCacheScript);
+  } else {
+    const bundleTag = `<script src="/assets/app-${bundleHash}.js"></script>`;
+    html = html.replace(bundleTag, antiCacheScript + '\n' + bundleTag);
+  }
+  writeFileSync(path, html);
+  console.log(`[build-html] ${page}: anti-cache script injected (bundle: app-${bundleHash}.js)`);
+}
+
 console.log('[build-html] Selesai ✅');
