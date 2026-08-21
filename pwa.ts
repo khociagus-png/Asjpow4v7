@@ -171,8 +171,11 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
     // updateViaCache:'none' -> browser SELALU mengecek sw.js ke jaringan
     // (tidak memakai HTTP cache) setiap kali update dicek. Tanpa ini browser
     // bisa memakai sw.js lama berhari-hari dan versi lama terus disajikan.
+    // Cache-busting: paksa browser fetch sw.js TERBARU dari server
+    // (beberapa HP cache sw.js di HTTP level meski updateViaCache:'none')
+    var swUrl = '/sw.js?v=' + Date.now();
     navigator.serviceWorker
-      .register('/sw.js', { updateViaCache: 'none' })
+      .register(swUrl, { updateViaCache: 'none' })
       .then(function (reg) {
         if (!reg) return;
 

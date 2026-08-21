@@ -85,6 +85,10 @@ async function sendPushNotification(token, title, body, url = '/') {
   let serviceAccount;
   try {
     serviceAccount = JSON.parse(envRaw);
+    // Fix double-escaped newlines in private_key (freebuff-env bug)
+    if (serviceAccount.private_key && serviceAccount.private_key.includes('\\n')) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
   } catch (e) {
     console.error('[FCM] Error parse FIREBASE_SERVICE_ACCOUNT');
     return false;
