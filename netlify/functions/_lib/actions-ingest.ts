@@ -140,11 +140,22 @@ async function extractText(buffer: Buffer, ext: string): Promise<string> {
 
   switch (e) {
     case 'pdf': {
-      // pdf-parse: dynamic import — named export PDFParse
+      // pdf-parse v2.x: class-based API → new PDFParse(Uint8Array).load() → .getText()
+      // NOTE: pdfjs-dist strict-checks Uint8Array — Node.js Buffer subclass
+      // may fail the internal realm check. Force a fresh Uint8Array copy.
       const pdfModule = await import('pdf-parse');
-      const PDFParse = (pdfModule as unknown as { PDFParse: (buf: Buffer) => Promise<{ text: string }> }).PDFParse;
-      const result = await PDFParse(buffer);
-      return cleanText(result.text || '');
+      const PDFClass = (pdfModule as any).PDFParse || (pdfModule as any).default;
+      const fresh = new Uint8Array(
+        buffer.buffer.slice(
+          buffer.byteOffset,
+          buffer.byteOffset + buffer.byteLength,
+        ),
+      );
+      const parser = new PDFClass(fresh);
+      await parser.load();
+      const result = await parser.getText();
+      parser.destroy();
+      return cleanText(result?.text || '');
     }
 
     case 'docx': {
@@ -293,7 +304,6 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
         // UPDATE: patch baris yang sudah ada
         const patchBody: Record<string, unknown> = {
           updated_at: new Date().toISOString(),
-          parsed_by_ai: true,
         };
         if (nama) patchBody.nama_lengkap = nama;
         if (email) patchBody.email = email;
@@ -339,7 +349,6 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
           alamat_lengkap: aiData.alamat ? String(aiData.alamat) : '',
           email,
           nik,
-          parsed_by_ai: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };

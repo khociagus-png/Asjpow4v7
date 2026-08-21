@@ -629,6 +629,14 @@ function buildMasterNested(row) {
       cv: row.file_cv || '',
       jft: row.jft_url || '',
       ssw: row.ssw_url || '',
+      ktp: row.ktp_url || '',
+      kk: row.kk_url || '',
+      ijazahSd: row.ijazah_sd_url || '',
+      ijazahSmp: row.ijazah_smp_url || '',
+      ijazahSma: row.ijazah_sma_url || '',
+      univ: row.univ_url || '',
+      sim: row.driver_license_url || row.sim_url || '',
+      cert: row.cert_url || '',
     },
   };
 }

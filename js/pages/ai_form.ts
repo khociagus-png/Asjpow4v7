@@ -883,18 +883,24 @@ export function updateFormUI() {
   }
   // ------------------------------------------------------
 
-  // --- TAMPILKAN JFT / SSW YANG SUDAH PERNAH UPLOAD DARI DATABASE ---
+  // --- TAMPILKAN BERKAS YANG SUDAH PERNAH UPLOAD DARI DATABASE ---
   // (kecuali user sudah pilih file baru di sesi ini — kalau mau nimpa file
   //  lama, tinggal pilih file baru; kalau tidak, status lama tetap tampil)
   [
-    ['jft', 'status_jft'],
-    ['ssw', 'status_ssw'],
+    ['jft', 'status_jft', !!currentJftBase64],
+    ['ssw', 'status_ssw', !!currentSswBase64],
+    ['ktp', 'status_ktp', !!currentKtpFile],
+    ['kk', 'status_kk', !!currentKkFile],
+    ['ijazahSd', 'status_ijazahSd', !!currentIjazahSdFile],
+    ['ijazahSmp', 'status_ijazahSmp', !!currentIjazahSmpFile],
+    ['ijazahSma', 'status_ijazahSma', !!currentIjazahSmaFile],
+    ['univ', 'status_univ', !!currentUnivFile],
   ].forEach(function (pair) {
-    var key = pair[0],
-      statusId = pair[1];
+    var key = pair[0] as string,
+      statusId = pair[1] as string,
+      sudahPilihBaru = pair[2] as boolean;
     var url = getByPath(latestCandidateData, 'uploads.' + key);
     var statusEl = $(statusId);
-    var sudahPilihBaru = key === 'jft' ? !!currentJftBase64 : !!currentSswBase64;
     if (!statusEl || sudahPilihBaru) return;
     if (url && url !== '-') {
       var namaFile = escapeHtml((url.split('/').pop() || key.toUpperCase()).replace(/_+/g, ' '));

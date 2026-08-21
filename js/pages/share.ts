@@ -584,13 +584,25 @@ export function renderGrid() {
     ];
     function docTypeOf(nm) {
       const base = String(nm || '').replace(/\.[a-z0-9]+$/i, '');
-      const m = base.match(/^[A-Z]+/);
-      let t = m ? m[0] : null;
-      if (!t) {
-        const up = base.toUpperCase();
-        t = EXTRA_TYPE_TOKENS.find((tk) => up.includes(tk)) || up;
+      const up = base.toUpperCase();
+      // Step 1: Token panjang (>3 char) sebagai substring — FILE_CV, CV_REVISI, dll.
+      for (const tk of EXTRA_TYPE_TOKENS) {
+        if (tk.length > 3 && up.includes(tk)) {
+          return EXTRA_TYPE_ALIAS[tk] || tk;
+        }
       }
-      return EXTRA_TYPE_ALIAS[t] || t;
+      // Step 2: Regex prefix uppercase — KK, KTP, IJAZAH, dll.
+      const m = base.match(/^[A-Z]+/);
+      const prefix = m ? m[0] : null;
+      if (prefix && EXTRA_TYPE_ALIAS[prefix]) return EXTRA_TYPE_ALIAS[prefix];
+      if (prefix && prefix.length >= 2) return prefix;
+      // Step 3: Pola lawas "1. X_CV.xlsx" — cari token di seluruh nama.
+      for (const tk of EXTRA_TYPE_TOKENS) {
+        if (tk.length >= 2 && up.includes(tk)) {
+          return EXTRA_TYPE_ALIAS[tk] || tk;
+        }
+      }
+      return up;
     }
     let extraBtns = '';
     const seenExtraTypes = new Set();

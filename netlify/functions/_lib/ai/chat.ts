@@ -38,7 +38,11 @@ const AI_FORM_DATA_INSTRUCTION =
   '"keluarga": [{"hubungan_id","hubungan_jp","nama","katakana","umur","pekerjaan_id","pekerjaan_jp","gaji"}]}\n' +
   'Aturan data: isi hanya field yang benar-benar diketahui dari percakapan (nilai bukan null, string kosong "" untuk yang belum); ' +
   'gender SELALU dinormalisasi ke "LAKI-LAKI" atau "PEREMPUAN"; ' +
-  'JANGAN menebak/mengarang data yang tidak disebut kandidat; sertakan juga data yang sudah ada di DATA KANDIDAT SAAT INI.\n';
+  'JANGAN menebak/mengarang data yang tidak disebut kandidat; sertakan juga data yang sudah ada di DATA KANDIDAT SAAT INI.\n' +
+  'Aturan bahasa field: field berakhiran "_id" = Bahasa Indonesia, field berakhiran "_jp" = Bahasa Jepang. ' +
+  'Contoh: kelebihan_id = \"Disiplin\" (ID), kelebihan_jp = \"基準がある\" (JP). ' +
+  'PROMOSI, KEBERHASILAN, KELEBIHAN, KEKURANGAN, HOBI, KEAHLIAN, MOTIVASI, ALASAN BIDANG, RENCANA PULANG: ' +
+  'WAJIB isi KEDUANYA (_id DAN _jp) — jangan kosongkan salah satu.\n';
 
 async function handleProcessAIChat(payload, sessionToken) {
   const p = payload || {};

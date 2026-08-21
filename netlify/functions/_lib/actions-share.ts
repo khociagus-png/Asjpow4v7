@@ -88,6 +88,16 @@ async function handleShareData(jobCode) {
       mByWa.set(normalizeWa(String(r.no_wa || r.wa || '')), r);
     }
 
+    // Filter dokumen share: admin toggle di modal Share Loker menentukan
+    // dokumen mana yang boleh tampil di share view. 'ALL' = tampilkan semua.
+    const rawShareDocs = toText(pick(jobRow, ['dokumen_share', 'dokumenshare'])).toUpperCase();
+    const allowedDocTypes = new Set(
+      rawShareDocs
+        ? rawShareDocs.split(/[,;]+/).map((s: string) => s.trim()).filter(Boolean)
+        : ['CV', 'JFT', 'SSW'],
+    );
+    const showAllDocs = allowedDocTypes.has('ALL');
+
     const candidates = [];
     for (const c of mapped) {
       const folder =
@@ -139,10 +149,21 @@ async function handleShareData(jobCode) {
           byType.set(t, { name: n, url: pubBase + folder + encodeURIComponent(n) });
         }
       }
-      const extraDocs = [...byType.values()];
+      // Filter extraDocs berdasarkan dokumen_share job.
+      // 'ALL' = tampilkan semua. Tanpa 'ALL' = hanya tipe yang di-toggle admin.
+      const rawExtraDocs = [...byType.values()];
+      const extraDocs = showAllDocs
+        ? rawExtraDocs
+        : rawExtraDocs.filter((d: { name: string; url: string }) => {
+            const t = docTypeOf(d.name);
+            return allowedDocTypes.has(t);
+          });
       // Gabungkan juga dokumen dari keterangan form (NAMA:URL;...) — dedupe
       // per URL biar tidak dobel dengan folder master.
-      const formDocs = byWa.get(normalizeWa(String(c.wa || ''))) || [];
+      // Juga filter by allowedDocTypes kecuali ALL.
+      const formDocs = (byWa.get(normalizeWa(String(c.wa || ''))) || []).filter(
+        (d: { name: string; url: string }) => showAllDocs || allowedDocTypes.has(docTypeOf(d.name)),
+      );
       const seenUrl = new Set(extraDocs.map((d) => d.url));
       for (const d of formDocs) {
         if (!seenUrl.has(String(d.url))) {
@@ -167,8 +188,10 @@ async function handleShareData(jobCode) {
             }
           }
           if (v && v !== '-' && v.startsWith('http') && !seenUrl.has(v)) {
-            seenUrl.add(v);
             const label = String(key).toUpperCase();
+            // Filter by allowedDocTypes kecuali ALL
+            if (!showAllDocs && !allowedDocTypes.has(label)) continue;
+            seenUrl.add(v);
             extraDocs.push({ name: label, url: v });
           }
         }
@@ -297,15 +320,27 @@ const TYPE_TOKENS = [
 ];
 function docTypeOf(name) {
   const base = String(name || '').replace(/\.[a-z0-9]+$/i, '');
-  const m = base.match(/^[A-Z]+/);
-  const raw = m ? m[0] : null;
-  let t = raw;
-  if (!t) {
-    const up = base.toUpperCase();
-    const hit = TYPE_TOKENS.find((tk) => up.includes(tk));
-    t = hit || up;
+  const up = base.toUpperCase();
+  // Step 1: Cek token PANJANG (>3 char) sebagai substring —
+  // menangani FILE_CV, CV_REVISI, PHOTOFILE, dll.
+  for (const tk of TYPE_TOKENS) {
+    if (tk.length > 3 && up.includes(tk)) {
+      return TYPE_ALIAS[tk] || tk;
+    }
   }
-  return TYPE_ALIAS[t] || t;
+  // Step 2: Regex prefix uppercase — menangani KK, KTP, IJAZAH, dll.
+  const m = base.match(/^[A-Z]+/);
+  const prefix = m ? m[0] : null;
+  if (prefix && TYPE_ALIAS[prefix]) return TYPE_ALIAS[prefix];
+  if (prefix && prefix.length >= 2) return prefix;
+  // Step 3: Pola lawas "1. X_CV.xlsx" — cari token di SELURUH nama
+  // (termasuk suffix setelah underscore). Hanya token >= 2 char.
+  for (const tk of TYPE_TOKENS) {
+    if (tk.length >= 2 && up.includes(tk)) {
+      return TYPE_ALIAS[tk] || tk;
+    }
+  }
+  return up;
 }
 
 // Usia file dari suffix numerik nama (ms epoch) — makin besar makin baru.

@@ -31,9 +31,16 @@ export function evaluasiTahapanKandidat(thpRaw) {
 export function renderJobDilamar(myData) {
   var apps = (myData && myData.applications) || [];
   var loker = (myData && myData.idLoker) || '';
-  if (!apps.length) return window.esc(loker || '-');
+  // Filter: hanya tampilkan lamaran yang SUDAH di-approve/diproses admin.
+  // Lamaran MENUNGGU (belum di-approve) tidak masuk list loker kandidat.
+  var approvedApps = apps.filter(function (a) {
+    var st = String((a && a.status) || 'MENUNGGU').toUpperCase();
+    return st !== 'MENUNGGU';
+  });
+  if (!approvedApps.length && !loker) return '-';
+  if (!approvedApps.length) return window.esc(loker);
   var chips = '';
-  apps.forEach(function (a) {
+  approvedApps.forEach(function (a) {
     if (!a || !a.code) return;
     var st = String(a.status || 'MENUNGGU').toUpperCase();
     var color =
