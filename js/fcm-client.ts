@@ -1,9 +1,11 @@
 // =============================================================================
-// fcm-client.js — Frontend Firebase Cloud Messaging & Service Worker
+// fcm-client.ts — Frontend Firebase Cloud Messaging & Service Worker
 // =============================================================================
+// Firebase SDK di-load dari CDN (lazy) — tidak masuk bundle utama.
+// Service worker (sw.js) sudah import Firebase SDK via importScripts().
 import { callAPI } from '../api-client.ts';
 
-let messaging = null;
+let messaging: any = null;
 
 // Konfigurasi Firebase dari akun
 const firebaseConfig = {
@@ -17,36 +19,33 @@ const firebaseConfig = {
  * Inisialisasi Firebase App & Messaging.
  * Dipanggil secara asinkron saat PWA dimuat.
  */
-export async function initFCM() {
+export async function initFCM(): Promise<void> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('Browser tidak mendukung Push Notification.');
+    console.warn('[FCM] Browser tidak mendukung Push Notification.');
     return;
   }
 
   try {
-    // Load Firebase SDK dinamis jika belum dimuat (untuk mengurangi bundle awal)
-    if (!window.firebase) {
+    // Load Firebase SDK dari CDN jika belum dimuat
+    const w = window as any;
+    if (!w.firebase) {
       await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
       await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
     }
 
-    // @ts-expect-error JS→TS migration
-    if (!window.firebase.apps.length) {
-      // @ts-expect-error JS→TS migration
-      window.firebase.initializeApp(firebaseConfig);
+    if (!w.firebase.apps.length) {
+      w.firebase.initializeApp(firebaseConfig);
     }
 
-    // @ts-expect-error JS→TS migration
-    messaging = window.firebase.messaging();
+    messaging = w.firebase.messaging();
 
     // Tangkap notifikasi saat aplikasi sedang terbuka (foreground)
-    messaging.onMessage((payload) => {
-      console.log('Pesan diterima (foreground): ', payload);
-      // Munculkan toast UI
+    messaging.onMessage((payload: any) => {
+      console.log('[FCM] Pesan diterima (foreground):', payload);
       const title = payload.notification?.title || 'Notifikasi Baru';
       const body = payload.notification?.body || '';
       if (window.showToast) {
-        window.showToast('info', title + ': ' + body);
+        window.showToast(title + ': ' + body, 'info');
       }
     });
 
@@ -61,7 +60,7 @@ export async function initFCM() {
  * Jika disetujui, ambil FCM token dan kirim ke backend (Supabase).
  * @param {string} userWa - Nomor WA (ID unik user/admin yang login)
  */
-export async function requestNotificationPermission(userWa) {
+export async function requestNotificationPermission(userWa: string): Promise<void> {
   if (!messaging) {
     await initFCM();
   }
@@ -70,9 +69,8 @@ export async function requestNotificationPermission(userWa) {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      console.log('Izin notifikasi diberikan.');
+      console.log('[FCM] Izin notifikasi diberikan.');
 
-      // Gunakan public VAPID key (default Firebase auto-generate)
       const swRegistration = await navigator.serviceWorker.getRegistration();
       if (!swRegistration) {
         throw new Error('Service Worker belum terdaftar.');
@@ -84,24 +82,36 @@ export async function requestNotificationPermission(userWa) {
 
       if (token) {
         console.log('[FCM] Token didapatkan:', token);
-        // Kirim ke backend untuk disimpan di tabel fcm_tokens
         await saveTokenToDatabase(userWa, token);
       } else {
-        console.warn('Gagal mendapatkan token registrasi FCM.');
+        console.warn('[FCM] Gagal mendapatkan token registrasi FCM.');
       }
     } else {
-      console.warn('Izin notifikasi ditolak oleh pengguna.');
+      console.warn('[FCM] Izin notifikasi ditolak oleh pengguna.');
     }
   } catch (error) {
-    console.error('Error meminta izin notifikasi:', error);
+    console.error('[FCM] Error meminta izin notifikasi:', error);
   }
 }
 
-async function saveTokenToDatabase(wa, token) {
+/**
+ * Cek apakah user sudah memberikan izin notifikasi.
+ */
+export function isNotificationGranted(): boolean {
+  return 'Notification' in window && Notification.permission === 'granted';
+}
+
+/**
+ * Cek apakah browser mendukung push notification.
+ */
+export function isPushSupported(): boolean {
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+
+async function saveTokenToDatabase(wa: string, token: string): Promise<void> {
   try {
-    // Memanggil API backend (buat endpoint baru /aksi 'registerFcmToken')
     const res = await callAPI('registerFcmToken', [wa, token, navigator.userAgent]);
-    if (res && res.success) {
+    if (res && (res as any).success) {
       console.log('[FCM] Token berhasil disimpan di database.');
     }
   } catch (err) {

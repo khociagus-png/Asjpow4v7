@@ -315,6 +315,12 @@ export function initApp(res, isSilent = false) {
     window.isAdmin = true;
     window.currentAdminName = localStorage.getItem('asj_admin_name');
     setSentryUser({ role: 'admin', name: window.currentAdminName });
+    // Aktifkan notifikasi push (FCM) — non-blocking, .catch() agar login tidak terganggu
+    try {
+      if (typeof window.requestNotificationPermission === 'function' && window.currentAdminName) {
+        window.requestNotificationPermission(window.currentAdminName).catch(function () {});
+      }
+    } catch (_) {}
 
     if (!isSilent) {
       if (document.getElementById('nav-mode'))
@@ -392,6 +398,12 @@ export function initApp(res, isSilent = false) {
       name: window.currentKandidatName,
       wa: window.currentKandidatWa,
     });
+    // Aktifkan notifikasi push (FCM) — non-blocking, .catch() agar login tidak terganggu
+    try {
+      if (typeof window.requestNotificationPermission === 'function' && window.currentKandidatWa) {
+        window.requestNotificationPermission(window.currentKandidatWa).catch(function () {});
+      }
+    } catch (_) {}
 
     if (!isSilent) {
       if (document.getElementById('nav-mode'))

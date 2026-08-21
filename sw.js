@@ -32,11 +32,37 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
   console.log('[sw.js] Received background message ', payload);
-  // Customize notification here if needed, but FCM usually handles it automatically
-  // if you send `notification` payload in HTTP v1.
+  // FCM HTTP v1 dengan field 'notification' otomatis menampilkan notifikasi.
+  // onBackgroundMessage hanya untuk custom logic (misal badge count).
 });
 
-const VERSION = 'asj-portal-app-2bedcaa48d-md7f6dfe9';
+// Notifikasi di-klik → navigasi ke URL yang sesuai
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = '/';
+  if (event.notification.data && event.notification.data.url) {
+    url = event.notification.data.url;
+  } else if (event.notification.data && event.notification.data.FCM_MSG && event.notification.data.FCM_MSG.data && event.notification.data.FCM_MSG.data.url) {
+    url = event.notification.data.FCM_MSG.data.url;
+  }
+  // Buka/fokus tab yang sesuai URL
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+      for (var i = 0; i < clientList.length; i++) {
+        var client = clientList[i];
+        if (client.url.indexOf(self.registration.scope) === 0 && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(url);
+      }
+    })
+  );
+});
+
+const VERSION = 'asj-portal-app-c02897bfbb-md7f6dfe9';
 const SHELL = [
   '/',
   '/index.html',
@@ -46,7 +72,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-2bedcaa48d.js',
+  '/assets/app-c02897bfbb.js',
   '/assets/modals-shared.html',
   '/manifest.webmanifest?v=8f163ba13c',
   '/icons/icon-192.png?v=39eaab3509',
