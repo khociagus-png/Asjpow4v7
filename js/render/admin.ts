@@ -385,8 +385,12 @@ async function downloadJobDocs(code: string) {
   try {
     showToast('Mempersiapkan dokumen untuk ' + code + '...', 'info');
     const res = await callAPI('downloadJobDocs', [code]);
-    if (!res?.success) {
-      showToast(res?.error || 'Gagal download dokumen.', 'error');
+    // callAPI returns undefined when sessionInvalid triggers page reload
+    if (!res) return;
+    // sessionInvalid is handled by callAPI (toast + reload); skip our own toast
+    if (res.sessionInvalid) return;
+    if (!res.success) {
+      showToast(res.error || res.message || 'Gagal download dokumen.', 'error');
       return;
     }
     // Decode base64 → Blob → trigger download
@@ -405,6 +409,7 @@ async function downloadJobDocs(code: string) {
     showToast('Berhasil! ' + res.totalFiles + ' file dari ' + res.candidateCount + ' kandidat.', 'success');
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('session') || msg.includes('sesi')) return; // already handled by callAPI
     showToast('Gagal download: ' + msg, 'error');
   }
 }

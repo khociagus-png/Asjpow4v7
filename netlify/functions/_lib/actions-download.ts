@@ -72,16 +72,19 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
       );
     }
     if (!candidates.length) {
-      return { success: false, error: 'Tidak ada kandidat untuk job ' + code };
+      return { success: false, error: 'Tidak ada kandidat untuk job ' + code + '. Pastikan kandidat sudah terdaftar di job ini.' };
     }
+    console.log('[download] Found', candidates.length, 'candidates for job', code);
 
     // 2. Kumpulkan semua WA
     const waList = candidates
       .map((c) => normalizeWa(String(pick(c, ['no_wa', 'wa', 'whatsapp']) || '')))
       .filter(Boolean);
+    console.log('[download] WA list:', waList.length, 'entries');
 
     // 3. Tarik master data untuk semua kandidat (batch)
-    const masterRows = await fetchMasterByWa(waList);
+    // Guard: jangan kirim query kosong ke Supabase
+    const masterRows = waList.length ? await fetchMasterByWa(waList) : [];
     const masterByWa = new Map<string, Record<string, unknown>>();
     if (Array.isArray(masterRows)) {
       for (const row of masterRows) {
@@ -93,6 +96,7 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
     // 4. Kumpulkan semua URL dokumen
     const downloads: { url: string; folder: string; label: string }[] = [];
     for (const cand of candidates) {
+      if (!cand || typeof cand !== 'object') continue;
       const wa = normalizeWa(String(pick(cand, ['no_wa', 'wa', 'whatsapp']) || ''));
       const nama = safeFolderName(
         String(pick(cand, ['nama_lengkap', 'nama']) || 'KANDIDAT').toUpperCase(),
@@ -126,14 +130,22 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
     }
 
     if (!downloads.length) {
-      return { success: false, error: 'Tidak ada dokumen yang bisa di-download.' };
+      return { success: false, error: 'Tidak ada dokumen yang bisa di-download untuk ' + candidates.length + ' kandidat. Pastikan data master sudah dilengkapi.' };
     }
+    console.log('[download] Found', downloads.length, 'files to download from', candidates.length, 'candidates');
 
     // 5. Download semua file dan masukkan ke ZIP
     const archiverMod = await import('archiver');
+    // ESM export: { ZipArchive } class. CJS fallback: function('zip').
+    const ZipClass = (archiverMod as any).ZipArchive;
+    const ArchiveClass = ZipClass || (archiverMod as any).Archiver || (archiverMod as any).default;
     return new Promise((resolve) => {
       const chunks: Buffer[] = [];
-      const archive = (archiverMod as any)('zip', { zlib: { level: 6 } });
+      const archive = ZipClass
+        ? new ZipClass('zip', { zlib: { level: 6 } })
+        : typeof ArchiveClass === 'function'
+          ? new ArchiveClass('zip', { zlib: { level: 6 } })
+          : (archiverMod as any)('zip', { zlib: { level: 6 } });
 
       archive.on('data', (chunk: Buffer) => chunks.push(chunk));
       archive.on('end', () => {
@@ -156,21 +168,32 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
       const total = downloads.length;
 
       async function processNext() {
-        if (processed >= total) {
-          archive.finalize();
-          return;
+        try {
+          if (processed >= total) {
+            archive.finalize();
+            return;
+          }
+          const d = downloads[processed];
+          processed++;
+          const buf = await fetchBuffer(d.url);
+          if (buf) {
+            const fileName = filenameFromUrl(d.url, d.label);
+            archive.append(buf, { name: d.folder + '/' + fileName });
+          } else {
+            console.warn('[download] Skip file (fetch failed):', d.url.substring(0, 80));
+          }
+          await processNext();
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error('[download] processNext error:', msg);
+          archive.abort();
         }
-        const d = downloads[processed];
-        processed++;
-        const buf = await fetchBuffer(d.url);
-        if (buf) {
-          const fileName = filenameFromUrl(d.url, d.label);
-          archive.append(buf, { name: d.folder + '/' + fileName });
-        }
-        await processNext();
       }
 
-      processNext();
+      processNext().catch((err: unknown) => {
+        console.error('[download] processNext uncaught:', err);
+        archive.abort();
+      });
     });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
