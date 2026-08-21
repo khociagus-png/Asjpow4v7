@@ -310,7 +310,8 @@ for (const page of ALL_HTML) {
   const antiCacheScript = `<!-- ANTI-CACHE -->
 <script>
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
-(function(){var E="app-${bundleHash}";if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})})();
+// sessionStorage guard: cuma fire 1x per deploy, mencegah infinite loop.
+(function(){var E="app-${bundleHash}";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}})();
 </script>
 <!-- /ANTI-CACHE -->`;
   // Ganti anti-cache yang sudah ada (idempotent) atau sisipkan sebelum bundle script
