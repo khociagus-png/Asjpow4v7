@@ -82,11 +82,9 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  // 1) AKTIFKAN SEKARANG — jangan pernah biarkan SW baru menunggu. Ini kunci
-  //    anti-cache-nyangkut: begitu sw.js berubah, SW baru langsung mengambil
-  //    alih pada kunjungan berikutnya.
+  // 1) AKTIFKAN SEKARANG — jangan pernah biarkan SW baru menunggu.
   self.skipWaiting();
-  // 2) Precache best-effort (per-item catch: satu aset gagal tidak menggagalkan).
+  // 2) Precache best-effort.
   e.waitUntil(
     (async () => {
       const cache = await caches.open(VERSION);
@@ -94,6 +92,29 @@ self.addEventListener('install', (e) => {
     })(),
   );
 });
+
+// SELF-INVALIDATING: check versi dari server tiap 5 menit.
+// Kalau sw.js di server beda dari yang terinstall → force reload semua tab.
+// Ini menangani kasus HP yang cache sw.js di HTTP level.
+setInterval(function () {
+  fetch('/sw.js?_check=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.text(); })
+    .then(function (serverCode) {
+      var serverVersion = serverCode.match(/const VERSION = '([^']+)'/);
+      if (serverVersion && serverVersion[1] !== VERSION) {
+        console.log('[sw.js] VERSION mismatch! Server:', serverVersion[1], 'Local:', VERSION);
+        // Force reload semua tab
+        self.clients.matchAll({ type: 'window' }).then(function (clientList) {
+          clientList.forEach(function (client) {
+            client.postMessage({ type: 'ASJ_FORCE_RELOAD' });
+          });
+        });
+        // Unregister diri sendiri supaya fetch berikutnya dapat sw.js baru
+        self.registration.unregister();
+      }
+    })
+    .catch(function () {});
+}, 5 * 60 * 1000);
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
