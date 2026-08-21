@@ -8,7 +8,7 @@
 // serve-static.mjs yang memakai loadHandlers().handleShareData).
 'use strict';
 
-const { handleShareData } = require('./_lib/actions-share.js');
+const { handleShareData } = require('./_lib/actions-share');
 
 exports.handler = async (event) => {
   const job = (event.queryStringParameters && event.queryStringParameters.job) || '';

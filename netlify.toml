@@ -2,6 +2,7 @@
 publish = "."
 functions = "netlify/functions"
 command = "echo 'Static site - no build step'"
+node_bundler = "esbuild"
 
 [dev]
 functions = "netlify/functions"
