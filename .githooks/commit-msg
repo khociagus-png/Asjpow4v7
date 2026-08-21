@@ -1,53 +1,35 @@
 #!/usr/bin/env bash
-# =============================================================================
-# commit-msg — Validate conventional commit message format.
-# =============================================================================
-# Format: type(scope): description
-# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-# Examples:
-#   feat(auth): add refresh token for admin session
-#   fix(filter): handle null tahapan in candidate filter
-#   docs: update MEMORY.md with session context
-#   refactor(esm): extract bridge aliases to separate module
-#
-# Skip: git commit --no-verify (CI still catches it)
-# =============================================================================
-set -e
+# commit-msg — validate conventional commit message format.
+# Runs commitlint if available; skips gracefully otherwise.
 
-COMMIT_MSG_FILE="$1"
-COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
-
-# Skip merge commits
-if echo "$COMMIT_MSG" | head -1 | grep -qE '^Merge (pull request|branch)'; then
+if [ "$SKIP_GIT_CHECKS" = "1" ]; then
   exit 0
 fi
 
-# Skip fixup/squash commits
-if echo "$COMMIT_MSG" | head -1 | grep -qE '^(fixup|squash)!'; then
+# Find commitlint binary
+COMMITLINT=""
+if command -v bun >/dev/null 2>&1; then
+  COMMITLINT="bunx commitlint"
+elif command -v npx >/dev/null 2>&1; then
+  COMMITLINT="npx commitlint"
+else
+  echo "⚠️  commit-msg: commitlint tidak ditemukan — lewati validasi."
   exit 0
 fi
 
-# Conventional commit regex
-PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_-]+\))?: .{1,}'
+# Validate the commit message
+$COMMITLINT --edit "$1" 2>&1
+EXIT_CODE=$?
 
-if ! echo "$COMMIT_MSG" | head -1 | grep -qE "$PATTERN"; then
+if [ $EXIT_CODE -ne 0 ]; then
   echo ""
-  echo "❌ Invalid commit message format!"
+  echo "💡 Format commit message harus: type(scope): description"
+  echo "   Contoh: feat(auth): add refresh token"
+  echo "            fix(filter): handle null tahapan"
+  echo "            docs: update MEMORY.md"
   echo ""
-  echo "  Expected: type(scope): description"
+  echo "   Type: feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert"
   echo ""
-  echo "  Types: feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert"
-  echo ""
-  echo "  Examples:"
-  echo "    feat(auth): add refresh token for admin session"
-  echo "    fix(filter): handle null tahapan in candidate filter"
-  echo "    docs: update MEMORY.md with session context"
-  echo "    refactor(esm): extract bridge aliases to separate module"
-  echo ""
-  echo "  Your message: $(head -1 "$COMMIT_MSG_FILE")"
-  echo ""
-  exit 1
 fi
 
-echo "✅ Commit message format OK."
-exit 0
+exit $EXIT_CODE

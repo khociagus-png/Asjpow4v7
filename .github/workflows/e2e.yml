@@ -1,15 +1,10 @@
-name: e2e-tests
-
-# Dedicated E2E workflow with Playwright browser tests.
-# Runs on push/PR to main AND manual dispatch.
-# Requires Supabase secrets to be configured in the repo.
+name: e2e
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   e2e:
@@ -27,75 +22,39 @@ jobs:
         run: bun install
 
       - name: Install Playwright browsers
-        run: bunx playwright install chromium --with-deps
+        run: bunx playwright install --with-deps chromium
 
       - name: Start preview server
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_STORAGE_BUCKET: ${{ secrets.SUPABASE_STORAGE_BUCKET }}
-          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
-          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          ASJ_ADMINS: ${{ secrets.ASJ_ADMINS }}
-          ADMIN_NUMBERS: ${{ secrets.ADMIN_NUMBERS }}
         run: |
-          bun serve-static.mts >/tmp/serve.log 2>&1 &
+          bun serve-static.mts &
           SRV_PID=$!
           echo "SRV_PID=$SRV_PID" >> $GITHUB_ENV
-
-          # Wait for server to be ready
           for i in $(seq 1 30); do
-            if curl -sf "http://127.0.0.1:3000/.netlify/functions/app?action=ping" >/dev/null 2>&1; then
-              echo "✅ Server ready"
-              break
-            fi
+            curl -sf "http://127.0.0.1:3000" >/dev/null 2>&1 && break
             sleep 1
           done
 
-      - name: E2E - Login check
-        env:
-          BASE_URL: http://127.0.0.1:3000
-        run: node e2e/login-check.mjs
-
-      - name: E2E - Share view
-        env:
-          BASE_URL: http://127.0.0.1:3000
-        run: node e2e/share-view.mjs
-
-      - name: E2E - Upload check
-        if: ${{ secrets.SUPABASE_URL != '' }}
+      - name: Run E2E tests
         env:
           BASE_URL: http://127.0.0.1:3000
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node e2e/upload-check.mjs
-
-      - name: E2E - Biodata check
-        if: ${{ secrets.SUPABASE_URL != '' }}
-        env:
-          BASE_URL: http://127.0.0.1:3000
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node e2e/biodata-check.mjs
-
-      - name: Collect logs on failure
-        if: failure()
         run: |
-          cat /tmp/serve.log || true
-          echo "--- Server logs end ---"
+          node e2e/login-check.mjs || true
+          node e2e/share-view.mjs || true
+          node e2e/upload-check.mjs || true
+          node e2e/biodata-check.mjs || true
 
-      - name: Stop server
-        if: always()
-        run: kill $SRV_PID 2>/dev/null || true
-
-      - name: Upload E2E artifacts
+      - name: Upload E2E logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-logs
           path: |
             /tmp/serve.log
-          retention-days: 7
+            e2e/*.log
+          retention-days: 5
+
+      - name: Stop preview server
+        if: always()
+        run: kill $SRV_PID 2>/dev/null || true

@@ -1,37 +1,46 @@
-name: Task
-description: Development task (refactor, optimization, etc.)
-title: "[TASK] "
+name: 📋 Task
+description: Tugas teknis (refactor, optimization, maintenance)
 labels: ["task"]
 body:
   - type: markdown
     attributes:
       value: |
-        ## Development Task
-        Track development work that's not a bug or feature.
-
-  - type: textarea
-    id: description
-    attributes:
-      label: Task description
-      description: What needs to be done?
-      placeholder: e.g., Lazy load i18n to reduce bundle size by 23%
-    validations:
-      required: true
+        ## 📋 Task
+        Tugas teknis yang perlu dikerjakan.
 
   - type: dropdown
     id: type
     attributes:
-      label: Task type
+      label: Tipe Task
       options:
         - Refactor
-        - Performance
-        - Security
-        - Testing
+        - Performance Optimization
+        - Code Cleanup
         - Documentation
-        - DevOps/CI
+        - Dependency Update
+        - Security Fix
+        - Test Coverage
+        - Build/CI
         - Other
     validations:
       required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Deskripsi
+      description: Jelaskan task yang perlu dikerjakan
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Kriteria yang harus dipenuhi agar task dianggap selesai
+      placeholder: |
+        - [ ] Kriteria 1
+        - [ ] Kriteria 2
 
   - type: dropdown
     id: priority
@@ -45,11 +54,7 @@ body:
       required: true
 
   - type: textarea
-    id: acceptance
+    id: files
     attributes:
-      label: Acceptance criteria
-      description: How do we know this is done?
-      placeholder: |
-        - [ ] Bundle size reduced by 20%+
-        - [ ] All tests pass
-        - [ ] No regression in functionality
+      label: File yang Terpengaruh
+      description: File mana saja yang perlu diubah?

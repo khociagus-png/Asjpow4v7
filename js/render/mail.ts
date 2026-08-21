@@ -26,12 +26,15 @@ var MAIL_STATUS_LABEL = {
   ALL: 'SEMUA',
 };
 var MAIL_STATE_OF = function (x) {
-  return (x.status || 'MENUNGGU').toUpperCase();
+  var st = (x.status || 'MENUNGGU').toUpperCase();
+  // Normalize legacy status 'UMUM' → 'UPDATE' supaya badge & filter konsisten.
+  if (st === 'UMUM') return 'UPDATE';
+  return st;
 };
 // Kelompokkan status (baru + legacy) ke bucket filter.
 var MAIL_BUCKET = function (st) {
   if (st === 'MENUNGGU' || st === 'MAIL' || st === 'BARU' || st === 'PENDING') return 'MENUNGGU';
-  if (st === 'UPDATE' || st === 'UPDATED' || st === 'DATA DIUBAH') return 'UPDATE';
+  if (st === 'UPDATE' || st === 'UPDATED' || st === 'DATA DIUBAH' || st === 'UMUM') return 'UPDATE';
   if (st === 'REVIEW ADMIN' || st === 'REVIEW') return 'REVIEW';
   if (st === 'LULUS' || st === 'LOLOS' || st === 'APPROVED' || st === 'APPROVE') return 'LULUS';
   if (st === 'GAGAL' || st === 'TOLAK' || st === 'REJECTED' || st === 'REJECT') return 'GAGAL';

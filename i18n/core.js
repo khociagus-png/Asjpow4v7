@@ -32,6 +32,8 @@ export const OPTION_TRANSLATIONS = {
   LIST: { id: 'LIST', jp: 'リスト' },
   // Status lamaran (list_status_lamaran)
   MENUNGGU: { id: 'MENUNGGU', jp: '待機中' },
+  UPDATE: { id: 'UPDATE', jp: '更新済' },
+  UMUM: { id: 'UPDATE', jp: '更新済' },
   'REVIEW ADMIN': { id: 'REVIEW ADMIN', jp: '管理者確認中' },
   GAGAL: { id: 'GAGAL', jp: '不合格' },
   LULUS: { id: 'LULUS', jp: '合格' },
