@@ -807,6 +807,33 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
         });
       }
     }
+    // --- SMART INGESTION (silent, fire-and-forget) ---
+    // Setelah file ter-upload, ekstrak teks lokal → AI rapikan → upsert master.
+    // Hanya untuk dokumen teks (PDF/DOCX/XLSX/CSV/TXT), bukan foto.
+    // Tidak menunggu hasil — parse berjalan di belakang, admin/kandidat tidak tahu.
+    const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
+    const fileExt = ext.toLowerCase();
+    if (PARSEABLE_EXTS.has(fileExt) && url && wa) {
+      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
+      handleProcessUploadDoc([{ fileUrl: url, fileType: fileExt, wa }], sessionToken)
+        .then(async (result) => {
+          if (result && result.success && result.action) {
+            // Kirim notifikasi ke mail inbox: biodata berhasil di-parse AI
+            try {
+              await syncFormMailDariUpload(
+                wa,
+                nama,
+                'BIODATA_AI',
+                'Biodata berhasil diekstrak & diperbarui oleh AI (' + result.data?.nama_lengkap + ')',
+                '',
+              );
+            } catch {
+              /* mail notif non-fatal */
+            }
+          }
+        })
+        .catch(() => { /* parse gagal — diam saja, tidak mengganggu upload */ });
+    }
     return { success: true };
   } catch (e) {
     return { success: false, error: 'Gagal menyimpan berkas. Silakan coba lagi.' };

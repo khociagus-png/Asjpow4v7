@@ -19,6 +19,7 @@ import { renderDbFilters } from '../admin_modal/dbfilter.ts';
 import { renderJadwal, renderDashboardAgenda } from '../admin_ops/schedule.ts';
 import { renderTugas } from '../api/wa.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
+import { callAPI } from '../../api-client.ts';
 // 7. FUNGSI RENDER — DOMAIN ADMIN (admin.html)
 // ==========================================
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
@@ -32,6 +33,28 @@ var SIDEBAR_INACTIVE =
   'w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2';
 var SIDEBAR_ACTIVE =
   'w-full px-3 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold transition shadow-md text-left flex items-center gap-2';
+
+// --- Sidebar Drawer Toggle ---
+// Satu klik buka sidebar, auto-hide setelah tab dipilih (login-style).
+function closeAdminSidebar() {
+  var sidebar = document.getElementById('admin-sidebar');
+  var backdrop = document.getElementById('admin-sidebar-backdrop');
+  if (sidebar) sidebar.classList.add('-translate-x-full');
+  if (backdrop) backdrop.classList.add('hidden');
+}
+
+export function toggleAdminSidebar() {
+  var sidebar = document.getElementById('admin-sidebar');
+  var backdrop = document.getElementById('admin-sidebar-backdrop');
+  if (!sidebar) return;
+  var isOpen = !sidebar.classList.contains('-translate-x-full');
+  if (isOpen) {
+    closeAdminSidebar();
+  } else {
+    sidebar.classList.remove('-translate-x-full');
+    if (backdrop) backdrop.classList.remove('hidden');
+  }
+}
 
 export function adminSwitchTab(t) {
   var tabs = ['kelola', 'dbjob', 'mail', 'tambah', 'pelamar', 'jadwal', 'wa', 'config'];
@@ -51,6 +74,8 @@ export function adminSwitchTab(t) {
     tgtT.className = SIDEBAR_ACTIVE;
     tgtT.setAttribute('aria-current', 'page');
   }
+  // Auto-close sidebar drawer setelah tab dipilih
+  closeAdminSidebar();
   // Hash-based routing (shareable links, browser back button)
   if (window.location && t) {
     var newHash = '#' + t;
@@ -337,6 +362,9 @@ export function renderDbJobTable(arr) {
       '"><i class="fas fa-share-alt"></i> ' +
       tr('ui.share_toggle') +
       '</button>' +
+      '<button onclick="window.downloadJobDocs(\'' +
+      window.escJs(db.code) +
+      '\')" class="ml-2 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded font-bold shadow text-[10px]" title="Download semua dokumen"><i class="fas fa-download"></i> Docs</button>' +
       '</td>' +
       '</tr>';
   }
@@ -349,12 +377,46 @@ export function renderDbJobTable(arr) {
   tb.innerHTML = html;
 }
 
+// ---------------------------------------------------------------------------
+// Download semua dokumen kandidat per job (ZIP)
+// ---------------------------------------------------------------------------
+async function downloadJobDocs(code: string) {
+  if (!code) return;
+  try {
+    showToast('Mempersiapkan dokumen untuk ' + code + '...', 'info');
+    const res = await callAPI('downloadJobDocs', [code]);
+    if (!res?.success) {
+      showToast(res?.error || 'Gagal download dokumen.', 'error');
+      return;
+    }
+    // Decode base64 → Blob → trigger download
+    const byteChars = atob(res.zipBase64);
+    const byteArr = new Uint8Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([byteArr], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = res.fileName || 'Dokumen_' + code + '.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Berhasil! ' + res.totalFiles + ' file dari ' + res.candidateCount + ' kandidat.', 'success');
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    showToast('Gagal download: ' + msg, 'error');
+  }
+}
+
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file /
 // HTML inline onclick (adminSwitchTab, filterDbJob, window.limitDb+=10;...).
 registerSeamAliases({
   adminSwitchTab,
+  toggleAdminSidebar,
   renderAdmin,
   filterDbJob,
   debouncedFilterDbJob,
   badgeTahapanDb,
+  downloadJobDocs,
 });

@@ -32,8 +32,13 @@
   },
   "dependencies": {
     "@sentry/browser": "^10.70.0",
+    "@types/archiver": "^8.0.0",
+    "archiver": "^8.0.0",
     "bcryptjs": "^3.0.3",
-    "web-vitals": "^6.1.1"
+    "mammoth": "^1.12.1",
+    "pdf-parse": "^2.4.5",
+    "web-vitals": "^6.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@sentry/cli": "^3.6.2",

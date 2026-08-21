@@ -85,6 +85,8 @@ const ADMIN_ACTIONS = new Set([
   'getAdminAiContext',
   'buildAdminAiCandidateSummary',
   'parseDokumenBiodata',
+  'processUploadDoc',
+  'downloadJobDocs',
   'generateWawancaraModel',
   'getHasilWawancara',
   // Signed upload URL ke Storage (files.ts) - sekarang wajib sesi admin.
@@ -128,6 +130,10 @@ const NETLIFY_FUNCTIONS = {
   // File generik (Supabase Storage) - hanya getUploadUrls (upload/list/delete
   // generik dihapus dari files.ts karena tidak dipakai & tanpa gerbang admin)
   getUploadUrls: 'files',
+  // Smart Ingestion (upload dokumen → extract → AI parse → upsert master)
+  processUploadDoc: 'files',
+  // Download semua dokumen kandidat per job (ZIP)
+  downloadJobDocs: 'files',
   // Data utama aplikasi
   getAppData: 'get-app-data',
   getMonthlyReport: 'get-app-data',

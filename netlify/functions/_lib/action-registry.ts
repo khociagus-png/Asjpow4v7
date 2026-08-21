@@ -13,6 +13,8 @@ import * as wa from './actions-wa.ts';
 import * as config from './actions-config.ts';
 import * as register from './actions-register.ts';
 import * as aiCv from './ai/cv.ts';
+import * as ingest from './actions-ingest.ts';
+import * as download from './actions-download.ts';
 // =============================================================================
 // action-registry.js — SATU-SATUNYA sumber kebenaran kontrak action backend.
 // -----------------------------------------------------------------------------
@@ -115,6 +117,10 @@ const ACTION_HANDLERS = {
   parseDokumenBiodata: aiClassify.handleParseDokumenBiodata,
   getAdminAiContext: aiCv.handleGetAdminAiContext,
   buildAdminAiCandidateSummary: aiCv.handleBuildAdminAiCandidateSummary,
+  // Smart Ingestion (upload → extract → Gemini → upsert master)
+  processUploadDoc: ingest.handleProcessUploadDoc,
+  // Download dokumen kandidat per job (ZIP)
+  downloadJobDocs: download.handleDownloadJobDocs,
   submitDataAsj: aiCv.handleSubmitDataAsj,
   simpanDataTtdNaitei: aiCv.handleSimpanDataTtdNaitei,
 };
@@ -135,6 +141,7 @@ const AI_ACTIONS = new Set([
   'processAdminAIChat',
   'processAiInterview',
   'parseDokumenBiodata',
+  'processUploadDoc',
   'generateWawancaraModel',
 ]);
 const FONNTE_ACTIONS = new Set(['kirimSatuPesanFonnte', 'kirimTawaranMassal']);
