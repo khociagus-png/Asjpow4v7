@@ -1,7 +1,7 @@
 [build]
 publish = "."
 functions = "netlify/functions"
-command = "echo 'Static site - no build step'"
+command = "bash scripts/prebuild-netlify.sh"
 node_bundler = "esbuild"
 
 [dev]
