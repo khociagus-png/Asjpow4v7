@@ -47,11 +47,14 @@ async function handleShareData(jobCode) {
     let forms = await findFormsByWaList(waList);
     if (forms === undefined) forms = await findForms();
     const byWa = new Map();
+    const formsByWa = new Map();
     for (const f of forms) {
       const w = normalizeWa(String(f.no_wa || f.wa || f.whatsapp || ''));
       if (!w) continue;
       if (!byWa.has(w)) byWa.set(w, []);
       for (const d of parseDocs(toText(f.keterangan))) byWa.get(w).push(d);
+      if (!formsByWa.has(w)) formsByWa.set(w, []);
+      formsByWa.get(w).push(f);
     }
     // Jalur cepat: tarik pemberkasan_checklist + master_database_candidate
     // untuk WA kandidat job ini — dokumen pemberkasan (KK/KTP/ijazah/dll)
@@ -184,9 +187,9 @@ async function handleShareData(jobCode) {
 
       // Fallback ke database_asj_form: photo/JFT/SSW/CV mungkin disimpan
       // di lamaran (database_asj_form) tapi tidak ada di database_candidate.
-      // Scan SEMUA baris lamaran kandidat ini → ambil non-empty terbaru.
+      // Ambil baris form milik kandidat ini → ambil non-empty terbaru.
       const cWa = normalizeWa(String(c.wa || ''));
-      const formRows = forms.filter((f) => normalizeWa(String(f.no_wa || f.wa || '')) === cWa);
+      const formRows = formsByWa.get(cWa) || [];
       const pickFirstForm = (fields) => {
         for (const r of formRows) {
           const v = toText(pick(r, fields));
