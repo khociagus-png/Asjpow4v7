@@ -3,7 +3,7 @@
 > **File ini untuk detail** — info singkat sudah ada di AGENTS.md §STATUS SEKARANG.
 > Baca hanya saat butuh konteks lengkap (history, decisions, known issues detail).
 
-**Terakhir diupdate:** 2026-08-21 18:20 UTC — oleh Buffy (AI agent)
+**Terakhir diupdate:** 2026-08-21 19:00 UTC — oleh Buffy (AI agent)
 
 ---
 
@@ -100,6 +100,10 @@
 - **Mail Inbox 'Umum'** ✅ — Normalize ke 'UPDATE'
 - **Performance optimization** ✅ — Terverifikasi ada di kode
 - **73 file `@ts-nocheck`** ✅ — Sudah bersih
+
+### ❌ KNOWN BUG — USER LAPOR MALAM 2026-08-21:
+- **Admin panel di Freebuff preview HP** — user fix admin menu model baru di desktop tadi sore. Pas buka preview di HP, admin menu balik ke model lama (tab bar horizontal, bukan sidebar). Source admin.html SUDAH punya sidebar + bottom-nav. Preview serve benar. Tapi HP render model lama. Penyebab pasti BELUM diketahui — kemungkinan Freebuff preview cache / browser cache / JS bundle berbeda.
+- **Dua site Netlify** — `asjportal.netlify.app` (lama, bundle `app-d74730f28a`) vs `asjportal-terbaru.netlify.app` (baru, bundle `app-89d2bde3c8`). User sering salah buka yang lama.
 
 ### ⚠️ BELUM / OPSIONAL:
 - **`GROQ_API_KEY` & `LOG_DRAIN_TOKEN`** — belum dipakai kode (opsional)
