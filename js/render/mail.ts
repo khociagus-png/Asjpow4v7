@@ -160,8 +160,12 @@ export function renderFormInbox() {
 
     // Dokumen tambahan dari keterangan ("NAMA:URL;...") — tampilkan semua
     // yang di-upload kandidat beserta preview (gambar → foto, lainnya → pdf).
+    // Dedup by URL supaya upload ganda tidak render tombol berulang.
     var extraDocBtns = '';
+    var seenDocUrls: Record<string, boolean> = {};
     (Array.isArray(f.docs) ? f.docs : []).forEach(function (dc) {
+      if (seenDocUrls[dc.url]) return;
+      seenDocUrls[dc.url] = true;
       var isImg =
         /\.(jpe?g|png|webp|gif|bmp|svg)(\?|$)/i.test(dc.url) || /^data:image\//i.test(dc.url);
       // Guard defensif: kalau `esc` lokal undefined (mis. deklarasi var
@@ -195,6 +199,8 @@ export function renderFormInbox() {
             : MAIL_BUCKET(st) === 'REVIEW'
               ? 'bg-sky-900/40 border-sky-500/30 text-sky-400'
               : 'bg-amber-900/40 border-amber-500/30 text-amber-300';
+    // Normalisasi teks badge: 'UMUM' → 'UPDATE' supaya admin tidak bingung
+    var displayStatus = f.status === 'UMUM' ? 'UPDATE' : f.status;
     // Row yang sudah diproses: tampilkan keterangan feedback, tanpa tombol review.
     var actionCell = '';
     var deleteBtn =
@@ -307,7 +313,7 @@ export function renderFormInbox() {
       '" class="p-4 text-center"><span class="px-2 py-1 rounded text-[9px] font-bold ' +
       badgeClass +
       '">' +
-      esc(window.trOption(f.status)) +
+      esc(window.trOption(displayStatus)) +
       '</span>' +
       (f.feedback
         ? '<div class="text-[9px] text-violet-300/70 mt-1 max-w-[150px] break-words" title="' +
@@ -320,12 +326,12 @@ export function renderFormInbox() {
       '<td data-label="' +
       tr('table.doc_folder') +
       '" class="rt-full p-4 text-center">' +
-      '<div class="flex flex-wrap gap-1 justify-center">' +
-      '<a href="' +
+      '<div class="flex flex-wrap gap-1 justify-center max-h-[80px] overflow-auto">' +
+      (f.folderUrl && f.folderUrl !== '-' ? '<a href="' +
       esc(f.folderUrl) +
       '" target="_blank" aria-label="' +
       tr('table.doc_folder') +
-      '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' +
+      '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' : '') +
       btnPhoto +
       btnJft +
       btnSsw +
