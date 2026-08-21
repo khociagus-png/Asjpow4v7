@@ -182,6 +182,35 @@ async function handleShareData(jobCode) {
       let finalJft = c.jft;
       let finalSsw = c.ssw;
 
+      // Fallback ke database_asj_form: photo/JFT/SSW/CV mungkin disimpan
+      // di lamaran (database_asj_form) tapi tidak ada di database_candidate.
+      // Scan SEMUA baris lamaran kandidat ini → ambil non-empty terbaru.
+      const cWa = normalizeWa(String(c.wa || ''));
+      const formRows = forms.filter((f) => normalizeWa(String(f.no_wa || f.wa || '')) === cWa);
+      const pickFirstForm = (fields) => {
+        for (const r of formRows) {
+          const v = toText(pick(r, fields));
+          if (v && v !== '-' && v !== 'null') return v;
+        }
+        return null;
+      };
+      if (!pasPhoto || pasPhoto === '-') {
+        const fPhoto = pickFirstForm(['pas_photo', 'pasPhoto', 'photo']);
+        if (fPhoto) pasPhoto = fPhoto;
+      }
+      if (!finalJft || finalJft === '-') {
+        const fJft = pickFirstForm(['jft', 'jft_url']);
+        if (fJft) finalJft = fJft;
+      }
+      if (!finalSsw || finalSsw === '-') {
+        const fSsw = pickFirstForm(['ssw', 'ssw_url']);
+        if (fSsw) finalSsw = fSsw;
+      }
+      if (!finalCv || finalCv === '-') {
+        const fCv = pickFirstForm(['file_cv', 'cv', 'cv_url']);
+        if (fCv) finalCv = fCv;
+      }
+
       // Extract newest CV/JFT/SSW dari extraDocs (folder master & history)
       // jika kandidat melamar tanpa dokumen tersebut di loker baru.
       for (let i = extraDocs.length - 1; i >= 0; i--) {
