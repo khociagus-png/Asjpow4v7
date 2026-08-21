@@ -4,6 +4,40 @@
 > entri per commit dicatat di sini supaya file riwayat tidak membengkak.
 > Format: paling lama di atas (paling baru di bawah).
 
+## `98a1902` — MEMORY.md updated (full session log)
+
+- Updated MEMORY.md with all 18 commits from session 2026-08-21
+- Updated PROGRESS2.md with session entry
+
+## `0197c57` — fix(netlify): pre-bundle functions + DEPLOY LIVE
+
+- Root cause: `package.json` `"type":"module"` → esbuild Netlify gagal resolve `.ts` dari CommonJS `require()`
+- Fix: `scripts/build-netlify-functions.sh` — bundle 20 functions ke CJS standalone via esbuild lokal
+- `.netlify/functions/package.json` — override type ke `"commonjs"`
+- `netlify.toml` — functions → `.netlify/functions`, command → build script
+- **DEPLOY LIVE** ke `asjportal-terbaru.netlify.app` — semua fix sudah production
+- Verifikasi: homepage 200, bundle `app-89d2bde3c8.js` (461KB), ping OK, getAppData OK (143 jobs)
+
+## `ad710f0` — fix(pwa): Netlify _headers + build-system anti-cache
+
+- `_headers` — `Cache-Control: no-cache` untuk sw.js + semua HTML
+- `scripts/build-html.mts` — otomatis inject anti-cache script ke admin.html + index.html
+- Referensi: web.dev/articles/service-worker-caching-and-http-caching
+
+## `d43c9ca` — perf(sentry): lazy load SDK dari CDN
+
+- Sentry SDK 688KB di-load dari CDN (bukan bundle)
+- Bundle: 1.2MB → 461KB (-62%)
+- `js/core/sentry.ts` — dynamic CDN load saat `initSentry()` dipanggil
+- Hapus `js/core/sentry-dummy.js` (dead code)
+
+## `2a04444` — feat(fcm): push notifications activate
+
+- `sw.js` — tambah `notificationclick` handler
+- `js/fcm-client.ts` — hapus `@ts-expect-error`, tambah proper types
+- `js/engine/init.ts` — auto-request notifikasi setelah login (admin + kandidat)
+- `netlify/functions/_lib/env.ts` — whitelist `FIREBASE_SERVICE_ACCOUNT`
+
 ## `17f09ac` — TypeScript migration
 
 - Konversi 136+ file JS→TS (frontend, backend, scripts, tests)

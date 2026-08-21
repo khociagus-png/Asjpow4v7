@@ -5,7 +5,26 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-20 — dikerjakan oleh **codebuff** (via Freebuff) — **TypeScript migration** (`17f09ac`)
+**Update terakhir:** sesi 2026-08-21 — dikerjakan oleh **Buffy** (AI agent) — **Sentry lazy load + FCM + Anti-cache + Netlify deploy fix** (`0197c57`)
+
+---
+
+## Sesi 2026-08-21 — Sentry + FCM + Anti-cache + Netlify Deploy Fix (Buffy)
+
+### Ringkasan
+
+**18 commits** (`a26c9e4` → `0197c57`):
+
+- **Sentry lazy load** — SDK 688KB di-load dari CDN, bundle -62% (1.2MB → 461KB)
+- **FCM Push Notifications** — sw.js notificationclick + fcm-client init + login trigger
+- **Anti-cache 7 layer** — `_headers` + `updateViaCache:none` + anti-cache HTML + self-invalidating SW + version check + skipWaiting + clients.claim
+- **Mail Inbox fix** — UMUM→UPDATE, folder guard, dedup docs, max-height
+- **Netlify deploy fix** — Root cause: `package.json` `"type":"module"` → esbuild gagal resolve `.ts`. Fix: pre-bundle 20 functions ke CJS standalone
+- **Deploy LIVE** ke `asjportal-terbaru.netlify.app`
+- **Dev tooling** — commitlint, E2E CI, issue templates, bundle analyzer
+- **Regression fixes** — XSS test, bundle-analyze TS error, FCM private_key escape
+
+**Status:** 181/181 test, tsc 0 errors, deploy live, backend functions OK
 
 ---
 
