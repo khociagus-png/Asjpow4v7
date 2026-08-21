@@ -10,14 +10,38 @@
 ## 📍 Posisi Sekarang
 
 - **Produk:** ASJ Portal — portal lowongan kerja ke Jepang (Netlify + Supabase)
-- **Live:** `asjportal.netlify.app` — bundle `app-0d473e8141.js`
-- **Status:** STABIL. Deploy terakhir sukses. Tidak ada bug kritis.
+- **Live:** `asjportal.netlify.app` — bundle `app-2bedcaa48d.js`
+- **Status:** STABIL. 181/181 test lulus. TS clean (0 errors).
 - **Stack:** Vanilla JS (ESM), Netlify Functions, Supabase, Cloudinary, Tailwind v4
+- **Repo:** Bersih (21MB). Clone repos dihapus. Commit convention diterapkan.
+
+## 📋 Sesi 2026-08-21 — Ringkasan
+
+### Commits hari ini (7 commits, `a26c9e4` → `d3afc52`):
+
+| # | Hash | Isi | Status |
+|---|------|-----|--------|
+| 1 | `a26c9e4` | feat: share view filter + upload helpers + Smart Ingestion fix + AI CV lang fix | ✅ Live |
+| 2 | `3b9f560` | chore: AI agent (`.claude/`), bundle analyzer, E2E CI, issue templates | ✅ Pushed |
+| 3 | `fe67a98` | docs: simplify context loading — status pindah ke AGENTS.md | ✅ Pushed |
+| 4 | `4e9694d` | fix(mail): normalize 'UMUM' → 'UPDATE' + commitlint + i18n | ✅ Pushed |
+| 5 | `c7825ee` | fix(mail): folder guard, dedup docs, max-height, badge fix + repo cleanup | ✅ Pushed |
+| 6 | `3a55676` | fix(scripts): bundle-analyze.mts TS error (filename → writeFileSync) | ✅ Pushed |
+| 7 | `d3afc52` | fix(test): update mail XSS test for displayStatus | ✅ Pushed |
+
+### Yang dilakukan:
+
+1. **Dev tooling:** `.claude/agents/` + 3 skills (build/debug/e2e), commitlint, E2E CI, issue templates, bundle analyzer
+2. **Mail Inbox fix:** UMUM→UPDATE normalization, folder icon guard, dedup docs by URL, max-height scroll
+3. **Repo cleanup:** hapus TencentDB-Agent-Memory (943MB) + playwright-agent-kit (504KB)
+4. **Regression fix:** XSS test updated untuk `displayStatus` variable
+5. **TypeScript:** `bun tsc -b --noEmit` clean (0 errors)
 
 ## 🔧 Yang Terakhir Dikerjakan (reverse chronological)
 
-1. **TypeScript migration** (2026-08-20) — 136+ file dikonversi JS→TS, `@ts-nocheck` di 73 file (gradual)
-2. **Performance optimization** — debounce 250ms, infinite scroll, sessionStorage cache (belum di-commit)
+1. **Sesi 2026-08-21** — Dev tooling + Mail Inbox fix + repo cleanup + regression fix (7 commits)
+2. **TypeScript migration** (2026-08-20) — 136+ file dikonversi JS→TS, `@ts-nocheck` di 73 file (gradual)
+3. **Performance optimization** — debounce 250ms, infinite scroll, sessionStorage cache (belum di-commit)
 3. **Guard runtime handler** — `checkInlineHandlers()` di `bridge.js` (dev-only)
 4. **Scanner `check-handlers.mjs`** — self-validating, mencegah handler inline hilang dari seam
 5. **Fix 3 handler inline tidak ter-expose** — filterKelolaLoker, filterCbx, cariKandidatManual
