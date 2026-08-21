@@ -7,7 +7,7 @@
 
 import { build } from "esbuild";
 import { visualizer } from "esbuild-visualizer";
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const OUTDIR = ".freebuff";
@@ -30,14 +30,13 @@ async function analyze() {
     mkdirSync(OUTDIR, { recursive: true });
   }
 
-  // Generate visualization
+  // Generate visualization (visualizer returns HTML string, write to file)
   const htmlPath = join(OUTDIR, "bundle-analysis.html");
   const chartData = await visualizer(result.metafile, {
-    filename: htmlPath,
     title: "ASJ Portal Bundle Analysis",
     template: "treemap", // treemap | sunburst | network
-    gzipSize: true,
   });
+  writeFileSync(htmlPath, chartData, "utf-8");
 
   console.log(`\n✅ Bundle analysis saved to: ${htmlPath}`);
   console.log(`   Open in browser to view the visualization.\n`);
