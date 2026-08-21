@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# =============================================================================
+# commit-msg — Validate conventional commit message format.
+# =============================================================================
+# Format: type(scope): description
+# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+# Examples:
+#   feat(auth): add refresh token for admin session
+#   fix(filter): handle null tahapan in candidate filter
+#   docs: update MEMORY.md with session context
+#   refactor(esm): extract bridge aliases to separate module
+#
+# Skip: git commit --no-verify (CI still catches it)
+# =============================================================================
+set -e
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Skip merge commits
+if echo "$COMMIT_MSG" | head -1 | grep -qE '^Merge (pull request|branch)'; then
+  exit 0
+fi
+
+# Skip fixup/squash commits
+if echo "$COMMIT_MSG" | head -1 | grep -qE '^(fixup|squash)!'; then
+  exit 0
+fi
+
+# Conventional commit regex
+PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_-]+\))?: .{1,}'
+
+if ! echo "$COMMIT_MSG" | head -1 | grep -qE "$PATTERN"; then
+  echo ""
+  echo "❌ Invalid commit message format!"
+  echo ""
+  echo "  Expected: type(scope): description"
+  echo ""
+  echo "  Types: feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert"
+  echo ""
+  echo "  Examples:"
+  echo "    feat(auth): add refresh token for admin session"
+  echo "    fix(filter): handle null tahapan in candidate filter"
+  echo "    docs: update MEMORY.md with session context"
+  echo "    refactor(esm): extract bridge aliases to separate module"
+  echo ""
+  echo "  Your message: $(head -1 "$COMMIT_MSG_FILE")"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Commit message format OK."
+exit 0

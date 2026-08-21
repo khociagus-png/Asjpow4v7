@@ -14,6 +14,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 | Dokumen                                                                                        | Isi                                                                                     | Kapan dibaca                             |
 | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **MEMORY.md** 🔥                                                                               | **AI Context Memory** — posisi project, known issues, keputusan, yang perlu dilanjutkan  | **WAJIB — DI AWAL SETIAP SESI**         |
 | **AGENTS.md** (ini)                                                                            | Peta kode + konvensi patch cepat                                                        | Setiap sesi                              |
 | **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                       | Setiap sesi                              |
 | **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |

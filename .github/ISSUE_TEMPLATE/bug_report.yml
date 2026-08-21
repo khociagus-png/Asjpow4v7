@@ -1,0 +1,81 @@
+name: Bug Report
+description: Report a bug in ASJ Portal
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report
+        Thanks for reporting a bug! Please fill out the form below.
+
+  - type: input
+    id: page
+    attributes:
+      label: Page/Feature
+      description: Which page or feature has the bug?
+      placeholder: e.g., Admin Panel - Filter Kandidat
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly
+      placeholder: e.g., Filter tidak merespon setelah ketik 3 karakter
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+      placeholder: e.g., Filter harus memfilter kandidat berdasarkan keyword
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this?
+      placeholder: |
+        1. Login as admin
+        2. Go to Pelamar tab
+        3. Type in search box
+        4. See error in console
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low (visual only)
+        - Medium (feature broken)
+        - High (blocking workflow)
+        - Critical (data loss/security)
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Paste any console errors
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & Device
+      placeholder: e.g., Chrome 120, iPhone 15

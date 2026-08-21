@@ -1,0 +1,55 @@
+name: Task
+description: Development task (refactor, optimization, etc.)
+title: "[TASK] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Development Task
+        Track development work that's not a bug or feature.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task description
+      description: What needs to be done?
+      placeholder: e.g., Lazy load i18n to reduce bundle size by 23%
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Task type
+      options:
+        - Refactor
+        - Performance
+        - Security
+        - Testing
+        - Documentation
+        - DevOps/CI
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know this is done?
+      placeholder: |
+        - [ ] Bundle size reduced by 20%+
+        - [ ] All tests pass
+        - [ ] No regression in functionality
