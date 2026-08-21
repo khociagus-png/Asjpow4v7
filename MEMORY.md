@@ -10,8 +10,8 @@
 ## 📍 Posisi Sekarang
 
 - **Produk:** ASJ Portal — portal lowongan kerja ke Jepang (Netlify + Supabase)
-- **Live:** `asjportal.netlify.app` — bundle `app-2bedcaa48d.js`
-- **Status:** STABIL. 181/181 test lulus. TS clean (0 errors).
+- **Live:** `asjportal.netlify.app` — bundle `app-c3a892eb9c.js`
+- **Status:** STABIL. 181/181 test lulus. TS clean (0 errors). Bundle 461KB (dari 1.2MB).
 - **Stack:** Vanilla JS (ESM), Netlify Functions, Supabase, Cloudinary, Tailwind v4
 - **Repo:** Bersih (21MB). Clone repos dihapus. Commit convention diterapkan.
 
@@ -39,7 +39,7 @@
 
 ## 🔧 Yang Terakhir Dikerjakan (reverse chronological)
 
-1. **Sesi 2026-08-21** — Dev tooling + Mail Inbox fix + repo cleanup + regression fix (7 commits)
+1. **Sesi 2026-08-21** — Dev tooling + Mail Inbox fix + repo cleanup + regression fix + **Sentry lazy load** (bundle -62%)
 2. **TypeScript migration** (2026-08-20) — 136+ file dikonversi JS→TS, `@ts-nocheck` di 73 file (gradual)
 3. **Performance optimization** (Antigravity) — debounce 250ms, infinite scroll, sessionStorage cache (✅ sudah di kode)
 3. **Guard runtime handler** — `checkInlineHandlers()` di `bridge.js` (dev-only)
@@ -52,7 +52,8 @@
 ## 🐛 Known Issues / Belum Selesai
 
 - **Performance optimization** (Antigravity, 2026-08-20) — debounce 250ms + infinite scroll + sessionStorage cache — ✅ SUDAH ADA di kode & di-build (terverifikasi 2026-08-21)
-- **73 file pakai `@ts-nocheck`** — perlu dihapus bertahap
+- **Sentry lazy load** ✅ DONE — SDK 688KB di-load dari CDN (bundle 1.2MB → 461KB)
+- **73 file pakai `@ts-nocheck`** — sudah bersih (0 tersisa)
 - **`GROQ_API_KEY` & `LOG_DRAIN_TOKEN`** belum dipakai kode (opsional)
 - **Node.js v22.23.2** perlu install manual di Windows (path: `C:\Users\AMANAH Sakura 3\nodejs-v22.23.2\`)
 
@@ -92,7 +93,7 @@ Bridge: js/core/bridge.js → registerSeamAliases() → window.*
 - **E2E di CI** — `.github/workflows/e2e.yml` (Playwright, auto-run on push/PR)
 - **Issue templates** — `.github/ISSUE_TEMPLATE/` (bug, feature, task)
 - **AI agent** — `.claude/agents/senior-asj-developer.md` + 3 skills (build, debug, e2e)
-- **Bundle insight** — Sentry = 688KB (29%), i18n = 97KB (4%), optimasi berikutnya: lazy load Sentry
+- **Bundle insight** — Sentry ✅ LAZY LOAD (CDN, bundle -62%), i18n = 97KB (next target)
 
 ## 📌 Yang Perlu Dilanjutkan
 

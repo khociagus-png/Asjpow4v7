@@ -419,8 +419,8 @@ export function flushGuardWarnings() {
 window.PortalBridge = PortalBridge;
 initSeamDispatcher();
 
-// Sentry error tracking (auto-init saat module dimuat)
-initSentry();
+// Sentry error tracking (lazy load — SDK 688KB di-load async saat init dipanggil)
+initSentry().catch(() => {});
 
 // Web Vitals tracking (auto-init saat module dimuat)
 initWebVitals();
