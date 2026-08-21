@@ -41,7 +41,7 @@
 
 1. **Sesi 2026-08-21** — Dev tooling + Mail Inbox fix + repo cleanup + regression fix (7 commits)
 2. **TypeScript migration** (2026-08-20) — 136+ file dikonversi JS→TS, `@ts-nocheck` di 73 file (gradual)
-3. **Performance optimization** — debounce 250ms, infinite scroll, sessionStorage cache (belum di-commit)
+3. **Performance optimization** (Antigravity) — debounce 250ms, infinite scroll, sessionStorage cache (✅ sudah di kode)
 3. **Guard runtime handler** — `checkInlineHandlers()` di `bridge.js` (dev-only)
 4. **Scanner `check-handlers.mjs`** — self-validating, mencegah handler inline hilang dari seam
 5. **Fix 3 handler inline tidak ter-expose** — filterKelolaLoker, filterCbx, cariKandidatManual
@@ -51,7 +51,7 @@
 
 ## 🐛 Known Issues / Belum Selesai
 
-- **Performance optimization belum di-commit** (Antigravity, 2026-08-20) — debounce + infinite scroll + cache sudah diode tapi belum masuk git
+- **Performance optimization** (Antigravity, 2026-08-20) — debounce 250ms + infinite scroll + sessionStorage cache — ✅ SUDAH ADA di kode & di-build (terverifikasi 2026-08-21)
 - **73 file pakai `@ts-nocheck`** — perlu dihapus bertahap
 - **`GROQ_API_KEY` & `LOG_DRAIN_TOKEN`** belum dipakai kode (opsional)
 - **Node.js v22.23.2** perlu install manual di Windows (path: `C:\Users\AMANAH Sakura 3\nodejs-v22.23.2\`)
