@@ -406,7 +406,10 @@ async function downloadJobDocs(code: string) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Berhasil! ' + res.totalFiles + ' file dari ' + res.candidateCount + ' kandidat.', 'success');
+    showToast(
+      'Berhasil! ' + res.totalFiles + ' file dari ' + res.candidateCount + ' kandidat.',
+      'success',
+    );
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes('session') || msg.includes('sesi')) return; // already handled by callAPI

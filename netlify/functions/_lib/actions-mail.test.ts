@@ -4,11 +4,11 @@
 // diproses (progres LULUS/GAGAL tidak di-reset) — ini alur inti mail sync.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { mailStatusUntukUpdate, appendFeedback } from './actions-mail.ts';
+import { mailStatusUntukUpdate, appendFeedback } from './actions-mail';
 // Label seksi AI form — diimpor dari ai/cv.js (bukan duplikat) supaya test
 // menjaga sinkron dengan kode produksi; simpan ini juga membuktikan tidak ada
 // circular require (ai/cv → actions-mail).
-import { AI_SEKSI_LABEL } from './ai/cv.ts';
+import { AI_SEKSI_LABEL } from './ai/cv';
 
 describe('mailStatusUntukUpdate — transisi status saat biodata/berkas diubah', () => {
   it('baris belum diproses (MENUNGGU/MAIL/BARU/PENDING) tetap MENUNGGU', () => {

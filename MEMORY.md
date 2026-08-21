@@ -3,16 +3,16 @@
 > **File ini untuk detail** — info singkat sudah ada di AGENTS.md §STATUS SEKARANG.
 > Baca hanya saat butuh konteks lengkap (history, decisions, known issues detail).
 
-**Terakhir diupdate:** 2026-08-21 19:00 UTC — oleh Buffy (AI agent)
+**Terakhir diupdate:** 2026-08-21 22:00 UTC — oleh Buffy (AI agent)
 
 ---
 
 ## 📍 Posisi Sekarang
 
 - **Produk:** ASJ Portal — portal lowongan kerja ke Jepang (Netlify + Supabase)
-- **Live (baru):** `asjportal-terbaru.netlify.app` — bundle `app-89d2bde3c8.js` (461KB)
+- **Live (baru):** `asjportal-terbaru.netlify.app` — bundle `app-9c28a553ef.js` (374KB)
 - **Live (lama):** `asjportal.netlify.app` — bundle lama (1.2MB, masih aktif)
-- **Status:** PRODUCTION READY. 181/181 test lulus. TS clean (0 errors). Bundle 461KB (dari 1.2MB).
+- **Status:** PRODUCTION READY. 267/267 test lulus. TS clean (0 errors). Bundle 374KB (dari 1.2MB).
 - **Stack:** Vanilla JS (ESM), Netlify Functions (pre-bundled CJS), Supabase, Cloudinary, Tailwind v4
 - **Repo:** Bersih (21MB). Commit convention diterapkan.
 
@@ -20,58 +20,47 @@
 
 ### Commits hari ini (16 commits, `a26c9e4` → `0197c57`):
 
-| # | Hash | Isi | Status |
-|---|------|-----|--------|
-| 1 | `a26c9e4` | feat: share view filter + upload helpers + Smart Ingestion fix | ✅ Live |
-| 2 | `3b9f560` | chore: AI agent + bundle analyzer + E2E CI + issue templates | ✅ Pushed |
-| 3 | `fe67a98` | docs: simplify context loading | ✅ Pushed |
-| 4 | `4e9694d` | fix(mail): UMUM→UPDATE + commitlint + i18n | ✅ Pushed |
-| 5 | `c7825ee` | fix(mail): folder guard + dedup + cleanup | ✅ Pushed |
-| 6 | `3a55676` | fix(scripts): bundle-analyze TS error | ✅ Pushed |
-| 7 | `d3afc52` | fix(test): XSS test regression | ✅ Pushed |
-| 8 | `3d93698` | docs: fix MEMORY.md perf status | ✅ Pushed |
-| 9 | `d43c9ca` | **perf(sentry): lazy load CDN — bundle -62%** | ✅ Live |
-| 10 | `2a04444` | **feat(fcm): push notifications activate** | ✅ Live |
-| 11 | `a3e6d42` | chore: rebuild bundle + env vars | ✅ Pushed |
-| 12 | `21f179d` | fix(sw): force cache-bust + FCM private_key | ✅ Pushed |
-| 13 | `809f58e` | fix(sw): self-invalidating version check | ✅ Pushed |
-| 14 | `ef15eba` | fix(html): anti-cache in HTML before bundle | ✅ Pushed |
-| 15 | `8651e7a` | fix(html): auto-inject anti-cache via build | ✅ Pushed |
-| 16 | `ad710f0` | fix(pwa): _headers + build-system anti-cache | ✅ Pushed |
-| 17 | `dc2c8f9` | fix(netlify): prebuild strip .ts extensions | ✅ Pushed |
-| 18 | `0197c57` | **fix(netlify): pre-bundle functions + DEPLOY LIVE** | ✅ **LIVE** |
+| #   | Hash      | Isi                                                            | Status      |
+| --- | --------- | -------------------------------------------------------------- | ----------- |
+| 1   | `a26c9e4` | feat: share view filter + upload helpers + Smart Ingestion fix | ✅ Live     |
+| 2   | `3b9f560` | chore: AI agent + bundle analyzer + E2E CI + issue templates   | ✅ Pushed   |
+| 3   | `fe67a98` | docs: simplify context loading                                 | ✅ Pushed   |
+| 4   | `4e9694d` | fix(mail): UMUM→UPDATE + commitlint + i18n                     | ✅ Pushed   |
+| 5   | `c7825ee` | fix(mail): folder guard + dedup + cleanup                      | ✅ Pushed   |
+| 6   | `3a55676` | fix(scripts): bundle-analyze TS error                          | ✅ Pushed   |
+| 7   | `d3afc52` | fix(test): XSS test regression                                 | ✅ Pushed   |
+| 8   | `3d93698` | docs: fix MEMORY.md perf status                                | ✅ Pushed   |
+| 9   | `d43c9ca` | **perf(sentry): lazy load CDN — bundle -62%**                  | ✅ Live     |
+| 10  | `2a04444` | **feat(fcm): push notifications activate**                     | ✅ Live     |
+| 11  | `a3e6d42` | chore: rebuild bundle + env vars                               | ✅ Pushed   |
+| 12  | `21f179d` | fix(sw): force cache-bust + FCM private_key                    | ✅ Pushed   |
+| 13  | `809f58e` | fix(sw): self-invalidating version check                       | ✅ Pushed   |
+| 14  | `ef15eba` | fix(html): anti-cache in HTML before bundle                    | ✅ Pushed   |
+| 15  | `8651e7a` | fix(html): auto-inject anti-cache via build                    | ✅ Pushed   |
+| 16  | `ad710f0` | fix(pwa): _headers + build-system anti-cache                   | ✅ Pushed   |
+| 17  | `dc2c8f9` | fix(netlify): prebuild strip .ts extensions                    | ✅ Pushed   |
+| 18  | `0197c57` | **fix(netlify): pre-bundle functions + DEPLOY LIVE**           | ✅ **LIVE** |
 
 ### Ringkasan Kerja:
 
 **Performance:**
+
 1. **Sentry lazy load** — SDK 688KB di-load dari CDN (bundle 1.2MB → 461KB, -62%)
 2. **Anti-cache 7 layer** — `_headers` + `updateViaCache:none` + anti-cache HTML + self-invalidating SW + version check + `skipWaiting` + `clients.claim`
 3. **Performance optimization** (Antigravity) — debounce 250ms + infinite scroll + sessionStorage cache — ✅ TERVERIFIKASI ada di kode
 
-**Features:**
-4. **FCM Push Notifications** — `sw.js` notificationclick + `fcm-client.ts` init + `init.ts` login trigger + `env.ts` whitelist
-5. **Mail Inbox fix** — UMUM→UPDATE normalization, folder icon guard, dedup docs, max-height scroll
+**Features:** 4. **FCM Push Notifications** — `sw.js` notificationclick + `fcm-client.ts` init + `init.ts` login trigger + `env.ts` whitelist 5. **Mail Inbox fix** — UMUM→UPDATE normalization, folder icon guard, dedup docs, max-height scroll
 
-**Fixes:**
-6. **XSS test regression** — test updated untuk `displayStatus` variable
-7. **bundle-analyze.mts** — TS error fix (filename → writeFileSync)
-8. **FCM private_key escape** — double-escaped newlines in env var
+**Fixes:** 6. **XSS test regression** — test updated untuk `displayStatus` variable 7. **bundle-analyze.mts** — TS error fix (filename → writeFileSync) 8. **FCM private_key escape** — double-escaped newlines in env var
 
-**Dev Tooling:**
-9. **Commitlint** — conventional commits validation
-10. **E2E CI** — Playwright workflow di GitHub Actions
-11. **Issue templates** — bug, feature, task
-12. **Bundle analyzer** — `bun run bundle:analyze`
+**Dev Tooling:** 9. **Commitlint** — conventional commits validation 10. **E2E CI** — Playwright workflow di GitHub Actions 11. **Issue templates** — bug, feature, task 12. **Bundle analyzer** — `bun run bundle:analyze`
 
-**DevOps (CRITICAL):**
-13. **Root cause Netlify deploy gagal** — `package.json` punya `"type": "module"` → esbuild Netlify tidak resolve `.ts` dari CommonJS `require()`
-14. **Fix:** Pre-bundle 20 functions ke CJS standalone via esbuild lokal (`scripts/build-netlify-functions.sh`)
-15. **Deploy LIVE** ke `asjportal-terbaru.netlify.app` — semua fix sudah production
+**DevOps (CRITICAL):** 13. **Root cause Netlify deploy gagal** — `package.json` punya `"type": "module"` → esbuild Netlify tidak resolve `.ts` dari CommonJS `require()` 14. **Fix:** Pre-bundle 20 functions ke CJS standalone via esbuild lokal (`scripts/build-netlify-functions.sh`) 15. **Deploy LIVE** ke `asjportal-terbaru.netlify.app` — semua fix sudah production
 
-**Cleanup:**
-16. **Repo cleanup** — hapus TencentDB-Agent-Memory (943MB) + playwright-agent-kit (504KB)
+**Cleanup:** 16. **Repo cleanup** — hapus TencentDB-Agent-Memory (943MB) + playwright-agent-kit (504KB)
 
 ### Regression yang Ditemukan & Diperbaiki:
+
 - ❌ XSS test gagal → ✅ Fixed (test expects `displayStatus`)
 - ❌ bundle-analyze.mts TS error → ✅ Fixed
 - ❌ FCM double-escaped private_key → ✅ Fixed
@@ -94,6 +83,7 @@
 ## 🐛 Known Issues / Belum Selesai
 
 ### ✅ SELESAI HARI INI:
+
 - **Sentry lazy load** ✅ — SDK 688KB dari CDN (bundle -62%)
 - **HP cache nyangkut** ✅ — 7 layer anti-cache + `_headers` no-cache
 - **Netlify deploy gagal** ✅ — Pre-bundle functions ke CJS, DEPLOY LIVE
@@ -101,15 +91,45 @@
 - **Performance optimization** ✅ — Terverifikasi ada di kode
 - **73 file `@ts-nocheck`** ✅ — Sudah bersih
 
-### ❌ KNOWN BUG — USER LAPOR MALAM 2026-08-21:
-- **Admin panel di Freebuff preview HP** — user fix admin menu model baru di desktop tadi sore. Pas buka preview di HP, admin menu balik ke model lama (tab bar horizontal, bukan sidebar). Source admin.html SUDAH punya sidebar + bottom-nav. Preview serve benar. Tapi HP render model lama. Penyebab pasti BELUM diketahui — kemungkinan Freebuff preview cache / browser cache / JS bundle berbeda.
-- **Dua site Netlify** — `asjportal.netlify.app` (lama, bundle `app-d74730f28a`) vs `asjportal-terbaru.netlify.app` (baru, bundle `app-89d2bde3c8`). User sering salah buka yang lama.
+### ✅ SELESAI MALAM 2026-08-21 (sesi 2 — Buffy):
+
+- **Auto-loop fix** ✅ — 3 mekanisme anti-cache race condition (cekVersiSw + ASJ_FORCE_RELOAD + controllerchange) → fixed dengan cooldown lock `asj_last_reload` (10 detik). Sekarang reload hanya terjadi 1x per deploy.
+- **Admin menu HP fix** ✅ — Root cause: `index.html` masih punya tab bar horizontal lama (model lama). `admin.html` sudah punya sidebar drawer + bottom nav tapi `index.html` tidak. Fix: ganti horizontal tabs dengan sidebar drawer + toggle button + bottom nav di `index.html`. Bundle baru: `app-c5db0c9bf3.js`.
+
+### 🔴 PELAJARAN KOMUNIKASI (Wajib baca di sesi berikutnya):
+
+- **Masalah sebelumnya:** AI berulang kali "fix cache" tanpa baca kode source → muter-muter hampir 2 jam tanpa hasil.
+- **Root cause bukan teknis, tapi proses:** AI tidak baca MEMORY.md dengan seksama, tidak verifikasi kode sebelum fix, dan ngeyel meski user sudah bilang "sudah clear cache".
+- **Rule baru:** Selalu baca kode source dulu sebelum fix. Kalau fix tidak jalan setelah 2x percobaan, STOP dan tanya user untuk screenshot/URL.
+
+### ❌ KNOWN BUG (RESOLVED):
+
+- **Admin panel di HP** ✅ — FIXED: sidebar drawer + bottom nav added to index.html.
+- **Dua site Netlify** — `asjportal.netlify.app` (lama, bundle `app-d74730f28a`) vs `asjportal-terbaru.netlify.app` (baru, bundle `app-c5db0c9bf3`). User sering salah buka yang lama.
+
+### ✅ SELESAI MALAM 2026-08-21 (sesi 3 — Buffy):
+
+- **PostHog session replay** ✅ — Key: `phc_tVeoUDFj4JVqHnTEmWwwNc7VTb7tMPMgnZEebYvEL6d8`. Bundle: `app-dd18faf7a8.js` (464KB, +2KB dari PostHog). Fitur: session replay (maskAllInputs), error capture, analytics. Free tier: 1M events + 5K recordings/bulan.
+- **File baru:** `js/core/posthog.ts` — CDN lazy load (sama pola seperti sentry.ts).
+- **Integration:** init di boot.ts, identify di init.ts (setelah login), reset di nav.ts (saat logout).
+
+### ✅ SELESAI MALAM 2026-08-21 (sesi 4 — Buffy):
+
+- **i18n lazy load** ✅ — JP locale (~69KB source) di-remove dari bundle, diload via fetch() saat user switch ke JP. Bundle turun dari 464KB → **374KB (−90KB, −19.5%)**.
+  - `i18n/core.js`: hapus static import JP, tambah `ensureJpLocale()` + `toggleFormLanguage()` async
+  - `scripts/build-i18n-jp.mts`: merge 15 domain JP ke `assets/jp-locale.js` (59.7KB)
+  - `sw.js`: cache `jp-locale.js` di SHELL list
+  - `_headers`: cache 1 jam untuk `jp-locale.js`
+  - `i18n.test.ts`: update test untuk handle lazy-load (injek JP langsung untuk parity test)
+- **Redirect rules** ✅ — `_redirects` file dibuat untuk redirect `asjportal.netlify.app` → `asjportal-terbaru.netlify.app`. Perlu deploy ke project lama Netlify.
+- **PostHog** ✅ — Terintegrasi, session replay aktif.
 
 ### ⚠️ BELUM / OPSIONAL:
+
 - **`GROQ_API_KEY` & `LOG_DRAIN_TOKEN`** — belum dipakai kode (opsional)
 - **Node.js v22.23.2** — perlu install manual di Windows
-- **i18n lazy load** — inactive language 97KB, bisa di-load async (next target)
-- **Deploy ke `asjportal.netlify.app`** — old site masih bundle lama, perlu migrasi
+- **Deploy redirect ke `asjportal.netlify.app`** — _redirects file sudah siap, perlu deploy ke project lama
+- **FIREBASE_SERVICE_ACCOUNT** — perlu di-set di Netlify production env vars
 
 ## 📋 Aturan Penting (JANGAN LUPA)
 
@@ -120,6 +140,13 @@
 5. **Build wajib:** `bun run build` setelah ubah JS/HTML/CSS
 6. **Jangan deploy tanpa izin pemilik**
 7. **Jangan sentuh pipeline** (PIPELINE.md)
+
+### ⚡ DEBUGGING RULE (PENTING!)
+
+- **JANGAN ASSUME sebelum baca kode.** Kalau user lapor "X masih salah", langkah PERTAMA adalah baca source file yang relevan — bukan langsung fix cache/SW/etc.
+- **Periksa perbedaan antara index.html vs admin.html** — kedua file punya admin section, tapi kontennya bisa beda (index.html = SPA utama, admin.html = standalone admin).
+- **Jika fix tidak jalan setelah 2 percobaan, STOP dan tanya user** — jangan loop terus. Tanya: "Bisa screenshot halaman yang terlihat? URL-nya apa?"
+- **Baca MEMORY.md di awal setiap sesi** — jangan mengulangi fix yang sudah dilakukan sebelumnya.
 
 ## 🏗 Arsitektur Cepat
 
@@ -145,6 +172,7 @@ Build: bun run build (check:globals + check:handlers + build:css + build:html + 
 - **Prettier:** single quote, semi, 2-spasi, LF
 - **Test:** Vitest 181/181 lulus
 - **Sentry:** Lazy load dari CDN (bukan bundle)
+- **PostHog:** Lazy load dari CDN — session replay + analytics (gratis 1M events + 5K recordings/bulan)
 - **FCM:** Firebase FCM (gratis unlimited)
 - **Netlify functions:** Pre-bundled ke CJS (esbuild lokal, bukan Netlify esbuild)
 - **Anti-cache:** 7 layer defense-in-depth (HTML anti-cache + SW self-invalidating + _headers + updateViaCache + cache-busting URL + skipWaiting + clients.claim)
@@ -190,6 +218,7 @@ curl -s https://asjportal-terbaru.netlify.app/ | grep -o 'app-[a-f0-9]*\.js'
 ---
 
 > **CARA PAKAI FILE INI:**
+>
 > - AI agent: BACA file ini DI AWAL sesi sebelum coding
 > - User: UPDATE file ini SELESAI sesi kerja (tambah bullet point apa yang dikerjakan)
 > - File inipersist di git — semua AI agent yang kerja di project ini akan punya konteks yang sama

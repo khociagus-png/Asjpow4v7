@@ -1,13 +1,9 @@
-import { normalizeWa, pick, supabaseJson } from './db/client.ts';
+import { normalizeWa, pick, supabaseJson } from './db/client';
 // candidate-helpers.js — helper kandidat SHARED (dipakai lintas domain:
 // auth, job, form). Dipisah dari handlers.js (Fase 1.1b) supaya tidak ada
 // saling-require antar modul action.
 
-import {
-  findCandidateByWaFiltered,
-  findCandidates,
-  maxCandidateIdNumber,
-} from './db/candidates.ts';
+import { findCandidateByWaFiltered, findCandidates, maxCandidateIdNumber } from './db/candidates';
 
 // Kolom WA yang dikenali di tabel kandidat (urutan prioritas).
 const CAND_WA_COLS = ['no_wa', 'wa', 'whatsapp', 'telepon', 'phone', 'no_hp'];

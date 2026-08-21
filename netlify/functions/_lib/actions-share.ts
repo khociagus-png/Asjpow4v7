@@ -1,8 +1,8 @@
-import { normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client.ts';
-import { findJobByCodeFiltered, findJobs } from './db/jobs.ts';
-import { findForms, findFormsByWaList, parseDocs } from './db/forms.ts';
-import { findCandidates, findCandidatesByJobFiltered, mapCandidate } from './db/candidates.ts';
-import { listStorageFolder, BERKAS_COLUMNS } from './db/berkas.ts';
+import { normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client';
+import { findJobByCodeFiltered, findJobs } from './db/jobs';
+import { findForms, findFormsByWaList, parseDocs } from './db/forms';
+import { findCandidates, findCandidatesByJobFiltered, mapCandidate } from './db/candidates';
+import { listStorageFolder, BERKAS_COLUMNS } from './db/berkas';
 // actions-share.js — viewer TSK publik (share.html?job=KODE). Dipanggil
 // LANGSUNG via GET dari netlify/functions/share-data.js (redirect /api/
 // share-data), bukan lewat dispatch POST. MODUL BARU (Fase 1.1d
@@ -93,7 +93,10 @@ async function handleShareData(jobCode) {
     const rawShareDocs = toText(pick(jobRow, ['dokumen_share', 'dokumenshare'])).toUpperCase();
     const allowedDocTypes = new Set(
       rawShareDocs
-        ? rawShareDocs.split(/[,;]+/).map((s: string) => s.trim()).filter(Boolean)
+        ? rawShareDocs
+            .split(/[,;]+/)
+            .map((s: string) => s.trim())
+            .filter(Boolean)
         : ['CV', 'JFT', 'SSW'],
     );
     const showAllDocs = allowedDocTypes.has('ALL');

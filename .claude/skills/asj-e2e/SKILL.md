@@ -7,7 +7,7 @@ description: >
   unit tests (use bun run test), building (use asj-build), or general
   debugging (use asj-debug).
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # ASJ E2E Testing Skill
@@ -37,12 +37,12 @@ BASE_URL="http://localhost:3000" node e2e/share-view.mjs
 
 ## Existing E2E tests
 
-| Test | What it checks |
-|---|---|
-| `login-check.mjs` | Login flow: public → kandidat → admin |
-| `upload-check.mjs` | File upload: KTP/KK via Cloudinary |
-| `biodata-check.mjs` | Biodata save + sync to DB |
-| `share-view.mjs` | Public share page renders correctly |
+| Test                | What it checks                        |
+| ------------------- | ------------------------------------- |
+| `login-check.mjs`   | Login flow: public → kandidat → admin |
+| `upload-check.mjs`  | File upload: KTP/KK via Cloudinary    |
+| `biodata-check.mjs` | Biodata save + sync to DB             |
+| `share-view.mjs`    | Public share page renders correctly   |
 
 ## Writing new E2E tests
 
@@ -62,10 +62,10 @@ async function runTest() {
   try {
     // 1. Navigate
     await page.goto(`${BASE_URL}/`);
-    
+
     // 2. Interact
     await page.click('selector');
-    
+
     // 3. Assert
     const result = await page.textContent('.selector');
     console.assert(result.includes('expected'), ' assertion failed');
@@ -84,15 +84,15 @@ runTest();
 
 ## Key selectors reference
 
-| Element | Selector |
-|---|---|
-| Admin login form | `#admin-pin-input` |
-| Kandidat login | `#login-wa` |
-| Search kandidat | `#search-kandidat` |
-| Filter table | `#filter-db-job` |
-| Mail inbox tab | `[data-tab="mail"]` |
-| Pelamar tab | `[data-tab="pelamar"]` |
-| Modal container | `.modal-overlay` |
+| Element          | Selector               |
+| ---------------- | ---------------------- |
+| Admin login form | `#admin-pin-input`     |
+| Kandidat login   | `#login-wa`            |
+| Search kandidat  | `#search-kandidat`     |
+| Filter table     | `#filter-db-job`       |
+| Mail inbox tab   | `[data-tab="mail"]`    |
+| Pelamar tab      | `[data-tab="pelamar"]` |
+| Modal container  | `.modal-overlay`       |
 
 ## Debugging E2E failures
 
@@ -107,6 +107,7 @@ runTest();
 ## CI integration
 
 E2E tests can be added to `.github/workflows/ci-check.yml`:
+
 ```yaml
 - name: E2E tests
   run: |

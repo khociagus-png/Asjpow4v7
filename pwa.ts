@@ -12,7 +12,7 @@
 // Alias window.* (cobaInstallApp/bersihkanDraftLamaBase64) dipasang via
 // registry seam terpusat (Fase 3.5 L6) — pwa.js hanya dimuat lewat main.js
 // (bundel admin/index), tempat bridge.js sudah dievaluasi lebih dulu.
-import { registerSeamAliases } from './js/core/bridge.ts';
+import { registerSeamAliases } from './js/core/bridge';
 
 // 0. MODE DEV (localhost) & PREVIEW Freebuff — preview SELALU fresh, tanpa
 // chance versi lama.
@@ -83,16 +83,27 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
   );
 
   window.addEventListener('load', function () {
-    // SELF-CHECK ANTI-BASI (jaring pengaman #2, TIDAK tergantung siklus hidup
-    // service worker): bandingkan VERSION sw.js di server dengan yang terakhir
+    // COOLDOWN LOCK: cegah multiple reload dari berbagai mekanisme anti-cache
+    // yang race condition (cekVersiSw + ASJ_FORCE_RELOAD + controllerchange).
+    // Kalau sudah pernah reload < 10 detik yang lalu, SKIP semua mekanisme
+    // berikutnya — ini menghentikan auto-loop.
+    function isReloadCooldownActive() {
+      if (!window.sessionStorage) return false;
+      var lastReload = parseInt(sessionStorage.getItem('asj_last_reload') || '0', 10);
+      var now = Date.now();
+      return lastReload && now - lastReload < 10000;
+    }
+    function markReloaded() {
+      if (window.sessionStorage) sessionStorage.setItem('asj_last_reload', String(Date.now()));
+    }
+
+    // SELF-CHECK ANTI-BASI: bandingkan VERSION sw.js di server dengan yang terakhir
     // dilihat. Kalau berubah (deploy baru), reload sekali — halaman basi dari
-    // cache langsung dilempar ke versi terbaru. Query param acak memastikan
-    // fetch ini tidak pernah dijawab dari cache SW/HTTP lama.
-    // (Jaring pengaman #1 = siklus SW di bawah: skipWaiting + activate purge +
-    // broadcast ASJ_FORCE_RELOAD di sw.js.)
+    // cache langsung dilempar ke versi terbaru.
     (function cekVersiSw() {
       try {
         if (!window.sessionStorage) return;
+        if (isReloadCooldownActive()) return; // sudah baru saja reload, skip
         fetch('/sw.js?v=' + Date.now(), { cache: 'no-store' })
           .then(function (r) {
             return r.text();
@@ -104,19 +115,11 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
             var swHash = (ver.match(/app-([a-f0-9]+)/) || [])[1];
 
             // Hash bundel yang BENAR-BENAR TERMUAT di halaman ini (bukan
-            // yang di-sw.js). Kalau beda dengan versi di server → halaman
-            // basi: bersihkan SEMUA cache + unregister SW + reload SEKALI
-            // (guard sessionStorage anti-loop). Ini jaring pengaman terkuat
-            // "selalu auto-update": tidak bergantung sama sekali pada siklus
-            // hidup service worker, jalan tiap kali portal dibuka.
-            // Hash bundel yang BENAR-BENAR TERMUAT di halaman ini (bukan
             // yang di-sw.js). HANYA untuk halaman bundel (/assets/app-<hash>.js).
             // Halaman standalone (ai_form/master-full/apply-full/dll) memuat
             // modul ESM langsung dengan cache-buster ?v=esm<rev> — query itu
             // BUKAN hash bundel, jadi membandingkannya dengan swHash selalu
-            // beda → purge+reload palsu tiap buka (bug 2026-08-18). Untuk
-            // halaman standalone, jaring pengaman SW (skipWaiting + activate
-            // purge + ASJ_FORCE_RELOAD) + soft-reload di bawah sudah cukup.
+            // beda → purge+reload palsu tiap buka (bug 2026-08-18).
             var loadedHash = '';
             var app = document.querySelector('script[src*="/assets/app-"]');
             if (app) {
@@ -128,8 +131,8 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
               if (purged !== ver) {
                 sessionStorage.setItem('asj_sw_purged', ver);
                 refreshing = true;
-                // Hapus semua cache + unregister SW lama — halaman basi tidak
-                // boleh punya apa pun untuk dijadikan sumber aset lama.
+                markReloaded();
+                // Hapus semua cache + unregister SW lama
                 if (window.caches && caches.keys) {
                   caches
                     .keys()
@@ -157,8 +160,9 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
 
             var last = sessionStorage.getItem('asj_sw_ver');
             sessionStorage.setItem('asj_sw_ver', ver);
-            if (last && last !== ver && !refreshing) {
+            if (last && last !== ver && !refreshing && !isReloadCooldownActive()) {
               refreshing = true;
+              markReloaded();
               window.location.reload();
             }
           })
@@ -212,19 +216,19 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
       });
 
     // Auto-reload saat Service Worker baru aktif (mencegah cache nyangkut).
-    // DITUNDA: hanya reload saat halaman sudah lama tidak aktif / user tidak
-    // sedang berinteraksi — reload di tengah klik "Install App" akan
-    // membatalkan prompt install (deferredPrompt hilang).
+    // COOLDOWN: kalau baru saja reload (<10s), SKIP — cegah auto-loop.
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       if (refreshing) return;
-      if (userInteracted) return; // user sedang aktif — jangan ganggu
+      if (userInteracted) return;
+      if (isReloadCooldownActive()) return; // sudah baru saja reload
       refreshing = true;
+      markReloaded();
       try {
         if (window.showToast) {
           window.showToast('Versi terbaru tersedia — memuat ulang…', 'info');
         }
       } catch (e) {
-        /* toast opsional — jangan sampai memblokir reload */
+        /* toast opsional */
       }
       window.setTimeout(function () {
         window.location.reload();
@@ -232,14 +236,14 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
     });
 
     // Pesan dari Service Worker: versi baru SUDAH aktif (ASJ_FORCE_RELOAD
-    // dikirim sw.js saat activate). Langsung muat ulang — tanpa menunggu
-    // reload manual. Sama seperti controllerchange di atas, tapi ini juga
-    // menangkap tab yang sedang terbuka saat SW baru mengambil alih.
+    // dikirim sw.js saat activate). COOLDOWN guard mencegah loop.
     navigator.serviceWorker.addEventListener('message', function (ev) {
       if (!ev.data || ev.data.type !== 'ASJ_FORCE_RELOAD') return;
       if (refreshing) return;
-      if (userInteracted) return; // user sedang aktif — jangan ganggu
+      if (userInteracted) return;
+      if (isReloadCooldownActive()) return; // sudah baru saja reload
       refreshing = true;
+      markReloaded();
       try {
         if (window.showToast) {
           window.showToast('Versi terbaru tersedia — memuat ulang…', 'info');

@@ -1,5 +1,6 @@
 import { callAPI } from '../../api-client.ts';
 import { setSentryUser } from '../core/sentry.ts';
+import { identifyPosthog, resetPosthog } from '../core/posthog.ts';
 import { tr } from '../../i18n.ts';
 import { showToast, safeSet } from '../init/util.ts';
 import {
@@ -315,6 +316,7 @@ export function initApp(res, isSilent = false) {
     window.isAdmin = true;
     window.currentAdminName = localStorage.getItem('asj_admin_name');
     setSentryUser({ role: 'admin', name: window.currentAdminName });
+    identifyPosthog({ role: 'admin', name: window.currentAdminName });
     // Aktifkan notifikasi push (FCM) — non-blocking, .catch() agar login tidak terganggu
     try {
       if (typeof window.requestNotificationPermission === 'function' && window.currentAdminName) {
@@ -394,6 +396,11 @@ export function initApp(res, isSilent = false) {
     window.currentKandidatName = localStorage.getItem('asj_kandidat_name');
     window.currentKandidatWa = localStorage.getItem('asj_kandidat_wa');
     setSentryUser({
+      role: 'kandidat',
+      name: window.currentKandidatName,
+      wa: window.currentKandidatWa,
+    });
+    identifyPosthog({
       role: 'kandidat',
       name: window.currentKandidatName,
       wa: window.currentKandidatWa,

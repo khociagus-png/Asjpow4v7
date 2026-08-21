@@ -25,12 +25,13 @@
     "hook:install": "git config core.hooksPath .githooks",
     "prepare": "git config core.hooksPath .githooks || true",
     "build:css": "tailwindcss -i ./src/main.css -o ./assets/main.css --minify",
+    "build:i18n-jp": "npx tsx scripts/build-i18n-jp.mts",
     "build:js": "node scripts/build-js.mts",
     "build:html": "node scripts/build-html.mts",
     "deploy": "bun scripts/deploy-netlify.mts",
     "check:globals": "node scripts/check-globals.mts",
     "check:handlers": "node scripts/check-handlers.mts",
-    "build": "bun run check:globals && bun run check:handlers && bun run build:css && bun run build:html && bun run build:js"
+    "build": "bun run check:globals && bun run check:handlers && bun run build:css && bun run build:i18n-jp && bun run build:html && bun run build:js"
   },
   "dependencies": {
     "@sentry/browser": "^10.70.0",

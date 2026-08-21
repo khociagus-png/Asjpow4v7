@@ -1,4 +1,4 @@
-import { supabaseJson, pick, toText, findTable } from './client.ts';
+import { supabaseJson, pick, toText, findTable } from './client';
 // db/jobs.js — repo lowongan (job_database/loker): mapJob, findJobs, lookup by kode.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 

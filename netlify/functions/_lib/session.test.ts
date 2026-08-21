@@ -16,7 +16,7 @@ vi.mock('./env.js', () => {
   };
 });
 
-import { signToken, verifyToken } from './session.ts';
+import { signToken, verifyToken } from './session';
 
 describe('session — signToken + verifyToken', () => {
   it('roundtrip: sign → verify mengembalikan payload asli', () => {

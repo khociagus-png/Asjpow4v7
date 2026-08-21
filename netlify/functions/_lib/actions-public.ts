@@ -1,11 +1,11 @@
-import { findJobs, mapJob } from './db/jobs.ts';
-import { findForms, findFormsByWa, findFormsLight, mapForm } from './db/forms.ts';
-import { attachBerkasBio } from './db/berkas.ts';
-import { findAssets, findSettings } from './db/misc.ts';
-import * as session from './session.ts';
-import { requireAdmin } from './actions-auth.ts';
-import * as demo from './demo.ts';
-import { cacheGet, cacheSet } from './cache.ts';
+import { findJobs, mapJob } from './db/jobs';
+import { findForms, findFormsByWa, findFormsLight, mapForm } from './db/forms';
+import { attachBerkasBio } from './db/berkas';
+import { findAssets, findSettings } from './db/misc';
+import * as session from './session';
+import { requireAdmin } from './actions-auth';
+import * as demo from './demo';
+import { cacheGet, cacheSet } from './cache';
 // actions-public.js — data publik & dashboard utama (getAppData).
 //
 // MODUL BARU (Fase 1.1 REFACTOR_TODO.md): kode dipindah dari handlers.js
@@ -29,7 +29,7 @@ import {
   supabaseJson,
   tablesFromSchema,
   toText,
-} from './db/client.ts';
+} from './db/client';
 import {
   attachApplications,
   findAllCandidatesLight,
@@ -37,7 +37,7 @@ import {
   findCandidates,
   findCandidatesByIds,
   mapCandidate,
-} from './db/candidates.ts';
+} from './db/candidates';
 
 // sys_config.config_type -> key dropdown yang dikirim ke frontend
 // (kunci ekstra statusLoker/lokasiZoom/dst. ikut dikirim persis seperti

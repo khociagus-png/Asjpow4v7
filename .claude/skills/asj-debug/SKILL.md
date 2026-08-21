@@ -8,7 +8,7 @@ description: >
   don't explain the issue. DO NOT USE FOR: running builds/tests (use asj-build),
   writing E2E tests (use asj-e2e).
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # ASJ Debug Skill
@@ -96,18 +96,19 @@ curl -s -X POST http://localhost:3000/.netlify/functions/app \
 ## When to escalate to browser
 
 Only after reading code and logs doesn't explain the issue:
+
 - Live page structure changed and code doesn't reflect current DOM
 - Timing/race condition needs live observation
 - Visual layout issue not apparent from code
 
 ## Key files reference
 
-| Issue | File to check |
-|---|---|
-| Handler missing | `js/core/bridge.js` (seam aliases) |
-| Backend action | `netlify/functions/_lib/handlers.js` |
-| Frontend API call | `api-client.js` (NETLIFY_FUNCTIONS map) |
-| Auth | `netlify/functions/_lib/session.js` |
-| WA format | `js/04_auth.js` (normalizeWaInput, isValidWaInput) |
-| i18n | `i18n/` directory |
-| Build | `scripts/build-*.mjs` |
+| Issue             | File to check                                      |
+| ----------------- | -------------------------------------------------- |
+| Handler missing   | `js/core/bridge.js` (seam aliases)                 |
+| Backend action    | `netlify/functions/_lib/handlers.js`               |
+| Frontend API call | `api-client.js` (NETLIFY_FUNCTIONS map)            |
+| Auth              | `netlify/functions/_lib/session.js`                |
+| WA format         | `js/04_auth.js` (normalizeWaInput, isValidWaInput) |
+| i18n              | `i18n/` directory                                  |
+| Build             | `scripts/build-*.mjs`                              |

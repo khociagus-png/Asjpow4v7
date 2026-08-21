@@ -1,16 +1,16 @@
 import bcrypt from 'bcryptjs';
-import { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client.ts';
-import { findJobByCodeFiltered, findJobs } from './db/jobs.ts';
-import { findForms, findFormsByWa, upsertFormRow } from './db/forms.ts';
-import { findCandidateByWaFiltered, findCandidates, mapCandidate } from './db/candidates.ts';
-import * as session from './session.ts';
-import { requireRole, isOwnerOrAdmin } from './actions-auth.ts';
-import { findMasterByWa } from './actions-master.ts';
-import { cacheClear } from './cache.ts';
-import { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } from './storage.ts';
-import { syncFormMailDariUpload } from './actions-mail.ts';
-import { nextCandidateId } from './candidate-helpers.ts';
-import * as fcm from './fcm-server.ts';
+import { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client';
+import { findJobByCodeFiltered, findJobs } from './db/jobs';
+import { findForms, findFormsByWa, upsertFormRow } from './db/forms';
+import { findCandidateByWaFiltered, findCandidates, mapCandidate } from './db/candidates';
+import * as session from './session';
+import { requireRole, isOwnerOrAdmin } from './actions-auth';
+import { findMasterByWa } from './actions-master';
+import { cacheClear } from './cache';
+import { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } from './storage';
+import { syncFormMailDariUpload } from './actions-mail';
+import { nextCandidateId } from './candidate-helpers';
+import * as fcm from './fcm-server';
 // actions-upload.js — upload & apply (apply-full.html, admin pemberkasan,
 // upload langsung). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah
 // dari actions-extra.js, perilaku TIDAK berubah.
@@ -824,7 +824,9 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
                 wa,
                 nama,
                 'BIODATA_AI',
-                'Biodata berhasil diekstrak & diperbarui oleh AI (' + result.data?.nama_lengkap + ')',
+                'Biodata berhasil diekstrak & diperbarui oleh AI (' +
+                  result.data?.nama_lengkap +
+                  ')',
                 '',
               );
             } catch {
@@ -832,7 +834,9 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
             }
           }
         })
-        .catch(() => { /* parse gagal — diam saja, tidak mengganggu upload */ });
+        .catch(() => {
+          /* parse gagal — diam saja, tidak mengganggu upload */
+        });
     }
     return { success: true };
   } catch (e) {

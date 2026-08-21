@@ -7,7 +7,7 @@
 // ==========================================
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { check, fail } from './rate-limit.ts';
+import { check, fail } from './rate-limit';
 
 describe('rate-limit — check()', () => {
   it('first request within limit → ok', () => {

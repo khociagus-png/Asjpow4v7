@@ -1,5 +1,5 @@
-import { supabaseJson, toText } from './db/client.ts';
-import { requireRole } from './actions-auth.ts';
+import { supabaseJson, toText } from './db/client';
+import { requireRole } from './actions-auth';
 // actions-schedule.js — jadwal (database_schedule) & tugas (database_tugas).
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js
 // (2.549 baris), perilaku TIDAK berubah.

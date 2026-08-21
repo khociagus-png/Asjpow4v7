@@ -4,7 +4,7 @@
 // salah map = kandidat dapat model wawancara bidang yang salah.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { normalizeBidang } from './chat.ts';
+import { normalizeBidang } from './chat';
 
 describe('normalizeBidang — pilih model wawancara per bidang SSW', () => {
   it('7 bidang resmi dikenali (case-insensitive)', () => {

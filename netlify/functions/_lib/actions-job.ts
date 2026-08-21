@@ -1,11 +1,11 @@
-import { hasBackend, normalizeWa, pick, supabaseJson, toText } from './db/client.ts';
-import { findForms, findFormsByWa, mapForm } from './db/forms.ts';
-import { findCandidates, mapCandidate } from './db/candidates.ts';
-import { attachBerkasBio } from './db/berkas.ts';
-import { requireAdmin } from './actions-auth.ts';
-import { findCandidateByWa } from './candidate-helpers.ts';
-import { cacheClear } from './cache.ts';
-import { stripRaw } from './actions-public.ts';
+import { hasBackend, normalizeWa, pick, supabaseJson, toText } from './db/client';
+import { findForms, findFormsByWa, mapForm } from './db/forms';
+import { findCandidates, mapCandidate } from './db/candidates';
+import { attachBerkasBio } from './db/berkas';
+import { requireAdmin } from './actions-auth';
+import { findCandidateByWa } from './candidate-helpers';
+import { cacheClear } from './cache';
+import { stripRaw } from './actions-public';
 // actions-job.js — kelola lowongan (job_database): simpan/edit/status/hapus/
 // tahapan/dokumen share/tandai gagal. MODUL BARU (Fase 1.1c REFACTOR_TODO.md)
 // — kode dipindah dari handlers.js, perilaku TIDAK berubah.
@@ -16,7 +16,7 @@ import {
   findJobs,
   mapJob,
   maxJobCodeNumber,
-} from './db/jobs.ts';
+} from './db/jobs';
 
 // Pemetaan payload frontend -> kolom tabel job_database (snake_case).
 const JOB_COLUMNS = {

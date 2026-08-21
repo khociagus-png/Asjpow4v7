@@ -3,7 +3,7 @@
 // supaya 1 loker = 1 CV/JFT/SSW/foto (tidak dobel di share view).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { docTypeOf } from './handlers.ts';
+import { docTypeOf } from './handlers';
 
 describe('docTypeOf — pola baru (prefix kapital)', () => {
   it('KK / KTP / CVFILE / PHOTOFILE bertimestamp', () => {

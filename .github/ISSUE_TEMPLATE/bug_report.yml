@@ -1,6 +1,6 @@
 name: 🐛 Bug Report
 description: Laporkan bug atau masalah yang ditemukan
-labels: ["bug", "triage"]
+labels: ['bug', 'triage']
 body:
   - type: markdown
     attributes:
@@ -13,7 +13,7 @@ body:
     attributes:
       label: Halaman/URL
       description: Halaman mana yang mengalami bug?
-      placeholder: "admin.html, index.html, master-full.html, dll"
+      placeholder: 'admin.html, index.html, master-full.html, dll'
     validations:
       required: true
 
@@ -22,7 +22,7 @@ body:
     attributes:
       label: Deskripsi Bug
       description: Jelaskan bug yang terjadi
-      placeholder: "Ketika saya klik tombol X, terjadi Y..."
+      placeholder: 'Ketika saya klik tombol X, terjadi Y...'
     validations:
       required: true
 
@@ -92,7 +92,7 @@ body:
     attributes:
       label: OS
       description: Operating system
-      placeholder: "Windows 11, macOS Sonoma, dll"
+      placeholder: 'Windows 11, macOS Sonoma, dll'
 
   - type: textarea
     id: console

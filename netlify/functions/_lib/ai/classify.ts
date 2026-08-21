@@ -1,8 +1,8 @@
 import { normalizeWa, pick, normalizeGender } from '../db/client.ts';
 import { findCandidateByIdFiltered, findCandidates } from '../db/candidates.ts';
 import { requireRole } from '../actions-auth.ts';
-import { findMasterByWa } from './cv.ts';
-import { geminiParseFile, parseJsonLoose } from './providers.ts';
+import { findMasterByWa } from './cv';
+import { geminiParseFile, parseJsonLoose } from './providers';
 // ai/classify.js — domain AI klasifikasi & parse dokumen biodata/CV admin
 // (PDF/Excel/Word/CSV/TXT/gambar → Gemini → JSON). MODUL BARU (Fase 1.4
 // REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.

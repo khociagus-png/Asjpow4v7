@@ -1,4 +1,4 @@
-import { handleAction } from './handlers.ts';
+import { handleAction } from './handlers';
 // netlify-wrapper.js — factory handler Netlify standar.
 //
 // Setiap file di netlify/functions/<nama>.js hanyalah:

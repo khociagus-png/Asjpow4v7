@@ -1,7 +1,7 @@
-import { normalizeWa, pick, supabaseJson, toText } from './db/client.ts';
-import { findCandidatesByJobFiltered, findCandidates } from './db/candidates.ts';
-import { fetchMasterByWa } from './db/master.ts';
-import { requireRole } from './actions-auth.ts';
+import { normalizeWa, pick, supabaseJson, toText } from './db/client';
+import { findCandidatesByJobFiltered, findCandidates } from './db/candidates';
+import { fetchMasterByWa } from './db/master';
+import { requireRole } from './actions-auth';
 // actions-download.ts — download semua berkas/dokumen kandidat per job sebagai ZIP.
 // Dipanggil admin dari tab Histori Job Internal.
 
@@ -72,7 +72,13 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
       );
     }
     if (!candidates.length) {
-      return { success: false, error: 'Tidak ada kandidat untuk job ' + code + '. Pastikan kandidat sudah terdaftar di job ini.' };
+      return {
+        success: false,
+        error:
+          'Tidak ada kandidat untuk job ' +
+          code +
+          '. Pastikan kandidat sudah terdaftar di job ini.',
+      };
     }
     console.log('[download] Found', candidates.length, 'candidates for job', code);
 
@@ -130,9 +136,21 @@ export async function handleDownloadJobDocs(payload: unknown[], sessionToken?: s
     }
 
     if (!downloads.length) {
-      return { success: false, error: 'Tidak ada dokumen yang bisa di-download untuk ' + candidates.length + ' kandidat. Pastikan data master sudah dilengkapi.' };
+      return {
+        success: false,
+        error:
+          'Tidak ada dokumen yang bisa di-download untuk ' +
+          candidates.length +
+          ' kandidat. Pastikan data master sudah dilengkapi.',
+      };
     }
-    console.log('[download] Found', downloads.length, 'files to download from', candidates.length, 'candidates');
+    console.log(
+      '[download] Found',
+      downloads.length,
+      'files to download from',
+      candidates.length,
+      'candidates',
+    );
 
     // 5. Download semua file dan masukkan ke ZIP
     const archiverMod = await import('archiver');

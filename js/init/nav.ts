@@ -1,6 +1,7 @@
 import { AUTO_REFRESH_TIMER } from './state.ts';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
+import { resetPosthog } from '../core/posthog.ts';
 // MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
 // js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
 // 02_init.js — perilaku tidak berubah.
@@ -135,6 +136,7 @@ export function logoutApp() {
   window.currentKandidatName = '';
   window.currentKandidatWa = '';
   window.currentKandidatId = '';
+  resetPosthog();
 
   if (AUTO_REFRESH_TIMER) {
     clearInterval(AUTO_REFRESH_TIMER);

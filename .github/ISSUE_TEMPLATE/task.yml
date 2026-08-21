@@ -1,6 +1,6 @@
 name: 📋 Task
 description: Tugas teknis (refactor, optimization, maintenance)
-labels: ["task"]
+labels: ['task']
 body:
   - type: markdown
     attributes:

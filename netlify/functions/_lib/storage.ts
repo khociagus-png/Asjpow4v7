@@ -1,5 +1,5 @@
-import { supabaseKey, supabaseUrl } from './db/client.ts';
-import { env } from './env.ts';
+import { supabaseKey, supabaseUrl } from './db/client';
+import { env } from './env';
 // storage.js — helper Supabase Storage (upload base64, hapus varian lama,
 // public URL). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari
 // actions-extra.js, perilaku TIDAK berubah.

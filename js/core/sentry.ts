@@ -118,7 +118,11 @@ export function setSentryUser(ctx: { role?: string; wa?: string; name?: string }
  * @param {string} message
  * @param {object} [data]
  */
-export function addBreadcrumb(category: string, message: string, data?: Record<string, unknown>): void {
+export function addBreadcrumb(
+  category: string,
+  message: string,
+  data?: Record<string, unknown>,
+): void {
   if (!_initialized || !_Sentry) return;
   _Sentry.addBreadcrumb({
     category,

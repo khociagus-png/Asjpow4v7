@@ -1,13 +1,13 @@
-import { APPLY_WA_COLS } from './ai/cv.ts';
-import { normalizeWa, pick, supabaseJson, toText } from './db/client.ts';
-import { findCandidateByWaFiltered, findCandidates } from './db/candidates.ts';
-import { fetchMasterByWa } from './db/master.ts';
-import * as session from './session.ts';
-import { requireRole, isOwnerOrAdmin } from './actions-auth.ts';
-import { syncBiodataKeMail } from './actions-mail.ts';
-import { nextCandidateId } from './candidate-helpers.ts';
-import { cacheClear } from './cache.ts';
-import { resolveFileUrl } from './storage.ts';
+import { APPLY_WA_COLS } from './ai/cv';
+import { normalizeWa, pick, supabaseJson, toText } from './db/client';
+import { findCandidateByWaFiltered, findCandidates } from './db/candidates';
+import { fetchMasterByWa } from './db/master';
+import * as session from './session';
+import { requireRole, isOwnerOrAdmin } from './actions-auth';
+import { syncBiodataKeMail } from './actions-mail';
+import { nextCandidateId } from './candidate-helpers';
+import { cacheClear } from './cache';
+import { resolveFileUrl } from './storage';
 // actions-master.js — master biodata/CV (master_database_candidate) untuk
 // master-full.html + preview CV + ai_form. MODUL BARU (Fase 1.2 REFACTOR_TODO.md)
 // — kode dipindah dari actions-extra.js, perilaku TIDAK berubah.

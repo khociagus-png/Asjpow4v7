@@ -1,4 +1,4 @@
-import { supabaseJson } from './client.ts';
+import { supabaseJson } from './client';
 // db/master.js — repo master biodata/CV (master_database_candidate).
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 

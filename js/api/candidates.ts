@@ -140,7 +140,9 @@ export function cekDokumenSebelumnya(wa) {
       if (st) {
         var namaFile = '';
         if (fileUrl && fileUrl !== '-') {
-          try { namaFile = fileUrl.split('/').pop() || ''; } catch(e) {}
+          try {
+            namaFile = fileUrl.split('/').pop() || '';
+          } catch (e) {}
           namaFile = namaFile.replace(/_+/g, ' ').replace(/\.[^.]+$/, '');
         }
         st.innerHTML =
@@ -160,16 +162,58 @@ export function cekDokumenSebelumnya(wa) {
     }
   };
   // Photo & CV — dari database_candidate
-  setDok('k-photo', 'st-photo', 'PAS PHOTO', !!(c && c.pasPhoto && c.pasPhoto !== '-'), c ? c.pasPhoto : '');
+  setDok(
+    'k-photo',
+    'st-photo',
+    'PAS PHOTO',
+    !!(c && c.pasPhoto && c.pasPhoto !== '-'),
+    c ? c.pasPhoto : '',
+  );
   setDok('k-cv', 'st-cv', 'CV', !!(c && c.fileCv && c.fileCv !== '-'), c ? c.fileCv : '');
   // JFT & SSW
-  setDok('k-jft', 'st-jft', 'JFT', !!(c && (c.jftUrl || c.jft) && (c.jftUrl || c.jft) !== '-'), c ? (c.jftUrl || c.jft) : '');
-  setDok('k-ssw', 'st-ssw', 'SSW', !!(c && (c.sswUrl || c.ssw) && (c.sswUrl || c.ssw) !== '-'), c ? (c.sswUrl || c.ssw) : '');
+  setDok(
+    'k-jft',
+    'st-jft',
+    'JFT',
+    !!(c && (c.jftUrl || c.jft) && (c.jftUrl || c.jft) !== '-'),
+    c ? c.jftUrl || c.jft : '',
+  );
+  setDok(
+    'k-ssw',
+    'st-ssw',
+    'SSW',
+    !!(c && (c.sswUrl || c.ssw) && (c.sswUrl || c.ssw) !== '-'),
+    c ? c.sswUrl || c.ssw : '',
+  );
   // Edit Super modal upload IDs
-  setDok('edit-k-photo', 'edit-k-st-photo', 'PAS PHOTO', !!(c && c.pasPhoto && c.pasPhoto !== '-'), c ? c.pasPhoto : '');
-  setDok('edit-k-cv', 'edit-k-st-cv', 'CV', !!(c && c.fileCv && c.fileCv !== '-'), c ? c.fileCv : '');
-  setDok('edit-k-file-jft', 'edit-k-st-jft', 'JFT', !!(c && (c.jftUrl || c.jft) && (c.jftUrl || c.jft) !== '-'), c ? (c.jftUrl || c.jft) : '');
-  setDok('edit-k-file-ssw', 'edit-k-st-ssw', 'SSW', !!(c && (c.sswUrl || c.ssw) && (c.sswUrl || c.ssw) !== '-'), c ? (c.sswUrl || c.ssw) : '');
+  setDok(
+    'edit-k-photo',
+    'edit-k-st-photo',
+    'PAS PHOTO',
+    !!(c && c.pasPhoto && c.pasPhoto !== '-'),
+    c ? c.pasPhoto : '',
+  );
+  setDok(
+    'edit-k-cv',
+    'edit-k-st-cv',
+    'CV',
+    !!(c && c.fileCv && c.fileCv !== '-'),
+    c ? c.fileCv : '',
+  );
+  setDok(
+    'edit-k-file-jft',
+    'edit-k-st-jft',
+    'JFT',
+    !!(c && (c.jftUrl || c.jft) && (c.jftUrl || c.jft) !== '-'),
+    c ? c.jftUrl || c.jft : '',
+  );
+  setDok(
+    'edit-k-file-ssw',
+    'edit-k-st-ssw',
+    'SSW',
+    !!(c && (c.sswUrl || c.ssw) && (c.sswUrl || c.ssw) !== '-'),
+    c ? c.sswUrl || c.ssw : '',
+  );
 }
 
 // Dipanggil saat WA di-blur di modal Input Kandidat: kalau nama/WA cocok

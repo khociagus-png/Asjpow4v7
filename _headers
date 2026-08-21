@@ -41,6 +41,9 @@
 /assets/main.css
   Cache-Control: public, max-age=31536000, immutable
 
+/assets/jp-locale.js
+  Cache-Control: public, max-age=3600
+
 # API & dynamic: selalu fresh
 /.netlify/*
   Cache-Control: no-cache, no-store

@@ -1,12 +1,12 @@
-import { normalizeWa, supabaseJson } from './db/client.ts';
-import { findForms, findFormsByWaList } from './db/forms.ts';
-import { attachApplications, mapCandidate } from './db/candidates.ts';
-import { attachBerkasBio } from './db/berkas.ts';
-import { requireAdmin } from './actions-auth.ts';
-import { findCandidateByWa } from './candidate-helpers.ts';
-import { stripRaw, loadCandidatesUnik } from './actions-public.ts';
-import { cacheClear } from './cache.ts';
-import { syncBiodataKeMail } from './actions-mail.ts';
+import { normalizeWa, supabaseJson } from './db/client';
+import { findForms, findFormsByWaList } from './db/forms';
+import { attachApplications, mapCandidate } from './db/candidates';
+import { attachBerkasBio } from './db/berkas';
+import { requireAdmin } from './actions-auth';
+import { findCandidateByWa } from './candidate-helpers';
+import { stripRaw, loadCandidatesUnik } from './actions-public';
+import { cacheClear } from './cache';
+import { syncBiodataKeMail } from './actions-mail';
 // actions-candidate.js — kelola kandidat (database_candidate): catatan,
 // update super (admin), halaman daftar kandidat. MODUL BARU (Fase 1.1c
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.

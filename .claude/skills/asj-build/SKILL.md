@@ -7,7 +7,7 @@ description: >
   Netlify. DO NOT USE FOR: debugging runtime behavior, inspecting live
   pages, or fixing bugs — use asj-debug or asj-e2e instead.
 metadata:
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # ASJ Build Skill

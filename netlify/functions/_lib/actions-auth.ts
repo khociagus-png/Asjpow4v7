@@ -1,12 +1,12 @@
 import bcrypt from 'bcryptjs';
-import { env } from './env.ts';
+import { env } from './env';
 import { normalizeWa, isValidWaFormat } from '../../../shared/wa-rules.ts';
-import { hasBackend, pick, supabaseJson, toText } from './db/client.ts';
-import { findCandidateByWaFiltered, findCandidates } from './db/candidates.ts';
-import { findAdmins } from './db/misc.ts';
-import * as session from './session.ts';
-import { cacheClear } from './cache.ts';
-import { findCandidateByWa, CAND_WA_COLS } from './candidate-helpers.ts';
+import { hasBackend, pick, supabaseJson, toText } from './db/client';
+import { findCandidateByWaFiltered, findCandidates } from './db/candidates';
+import { findAdmins } from './db/misc';
+import * as session from './session';
+import { cacheClear } from './cache';
+import { findCandidateByWa, CAND_WA_COLS } from './candidate-helpers';
 // actions-auth.js — autentikasi & otorisasi backend.
 //
 // MODUL BARU (Fase 1.1b REFACTOR_TODO.md): kode dipindah dari handlers.js —

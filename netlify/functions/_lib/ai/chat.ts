@@ -1,7 +1,7 @@
 import { normalizeWa, pick, supabaseJson } from '../db/client.ts';
 import { requireRole } from '../actions-auth.ts';
-import { buildRingkasData, findMasterByWa, APPLY_WA_COLS } from './cv.ts';
-import { geminiGenerate, parseJsonLoose } from './providers.ts';
+import { buildRingkasData, findMasterByWa, APPLY_WA_COLS } from './cv';
+import { geminiGenerate, parseJsonLoose } from './providers';
 // ai/chat.js — domain AI chat & wawancara: Qween Jeklin (chat kandidat master),
 // Jeklin copilot admin, Dede Jeklin (siswa baru), wawancara kerja (mensetsu)
 // per bidang SSW + hasil wawancara. MODUL BARU (Fase 1.4 REFACTOR_TODO.md) —

@@ -1,6 +1,6 @@
-import { supabaseJson, toText, pick, normalizeWa } from './client.ts';
+import { supabaseJson, toText, pick, normalizeWa } from './client';
 import { storageRequest, bucket } from '../storage.ts';
-import { fetchMasterLightByWa } from './master.ts';
+import { fetchMasterLightByWa } from './master';
 // db/berkas.js — repo pemberkasan_checklist + attach berkas/bio kandidat + list folder Storage.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 

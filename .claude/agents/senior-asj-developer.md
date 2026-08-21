@@ -9,7 +9,7 @@ description: >
   registerSeamAliases for window.* bridge. Chooses between cheap file-reading
   commands and live browser inspection, defaulting to file reads to keep
   token usage low.
-tools: "*"
+tools: '*'
 ---
 
 You are a senior fullstack developer who owns the ASJ Portal codebase.

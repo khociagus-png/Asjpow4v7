@@ -437,19 +437,31 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. MENU TAB ADMIN TERLENGKAP               -->
+  <!-- 2. UNIFIED DASHBOARD: SIDEBAR + CONTENT    -->
   <!-- ========================================== -->
-  <div class="flex flex-wrap gap-2 bg-slate-900 p-2 rounded-xl border border-red-900/50 shadow-lg">
-    <button data-action="adminSwitchTab" data-action-arg='["kelola"]' id="tab-kelola" class="px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold transition shadow-md flex-1 md:flex-none text-center"><i class="fas fa-globe md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_public_job">Loker Publik</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["dbjob"]' id="tab-dbjob" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-server md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_internal_db">DB Job Internal</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["tambah"]' id="tab-tambah" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-plus md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_add_job">Tambah Job</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["pelamar"]' id="tab-pelamar" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-users md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_candidate">Data Pelamar</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["jadwal"]' id="tab-jadwal" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-calendar-alt md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_schedule">Jadwal Agenda</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["mail"]' id="tab-mail" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-envelope md:mr-1"></i> <span class="hidden md:inline" data-lang="admin.tab_mail">Mail Inbox</span></button>
-    <!-- TAB BARU: WA PINTAR -->
-    <button data-action="adminSwitchTab" data-action-arg='["wa"]' id="tab-wa" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fab fa-whatsapp md:mr-1 text-emerald-400"></i> <span class="hidden md:inline" data-lang="ui.wa_pintar">WA Pintar</span></button>
-    <button data-action="adminSwitchTab" data-action-arg='["config"]' id="tab-config" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition flex-1 md:flex-none text-center"><i class="fas fa-cog md:mr-1"></i> <span class="hidden md:inline" data-lang="ui.settings">Pengaturan</span></button>
-  </div>
+  <!-- SIDEBAR DRAWER (overlay, slide-in) -->
+  <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 z-[95] transition-opacity duration-300" onclick="window.toggleAdminSidebar()"></div>
+  <aside id="admin-sidebar" role="navigation" aria-label="Admin sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-slate-700 p-3 flex flex-col gap-1 shadow-2xl z-[96] transform -translate-x-full transition-transform duration-300 ease-in-out">
+    <div class="flex items-center justify-between px-2 py-2 mb-2 border-b border-slate-700">
+      <span class="text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-th-large mr-1"></i> Menu</span>
+      <button onclick="window.toggleAdminSidebar()" class="text-slate-400 hover:text-white p-1 transition" aria-label="Tutup menu"><i class="fas fa-times text-lg"></i></button>
+    </div>
+    <button data-action="adminSwitchTab" data-action-arg='["kelola"]' id="tab-kelola" class="w-full px-3 py-2.5 bg-red-600 text-white rounded-lg text-sm font-bold transition shadow-md text-left flex items-center gap-2" aria-label="Loker Publik"><i class="fas fa-globe w-5 text-center"></i> <span data-lang="admin.tab_public_job">Loker Publik</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["dbjob"]' id="tab-dbjob" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="DB Job Internal"><i class="fas fa-server w-5 text-center"></i> <span data-lang="admin.tab_internal_db">DB Job Internal</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["tambah"]' id="tab-tambah" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="Tambah Job"><i class="fas fa-plus w-5 text-center"></i> <span data-lang="admin.tab_add_job">Tambah Job</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["pelamar"]' id="tab-pelamar" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="Data Pelamar"><i class="fas fa-users w-5 text-center"></i> <span data-lang="admin.tab_candidate">Data Pelamar</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["jadwal"]' id="tab-jadwal" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="Jadwal Agenda"><i class="fas fa-calendar-alt w-5 text-center"></i> <span data-lang="admin.tab_schedule">Jadwal Agenda</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["mail"]' id="tab-mail" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="Mail Inbox"><i class="fas fa-envelope w-5 text-center"></i> <span data-lang="admin.tab_mail">Mail Inbox</span></button>
+    <button data-action="adminSwitchTab" data-action-arg='["wa"]' id="tab-wa" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2" aria-label="WA Pintar"><i class="fab fa-whatsapp w-5 text-center text-emerald-400"></i> <span data-lang="ui.wa_pintar">WA Pintar</span></button>
+    <div class="flex-1"></div>
+    <button data-action="adminSwitchTab" data-action-arg='["config"]' id="tab-config" class="w-full px-3 py-2.5 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg text-sm font-bold transition text-left flex items-center gap-2 mt-auto" aria-label="Pengaturan"><i class="fas fa-cog w-5 text-center"></i> <span data-lang="ui.settings">Pengaturan</span></button>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <div class="flex-1 min-w-0 pl-0">
+
+  <!-- TOGGLE SIDEBAR (visible on all screen sizes) -->
+  <button onclick="window.toggleAdminSidebar()" class="sticky top-2 z-[30] ml-1 mb-2 px-3 py-1.5 bg-slate-800 hover:bg-red-600 text-slate-400 hover:text-white rounded-lg text-xs font-bold transition-all duration-200 border border-slate-700 hover:border-red-500 shadow-lg inline-flex items-center gap-1.5"><i class="fas fa-bars"></i> Menu</button>
 
   <!-- ========================================== -->
   <!-- 3. KONTEN TAB: LOKER PUBLIK                -->
@@ -1146,10 +1158,10 @@
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
 // Delay 2s supaya SW sempat register+cache dulu → mencegah loop.
 // sessionStorage guard: cuma fire 1x per deploy.
-setTimeout(function(){var E="app-89d2bde3c8";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
+setTimeout(function(){var E="app-dd18faf7a8";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
 </script>
 <!-- /ANTI-CACHE -->
-<script src="/assets/app-89d2bde3c8.js"></script>
+<script src="/assets/app-9c28a553ef.js"></script>
 <!-- Renderer dokumen lokal (xlsx/mammoth/pptx-preview) kini di-load LAZY saat
        preview pertama dibuka (lihat muatVendorLib di 02_init.js) — hemat 2.8MB
        download+parse di tiap load halaman. -->

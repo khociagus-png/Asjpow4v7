@@ -7,8 +7,12 @@
 
 import { callAPI } from '../../api-client.ts';
 import { getSavedTheme } from './theme.ts';
+import { initPosthog } from '../core/posthog.ts';
 
 document.addEventListener('DOMContentLoaded', async function () {
+  // PostHog: init session replay + analytics (~30KB CDN, async non-blocking)
+  initPosthog();
+
   window.injectModalWaPintar();
 
   // PEMULIHAN SESI ADMIN DIAM-DIAM (fitur "selama tidak logout, selalu

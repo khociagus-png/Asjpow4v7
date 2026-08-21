@@ -1,8 +1,8 @@
-import { env, debugFileEnvKeys, debugFileStructure } from './env.ts';
-import { findJobs } from './db/jobs.ts';
-import { findCandidates } from './db/candidates.ts';
-import { findAdmins, findSettings } from './db/misc.ts';
-import { requireAdmin, masterPins } from './actions-auth.ts';
+import { env, debugFileEnvKeys, debugFileStructure } from './env';
+import { findJobs } from './db/jobs';
+import { findCandidates } from './db/candidates';
+import { findAdmins, findSettings } from './db/misc';
+import { requireAdmin, masterPins } from './actions-auth';
 // actions-diagnostics.js — diagnostik koneksi backend (getAppConfig).
 // MODUL BARU (Fase 1.1d REFACTOR_TODO.md) — kode dipindah dari handlers.js,
 // perilaku TIDAK berubah. Endpoint ini mengembalikan info SENSITIF (skema DB,
@@ -15,7 +15,7 @@ import {
   supabaseUrl,
   tablesFromSchema,
   toText,
-} from './db/client.ts';
+} from './db/client';
 
 async function handleGetAppConfig(sessionToken) {
   // Endpoint ini mengembalikan info SENSITIF (skema DB, klasifikasi hash

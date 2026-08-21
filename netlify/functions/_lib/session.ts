@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { env } from './env.ts';
+import { env } from './env';
 // session.js — token sesi bertanda tangan (HMAC-SHA256).
 //
 // Pengganti "createSession" di auth.ts asli. Token { role, wa?, name? }

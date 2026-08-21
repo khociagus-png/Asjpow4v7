@@ -159,6 +159,14 @@ if (!sw.includes(`'/assets/modals-shared.html',`)) {
   );
   console.log('[build-js] sw.js: SHELL -> /assets/modals-shared.html');
 }
+// JP locale lazy-loaded dari assets/jp-locale.js (i18n lazy-load).
+if (!sw.includes("'/assets/jp-locale.js',")) {
+  sw = sw.replace(
+    `  '/assets/modals-shared.html',\n`,
+    `  '/assets/modals-shared.html',\n  '/assets/jp-locale.js',\n`,
+  );
+  console.log('[build-js] sw.js: SHELL -> /assets/jp-locale.js');
+}
 // VERSION ikut hash modals supaya SW refresh saat partial berubah (tanpa ubah JS).
 // Hash dihitung atas konten ternormalisasi LF: dengan core.autocrlf=true (Windows)
 // working-tree berbentuk CRLF, sha1 byte mentah beda dari blob LF di repo —

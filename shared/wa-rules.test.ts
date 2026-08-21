@@ -5,7 +5,7 @@
 // tanpa mengubah test ini — drift frontend↔backend adalah bug (kasus SATRIA).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { normalizeWa, isValidWaFormat } from './wa-rules.ts';
+import { normalizeWa, isValidWaFormat } from './wa-rules';
 
 describe('normalizeWa — format baku 628…', () => {
   it('0xx… → 62xx…', () => {

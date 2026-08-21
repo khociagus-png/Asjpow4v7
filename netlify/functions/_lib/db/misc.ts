@@ -1,4 +1,4 @@
-import { supabaseJson, supabasePaged, pick, toText, findTable } from './client.ts';
+import { supabaseJson, supabasePaged, pick, toText, findTable } from './client';
 // db/misc.js — repo misc: admins, settings/assets, pengumuman, query paginated.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 

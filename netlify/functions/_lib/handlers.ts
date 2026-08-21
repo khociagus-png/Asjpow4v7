@@ -1,7 +1,7 @@
-import * as session from './session.ts';
-import * as rateLimit from './rate-limit.ts';
-import { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } from './action-registry.ts';
-import * as shareActions from './actions-share.ts';
+import * as session from './session';
+import * as rateLimit from './rate-limit';
+import { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } from './action-registry';
+import * as shareActions from './actions-share';
 // handlers.js — dispatcher pusat backend rebuild.
 //
 // Frontend mengirim { action, payload, sessionToken } ke /.netlify/functions/*

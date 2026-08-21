@@ -5,8 +5,8 @@
 // baru, supaya tombol KK/KTP/CV di share view tidak pernah dobel.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { isVarianOf, stemAliases } from './storage.ts';
-import { buildRingkasData } from './ai/cv.ts';
+import { isVarianOf, stemAliases } from './storage';
+import { buildRingkasData } from './ai/cv';
 
 describe('isVarianOf', () => {
   it('varian bertimestamp terdeteksi (KK_1786….pdf milik stem KK)', () => {

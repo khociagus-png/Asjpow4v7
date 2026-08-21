@@ -1,6 +1,6 @@
-import { normalizeWa, supabaseJson } from './db/client.ts';
-import { env } from './env.ts';
-import { requireRole } from './actions-auth.ts';
+import { normalizeWa, supabaseJson } from './db/client';
+import { env } from './env';
+import { requireRole } from './actions-auth';
 // actions-wa.js — template WA (wa_templates) + pengiriman WhatsApp via Fonnte.
 // MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.

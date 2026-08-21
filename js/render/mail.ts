@@ -327,11 +327,13 @@ export function renderFormInbox() {
       tr('table.doc_folder') +
       '" class="rt-full p-4 text-center">' +
       '<div class="flex flex-wrap gap-1 justify-center max-h-[80px] overflow-auto">' +
-      (f.folderUrl && f.folderUrl !== '-' ? '<a href="' +
-      esc(f.folderUrl) +
-      '" target="_blank" aria-label="' +
-      tr('table.doc_folder') +
-      '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>' : '') +
+      (f.folderUrl && f.folderUrl !== '-'
+        ? '<a href="' +
+          esc(f.folderUrl) +
+          '" target="_blank" aria-label="' +
+          tr('table.doc_folder') +
+          '" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-[9px] font-bold shadow transition"><i class="fas fa-folder text-amber-400"></i></a>'
+        : '') +
       btnPhoto +
       btnJft +
       btnSsw +

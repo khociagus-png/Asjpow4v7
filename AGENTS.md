@@ -14,6 +14,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 - **Next:** Lazy load Sentry, hapus `@ts-nocheck` bertahap
 
 **Aturan singkat:**
+
 1. WA: selalu `628xxxxxxxxxx` (13 digit)
 2. Upload: browser → Cloudinary → URL string
 3. Modal: edit di `partials/modals-shared.html` saja
@@ -24,11 +25,11 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 ## 1. Urutan dokumen (hanya jika butuh detail)
 
-| Dokumen | Isi | Kapan dibaca |
-|---|---|---|
-| **MEMORY.md** | Detail history, decisions, known issues | Saat butuh konteks lengkap |
-| **AGENTS.md** (ini) | Peta kode + konvensi | Setiap sesi |
-| **WORKFLOW.md** | Aturan commit/push | Setiap sesi |
+| Dokumen                                                                                        | Isi                                                                                     | Kapan dibaca                             |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **MEMORY.md**                                                                                  | Detail history, decisions, known issues                                                 | Saat butuh konteks lengkap               |
+| **AGENTS.md** (ini)                                                                            | Peta kode + konvensi                                                                    | Setiap sesi                              |
+| **WORKFLOW.md**                                                                                | Aturan commit/push                                                                      | Setiap sesi                              |
 | **WORKFLOW.md**                                                                                | Aturan kerja tim: commit/push, struktur, command, larangan deploy                       | Setiap sesi                              |
 | **PIPELINE.md**                                                                                | Alur lapangan ASJ (JO → seleksi → lolos → pemberkasan) — **jangan mengubah pipeline**   | Sebelum menyentuh fitur tahapan kandidat |
 | **REVIEW.md**                                                                                  | Audit keamanan & rekomendasi                                                            | Saat kerja di backend/keamanan           |

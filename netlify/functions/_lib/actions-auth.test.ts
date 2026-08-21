@@ -4,9 +4,9 @@
 // kasus SATRIA 2026-08-15) ditolak supaya tidak bikin kandidat duplikat.
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import * as auth from './actions-auth.ts';
+import * as auth from './actions-auth';
 const { isValidWaFormat, handleRefreshAdminSession, handleRefreshKandidatSession } = auth;
-import * as session from './session.ts';
+import * as session from './session';
 describe('refreshKandidatSession — pemulihan sesi kandidat diam-diam', () => {
   it('refresh token kandidat yang sah → sessionToken baru + wa', async () => {
     const rt = session.signToken({ role: 'kandidat', wa: '6281234567890', kind: 'refresh' });

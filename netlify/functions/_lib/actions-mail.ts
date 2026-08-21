@@ -1,11 +1,11 @@
 import bcrypt from 'bcryptjs';
-import { normalizeWa, pick, supabaseJson } from './db/client.ts';
-import { mapCandidate } from './db/candidates.ts';
-import { attachBerkasBio } from './db/berkas.ts';
-import { requireAdmin } from './actions-auth.ts';
-import { findCandidateByWa, nextCandidateId } from './candidate-helpers.ts';
-import { stripRaw } from './actions-public.ts';
-import { cacheClear } from './cache.ts';
+import { normalizeWa, pick, supabaseJson } from './db/client';
+import { mapCandidate } from './db/candidates';
+import { attachBerkasBio } from './db/berkas';
+import { requireAdmin } from './actions-auth';
+import { findCandidateByWa, nextCandidateId } from './candidate-helpers';
+import { stripRaw } from './actions-public';
+import { cacheClear } from './cache';
 // actions-mail.js — Mail inbox (database_asj_form): review/approve/reject/
 // delete/tandai dibaca + sinkronisasi kandidat. MODUL BARU (Fase 1.1c
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
@@ -16,7 +16,7 @@ import {
   findFormsByWa,
   mapForm,
   upsertFormRow,
-} from './db/forms.ts';
+} from './db/forms';
 
 // Frontend mengirim rowIndex (posisi di array formInbox). Urutan harus sama
 // dengan findForms() yang dipakai getAppData.

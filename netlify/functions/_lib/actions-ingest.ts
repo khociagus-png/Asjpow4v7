@@ -1,9 +1,9 @@
-import { env } from './env.ts';
-import { normalizeWa, normalizeGender, pick, supabaseJson, toText } from './db/client.ts';
-import { requireRole } from './actions-auth.ts';
-import { findMasterByWa } from './actions-master.ts';
-import { parseJsonLoose } from './ai/providers.ts';
-import { cacheClear } from './cache.ts';
+import { env } from './env';
+import { normalizeWa, normalizeGender, pick, supabaseJson, toText } from './db/client';
+import { requireRole } from './actions-auth';
+import { findMasterByWa } from './actions-master';
+import { parseJsonLoose } from './ai/providers';
+import { cacheClear } from './cache';
 // actions-ingest.ts — Smart Ingestion: download file → extract text locally →
 // Gemini structured JSON → upsert master_database_candidate.
 // Hanya memproses file BARU (new uploads), tidak memproses legacy data.
@@ -86,7 +86,10 @@ async function geminiStructuredExtract(text: string): Promise<GeminiExtractedDat
   for (const model of MODELS) {
     try {
       const res = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key,
+        'https://generativelanguage.googleapis.com/v1beta/models/' +
+          model +
+          ':generateContent?key=' +
+          key,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -105,9 +108,8 @@ async function geminiStructuredExtract(text: string): Promise<GeminiExtractedDat
       }
       const j = await res.json();
       const reply =
-        j?.candidates?.[0]?.content?.parts
-          ?.map((p: { text?: string }) => p.text || '')
-          .join('') || '';
+        j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('') ||
+        '';
       if (reply) {
         const parsed = parseJsonLoose(reply) as GeminiExtractedData;
         if (parsed && typeof parsed === 'object') return parsed;
@@ -146,10 +148,7 @@ async function extractText(buffer: Buffer, ext: string): Promise<string> {
       const pdfModule = await import('pdf-parse');
       const PDFClass = (pdfModule as any).PDFParse || (pdfModule as any).default;
       const fresh = new Uint8Array(
-        buffer.buffer.slice(
-          buffer.byteOffset,
-          buffer.byteOffset + buffer.byteLength,
-        ),
+        buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
       );
       const parser = new PDFClass(fresh);
       await parser.load();
@@ -244,7 +243,8 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
     if (buffer.length > MAX_FILE_BYTES) {
       return {
         success: false,
-        error: 'File terlalu besar (' + Math.round(buffer.length / 1024 / 1024) + ' MB). Maks 10 MB.',
+        error:
+          'File terlalu besar (' + Math.round(buffer.length / 1024 / 1024) + ' MB). Maks 10 MB.',
       };
     }
 
@@ -265,7 +265,8 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
     if (!extractedText || extractedText.length < 10) {
       return {
         success: false,
-        error: 'Tidak bisa mengekstrak teks dari file ini. Pastikan file tidak kosong atau terenkripsi.',
+        error:
+          'Tidak bisa mengekstrak teks dari file ini. Pastikan file tidak kosong atau terenkripsi.',
       };
     }
 
@@ -281,9 +282,13 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
 
     // Step 4: Normalisasi hasil
     const no_wa = normalizeWa(String(aiData.no_wa || wa || ''));
-    const email = String(aiData.email || '').trim().toLowerCase();
+    const email = String(aiData.email || '')
+      .trim()
+      .toLowerCase();
     const nik = String(aiData.nik || '').trim();
-    const nama = String(aiData.nama_lengkap || '').trim().toUpperCase();
+    const nama = String(aiData.nama_lengkap || '')
+      .trim()
+      .toUpperCase();
 
     if (aiData.gender) {
       const g = normalizeGender(aiData.gender);
@@ -321,7 +326,11 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
           const existingAi = existing.ai_data_json
             ? parseJsonLoose(String(existing.ai_data_json))
             : {};
-          const merged = { ...(existingAi || {}), skills: aiData.skills, source: 'smart_ingestion' };
+          const merged = {
+            ...(existingAi || {}),
+            skills: aiData.skills,
+            source: 'smart_ingestion',
+          };
           patchBody.ai_data_json = JSON.stringify(merged);
         }
 
@@ -334,9 +343,7 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
         action = 'updated';
       } else {
         // CREATE: post baris baru
-        const idKandidat = await (
-          await import('./candidate-helpers.ts')
-        ).nextCandidateId();
+        const idKandidat = await (await import('./candidate-helpers.ts')).nextCandidateId();
 
         const postBody: Record<string, unknown> = {
           id_kandidat: idKandidat,
@@ -355,7 +362,10 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
         if (aiData.pendidikan) postBody.pendidikan_1_tingkat = String(aiData.pendidikan);
         if (aiData.pekerjaan) postBody.pekerjaan_1_nama_perusahaan = String(aiData.pekerjaan);
         if (Array.isArray(aiData.skills) && aiData.skills.length) {
-          postBody.ai_data_json = JSON.stringify({ skills: aiData.skills, source: 'smart_ingestion' });
+          postBody.ai_data_json = JSON.stringify({
+            skills: aiData.skills,
+            source: 'smart_ingestion',
+          });
         }
 
         const result = await supabaseJson('POST', 'master_database_candidate', {

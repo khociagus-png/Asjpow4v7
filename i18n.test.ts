@@ -11,7 +11,13 @@ import { describe, it, expect } from 'vitest';
 globalThis.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
 globalThis.window = globalThis;
 
-const { LANG, tr } = await import('./i18n.js');
+const { LANG, tr, ensureJpLocale } = await import('./i18n.js');
+
+// JP locale di-load secara lazy (tidak bundled). Untuk test parity,
+// kita load langsung dari source file agar test bisa jalan tanpa fetch.
+import { jp } from './i18n/locales/jp/index.js';
+// Injek ke LANG supaya test paritas bisa jalan.
+LANG.jp = jp;
 
 function leaves(obj, prefix = '', out = new Set()) {
   for (const [k, v] of Object.entries(obj)) {

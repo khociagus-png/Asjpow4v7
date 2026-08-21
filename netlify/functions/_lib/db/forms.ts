@@ -1,4 +1,4 @@
-import { supabaseJson, toText, normalizeWa } from './client.ts';
+import { supabaseJson, toText, normalizeWa } from './client';
 // db/forms.js — repo mail inbox (database_asj_form): mapForm, findForms, query per WA.
 // MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 

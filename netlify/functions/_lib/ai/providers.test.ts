@@ -3,7 +3,7 @@
 // JSON murni: ada teks di sekitar, atau dibungkus markdown fence).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { parseJsonLoose } from './providers.ts';
+import { parseJsonLoose } from './providers';
 
 describe('parseJsonLoose — output AI → objek', () => {
   it('JSON murni langsung diparse', () => {

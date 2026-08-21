@@ -4,7 +4,7 @@
 // normalisasi = kandidat duplikat (kasus SATRIA 6223 vs 6282, 2026-08-15).
 // ==========================================
 import { describe, it, expect } from 'vitest';
-import { normalizeWa, normalizeStatus, normalizeGender } from './client.ts';
+import { normalizeWa, normalizeStatus, normalizeGender } from './client';
 
 describe('normalizeWa — format baku 628…', () => {
   it('0xx… dikonversi ke 62xx… (awalan HP)', () => {

@@ -1,10 +1,11 @@
 // i18n/core.js — LOGIKA i18n (Fase 4): CURRENT_LANG, komposisi LANG, tr(),
 // trOption(), renderLanguageLight, toggleFormLanguage.
-// Data bahasa dipisah ke i18n/locales/{id,jp}.js; alias window.* lain ada di
-// i18n.js (agregat) — satu-satunya pengecualian: accessor window.CURRENT_LANG
-// DI SINI karena ia harus men-assign binding modul CURRENT_LANG.
+// Data bahasa: id dipanggil static (default ~60KB), jp dipanggil dynamic
+// (lazy-load via assets/jp-locale.js ~60KB hanya saat user switch ke JP).
+// alias window.* lain ada di i18n.js (agregat) — satu-satunya pengecualian:
+// accessor window.CURRENT_LANG DI SINI karena ia harus men-assign binding
+// modul CURRENT_LANG.
 import { id } from './locales/id/index.js';
-import { jp } from './locales/jp/index.js';
 export var CURRENT_LANG = localStorage.getItem('asj_lang') || 'id';
 // Accessor window.CURRENT_LANG — pemakai luar (01_public.setLanguage,
 // pages/share.js) menulis `window.CURRENT_LANG = lang`; accessor men-delegate
@@ -17,7 +18,50 @@ Object.defineProperty(window, 'CURRENT_LANG', {
     CURRENT_LANG = v;
   },
 });
-export const LANG = { id, jp };
+// LANG dimulai dengan id saja. JP ditambahkan secara dinamis
+// setelah fetch aset jp-locale.js selesai (lihat ensureJpLocale()).
+export const LANG = { id };
+
+// Cache data JP setelah pertama kali dimuat (tidak perlu fetch ulang).
+let _jpLoaded = false;
+let _jpLoading = null;
+
+/**
+ * Pastikan data JP locale sudah dimuat. Return true jika sudah siap.
+ * Dipanggil oleh toggleFormLanguage() sebelum switch ke JP.
+ */
+export async function ensureJpLocale() {
+  if (_jpLoaded) return true;
+  if (_jpLoading) return _jpLoading;
+  _jpLoading = (async () => {
+    try {
+      // Coba fetch aset JP locale dari assets/jp-locale.js.
+      // File ini di-generate oleh scripts/build-i18n-jp.mts dan berisi
+      // window.__ASJ_JP_LOCALE__ = { ...merged domains... };
+      if (!window.__ASJ_JP_LOCALE__) {
+        const resp = await fetch('/assets/jp-locale.js', { cache: 'no-cache' });
+        if (!resp.ok) throw new Error('Failed to fetch JP locale: ' + resp.status);
+        const text = await resp.text();
+        // eval() diperlukan karena file berisi window.__ASJ_JP_LOCALE__ = {...}
+        // (bukan modul ESM). Aman karena file ini di-generate oleh build script
+        // kita sendiri, bukan input user.
+        // eslint-disable-next-line no-eval
+        (0, eval)(text);
+      }
+      if (window.__ASJ_JP_LOCALE__) {
+        LANG.jp = window.__ASJ_JP_LOCALE__;
+        _jpLoaded = true;
+        return true;
+      }
+    } catch (e) {
+      console.warn('[i18n] Failed to load JP locale:', e);
+    }
+    return false;
+  })();
+  const result = await _jpLoading;
+  _jpLoading = null;
+  return result;
+}
 export const OPTION_TRANSLATIONS = {
   // Tahapan pipeline (list_tahapan)
   'CHECK KAIWA': { id: 'CHECK KAIWA', jp: 'チェック会話' },
@@ -219,8 +263,16 @@ export function renderLanguageLight() {
 }
 
 // Tombol ganti bahasa untuk halaman mandiri (ID ↔ JP).
-export function toggleFormLanguage() {
-  CURRENT_LANG = CURRENT_LANG === 'id' ? 'jp' : 'id';
+// Async karena JP locale perlu di-load saat pertama kali switch.
+export async function toggleFormLanguage() {
+  const nextLang = CURRENT_LANG === 'id' ? 'jp' : 'id';
+
+  // Jika switch ke JP, pastikan data sudah dimuat dulu.
+  if (nextLang === 'jp') {
+    await ensureJpLocale();
+  }
+
+  CURRENT_LANG = nextLang;
   window.CURRENT_LANG = CURRENT_LANG;
   try {
     localStorage.setItem('asj_lang', CURRENT_LANG);
@@ -230,4 +282,17 @@ export function toggleFormLanguage() {
   if (typeof window.renderSysConfig === 'function' && document.getElementById('config-container'))
     window.renderSysConfig();
   if (typeof window.rePopulateDropdowns === 'function') window.rePopulateDropdowns();
+}
+
+// Preload JP locale saat IDLE jika user pernah pakai JP sebelumnya.
+// Tidak ganggu first-paint karena pakai requestIdleCallback.
+if (typeof requestIdleCallback === 'function') {
+  requestIdleCallback(() => {
+    if (localStorage.getItem('asj_lang') === 'jp') {
+      ensureJpLocale();
+    }
+  });
+} else if (localStorage.getItem('asj_lang') === 'jp') {
+  // Fallback untuk browser tanpa requestIdleCallback
+  setTimeout(() => ensureJpLocale(), 2000);
 }

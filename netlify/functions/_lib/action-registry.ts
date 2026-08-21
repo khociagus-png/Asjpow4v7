@@ -1,20 +1,20 @@
-import * as publicData from './actions-public.ts';
-import * as diagnostics from './actions-diagnostics.ts';
-import * as auth from './actions-auth.ts';
-import * as jobActions from './actions-job.ts';
-import * as aiChat from './ai/chat.ts';
-import * as aiClassify from './ai/classify.ts';
-import * as candidateActions from './actions-candidate.ts';
-import * as mailActions from './actions-mail.ts';
-import * as upload from './actions-upload.ts';
-import * as master from './actions-master.ts';
-import * as schedule from './actions-schedule.ts';
-import * as wa from './actions-wa.ts';
-import * as config from './actions-config.ts';
-import * as register from './actions-register.ts';
-import * as aiCv from './ai/cv.ts';
-import * as ingest from './actions-ingest.ts';
-import * as download from './actions-download.ts';
+import * as publicData from './actions-public';
+import * as diagnostics from './actions-diagnostics';
+import * as auth from './actions-auth';
+import * as jobActions from './actions-job';
+import * as aiChat from './ai/chat';
+import * as aiClassify from './ai/classify';
+import * as candidateActions from './actions-candidate';
+import * as mailActions from './actions-mail';
+import * as upload from './actions-upload';
+import * as master from './actions-master';
+import * as schedule from './actions-schedule';
+import * as wa from './actions-wa';
+import * as config from './actions-config';
+import * as register from './actions-register';
+import * as aiCv from './ai/cv';
+import * as ingest from './actions-ingest';
+import * as download from './actions-download';
 // =============================================================================
 // action-registry.js — SATU-SATUNYA sumber kebenaran kontrak action backend.
 // -----------------------------------------------------------------------------
