@@ -353,6 +353,35 @@ async function handleSubmitApply(payload) {
       await upsertFormRow(body);
     }
 
+    // Sync photo/JFT/SSW/CV dari lamaran ke database_candidate (profile kandidat).
+    // Tanpa sync ini, ALL_CANDIDATES (yang baca database_candidate) tidak punya
+    // photo/JFT/SSW → Digital CV mini dan share view tampil kosong.
+    // Sync HANYA jika nilai baru tidak kosong — jangan timpa data yang sudah ada
+    // dari upload sebelumnya (pemberkasan/admin).
+    try {
+      const candRow = await findCandidateByWaFiltered(wa);
+      if (candRow && candRow.id !== undefined) {
+        const candPatch: Record<string, any> = {};
+        const photoVal = String(body.pas_photo || '').trim();
+        if (photoVal && photoVal !== '-') candPatch.pas_photo = photoVal;
+        const jftVal = String(body.jft || '').trim();
+        if (jftVal && jftVal !== '-') candPatch.jft = jftVal;
+        const sswVal = String(body.ssw || '').trim();
+        if (sswVal && sswVal !== '-') candPatch.ssw = sswVal;
+        const cvVal = String(body.file_cv || '').trim();
+        if (cvVal && cvVal !== '-') candPatch.file_cv = cvVal;
+        if (Object.keys(candPatch).length) {
+          await supabaseJson('PATCH', 'database_candidate', {
+            query: { id: 'eq.' + candRow.id },
+            body: candPatch,
+            headers: { Prefer: 'return=minimal' },
+          });
+        }
+      }
+    } catch {
+      /* sync ke database_candidate non-fatal — jangan gagalkan lamaran */
+    }
+
     // Carry-over dokumen TSK dari lamaran loker (KTP/KK/ijazah/universitas) ke
     // kolom master_database_candidate (*_url). Saat kandidat LOLOS ke
     // pemberkasan, BERKAS_COLUMNS (db/berkas.js) fallback ke kolom master ini
