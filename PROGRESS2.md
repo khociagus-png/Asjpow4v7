@@ -5,11 +5,52 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-22 — dikerjakan oleh **Buffy** (AI agent) — **Smart Ingestion + Bundle optimization + SW reload fix** (`bc39b1d`)
+**Update terakhir:** sesi 2026-08-22 (sore) — dikerjakan oleh **Buffy** (AI agent) — **Fix laporan bulanan + Regression tests + Security review** (`b317d57`)
 
 ---
 
-## Sesi 2026-08-22 — Smart Ingestion + Bundle Optimization + SW Reload Fix (Buffy)
+## Sesi 2026-08-22 (Sore) — Fix Laporan Bulanan + Regression Tests + Reviews (Buffy)
+
+### Commits
+
+| Hash      | Isi                                                     | Status    |
+| --------- | ------------------------------------------------------- | --------- |
+| `b317d57` | fix: laporan bulanan + regression tests + stale entries | ✅ Pushed |
+
+### Yang Dikerjakan:
+
+1. **Fix laporan bulanan** — `getMonthlyReport` tidak ada di `ADMIN_ACTIONS` → session token tidak dikirim → backend reject "Sesi tidak valid". Fix: tambah ke ADMIN_ACTIONS
+2. **Hapus stale entries** — `getDriveLinkCandidates` & `uploadDriveReplacement` di ADMIN_ACTIONS tapi tidak ada handler/frontend. Dihapus
+3. **Regression tests (+2)** — `action-registry.test.ts`:
+   - Test: setiap backend `requireAdmin` action harus ada di frontend `ADMIN_ACTIONS`
+   - Test: setiap `ADMIN_ACTIONS` entry harus ada di `ACTION_HANDLERS`
+4. **Vitest fix** — Tambah `.freebuff` ke exclude list (deploy staging mempengaruhi test scan)
+5. **MEMORY.md update** — Tambah §PELAJARAN DEPLOY: Netlify Free plan memblokir API env vars + function upload
+6. **Security review** — 2 findings:
+   - `ingest.js` tanpa rate limiting (Medium)
+   - `ingest.js` CORS `Access-Control-Allow-Origin: *` (Medium)
+7. **Supabase/Postgres review** — No critical issues. `select *` acceptable for detail views, `ilike` wildcard OK untuk dataset kecil
+8. **Tailwind v4 review** — Setup sudah benar (CSS-first, @theme, no config.js)
+
+### Test Results:
+
+```
+Test Files  32 passed (32)
+Tests       285 passed (285)   ← +2 regression tests
+Bundle:     app-bb81adcbdc.js  (374KB)
+```
+
+### Netlify Deploy Status:
+
+- ✅ Site `asjportal-baru.netlify.app` — static files deployed (drag & drop)
+- ❌ Functions — belum deployed (Netlify Free plan memblokir API upload)
+- ❌ Env vars — belum di-set (Netlify Free plan memblokir API create)
+- **Solusi:** Connect GitHub repo ke Netlify → auto-build + deploy functions + set env vars via Dashboard
+- SSO account `suparnopnrg4` sudah dimatikan via API
+
+---
+
+## Sesi 2026-08-22 (Pagi) — Smart Ingestion + Bundle Optimization + SW Reload Fix (Buffy)
 
 ### Commits
 
