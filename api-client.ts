@@ -130,8 +130,9 @@ const NETLIFY_FUNCTIONS = {
   // File generik (Supabase Storage) - hanya getUploadUrls (upload/list/delete
   // generik dihapus dari files.ts karena tidak dipakai & tanpa gerbang admin)
   getUploadUrls: 'files',
-  // Smart Ingestion (upload dokumen → extract → AI parse → upsert master)
-  processUploadDoc: 'files',
+  // Smart Ingestion → function terpisah (ingest.js) agar heavy deps
+  // (pdf-parse, xlsx, mammoth) tidak dibundle ke semua 19 function lainnya.
+  processUploadDoc: 'ingest',
   // Download semua dokumen kandidat per job (ZIP)
   downloadJobDocs: 'files',
   // Data utama aplikasi

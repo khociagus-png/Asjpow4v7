@@ -13,7 +13,6 @@ import * as wa from './actions-wa';
 import * as config from './actions-config';
 import * as register from './actions-register';
 import * as aiCv from './ai/cv';
-import * as ingest from './actions-ingest';
 import * as download from './actions-download';
 // =============================================================================
 // action-registry.js — SATU-SATUNYA sumber kebenaran kontrak action backend.
@@ -117,8 +116,13 @@ const ACTION_HANDLERS = {
   parseDokumenBiodata: aiClassify.handleParseDokumenBiodata,
   getAdminAiContext: aiCv.handleGetAdminAiContext,
   buildAdminAiCandidateSummary: aiCv.handleBuildAdminAiCandidateSummary,
-  // Smart Ingestion (upload → extract → Gemini → upsert master)
-  processUploadDoc: ingest.handleProcessUploadDoc,
+  // Smart Ingestion dipindah ke function terpisah (ingest.js)
+  // untuk mengurangi ukuran bundle 19 function lainnya (~2.2MB per function).
+  // Routing: api-client.ts → processUploadDoc: 'ingest' → /.netlify/functions/ingest
+  processUploadDoc: () => ({
+    success: false,
+    message: 'processUploadDoc has been moved to /ingest function',
+  }),
   // Download dokumen kandidat per job (ZIP)
   downloadJobDocs: download.handleDownloadJobDocs,
   submitDataAsj: aiCv.handleSubmitDataAsj,

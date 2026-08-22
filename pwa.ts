@@ -85,16 +85,44 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     // COOLDOWN LOCK: cegah multiple reload dari berbagai mekanisme anti-cache
     // yang race condition (cekVersiSw + ASJ_FORCE_RELOAD + controllerchange).
-    // Kalau sudah pernah reload < 10 detik yang lalu, SKIP semua mekanisme
-    // berikutnya — ini menghentikan auto-loop.
+    // Kalau sudah pernah reload < 30 detik yang lalu, SKIP semua mekanisme.
+    // MAX RELOAD: maksimal 2 auto-reload per sesi browser (sessionStorage)
+    // — cegah loop 5-10x yang terjadi karena 3 mekanisme fire bergantian
+    // dan `refreshing` local variable reset tiap page load.
+    var MAX_AUTO_RELOADS = 2;
+    var RELOAD_COOLDOWN_MS = 30000;
+    function getReloadCount() {
+      if (!window.sessionStorage) return 0;
+      return parseInt(sessionStorage.getItem('asj_reload_count') || '0', 10);
+    }
     function isReloadCooldownActive() {
       if (!window.sessionStorage) return false;
       var lastReload = parseInt(sessionStorage.getItem('asj_last_reload') || '0', 10);
       var now = Date.now();
-      return lastReload && now - lastReload < 10000;
+      if (lastReload && now - lastReload < RELOAD_COOLDOWN_MS) return true;
+      // MAX RELOAD CAP: jika sudah reload MAX_AUTO_RELOADS kali, STOP permanen
+      if (getReloadCount() >= MAX_AUTO_RELOADS) return true;
+      return false;
     }
     function markReloaded() {
-      if (window.sessionStorage) sessionStorage.setItem('asj_last_reload', String(Date.now()));
+      if (!window.sessionStorage) return;
+      sessionStorage.setItem('asj_last_reload', String(Date.now()));
+      var count = getReloadCount() + 1;
+      sessionStorage.setItem('asj_reload_count', String(count));
+    }
+    // Persist `refreshing` flag across page loads (anti-loop akar masalah).
+    // Local variable reset tiap reload → mekanisme lain bisa fire lagi.
+    // Bersihkan lock kalau cooldown sudah expired (reload selesai aman).
+    if (sessionStorage.getItem('asj_refreshing_lock') === '1') {
+      if (isReloadCooldownActive()) {
+        refreshing = true; // masih dalam cooldown → tetap lock
+      } else {
+        sessionStorage.removeItem('asj_refreshing_lock'); // sudah aman
+      }
+    }
+    function lockRefreshing() {
+      refreshing = true;
+      if (window.sessionStorage) sessionStorage.setItem('asj_refreshing_lock', '1');
     }
 
     // SELF-CHECK ANTI-BASI: bandingkan VERSION sw.js di server dengan yang terakhir
@@ -130,7 +158,7 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
               var purged = sessionStorage.getItem('asj_sw_purged');
               if (purged !== ver) {
                 sessionStorage.setItem('asj_sw_purged', ver);
-                refreshing = true;
+                lockRefreshing();
                 markReloaded();
                 // Hapus semua cache + unregister SW lama
                 if (window.caches && caches.keys) {
@@ -161,7 +189,7 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
             var last = sessionStorage.getItem('asj_sw_ver');
             sessionStorage.setItem('asj_sw_ver', ver);
             if (last && last !== ver && !refreshing && !isReloadCooldownActive()) {
-              refreshing = true;
+              lockRefreshing();
               markReloaded();
               window.location.reload();
             }
@@ -221,7 +249,7 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
       if (refreshing) return;
       if (userInteracted) return;
       if (isReloadCooldownActive()) return; // sudah baru saja reload
-      refreshing = true;
+      lockRefreshing();
       markReloaded();
       try {
         if (window.showToast) {
@@ -242,7 +270,7 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
       if (refreshing) return;
       if (userInteracted) return;
       if (isReloadCooldownActive()) return; // sudah baru saja reload
-      refreshing = true;
+      lockRefreshing();
       markReloaded();
       try {
         if (window.showToast) {

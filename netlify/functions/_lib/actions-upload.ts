@@ -15,6 +15,26 @@ import * as fcm from './fcm-server';
 // upload langsung). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah
 // dari actions-extra.js, perilaku TIDAK berubah.
 
+// ---------------------------------------------------------------------------
+// Fire-and-forget helper: panggil /ingest function via HTTP.
+// Menggantikan dynamic import('./actions-ingest.ts') agar heavy deps
+// (pdf-parse, xlsx, mammoth) TIDAK dibundle ke actions-upload.ts.
+// ---------------------------------------------------------------------------
+function fireIngest(payload: unknown[], sessionToken?: string): void {
+  const baseUrl = process.env.URL || process.env.DEPLOY_PRIME_URL || '';
+  const target = baseUrl ? `${baseUrl}/.netlify/functions/ingest` : '/.netlify/functions/ingest';
+  const body = JSON.stringify({ action: 'processUploadDoc', payload, sessionToken });
+  // Fire-and-forget: jangan await, jangan block upload response.
+  fetch(target, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  })
+    .then((r) => r.json())
+    .then((j) => console.log('[Smart Ingest] result:', JSON.stringify(j).slice(0, 200)))
+    .catch((e) => console.warn('[Smart Ingest] HTTP call failed:', e.message));
+}
+
 const PUBLIC_PREFILL_FIELDS = new Set([
   'idKandidat',
   'id',
@@ -452,30 +472,11 @@ async function handleSubmitApply(payload) {
     collectIngest(d.sswFile || d.oldSsw, 'SSW');
     (d.extraFiles || []).forEach((x) => collectIngest(x && x.url, x && x.name));
     if (ingestFiles.length && wa) {
-      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
       // handleSubmitApply adalah endpoint publik (tanpa sessionToken)
-      handleProcessUploadDoc(
+      fireIngest(
         ingestFiles.map((f) => ({ ...f, wa })),
         undefined,
-      )
-        .then(async (result) => {
-          if (result && result.success && result.action) {
-            try {
-              await syncFormMailDariUpload(
-                wa,
-                String(d.nama || '').toUpperCase(),
-                'BIODATA_AI',
-                'Biodata berhasil diekstrak & diperbarui oleh AI',
-                '',
-              );
-            } catch {
-              /* mail notif non-fatal */
-            }
-          }
-        })
-        .catch(() => {
-          /* parse gagal — diam saja */
-        });
+      );
     }
 
     return { success: true, message: 'Lamaran berhasil dikirim. Terima kasih.' };
@@ -731,29 +732,10 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
       if (PARSEABLE_EXTS.has(ext)) ingestFiles.push({ fileUrl: fUrl, fileType: ext });
     }
     if (ingestFiles.length && wa) {
-      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
-      handleProcessUploadDoc(
+      fireIngest(
         ingestFiles.map((f) => ({ ...f, wa })),
         sessionToken,
-      )
-        .then(async (result) => {
-          if (result && result.success && result.action) {
-            try {
-              await syncFormMailDariUpload(
-                wa,
-                nama,
-                'BIODATA_AI',
-                'Biodata berhasil diekstrak & diperbarui oleh AI',
-                '',
-              );
-            } catch {
-              /* mail notif non-fatal */
-            }
-          }
-        })
-        .catch(() => {
-          /* parse gagal — diam saja */
-        });
+      );
     }
     return { success: true, uploaded };
   } catch (e) {
@@ -891,29 +873,7 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
     const fileExt = ext.toLowerCase();
     if (PARSEABLE_EXTS.has(fileExt) && url && wa) {
-      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
-      handleProcessUploadDoc([{ fileUrl: url, fileType: fileExt, wa }], sessionToken)
-        .then(async (result) => {
-          if (result && result.success && result.action) {
-            // Kirim notifikasi ke mail inbox: biodata berhasil di-parse AI
-            try {
-              await syncFormMailDariUpload(
-                wa,
-                nama,
-                'BIODATA_AI',
-                'Biodata berhasil diekstrak & diperbarui oleh AI (' +
-                  result.data?.nama_lengkap +
-                  ')',
-                '',
-              );
-            } catch {
-              /* mail notif non-fatal */
-            }
-          }
-        })
-        .catch(() => {
-          /* parse gagal — diam saja, tidak mengganggu upload */
-        });
+      fireIngest([{ fileUrl: url, fileType: fileExt, wa }], sessionToken);
     }
     return { success: true };
   } catch (e) {
@@ -1003,26 +963,7 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
     // CV Revisi: ekstrak teks → AI rapikan → upsert master.
     const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
     if (url && PARSEABLE_EXTS.has(ext.toLowerCase()) && wa) {
-      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
-      handleProcessUploadDoc([{ fileUrl: url, fileType: ext.toLowerCase(), wa }], sessionToken)
-        .then(async (result) => {
-          if (result && result.success && result.action) {
-            try {
-              await syncFormMailDariUpload(
-                wa,
-                nama,
-                'BIODATA_AI',
-                'Biodata CV revisi berhasil diekstrak & diperbarui oleh AI',
-                '',
-              );
-            } catch {
-              /* mail notif non-fatal */
-            }
-          }
-        })
-        .catch(() => {
-          /* parse gagal — diam saja */
-        });
+      fireIngest([{ fileUrl: url, fileType: ext.toLowerCase(), wa }], sessionToken);
     }
     return { success: true };
   } catch (e) {
