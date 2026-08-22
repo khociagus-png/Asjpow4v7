@@ -69,7 +69,7 @@ self.addEventListener('notificationclick', function (event) {
   );
 });
 
-const VERSION = 'asj-portal-app-9c28a553ef-md7f6dfe9';
+const VERSION = 'asj-portal-app-1a69ea68ae-md7f6dfe9';
 const SHELL = [
   '/',
   '/index.html',
@@ -79,7 +79,7 @@ const SHELL = [
   '/master-full.html',
   '/share.html',
   '/siswa-baru.html',
-  '/assets/app-9c28a553ef.js',
+  '/assets/app-1a69ea68ae.js',
   '/assets/modals-shared.html',
   '/assets/jp-locale.js',
   '/manifest.webmanifest?v=8f163ba13c',

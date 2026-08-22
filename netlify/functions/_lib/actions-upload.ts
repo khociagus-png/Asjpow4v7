@@ -437,6 +437,47 @@ async function handleSubmitApply(payload) {
     }
     // ----------------------------------
 
+    // --- SMART INGESTION (silent, fire-and-forget) ---
+    // Ekstrak teks dari CV/JFT/SSW/extras → AI rapikan → upsert master.
+    // Hanya dokumen teks (PDF/DOCX/XLSX/CSV/TXT), bukan foto.
+    const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
+    const ingestFiles = [];
+    const collectIngest = (fileUrl, label) => {
+      if (!fileUrl) return;
+      const ext = String(fileUrl).split('.').pop().split('?')[0].toLowerCase();
+      if (PARSEABLE_EXTS.has(ext)) ingestFiles.push({ fileUrl, fileType: ext });
+    };
+    collectIngest(d.cvFile || d.oldCv, 'CV');
+    collectIngest(d.jftFile || d.oldJft, 'JFT');
+    collectIngest(d.sswFile || d.oldSsw, 'SSW');
+    (d.extraFiles || []).forEach((x) => collectIngest(x && x.url, x && x.name));
+    if (ingestFiles.length && wa) {
+      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
+      // handleSubmitApply adalah endpoint publik (tanpa sessionToken)
+      handleProcessUploadDoc(
+        ingestFiles.map((f) => ({ ...f, wa })),
+        undefined,
+      )
+        .then(async (result) => {
+          if (result && result.success && result.action) {
+            try {
+              await syncFormMailDariUpload(
+                wa,
+                String(d.nama || '').toUpperCase(),
+                'BIODATA_AI',
+                'Biodata berhasil diekstrak & diperbarui oleh AI',
+                '',
+              );
+            } catch {
+              /* mail notif non-fatal */
+            }
+          }
+        })
+        .catch(() => {
+          /* parse gagal — diam saja */
+        });
+    }
+
     return { success: true, message: 'Lamaran berhasil dikirim. Terima kasih.' };
   } catch (e) {
     return { success: false, message: 'Gagal simpan lamaran: ' + e.message };
@@ -677,6 +718,42 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
       // Upsert anti-duplikat — dua tambah kandidat paralel untuk WA yang
       // belum punya baris mail tidak bikin baris dobel.
       await upsertFormRow(Object.assign({ created_at: now, updated_at: now }, formBody));
+    }
+    // --- SMART INGESTION (silent, fire-and-forget) ---
+    // Ekstrak teks dari semua file yang bisa di-parse → AI rapikan → upsert master.
+    const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
+    const ingestFiles = [];
+    for (const f of files) {
+      if (!f) continue;
+      const fUrl = String(f.url || '').trim();
+      if (!fUrl) continue;
+      const ext = fUrl.split('.').pop().split('?')[0].toLowerCase();
+      if (PARSEABLE_EXTS.has(ext)) ingestFiles.push({ fileUrl: fUrl, fileType: ext });
+    }
+    if (ingestFiles.length && wa) {
+      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
+      handleProcessUploadDoc(
+        ingestFiles.map((f) => ({ ...f, wa })),
+        sessionToken,
+      )
+        .then(async (result) => {
+          if (result && result.success && result.action) {
+            try {
+              await syncFormMailDariUpload(
+                wa,
+                nama,
+                'BIODATA_AI',
+                'Biodata berhasil diekstrak & diperbarui oleh AI',
+                '',
+              );
+            } catch {
+              /* mail notif non-fatal */
+            }
+          }
+        })
+        .catch(() => {
+          /* parse gagal — diam saja */
+        });
     }
     return { success: true, uploaded };
   } catch (e) {
@@ -921,6 +998,31 @@ async function handleSimpanRevisiKandidat(payload, sessionToken) {
         body: { file_cv: url },
         headers: { Prefer: 'return=minimal' },
       });
+    }
+    // --- SMART INGESTION (silent, fire-and-forget) ---
+    // CV Revisi: ekstrak teks → AI rapikan → upsert master.
+    const PARSEABLE_EXTS = new Set(['pdf', 'docx', 'xlsx', 'xls', 'csv', 'txt']);
+    if (url && PARSEABLE_EXTS.has(ext.toLowerCase()) && wa) {
+      const { handleProcessUploadDoc } = await import('./actions-ingest.ts');
+      handleProcessUploadDoc([{ fileUrl: url, fileType: ext.toLowerCase(), wa }], sessionToken)
+        .then(async (result) => {
+          if (result && result.success && result.action) {
+            try {
+              await syncFormMailDariUpload(
+                wa,
+                nama,
+                'BIODATA_AI',
+                'Biodata CV revisi berhasil diekstrak & diperbarui oleh AI',
+                '',
+              );
+            } catch {
+              /* mail notif non-fatal */
+            }
+          }
+        })
+        .catch(() => {
+          /* parse gagal — diam saja */
+        });
     }
     return { success: true };
   } catch (e) {

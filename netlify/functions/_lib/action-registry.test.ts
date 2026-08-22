@@ -10,12 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-const {
-  ACTION_HANDLERS,
-  LOGIN_ACTIONS,
-  AI_ACTIONS,
-  FONNTE_ACTIONS,
-} = require('./action-registry.ts');
+import { ACTION_HANDLERS, LOGIN_ACTIONS, AI_ACTIONS, FONNTE_ACTIONS } from './action-registry';
 
 const ROOT = process.cwd();
 const CALL_RE = /callAPI\(\s*['"]([^'"]+)['"]/g;

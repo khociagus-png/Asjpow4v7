@@ -71,9 +71,18 @@ export async function requestNotificationPermission(userWa: string): Promise<voi
     if (permission === 'granted') {
       console.log('[FCM] Izin notifikasi diberikan.');
 
-      const swRegistration = await navigator.serviceWorker.getRegistration();
+      // Tunggu SW terdaftar (max 5 detik) — kadang masih register saat init
+      let swRegistration = await navigator.serviceWorker.getRegistration();
       if (!swRegistration) {
-        throw new Error('Service Worker belum terdaftar.');
+        for (let i = 0; i < 10; i++) {
+          await new Promise((r) => setTimeout(r, 500));
+          swRegistration = await navigator.serviceWorker.getRegistration();
+          if (swRegistration) break;
+        }
+      }
+      if (!swRegistration) {
+        console.warn('[FCM] Service Worker belum terdaftar — skip token.');
+        return;
       }
 
       const token = await messaging.getToken({

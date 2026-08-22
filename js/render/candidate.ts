@@ -62,7 +62,13 @@ export function jobDilamarCell(c) {
 // Preferensi per-admin disimpan di localStorage supaya tidak reset tiap reload.
 let viewKandidatSimple = false;
 try {
-  viewKandidatSimple = window.localStorage.getItem('asj_view_kandidat_simple') === '1';
+  var stored = window.localStorage.getItem('asj_view_kandidat_simple');
+  if (stored !== null) {
+    viewKandidatSimple = stored === '1';
+  } else if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+    // Boot pertama kali di mobile: default simple (belum ada preferensi tersimpan)
+    viewKandidatSimple = true;
+  }
 } catch (e) {}
 
 // ── Column filter state (Excel-style) ──────────────────────────────────
@@ -422,10 +428,6 @@ function syncViewKandidatUi() {
 // Di mobile (≤768px), otomatis pakai mode sederhana.
 export function toggleViewKandidat() {
   viewKandidatSimple = !viewKandidatSimple;
-  // Force simple di mobile supaya tabel tidak overflow
-  if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-    viewKandidatSimple = true;
-  }
   try {
     window.localStorage.setItem('asj_view_kandidat_simple', viewKandidatSimple ? '1' : '0');
   } catch (e) {}
