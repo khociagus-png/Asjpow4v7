@@ -6,6 +6,7 @@
 //   2. grup rate limit hanya berisi action yang terdaftar;
 //   3. SETIAP action yang dipanggil frontend (callAPI('x', ...)) ada di
 //      registry — typo nama action gagal di sini, bukan di runtime produksi.
+//   4. [REGRESSION 2026-08-22] Backend requireAdmin actions ada di frontend ADMIN_ACTIONS.
 // ==========================================
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -71,10 +72,7 @@ describe('grup rate limit ⊆ registry', () => {
 });
 
 // Kunci-kunci literal di peta NETLIFY_FUNCTIONS (api-client.js) — routing
-// action → nama function Netlify. Parsed dari sumber karena peta ini PRIVATE
-// modul (tidak di-export). Menjaga agar SETIAP action yang dipanggil frontend
-// punya route — tanpa ini callAPI menolak dengan "Aksi tidak dikenal" walau
-// handler backend-nya ada (bug tandaiDibacaForm, 2026-08-18).
+// action → nama function Netlify. Dari sumber karena peta ini PRIVATE.
 function netlifyFunctionRoutes() {
   const src = readFileSync(join(ROOT, 'api-client.ts'), 'utf8');
   const block = src.match(/const NETLIFY_FUNCTIONS = \{([\s\S]*?)\n\};/);
@@ -108,5 +106,92 @@ describe('kontrak frontend → registry', () => {
       missing,
       'action dipanggil frontend tapi tidak punya route NETLIFY_FUNCTIONS: ' + missing.join(', '),
     ).toEqual([]);
+  });
+});
+
+// ─── REGRESSION: getMonthlyReport bug (2026-08-22) ──────────────────────
+// Backend action yang pakai requireAdmin / requireRole(session, 'admin')
+// WAJIB ada di ADMIN_ACTIONS (frontend) supaya session token dikirim.
+// Kalau tidak, callAPI tanpa sessionToken → backend reject "Sesi tidak valid".
+
+/** Parse ADMIN_ACTIONS from api-client.ts source (file-based, no TS import). */
+function parseAdminActionsFromClient(): Set<string> {
+  const src = readFileSync(join(ROOT, 'api-client.ts'), 'utf8');
+  const block = src.match(/const ADMIN_ACTIONS = new Set\(\[([\s\S]*?)\]\);/);
+  if (!block) return new Set();
+  const names = new Set<string>();
+  const re = /'([A-Za-z]+)'/g;
+  let m;
+  while ((m = re.exec(block[1])) !== null) names.add(m[1]);
+  return names;
+}
+
+/**
+ * Scan backend actions-*.ts for handler functions that use requireAdmin.
+ * Simple approach: find "export async function handle..." lines,
+ * then check if the next 80 lines contain requireAdmin/requireRole.
+ */
+function backendAdminActions(): string[] {
+  const actionsDir = join(ROOT, 'netlify', 'functions', '_lib');
+  const adminGuarded = new Set<string>();
+  const files = readdirSync(actionsDir).filter(
+    (f) => f.startsWith('actions-') && f.endsWith('.ts') && !f.includes('.test.'),
+  );
+  for (const f of files) {
+    const src = readFileSync(join(actionsDir, f), 'utf8');
+    // Find all handler function declarations
+    const handlerRe = /(?:export\s+)?(?:async\s+)?function\s+(handle\w+)/g;
+    let m;
+    while ((m = handlerRe.exec(src)) !== null) {
+      const handlerName = m[1];
+      // Extract function body: from opening { to closing } at depth 0
+      const afterFn = src.slice(m.index + m[0].length);
+      const openIdx = afterFn.indexOf('{');
+      if (openIdx < 0) continue;
+      let depth = 0;
+      let bodyEnd = -1;
+      for (let i = openIdx; i < afterFn.length && i < openIdx + 5000; i++) {
+        if (afterFn[i] === '{') depth++;
+        if (afterFn[i] === '}') depth--;
+        if (depth === 0) {
+          bodyEnd = i;
+          break;
+        }
+      }
+      const body = bodyEnd > 0 ? afterFn.slice(0, bodyEnd) : afterFn.slice(0, 3000);
+      if (body.includes('requireAdmin') || body.includes("requireRole(sessionToken, 'admin')")) {
+        const actionName = handlerName.startsWith('handle')
+          ? handlerName.slice(6, 7).toLowerCase() + handlerName.slice(7)
+          : handlerName;
+        adminGuarded.add(actionName);
+      }
+    }
+  }
+  return [...adminGuarded];
+}
+
+describe('ADMIN_ACTIONS ⊇ backend admin-gated actions', () => {
+  it('every backend requireAdmin action is in frontend ADMIN_ACTIONS', () => {
+    const frontendAdmin = parseAdminActionsFromClient();
+    expect(frontendAdmin.size).toBeGreaterThan(30); // sanity
+    const backendAdmin = backendAdminActions();
+    expect(backendAdmin.length).toBeGreaterThan(5); // sanity — there are many admin actions
+    const missing = backendAdmin.filter((a) => !frontendAdmin.has(a));
+    expect(
+      missing,
+      'Backend action requires admin session but frontend ADMIN_ACTIONS is missing: ' +
+        missing.join(', ') +
+        '. Without these, callAPI will NOT send sessionToken → backend rejects "Sesi tidak valid".',
+    ).toEqual([]);
+  });
+
+  it('ADMIN_ACTIONS only contains actions that exist in ACTION_HANDLERS', () => {
+    const frontendAdmin = parseAdminActionsFromClient();
+    for (const a of frontendAdmin) {
+      expect(
+        ACTION_HANDLERS[a],
+        `'${a}' is in ADMIN_ACTIONS but not in ACTION_HANDLERS — typo or removed handler?`,
+      ).toBeDefined();
+    }
   });
 });

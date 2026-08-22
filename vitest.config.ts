@@ -10,6 +10,6 @@ export default defineConfig({
   },
   test: {
     include: ['**/*.test.ts', '**/*.test.mts'],
-    exclude: ['node_modules', 'assets', 'vendor', 'e2e'],
+    exclude: ['node_modules', 'assets', 'vendor', 'e2e', '.freebuff'],
   },
 });

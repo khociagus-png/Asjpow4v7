@@ -257,6 +257,37 @@ curl -s https://asjportal-terbaru.netlify.app/ | grep -o 'app-[a-f0-9]*\.js'
 
 **Lesson:** Simpan `NETLIFY_AUTH_TOKEN` di `.env.local` (sudah ada). Kalau netlify-cli error, coba downgrade atau deploy manual via Dashboard.
 
+### 🔴 Masalah: Netlify Free Plan API Limitations (BARU!)
+
+**Tanggal:** 2026-08-22 (sesi sore)
+**Root Cause:** Netlify Free plan membatasi akses API untuk:
+
+1. **Environment Variables** — `POST /api/v1/sites/{id}/env` → selalu return "Not Found"
+   - GET `/env` → return `[]` (baca bisa, tulis tidak bisa)
+   - PATCH/PUT → juga "Not Found"
+   - Account-level POST → `403 Upgrade your Netlify account`
+   - **Solusi:** Set env vars HANYA lewat Netlify Dashboard UI → Site configuration → Environment variables
+
+2. **Function Upload** — `PUT /api/v1/sites/{id}/deploys/{did}/functions/{name}` → "Not Found"
+   - Tidak bisa upload functions via API di Free plan
+   - **Solusi:** Hubungkan GitHub repo ke site → Netlify auto-build + deploy functions
+
+3. **Build Settings Update** — `PATCH /api/v1/sites/{id}` → `build_settings` tidak tersimpan
+   - **Solusi:** Set build settings lewat Dashboard → Build & deploy → Build settings
+
+**Yang MASIH bisa via API di Free plan:**
+
+- ✅ GET site info, list sites, list deploys
+- ✅ PATCH site (name, SSO settings)
+- ✅ POST create new deploy (manual deploy)
+- ✅ POST create site
+
+**Workaround paling efektif:**
+
+1. **Hubungkan GitHub repo** ke Netlify site → auto-deploy + functions + build settings
+2. **Set env vars** lewat Dashboard UI
+3. Kalau tidak bisa connect Git, deploy manual via Dashboard drag & drop (static files only, no functions)
+
 ---
 
 > **CARA PAKAI FILE INI:**

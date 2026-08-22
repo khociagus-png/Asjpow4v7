@@ -73,8 +73,6 @@ const ADMIN_ACTIONS = new Set([
   'saveRincianPreset',
   'deleteRincianPreset',
   'runMigration',
-  'getDriveLinkCandidates',
-  'uploadDriveReplacement',
   // Aksi admin yang dulu tanpa gerbang server (audit keamanan 2026-08-09) -
   // sekarang wajib sesi admin di backend, jadi frontend harus kirim sessionToken.
   'updateSysConfig',
@@ -89,6 +87,7 @@ const ADMIN_ACTIONS = new Set([
   'downloadJobDocs',
   'generateWawancaraModel',
   'getHasilWawancara',
+  'getMonthlyReport',
   // Signed upload URL ke Storage (files.ts) - sekarang wajib sesi admin.
   'getUploadUrls',
 ]);
