@@ -5,7 +5,36 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-21 — dikerjakan oleh **Buffy** (AI agent) — **Sentry lazy load + FCM + Anti-cache + Netlify deploy fix** (`0197c57`)
+**Update terakhir:** sesi 2026-08-22 — dikerjakan oleh **Buffy** (AI agent) — **Smart Ingestion + Bundle optimization + SW reload fix** (`bc39b1d`)
+
+---
+
+## Sesi 2026-08-22 — Smart Ingestion + Bundle Optimization + SW Reload Fix (Buffy)
+
+### Commits
+
+| Hash      | Isi                                                                         | Status    |
+| --------- | --------------------------------------------------------------------------- | --------- |
+| `70d84ac` | feat: Smart Ingestion + fix toggle mobile + FCM graceful degrade + test fix | ✅ Pushed |
+| `bc39b1d` | feat: optimize bundle + fix SW reload loop + Smart Ingestion E2E            | ✅ Pushed |
+
+### Yang Dikerjakan:
+
+1. **Smart Ingestion** — 3 jalur upload terkoneksi (handleSubmitApply, handleSimpanKandidatDanUpload, handleSimpanRevisiKandidat) ke `actions-ingest.ts` (Gemini parse → upsert master_database_candidate)
+2. **Bundle optimization** — Smart Ingestion dipindah ke function terpisah (`ingest.js`). 18 function lainnya turun dari 5338KB → 1246KB (-76%). Total functions: 106MB → 26.7MB (-75%)
+3. **SW reload loop fix** — Max 2 auto-reloads per session + 30s cooldown + persistent refreshing flag via sessionStorage (sebelumnya unlimited reloads 5-10x)
+4. **Toggle detail mobile fix** — Hanya force simple di boot pertama (bukan di setiap toggle). User bisa toggle bebas di mobile
+5. **FCM graceful degrade** — Polling 5 detik + no crash di localhost
+6. **Test fix (Windows)** — action-registry.test.ts: `require()` → `import` ESM
+7. **Smart Ingestion E2E test** — upload → Gemini parse → ai_data_json verified
+8. **Pre-bundle** — 21 functions (was 20), all pass esbuild + vitest 283/283
+
+### Deploy Attempt:
+
+- ❌ Deploy gagal — netlify-cli v27 punya Intrinsic error di Windows + Node 22
+- Root cause: compatibility bug di netlify-cli dependency (bukan kode project)
+- Solusi: perlu downgrade netlify-cli ATAU deploy manual via Netlify Dashboard
+- Detail: lihat MEMORY.md §PELAJARAN DEPLOY NETLIFY
 
 ---
 

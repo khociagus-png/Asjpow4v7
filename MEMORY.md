@@ -3,7 +3,7 @@
 > **File ini untuk detail** — info singkat sudah ada di AGENTS.md §STATUS SEKARANG.
 > Baca hanya saat butuh konteks lengkap (history, decisions, known issues detail).
 
-**Terakhir diupdate:** 2026-08-21 22:00 UTC — oleh Buffy (AI agent)
+**Terakhir diupdate:** 2026-08-22 14:00 UTC — oleh Buffy (AI agent)
 
 ---
 
@@ -214,6 +214,48 @@ node $(which netlify) deploy --prod --dir=. --site="$SITE_ID" --skip-functions-c
 # 4. Verify
 curl -s https://asjportal-terbaru.netlify.app/ | grep -o 'app-[a-f0-9]*\.js'
 ```
+
+---
+
+## 🔴 PELAJARAN DEPLOY NETLIFY (Wajib baca sebelum deploy)
+
+### Masalah: netlify-cli v27 Intrinsic Error di Windows
+
+**Tanggal:** 2026-08-22
+**Error:** `TypeError: Cannot read properties of undefined (reading 'Intrinsic')`
+**Lokasi:** `netlify deploy --prod` command (bukan `--help`)
+
+**Analisis:**
+
+- `netlify-cli@27.0.0` di Windows + Node.js v22.23.2 → crash saat `deploy` command
+- `--help` berfungsi, tapi `deploy` → Intrinsic error
+- Error dari dependency internal (bukan dari kode netlify-cli sendiri)
+- `bun run netlify deploy` dan `node netlify-cli/bin/run.js deploy` → SAMA-sama gagal
+- `npx netlify-cli@15` → timeout (terlalu lama install)
+
+**Solusi yang sudah dicoba (semua gagal):**
+
+1. ❌ `bun scripts/deploy-netlify.mts` — Intrinsic error
+2. ❌ `SKIP_INSTALL=1 SKIP_BUILD=1` — node_modules ter-lock, tetap Intrinsic error
+3. ❌ `node netlify-cli/bin/run.js deploy` — Intrinsic error
+4. ❌ Zip deploy API (upload zip) — static files OK, tapi functions TIDAK ter-deploy
+5. ❌ File-by-file deploy API — stuck di "uploading" state
+
+**Root cause:** netlify-cli v27 punya compatibility bug dengan environment ini (Windows + Node 22 + tertentu). Ini BUKAN masalah kode project kita, tapi masalah tooling.
+
+**Yang perlu dilakukan untuk fix:**
+
+1. **Option A:** Downgrade netlify-cli ke v15 atau v12 (yang lebih stabil)
+2. **Option B:** Deploy manual via Netlify Dashboard (drag & drop folder)
+3. **Option C:** Deploy dari GitHub Actions (build hook)
+4. **Option D:** Setup Git connection di Netlify → auto-deploy on push
+
+**Yang SUDAH berhasil deploy (historical):**
+
+- 2026-08-21: Deploy via `scripts/deploy-netlify.mts` (saat netlify-cli masih compatible)
+- 2026-08-18-19: Deploy via `scripts/deploy-netlify.mjs` (versi lama)
+
+**Lesson:** Simpan `NETLIFY_AUTH_TOKEN` di `.env.local` (sudah ada). Kalau netlify-cli error, coba downgrade atau deploy manual via Dashboard.
 
 ---
 
