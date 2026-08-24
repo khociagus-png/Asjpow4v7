@@ -40,7 +40,7 @@ var IS_PREVIEW_HOST =
   (location.hostname.indexOf('daytonaproxy') > -1 ||
     location.hostname.indexOf('.freebuff') > -1 ||
     location.hostname.indexOf('freebuff.app') > -1);
-if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
+if ((IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
   // Hapus SW lama + cache-nya (aman: hanya di localhost, production tidak
   // tersentuh). Dipanggil sekali di awal, sebelum registrasi apa pun.
   navigator.serviceWorker
@@ -284,6 +284,13 @@ if ((IS_DEV_HOST || IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
       }, 1200);
     });
   });
+
+  // Fallback: if document already loaded when this module ran, the load listener
+  // above never fired. Register SW immediately.
+  if (document.readyState === 'complete') {
+    var swUrl2 = '/sw.js?v=' + Date.now();
+    navigator.serviceWorker.register(swUrl2, { updateViaCache: 'none' }).catch(function () {});
+  }
 }
 
 // 2. Tangkap beforeinstallprompt (Chrome Android/Desktop)
@@ -453,3 +460,11 @@ bersihkanDraftLamaBase64();
     /* penanda versi opsional — jangan ganggu halaman */
   }
 })();
+
+// 7. DIRECT SW REGISTRATION — ensure SW is registered regardless of load event timing.
+// The load listener above may not fire if the module loads after document.readyState='complete'.
+// This runs unconditionally (safe: register is idempotent).
+if ('serviceWorker' in navigator && !IS_PREVIEW_HOST) {
+  var swDirectUrl = '/sw.js?v=' + Date.now();
+  navigator.serviceWorker.register(swDirectUrl, { updateViaCache: 'none' }).catch(function () {});
+}

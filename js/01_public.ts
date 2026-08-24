@@ -3,6 +3,7 @@ import { renderPublicFilterUI, renderPublicFiltered } from './render/public.ts';
 import { renderAdminFull } from './render/admin.ts';
 import { renderSysConfig } from './admin_ops/sysconfig.ts';
 import { registerSeamAliases } from './core/bridge.ts';
+import { esc } from '../api-client.ts';
 // 1. LANGUAGE ENGINE V1.0 (LOCK)
 // ==========================================
 // CURRENT_LANG is now in src/i18n.js

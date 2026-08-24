@@ -162,7 +162,8 @@ export function simpanKandidatDariAi() {
     return;
   }
 
-  // Transfer to the main upload modal for final file attachments  var elKNama = document.getElementById('k-nama');
+  // Transfer to the main upload modal for final file attachments
+  var elKNama = document.getElementById('k-nama');
   var elKWa = document.getElementById('k-wa');
   var elKLoker = document.getElementById('k-loker');
   // @ts-expect-error JS→TS migration

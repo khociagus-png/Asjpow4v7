@@ -1,3 +1,4 @@
+import { esc } from '../../api-client.ts';
 import { tr } from '../../i18n.ts';
 import { ALL_FORM, mailFilterStatus, mailSearchText } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';

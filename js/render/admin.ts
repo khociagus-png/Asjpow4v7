@@ -1,5 +1,5 @@
 import { tr } from '../../i18n.ts';
-import { safeSet } from '../init/util.ts';
+import { safeSet, showToast } from '../init/util.ts';
 import {
   ALL_CANDIDATES,
   ALL_CANDIDATES_TOTAL,

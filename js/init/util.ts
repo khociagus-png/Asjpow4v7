@@ -269,6 +269,133 @@ export function toggleMinimize(id, btnEl) {
 }
 
 // ---------------------------------------------------------------------------
+// FOCUS TRAP for modals (WCAG 2.4.3 / 2.1.2):
+// When a modal opens, trap Tab/Shift+Tab inside it. On Escape, close and
+// restore focus to the element that triggered the modal.
+// Per-modal state to avoid collision when multiple modals stack.
+var _trapState = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+var _globalPrev = null; // fallback if WeakMap unavailable
+export function trapFocus(modalEl) {
+  if (!modalEl) return;
+  // Remove any existing trap on this modal first (prevents listener leak)
+  releaseFocus(modalEl);
+  var prev = document.activeElement;
+  var focusable = modalEl.querySelectorAll(
+    'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusable.length === 0) return;
+  var first = focusable[0];
+  var last = focusable[focusable.length - 1];
+  function handler(e) {
+    if (e.key === 'Escape') {
+      modalEl.classList.add('hidden');
+      cleanup();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+  function cleanup() {
+    modalEl.removeEventListener('keydown', handler);
+    if (_observer) _observer.disconnect();
+    var st = _trapState ? _trapState.get(modalEl) : null;
+    var target = st ? st.prev : _globalPrev;
+    if (target && typeof target.focus === 'function') {
+      target.focus();
+    }
+    if (_trapState) _trapState.delete(modalEl);
+    else _globalPrev = null;
+  }
+  // Auto-cleanup when modal is hidden by any means (not just Escape)
+  var _observer = null;
+  if (typeof MutationObserver !== 'undefined') {
+    _observer = new MutationObserver(function () {
+      if (modalEl.classList.contains('hidden')) {
+        cleanup();
+      }
+    });
+    _observer.observe(modalEl, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (_trapState) _trapState.set(modalEl, { prev: prev, handler: handler, observer: _observer });
+  else _globalPrev = prev;
+  modalEl._focusTrapCleanup = cleanup;
+  modalEl.addEventListener('keydown', handler);
+  setTimeout(function () { first.focus(); }, 50);
+}
+export function releaseFocus(modalEl) {
+  if (modalEl && modalEl._focusTrapCleanup) {
+    modalEl._focusTrapCleanup();
+    modalEl._focusTrapCleanup = null;
+    return;
+  }
+  // Global fallback
+  if (_globalPrev && typeof _globalPrev.focus === 'function') {
+    _globalPrev.focus();
+  }
+  _globalPrev = null;
+}
+
+// AUTO-TRAP FOCUS: When any [role="dialog"] modal becomes visible (hidden class
+// removed), automatically call trapFocus. This avoids editing every modal open
+// function across the codebase. Handles both static (modals-shared.html) and
+// dynamically created modals (e.g., modal-wa-pintar).
+if (typeof MutationObserver !== 'undefined') {
+  // Watch class changes on individual dialog elements
+  var _autoTrapObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      if (m.type !== 'attributes' || m.attributeName !== 'class') return;
+      var el = m.target;
+      if (el.getAttribute('role') !== 'dialog') return;
+      if (el.classList.contains('hidden')) return; // still hidden
+      // Modal just became visible — trap focus if not already trapped
+      if (!el._focusTrapCleanup) {
+        trapFocus(el);
+      }
+    });
+  });
+  // Watch for NEW [role="dialog"] elements added to the DOM (dynamic modals)
+  var _childObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      m.addedNodes.forEach(function (node) {
+        if (node.nodeType !== 1) return; // skip text nodes
+        if (node.getAttribute && node.getAttribute('role') === 'dialog') {
+          _autoTrapObserver.observe(node, { attributes: true, attributeFilter: ['class'] });
+        }
+        // Also check children of added node
+        if (node.querySelectorAll) {
+          node.querySelectorAll('[role="dialog"]').forEach(function (d) {
+            _autoTrapObserver.observe(d, { attributes: true, attributeFilter: ['class'] });
+          });
+        }
+      });
+    });
+  });
+  function _watchDialogs(root) {
+    root.querySelectorAll('[role="dialog"]').forEach(function (d) {
+      _autoTrapObserver.observe(d, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      _watchDialogs(document);
+      _childObserver.observe(document.body, { childList: true, subtree: true });
+    });
+  } else {
+    _watchDialogs(document);
+    _childObserver.observe(document.body, { childList: true, subtree: true });
+  }
+}
+
 // BRIDGE ESM → classic (bundel admin/index): alias window.* untuk SEMUA
 // helper di atas. Pemakai classic memanggil bare global (`showToast(...)`,
 // `safeSet(...)`, `normalizePhone(...)`, …) — alias ini satu-satunya jalur
@@ -294,5 +421,5 @@ registerSeamAliases({
   formatInputWA,
   hapusRingWA,
   salinTeksDecode,
-  toggleMinimize,
+  toggleMinimize, trapFocus, releaseFocus,
 });

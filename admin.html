@@ -141,7 +141,7 @@
          <button onclick="toggleMobileMenu(); cobaInstallApp()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center">
            <i class="fas fa-mobile-alt mr-2"></i><span data-lang="ui.install_app"> Install App</span>
          </button>
-         <button onclick="setLanguage(CURRENT_LANG === 'id' ? 'jp' : 'id')" data-lang-title="header.language" class="w-full py-3 mn-surface rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+         <button onclick="toggleFormLanguage()" data-lang-title="header.language" class="w-full py-3 mn-surface rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
            <i class="fas fa-language"></i><span data-lang="header.language">Bahasa</span><span id="lang-current-menu">ID</span>
          </button>
        </div>
@@ -196,12 +196,12 @@
     <div id="public-ctrl-bar" class="flex flex-wrap justify-between items-center p-4 rounded-xl border shadow-lg mb-6 gap-4 transition-colors">
       
       <div class="flex gap-2 items-center flex-wrap">
-        <span id="ctrl-label-tema" class="text-xs font-bold text-slate-400 mr-1 uppercase tracking-widest"><i class="fas fa-paint-brush"></i><span data-lang="ui.theme"> Tema</span></span>
+        <span id="ctrl-label-tema" class="text-xs font-bold text-slate-300 mr-1 uppercase tracking-widest"><i class="fas fa-paint-brush"></i><span data-lang="ui.theme"> Tema</span></span>
         <button data-action="toggleTheme" id="theme-toggle-btn" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-slate-200 border border-white/25 rounded-full text-xs font-bold transition-colors shadow-lg flex items-center gap-1.5" title="Ganti Tema"><i class="fas fa-moon"></i> <span data-lang="ui.dark">Dark</span></button>
       </div>
 
       <div class="flex gap-2 items-center flex-wrap">
-        <span class="text-xs font-bold text-slate-400 mr-2 uppercase tracking-widest">
+        <span class="text-xs font-bold text-slate-300 mr-2 uppercase tracking-widest">
             <i class="fas fa-filter"></i> <span data-lang="public.filter">Filter</span>
         </span>
         <button data-action="filterPublicData" data-action-arg='["ALL"]' id="public-f-ALL" class="px-4 py-2 rounded-lg text-sm font-bold shadow-md transition"><span data-lang="public.all">Semua</span></button>
@@ -217,11 +217,11 @@
       <table class="responsive-table rt-active w-full min-w-[900px] text-left text-sm whitespace-nowrap">
         <thead id="public-table-head" class="bg-slate-800 text-slate-200 text-sm uppercase tracking-wider font-bold border-b border-slate-700 transition-colors duration-300">
           <tr>
-            <th class="p-4 text-center w-32" data-lang="table.code">Kode Job</th>
-            <th class="p-4" data-lang="table.job">Nama Pekerjaan</th>
-            <th class="p-4 text-center" data-lang="table.status">Status</th>
-            <th class="p-4" data-lang="table.req">Persyaratan & Ket.</th>
-            <th class="p-4 text-center w-48" data-lang="table.action">Aksi Pelamar</th>
+            <th scope="col" class="p-4 text-center w-32" data-lang="table.code">Kode Job</th>
+            <th scope="col" class="p-4" data-lang="table.job">Nama Pekerjaan</th>
+            <th scope="col" class="p-4 text-center" data-lang="table.status">Status</th>
+            <th scope="col" class="p-4" data-lang="table.req">Persyaratan & Ket.</th>
+            <th scope="col" class="p-4 text-center w-48" data-lang="table.action">Aksi Pelamar</th>
           </tr>
         </thead>
         <tbody id="public-table-body" class="divide-y divide-white/5 transition-colors duration-300">
@@ -275,14 +275,14 @@
                            <i class="fas fa-check-circle text-sky-400 mt-0.5 text-sm"></i>
                            <div>
                                <p class="font-bold text-slate-200" data-lang="public.layanan_tg_ssw">Program TG / SSW</p>
-                              <p class="text-slate-400 mt-0.5" data-lang="public.layanan_tg_desc">Pendidikan: <span class="text-white font-bold">6 Jt</span><br>Keberangkatan: 15-25 Jt</p>
+                              <p class="text-slate-300 mt-0.5" data-lang="public.layanan_tg_desc">Pendidikan: <span class="text-white font-bold">6 Jt</span><br>Keberangkatan: 15-25 Jt</p>
                            </div>
                        </li>
                        <li class="flex gap-2.5">
                            <i class="fas fa-check-circle text-sky-400 mt-0.5 text-sm"></i>
                            <div>
                                <p class="font-bold text-slate-200" data-lang="public.layanan_magang">Program Magang</p>
-                              <p class="text-slate-400 mt-0.5" data-lang="public.layanan_magang_desc">Pendidikan: <span class="text-white font-bold">5,5 Jt</span><br>Keberangkatan: 45-50 Jt</p>
+                              <p class="text-slate-300 mt-0.5" data-lang="public.layanan_magang_desc">Pendidikan: <span class="text-white font-bold">5,5 Jt</span><br>Keberangkatan: 45-50 Jt</p>
                            </div>
                        </li>
                    </ul>
@@ -342,7 +342,7 @@
                <p class="text-sm text-slate-300 mb-6 leading-relaxed" data-lang="landing.visa_desc">
                    Menerima pembuatan dokumen dan Visa Jepang (TG & Magang). Melayani proses pemberkasan untuk kandidat di area/domisili <strong>Surabaya, Jakarta, dan Medan</strong>.
                </p>
-               <ul class="space-y-3 text-sm text-slate-400 mb-8 flex-1 font-medium">
+               <ul class="space-y-3 text-sm text-slate-300 mb-8 flex-1 font-medium">
                    <li class="flex items-start"><i class="fas fa-check-circle text-sky-400 mr-2.5 mt-0.5 text-sm"></i><span data-lang="landing.visa_list_1"> Proses Cepat & Terpercaya</span></li>
                    <li class="flex items-start"><i class="fas fa-check-circle text-sky-400 mr-2.5 mt-0.5 text-sm"></i><span data-lang="landing.visa_list_2"> Legal & Resmi sesuai Prosedur</span></li>
                    <li class="flex items-start"><i class="fas fa-check-circle text-sky-400 mr-2.5 mt-0.5 text-sm"></i><span data-lang="landing.visa_list_3"> Pendampingan Penuh sampai Berangkat</span></li>
@@ -376,7 +376,7 @@
                <p class="text-sm text-slate-300 mb-6 leading-relaxed"><span data-lang="landing.exam_desc">
                    Solusi cepat dapat jadwal ujian! Kami bantu pendaftaran resmi akun Prometric Anda untuk seluruh titik lokasi di Indonesia (Bandung, Jakarta, Surabaya, Bali, dll).
                </span></p>
-               <ul class="space-y-3 text-sm text-slate-400 mb-8 flex-1 font-medium">
+               <ul class="space-y-3 text-sm text-slate-300 mb-8 flex-1 font-medium">
                    <li class="flex items-start"><i class="fas fa-check-circle text-amber-400 mr-2.5 mt-0.5 text-sm"></i><span data-lang="landing.exam_list_1"> Info Jadwal Terupdate (Agustus-September)</span></li>
                    <li class="flex items-start"><i class="fas fa-check-circle text-amber-400 mr-2.5 mt-0.5 text-sm"></i><span data-lang="landing.exam_list_2"> Melayani Pendaftaran Individu / Group</span></li>
                    <li class="flex items-start" data-lang="landing.exam_list_3"><i class="fas fa-check-circle text-amber-400 mr-2.5 mt-0.5 text-sm"></i> <strong class="text-amber-300 font-bold">Guarantee 100%</strong> Request Location</li>
@@ -395,7 +395,7 @@
            </div>
            <div>
                <h4 class="text-white font-bold text-sm mb-1"><span data-lang="landing.maps_title">Kunjungi LPK Amanah Sakura Japan</span></h4>
-               <p class="text-sm text-slate-400 max-w-xl"><span data-lang="landing.maps_desc">Jl. Kyai Ageng Musakaf, Desa Gandukepuh, Kec. Sukorejo, Kab. Ponorogo, Jawa Timur.</span></p>
+               <p class="text-sm text-slate-300 max-w-xl"><span data-lang="landing.maps_desc">Jl. Kyai Ageng Musakaf, Desa Gandukepuh, Kec. Sukorejo, Kab. Ponorogo, Jawa Timur.</span></p>
            </div>
        </div>
        <a id="maps-lpk-link" href="https://maps.app.goo.gl/rXZ1YZAtT9JUNn6q6?g_st=ic" target="_blank" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white text-sm font-bold rounded-xl border border-slate-500 transition shadow hover:-translate-y-0.5 whitespace-nowrap"><i class="fas fa-location-arrow mr-1.5"></i><span data-lang="landing.maps_btn"> Buka Google Maps</span></a>
@@ -444,7 +444,7 @@
   <!-- ========================================== -->
   <!-- SIDEBAR DRAWER (overlay, slide-in)         -->
   <!-- ========================================== -->
-  <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 z-[95] transition-opacity duration-300" onclick="window.toggleAdminSidebar()"></div>
+  <div id="admin-sidebar-backdrop" role="button" tabindex="0" aria-label="Tutup sidebar" class="hidden fixed inset-0 bg-black/60 z-[95] transition-opacity duration-300" onclick="window.toggleAdminSidebar()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.toggleAdminSidebar()}"></div>
   <aside id="admin-sidebar" role="navigation" aria-label="Admin sidebar" class="fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-slate-700 p-3 flex flex-col gap-1 shadow-2xl z-[96] transform -translate-x-full transition-transform duration-300 ease-in-out">
     <div class="flex items-center justify-between px-2 py-2 mb-2 border-b border-slate-700">
       <span class="text-xs font-bold text-slate-500 uppercase tracking-widest"><i class="fas fa-th-large mr-1"></i> Menu</span>
@@ -474,17 +474,17 @@
     <!-- Search di atas tabel (filterKelolaLoker di 05_render.js) — input ini
          wajib ada, kalau tidak filter kelola mati diam-diam (audit id 2026-08-12). -->
     <div class="relative w-full md:w-72 mb-3">
-      <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+      <i class="fas fa-search absolute left-3 top-2.5 text-slate-300 text-sm"></i>
       <input type="text" id="search-kelola" onkeyup="filterKelolaLoker()" data-lang-placeholder="admin.search_placeholder" placeholder="Cari Kode / Pekerjaan…" class="w-full pl-9 p-2 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition" aria-label="Cari loker kelola">
     </div>
     <table class="responsive-table rt-active w-full text-sm text-left whitespace-nowrap min-w-[800px]">
       <thead class="bg-slate-800 text-slate-300 uppercase text-sm border-b border-slate-700 tracking-wider">
         <tr>
-           <th class="p-4" data-lang="table.code">ID Code</th>
-           <th class="p-4" data-lang="table.job">Pekerjaan</th>
-           <th class="p-4 text-center" data-lang="table.status_loker">Status Loker</th>
-           <th class="p-4 text-center" data-lang="table.admin_action">Tindakan Admin (Live)</th>
-           <th class="p-4 text-center" data-lang="table.delete">Hapus</th>
+           <th scope="col" class="p-4" data-lang="table.code">ID Code</th>
+           <th scope="col" class="p-4" data-lang="table.job">Pekerjaan</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.status_loker">Status Loker</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.admin_action">Tindakan Admin (Live)</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.delete">Hapus</th>
         </tr>
       </thead>
       <tbody id="admin-table-body" class="divide-y divide-slate-800"></tbody>
@@ -498,14 +498,14 @@
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-purple-900/50 pb-4 mb-4 gap-4">
          <h2 class="text-purple-400 font-bold text-lg"><i class="fas fa-server mr-2"></i> <span data-lang="admin.history_internal">Histori Job Internal</span></h2>
          <div class="relative w-full md:w-72">
-            <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+            <i class="fas fa-search absolute left-3 top-2.5 text-slate-300 text-sm"></i>
             <input type="text" id="search-dbjob" oninput="window.debouncedFilterDbJob && window.debouncedFilterDbJob(250)" onkeyup="window.debouncedFilterDbJob && window.debouncedFilterDbJob(250)" data-lang-placeholder="admin.search_placeholder" placeholder="Cari ID, TSK, Pekerjaan…" class="w-full pl-9 p-2 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-purple-500 transition">
          </div>
       </div>
       
       <div class="flex flex-col gap-3 mb-5 bg-black/30 p-4 rounded-lg border border-purple-900/30 text-sm">
          <div class="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1 custom-scrollbar">
-            <span class="text-xs font-bold text-slate-400 mr-2 uppercase tracking-widest"><i class="fas fa-sort-amount-down mr-1"></i> <span data-lang="admin.sort">Urutkan:</span></span>
+            <span class="text-xs font-bold text-slate-300 mr-2 uppercase tracking-widest"><i class="fas fa-sort-amount-down mr-1"></i> <span data-lang="admin.sort">Urutkan:</span></span>
             <button data-action="setSortDb" data-action-arg='["TERBARU"]' id="btn-sort-terbaru" data-lang="admin.sort_newest" class="px-4 py-1.5 bg-slate-700 text-slate-300 rounded-full font-bold transition hover:bg-slate-600">Terbaru</button>
             <button data-action="setSortDb" data-action-arg='["TERLAMA"]' id="btn-sort-terlama" data-lang="admin.sort_oldest" class="px-4 py-1.5 bg-slate-700 text-slate-300 rounded-full font-bold transition hover:bg-slate-600">Terlama</button>
             <button data-action="setSortDb" data-action-arg='["TERBANYAK"]' id="btn-sort-terbanyak" data-lang="admin.sort_most" class="px-4 py-1.5 bg-purple-600 text-white rounded-full font-bold transition shadow-lg">Terbanyak</button>
@@ -517,12 +517,12 @@
       <table class="responsive-table rt-active w-full min-w-[900px] text-sm text-left whitespace-nowrap">
         <thead class="bg-slate-800 text-slate-300 text-sm uppercase border-b border-slate-700 tracking-wider">
           <tr>
-             <th class="p-4" data-lang="table.code">ID Loker</th>
-             <th class="p-4" data-lang="table.tsk">Pengurus (TSK)</th>
-             <th class="p-4" data-lang="table.field_location">Bidang & Lokasi</th>
-             <th class="p-4 text-center" data-lang="table.candidate_count">Jml Kandidat</th>
-             <th class="p-4 text-center" data-lang="table.stage_status">Tahapan & Status</th>
-             <th class="p-4 text-center" data-lang="table.action_db">Aksi DB</th>
+             <th scope="col" class="p-4" data-lang="table.code">ID Loker</th>
+             <th scope="col" class="p-4" data-lang="table.tsk">Pengurus (TSK)</th>
+             <th scope="col" class="p-4" data-lang="table.field_location">Bidang & Lokasi</th>
+             <th scope="col" class="p-4 text-center" data-lang="table.candidate_count">Jml Kandidat</th>
+             <th scope="col" class="p-4 text-center" data-lang="table.stage_status">Tahapan & Status</th>
+             <th scope="col" class="p-4 text-center" data-lang="table.action_db">Aksi DB</th>
           </tr>
         </thead>
         <tbody id="admin-dbjob-body" class="divide-y divide-slate-800"></tbody>
@@ -542,15 +542,15 @@
              <div><label class="block text-sm text-red-400 mb-1.5 font-bold" data-lang="admin.form_db_stage">TAHAPAN INTERNAL</label><select id="input-tahapan-db" required class="w-full p-3 rounded-lg bg-black border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
              <div class="col-span-2"><label class="block text-sm text-red-400 mb-1.5 font-bold" data-lang="admin.form_quota">KUOTA DIBUTUHKAN (Cth: 3 Org)</label><input type="text" id="input-kuota" required class="w-full p-3 rounded-lg bg-black border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></div>
           </div>
-          <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_category">KATEGORI BIDANG</label><select id="input-kategori" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
-          <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_job_name">NAMA PEKERJAAN (Judul Loker)</label><input type="text" id="input-pekerjaan" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></div>
-          <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_gender">GENDER</label><select id="input-gender" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
+          <div><label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_category">KATEGORI BIDANG</label><select id="input-kategori" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
+          <div><label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_job_name">NAMA PEKERJAAN (Judul Loker)</label><input type="text" id="input-pekerjaan" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></div>
+          <div><label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_gender">GENDER</label><select id="input-gender" required class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></select></div>
           <div><label class="block text-xs font-bold text-sky-400 mb-1.5 uppercase"><i class="fas fa-file-excel mr-1"></i><span data-lang="ui.upload_cv_excel"> UPLOAD FORMAT CV/EXCEL (Opsional)</span></label><input type="file" id="input-template" accept=".pdf,.xls,.xlsx,.doc,.docx" onchange="cekUploadFile(this, { maxMb: 5 })" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-sky-900/50 file:text-sky-400 hover:file:bg-sky-900/80 cursor-pointer"></div>
           <div><label class="block text-xs font-bold text-pink-400 mb-1.5 uppercase"><i class="fas fa-image mr-1"></i><span data-lang="ui.upload_pamflet"> UPLOAD PAMFLET (Opsional)</span></label><input type="file" id="input-pamflet" accept="image/*" onchange="cekUploadFile(this, { maxMb: 5 })" class="w-full text-sm text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-pink-900/50 file:text-pink-400 hover:file:bg-pink-900/80 cursor-pointer"></div>
         </div>
         <div class="space-y-5">
           <div>
-            <label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_location">PENEMPATAN LOKASI (Pilih Checkbox)</label>
+            <label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_location">PENEMPATAN LOKASI (Pilih Checkbox)</label>
             <div class="relative mb-2">
                <i class="fas fa-search absolute left-3 top-3 text-slate-500 text-sm"></i>
                <input type="text" onkeyup="filterCbx('checkbox-lokasi', this.value)" data-lang-placeholder="admin.form_search_location" placeholder="Cari lokasi…" class="w-full pl-8 p-2.5 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition">
@@ -559,7 +559,7 @@
             <input type="text" id="custom-lokasi" data-lang-placeholder="admin.form_custom_location" placeholder="✍️ Ketik manual lokasi lainnya (opsional)…" class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition">
           </div>
           <div>
-            <label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_req">SYARAT KANDIDAT (Pilih Checkbox)</label>
+            <label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_req">SYARAT KANDIDAT (Pilih Checkbox)</label>
             <div class="relative mb-2">
                <i class="fas fa-search absolute left-3 top-3 text-slate-500 text-sm"></i>
                <input type="text" onkeyup="filterCbx('checkbox-syarat', this.value)" data-lang-placeholder="admin.form_search_req" placeholder="Cari syarat…" class="w-full pl-8 p-2.5 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition">
@@ -568,25 +568,25 @@
             <input type="text" id="custom-syarat" data-lang-placeholder="admin.form_custom_req" placeholder="✍️ Ketik manual syarat lainnya (opsional)…" class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition">
           </div>
           <div>
-            <label class="block text-sm font-bold text-slate-400 mb-1.5"><i class="fas fa-file-upload mr-1"></i> <span data-lang="admin.form_req_upload_docs">SYARAT UPLOAD DOKUMEN</span></label>
+            <label class="block text-sm font-bold text-slate-300 mb-1.5"><i class="fas fa-file-upload mr-1"></i> <span data-lang="admin.form_req_upload_docs">SYARAT UPLOAD DOKUMEN</span></label>
             <div id="checkbox-req-files" class="grid grid-cols-2 gap-2 h-24 overflow-y-auto p-3 bg-black/40 border border-slate-700 rounded-lg text-sm text-slate-300 mb-2 custom-scrollbar">
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="CV" class="cbx-req-file accent-red-500 w-4 h-4" checked> <span data-lang="admin.doc_cv">CV</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="JFT" class="cbx-req-file accent-red-500 w-4 h-4" checked> <span data-lang="admin.doc_jft">JFT / N4</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="SSW" class="cbx-req-file accent-red-500 w-4 h-4" checked> <span data-lang="admin.doc_ssw">SSW</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="SIM A" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_sim_a">SIM A</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="KTP" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_ktp">KTP</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="KK" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_kk">KK</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="AKTE" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_akte">AKTE</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_ijazah">IJAZAH</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SD" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_ijazah_sd">IJAZAH SD</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SMP" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_ijazah_smp">IJAZAH SMP</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SMA" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_ijazah_sma">IJAZAH SMA</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="UNIVERSITAS" class="cbx-req-file accent-red-500 w-4 h-4"> <span data-lang="admin.doc_univ">UNIVERSITAS</span></label>
-               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="ALL" class="cbx-req-file accent-pink-500 w-4 h-4"> <span data-lang="admin.doc_all">Semua File Folder (SIM dll)</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="CV" class="cbx-req-file accent-red-500 w-5 h-5" checked> <span data-lang="admin.doc_cv">CV</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="JFT" class="cbx-req-file accent-red-500 w-5 h-5" checked> <span data-lang="admin.doc_jft">JFT / N4</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="SSW" class="cbx-req-file accent-red-500 w-5 h-5" checked> <span data-lang="admin.doc_ssw">SSW</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="SIM A" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_sim_a">SIM A</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="KTP" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_ktp">KTP</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="KK" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_kk">KK</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="AKTE" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_akte">AKTE</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_ijazah">IJAZAH</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SD" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_ijazah_sd">IJAZAH SD</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SMP" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_ijazah_smp">IJAZAH SMP</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="IJAZAH SMA" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_ijazah_sma">IJAZAH SMA</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="UNIVERSITAS" class="cbx-req-file accent-red-500 w-5 h-5"> <span data-lang="admin.doc_univ">UNIVERSITAS</span></label>
+               <label class="flex items-center gap-2 cursor-pointer hover:text-white transition"><input type="checkbox" value="ALL" class="cbx-req-file accent-pink-500 w-5 h-5"> <span data-lang="admin.doc_all">Semua File Folder (SIM dll)</span></label>
             </div>
             <input type="text" id="custom-req-file" placeholder="✍️ Ketik dokumen lain (pisahkan dgn koma)…" class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition">
           </div>
-          <div><label class="block text-sm font-bold text-slate-400 mb-1.5" data-lang="admin.form_note">KETERANGAN PUBLIK (Opsional)</label><textarea id="input-keterangan" rows="2" class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></textarea></div>
+          <div><label class="block text-sm font-bold text-slate-300 mb-1.5" data-lang="admin.form_note">KETERANGAN PUBLIK (Opsional)</label><textarea id="input-keterangan" rows="2" class="w-full p-3 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-red-500 transition"></textarea></div>
         </div>
         <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -616,7 +616,7 @@
       <h2 class="text-sky-400 font-bold text-lg"><i class="fas fa-users mr-2"></i> <span data-lang="admin.candidate_db">Database Pelamar</span></h2>
       <div class="flex flex-wrap gap-3 w-full md:w-auto">
          <div class="relative flex-1 md:w-64">
-            <i class="fas fa-search absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+            <i class="fas fa-search absolute left-3 top-2.5 text-slate-300 text-sm"></i>
             <input type="text" id="search-kandidat" oninput="window._debouncedFilter && window._debouncedFilter()" onkeyup="window._debouncedFilter && window._debouncedFilter()" data-lang-placeholder="admin.search_candidate" placeholder="Find Nama, Code, Tahapan…" class="w-full pl-9 p-2 rounded-lg bg-black/40 border border-slate-700 text-sm text-white outline-none focus:border-sky-500 transition">
          </div>
          <button data-action="bukaModalTambahKandidat" class="px-5 py-2 bg-sky-600 text-white rounded-lg text-sm font-bold hover:bg-sky-500 shadow-lg transition whitespace-nowrap"><i class="fas fa-user-plus mr-1"></i> <span data-lang="button.manual_input">Input Manual</span></button>
@@ -651,18 +651,18 @@
     <table class="responsive-table rt-active w-full min-w-[900px] text-sm text-left whitespace-nowrap">
       <thead id="admin-kandidat-head" class="bg-slate-800 text-slate-300 text-sm uppercase border-b border-slate-700 tracking-wider">
         <tr>
-           <th class="p-4" data-lang="table.candidate_id">ID Kandidat</th>
-           <th class="p-4" data-lang="table.full_name">Nama Lengkap</th>
-           <th class="p-4" data-lang="table.applied_job">Job Dilamar</th>
-           <th class="p-4" data-lang="table.stage_status">Tahapan & Status</th>
-           <th class="p-4" data-lang="table.admin_note">Catatan Admin</th>
-           <th class="p-4 text-center" data-lang="table.action_candidate">Aksi (Profil/Update/WA)</th>
+           <th scope="col" class="p-4" data-lang="table.candidate_id">ID Kandidat</th>
+           <th scope="col" class="p-4" data-lang="table.full_name">Nama Lengkap</th>
+           <th scope="col" class="p-4" data-lang="table.applied_job">Job Dilamar</th>
+           <th scope="col" class="p-4" data-lang="table.stage_status">Tahapan & Status</th>
+           <th scope="col" class="p-4" data-lang="table.admin_note">Catatan Admin</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.action_candidate">Aksi (Profil/Update/WA)</th>
         </tr>
       </thead>
       <tbody id="admin-kandidat-body" class="divide-y divide-slate-800"></tbody>
     </table>
     <div class="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-sky-900/50 text-sm">
-      <span id="kandidat-count" class="text-slate-400 font-bold text-xs"><span data-lang="ui.zero_candidates">0 kandidat</span></span>
+      <span id="kandidat-count" class="text-slate-300 font-bold text-xs"><span data-lang="ui.zero_candidates">0 kandidat</span></span>
       <button id="btn-muat-kandidat" data-action="muatLebihKandidat" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-xs font-bold hover:bg-sky-500 transition shadow-lg"><i class="fas fa-chevron-down mr-1"></i><span data-lang="ui.load_more"> Muat Lebih Banyak</span></button>
     </div>
   </div>
@@ -678,12 +678,12 @@
     
     <div id="form-jadwal-container" class="hidden bg-black/40 border border-slate-700 rounded-xl p-5 mb-5 shadow-inner">
       <form id="form-tambah-jadwal" onsubmit="submitJadwal(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_agenda_name">NAMA AGENDA</label><input type="text" id="j-nama" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_job_id">ID LOKER</label><input type="text" id="j-loker" placeholder="UMUM / ASJ…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_time">WAKTU (TGL & JAM)</label><input type="datetime-local" id="j-waktu" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_location_zoom">LOKASI / MEDIA ZOOM</label><input type="text" id="j-lokasi" placeholder="Zoom / Kantor…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_tsk_admin">PENGURUS (TSK)</label><select id="j-tsk" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></select></div>
-        <div><label class="block text-xs font-bold text-slate-400 mb-1.5" data-lang="admin.form_zoom_link">LINK TAUTAN ZOOM (Opsional)</label><input type="url" id="j-link" placeholder="https://…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_agenda_name">NAMA AGENDA</label><input type="text" id="j-nama" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_job_id">ID LOKER</label><input type="text" id="j-loker" placeholder="UMUM / ASJ…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_time">WAKTU (TGL & JAM)</label><input type="datetime-local" id="j-waktu" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_location_zoom">LOKASI / MEDIA ZOOM</label><input type="text" id="j-lokasi" placeholder="Zoom / Kantor…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_tsk_admin">PENGURUS (TSK)</label><select id="j-tsk" required class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></select></div>
+        <div><label class="block text-xs font-bold text-slate-300 mb-1.5" data-lang="admin.form_zoom_link">LINK TAUTAN ZOOM (Opsional)</label><input type="url" id="j-link" placeholder="https://…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-700 text-white text-sm outline-none focus:border-amber-500 transition"></div>
         <div class="md:col-span-2 mt-2"><button type="submit" id="btn-submit-jadwal" class="w-full py-4 rounded-xl bg-amber-600 hover:bg-amber-500 font-bold text-white text-sm shadow-lg transition"><i class="fas fa-save mr-2"></i> <span data-lang="button.save_schedule">Simpan Jadwal</span></button></div>
       </form>
     </div>
@@ -691,11 +691,11 @@
     <table class="responsive-table rt-active w-full min-w-[800px] text-sm text-left whitespace-nowrap">
       <thead class="bg-slate-800 text-slate-300 text-sm uppercase border-b border-slate-700 tracking-wider">
         <tr>
-            <th class="p-4" data-lang="table.schedule_id">ID Jadwal</th>
-            <th class="p-4" data-lang="table.agenda">Agenda</th>
-            <th class="p-4" data-lang="table.job_time">Job / Waktu</th>
-            <th class="p-4" data-lang="table.location_link">Lokasi / Link</th>
-            <th class="p-4 text-center" data-lang="table.action">Aksi</th>
+            <th scope="col" class="p-4" data-lang="table.schedule_id">ID Jadwal</th>
+            <th scope="col" class="p-4" data-lang="table.agenda">Agenda</th>
+            <th scope="col" class="p-4" data-lang="table.job_time">Job / Waktu</th>
+            <th scope="col" class="p-4" data-lang="table.location_link">Lokasi / Link</th>
+            <th scope="col" class="p-4 text-center" data-lang="table.action">Aksi</th>
         </tr>
       </thead>
       <tbody id="admin-jadwal-body" class="divide-y divide-slate-800"></tbody>
@@ -722,21 +722,21 @@
       </div>
     </div>
     <div class="flex items-center gap-2 mb-3">
-      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider"><span data-lang="ui.status_label">Status:</span></span>
+      <span class="text-xs font-bold text-slate-300 uppercase tracking-wider"><span data-lang="ui.status_label">Status:</span></span>
       <span id="mail-status-counts" class="text-xs font-bold text-slate-300"></span>
     </div>
     <table class="responsive-table rt-active w-full min-w-[900px] text-sm text-left whitespace-nowrap">
       <thead class="bg-slate-800 text-slate-300 text-sm uppercase border-b border-slate-700 tracking-wider">
         <tr>
-                      <th class="p-4 text-center"><input type="checkbox" id="mail-check-all" onclick="mailSelectAll(this)" title="Pilih semua (tampilan ini)" aria-label="Pilih semua" class="w-4 h-4 accent-rose-500 cursor-pointer"></th>
-           <th class="p-4" data-lang="table.timestamp">Timestamp</th>
-           <th class="p-4" data-lang="table.job_code">Job Code</th>
-           <th class="p-4" data-lang="table.category">Kategori</th>
-           <th class="p-4" data-lang="table.applicant_name">Nama Pelamar</th>
-           <th class="p-4" data-lang="table.wa_num">No. WA</th>
-           <th class="p-4 text-center" data-lang="table.status">Status</th>
-           <th class="p-4 text-center" data-lang="table.doc_folder">Folder Berkas</th>
-           <th class="p-4 text-center" data-lang="table.action_review">Aksi (Review)</th>
+                      <th scope="col" class="p-4 text-center"><input type="checkbox" id="mail-check-all" onclick="mailSelectAll(this)" title="Pilih semua (tampilan ini)" aria-label="Pilih semua" class="w-5 h-5 accent-rose-500 cursor-pointer"></th>
+           <th scope="col" class="p-4" data-lang="table.timestamp">Timestamp</th>
+           <th scope="col" class="p-4" data-lang="table.job_code">Job Code</th>
+           <th scope="col" class="p-4" data-lang="table.category">Kategori</th>
+           <th scope="col" class="p-4" data-lang="table.applicant_name">Nama Pelamar</th>
+           <th scope="col" class="p-4" data-lang="table.wa_num">No. WA</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.status">Status</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.doc_folder">Folder Berkas</th>
+           <th scope="col" class="p-4 text-center" data-lang="table.action_review">Aksi (Review)</th>
         </tr>
       </thead>
       <tbody id="admin-mail-body" class="divide-y divide-slate-800"></tbody>
@@ -768,11 +768,11 @@
            <form id="form-wa-template" onsubmit="submitWaTemplate(event)" class="space-y-4">
               <input type="hidden" id="wa-id">
               <div>
-                 <label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.template_name">NAMA TEMPLATE (Kategori)</span></label>
+                 <label class="block text-xs font-bold text-slate-300 mb-1"><span data-lang="ui.template_name">NAMA TEMPLATE (Kategori)</span></label>
                  <input type="text" id="wa-nama" required placeholder="Contoh: Jadwal Interview" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-600 text-white text-sm outline-none focus:border-emerald-500 transition">
               </div>
               <div>
-                 <label class="block text-xs font-bold text-slate-400 mb-1"><span data-lang="ui.template_message">ISI PESAN WA</span></label>
+                 <label class="block text-xs font-bold text-slate-300 mb-1"><span data-lang="ui.template_message">ISI PESAN WA</span></label>
                  <textarea id="wa-isi" required rows="8" placeholder="Konnichiwa <<NAMA>>,&#10;Jadwal interview untuk posisi <<JOB>>…" class="w-full p-2.5 rounded-lg bg-black/60 border border-slate-600 text-white text-sm outline-none focus:border-emerald-500 transition leading-relaxed"></textarea>
                  <p class="text-[9px] text-emerald-400/80 mt-1.5 leading-relaxed font-mono bg-emerald-900/20 p-2 rounded" data-lang="ui.template_code_hint">
                     <strong>Gunakan Kode Ini:</strong><br>
@@ -789,7 +789,7 @@
         
         <!-- KANAN: LIST TEMPLATE TERSIMPAN -->
         <div class="lg:col-span-2">
-           <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4"><i class="fas fa-list mr-1"></i><span data-lang="ui.template_saved"> Template Tersimpan</span></h3>
+           <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-4"><i class="fas fa-list mr-1"></i><span data-lang="ui.template_saved"> Template Tersimpan</span></h3>
            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="wa-template-list">
               <!-- JS Render Here -->
            </div>
@@ -802,16 +802,16 @@
   <!-- KONTEN TAB: PENGATURAN SISTEM (SYS CONFIG) -->
   <!-- ========================================== -->
   <div id="admin-config" class="hidden bg-slate-900 rounded-xl border border-slate-700 p-6 shadow-xl">
-     <h2 class="text-white font-bold mb-6 border-b border-slate-700 pb-3 text-lg"><i class="fas fa-cogs mr-2 text-slate-400"></i><span data-lang="ui.sysconfig_dropdown"> Pengaturan Sistem (Dropdown)</span></h2>
-     <p class="text-sm text-slate-400 mb-6"><span data-lang="ui.sysconfig_dropdown_desc">Kelola pilihan dropdown yang akan muncul di formulir (menggantikan Sheet SYS CONFIG).</span></p>
+     <h2 class="text-white font-bold mb-6 border-b border-slate-700 pb-3 text-lg"><i class="fas fa-cogs mr-2 text-slate-300"></i><span data-lang="ui.sysconfig_dropdown"> Pengaturan Sistem (Dropdown)</span></h2>
+     <p class="text-sm text-slate-300 mb-6"><span data-lang="ui.sysconfig_dropdown_desc">Kelola pilihan dropdown yang akan muncul di formulir (menggantikan Sheet SYS CONFIG).</span></p>
 
      <!-- MIGRASI DATABASE (Jalankan dari UI, tanpa buka SQL Editor) -->
      <div class="bg-black/40 border border-indigo-500/40 p-5 rounded-xl mb-6 shadow-inner">
         <h3 class="text-sm font-bold text-indigo-400 mb-2 uppercase tracking-wider"><i class="fas fa-database mr-1"></i><span data-lang="ui.db_migrate_auto"> Migrasi Database (Otomatis)</span></h3>
-        <p class="text-xs text-slate-400 mb-3"><span data-lang="ui.db_migrate_desc">Jalankan pembaruan struktur &amp; pembersihan data: seed preset rincian biaya, cek kolom loker/master, normalisasi gender, rapikan nama, dan bersihkan NIK 'EMPTY'. Aman dijalankan berulang kali (idempotent).</span></p>
+        <p class="text-xs text-slate-300 mb-3"><span data-lang="ui.db_migrate_desc">Jalankan pembaruan struktur &amp; pembersihan data: seed preset rincian biaya, cek kolom loker/master, normalisasi gender, rapikan nama, dan bersihkan NIK 'EMPTY'. Aman dijalankan berulang kali (idempotent).</span></p>
         <div class="flex flex-wrap gap-2 items-center">
             <button data-action="jalankanMigrasi" id="btn-jalankan-migrasi" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-lg"><i class="fas fa-play mr-1"></i><span data-lang="ui.run_migration"> Jalankan Migrasi</span></button>
-            <span id="migrasi-status" class="text-xs text-slate-400"></span>
+            <span id="migrasi-status" class="text-xs text-slate-300"></span>
         </div>
         <div id="migrasi-results" class="mt-3 space-y-1.5 hidden"></div>
         <div id="migrasi-pending" class="mt-3 hidden">
@@ -831,7 +831,7 @@
   <!-- INPUT PENGUMUMAN ADMIN -->
     <div class="bg-black/40 border border-rose-500/50 p-5 rounded-xl flex flex-col h-full shadow-inner mb-6">
         <h3 class="text-sm font-bold text-rose-400 mb-2 uppercase tracking-wider"><i class="fas fa-bullhorn mr-1"></i><span data-lang="ui.marquee_live"> Pengumuman Berjalan (Live)</span></h3>
-        <p class="text-xs text-slate-400 mb-3"><span data-lang="ui.marquee_live_desc">Teks ini akan muncul berjalan (Marquee) di semua halaman (Publik, Kandidat, Admin).</span></p>
+        <p class="text-xs text-slate-300 mb-3"><span data-lang="ui.marquee_live_desc">Teks ini akan muncul berjalan (Marquee) di semua halaman (Publik, Kandidat, Admin).</span></p>
         <div class="flex gap-2">
             <input type="text" id="input-pengumuman" placeholder="Ketik pengumuman di sini… (Kosongkan untuk menghapus)" aria-label="Ketik pengumuman di sini… (Kosongkan untuk menghapus)" data-lang-aria="admin.announce_ph" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg text-sm px-4 py-2.5 text-white outline-none focus:border-rose-500">
             <button data-action="simpanPengumuman" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-lg"><i class="fas fa-save mr-1"></i><span data-lang="ui.save_publish"> Simpan & Tayangkan</span></button>
@@ -878,10 +878,10 @@
                   <!-- Tengah: Identitas & QR -->
                   <div class="flex justify-between items-center mt-auto z-10">
                       <div>
-                          <p class="text-slate-400 text-[9px] uppercase font-bold mb-0.5"><span data-lang="ui.student_name">Nama Siswa</span></p>
+                          <p class="text-slate-300 text-[9px] uppercase font-bold mb-0.5"><span data-lang="ui.student_name">Nama Siswa</span></p>
                           <p class="text-white font-black text-sm md:text-base tracking-wide leading-tight break-words line-clamp-2 max-w-[170px]" id="sc-nama">-</p>
                           
-                          <p class="text-slate-400 text-[9px] uppercase font-bold mt-3 mb-0.5"><span data-lang="ui.reg_id">ID Pendaftaran</span></p>
+                          <p class="text-slate-300 text-[9px] uppercase font-bold mt-3 mb-0.5"><span data-lang="ui.reg_id">ID Pendaftaran</span></p>
                           <p class="text-sky-300 font-mono text-sm md:text-sm font-bold" id="sc-id">-</p>
                       </div>
                       <div class="bg-white p-2 rounded-xl shadow-lg border-2 border-slate-200">                        <img id="sc-qr" src="" alt="QR Code" referrerpolicy="no-referrer" class="w-20 h-20 md:w-24 md:h-24 object-contain">
@@ -906,7 +906,7 @@
                <div class="w-full bg-slate-800 rounded-full h-2.5 shadow-inner">
                    <div id="prog-master-bar" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-2.5 rounded-full transition-[width] duration-1000" style="width: 0%"></div>
                </div>
-               <p id="prog-msg" class="text-xs text-slate-400 mt-4 italic text-center font-bold"><span data-lang="ui.silver_crown_hint">Lengkapi profil Anda hingga 100% untuk mendapatkan Mahkota Perak! </span><i class="fas fa-medal"></i></p>
+               <p id="prog-msg" class="text-xs text-slate-300 mt-4 italic text-center font-bold"><span data-lang="ui.silver_crown_hint">Lengkapi profil Anda hingga 100% untuk mendapatkan Mahkota Perak! </span><i class="fas fa-medal"></i></p>
           </div>
 
           <!-- PANEL JADWAL KANDIDAT -->
@@ -972,7 +972,7 @@
                   </div>
                   <div class="flex flex-wrap items-center gap-2 mb-4">
                       <span id="prog-berkas-txt" class="text-xs font-bold text-white">0/17 dokumen</span>
-                      <span id="prog-biodata-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Biodata: ?</span>
+                      <span id="prog-biodata-badge" class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Biodata: ?</span>
                   </div>
                   <div id="prog-berkas-list" class="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
                       <!-- item checklist akan di-render JS -->
@@ -1162,10 +1162,10 @@
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
 // Delay 2s supaya SW sempat register+cache dulu → mencegah loop.
 // sessionStorage guard: cuma fire 1x per deploy.
-setTimeout(function(){var E="app-f9b3c9a594";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
+setTimeout(function(){var E="app-b682a3be46";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
 </script>
 <!-- /ANTI-CACHE -->
-<script src="/assets/app-bb81adcbdc.js"></script>
+<script src="/assets/app-46cc0f6cb7.js"></script>
 <!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
        adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
        tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah

@@ -1,28 +1,20 @@
-// ESLint flat config (ESLint 9).
-// Fase 3 tuntas (langkah 13): SEMUA file frontend sudah ES Modules dan
-// referensi global implisit sudah di-window-kan eksplisit — jadi `no-undef`
-// kini AMAN diaktifkan utk file frontend (blok khusus di bawah) dan menangkap
-// referensi yang terlewat (contoh nyata: `tr`/`callAPI`/`cekUploadFile` bare
-// di js/pages/master_full.js yang bakal ReferenceError saat render langkah
-// 2-3 — ketahuan langkah 15). no-unused-vars tetap nonaktif (banyak helper
-// di-export utk alias window.* dan dipakai lintas halaman). .mjs (scripts/,
-// e2e/) & netlify functions (CommonJS require/module.exports) tetap tanpa
-// no-undef — mereka memakai global node sendiri. Prettier yang menangani
-// gaya; ESLint di sini menangkap error sintaks/logika murni (contoh nyata:
-// 4 key duplikat di i18n.js yang ditemukan no-dupe-keys).
+// ESLint flat config (ESLint 10 + typescript-eslint 8).
+// Updated: target .ts files with @typescript-eslint/parser (2026-08-24).
+// no-undef aktif untuk SEMUA frontend files (.js + .ts) — semua referensi
+// global sudah di-window-kan eksplisit via registerSeamAliases (bridge.ts).
+// .mjs (scripts/, e2e/) & netlify functions (CommonJS) tetap tanpa no-undef.
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
     ignores: ['assets/**', 'vendor/**', 'node_modules/**', 'dist/**', '*.html'],
   },
+  // Base config for all JS files
   {
     files: ['**/*.js', '**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2022,
-      // .mjs (scripts/, e2e/) dan test memakai import/export — parse sebagai
-      // module. File classic-script (js/*.js) tetap lint-able karena
-      // no-undef/no-unused-vars nonaktif (lihat komentar atas).
       sourceType: 'module',
       globals: {
         ...globals.browser,
@@ -30,22 +22,49 @@ export default [
       },
     },
     rules: {
-      // Error sintaks / struktur yang jelas-jelas bug
       'no-dupe-keys': 'error',
       'no-dupe-args': 'error',
       'no-duplicate-case': 'error',
       'no-unreachable': 'error',
       'no-constant-condition': ['error', { checkLoops: false }],
-      // Kesetaraan longgar sering jadi sumber bug (== vs ===)
       eqeqeq: 'warn',
     },
   },
+  // TypeScript files with TS parser
+  ...tseslint.configs.recommended.map((cfg) => ({
+    ...cfg,
+    files: ['**/*.ts', '**/*.mts'],
+  })),
   {
-    // Frontend ESM (Fase 3 langkah 15): aktifkan no-undef utk deteksi
-    // referensi global yang terlewat — semuanya sudah di-window-kan eksplisit.
-    files: ['js/**/*.js', 'api-client.js', 'i18n.js', 'pwa.js'],
+    files: ['**/*.ts', '**/*.mts'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-dupe-keys': 'error',
+      'no-unreachable': 'error',
+      'no-constant-condition': ['error', { checkLoops: false }],
+      eqeqeq: 'warn',
+      // Disable noisy rules for JS-in-TS codebase (36/54 files are pure JS)
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-var': 'off',
+      'prefer-const': 'off',
+    },
+  },
+  // Frontend ESM: no-undef for all frontend files
+  {
+    files: [
+      'js/**/*.ts', 'js/**/*.js',
+      'api-client.ts', 'i18n.ts', 'pwa.ts',
+      'api-client.js', 'i18n.js', 'pwa.js',
+    ],
     rules: {
       'no-undef': 'error',
     },
   },
-];
+);

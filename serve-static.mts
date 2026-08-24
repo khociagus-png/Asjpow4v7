@@ -231,17 +231,6 @@ createServer(async (req, res) => {
       return;
     }
 
-    // Preview: /sw.js SELALU no-op (lihat NOOP_SW) — SW lama dari sesi
-    // preview sebelumnya langsung diganti + cache-nya dihapus. Header
-    // no-store supaya browser/proxy tidak meng-cache sw.js ini.
-    if (req.method === 'GET' && pathname === '/sw.js') {
-      res.writeHead(200, {
-        'Content-Type': 'text/javascript; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store',
-      });
-      res.end(NOOP_SW);
-      return;
-    }
 
     const file = await resolveFile(pathname);
     let body = await readFile(file);
