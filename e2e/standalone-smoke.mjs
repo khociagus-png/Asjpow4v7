@@ -28,7 +28,12 @@ async function loadAndCollectErrors(url) {
   page.removeAllListeners('pageerror');
   page.on('pageerror', (e) => jsErrors.push(String(e)));
   await page.goto(BASE + url, { waitUntil: 'domcontentloaded', timeout: 45000 });
-  await page.waitForTimeout(2500);
+  // Poll up to 10s for chatBox to be populated (API call is async)
+  for (let i = 0; i < 20; i++) {
+    const has = await page.evaluate(() => (document.getElementById('chatBox')?.textContent || '').length > 0);
+    if (has) break;
+    await page.waitForTimeout(500);
+  }
   return jsErrors;
 }
 

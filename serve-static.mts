@@ -15,12 +15,10 @@
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import { dirname, extname, join, normalize, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { transform } from 'esbuild';
-
-const require = createRequire(import.meta.url);
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { transform, buildSync } from 'esbuild';
+import { mkdirSync } from 'node:fs';
 
 // Cache for transpiled TS → JS to avoid re-transpiling on every request
 const tsCache = new Map();
@@ -78,9 +76,29 @@ function sendJson(res, status, obj) {
 // Backend: jalankan handler rebuild (netlify/functions/_lib/handlers.js)
 // in-process. Request body sama dengan yang dikirim ke Netlify Functions:
 // { action, payload, sessionToken }.
+// Bundle handlers.ts + deps at startup so ESM extensionless imports resolve.
 let handlers = null;
-function loadHandlers() {
-  if (!handlers) handlers = require(join(HERE, 'netlify/functions/_lib/handlers.ts'));
+async function loadHandlers() {
+  if (!handlers) {
+    const cacheDir = join(HERE, '.netlify');
+    try { mkdirSync(cacheDir, { recursive: true }); } catch { /* ok */ }
+    const bundledPath = join(cacheDir, '_handlers-preview.mjs');
+    try {
+      buildSync({
+        entryPoints: [join(HERE, 'netlify/functions/_lib/handlers.ts')],
+        bundle: true,
+        outfile: bundledPath,
+        format: 'esm',
+        platform: 'node',
+        target: 'node22',
+        logLevel: 'warning',
+      });
+    } catch (e) {
+      throw new Error('Failed to bundle handlers: ' + e.message);
+    }
+    const mod = await import(pathToFileURL(bundledPath).href);
+    handlers = mod.default || mod;
+  }
   return handlers;
 }
 
@@ -105,7 +123,8 @@ async function handleApi(req, res) {
       const fwd = req.headers['x-forwarded-for'];
       const ip =
         (fwd ? String(fwd).split(',')[0].trim() : null) || req.socket.remoteAddress || null;
-      out = await loadHandlers().handleAction(body.action, body.payload, body.sessionToken, {
+      const h = await loadHandlers();
+      out = await h.handleAction(body.action, body.payload, body.sessionToken, {
         ip,
       });
     } catch (e) {
@@ -223,7 +242,8 @@ createServer(async (req, res) => {
       const q = new URL(req.url, 'http://localhost').searchParams.get('job') || '';
       let out;
       try {
-        out = await loadHandlers().handleShareData(q);
+        const h2 = await loadHandlers();
+        out = await h2.handleShareData(q);
       } catch (e) {
         out = { error: 'Error internal: ' + e.message };
       }
