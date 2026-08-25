@@ -54,8 +54,7 @@ export function renderTugas() {
       '</div></div>';
   });
   if (ALL_TUGAS.length === 0)
-    html =
-      '<div class="text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">${window.tr("admin.no_tasks")}</div>';
+    html = `<div class="text-center text-slate-500 py-6 text-xs font-bold border border-dashed border-slate-700 rounded-xl bg-black/20">${window.tr('admin.no_tasks')}</div>`;
   list.innerHTML = html;
 }
 // ===== PATCH-IN-PLACE: JADWAL/TUGAS =====
