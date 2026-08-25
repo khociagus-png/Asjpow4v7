@@ -89,6 +89,76 @@ console.log(
     (mapSize ? ` · sourcemap ${(mapSize / 1024).toFixed(1)} KB` : ''),
 );
 
+
+// 1b. Compile standalone page .ts → .js (ai_form, master_full, share, apply_full, siswa_baru).
+//     Standalone pages load <script type="module" src="/js/pages/xxx.js"> tapi
+//     hanya .ts yang ada di disk (rename TS migration). Dev server (serve-static)
+//     transpile on-the-fly, tapi Netlify serve static langsung → 404 tanpa step ini.
+//     esbuild bundle + transpile: resolve semua import (bridge, cloudinary, api-client, i18n)
+//     jadi 1 file .js per halaman (ESM, karena type=module).
+const STANDALONE_TS_MAP = {
+  'ai_form.html': `${ROOT}/js/pages/ai_form.ts`,
+  'master-full.html': `${ROOT}/js/pages/master_full.ts`,
+  'share.html': `${ROOT}/js/pages/share.ts`,
+  'apply-full.html': `${ROOT}/js/pages/apply_full.ts`,
+  'siswa-baru.html': `${ROOT}/js/pages/siswa_baru.ts`,
+};
+let standaloneCount = 0;
+for (const [htmlPage, tsEntry] of Object.entries(STANDALONE_TS_MAP)) {
+  const outJs = tsEntry.replace(/\.ts$/, '.js');
+  if (!existsSync(tsEntry)) {
+    console.warn(`[build-js] Standalone: ${tsEntry} tidak ditemukan, skip`);
+    continue;
+  }
+  try {
+    await build({
+      entryPoints: [tsEntry],
+      bundle: true,
+      format: 'esm',
+      minify: true,
+      outfile: outJs,
+      logLevel: 'error',
+      loader: { '.ts': 'ts' },
+    });
+    standaloneCount++;
+  } catch (err) {
+    console.error(`[build-js] Standalone gagal: ${htmlPage} — ${err.message}`);
+    process.exit(1);
+  }
+}
+console.log(`[build-js] Standalone pages: ${standaloneCount} file .ts → .js ✅`);
+
+// 1c. Compile shared standalone modules .ts → .js (upload-guard, apply-docs, pwa).
+//     Dipakai sebagai <script type="module"> terpisah oleh halaman standalone.
+const SHARED_STANDALONE_MODULES = [
+  `${ROOT}/js/upload-guard.ts`,
+  `${ROOT}/js/apply-docs.ts`,
+  `${ROOT}/pwa.ts`,
+];
+let sharedCount = 0;
+for (const tsFile of SHARED_STANDALONE_MODULES) {
+  const outJs = tsFile.replace(/\.ts$/, '.js');
+  if (!existsSync(tsFile)) {
+    console.warn(`[build-js] Shared module: ${tsFile} tidak ditemukan, skip`);
+    continue;
+  }
+  try {
+    await build({
+      entryPoints: [tsFile],
+      bundle: true,
+      format: 'esm',
+      minify: true,
+      outfile: outJs,
+      logLevel: 'error',
+      loader: { '.ts': 'ts' },
+    });
+    sharedCount++;
+  } catch (err) {
+    console.error(`[build-js] Shared module gagal: ${tsFile} — ${err.message}`);
+    process.exit(1);
+  }
+}
+console.log(`[build-js] Shared standalone modules: ${sharedCount} file .ts → .js ✅`);
 // 2. admin.html & index.html: stack 20 tag -> 1 tag bundel (idempotent, dan
 //    mengganti bundel lama kalau hash berubah).
 const stackRe =
