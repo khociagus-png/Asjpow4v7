@@ -19,6 +19,7 @@ import { bucket, storageRequest, publicUrl, hapusJenisVarian, uploadBase64 } fro
 import { syncFormMailDariUpload } from './actions-mail';
 import { nextCandidateId } from './candidate-helpers';
 import * as fcm from './fcm-server';
+import { notifyAdmins } from './fcm-helpers';
 // actions-upload.js — upload & apply (apply-full.html, admin pemberkasan,
 // dari actions-extra.js, perilaku TIDAK berubah.
 
@@ -451,24 +452,12 @@ async function handleSubmitApply(payload) {
     // --- PUSH NOTIFICATION KE ADMIN ---
     // Jangan biarkan error notif membatalkan submit
     try {
-      // Ambil token semua admin
-      const { rows: adminTokens } = await supabaseJson('GET', 'fcm_tokens', {
-        query: { select: 'token', wa: 'eq.ADMIN' },
-      });
-      if (adminTokens && adminTokens.length > 0) {
-        const tokens = adminTokens.map((r) => r.token);
-        fcm
-          .sendMulticast(
-            tokens,
-            'Lamaran Baru!',
-            `${d.nama} baru saja melamar posisi ${code}.`,
-            '/admin.html',
-          )
-          .catch(console.error);
-      }
-    } catch (e) {
-      console.error('FCM Error:', e);
-    }
+      notifyAdmins(
+        'Lamaran Baru!',
+        `${d.nama || 'Kandidat'} baru saja melamar posisi ${code}.`,
+        '/admin.html',
+      );
+    } catch (_) {}
     // ----------------------------------
 
     // --- SMART INGESTION (silent, fire-and-forget) ---
@@ -894,6 +883,16 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
       fireIngest([{ fileUrl: url, fileType: fileExt, wa }], sessionToken);
     }
     return { success: true };
+
+    // --- PUSH NOTIFICATION KE ADMIN: BERKAS BARU ---
+    try {
+      notifyAdmins(
+        'Berkas Baru!',
+        `${nama || 'Kandidat'} mengunggah ${jenis || 'dokumen'}.`,
+        '/admin.html',
+      );
+    } catch (_) {}
+    // ------------------------------------------------
   } catch (e) {
     return { success: false, error: 'Gagal menyimpan berkas. Silakan coba lagi.' };
   }

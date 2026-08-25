@@ -175,13 +175,15 @@ async function handleHapusTugas(payload, sessionToken) {
 // ke kandidat yang terdaftar. Dipanggil saat kandidat login (frontend).
 // Dedup: gunakan field `reminder_sent` di database_schedule untuk cegah
 // kirim ulang (set true setelah berhasil kirim).
+// === CHECK & SEND AGENDA REMINDERS (MULTI-LEVEL) ===
+// Cek jadwal aktif dalam 3 window: H-7 (6-8 hari), H-1 (20-28 jam), H-0 (≤60 menit).
+// Kirim FCM push ke kandidat yang terdaftar. Dipanggil saat kandidat login.
+// Dedup: field reminder_h7_sent, reminder_h1_sent, reminder_sent.
 async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
-  // Bisa dipanggil kandidat (login trigger) atau admin (manual test)
   let sent = 0;
   let errors = 0;
   try {
     const now = Date.now();
-    const oneHourMs = 60 * 60 * 1000;
     const { rows: schedules } = await supabaseJson('GET', 'database_schedule', {
       query: {
         select: '*',
@@ -192,56 +194,38 @@ async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
     if (!Array.isArray(schedules) || schedules.length === 0) {
       return { success: true, sent: 0, checked: 0 };
     }
-    for (const s of schedules) {
-      const waktu = String(s.tanggal_waktu || '');
-      if (!waktu) continue;
-      // Parse waktu — support format ISO dan "DD/MM/YYYY HH:mm"
-      let schedTime = 0;
+
+    // Helper: parse waktu jadwal → timestamp
+    const parseTime = (waktu) => {
+      if (!waktu) return 0;
       try {
         if (waktu.includes('/')) {
           const [datePart, timePart] = waktu.split(' ');
           const [dd, mm, yyyy] = datePart.split('/');
           const [hh, mi] = (timePart || '00:00').split(':');
-          schedTime = new Date(
-            Number(yyyy),
-            Number(mm) - 1,
-            Number(dd),
-            Number(hh),
-            Number(mi),
-          ).getTime();
-        } else {
-          schedTime = new Date(waktu).getTime();
+          return new Date(Number(yyyy), Number(mm) - 1, Number(dd), Number(hh), Number(mi)).getTime();
         }
+        return new Date(waktu).getTime();
       } catch {
-        continue;
+        return 0;
       }
-      if (!schedTime || isNaN(schedTime)) continue;
-      // Cek apakah dalam window H-1 (sekarang sampai +1 jam)
-      const diffMs = schedTime - now;
-      if (diffMs < 0 || diffMs > oneHourMs) continue;
-      // Cek dedup
-      if (s.reminder_sent === true || s.reminder_sent === 'true') continue;
-      // Parse daftar kandidat (WA dari comma/newline separated list)
-      const daftarRaw = String(s.daftar_kandidat || '');
-      const waList = daftarRaw
+    };
+
+    // Helper: parse daftar kandidat → WA list
+    const parseWaList = (raw) => {
+      return String(raw || '')
         .split(/[\n,;]+/)
         .map((x) => {
-          const digits = x.replace(/\D/g, '');
-          if (digits.startsWith('628') && digits.length >= 13) return digits;
-          if (digits.startsWith('08') && digits.length >= 10) return '62' + digits.slice(1);
+          const d = x.replace(/\D/g, '');
+          if (d.startsWith('628') && d.length >= 13) return d;
+          if (d.startsWith('08') && d.length >= 10) return '62' + d.slice(1);
           return '';
         })
         .filter(Boolean);
-      if (waList.length === 0) continue;
-      // Kirim FCM ke setiap kandidat
-      const agenda = s.nama_agenda || 'Jadwal';
-      const lokasi = s.lokasi_link || '-';
-      const timeLeft = Math.round(diffMs / 60000);
-      const title = '⏰ Pengingat: ' + agenda;
-      const body =
-        agenda +
-        (timeLeft > 0 ? ' dalam ' + timeLeft + ' menit' : ' dimulai sekarang') +
-        (lokasi && lokasi !== '-' ? ' di ' + lokasi : '');
+    };
+
+    // Helper: kirim FCM ke list WA
+    const sendToWaList = async (waList, title, body) => {
       for (const wa of waList) {
         try {
           const { rows: tokens } = await supabaseJson('GET', 'fcm_tokens', {
@@ -258,18 +242,60 @@ async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
           errors++;
         }
       }
-      // Tandai sudah dikirim
-      try {
-        const schedId = s.id || s.id_jadwal;
-        if (schedId) {
-          await supabaseJson('PATCH', 'database_schedule', {
-            query: { id: 'eq.' + schedId },
-            body: { reminder_sent: true, updated_at: new Date().toISOString() },
-            headers: { Prefer: 'return=minimal' },
-          });
+    };
+
+    // Window definitions
+    const WINDOWS = [
+      { key: 'h7', field: 'reminder_h7_sent', minMs: 6 * 86400000, maxMs: 8 * 86400000, label: '7 hari' },
+      { key: 'h1', field: 'reminder_h1_sent', minMs: 20 * 3600000, maxMs: 28 * 3600000, label: 'besok' },
+      { key: 'h0', field: 'reminder_sent',    minMs: 0, maxMs: 60 * 60000, label: 'mulai' },
+    ];
+
+    for (const s of schedules) {
+      const schedTime = parseTime(s.tanggal_waktu);
+      if (!schedTime || isNaN(schedTime)) continue;
+
+      const diffMs = schedTime - now;
+      const agenda = s.nama_agenda || 'Jadwal';
+      const lokasi = s.lokasi_link || '';
+      const waList = parseWaList(s.daftar_kandidat);
+      if (waList.length === 0) continue;
+
+      for (const w of WINDOWS) {
+        // Skip jika sudah dikirim
+        if (s[w.field] === true || s[w.field] === 'true') continue;
+        // Skip jika di luar window
+        if (diffMs < w.minMs || diffMs > w.maxMs) continue;
+
+        let title, body;
+        if (w.key === 'h0') {
+          const mins = Math.round(diffMs / 60000);
+          title = '⏰ ' + agenda;
+          body = agenda + (mins > 0 ? ' dalam ' + mins + ' menit' : ' dimulai sekarang')
+            + (lokasi ? ' di ' + lokasi : '');
+        } else if (w.key === 'h1') {
+          title = '📅 Jadwal besok: ' + agenda;
+          body = agenda + ' dijadwalkan besok'
+            + (lokasi ? ' di ' + lokasi : '');
+        } else {
+          title = '📅 Jadwal 7 hari lagi: ' + agenda;
+          body = agenda + ' dijadwalkan 7 hari lagi'
+            + (lokasi ? ' di ' + lokasi : '');
         }
-      } catch {
-        // best-effort
+
+        await sendToWaList(waList, title, body);
+
+        // Tandai sudah dikirim
+        try {
+          const schedId = s.id || s.id_jadwal;
+          if (schedId) {
+            await supabaseJson('PATCH', 'database_schedule', {
+              query: { id: 'eq.' + schedId },
+              body: { [w.field]: true, updated_at: new Date().toISOString() },
+              headers: { Prefer: 'return=minimal' },
+            });
+          }
+        } catch {}
       }
     }
     return { success: true, sent, errors, checked: schedules.length };
