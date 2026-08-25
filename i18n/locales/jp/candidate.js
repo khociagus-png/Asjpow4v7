@@ -97,5 +97,10 @@ export const candidate = {
     form_address: 'KTP記載の住所',
     form_jft_text: 'JFT / JLPTスコア',
     form_ssw_text: 'SSW分野',
+    multi_job_title: 'すべての応募',
+    multi_job_empty: '現在応募中の職種はありません。',
+    applied_at: '応募日:',
+    job_status_label: 'ステータス:',
+    job_stage_label: '選考段階:',
   },
 };

@@ -262,9 +262,93 @@ export function kalkulasiProgress(myData) {
   }
 }
 
+// Multi-Job Progress View — render SEMUA lamaran kandidat sebagai card detail.
+// Setiap card menampilkan: kode job, status, tahapan, waktu lamaran.
+// Uses window.esc/window.trOption (globals via bridge) for consistency with rest of codebase.
+export function renderMultiJobProgress(myData) {
+  var container = document.getElementById('k-dash-multi-job');
+  if (!container) return;
+  var apps = (myData && myData.applications) || [];
+  if (apps.length === 0) {
+    container.innerHTML =
+      '<div class="text-xs text-slate-500 text-center py-4 border border-dashed border-slate-700/50 rounded-xl">' +
+      tr('candidate.multi_job_empty') +
+      '</div>';
+    container.classList.remove('hidden');
+    return;
+  }
+  var html =
+    '<h3 class="text-sm font-black text-slate-300 mb-3 tracking-wide uppercase"><i class="fas fa-layer-group mr-2 text-emerald-400"></i>' +
+    tr('candidate.multi_job_title') +
+    ' <span class="text-slate-500 text-[10px]">(' +
+    apps.length +
+    ')</span></h3>';
+  html += '<div class="space-y-2">';
+  apps.forEach(function (a) {
+    if (!a || !a.code) return;
+    var st = String(a.status || 'MENUNGGU').toUpperCase();
+    var cls =
+      st === 'LULUS' || st === 'AKTIF'
+        ? {
+            box: 'bg-emerald-900/60 text-emerald-300 border-emerald-600/50',
+            icon: 'fa-check-circle',
+            txt: 'text-emerald-300',
+          }
+        : st === 'GAGAL' || st === 'REJECT' || st === 'DITOLAK'
+          ? {
+              box: 'bg-red-900/60 text-red-300 border-red-600/50',
+              icon: 'fa-times-circle',
+              txt: 'text-red-300',
+            }
+          : st === 'REVIEW' || st === 'REVIEW ADMIN'
+            ? {
+                box: 'bg-amber-900/60 text-amber-300 border-amber-600/50',
+                icon: 'fa-eye',
+                txt: 'text-amber-300',
+              }
+            : {
+                box: 'bg-sky-900/60 text-sky-300 border-sky-600/50',
+                icon: 'fa-clock',
+                txt: 'text-sky-300',
+              };
+    var statusLabel = window.trOption(st);
+    var dateStr = a.timestamp ? a.timestamp.split('T')[0] || a.timestamp : '';
+    html +=
+      '<div class="flex items-center gap-3 p-3 bg-black/40 border border-slate-700/50 rounded-xl hover:border-emerald-500/30 transition">' +
+      '<div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border ' +
+      cls.box +
+      '">' +
+      '<i class="fas ' +
+      cls.icon +
+      ' text-xs"></i></div>' +
+      '<div class="flex-1 min-w-0">' +
+      '<p class="text-xs font-black text-emerald-400 truncate">' +
+      window.esc(a.code) +
+      '</p>' +
+      '<p class="text-[10px] text-slate-400">' +
+      tr('candidate.job_status_label') +
+      ' <span class="font-bold ' +
+      cls.txt +
+      '">' +
+      window.esc(statusLabel) +
+      '</span></p>' +
+      '</div>' +
+      (dateStr
+        ? '<span class="text-[9px] text-slate-500 whitespace-nowrap">' +
+          window.esc(dateStr) +
+          '</span>'
+        : '') +
+      '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+  container.classList.remove('hidden');
+}
+
 // BRIDGE ESM → classic (bundel): alias window.* utk pemakai lintas file
 // (engine/init.js via window.*, render/candidate.js, dll).
 registerSeamAliases({
   evaluasiTahapanKandidat,
   kalkulasiProgress,
+  renderMultiJobProgress,
 });

@@ -6,6 +6,7 @@ import { requireAdmin } from './actions-auth';
 import { findCandidateByWa, nextCandidateId } from './candidate-helpers';
 import { stripRaw } from './actions-public';
 import { cacheClear } from './cache';
+import * as fcm from './fcm-server';
 // actions-mail.js — Mail inbox (database_asj_form): review/approve/reject/
 // delete/tandai dibaca + sinkronisasi kandidat. MODUL BARU (Fase 1.1c
 // REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
@@ -51,6 +52,42 @@ async function handleFormStatus(rowIndex, status, reason) {
       await syncCandidateDariForm(f, status);
     } catch (e) {
       console.error('[form-status] sync candidate:', e && e.message ? e.message : e);
+    }
+    // === FCM NOTIFICATION: kirim push ke kandidat saat status berubah ===
+    const waNotify = normalizeWa(String(f.no_wa || f.wa || ''));
+    if (waNotify && (status === 'GAGAL' || status === 'REVIEW ADMIN' || status === 'LULUS')) {
+      try {
+        const jobCode = String(f.code_job || '');
+        const reasonText = reason || '';
+        let title = '';
+        let body = '';
+        if (status === 'GAGAL') {
+          title = 'Dokumen ' + jobCode + ' perlu revisi';
+          body = reasonText || 'Lamaran ditolak. Silakan cek dashboard untuk detail.';
+        } else if (status === 'REVIEW ADMIN') {
+          title = 'Dokumen ' + jobCode + ' sedang direview';
+          body = 'Admin sedang meninjau dokumen Anda.';
+        } else if (status === 'LULUS') {
+          title = 'Lamaran ' + jobCode + ' disetujui! 🎉';
+          body = 'Selamat! Lamaran Anda telah disetujui. Cek dashboard untuk langkah selanjutnya.';
+        }
+        if (title) {
+          const { rows: tokens } = await supabaseJson('GET', 'fcm_tokens', {
+            query: { select: 'token', wa: 'eq.' + waNotify, limit: 10 },
+          });
+          if (Array.isArray(tokens) && tokens.length > 0) {
+            const tokenList = tokens.map((t) => t.token).filter(Boolean);
+            if (tokenList.length > 0) {
+              await fcm.sendMulticast(tokenList, title, body, '/');
+            }
+          }
+        }
+      } catch (eFcm) {
+        console.error(
+          '[form-status] FCM notification:',
+          eFcm && eFcm.message ? eFcm.message : eFcm,
+        );
+      }
     }
     // PATCH-IN-PLACE: kembalikan baris mail hasil update + baris kandidat yang
     // berubah (LULUS → dibuat/diperbarui, GAGAL → status GAGAL & lepas job)

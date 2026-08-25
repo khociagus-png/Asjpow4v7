@@ -83,7 +83,7 @@ const ACTION_HANDLERS = {
   tambahTugasBaru: schedule.handleTambahTugasBaru,
   setTugasStatus: schedule.handleSetTugasStatus,
   hapusTugas: schedule.handleHapusTugas,
-  checkAndSendAgendaReminders: () => ({ success: true, sent: 0 }),
+  checkAndSendAgendaReminders: schedule.handleCheckAndSendAgendaReminders,
   // Template & kirim WA (Fonnte)
   simpanWaTemplate: wa.handleSimpanWaTemplate,
   hapusWaTemplate: wa.handleHapusWaTemplate,

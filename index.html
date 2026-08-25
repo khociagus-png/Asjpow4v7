@@ -912,6 +912,10 @@
                   <!-- Jadwal akan disuntik dari script -->
               </div>
           </div>
+          <!-- MULTI-JOB PROGRESS VIEW -->
+          <div id="k-dash-multi-job" class="hidden mb-6 md:mb-8 max-w-xl mx-auto bg-black/40 border border-slate-700 p-4 md:p-5 rounded-2xl text-left shadow-lg">
+          </div>
+
 
           <div id="k-dash-catatan-box" class="hidden mb-8 max-w-xl mx-auto bg-sky-900/20 border border-sky-500/30 p-5 rounded-2xl text-center shadow-lg">
               <p class="text-xs text-sky-400 font-bold uppercase mb-2 tracking-widest"><i class="fas fa-envelope-open-text mr-1"></i><span data-lang="ui.admin_eval_msg"> Pesan / Evaluasi dari Admin:</span></p>
@@ -1158,10 +1162,10 @@
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
 // Delay 2s supaya SW sempat register+cache dulu → mencegah loop.
 // sessionStorage guard: cuma fire 1x per deploy.
-setTimeout(function(){var E="app-b8869d7ec3";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
+setTimeout(function(){var E="app-d46ec2a604";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
 </script>
 <!-- /ANTI-CACHE -->
-<script src="/assets/app-d559fc43e6.js"></script>
+<script src="/assets/app-2c26444896.js"></script>
 <!-- Renderer dokumen lokal (xlsx/mammoth/pptx-preview) kini di-load LAZY saat
        preview pertama dibuka (lihat muatVendorLib di 02_init.js) — hemat 2.8MB
        download+parse di tiap load halaman. -->

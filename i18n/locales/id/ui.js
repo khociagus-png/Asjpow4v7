@@ -530,5 +530,12 @@ export const ui = {
     toast_wa_invalid_cand: 'Nomor WA Kandidat tidak valid',
     toast_wa_invalid_cand2: 'Nomor WA kandidat tidak valid!',
     toast_wa_template_saved: 'Template WA tersimpan!',
+    notif_doc_rejected: 'Dokumen {job} perlu revisi: {reason}',
+    notif_doc_approved: 'Dokumen {job} disetujui!',
+    notif_status_changed: 'Status lamaran {job}: {status}',
+    reminder_schedule_h1: 'Jadwal {agenda} dalam 1 jam di {lokasi}!',
+    reminder_schedule_h0: 'Jadwal {agenda} dimulai sekarang!',
+    reminder_sent_label: 'Pengingat terkirim',
+    no_reminders: 'Tidak ada pengingat saat ini.',
   },
 };

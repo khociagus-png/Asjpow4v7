@@ -24,7 +24,7 @@ import {
 } from '../init/state.ts';
 import { renderAdminFull } from '../render/admin.ts';
 import { renderFormInbox } from '../render/mail.ts';
-import { renderJobDilamar, renderProgresPemberkasan } from './dashboard.ts';
+import { renderJobDilamar, renderProgresPemberkasan, renderMultiJobProgress } from './dashboard.ts';
 import { renderRiwayatKandidat } from '../08_wa_pintar.ts';
 import { renderStudentCard } from '../12_esign_match.ts';
 import { renderLanguage } from '../01_public.ts';
@@ -470,7 +470,15 @@ export function initApp(res, isSilent = false) {
       // Tombol AI CV & Latihan Interview tetap tampil untuk semua (biar kelihatan
       // bedanya siswa ASJ vs kandidat luar); aksesnya dibatasi di fungsi masing-masing.
       renderRiwayatKandidat();
+      renderMultiJobProgress(myData);
       renderStudentCard();
+      // Fire-and-forget: check schedule reminders (H-1 window)
+      try {
+        window.callAPI('checkAndSendAgendaReminders', [currentKandidatWa]);
+      } catch (eReminder) {
+        // non-blocking — reminder failure should never block dashboard
+      }
+
       let mySchedules = res.mySchedules || [];
       let boxJadwal = document.getElementById('k-dash-jadwal-box');
       let listJadwal = document.getElementById('k-dash-jadwal-list');

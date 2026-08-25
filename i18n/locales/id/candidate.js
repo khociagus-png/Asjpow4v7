@@ -97,5 +97,10 @@ export const candidate = {
     form_address: 'Alamat Sesuai KTP',
     form_jft_text: 'Nilai JFT / JLPT',
     form_ssw_text: 'Bidang SSW',
+    multi_job_title: 'Semua Lamaran Saya',
+    multi_job_empty: 'Anda belum memiliki lamaran aktif.',
+    applied_at: 'Dilamar:',
+    job_status_label: 'Status:',
+    job_stage_label: 'Tahapan:',
   },
 };
