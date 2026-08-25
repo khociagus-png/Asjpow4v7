@@ -515,3 +515,67 @@ format:check bersih · lint 0 error (12 warning eqeqeq lama) · 148/148 vitest �
 - **Preset unsigned `asjportal` WAJIB ada** di dashboard Cloudinary (Settings → Upload → Unsigned upload preset) — belum diverifikasi dari sisi preset; tanpa preset itu upload ditolak `Invalid upload preset`.
 - Keep-alive + Cloudinary baru efektif **setelah deploy Netlify** (tetap butuh izin eksplisit pemilik — lihat `DEPLOY.md`).
 - Belum dimigrasi (pola sama bisa menyusul): `master-full.html` masih kirim base64 via `submitMasterForm`; `apply-full.html`/`ai_form.html`/loker admin sudah upload langsung browser→Supabase Storage via `getUploadUrls`.
+
+---
+
+## Sesi 2026-08-25 (Malam) — Fix Build Pipeline, E2E Tests, Bundle Optimization, Dashboard + Email Auto-fill (Buffy)
+
+### Commits
+
+| Hash      | Isi                                                                                      | Status    |
+| --------- | ---------------------------------------------------------------------------------------- | --------- |
+| `9184036` | fix(build): compile standalone .ts → .js untuk Netlify (8 file)                          | ✅ Pushed |
+| `0257389` | chore: bersihkan 62 komentar basi REFACTOR_TODO + buat sentry-dummy.js                   | ✅ Pushed |
+| `8d5f3dd` | fix: node-compatible build + typecheck + hapus dead function (admin-sync.js)             | ✅ Pushed |
+| `94b4fe5` | fix(e2e): require → import handlers.ts untuk 3 test (backend-fast-path, diag-cvmini*)   | ✅ Pushed |
+| `e539257` | fix(e2e+preview): fix all failing E2E tests + backend preview loading                    | ✅ Pushed |
+| `a44f472` | perf(build): externalize shared deps → bridge.js + cloudinary.js (-35% bundle size)      | ✅ Pushed |
+| `bb903b8` | fix(e2e): login/dashboard visibility check using getComputedStyle                        | ✅ Pushed |
+| `2a9c117` | fix(html): tambah missing `</div>` untuk page-admin → fix dashboard kandidat              | ✅ Pushed |
+| `1200d0f` | fix(apply): tambah email auto-fill di cekDataPelamar                                     | ✅ Pushed |
+
+### Yang Dikerjakan:
+
+#### 1. Build Pipeline Fixes
+- **Standalone .ts → .js compile** — 8 file (.ts) yang tidak di-bundle oleh esbuild (apply_full, master_full, share, siswa_baru, ai_form, cloudinary, upload-guard, pwa) perlu di-compile manual supaya Netlify bisa serve .js statis
+- **sentry-dummy.js** — Import map refer ke `@sentry/browser` yang tidak ada → buat ESM stub 506 bytes
+- **Node-compatible build** — `bun run` diganti `npx/node` di package.json (bun tidak jalan di Windows dev)
+- **TypeCheck** — `tsc --noEmit` ditambah ke build pipeline
+
+#### 2. E2E Test Fixes
+- **serve-static.mts** — Backend preview `require()` tidak bisa resolve `.ts` extensionless imports → esbuild bundling + `await import()`
+- **backend-fast-path, diag-cvmini, diag-cvmini3** — `require('handlers.js')` → `import('handlers.ts')` + jalankan pakai `npx tsx`
+- **standalone-smoke** — chatBox check fixed wait 2.5s → polling up to 10s (500ms intervals)
+- **share-view** — Hardcoded job `TG633ASJ` tidak ada di local DB → auto-discover job dari server
+- **login-check, biodata-check, upload-check** — Playwright `isVisible()` tidak detect Tailwind `!hidden` → pakai `getComputedStyle`
+
+#### 3. Bundle Optimization (-35% per page)
+- Pre-build `bridge.js` + `cloudinary.js` sebagai shared ESM modules
+- esbuild `external` plugin: standalone pages import bridge/cloudinary dari shared file (bukan inline bundle)
+- Hasil: ai_form 107KB→22KB, master_full 105KB→20KB, share 105KB→21KB, apply_full 98KB→13KB
+
+#### 4. Dashboard Kandidat Fix
+- **Missing `</div>`** di `index.html` menyebabkan `page-kandidat` ter-nested di dalam `page-admin`
+- Saat `changePage('kandidat')` hide page-admin, page-kandidat ikut ter-hide → dashboard kosong
+
+#### 5. Email Auto-fill di Apply Form
+- `handleCekDataPelamar` tidak mengembalikan field `email` (hanya baca `database_asj_form` yang tidak punya kolom email)
+- Fix: fetch email dari `database_candidate` via single `findCandidates()` call (merged dengan existing photo/JFT/SSW fallback)
+- Verified: `cekDataPelamar` → `email: "khoci89@gmail.com"` ✅
+
+### Test Results:
+
+```
+E2E Tests:   89/89 pass (backend-fast-path 13, login-check 20, biodata-check 11, upload-check 20, standalone-smoke 15, share-view 10, diag-cvmini OK, diag-cvmini3 OK)
+TypeCheck:   tsc --noEmit → 0 errors
+Build:       npm run build → clean (0 errors)
+```
+
+### Auto-fill Data Sync Summary:
+
+| Form | Source | Fields |
+|------|--------|--------|
+| CV Master (`master-full.html`) | `getMasterDataByWa` → `master_database_candidate` | 100+ fields (full profile) |
+| CV AI (`ai_form.html`) | `getDrafCvMaster` → `master_database_candidate` | 100+ fields (full profile) |
+| Apply (`apply-full.html`) | `cekDataPelamar` → `database_asj_form` + `database_candidate` fallback | nama, gender, usia, tb, bb, **email** ✅, pasPhoto, jftUrl, sswUrl |
+
