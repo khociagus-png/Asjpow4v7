@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_tugas_created ON database_tugas (created_at DESC)
 -- ############################################################
 
 -- 2a. Duplikat kandidat per no_wa
-SELECT no_wa, COUNT(*) AS jumlah, string_agg(COALESCE(nama,'?') || ' (id=' || id || ')', ' | ') AS baris
+SELECT no_wa, COUNT(*) AS jumlah, string_agg(COALESCE(nama_lengkap,'?') || ' (id=' || id || ')', ' | ') AS baris
 FROM database_candidate
 WHERE no_wa IS NOT NULL AND no_wa <> ''
 GROUP BY no_wa HAVING COUNT(*) > 1
@@ -66,7 +66,7 @@ ORDER BY jumlah DESC;
 -- 2d. Duplikat berkas per (wa, tahap)
 SELECT wa, tahap, COUNT(*) AS jumlah
 FROM pemberkasan_checklist
-WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL AND tahap <> ''
+WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL
 GROUP BY wa, tahap HAVING COUNT(*) > 1
 ORDER BY jumlah DESC;
 
@@ -83,7 +83,7 @@ WITH ranked AS (
   SELECT ctid,
          ROW_NUMBER() OVER (
            PARTITION BY no_wa
-           ORDER BY CASE UPPER(COALESCE(status, ''))
+           ORDER BY CASE UPPER(COALESCE(status_kandidat, ''))
                       WHEN 'LULUS' THEN 1 WHEN 'GAGAL' THEN 2
                       WHEN 'REVIEW' THEN 3 WHEN 'REVIEW ADMIN' THEN 3
                       WHEN 'UPDATE' THEN 4 ELSE 5 END ASC,
@@ -126,7 +126,7 @@ WITH ranked AS (
            ORDER BY updated_at DESC NULLS LAST, id DESC
          ) AS rn
   FROM pemberkasan_checklist
-  WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL AND tahap <> ''
+  WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL
 )
 DELETE FROM pemberkasan_checklist WHERE ctid IN (SELECT ctid FROM ranked WHERE rn > 1);
 
@@ -175,7 +175,7 @@ UNION ALL
 SELECT 'pemberkasan_checklist (per wa+tahap)',
        COUNT(*), COALESCE(SUM(jml - 1), 0)
 FROM (SELECT wa, tahap, COUNT(*) AS jml FROM pemberkasan_checklist
-      WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL AND tahap <> ''
+      WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL
       GROUP BY wa, tahap HAVING COUNT(*) > 1) d
 ORDER BY dup_count DESC;
 
