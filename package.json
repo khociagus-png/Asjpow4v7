@@ -9,12 +9,12 @@
     "e2e:share": "node e2e/share-view.mjs",
     "e2e:upload": "node e2e/upload-check.mjs",
     "e2e:biodata": "node e2e/biodata-check.mjs",
-    "e2e:upsert": "bun e2e/upsert-check.mjs",
+    "e2e:upsert": "node e2e/upsert-check.mjs",
     "dedupe": "node scripts/dedupe-duplicates.mts",
     "dedupe:apply": "node scripts/dedupe-duplicates.mts --apply",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . && bun run check:i18n",
+    "lint": "eslint . && node scripts/check-i18n.mts",
     "bundle:size": "node scripts/bundle-size-report.mts",
     "bundle:analyze": "node scripts/bundle-analyze.mts",
     "generate-api-docs": "node scripts/generate-api-docs.mts",
@@ -29,10 +29,10 @@
     "build:i18n-jp": "npx tsx scripts/build-i18n-jp.mts",
     "build:js": "node scripts/build-js.mts",
     "build:html": "node scripts/build-html.mts",
-    "deploy": "bun scripts/deploy-netlify.mts",
+    "deploy": "node scripts/deploy-netlify.mts",
     "check:globals": "node scripts/check-globals.mts",
     "check:handlers": "node scripts/check-handlers.mts",
-    "build": "bun run check:globals && bun run check:handlers && bun run build:css && bun run build:i18n-jp && bun run build:html && bun run build:js"
+    "build": "npx tsc --noEmit && node scripts/check-globals.mts && node scripts/check-handlers.mts && npx @tailwindcss/cli -i ./src/main.css -o ./assets/main.css --minify && npx tsx scripts/build-i18n-jp.mts && node scripts/build-html.mts && node scripts/build-js.mts"
   },
   "dependencies": {
     "@sentry/browser": "^10.70.0",
