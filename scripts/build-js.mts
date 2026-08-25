@@ -90,6 +90,63 @@ console.log(
 );
 
 
+
+// 1a-extra. Pre-build shared modules (bridge.js, cloudinary.js) as standalone ESM.
+//     Standalone pages + upload-guard + apply-docs + pwa all bundle bridge+api-client+i18n
+//     independently, causing ~90KB duplication per page. By pre-building bridge.js and
+//     cloudinary.js as self-contained ESM files, we can mark them as external in standalone
+//     builds — the browser loads them once (cached by URL), saving ~30KB per page load.
+const SHARED_MODULES = [
+  { entry: `${ROOT}/js/core/bridge.ts`, out: `${ROOT}/js/core/bridge.js` },
+  { entry: `${ROOT}/js/cloudinary.ts`, out: `${ROOT}/js/cloudinary.js` },
+];
+for (const { entry, out } of SHARED_MODULES) {
+  if (!existsSync(entry)) { console.warn(`[build-js] Shared module not found: ${entry}, skip`); continue; }
+  try {
+    await build({
+      entryPoints: [entry],
+      bundle: true,
+      format: 'esm',
+      minify: true,
+      outfile: out,
+      logLevel: 'error',
+      loader: { '.ts': 'ts' },
+    });
+  } catch (err) {
+    console.error(`[build-js] Shared module gagal: ${entry} — ${err.message}`);
+    process.exit(1);
+  }
+}
+console.log(`[build-js] Shared modules (bridge.js + cloudinary.js): pre-built ✅`);
+
+// esbuild plugin: rewrite .ts imports → .js + mark as external.
+// Standalone pages import bridge.ts/cloudinary.ts with relative paths.
+// The browser can resolve .js natively but not .ts, so we rewrite the
+// extension AND mark them external so esbuild doesn't inline them.
+const externalizeSharedDeps = {
+  name: 'externalize-shared-deps',
+  setup(buildPlugin) {
+    // Track entry points so we don't mark them external
+    const entryAbsPaths = new Set();
+    buildPlugin.onResolve({ filter: /^$/, namespace: 'file' }, args => {
+      if (args.path) entryAbsPaths.add(args.path);
+      return undefined;
+    });
+    buildPlugin.onResolve({ filter: /.ts$/ }, args => {
+      // Don't externalize entry points
+      if (entryAbsPaths.has(args.path) || args.kind === 'entry-point') return undefined;
+      return { path: args.path.replace(/.ts$/, '.js'), external: true };
+    });
+    // Handle extensionless imports (pwa.ts uses './js/core/bridge' without .ts)
+    buildPlugin.onResolve({ filter: /bridge$/ }, args => {
+      if (!args.path.endsWith('.ts') && !args.path.endsWith('.js')) {
+        return { path: args.path + '.js', external: true };
+      }
+      return null;
+    });
+  },
+};
+
 // 1b. Compile standalone page .ts → .js (ai_form, master_full, share, apply_full, siswa_baru).
 //     Standalone pages load <script type="module" src="/js/pages/xxx.js"> tapi
 //     hanya .ts yang ada di disk (rename TS migration). Dev server (serve-static)
@@ -119,6 +176,7 @@ for (const [htmlPage, tsEntry] of Object.entries(STANDALONE_TS_MAP)) {
       outfile: outJs,
       logLevel: 'error',
       loader: { '.ts': 'ts' },
+      plugins: [externalizeSharedDeps],
     });
     standaloneCount++;
   } catch (err) {
@@ -151,6 +209,7 @@ for (const tsFile of SHARED_STANDALONE_MODULES) {
       outfile: outJs,
       logLevel: 'error',
       loader: { '.ts': 'ts' },
+      plugins: [externalizeSharedDeps],
     });
     sharedCount++;
   } catch (err) {
