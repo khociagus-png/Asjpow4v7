@@ -2,6 +2,83 @@ import { normalizeWa, pick, supabaseJson } from '../db/client.ts';
 import { requireRole } from '../actions-auth.ts';
 import { buildRingkasData, findMasterByWa, APPLY_WA_COLS } from './cv';
 import { geminiGenerate, parseJsonLoose } from './providers';
+
+// ---------------------------------------------------------------------------
+// Auto-translate: isi field _jp yang kosong dari field _id (terjemahan ID→JP).
+// Satu panggilan Gemini untuk semua field sekaligus supaya cepat & hemat kuota.
+// ---------------------------------------------------------------------------
+const AI_ID_JP_PAIRS: Array<{
+  idPath: string[];
+  jpPath: string[];
+}> = [
+  { idPath: ['medis', 'alergi_id'], jpPath: ['medis', 'alergi_jp'] },
+  { idPath: ['medis', 'riwayat_medis_id'], jpPath: ['medis', 'riwayat_medis_jp'] },
+  { idPath: ['medis', 'riwayat_kecelakaan_id'], jpPath: ['medis', 'riwayat_kecelakaan_jp'] },
+  { idPath: ['wawancara', 'promosi_id'], jpPath: ['wawancara', 'promosi_jp'] },
+  { idPath: ['wawancara', 'kelebihan_id'], jpPath: ['wawancara', 'kelebihan_jp'] },
+  { idPath: ['wawancara', 'kekurangan_id'], jpPath: ['wawancara', 'kekurangan_jp'] },
+  { idPath: ['wawancara', 'hobi_id'], jpPath: ['wawancara', 'hobi_jp'] },
+  { idPath: ['wawancara', 'keahlian_id'], jpPath: ['wawancara', 'keahlian_jp'] },
+  { idPath: ['wawancara', 'motivasi_id'], jpPath: ['wawancara', 'motivasi_jp'] },
+  { idPath: ['wawancara', 'alasan_bidang_id'], jpPath: ['wawancara', 'alasan_bidang_jp'] },
+  { idPath: ['wawancara', 'rencana_pulang_id'], jpPath: ['wawancara', 'rencana_pulang_jp'] },
+  { idPath: ['wawancara', 'keinginan_id'], jpPath: ['wawancara', 'keinginan_jp'] },
+  { idPath: ['wawancara', 'tujuan_ke_jepang'], jpPath: ['wawancara', 'tujuan_ke_jepang_jp'] },
+  { idPath: ['kenalan_jepang', 'nama_id'], jpPath: ['kenalan_jepang', 'nama_jp'] },
+  { idPath: ['kenalan_jepang', 'hubungan_id'], jpPath: ['kenalan_jepang', 'hubungan_jp'] },
+  { idPath: ['kenalan_jepang', 'pekerjaan_id'], jpPath: ['kenalan_jepang', 'pekerjaan_jp'] },
+  { idPath: ['kenalan_jepang', 'alamat_id'], jpPath: ['kenalan_jepang', 'alamat_jp'] },
+];
+
+function getNested(obj: any, path: string[]): string {
+  let cur = obj;
+  for (const k of path) {
+    if (!cur || typeof cur !== 'object') return '';
+    cur = cur[k];
+  }
+  return cur !== undefined && cur !== null ? String(cur) : '';
+}
+
+function setNested(obj: any, path: string[], val: string): void {
+  let cur = obj;
+  for (let i = 0; i < path.length - 1; i++) {
+    if (!cur[path[i]] || typeof cur[path[i]] !== 'object') cur[path[i]] = {};
+    cur = cur[path[i]];
+  }
+  cur[path[path.length - 1]] = val;
+}
+
+async function autoTranslateMissingJp(data: Record<string, any>): Promise<void> {
+  const NL = String.fromCharCode(10);
+  const pairs: Array<{ index: number; idText: string; jpPath: string[] }> = [];
+  for (let i = 0; i < AI_ID_JP_PAIRS.length; i++) {
+    const pair = AI_ID_JP_PAIRS[i];
+    const idVal = getNested(data, pair.idPath).trim();
+    const jpVal = getNested(data, pair.jpPath).trim();
+    if (idVal && !jpVal) {
+      pairs.push({ index: pairs.length, idText: idVal, jpPath: pair.jpPath });
+    }
+  }
+  if (pairs.length === 0) return;
+  const lines = pairs.map((p) => (p.index + 1) + '. ' + p.idText).join(NL);
+  const prompt =
+    'Terjemahkan Bahasa Indonesia ke Bahasa Jepang untuk CV kerja.' + NL +
+    'Kembalikan JSON: ' + String.fromCharCode(123) + '"0":"jp0","1":"jp1",...' + String.fromCharCode(125) + ' tanpa teks lain.' + NL + NL + lines;
+  try {
+    const r = await geminiGenerate(prompt, []);
+    const text = String(r && r.reply ? r.reply : '').trim();
+    if (!text) return;
+    const parsed = parseJsonLoose(text);
+    if (!parsed || typeof parsed !== 'object') return;
+    for (let i = 0; i < pairs.length; i++) {
+      const jp = String(parsed[String(i)] || '').trim();
+      if (jp) setNested(data, pairs[i].jpPath, jp);
+    }
+  } catch (e) {
+    console.error('[autoTranslateMissingJp] error:', e && e.message ? e.message : e);
+  }
+}
+
 // ai/chat.js — domain AI chat & wawancara: Qween Jeklin (chat kandidat master),
 // Jeklin copilot admin, Dede Jeklin (siswa baru), wawancara kerja (mensetsu)
 
@@ -112,9 +189,12 @@ async function handleProcessAIChat(payload, sessionToken) {
       try {
         const parsed = parseJsonLoose(text);
         if (parsed && typeof parsed === 'object' && parsed.reply) {
+          const aiData = parsed.data && typeof parsed.data === 'object' ? parsed.data : undefined;
+          // Auto-translate: isi field _jp yang kosong dari field _id
+          if (aiData) await autoTranslateMissingJp(aiData);
           return {
             reply: String(parsed.reply),
-            data: parsed.data && typeof parsed.data === 'object' ? parsed.data : undefined,
+            data: aiData,
           };
         }
       } catch (e) {
