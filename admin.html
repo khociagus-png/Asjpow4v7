@@ -630,18 +630,18 @@
     <div class="flex flex-wrap gap-3 mb-4 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
       <div class="flex items-center gap-2 text-sky-400 font-bold text-sm mr-2"><i class="fas fa-filter"></i> Filter:</div>
       <select id="filter-db-gender" data-action="filterKandidat" aria-label="Filter" data-lang-aria="public.filter" class="bg-black/40 border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-1.5 focus:border-sky-500 outline-none">
-        <option value="all">Semua Gender</option>
-        <option value="l">Laki-laki (L)</option>
-        <option value="p">Perempuan (P)</option>
+        <option value="all" data-lang="admin.filter_all_gender">Semua Gender</option>
+        <option value="l" data-lang="admin.filter_male">Laki-laki (L)</option>
+        <option value="p" data-lang="admin.filter_female">Perempuan (P)</option>
       </select>
       <select id="filter-db-age" data-action="filterKandidat" aria-label="Filter" data-lang-aria="public.filter" class="bg-black/40 border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-1.5 focus:border-sky-500 outline-none">
-        <option value="all">Semua Usia</option>
-        <option value="under20">&lt; 20</option>
-        <option value="20to25">20 - 25</option>
-        <option value="over25">&gt; 25</option>
+        <option value="all" data-lang="admin.filter_all_age">Semua Usia</option>
+        <option value="under20" data-lang="admin.filter_under20">&lt; 20</option>
+        <option value="20to25" data-lang="admin.filter_20to25">20 - 25</option>
+        <option value="over25" data-lang="admin.filter_over25">&gt; 25</option>
       </select>
       <select id="filter-db-jft" data-action="filterKandidat" aria-label="Filter" data-lang-aria="public.filter" class="bg-black/40 border border-slate-700 text-slate-300 text-sm rounded-lg px-3 py-1.5 focus:border-sky-500 outline-none">
-        <option value="all">Semua Level JFT</option>
+        <option value="all" data-lang="admin.filter_all_jft">Semua Level JFT</option>
         <option value="a2">A2 / N4</option>
         <option value="b1">B1 / N3</option>
       </select>
@@ -1162,10 +1162,10 @@
 // ANTI-CACHE: cek apakah SW serve versi lama. Kalau iya, force reload.
 // Delay 2s supaya SW sempat register+cache dulu → mencegah loop.
 // sessionStorage guard: cuma fire 1x per deploy.
-setTimeout(function(){var E="app-b682a3be46";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
+setTimeout(function(){var E="app-b8869d7ec3";try{if(sessionStorage.getItem('asj_ac_v')===E)return;if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;caches.match("/assets/"+E+".js").then(function(r){if(!r){sessionStorage.setItem('asj_ac_v',E);console.log("[anti-cache] Stale SW, force reload...");navigator.serviceWorker.getRegistrations().then(function(regs){regs.forEach(function(reg){reg.unregister()});location.reload(true)})}}).catch(function(){})}catch(e){}},2000);
 </script>
 <!-- /ANTI-CACHE -->
-<script src="/assets/app-46cc0f6cb7.js"></script>
+<script src="/assets/app-d559fc43e6.js"></script>
 <!-- FIX 2026-08-12: admin TIDAK memakai lazy-load vendor renderer. Admin panel
        adalah kerja verifikasi data (preview berkas kandidat terus-menerus) —
        tunggu diam-diam saat script dimuat membuat admin ragu apakah data sudah

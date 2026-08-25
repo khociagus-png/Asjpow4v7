@@ -166,8 +166,7 @@ export function simpanKandidatDariAi() {
   var elKNama = document.getElementById('k-nama');
   var elKWa = document.getElementById('k-wa');
   var elKLoker = document.getElementById('k-loker');
-  // @ts-expect-error JS→TS migration
-  if (elKNama) elKNama.value = nama;
+  if (elKNama) (elKNama as HTMLInputElement).value = nama;
   if (elKWa) elKWa.value = wa;
   if (elKLoker) elKLoker.value = loker;
 

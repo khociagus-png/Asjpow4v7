@@ -281,7 +281,7 @@ export function trapFocus(modalEl) {
   releaseFocus(modalEl);
   var prev = document.activeElement;
   var focusable = modalEl.querySelectorAll(
-    'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [href], input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])',
   );
   if (focusable.length === 0) return;
   var first = focusable[0];
@@ -330,7 +330,9 @@ export function trapFocus(modalEl) {
   else _globalPrev = prev;
   modalEl._focusTrapCleanup = cleanup;
   modalEl.addEventListener('keydown', handler);
-  setTimeout(function () { first.focus(); }, 50);
+  setTimeout(function () {
+    first.focus();
+  }, 50);
 }
 export function releaseFocus(modalEl) {
   if (modalEl && modalEl._focusTrapCleanup) {
@@ -354,7 +356,7 @@ if (typeof MutationObserver !== 'undefined') {
   var _autoTrapObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (m) {
       if (m.type !== 'attributes' || m.attributeName !== 'class') return;
-      var el = m.target;
+      var el = m.target as Element & { _focusTrapCleanup?: Function };
       if (el.getAttribute('role') !== 'dialog') return;
       if (el.classList.contains('hidden')) return; // still hidden
       // Modal just became visible — trap focus if not already trapped
@@ -368,12 +370,13 @@ if (typeof MutationObserver !== 'undefined') {
     mutations.forEach(function (m) {
       m.addedNodes.forEach(function (node) {
         if (node.nodeType !== 1) return; // skip text nodes
-        if (node.getAttribute && node.getAttribute('role') === 'dialog') {
+        var el = node as Element;
+        if (el.getAttribute && el.getAttribute('role') === 'dialog') {
           _autoTrapObserver.observe(node, { attributes: true, attributeFilter: ['class'] });
         }
         // Also check children of added node
-        if (node.querySelectorAll) {
-          node.querySelectorAll('[role="dialog"]').forEach(function (d) {
+        if (el.querySelectorAll) {
+          el.querySelectorAll('[role="dialog"]').forEach(function (d) {
             _autoTrapObserver.observe(d, { attributes: true, attributeFilter: ['class'] });
           });
         }
@@ -421,5 +424,7 @@ registerSeamAliases({
   formatInputWA,
   hapusRingWA,
   salinTeksDecode,
-  toggleMinimize, trapFocus, releaseFocus,
+  toggleMinimize,
+  trapFocus,
+  releaseFocus,
 });

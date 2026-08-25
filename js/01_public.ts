@@ -4,6 +4,7 @@ import { renderAdminFull } from './render/admin.ts';
 import { renderSysConfig } from './admin_ops/sysconfig.ts';
 import { registerSeamAliases } from './core/bridge.ts';
 import { esc } from '../api-client.ts';
+import { ensureJpLocale } from '../i18n/core.js';
 // 1. LANGUAGE ENGINE V1.0 (LOCK)
 // ==========================================
 // CURRENT_LANG is now in src/i18n.js
@@ -99,7 +100,11 @@ export function renderLanguage() {
   });
 }
 
-export function setLanguage(lang) {
+export async function setLanguage(lang) {
+  // Ensure JP locale is loaded before switching to JP (fix: raw keys showing)
+  if (lang === 'jp') {
+    await ensureJpLocale();
+  }
   if (!window.LANG[lang]) return;
   // FIX Fase 3 langkah 12: CURRENT_LANG kini accessor bridge di i18n.js —
   // tulis via window.* supaya binding modul i18n ikut berubah (sebelumnya
