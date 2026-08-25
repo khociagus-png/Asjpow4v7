@@ -882,8 +882,6 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
     if (PARSEABLE_EXTS.has(fileExt) && url && wa) {
       fireIngest([{ fileUrl: url, fileType: fileExt, wa }], sessionToken);
     }
-    return { success: true };
-
     // --- PUSH NOTIFICATION KE ADMIN: BERKAS BARU ---
     try {
       notifyAdmins(
@@ -893,6 +891,8 @@ async function handleSimpanBerkasTahapan(payload, sessionToken) {
       );
     } catch (_) {}
     // ------------------------------------------------
+
+    return { success: true };
   } catch (e) {
     return { success: false, error: 'Gagal menyimpan berkas. Silakan coba lagi.' };
   }
