@@ -1,7 +1,7 @@
 // Diag: apakah field CV Mini (jft_text, ssw_text, pendidikan, photo) tersimpan?
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { handleAction } = require('../netlify/functions/_lib/handlers.js');
+
+
+const { handleAction } = await import('../netlify/functions/_lib/handlers.ts');
 
 const WA = '082130442661';
 const PIN = '2661';

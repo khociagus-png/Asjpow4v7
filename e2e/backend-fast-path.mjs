@@ -4,9 +4,9 @@
 // getAppData admin paralel) LANGSUNG ke handler — tanpa HTTP server.
 // Hanya mencetak status/angka (tidak ada data kandidat yang sensitif).
 // =============================================================
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const { handleAction } = require('../netlify/functions/_lib/handlers.js');
+
+
+const { handleAction } = await import('../netlify/functions/_lib/handlers.ts');
 
 const WA = process.env.E2E_WA || '082130442661';
 const PIN = process.env.E2E_PIN || '2661';
