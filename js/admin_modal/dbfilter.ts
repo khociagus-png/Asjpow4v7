@@ -1,8 +1,5 @@
 import { DROPDOWNS, dbFilterBidang, dbFilterTahapan } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
-// js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
-// 06_admin_modal.js — perilaku tidak berubah.
 // ==========================================
 // FILTER & SORT TABEL DB JOB ADMIN — chip bidang/tahapan + urutan
 // ==========================================

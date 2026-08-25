@@ -1,9 +1,6 @@
 import { tr } from '../../i18n.ts';
 import { ASSETS } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
-// js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
-// 03_engine.js — perilaku tidak berubah.
 // ==========================================
 // DASHBOARD KANDIDAT — badge job, progres pemberkasan, progres profil
 // ==========================================

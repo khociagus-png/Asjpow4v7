@@ -2,7 +2,6 @@
 // =============================================================================
 // module-map.mjs — Audit dependensi GLOBAL pada classic scripts (ASJ Portal)
 // -----------------------------------------------------------------------------
-// Kegunaan (Fase 0 REFACTOR_TODO.md):
 //   1. Petakan fungsi global per file ("function xxx(", "const xxx = () =>",
 //      "window.xxx =") tanpa menebak.
 //   2. Cari siapa yang memanggil fungsi lintas file → batas modul yang aman.

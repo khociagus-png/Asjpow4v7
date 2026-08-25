@@ -11,12 +11,10 @@ import { normalizeGenderValue } from '../03_candidate.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 9. INTERAKSI BACKEND — DOMAIN KANDIDAT (candidates)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
 // js/api/{forms,jobs,candidates,wa}.js (global scope TETAP di fase ini).
 // File ini: modal Input Kandidat Manual (cari/pilih otomatis), upload
 // kandidat (simpanKandidatDanUpload + baris dokumen lain dinamis), Super
 // Edit Kandidat, upload revisi CV, QR loker lokal, filter checkbox, &
-// pagination daftar kandidat admin. Body fungsi byte-identik dari 07_api.js.
 export function bukaModalTambahKandidat() {
   document.getElementById('modal-tambah-kandidat').classList.remove('hidden');
   var searchEl = document.getElementById('search-kandidat-manual');

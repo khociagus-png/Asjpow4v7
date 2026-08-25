@@ -4,7 +4,6 @@ import { findCandidates } from './db/candidates';
 import { findAdmins, findSettings } from './db/misc';
 import { requireAdmin, masterPins } from './actions-auth';
 // actions-diagnostics.js — diagnostik koneksi backend (getAppConfig).
-// MODUL BARU (Fase 1.1d REFACTOR_TODO.md) — kode dipindah dari handlers.js,
 // perilaku TIDAK berubah. Endpoint ini mengembalikan info SENSITIF (skema DB,
 // klasifikasi hash password kandidat, daftar env key) — wajib sesi admin.
 

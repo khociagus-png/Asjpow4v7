@@ -1,4 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script apply-full.html dipindah
 // ke js/pages/apply_full.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline
 // (onclick changeStep/submitApply, onblur formatInputWA) & onclick string

@@ -1,4 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script share.html dipindah ke
 // js/pages/share.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline
 // (toggleLang/renderGrid/submitSelection) & onclick string yang di-generate

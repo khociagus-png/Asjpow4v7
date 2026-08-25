@@ -1,9 +1,6 @@
 import { ASSETS, CURRENT_THEME } from './state.ts';
 import { renderPublicFilterUI, renderPublicFiltered } from '../render/public.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
-// js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
-// 02_init.js — perilaku tidak berubah.
 // ==========================================
 // TEMA — konfigurasi theme (TOKYO/SAKURA/INTER_VIP), partikel sakura,
 // banner/footer default, dan aplikasi theme ke halaman

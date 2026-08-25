@@ -1,6 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
-// js/init/{state,theme,util,preview,nav,boot}.js. Body listener byte-identik
-// dari 02_init.js — perilaku tidak berubah.
 // ==========================================
 // BOOT — urutan inisialisasi saat DOM siap + listener global
 // ==========================================

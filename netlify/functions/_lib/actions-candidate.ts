@@ -9,7 +9,6 @@ import { cacheClear } from './cache';
 import { syncBiodataKeMail } from './actions-mail';
 // actions-candidate.js — kelola kandidat (database_candidate): catatan,
 // update super (admin), halaman daftar kandidat. MODUL BARU (Fase 1.1c
-// REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 
 async function handleUpdateCatatanKandidat(payload, sessionToken) {
   const guard = requireAdmin(sessionToken);

@@ -8,7 +8,6 @@ import * as demo from './demo';
 import { cacheGet, cacheSet } from './cache';
 // actions-public.js — data publik & dashboard utama (getAppData).
 //
-// MODUL BARU (Fase 1.1 REFACTOR_TODO.md): kode dipindah dari handlers.js
 // (dispatcher pusat) supaya tiap domain punya file sendiri dan mudah di-patch.
 //
 // PLUS optimasi performa 2026-08-16 (terukur: 3 query berurutan 1.489 ms →

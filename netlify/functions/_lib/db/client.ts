@@ -1,7 +1,6 @@
 import { env } from '../env.ts';
 import { normalizeWa } from '../../../../shared/wa-rules.ts';
 // db/client.js — klien REST Supabase (PostgREST) + normalisasi data.
-// MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js,
 // perilaku TIDAK berubah.
 
 // Aturan WA (normalisasi + gate) — satu sumber kebenaran: shared/wa-rules.js

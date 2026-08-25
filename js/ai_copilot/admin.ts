@@ -1,8 +1,5 @@
 import { currentAdminName, isAdmin } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
-// js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
-// dari 09_ai_copilot.js — perilaku tidak berubah.
 // ==========================================
 // AI HR COPILOT (QWEEN JEKLIN) — chat admin + auto-fill form kandidat
 // ==========================================

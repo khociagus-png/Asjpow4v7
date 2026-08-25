@@ -3,12 +3,9 @@ import { renderJadwal } from '../admin_ops/schedule.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 9. INTERAKSI BACKEND — DOMAIN JADWAL & TUGAS ADMIN (wa)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
 // js/api/{forms,jobs,candidates,wa}.js (global scope TETAP di fase ini).
 // File ini: papan tugas admin (tambah/kerjakan/selesaikan/hapus), jadwal
 // (simpan/hapus), & helper memori window.ALL_TUGAS / window.ALL_SCHEDULES — domain
-// reminder/agenda yang dikirim lewat WA (Fonnte). Body fungsi byte-identik
-// dari 07_api.js — perilaku tidak berubah.
 export function renderTugas() {
   var list = document.getElementById('todo-list');
   if (!list) return;

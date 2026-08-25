@@ -3,7 +3,6 @@ import { env } from './env';
 import { cacheClear } from './cache';
 // actions-register.js — daftar siswa baru (respon_siswa_baru) + link & bridge
 // form (QR / apply-full / master-full / ai_form).
-// MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.
 
 // ---------------------------------------------------------------------------

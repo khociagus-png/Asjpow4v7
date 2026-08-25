@@ -3,11 +3,9 @@ import { renderFormInbox } from '../render/mail.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 9. INTERAKSI BACKEND (NETLIFY FUNCTIONS + SUPABASE) — DOMAIN MAIL INBOX
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
 // js/api/{forms,jobs,candidates,wa}.js (global scope TETAP di fase ini).
 // File ini: aksi mail/form (review/approve/reject/delete/tandai dibaca) +
 // patch-in-place di memori (window.ALL_FORM / window.ALL_CANDIDATES / window.MAIL_SELECTED).
-// Body fungsi byte-identik dari 07_api.js — perilaku tidak berubah.
 // REFACTOR: semua interaksi backend kini async/await + try/catch/finally.
 // Pola lama .then().catch() diganti blok try/finally supaya loader dan
 // tombol tidak pernah terkunci, dan error terpusat di satu tempat.

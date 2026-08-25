@@ -1,7 +1,4 @@
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
-// js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
-// 02_init.js — perilaku tidak berubah.
 // ==========================================
 // PREVIEW FILE — render Excel client-side (SheetJS lazy vendor), fallback
 // MS Office Viewer, pesan loading/error di iframe

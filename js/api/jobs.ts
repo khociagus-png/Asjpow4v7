@@ -4,11 +4,9 @@ import { registerSeamAliases } from '../core/bridge.ts';
 import { uploadToCloudinary } from '../cloudinary.ts';
 // 9. INTERAKSI BACKEND — DOMAIN LOKER / KELOLA (jobs)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/07_api.js dipecah per domain →
 // js/api/{forms,jobs,candidates,wa}.js (global scope TETAP di fase ini).
 // File ini: kelola loker (simpan/edit/status/hapus/tahapan DB), upload
 // pamflet/template (downscale + signed URL), & helper memori window.ALL_DB_JOBS/
-// window.ALL_JOBS. Body fungsi byte-identik dari 07_api.js — perilaku tidak berubah.
 // ===== PATCH-IN-PLACE: KELOLA LOKER =====
 // Sama seperti mail: backend mengembalikan baris yang berubah, frontend
 // menimpa di memori + render ulang dari memori (window.renderAdminFull = murni DOM,

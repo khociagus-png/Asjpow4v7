@@ -4,10 +4,8 @@ import { renderAdmin } from './admin.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 7. FUNGSI RENDER — DOMAIN PUBLIK (index.html)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
 // js/render/{public,admin,candidate,share,mail}.js (global scope TETAP).
 // File ini: filter & tabel lowongan publik (Semua/Buka/Urgent/Tutup) + filter
-// kelola loker. Body fungsi byte-identik dari 05_render.js — perilaku tidak
 // berubah.
 
 export function filterPublicData(s) {

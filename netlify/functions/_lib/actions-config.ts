@@ -2,7 +2,6 @@ import { supabaseJson } from './db/client';
 import { findSettings } from './db/misc';
 import { requireRole } from './actions-auth';
 // actions-config.js — konfigurasi sistem (sys_config) + preset rincian biaya.
-// MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah dari actions-extra.js,
 // perilaku TIDAK berubah.
 
 const CONFIG_TYPE_MAP = {

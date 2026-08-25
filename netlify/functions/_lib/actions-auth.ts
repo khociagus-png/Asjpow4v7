@@ -9,7 +9,6 @@ import { cacheClear } from './cache';
 import { findCandidateByWa, CAND_WA_COLS } from './candidate-helpers';
 // actions-auth.js — autentikasi & otorisasi backend.
 //
-// MODUL BARU (Fase 1.1b REFACTOR_TODO.md): kode dipindah dari handlers.js —
 // masterPins, requireAdmin, isValidWaFormat, handleCheckAdminMaster/Personal,
 // handleLoginKandidat, handleDaftarKandidat, handleGantiPasswordKandidat.
 // findCandidateByWa & CAND_WA_COLS dipakai lintas domain → ada di

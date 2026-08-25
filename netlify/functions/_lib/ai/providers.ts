@@ -1,7 +1,5 @@
 import { env } from '../env.ts';
 // ai/providers.js — lapisan PROVIDER AI (Gemini) + helper parsing output AI.
-// MODUL BARU (Fase 1.4 REFACTOR_TODO.md) — dipindah dari actions-ai.js,
-// body fungsi byte-identik (perilaku tidak berubah).
 
 // ---------------------------------------------------------------------------
 // Gemini

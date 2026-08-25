@@ -1,4 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script ai_form.html dipindah ke
 // js/pages/ai_form.js — sekarang ESM (Fase 3 langkah 13): diload type=module.
 // State (chatHistory, latestCandidateData, *Base64/*File, dll) PRIVATE modul;
 // fungsi yang dipanggil HTML onclick/onchange/onload + string onclick dinamis

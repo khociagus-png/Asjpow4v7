@@ -2,9 +2,6 @@ import { tr } from '../../i18n.ts';
 import { showToast } from '../init/util.ts';
 import { ALL_FORM, PREV_MAIL_COUNT } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
-// js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
-// 03_engine.js — perilaku tidak berubah.
 // ==========================================
 // GUARD AUTO-REFRESH & BADGE MAIL — deteksi modal terbuka / scroll,
 // hitung mail pending & perbarui semua badge notifikasi

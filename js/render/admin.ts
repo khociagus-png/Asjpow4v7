@@ -22,11 +22,9 @@ import { registerSeamAliases } from '../core/bridge.ts';
 import { callAPI } from '../../api-client.ts';
 // 7. FUNGSI RENDER — DOMAIN ADMIN (admin.html)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
 // js/render/{public,admin,candidate,share,mail}.js (global scope TETAP).
 // File ini: switch tab admin, render dashboard (renderAdminFull), tabel
 // kelola loker, tabel DB JOB + badge tahapan pipeline. Body fungsi
-// byte-identik dari 05_render.js — perilaku tidak berubah.
 
 // Sidebar tab styles (unified dashboard)
 var SIDEBAR_INACTIVE =

@@ -6,7 +6,6 @@ import { listStorageFolder, BERKAS_COLUMNS } from './db/berkas';
 // actions-share.js — viewer TSK publik (share.html?job=KODE). Dipanggil
 // LANGSUNG via GET dari netlify/functions/share-data.js (redirect /api/
 // share-data), bukan lewat dispatch POST. MODUL BARU (Fase 1.1d
-// REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 
 async function handleShareData(jobCode) {
   const code = String(jobCode || '').trim();

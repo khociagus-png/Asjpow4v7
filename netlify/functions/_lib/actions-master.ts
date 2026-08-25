@@ -9,8 +9,6 @@ import { nextCandidateId } from './candidate-helpers';
 import { cacheClear } from './cache';
 import { resolveFileUrl } from './storage';
 // actions-master.js — master biodata/CV (master_database_candidate) untuk
-// master-full.html + preview CV + ai_form. MODUL BARU (Fase 1.2 REFACTOR_TODO.md)
-// — kode dipindah dari actions-extra.js, perilaku TIDAK berubah.
 
 // Label ID untuk ringkasan biodata (kolom master → nama yang dibaca manusia).
 // Dipakai handleSimpanUpdateMaster untuk mencatat "[BIODATA] … diubah" ke mail

@@ -1,4 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): inline script siswa-baru.html dipindah
 // ke js/pages/siswa_baru.js. ESM (Fase 3 langkah 13): modul ES dimuat
 // <script type="module"> — export + alias window.* utk HTML inline (body
 // onload="initApp()", onkeypress="handleEnter(event)", onchange=

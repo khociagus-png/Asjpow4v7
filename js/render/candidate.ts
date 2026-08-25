@@ -4,11 +4,8 @@ import { ensureAllCandidates } from '../api/candidates.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 7. FUNGSI RENDER — DOMAIN KANDIDAT (tabel daftar kandidat admin)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
 // js/render/{public,admin,candidate,share,mail}.js (global scope TETAP).
 // File ini: kolom "Job Dilamar", filter kandidat (teks/gender/usia/JFT) &
-// tabel daftar kandidat admin. Body fungsi byte-identik dari 05_render.js —
-// perilaku tidak berubah.
 
 // Kolom "Job Dilamar" di tabel kandidat: job utama (id_loker_pilihan) +
 // chip +N kalau kandidat punya lamaran lain di mail (multi-apply).

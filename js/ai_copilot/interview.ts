@@ -1,9 +1,6 @@
 import { ALL_CANDIDATES, currentKandidatName, currentKandidatWa } from '../init/state.ts';
 import { ensureAllCandidates } from '../api/candidates.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/09_ai_copilot.js dipecah per domain →
-// js/ai_copilot/{admin,interview,parse,results}.js. Body fungsi byte-identik
-// dari 09_ai_copilot.js — perilaku tidak berubah.
 // ==========================================
 // SIMULATOR WAWANCARA VIP — latihan wawancara kandidat dengan AI Jeklin
 // ==========================================

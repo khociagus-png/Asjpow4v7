@@ -5,7 +5,6 @@ import { findMasterByWa } from './cv';
 import { geminiParseFile, parseJsonLoose } from './providers';
 // ai/classify.js — domain AI klasifikasi & parse dokumen biodata/CV admin
 // (PDF/Excel/Word/CSV/TXT/gambar → Gemini → JSON). MODUL BARU (Fase 1.4
-// REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
 
 // ---------------------------------------------------------------------------
 // parseDokumenBiodata — admin upload file CV (PDF/Excel/Word/CSV/TXT/gambar)

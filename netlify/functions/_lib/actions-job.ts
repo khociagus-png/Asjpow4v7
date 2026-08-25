@@ -7,8 +7,6 @@ import { findCandidateByWa } from './candidate-helpers';
 import { cacheClear } from './cache';
 import { stripRaw } from './actions-public';
 // actions-job.js — kelola lowongan (job_database): simpan/edit/status/hapus/
-// tahapan/dokumen share/tandai gagal. MODUL BARU (Fase 1.1c REFACTOR_TODO.md)
-// — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 
 import {
   countCandidatesForJob,

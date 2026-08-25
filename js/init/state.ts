@@ -1,6 +1,3 @@
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
-// js/init/{state,theme,util,preview,nav,boot}.js. Deklarasi byte-identik dari
-// 02_init.js — perilaku tidak berubah.
 // ==========================================
 // STATE GLOBAL — semua variabel global aplikasi (data dashboard, filter,
 // sesi aktif, timer). Diinisialisasi saat script dimuat (urutan STACK).

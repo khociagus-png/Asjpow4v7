@@ -5,11 +5,8 @@ import { ALL_DB_JOBS, ALL_JOBS } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 7. FUNGSI RENDER — DOMAIN SHARE LOKER (modal share + template WA)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
 // js/render/{public,admin,candidate,share,mail}.js (global scope TETAP).
 // File ini: modal share view loker (link, checkbox dokumen, template copas
-// WA, preview iframe, simpan dokumen share). Body fungsi byte-identik dari
-// 05_render.js — perilaku tidak berubah.
 
 // Chip dokumen share di modal Share Loker. SUMBER KEBENARAN frontend:
 // backend normalizeDokumenShare (netlify/functions/jobs.ts) HARUS menerima

@@ -1,7 +1,5 @@
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/11_admin_ops.js dipecah per domain →
 // js/admin_ops/{schedule,candidates,sysconfig,loading,migration,drive}.js.
-// Body fungsi byte-identik dari 11_admin_ops.js — perilaku tidak berubah.
 // ==========================================
 // MIGRASI DATABASE — jalankan migrasi dari tab Pengaturan, render hasil,
 // salin SQL pending

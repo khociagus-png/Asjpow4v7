@@ -10,9 +10,6 @@ import { ensureAllCandidates } from '../api/candidates.ts';
 import { normalizeGenderValue } from '../03_candidate.ts';
 import { previewFileInFrame } from '../init/preview.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/06_admin_modal.js dipecah per domain →
-// js/admin_modal/{dbfilter,cv,job}.js. Body fungsi byte-identik dari
-// 06_admin_modal.js — perilaku tidak berubah.
 // ==========================================
 // MODAL CV DIGITAL (DOSSIER) — buka CV, edit cepat, preview inline/PDF,
 // simpan catatan admin

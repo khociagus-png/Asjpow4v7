@@ -5,7 +5,6 @@ import { syncBiodataKeMail } from '../actions-mail.ts';
 // ai/cv.js — domain AI master/CV: auto-fill data kandidat (buildMasterNested /
 // buildRingkasData), konteks admin AI copilot, & penyimpanan data AI form
 // (ai_form_submissions + master_database_candidate). MODUL BARU (Fase 1.4
-// REFACTOR_TODO.md) — dipindah dari actions-ai.js, body fungsi byte-identik.
 
 import {
   findCandidateByIdFiltered,

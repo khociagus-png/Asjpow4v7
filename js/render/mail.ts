@@ -4,11 +4,8 @@ import { ALL_FORM, mailFilterStatus, mailSearchText } from '../init/state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
 // 7. FUNGSI RENDER — DOMAIN MAIL INBOX (tabel lamaran admin)
 // ==========================================
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/05_render.js dipecah per domain →
 // js/render/{public,admin,candidate,share,mail}.js (global scope TETAP).
 // File ini: seleksi massal MAIL_SELECTED, status/bucket mail, filter UI &
-// tabel inbox (window.renderFormInbox). Body fungsi byte-identik dari 05_render.js —
-// perilaku tidak berubah.
 
 // Seleksi baris Mail Inbox untuk hapus massal (key = rowIndex di window.ALL_FORM).
 export var MAIL_SELECTED: Record<string, any> = {};

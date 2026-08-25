@@ -9,7 +9,6 @@ import { registerSeamAliases } from './core/bridge.ts';
 // PRIVAT modul (tak ada pemakai luar).
 
 // 12. E-SIGN CANVAS, DIGITAL STUDENT CARD & MATCHMAKING
-// Dipisah dari 09_ai_copilot.js saat god-object refactor.
 // ==========================================
 // ==========================================
 // LOGIKA FULL SCREEN CANVAS E-SIGN

@@ -30,9 +30,6 @@ import { renderStudentCard } from '../12_esign_match.ts';
 import { renderLanguage } from '../01_public.ts';
 import { getSavedTheme } from '../init/theme.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/03_engine.js dipecah per domain →
-// js/engine/{pipeline,dashboard,guards,init}.js. Body fungsi byte-identik dari
-// 03_engine.js — perilaku tidak berubah.
 // ==========================================
 // MESIN UTAMA — tarik data super kilat (anti layar putih) & init dashboard
 // ==========================================

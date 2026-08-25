@@ -20,7 +20,6 @@ import { syncFormMailDariUpload } from './actions-mail';
 import { nextCandidateId } from './candidate-helpers';
 import * as fcm from './fcm-server';
 // actions-upload.js — upload & apply (apply-full.html, admin pemberkasan,
-// upload langsung). MODUL BARU (Fase 1.2 REFACTOR_TODO.md) — kode dipindah
 // dari actions-extra.js, perilaku TIDAK berubah.
 
 // ---------------------------------------------------------------------------

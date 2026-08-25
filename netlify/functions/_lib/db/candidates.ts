@@ -1,6 +1,5 @@
 import { supabaseJson, supabasePaged, pick, toText, normalizeWa, findTable } from './client';
 // db/candidates.js — repo kandidat (database_candidate): mapCandidate, query WA/ID,
-// attach lamaran. MODUL BARU (Fase 1.3 REFACTOR_TODO.md) — dipindah dari supabase.js.
 
 // Kolom asli tabel database_candidate:
 //   id, id_kandidat, nama_lengkap, nik, gender, usia, tb, bb, pendidikan,

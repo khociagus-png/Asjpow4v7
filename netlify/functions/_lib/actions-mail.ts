@@ -9,7 +9,6 @@ import { cacheClear } from './cache';
 import * as fcm from './fcm-server';
 // actions-mail.js — Mail inbox (database_asj_form): review/approve/reject/
 // delete/tandai dibaca + sinkronisasi kandidat. MODUL BARU (Fase 1.1c
-// REFACTOR_TODO.md) — kode dipindah dari handlers.js, perilaku TIDAK berubah.
 
 import {
   findFormByIndexFiltered,

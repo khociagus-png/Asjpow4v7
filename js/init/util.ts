@@ -1,8 +1,5 @@
 import { DROPDOWNS } from './state.ts';
 import { registerSeamAliases } from '../core/bridge.ts';
-// MODUL BARU (Fase 2 REFACTOR_TODO.md): js/02_init.js dipecah per domain →
-// js/init/{state,theme,util,preview,nav,boot}.js. Body fungsi byte-identik dari
-// 02_init.js — perilaku tidak berubah.
 // ==========================================
 // UTIL — pelindung DOM (safeSet/setImg/setBg), normalisasi WA, toast,
 // format data, dropdown/checkbox, preview URL & tipe file
