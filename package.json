@@ -9,6 +9,7 @@
     "e2e:share": "node e2e/share-view.mjs",
     "e2e:upload": "node e2e/upload-check.mjs",
     "e2e:biodata": "node e2e/biodata-check.mjs",
+    "e2e:upsert": "bun e2e/upsert-check.mjs",
     "dedupe": "node scripts/dedupe-duplicates.mts",
     "dedupe:apply": "node scripts/dedupe-duplicates.mts --apply",
     "test": "vitest run",

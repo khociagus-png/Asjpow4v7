@@ -14,7 +14,7 @@
 -- ############################################################
 
 -- database_candidate: lookup by WA, loker, ID kandidat
-CREATE INDEX IF NOT EXISTS idx_cand_no_wa ON database_candidate (no_wa);
+-- [DROPPED 2026-08-25] redundant — idx_dc_no_wa_loker btree (no_wa, id_loker_pilihan) prefix covers
 CREATE INDEX IF NOT EXISTS idx_cand_loker ON database_candidate (id_loker_pilihan);
 CREATE INDEX IF NOT EXISTS idx_cand_id_kandidat ON database_candidate (id_kandidat);
 
@@ -143,7 +143,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_cand_no_wa_uniq ON database_candidate (no_
 CREATE UNIQUE INDEX IF NOT EXISTS idx_master_no_wa_uniq ON master_database_candidate (no_wa);
 
 -- Berkas: 1 baris per (wa, tahap)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_berkas_wa_tahap_uniq ON pemberkasan_checklist (wa, tahap);
+-- [DROPPED 2026-08-25] redundant — idx_pemberkasan_wa_tahap UNIQUE (wa,tahap) sudah ada
 
 -- Lamaran (no_wa, code_job): sudah unik via idx_form_wa_job di SECTION 1.
 
