@@ -1,5 +1,13 @@
 import bcrypt from 'bcryptjs';
-import { hasBackend, normalizeWa, pick, supabaseJson, supabaseUrl, toText } from './db/client';
+import {
+  hasBackend,
+  normalizeWa,
+  pick,
+  supabaseJson,
+  supabaseUpsert,
+  supabaseUrl,
+  toText,
+} from './db/client';
 import { findJobByCodeFiltered, findJobs } from './db/jobs';
 import { findForms, findFormsByWa, upsertFormRow } from './db/forms';
 import { findCandidateByWaFiltered, findCandidates, mapCandidate } from './db/candidates';
@@ -689,8 +697,9 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabaseJson('POST', 'database_candidate', {
-        body: candBody,
+      // Upsert anti-duplikat (no_wa): dua input paralel utk WA yang sama
+      // tidak bikin 2 baris kandidat.
+      await supabaseUpsert('database_candidate', candBody, ['no_wa'], {
         headers: { Prefer: 'return=minimal' },
       });
     }
@@ -703,10 +712,13 @@ async function handleSimpanKandidatDanUpload(payload, sessionToken) {
         headers: { Prefer: 'return=minimal' },
       });
     } else {
-      await supabaseJson('POST', 'master_database_candidate', {
-        body: Object.assign({ created_at: now, updated_at: now }, masterBody),
-        headers: { Prefer: 'return=minimal' },
-      });
+      // Upsert anti-duplikat (no_wa): 1 master CV per kandidat.
+      await supabaseUpsert(
+        'master_database_candidate',
+        Object.assign({ created_at: now, updated_at: now }, masterBody),
+        ['no_wa'],
+        { headers: { Prefer: 'return=minimal' } },
+      );
     }
     const fRow = await findFormByWa(wa);
     if (fRow && fRow.id !== undefined) {

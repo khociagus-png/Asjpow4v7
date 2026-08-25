@@ -40,7 +40,7 @@ var IS_PREVIEW_HOST =
   (location.hostname.indexOf('daytonaproxy') > -1 ||
     location.hostname.indexOf('.freebuff') > -1 ||
     location.hostname.indexOf('freebuff.app') > -1);
-if ((IS_PREVIEW_HOST) && 'serviceWorker' in navigator) {
+if (IS_PREVIEW_HOST && 'serviceWorker' in navigator) {
   // Hapus SW lama + cache-nya (aman: hanya di localhost, production tidak
   // tersentuh). Dipanggil sekali di awal, sebelum registrasi apa pun.
   navigator.serviceWorker

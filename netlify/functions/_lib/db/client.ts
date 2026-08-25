@@ -58,6 +58,50 @@ async function supabaseJson(method, pathname, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+// UPSERT via PostgREST: INSERT dengan resolution=merge-duplicates + on_conflict.
+// Kalau baris dengan kolom konflik sudah ada (unique index), UPDATE baris lama
+// alih-alih error 409 duplicate key — duplikasi tidak mungkin & user tidak
+// melihat error. Butuh unique index di kolom konflik (lihat
+// migrations/20260825_index_antiduplikat.sql SECTION 4).
+/** @param {string} table @param {Record<string, unknown>} row @param {string[]} conflictCols @param {JsonOpts} [opts] @returns {Promise<unknown>} */
+async function supabaseUpsert(
+  table: string,
+  row: Record<string, unknown>,
+  conflictCols: string[],
+  opts: {
+    query?: Record<string, string | number>;
+    headers?: Record<string, string>;
+    body?: unknown;
+  } = {},
+): Promise<unknown> {
+  const cols = conflictCols.join(',');
+  try {
+    return await supabaseJson('POST', table, {
+      ...opts,
+      body: row,
+      query: { ...(opts.query || {}), on_conflict: cols },
+      // Gabung Prefer pemanggil (mis. return=minimal) dengan resolution upsert.
+      headers: {
+        ...(opts.headers || {}),
+        Prefer:
+          ((opts.headers && opts.headers.Prefer) || 'return=minimal') +
+          ',resolution=merge-duplicates',
+      },
+    });
+  } catch (e) {
+    // 42P10 = unique index di kolom konflik belum ada di DB
+    // (migrations/20260825_index_antiduplikat.sql SECTION 4 belum dijalankan).
+    // Fallback INSERT biasa — perilaku lama, race paralel tetap bisa dobel
+    // tapi tidak melempar error baru. Error lain diteruskan.
+    if (!String((e && e.message) || '').includes('42P10')) throw e;
+    return supabaseJson('POST', table, {
+      ...opts,
+      body: row,
+      headers: { ...(opts.headers || {}), Prefer: 'return=minimal' },
+    });
+  }
+}
+
 // Query paginated via header Range + total dari Content-Range. Tempat TUNGGAL
 // untuk fetch REST dengan Range — pemakai: fetchPagedAll (candidates.js) &
 // queryPaged (misc.js). supabaseJson biasa tidak bisa dipakai di sini (butuh
@@ -189,6 +233,7 @@ export {
   supabaseKey,
   hasBackend,
   supabaseJson,
+  supabaseUpsert,
   supabasePaged,
   findTable,
   pick,

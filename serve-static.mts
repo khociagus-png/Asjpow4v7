@@ -231,7 +231,6 @@ createServer(async (req, res) => {
       return;
     }
 
-
     const file = await resolveFile(pathname);
     let body = await readFile(file);
     const ext = extname(file).toLowerCase();

@@ -59,9 +59,14 @@ export default tseslint.config(
   // Frontend ESM: no-undef for all frontend files
   {
     files: [
-      'js/**/*.ts', 'js/**/*.js',
-      'api-client.ts', 'i18n.ts', 'pwa.ts',
-      'api-client.js', 'i18n.js', 'pwa.js',
+      'js/**/*.ts',
+      'js/**/*.js',
+      'api-client.ts',
+      'i18n.ts',
+      'pwa.ts',
+      'api-client.js',
+      'i18n.js',
+      'pwa.js',
     ],
     rules: {
       'no-undef': 'error',

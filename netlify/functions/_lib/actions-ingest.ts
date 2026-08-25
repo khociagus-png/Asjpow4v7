@@ -1,5 +1,12 @@
 import { env } from './env';
-import { normalizeWa, normalizeGender, pick, supabaseJson, toText } from './db/client';
+import {
+  normalizeWa,
+  normalizeGender,
+  pick,
+  supabaseJson,
+  supabaseUpsert,
+  toText,
+} from './db/client';
 import { requireRole } from './actions-auth';
 import { findMasterByWa } from './actions-master';
 import { parseJsonLoose } from './ai/providers';
@@ -368,8 +375,9 @@ export async function handleProcessUploadDoc(payload: unknown[], sessionToken?: 
           });
         }
 
-        const result = await supabaseJson('POST', 'master_database_candidate', {
-          body: postBody,
+        // Upsert anti-duplikat (no_wa): ingest ulang file yang sama tidak
+        // bikin baris master kedua.
+        const result = await supabaseUpsert('master_database_candidate', postBody, ['no_wa'], {
           headers: { Prefer: 'return=representation' },
         });
         upsertedRow = Array.isArray(result) ? result[0] : result;

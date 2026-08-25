@@ -148,6 +148,42 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_berkas_wa_tahap_uniq ON pemberkasan_checkl
 -- Lamaran (no_wa, code_job): sudah unik via idx_form_wa_job di SECTION 1.
 
 -- ############################################################
+-- SECTION 5 (BONUS): DASHBOARD DUPLIKAT — ringkasan 1 query
+-- Jalankan kapan saja (read-only) untuk pantau kesehatan data.
+--   dup_count  = jumlah kunci yang punya >1 baris
+--   extra_rows = total baris lebih yang bisa dihemat
+-- ############################################################
+SELECT 'database_candidate (per no_wa)' AS tabel,
+       COUNT(*) AS dup_count,
+       COALESCE(SUM(jml - 1), 0) AS extra_rows
+FROM (SELECT no_wa, COUNT(*) AS jml FROM database_candidate
+      WHERE no_wa IS NOT NULL AND no_wa <> ''
+      GROUP BY no_wa HAVING COUNT(*) > 1) d
+UNION ALL
+SELECT 'database_asj_form (per no_wa+code_job)',
+       COUNT(*), COALESCE(SUM(jml - 1), 0)
+FROM (SELECT no_wa, code_job, COUNT(*) AS jml FROM database_asj_form
+      WHERE no_wa IS NOT NULL AND no_wa <> '' AND code_job IS NOT NULL AND code_job <> ''
+      GROUP BY no_wa, code_job HAVING COUNT(*) > 1) d
+UNION ALL
+SELECT 'master_database_candidate (per no_wa)',
+       COUNT(*), COALESCE(SUM(jml - 1), 0)
+FROM (SELECT no_wa, COUNT(*) AS jml FROM master_database_candidate
+      WHERE no_wa IS NOT NULL AND no_wa <> ''
+      GROUP BY no_wa HAVING COUNT(*) > 1) d
+UNION ALL
+SELECT 'pemberkasan_checklist (per wa+tahap)',
+       COUNT(*), COALESCE(SUM(jml - 1), 0)
+FROM (SELECT wa, tahap, COUNT(*) AS jml FROM pemberkasan_checklist
+      WHERE wa IS NOT NULL AND wa <> '' AND tahap IS NOT NULL AND tahap <> ''
+      GROUP BY wa, tahap HAVING COUNT(*) > 1) d
+ORDER BY dup_count DESC;
+
+-- Hasil sehat = semua dup_count 0.
+-- Setelah SECTION 4 (UNIQUE index) terpasang, query ini selalu 0 —
+-- database menolak duplikat baru otomatis.
+
+-- ############################################################
 -- VERIFIKASI AKHIR: lihat semua index terpasang
 -- ############################################################
 -- SELECT tablename, indexname, indexdef

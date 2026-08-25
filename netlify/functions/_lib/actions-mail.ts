@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { normalizeWa, pick, supabaseJson } from './db/client';
+import { normalizeWa, pick, supabaseJson, supabaseUpsert } from './db/client';
 import { mapCandidate } from './db/candidates';
 import { attachBerkasBio } from './db/berkas';
 import { requireAdmin } from './actions-auth';
@@ -125,8 +125,9 @@ async function syncCandidateDariForm(f, status) {
       base.tanggal_daftar = now;
       base.created_at = now;
       base.updated_at = now;
-      await supabaseJson('POST', 'database_candidate', {
-        body: base,
+      // Upsert anti-duplikat: WA sudah punya baris (race GET-then-POST /
+      // varian format WA) -> update baris lama, bukan error 409 ke user.
+      await supabaseUpsert('database_candidate', base, ['no_wa'], {
         headers: { Prefer: 'return=minimal' },
       });
     }

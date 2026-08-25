@@ -1,5 +1,5 @@
 import { APPLY_WA_COLS } from './ai/cv';
-import { normalizeWa, pick, supabaseJson, toText } from './db/client';
+import { normalizeWa, pick, supabaseJson, supabaseUpsert, toText } from './db/client';
 import { findCandidateByWaFiltered, findCandidates } from './db/candidates';
 import { fetchMasterByWa } from './db/master';
 import * as session from './session';
@@ -1052,8 +1052,9 @@ async function handleSubmitMasterForm(payload, sessionToken) {
     } else {
       const idKand = await nextCandidateId();
       body.id_kandidat = idKand;
-      await supabaseJson('POST', 'master_database_candidate', {
-        body,
+      // Upsert anti-duplikat (no_wa): race dua simpan paralel -> update,
+      // bukan baris master dobel.
+      await supabaseUpsert('master_database_candidate', body, ['no_wa'], {
         headers: { Prefer: 'return=minimal' },
       });
     }
