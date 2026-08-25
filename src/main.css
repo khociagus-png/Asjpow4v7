@@ -2469,7 +2469,7 @@ body.theme-light .inline-flex.bg-slate-900\/80 .bg-sky-600.text-white {
 }
 
 /* ---- style inline admin.html (print) — dipindah ke sini oleh _gen-partials.mjs ---- */
-e > @media print {
+@media print {
   @page {
     size: A4 portrait;
     margin: 10mm;
