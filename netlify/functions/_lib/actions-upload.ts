@@ -196,6 +196,7 @@ async function handleCekDataPelamar(payload) {
             photoUrl: cPhoto && cPhoto !== '-' ? cPhoto : '-',
             jftUrl: cJft && cJft !== '-' ? cJft : '-',
             sswUrl: cSsw && cSsw !== '-' ? cSsw : '-',
+            email: toText(pick(candRow, ['email'])),
             applications: apps,
           };
         }
@@ -244,27 +245,31 @@ async function handleCekDataPelamar(payload) {
     let finalPhoto = bestPasPhoto;
     let finalJft = bestJft;
     let finalSsw = bestSsw;
-    if (finalPhoto === '-') {
-      try {
-        const cands = await findCandidates();
-        const candRow = (Array.isArray(cands?.rows) ? cands.rows : []).find(
-          (r) => normalizeWa(String(pick(r, ['no_wa', 'wa', 'whatsapp']) || '')) === want,
-        );
-        if (candRow) {
+
+    // Cari email + photo/JFT/SSW dari database_candidate (database_asj_form tidak punya kolom email).
+    let finalEmail = '';
+    try {
+      const cands = await findCandidates();
+      const candRow = (Array.isArray(cands?.rows) ? cands.rows : []).find(
+        (r) => normalizeWa(String(pick(r, ['no_wa', 'wa', 'whatsapp']) || '')) === want,
+      );
+      if (candRow) {
+        finalEmail = toText(pick(candRow, ['email']));
+        if (finalPhoto === '-') {
           const cPhoto = toText(pick(candRow, ['pas_photo', 'pasPhoto', 'photo']));
           if (cPhoto && cPhoto !== '-') finalPhoto = cPhoto;
-          if (finalJft === '-') {
-            const cJft = toText(pick(candRow, ['jft', 'file_jft']));
-            if (cJft && cJft !== '-') finalJft = cJft;
-          }
-          if (finalSsw === '-') {
-            const cSsw = toText(pick(candRow, ['ssw', 'file_ssw']));
-            if (cSsw && cSsw !== '-') finalSsw = cSsw;
-          }
         }
-      } catch {
-        /* fallback non-fatal */
+        if (finalJft === '-') {
+          const cJft = toText(pick(candRow, ['jft', 'file_jft']));
+          if (cJft && cJft !== '-') finalJft = cJft;
+        }
+        if (finalSsw === '-') {
+          const cSsw = toText(pick(candRow, ['ssw', 'file_ssw']));
+          if (cSsw && cSsw !== '-') finalSsw = cSsw;
+        }
       }
+    } catch {
+      /* fallback non-fatal */
     }
     return {
       found: true,
@@ -277,10 +282,12 @@ async function handleCekDataPelamar(payload) {
       photoUrl: finalPhoto,
       jftUrl: finalJft,
       sswUrl: finalSsw,
+      email: finalEmail,
       applications: apps,
     };
   } catch (e) {
     return { found: false, applications: [] };
+
   }
 }
 
