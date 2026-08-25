@@ -132,7 +132,7 @@ try {
   // click via evaluate: #global-loader bisa menutupi tombol saat proses
   // login, dan modal tertutup tepat saat Playwright mengecek stabilitas
   await page.evaluate(() => document.getElementById('btn-log-kandidat').click());
-  const loggedIn = await waitFor(async () => await page.locator('#page-kandidat').isVisible());
+  const loggedIn = await waitFor(async () => await page.evaluate(() => { const el = document.getElementById('page-kandidat'); return el && getComputedStyle(el).display !== 'none'; }));
   check('Login kandidat tes sukses', loggedIn);
   // Dashboard tampil optimistis — data kandidat (ALL_CANDIDATES) datang
   // belakangan via refreshDataDinamis; tunggu sampai terisi dulu supaya

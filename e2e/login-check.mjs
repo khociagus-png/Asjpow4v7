@@ -92,7 +92,7 @@ console.log(`\nTarget: ${BASE}\n`);
 
   // Nav top memakai kelas !hidden (sengaja selalu tersembunyi) — indikator
   // login yang valid: dashboard kandidat tampil (changePage dipanggil initApp)
-  const loggedIn = await waitFor(async () => await page.locator('#page-kandidat').isVisible());
+  const loggedIn = await waitFor(async () => await page.evaluate(() => { const el = document.getElementById('page-kandidat'); return el && getComputedStyle(el).display !== 'none'; }));
   check('Login sukses → dashboard kandidat tampil', loggedIn);
   check('Modal login tertutup', !(await page.locator('#modal-kandidat').isVisible()));
   const stored = await page.evaluate(() => localStorage.getItem('asj_kandidat_login'));
@@ -158,7 +158,7 @@ console.log(`\nTarget: ${BASE}\n`);
   // di TEST 2: #global-loader bisa menutupi tombol saat proses login)
   await page.fill('#admin-pin-personal', ADMIN_PIN);
   await page.evaluate(() => document.getElementById('btn-login-personal').click());
-  const adminMode = await waitFor(async () => await page.locator('#page-admin').isVisible());
+  const adminMode = await waitFor(async () => await page.evaluate(() => { const el = document.getElementById('page-admin'); return el && getComputedStyle(el).display !== 'none'; }));
   check('Login admin sukses → dashboard admin tampil', adminMode);
   check(
     'Menu hamburger admin aktif',
