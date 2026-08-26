@@ -13,9 +13,9 @@ import * as fcm from './fcm-server.ts';
  */
 export async function getAdminTokens(): Promise<string[]> {
   try {
-    const { rows } = await supabaseJson('GET', 'fcm_tokens', {
+    const rows = (await supabaseJson('GET', 'fcm_tokens', {
       query: { select: 'token,wa', limit: 200 },
-    });
+    })) as any[];
     if (!Array.isArray(rows)) return [];
     return rows
       .filter((t) => {
@@ -36,9 +36,9 @@ export async function getAdminTokens(): Promise<string[]> {
  */
 export async function getKandidatTokens(wa: string): Promise<string[]> {
   try {
-    const { rows } = await supabaseJson('GET', 'fcm_tokens', {
+    const rows = (await supabaseJson('GET', 'fcm_tokens', {
       query: { select: 'token', wa: 'eq.' + wa, limit: 20 },
-    });
+    })) as any[];
     if (!Array.isArray(rows)) return [];
     return rows.map((t) => t.token).filter(Boolean);
   } catch {
