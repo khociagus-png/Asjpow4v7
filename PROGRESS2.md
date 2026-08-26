@@ -9,6 +9,27 @@
 
 ---
 
+## Sesi 2026-08-26 (Sore) — Fix Form AI CV Data Hilang & FCM Admin Push Notification (AI Agent)
+
+### Commits
+
+| Hash      | Isi                                                         | Status    |
+| --------- | ----------------------------------------------------------- | --------- |
+| `f624c09` | fix: registerFcmToken for admin + send sessionToken         | ✅ Pushed |
+| `?`       | chore: bump bundle version to force cache reload            | ✅ Pushed |
+
+### Yang Dikerjakan:
+
+1. **Fix Data AI CV Hilang Saat Login Ulang**:
+   - **Root Cause**: Di `js/pages/ai_form.ts`, respon `getDrafCvMaster` mengandung data `AIDATAJSON` lama dari server, namun tidak diparsing sehingga nilai default form selalu menimpanya menjadi kosong, yang kemudian jika di-save akan ikut mengosongkan data di Supabase.
+   - **Fix**: Mengubah logika agar me-`JSON.parse(res.AIDATAJSON)` dan memuatnya ke `aiFormData` di `ai_form.ts`.
+2. **Fix PWA Push Notification (FCM) Admin Ditolak Server**:
+   - **Root Cause**: Ketika admin login (contoh username `khoci`), frontend memanggil `requestNotificationPermission('khoci')`. Backend di `netlify/functions/_lib/actions-auth.ts` mem-bypass normalisasi hanya jika stringnya `'ADMIN'`. Jika bukan, dipanggil fungsi `normalizeWa('khoci')` yang membuang semua karakter selain angka (menjadi `""`), lalu ditolak server dengan error `Invalid data`. Selain itu, route `registerFcmToken` di `api-client.ts` belum dikonfigurasi mengirimkan sesi aktif.
+   - **Fix**: Menambahkan `registerFcmToken` ke `CANDIDATE_ACTIONS` di `api-client.ts` agar `sessionToken` (baik admin atau kandidat) disertakan di header. Di backend, jika peran sesi aktif adalah `admin`, normalisasi dibypass (`wa = waRaw`), sehingga token atas nama `khoci` berhasil didaftarkan.
+3. **Deploy Issue**: `bun run scripts/deploy-netlify.mts` gagal karena error CLI `TypeError: Cannot read properties of undefined (reading 'Cjs')`. **Workaround:** kode langsung di-push ke branch `main` repositori asjpow4v7 GitHub sehingga Netlify otomatis mendeteksi dan mendeploy pembaruan terbaru.
+
+---
+
 ## Sesi 2026-08-26 — Fix missing window.showToast in standalone pages (AI Agent)
 
 ### Commits
