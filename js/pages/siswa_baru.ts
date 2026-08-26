@@ -10,6 +10,7 @@
 // (i18n + api-client) dan mendaftarkan alias seam HTML↔JS TERPUSAT via
 // registerSeamAliases — bukan window.X = X per baris.
 import { registerSeamAliases } from '../core/bridge.ts';
+import '../init/util.ts';
 import { uploadToCloudinary } from '../cloudinary.ts';
 
 export function $(id) {

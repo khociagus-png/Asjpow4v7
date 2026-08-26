@@ -5,7 +5,6 @@
 // Hanya mencetak status/angka (tidak ada data kandidat yang sensitif).
 // =============================================================
 
-
 const { handleAction } = await import('../netlify/functions/_lib/handlers.ts');
 
 const WA = process.env.E2E_WA || '082130442661';

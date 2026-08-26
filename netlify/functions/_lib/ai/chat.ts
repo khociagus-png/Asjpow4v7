@@ -60,10 +60,18 @@ async function autoTranslateMissingJp(data: Record<string, any>): Promise<void> 
     }
   }
   if (pairs.length === 0) return;
-  const lines = pairs.map((p) => (p.index + 1) + '. ' + p.idText).join(NL);
+  const lines = pairs.map((p) => p.index + 1 + '. ' + p.idText).join(NL);
   const prompt =
-    'Terjemahkan Bahasa Indonesia ke Bahasa Jepang untuk CV kerja.' + NL +
-    'Kembalikan JSON: ' + String.fromCharCode(123) + '"0":"jp0","1":"jp1",...' + String.fromCharCode(125) + ' tanpa teks lain.' + NL + NL + lines;
+    'Terjemahkan Bahasa Indonesia ke Bahasa Jepang untuk CV kerja.' +
+    NL +
+    'Kembalikan JSON: ' +
+    String.fromCharCode(123) +
+    '"0":"jp0","1":"jp1",...' +
+    String.fromCharCode(125) +
+    ' tanpa teks lain.' +
+    NL +
+    NL +
+    lines;
   try {
     const r = await geminiGenerate(prompt, []);
     const text = String(r && r.reply ? r.reply : '').trim();

@@ -203,7 +203,13 @@ async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
           const [datePart, timePart] = waktu.split(' ');
           const [dd, mm, yyyy] = datePart.split('/');
           const [hh, mi] = (timePart || '00:00').split(':');
-          return new Date(Number(yyyy), Number(mm) - 1, Number(dd), Number(hh), Number(mi)).getTime();
+          return new Date(
+            Number(yyyy),
+            Number(mm) - 1,
+            Number(dd),
+            Number(hh),
+            Number(mi),
+          ).getTime();
         }
         return new Date(waktu).getTime();
       } catch {
@@ -246,9 +252,21 @@ async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
 
     // Window definitions
     const WINDOWS = [
-      { key: 'h7', field: 'reminder_h7_sent', minMs: 6 * 86400000, maxMs: 8 * 86400000, label: '7 hari' },
-      { key: 'h1', field: 'reminder_h1_sent', minMs: 20 * 3600000, maxMs: 28 * 3600000, label: 'besok' },
-      { key: 'h0', field: 'reminder_sent',    minMs: 0, maxMs: 60 * 60000, label: 'mulai' },
+      {
+        key: 'h7',
+        field: 'reminder_h7_sent',
+        minMs: 6 * 86400000,
+        maxMs: 8 * 86400000,
+        label: '7 hari',
+      },
+      {
+        key: 'h1',
+        field: 'reminder_h1_sent',
+        minMs: 20 * 3600000,
+        maxMs: 28 * 3600000,
+        label: 'besok',
+      },
+      { key: 'h0', field: 'reminder_sent', minMs: 0, maxMs: 60 * 60000, label: 'mulai' },
     ];
 
     for (const s of schedules) {
@@ -271,16 +289,16 @@ async function handleCheckAndSendAgendaReminders(payload, sessionToken) {
         if (w.key === 'h0') {
           const mins = Math.round(diffMs / 60000);
           title = '⏰ ' + agenda;
-          body = agenda + (mins > 0 ? ' dalam ' + mins + ' menit' : ' dimulai sekarang')
-            + (lokasi ? ' di ' + lokasi : '');
+          body =
+            agenda +
+            (mins > 0 ? ' dalam ' + mins + ' menit' : ' dimulai sekarang') +
+            (lokasi ? ' di ' + lokasi : '');
         } else if (w.key === 'h1') {
           title = '📅 Jadwal besok: ' + agenda;
-          body = agenda + ' dijadwalkan besok'
-            + (lokasi ? ' di ' + lokasi : '');
+          body = agenda + ' dijadwalkan besok' + (lokasi ? ' di ' + lokasi : '');
         } else {
           title = '📅 Jadwal 7 hari lagi: ' + agenda;
-          body = agenda + ' dijadwalkan 7 hari lagi'
-            + (lokasi ? ' di ' + lokasi : '');
+          body = agenda + ' dijadwalkan 7 hari lagi' + (lokasi ? ' di ' + lokasi : '');
         }
 
         await sendToWaList(waList, title, body);

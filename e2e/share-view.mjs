@@ -28,7 +28,9 @@ if (!process.env.SHARE_JOB) {
       JOB = best.code || best.id || JOB_DEFAULT;
       console.log('  (info) Auto-discovered job:', JOB);
     }
-  } catch { /* fallback ke default */ }
+  } catch {
+    /* fallback ke default */
+  }
 }
 
 // ---- 1. API check ----------------------------------------------------------
@@ -112,21 +114,13 @@ if (browser) {
 
       check('tidak menampilkan error state', !errorVisible, 'halaman menampilkan Akses Ditolak');
       check('judul job terisi', !!title && title !== 'Loading Job…', `title=${title}`);
-      check(
-        `kandidat dirender di grid (${cardCount})`,
-        cardCount > 0,
-        `cards=${cardCount}`,
-      );
+      check(`kandidat dirender di grid (${cardCount})`, cardCount > 0, `cards=${cardCount}`);
       check('tidak ada error JS', jsErrors.length === 0, jsErrors.slice(0, 3).join(' | '));
     } catch (e) {
-      console.log(
-        `  ⚠ browser assertions interrupted: ${String(e.message || e).slice(0, 100)}`,
-      );
+      console.log(`  ⚠ browser assertions interrupted: ${String(e.message || e).slice(0, 100)}`);
     }
   } catch (e) {
-    console.log(
-      `  ⚠ browser navigation failed: ${String(e.message || e).slice(0, 100)}`,
-    );
+    console.log(`  ⚠ browser navigation failed: ${String(e.message || e).slice(0, 100)}`);
   }
   await browser.close();
 }

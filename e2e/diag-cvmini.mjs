@@ -1,7 +1,6 @@
 // Diag: simpan CV Mini — login kandidat sungguhan lalu simpanUpdateMaster
 // dengan payload PERSIS yang dikirim frontend (prosesSimpanCvMini).
 
-
 const { handleAction } = await import('../netlify/functions/_lib/handlers.ts');
 
 const WA = process.env.E2E_WA || '082130442661'; // AGUS KHOCI

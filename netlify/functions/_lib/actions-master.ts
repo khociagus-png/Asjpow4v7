@@ -167,26 +167,24 @@ const MASTER_COLUMN_MAP = {
   noCoe: 'no_coe',
 };
 
-
-
 // Peta auto-translate: form key (ID text) -> DB column JP.
 const JP_TRANSLATE_MAP: Record<string, string> = {
-  promosi: "promosi_diri_jp",
-  kelebihan: "kelebihan_jp",
-  kekurangan: "kekurangan_jp",
-  hobi: "hobi_jp",
-  keahlianKhusus: "keahlian_khusus_jp",
-  alasanBidang: "alasan_memilih_bidang_jp",
-  motivasiJepang: "motivasi_ke_jepang_jp",
-  keinginan: "keinginan_pribadi_jp",
-  rencanaPulang: "rencana_setelah_pulang_jp",
-  tujuanJepang: "tujuan_ke_jepang_jp",
-  penyakit: "riwayat_medis_jp",
-  alergi: "alergi_jp",
-  laka: "riwayat_kecelakaan_jp",
-  tempatLahir: "tempat_lahir_jp",
-  agama: "agama_jp",
-  alamat: "alamat_jp",
+  promosi: 'promosi_diri_jp',
+  kelebihan: 'kelebihan_jp',
+  kekurangan: 'kekurangan_jp',
+  hobi: 'hobi_jp',
+  keahlianKhusus: 'keahlian_khusus_jp',
+  alasanBidang: 'alasan_memilih_bidang_jp',
+  motivasiJepang: 'motivasi_ke_jepang_jp',
+  keinginan: 'keinginan_pribadi_jp',
+  rencanaPulang: 'rencana_setelah_pulang_jp',
+  tujuanJepang: 'tujuan_ke_jepang_jp',
+  penyakit: 'riwayat_medis_jp',
+  alergi: 'alergi_jp',
+  laka: 'riwayat_kecelakaan_jp',
+  tempatLahir: 'tempat_lahir_jp',
+  agama: 'agama_jp',
+  alamat: 'alamat_jp',
 };
 
 async function autoTranslateToJp(
@@ -195,32 +193,41 @@ async function autoTranslateToJp(
 ): Promise<Record<string, string>> {
   const toTranslate: Array<{ key: string; text: string }> = [];
   for (const [key, jpCol] of Object.entries(JP_TRANSLATE_MAP)) {
-    const idText = String(idFields[key] || "").trim();
+    const idText = String(idFields[key] || '').trim();
     if (!idText) continue;
-    const existing = existingJp ? String(existingJp[jpCol] || "").trim() : "";
+    const existing = existingJp ? String(existingJp[jpCol] || '').trim() : '';
     if (existing) continue;
     toTranslate.push({ key, text: idText });
   }
   if (toTranslate.length === 0) return {};
   const NL = String.fromCharCode(10);
-  const items = toTranslate.map((t, i) => (i + 1) + ". " + t.text).join(NL);
-  const prompt = "Terjemahkan Bahasa Indonesia ke Bahasa Jepang untuk CV kerja." + NL
-    + "Kembalikan JSON: " + String.fromCharCode(123) + "\"0\":\"jp0\",\"1\":\"jp1\",..." + String.fromCharCode(125) + " tanpa teks lain." + NL + NL + items;
+  const items = toTranslate.map((t, i) => i + 1 + '. ' + t.text).join(NL);
+  const prompt =
+    'Terjemahkan Bahasa Indonesia ke Bahasa Jepang untuk CV kerja.' +
+    NL +
+    'Kembalikan JSON: ' +
+    String.fromCharCode(123) +
+    '"0":"jp0","1":"jp1",...' +
+    String.fromCharCode(125) +
+    ' tanpa teks lain.' +
+    NL +
+    NL +
+    items;
   try {
-    const { geminiGenerate, parseJsonLoose } = await import("./ai/providers.ts");
+    const { geminiGenerate, parseJsonLoose } = await import('./ai/providers.ts');
     const r = await geminiGenerate(prompt, []);
-    const text = String(r && r.reply ? r.reply : "").trim();
+    const text = String(r && r.reply ? r.reply : '').trim();
     if (!text) return {};
     const parsed = parseJsonLoose(text);
-    if (!parsed || typeof parsed !== "object") return {};
+    if (!parsed || typeof parsed !== 'object') return {};
     const result: Record<string, string> = {};
     for (let i = 0; i < toTranslate.length; i++) {
-      const t = String(parsed[String(i)] || "").trim();
+      const t = String(parsed[String(i)] || '').trim();
       if (t) result[toTranslate[i].key] = t;
     }
     return result;
   } catch (e) {
-    console.error("[autoTranslate] error:", e && e.message ? e.message : e);
+    console.error('[autoTranslate] error:', e && e.message ? e.message : e);
     return {};
   }
 }
@@ -991,7 +998,7 @@ async function handleSubmitMasterForm(payload, sessionToken) {
         if (jpTranslations[fk]) body[jc] = jpTranslations[fk];
       }
     } catch (e) {
-      console.error("[submitMaster] auto-translate error:", e && e.message ? e.message : e);
+      console.error('[submitMaster] auto-translate error:', e && e.message ? e.message : e);
     }
     // C. Ringkasan perubahan biodata (untuk mail inbox): bandingkan nilai lama
     // (baris master sebelum PATCH) dengan nilai baru dari form.

@@ -1,4 +1,426 @@
-import{registerSeamAliases as L}from"../core/bridge.js";import{uploadToCloudinary as j}from"../cloudinary.js";(function(){function i(n){if(!n)return"";var t=String(n).replace(/\D/g,"");return t.startsWith("0")?t="62"+t.substring(1):t.startsWith("8")&&(t="62"+t),t}var a=new URLSearchParams(window.location.search);document.getElementById("job").value=(a.get("job")||"").trim(),document.getElementById("bidang").value=(a.get("bidang")||"").trim(),document.getElementById("wa").value=i(a.get("wa")||""),document.getElementById("nama").value=(a.get("nama")||"").trim(),window.dynamicReqStr=(a.get("req")||"CV,JFT,SSW").trim()})();var e=i=>document.getElementById(i),E=2*1024*1024,c=1,k=3,h="-",y="-",b="-";function x(i){let a=i.value.replace(/\D/g,"");a.startsWith("0")?a="62"+a.substring(1):a.startsWith("8")&&(a="62"+a),i.value=a.length>0?"+"+a:""}function F(){let i=e("wa").value.trim().replace(/\D/g,"");i.length<8||(e("wa-loading").classList.remove("hidden"),e("wa-msg").classList.add("hidden"),window.callAPI("cekDataPelamar",[i]).then(a=>{if(e("wa-loading").classList.add("hidden"),a&&a.found){if(e("wa-msg").classList.remove("hidden"),a.nama&&!e("nama").value&&(e("nama").value=a.nama),a.email&&!e("email").value&&(e("email").value=a.email),a.gender){var n=Array.prototype.find.call(e("gender").options,function(d){return d.value.toLowerCase()===String(a.gender).toLowerCase()});n&&(e("gender").value=n.value)}a.usia&&(e("usia").value=a.usia),a.tb&&(e("tb").value=a.tb),a.bb&&(e("bb").value=a.bb);var t=a.pasPhoto||a.photoUrl;t&&t!=="-"&&(h=t,e("photoInfo").innerHTML="<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>",e("photoWarn").style.display="none"),a.jftUrl&&a.jftUrl!=="-"&&(y=a.jftUrl,e("jftInfo").innerHTML="<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>",e("jftWarn").style.display="none"),a.sswUrl&&a.sswUrl!=="-"&&(b=a.sswUrl,e("sswInfo").innerHTML="<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>",e("sswWarn").style.display="none"),window.oldExtraFilesMap=a.extraFilesMap||{},window.dynamicExtraFiles&&window.dynamicExtraFiles.length>0&&window.dynamicExtraFiles.forEach((d,w)=>{if(window.oldExtraFilesMap[d.toUpperCase()]){let p=e("extraInfo_"+w),m=e("extraWarn_"+w);p&&(p.innerHTML="<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"),m&&(m.style.display="none")}})}var l=e("wa-warn");if(l){var r=(e("job").value||"").trim(),s=[],o={};if((a&&a.applications||[]).forEach(function(d){d&&d.code&&String(d.status||"").toUpperCase()==="LULUS"&&d.code!==r&&!o[d.code]&&(o[d.code]=!0,s.push(d))}),s.length>0){var f=s.map(function(d){return d.code}).join(", ");l.classList.remove("hidden"),l.innerHTML="<i class='fas fa-exclamation-triangle mr-1'></i> Nomor ini sudah <b>LULUS</b> untuk: <b>"+f+"</b>. Pastikan Anda memang ingin melamar <b>"+(r||"job ini")+"</b> \u2014 lamaran yang sudah LULUS tidak hilang."}else l.classList.add("hidden")}}))}function S(i,a){g(i,"extraInfo_"+a,"extraWarn_"+a,null)}function U(i){if(i===1&&(c===1&&!M()||c===2&&!W()))return;e(`step-${c}`).classList.remove("active"),e(`indicator-${c}`).classList.remove("active"),e(`indicator-${c}`).classList.add("completed"),c+=i;for(let n=1;n<=k;n++){let t=e(`indicator-${n}`);n<c?(t.classList.add("completed"),t.classList.remove("active")):n===c?(t.classList.add("active"),t.classList.remove("completed")):t.classList.remove("active","completed")}let a=c===1?"0%":c===2?"35%":"70%";e("progress-line").style.width=a,e(`step-${c}`).classList.add("active"),A()}function A(){e("btnPrev").style.display=c===1?"none":"flex",c===k?(e("btnNext").style.display="none",e("btnSubmit").style.display="flex"):(e("btnNext").style.display="flex",e("btnSubmit").style.display="none")}function M(){if(!e("job").value)return alert("Nomor Job tidak terdeteksi!"),!1;if(!e("nama").value.trim())return alert("Nama Lengkap wajib diisi."),e("nama").focus(),!1;let i=e("email").value.trim();return!i||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i)?(alert("Alamat Email wajib diisi dengan format yang valid."),e("email").focus(),!1):e("wa").value.trim()?e("gender").value?e("usia").value?e("tb").value?e("bb").value?!0:(alert("Berat Badan wajib diisi."),e("bb").focus(),!1):(alert("Tinggi Badan wajib diisi."),e("tb").focus(),!1):(alert("Usia wajib diisi."),e("usia").focus(),!1):(alert("Silakan pilih Gender Anda."),e("gender").focus(),!1):(alert("Nomor WhatsApp wajib diisi."),e("wa").focus(),!1)}function W(){if(e("photo").files.length===0&&h==="-")return alert("Silakan Upload Pas Photo Anda."),!1;if(!e("card-cv").classList.contains("hidden")&&e("cv").files.length===0)return alert("Silakan Upload Dokumen CV / Format TSK Anda."),!1;if(!e("card-jft").classList.contains("hidden")&&e("jft").files.length===0&&y==="-")return alert("Silakan Upload Sertifikat JFT Anda."),!1;if(!e("card-ssw").classList.contains("hidden")&&e("ssw").files.length===0&&b==="-")return alert("Silakan Upload Sertifikat SSW Anda."),!1;if(window.dynamicExtraFiles&&window.dynamicExtraFiles.length>0)for(let i=0;i<window.dynamicExtraFiles.length;i++){let a=window.dynamicExtraFiles[i],n=window.oldExtraFilesMap&&window.oldExtraFilesMap[a.toUpperCase()];if(e("extra_"+i).files.length===0&&!n)return alert("Silakan Upload "+a+" Anda."),!1;if(e("extraWarn_"+i).style.display==="block")return alert("Gagal lanjut! Ukuran file "+a+" melebihi batas 2 MB."),!1}return e("photoWarn").style.display==="block"||!e("card-cv").classList.contains("hidden")&&e("cvWarn").style.display==="block"||!e("card-jft").classList.contains("hidden")&&e("jftWarn").style.display==="block"||!e("card-ssw").classList.contains("hidden")&&e("sswWarn").style.display==="block"?(alert("Gagal lanjut! Ada file yang ukurannya melebihi batas 2 MB."),!1):!0}function g(i,a,n,t){let l=i.files[0],r=e(a),s=e(n),o=t?e(t):null;if(!l){r.innerHTML="Belum ada file dipilih",s.style.display="none",o&&(o.style.display="none");return}if(l.size>E){s.style.display="block",r.innerHTML="Belum ada file dipilih",o&&(o.style.display="none"),i.value="";return}if(!window.cekUploadFile(i,{maxMb:2})){s.style.display="none",r.innerHTML="Belum ada file dipilih",o&&(o.style.display="none");return}s.style.display="none",r.innerHTML=`\u2705 Sukses: ${l.name}`,o&&l.type.startsWith("image/")&&(o.src=URL.createObjectURL(l),o.style.display="block")}e("photo").onchange=()=>g(e("photo"),"photoInfo","photoWarn","photoPreview");e("cv").onchange=()=>g(e("cv"),"cvInfo","cvWarn",null);e("jft").onchange=()=>g(e("jft"),"jftInfo","jftWarn",null);e("ssw").onchange=()=>g(e("ssw"),"sswInfo","sswWarn",null);async function I(i,a,n){if(!i||!i.type||!i.type.startsWith("image/")||i.type==="image/svg+xml"||i.type==="image/gif")return i;try{let t=await new Promise((p,m)=>{let u=new FileReader;u.onload=()=>p(u.result),u.onerror=()=>m(new Error("read fail")),u.readAsDataURL(i)}),l=await new Promise((p,m)=>{let u=new Image;u.onload=()=>p(u),u.onerror=()=>m(new Error("decode fail")),u.src=t}),r=l.width,s=l.height,o=a||800;r>o&&(s=Math.round(s*o/r),r=o);let f=document.createElement("canvas");f.width=r,f.height=s,f.getContext("2d").drawImage(l,0,0,r,s);let d=await new Promise(p=>f.toBlob(p,"image/jpeg",n||.8));if(!d||d.size>=i.size)return i;let w=String(i.name||"image").replace(/\.[^/.]+$/,"")||"image";return new File([d],w+".jpg",{type:"image/jpeg"})}catch{return i}}async function P(i,a){let n={};for(let r of Object.keys(i))n[r]=i[r]?await I(i[r],800,.8):null;let t=Object.keys(n).filter(r=>n[r]);if(t.length===0)return{};let l={};for(let r of t)l[r]=await j(n[r]);return l}function T(i){let a=String(i||"").toLowerCase();if(a.indexOf("image/*")!==-1)return["jpg","jpeg","png","gif","webp","bmp","svg"];let n=[];return a.split(",").forEach(t=>{t=t.trim().replace(/^\./,""),t&&n.push(t)}),n.length>0?n:null}var B=["pdf","jpg","jpeg","png","gif","webp","bmp","svg","xls","xlsx","xlsm","doc","docx","ppt","pptx","odt","ods","odp","txt","rtf","csv"];function v(i){if(!i||!i.files||i.files.length===0)return"";let a=i.files[0],n=String(a.name||"").split(".").pop().toLowerCase();return(T(i.getAttribute("accept"))||B).indexOf(n)===-1?"Format "+(a.name||"file")+" tidak diizinkan untuk dokumen ini.":""}async function _(){if(!e("agree").checked){alert("Anda harus menyetujui persyaratan sebelum mengirim lamaran!");return}let i=["photo","cv","jft","ssw"];for(let a=0;a<i.length;a++){let n=document.getElementById(i[a]),t=v(n);if(t){alert(t);return}}e("loading").style.display="flex",e("btnSubmit").disabled=!0,e("btnPrev").disabled=!0;try{let a={};if(e("photo").files.length>0&&(a.photoFile=e("photo").files[0]),!e("card-cv").classList.contains("hidden")&&e("cv").files.length>0&&(a.cvFile=e("cv").files[0]),e("card-jft").classList.contains("hidden")===!1&&e("jft").files.length>0&&(a.jftFile=e("jft").files[0]),e("card-ssw").classList.contains("hidden")===!1&&e("ssw").files.length>0&&(a.sswFile=e("ssw").files[0]),window.dynamicExtraFiles&&window.dynamicExtraFiles.length>0)for(let s=0;s<window.dynamicExtraFiles.length;s++){let o=e("extra_"+s);if(o&&o.files.length>0){let f=v(o);if(f){e("loading").style.display="none",e("btnSubmit").disabled=!1,e("btnPrev").disabled=!1,alert(f);return}let d=window.dynamicExtraFiles[s].replace(/[^a-zA-Z0-9]/g,"_");a[d]=o.files[0]}}let n="master/"+e("nama").value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,"_"),t=await P(a,n),l=[];if(window.dynamicExtraFiles&&window.dynamicExtraFiles.length>0)for(let s=0;s<window.dynamicExtraFiles.length;s++){let o=window.dynamicExtraFiles[s],f=o.replace(/[^a-zA-Z0-9]/g,"_");t[f]?l.push({name:o.toUpperCase(),url:t[f]}):window.oldExtraFilesMap&&window.oldExtraFilesMap[o.toUpperCase()]&&l.push({name:o.toUpperCase(),url:window.oldExtraFilesMap[o.toUpperCase()]})}let r={job:e("job").value,bidang:e("bidang").value,nama:e("nama").value.trim().toUpperCase(),wa:e("wa").value.trim(),email:e("email").value.trim(),gender:e("gender").value,usia:e("usia").value,tb:e("tb").value,bb:e("bb").value,photoFile:t.photoFile||null,oldPhoto:h,cvFile:t.cvFile||null,jftFile:t.jftFile||null,oldJft:y,sswFile:t.sswFile||null,oldSsw:b,extraFiles:l};window.callAPI("submitApply",[r]).then(function(s){if(e("loading").style.display="none",!s.success){alert(s.message),e("btnSubmit").disabled=!1,e("btnPrev").disabled=!1;return}e("success").style.display="flex"}).catch(function(s){e("loading").style.display="none",e("btnSubmit").disabled=!1,e("btnPrev").disabled=!1,alert("Terjadi kesalahan jaringan: "+s.message)})}catch(a){e("loading").style.display="none",e("btnSubmit").disabled=!1,e("btnPrev").disabled=!1,alert("Terjadi kesalahan: "+a.message)}}window.onload=function(){let i=window.applyDocsPlan(window.dynamicReqStr);i.showCv&&e("card-cv").classList.remove("hidden"),i.showJft&&e("card-jft").classList.remove("hidden"),i.showSsw&&e("card-ssw").classList.remove("hidden");let a=i.extras;if(window.dynamicExtraFiles=a,a.length>0){let n="";a.forEach((t,l)=>{n+=`
+import { registerSeamAliases as L } from '../core/bridge.js';
+import { uploadToCloudinary as j } from '../cloudinary.js';
+(function () {
+  function i(n) {
+    if (!n) return '';
+    var t = String(n).replace(/\D/g, '');
+    return (
+      t.startsWith('0') ? (t = '62' + t.substring(1)) : t.startsWith('8') && (t = '62' + t),
+      t
+    );
+  }
+  var a = new URLSearchParams(window.location.search);
+  ((document.getElementById('job').value = (a.get('job') || '').trim()),
+    (document.getElementById('bidang').value = (a.get('bidang') || '').trim()),
+    (document.getElementById('wa').value = i(a.get('wa') || '')),
+    (document.getElementById('nama').value = (a.get('nama') || '').trim()),
+    (window.dynamicReqStr = (a.get('req') || 'CV,JFT,SSW').trim()));
+})();
+var e = (i) => document.getElementById(i),
+  E = 2 * 1024 * 1024,
+  c = 1,
+  k = 3,
+  h = '-',
+  y = '-',
+  b = '-';
+function x(i) {
+  let a = i.value.replace(/\D/g, '');
+  (a.startsWith('0') ? (a = '62' + a.substring(1)) : a.startsWith('8') && (a = '62' + a),
+    (i.value = a.length > 0 ? '+' + a : ''));
+}
+function F() {
+  let i = e('wa').value.trim().replace(/\D/g, '');
+  i.length < 8 ||
+    (e('wa-loading').classList.remove('hidden'),
+    e('wa-msg').classList.add('hidden'),
+    window.callAPI('cekDataPelamar', [i]).then((a) => {
+      if ((e('wa-loading').classList.add('hidden'), a && a.found)) {
+        if (
+          (e('wa-msg').classList.remove('hidden'),
+          a.nama && !e('nama').value && (e('nama').value = a.nama),
+          a.email && !e('email').value && (e('email').value = a.email),
+          a.gender)
+        ) {
+          var n = Array.prototype.find.call(e('gender').options, function (d) {
+            return d.value.toLowerCase() === String(a.gender).toLowerCase();
+          });
+          n && (e('gender').value = n.value);
+        }
+        (a.usia && (e('usia').value = a.usia),
+          a.tb && (e('tb').value = a.tb),
+          a.bb && (e('bb').value = a.bb));
+        var t = a.pasPhoto || a.photoUrl;
+        (t &&
+          t !== '-' &&
+          ((h = t),
+          (e('photoInfo').innerHTML =
+            "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"),
+          (e('photoWarn').style.display = 'none')),
+          a.jftUrl &&
+            a.jftUrl !== '-' &&
+            ((y = a.jftUrl),
+            (e('jftInfo').innerHTML =
+              "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"),
+            (e('jftWarn').style.display = 'none')),
+          a.sswUrl &&
+            a.sswUrl !== '-' &&
+            ((b = a.sswUrl),
+            (e('sswInfo').innerHTML =
+              "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"),
+            (e('sswWarn').style.display = 'none')),
+          (window.oldExtraFilesMap = a.extraFilesMap || {}),
+          window.dynamicExtraFiles &&
+            window.dynamicExtraFiles.length > 0 &&
+            window.dynamicExtraFiles.forEach((d, w) => {
+              if (window.oldExtraFilesMap[d.toUpperCase()]) {
+                let p = e('extraInfo_' + w),
+                  m = e('extraWarn_' + w);
+                (p &&
+                  (p.innerHTML =
+                    "<span style='color:#10b981; font-weight:700;'><i class='fas fa-check-circle'></i> File Tersimpan. Kosongkan jika tidak diganti.</span>"),
+                  m && (m.style.display = 'none'));
+              }
+            }));
+      }
+      var l = e('wa-warn');
+      if (l) {
+        var r = (e('job').value || '').trim(),
+          s = [],
+          o = {};
+        if (
+          (((a && a.applications) || []).forEach(function (d) {
+            d &&
+              d.code &&
+              String(d.status || '').toUpperCase() === 'LULUS' &&
+              d.code !== r &&
+              !o[d.code] &&
+              ((o[d.code] = !0), s.push(d));
+          }),
+          s.length > 0)
+        ) {
+          var f = s
+            .map(function (d) {
+              return d.code;
+            })
+            .join(', ');
+          (l.classList.remove('hidden'),
+            (l.innerHTML =
+              "<i class='fas fa-exclamation-triangle mr-1'></i> Nomor ini sudah <b>LULUS</b> untuk: <b>" +
+              f +
+              '</b>. Pastikan Anda memang ingin melamar <b>' +
+              (r || 'job ini') +
+              '</b> \u2014 lamaran yang sudah LULUS tidak hilang.'));
+        } else l.classList.add('hidden');
+      }
+    }));
+}
+function S(i, a) {
+  g(i, 'extraInfo_' + a, 'extraWarn_' + a, null);
+}
+function U(i) {
+  if (i === 1 && ((c === 1 && !M()) || (c === 2 && !W()))) return;
+  (e(`step-${c}`).classList.remove('active'),
+    e(`indicator-${c}`).classList.remove('active'),
+    e(`indicator-${c}`).classList.add('completed'),
+    (c += i));
+  for (let n = 1; n <= k; n++) {
+    let t = e(`indicator-${n}`);
+    n < c
+      ? (t.classList.add('completed'), t.classList.remove('active'))
+      : n === c
+        ? (t.classList.add('active'), t.classList.remove('completed'))
+        : t.classList.remove('active', 'completed');
+  }
+  let a = c === 1 ? '0%' : c === 2 ? '35%' : '70%';
+  ((e('progress-line').style.width = a), e(`step-${c}`).classList.add('active'), A());
+}
+function A() {
+  ((e('btnPrev').style.display = c === 1 ? 'none' : 'flex'),
+    c === k
+      ? ((e('btnNext').style.display = 'none'), (e('btnSubmit').style.display = 'flex'))
+      : ((e('btnNext').style.display = 'flex'), (e('btnSubmit').style.display = 'none')));
+}
+function M() {
+  if (!e('job').value) return (alert('Nomor Job tidak terdeteksi!'), !1);
+  if (!e('nama').value.trim()) return (alert('Nama Lengkap wajib diisi.'), e('nama').focus(), !1);
+  let i = e('email').value.trim();
+  return !i || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i)
+    ? (alert('Alamat Email wajib diisi dengan format yang valid.'), e('email').focus(), !1)
+    : e('wa').value.trim()
+      ? e('gender').value
+        ? e('usia').value
+          ? e('tb').value
+            ? e('bb').value
+              ? !0
+              : (alert('Berat Badan wajib diisi.'), e('bb').focus(), !1)
+            : (alert('Tinggi Badan wajib diisi.'), e('tb').focus(), !1)
+          : (alert('Usia wajib diisi.'), e('usia').focus(), !1)
+        : (alert('Silakan pilih Gender Anda.'), e('gender').focus(), !1)
+      : (alert('Nomor WhatsApp wajib diisi.'), e('wa').focus(), !1);
+}
+function W() {
+  if (e('photo').files.length === 0 && h === '-')
+    return (alert('Silakan Upload Pas Photo Anda.'), !1);
+  if (!e('card-cv').classList.contains('hidden') && e('cv').files.length === 0)
+    return (alert('Silakan Upload Dokumen CV / Format TSK Anda.'), !1);
+  if (!e('card-jft').classList.contains('hidden') && e('jft').files.length === 0 && y === '-')
+    return (alert('Silakan Upload Sertifikat JFT Anda.'), !1);
+  if (!e('card-ssw').classList.contains('hidden') && e('ssw').files.length === 0 && b === '-')
+    return (alert('Silakan Upload Sertifikat SSW Anda.'), !1);
+  if (window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0)
+    for (let i = 0; i < window.dynamicExtraFiles.length; i++) {
+      let a = window.dynamicExtraFiles[i],
+        n = window.oldExtraFilesMap && window.oldExtraFilesMap[a.toUpperCase()];
+      if (e('extra_' + i).files.length === 0 && !n)
+        return (alert('Silakan Upload ' + a + ' Anda.'), !1);
+      if (e('extraWarn_' + i).style.display === 'block')
+        return (alert('Gagal lanjut! Ukuran file ' + a + ' melebihi batas 2 MB.'), !1);
+    }
+  return e('photoWarn').style.display === 'block' ||
+    (!e('card-cv').classList.contains('hidden') && e('cvWarn').style.display === 'block') ||
+    (!e('card-jft').classList.contains('hidden') && e('jftWarn').style.display === 'block') ||
+    (!e('card-ssw').classList.contains('hidden') && e('sswWarn').style.display === 'block')
+    ? (alert('Gagal lanjut! Ada file yang ukurannya melebihi batas 2 MB.'), !1)
+    : !0;
+}
+function g(i, a, n, t) {
+  let l = i.files[0],
+    r = e(a),
+    s = e(n),
+    o = t ? e(t) : null;
+  if (!l) {
+    ((r.innerHTML = 'Belum ada file dipilih'),
+      (s.style.display = 'none'),
+      o && (o.style.display = 'none'));
+    return;
+  }
+  if (l.size > E) {
+    ((s.style.display = 'block'),
+      (r.innerHTML = 'Belum ada file dipilih'),
+      o && (o.style.display = 'none'),
+      (i.value = ''));
+    return;
+  }
+  if (!window.cekUploadFile(i, { maxMb: 2 })) {
+    ((s.style.display = 'none'),
+      (r.innerHTML = 'Belum ada file dipilih'),
+      o && (o.style.display = 'none'));
+    return;
+  }
+  ((s.style.display = 'none'),
+    (r.innerHTML = `\u2705 Sukses: ${l.name}`),
+    o &&
+      l.type.startsWith('image/') &&
+      ((o.src = URL.createObjectURL(l)), (o.style.display = 'block')));
+}
+e('photo').onchange = () => g(e('photo'), 'photoInfo', 'photoWarn', 'photoPreview');
+e('cv').onchange = () => g(e('cv'), 'cvInfo', 'cvWarn', null);
+e('jft').onchange = () => g(e('jft'), 'jftInfo', 'jftWarn', null);
+e('ssw').onchange = () => g(e('ssw'), 'sswInfo', 'sswWarn', null);
+async function I(i, a, n) {
+  if (
+    !i ||
+    !i.type ||
+    !i.type.startsWith('image/') ||
+    i.type === 'image/svg+xml' ||
+    i.type === 'image/gif'
+  )
+    return i;
+  try {
+    let t = await new Promise((p, m) => {
+        let u = new FileReader();
+        ((u.onload = () => p(u.result)),
+          (u.onerror = () => m(new Error('read fail'))),
+          u.readAsDataURL(i));
+      }),
+      l = await new Promise((p, m) => {
+        let u = new Image();
+        ((u.onload = () => p(u)), (u.onerror = () => m(new Error('decode fail'))), (u.src = t));
+      }),
+      r = l.width,
+      s = l.height,
+      o = a || 800;
+    r > o && ((s = Math.round((s * o) / r)), (r = o));
+    let f = document.createElement('canvas');
+    ((f.width = r), (f.height = s), f.getContext('2d').drawImage(l, 0, 0, r, s));
+    let d = await new Promise((p) => f.toBlob(p, 'image/jpeg', n || 0.8));
+    if (!d || d.size >= i.size) return i;
+    let w = String(i.name || 'image').replace(/\.[^/.]+$/, '') || 'image';
+    return new File([d], w + '.jpg', { type: 'image/jpeg' });
+  } catch {
+    return i;
+  }
+}
+async function P(i, a) {
+  let n = {};
+  for (let r of Object.keys(i)) n[r] = i[r] ? await I(i[r], 800, 0.8) : null;
+  let t = Object.keys(n).filter((r) => n[r]);
+  if (t.length === 0) return {};
+  let l = {};
+  for (let r of t) l[r] = await j(n[r]);
+  return l;
+}
+function T(i) {
+  let a = String(i || '').toLowerCase();
+  if (a.indexOf('image/*') !== -1) return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+  let n = [];
+  return (
+    a.split(',').forEach((t) => {
+      ((t = t.trim().replace(/^\./, '')), t && n.push(t));
+    }),
+    n.length > 0 ? n : null
+  );
+}
+var B = [
+  'pdf',
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'bmp',
+  'svg',
+  'xls',
+  'xlsx',
+  'xlsm',
+  'doc',
+  'docx',
+  'ppt',
+  'pptx',
+  'odt',
+  'ods',
+  'odp',
+  'txt',
+  'rtf',
+  'csv',
+];
+function v(i) {
+  if (!i || !i.files || i.files.length === 0) return '';
+  let a = i.files[0],
+    n = String(a.name || '')
+      .split('.')
+      .pop()
+      .toLowerCase();
+  return (T(i.getAttribute('accept')) || B).indexOf(n) === -1
+    ? 'Format ' + (a.name || 'file') + ' tidak diizinkan untuk dokumen ini.'
+    : '';
+}
+async function _() {
+  if (!e('agree').checked) {
+    alert('Anda harus menyetujui persyaratan sebelum mengirim lamaran!');
+    return;
+  }
+  let i = ['photo', 'cv', 'jft', 'ssw'];
+  for (let a = 0; a < i.length; a++) {
+    let n = document.getElementById(i[a]),
+      t = v(n);
+    if (t) {
+      alert(t);
+      return;
+    }
+  }
+  ((e('loading').style.display = 'flex'),
+    (e('btnSubmit').disabled = !0),
+    (e('btnPrev').disabled = !0));
+  try {
+    let a = {};
+    if (
+      (e('photo').files.length > 0 && (a.photoFile = e('photo').files[0]),
+      !e('card-cv').classList.contains('hidden') &&
+        e('cv').files.length > 0 &&
+        (a.cvFile = e('cv').files[0]),
+      e('card-jft').classList.contains('hidden') === !1 &&
+        e('jft').files.length > 0 &&
+        (a.jftFile = e('jft').files[0]),
+      e('card-ssw').classList.contains('hidden') === !1 &&
+        e('ssw').files.length > 0 &&
+        (a.sswFile = e('ssw').files[0]),
+      window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0)
+    )
+      for (let s = 0; s < window.dynamicExtraFiles.length; s++) {
+        let o = e('extra_' + s);
+        if (o && o.files.length > 0) {
+          let f = v(o);
+          if (f) {
+            ((e('loading').style.display = 'none'),
+              (e('btnSubmit').disabled = !1),
+              (e('btnPrev').disabled = !1),
+              alert(f));
+            return;
+          }
+          let d = window.dynamicExtraFiles[s].replace(/[^a-zA-Z0-9]/g, '_');
+          a[d] = o.files[0];
+        }
+      }
+    let n =
+        'master/' +
+        e('nama')
+          .value.trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9_-]/g, '_'),
+      t = await P(a, n),
+      l = [];
+    if (window.dynamicExtraFiles && window.dynamicExtraFiles.length > 0)
+      for (let s = 0; s < window.dynamicExtraFiles.length; s++) {
+        let o = window.dynamicExtraFiles[s],
+          f = o.replace(/[^a-zA-Z0-9]/g, '_');
+        t[f]
+          ? l.push({ name: o.toUpperCase(), url: t[f] })
+          : window.oldExtraFilesMap &&
+            window.oldExtraFilesMap[o.toUpperCase()] &&
+            l.push({ name: o.toUpperCase(), url: window.oldExtraFilesMap[o.toUpperCase()] });
+      }
+    let r = {
+      job: e('job').value,
+      bidang: e('bidang').value,
+      nama: e('nama').value.trim().toUpperCase(),
+      wa: e('wa').value.trim(),
+      email: e('email').value.trim(),
+      gender: e('gender').value,
+      usia: e('usia').value,
+      tb: e('tb').value,
+      bb: e('bb').value,
+      photoFile: t.photoFile || null,
+      oldPhoto: h,
+      cvFile: t.cvFile || null,
+      jftFile: t.jftFile || null,
+      oldJft: y,
+      sswFile: t.sswFile || null,
+      oldSsw: b,
+      extraFiles: l,
+    };
+    window
+      .callAPI('submitApply', [r])
+      .then(function (s) {
+        if (((e('loading').style.display = 'none'), !s.success)) {
+          (alert(s.message), (e('btnSubmit').disabled = !1), (e('btnPrev').disabled = !1));
+          return;
+        }
+        e('success').style.display = 'flex';
+      })
+      .catch(function (s) {
+        ((e('loading').style.display = 'none'),
+          (e('btnSubmit').disabled = !1),
+          (e('btnPrev').disabled = !1),
+          alert('Terjadi kesalahan jaringan: ' + s.message));
+      });
+  } catch (a) {
+    ((e('loading').style.display = 'none'),
+      (e('btnSubmit').disabled = !1),
+      (e('btnPrev').disabled = !1),
+      alert('Terjadi kesalahan: ' + a.message));
+  }
+}
+window.onload = function () {
+  let i = window.applyDocsPlan(window.dynamicReqStr);
+  (i.showCv && e('card-cv').classList.remove('hidden'),
+    i.showJft && e('card-jft').classList.remove('hidden'),
+    i.showSsw && e('card-ssw').classList.remove('hidden'));
+  let a = i.extras;
+  if (((window.dynamicExtraFiles = a), a.length > 0)) {
+    let n = '';
+    (a.forEach((t, l) => {
+      n += `
               <div class="upload-card">
                 <div class="upload-top">
                   <div class="upload-left">
@@ -11,4 +433,15 @@ import{registerSeamAliases as L}from"../core/bridge.js";import{uploadToCloudinar
                 <div id="extraInfo_${l}" class="file-name">Belum ada file dipilih</div>
                 <div id="extraWarn_${l}" class="size-warn"><i class="fa-solid fa-circle-exclamation"></i> Gagal! Ukuran file melebihi 2 MB.</div>
               </div>
-              `}),e("dynamic-cards").innerHTML=n}e("wa").value&&(x(e("wa")),e("wa").setAttribute("readonly",!0),e("nama").value&&e("nama").setAttribute("readonly",!0),F())};L({formatInputWA:x,handleExtraFile:S,cekRiwayat:F,changeStep:U,submitApply:_});export{U as changeStep,x as formatInputWA,S as handleExtraFile,_ as submitApply};
+              `;
+    }),
+      (e('dynamic-cards').innerHTML = n));
+  }
+  e('wa').value &&
+    (x(e('wa')),
+    e('wa').setAttribute('readonly', !0),
+    e('nama').value && e('nama').setAttribute('readonly', !0),
+    F());
+};
+L({ formatInputWA: x, handleExtraFile: S, cekRiwayat: F, changeStep: U, submitApply: _ });
+export { U as changeStep, x as formatInputWA, S as handleExtraFile, _ as submitApply };

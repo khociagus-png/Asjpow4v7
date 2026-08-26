@@ -81,7 +81,11 @@ let handlers = null;
 async function loadHandlers() {
   if (!handlers) {
     const cacheDir = join(HERE, '.netlify');
-    try { mkdirSync(cacheDir, { recursive: true }); } catch { /* ok */ }
+    try {
+      mkdirSync(cacheDir, { recursive: true });
+    } catch {
+      /* ok */
+    }
     const bundledPath = join(cacheDir, '_handlers-preview.mjs');
     try {
       buildSync({

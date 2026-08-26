@@ -89,8 +89,6 @@ console.log(
     (mapSize ? ` · sourcemap ${(mapSize / 1024).toFixed(1)} KB` : ''),
 );
 
-
-
 // 1a-extra. Pre-build shared modules (bridge.js, cloudinary.js) as standalone ESM.
 //     Standalone pages + upload-guard + apply-docs + pwa all bundle bridge+api-client+i18n
 //     independently, causing ~90KB duplication per page. By pre-building bridge.js and
@@ -101,7 +99,10 @@ const SHARED_MODULES = [
   { entry: `${ROOT}/js/cloudinary.ts`, out: `${ROOT}/js/cloudinary.js` },
 ];
 for (const { entry, out } of SHARED_MODULES) {
-  if (!existsSync(entry)) { console.warn(`[build-js] Shared module not found: ${entry}, skip`); continue; }
+  if (!existsSync(entry)) {
+    console.warn(`[build-js] Shared module not found: ${entry}, skip`);
+    continue;
+  }
   try {
     await build({
       entryPoints: [entry],
@@ -128,17 +129,17 @@ const externalizeSharedDeps = {
   setup(buildPlugin) {
     // Track entry points so we don't mark them external
     const entryAbsPaths = new Set();
-    buildPlugin.onResolve({ filter: /^$/, namespace: 'file' }, args => {
+    buildPlugin.onResolve({ filter: /^$/, namespace: 'file' }, (args) => {
       if (args.path) entryAbsPaths.add(args.path);
       return undefined;
     });
-    buildPlugin.onResolve({ filter: /.ts$/ }, args => {
+    buildPlugin.onResolve({ filter: /.ts$/ }, (args) => {
       // Don't externalize entry points
       if (entryAbsPaths.has(args.path) || args.kind === 'entry-point') return undefined;
       return { path: args.path.replace(/.ts$/, '.js'), external: true };
     });
     // Handle extensionless imports (pwa.ts uses './js/core/bridge' without .ts)
-    buildPlugin.onResolve({ filter: /bridge$/ }, args => {
+    buildPlugin.onResolve({ filter: /bridge$/ }, (args) => {
       if (!args.path.endsWith('.ts') && !args.path.endsWith('.js')) {
         return { path: args.path + '.js', external: true };
       }

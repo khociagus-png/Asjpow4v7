@@ -288,7 +288,6 @@ async function handleCekDataPelamar(payload) {
     };
   } catch (e) {
     return { found: false, applications: [] };
-
   }
 }
 
