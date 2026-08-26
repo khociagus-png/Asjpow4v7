@@ -20,9 +20,9 @@ export async function getAdminTokens(): Promise<string[]> {
     return rows
       .filter((t) => {
         const wa = String(t.wa || '');
-        // Kandidat WA: 628xxxxxxxxxx (13 digit)
+        // Kandidat WA: 628xxxxxxxxxx (12-14 digit)
         // Admin WA: selain format itu
-        return !wa || !/^628\d{10,11}$/.test(wa);
+        return !wa || !/^628\d{9,11}$/.test(wa);
       })
       .map((t) => t.token)
       .filter(Boolean);
