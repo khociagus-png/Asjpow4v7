@@ -13,8 +13,8 @@ var G = [],
   m = {},
   na = !1,
   ia = !1,
-  oa = '',
   sa = '',
+  oa = '',
   la = '',
   da = '',
   fa = 10,
@@ -29,9 +29,9 @@ var G = [],
   wa = '',
   ba = 'ALL',
   ka = '',
-  Aa = null,
   ja = null,
   ya = null,
+  Aa = null,
   xa = '',
   La = '';
 function f(a, e, t) {
@@ -137,16 +137,16 @@ f(
 );
 f(
   'currentAdminName',
-  () => oa,
+  () => sa,
   (a) => {
-    oa = a;
+    sa = a;
   },
 );
 f(
   'currentKandidatName',
-  () => sa,
+  () => oa,
   (a) => {
-    sa = a;
+    oa = a;
   },
 );
 f(
@@ -249,23 +249,23 @@ f(
 );
 f(
   'CURRENT_WA_KANDIDAT',
-  () => Aa,
-  (a) => {
-    Aa = a;
-  },
-);
-f(
-  'PREV_MAIL_COUNT',
   () => ja,
   (a) => {
     ja = a;
   },
 );
 f(
-  'AUTO_REFRESH_TIMER',
+  'PREV_MAIL_COUNT',
   () => ya,
   (a) => {
     ya = a;
+  },
+);
+f(
+  'AUTO_REFRESH_TIMER',
+  () => Aa,
+  (a) => {
+    Aa = a;
   },
 );
 f(
@@ -282,8 +282,8 @@ f(
     La = a;
   },
 );
-import { registerSeamAliases as Oa } from '../core/bridge.js';
-function Pa(a, e) {
+import { registerSeamAliases as Pa } from '../core/bridge.js';
+function Oa(a, e) {
   if (!a || typeof a != 'string' || !/^https?:\/\/[^/]+\/storage\/v1\/object\/public\//i.test(a))
     return a;
   var t = a.indexOf('?') >= 0 ? '&' : '?';
@@ -469,8 +469,8 @@ function ae(a, e) {
     n = e.querySelector('i.fa-chevron-down');
   (t && t.classList.toggle('hidden'), n && n.classList.toggle('rotate-180'));
 }
-var j = typeof WeakMap < 'u' ? new WeakMap() : null,
-  A = null;
+var y = typeof WeakMap < 'u' ? new WeakMap() : null,
+  j = null;
 function Ea(a) {
   if (!a) return;
   Fa(a);
@@ -483,7 +483,7 @@ function Ea(a) {
     r = t[t.length - 1];
   function i(u) {
     if (u.key === 'Escape') {
-      (a.classList.add('hidden'), s());
+      (a.classList.add('hidden'), o());
       return;
     }
     u.key === 'Tab' &&
@@ -491,20 +491,20 @@ function Ea(a) {
         ? document.activeElement === n && (u.preventDefault(), r.focus())
         : document.activeElement === r && (u.preventDefault(), n.focus()));
   }
-  function s() {
+  function o() {
     (a.removeEventListener('keydown', i), l && l.disconnect());
-    var u = j ? j.get(a) : null,
-      c = u ? u.prev : A;
-    (c && typeof c.focus == 'function' && c.focus(), j ? j.delete(a) : (A = null));
+    var u = y ? y.get(a) : null,
+      c = u ? u.prev : j;
+    (c && typeof c.focus == 'function' && c.focus(), y ? y.delete(a) : (j = null));
   }
   var l = null;
   (typeof MutationObserver < 'u' &&
     ((l = new MutationObserver(function () {
-      a.classList.contains('hidden') && s();
+      a.classList.contains('hidden') && o();
     })),
     l.observe(a, { attributes: !0, attributeFilter: ['class'] })),
-    j ? j.set(a, { prev: e, handler: i, observer: l }) : (A = e),
-    (a._focusTrapCleanup = s),
+    y ? y.set(a, { prev: e, handler: i, observer: l }) : (j = e),
+    (a._focusTrapCleanup = o),
     a.addEventListener('keydown', i),
     setTimeout(function () {
       n.focus();
@@ -515,15 +515,15 @@ function Fa(a) {
     (a._focusTrapCleanup(), (a._focusTrapCleanup = null));
     return;
   }
-  (A && typeof A.focus == 'function' && A.focus(), (A = null));
+  (j && typeof j.focus == 'function' && j.focus(), (j = null));
 }
 if (typeof MutationObserver < 'u') {
   let a = function (e) {
     e.querySelectorAll('[role="dialog"]').forEach(function (t) {
-      S.observe(t, { attributes: !0, attributeFilter: ['class'] });
+      L.observe(t, { attributes: !0, attributeFilter: ['class'] });
     });
   };
-  ((S = new MutationObserver(function (e) {
+  ((L = new MutationObserver(function (e) {
     e.forEach(function (t) {
       if (!(t.type !== 'attributes' || t.attributeName !== 'class')) {
         var n = t.target;
@@ -539,10 +539,10 @@ if (typeof MutationObserver < 'u') {
             var r = n;
             (r.getAttribute &&
               r.getAttribute('role') === 'dialog' &&
-              S.observe(n, { attributes: !0, attributeFilter: ['class'] }),
+              L.observe(n, { attributes: !0, attributeFilter: ['class'] }),
               r.querySelectorAll &&
                 r.querySelectorAll('[role="dialog"]').forEach(function (i) {
-                  S.observe(i, { attributes: !0, attributeFilter: ['class'] });
+                  L.observe(i, { attributes: !0, attributeFilter: ['class'] });
                 }));
           }
         });
@@ -554,9 +554,9 @@ if (typeof MutationObserver < 'u') {
         })
       : (a(document), U.observe(document.body, { childList: !0, subtree: !0 })));
 }
-var S, U;
-Oa({
-  thumbnailUrl: Pa,
+var L, U;
+Pa({
+  thumbnailUrl: Oa,
   safeSetVal: Ha,
   normalizePhone: Ua,
   showToast: Sa,
@@ -602,10 +602,11 @@ function d(a) {
   return document.getElementById(a);
 }
 var k = [],
-  o = {},
+  s = {},
   h = '',
+  S = '',
   T = '',
-  I = '',
+  I = null,
   E = null,
   F = null,
   M = null,
@@ -613,13 +614,12 @@ var k = [],
   D = null,
   R = null,
   N = null,
-  B = null,
   re =
     'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png',
   ne =
     'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png',
   g = window.AI_FORM_CONTEXT || {},
-  O = {
+  B = {
     f_nama: 'identitas.nama_lengkap',
     f_katakana: 'identitas.katakana',
     f_panggilan: 'identitas.panggilan',
@@ -697,7 +697,7 @@ var k = [],
     f_kenalan_alamat_jp: 'kenalan_jepang.alamat_jp',
   },
   ie = ['SD', 'SMP', 'SMA/SMK', 'D3/S1', 'LPK BAHASA'],
-  oe = ['AYAH', 'IBU', 'SUAMI', 'ISTRI', 'ANAK', 'KAKAK', 'ADIK'],
+  se = ['AYAH', 'IBU', 'SUAMI', 'ISTRI', 'ANAK', 'KAKAK', 'ADIK'],
   Da = {
     pendidikan: [
       ['tingkat', 'form.ai_f_tingkat', 'select', ie],
@@ -718,7 +718,7 @@ var k = [],
       ['gaji', 'form.ai_f_gaji'],
     ],
     keluarga: [
-      ['hubungan_id', 'form.ai_f_hubungan_id', 'select', oe],
+      ['hubungan_id', 'form.ai_f_hubungan_id', 'select', se],
       ['hubungan_jp', 'form.ai_f_hubungan_jp'],
       ['nama', 'form.ai_f_nama'],
       ['katakana', 'form.ai_f_katakana'],
@@ -749,12 +749,12 @@ function v(a) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-function L(a, e) {
+function P(a, e) {
   if (Array.isArray(e)) {
     var t = Array.isArray(a) ? a : [];
     if (!e.length) return t.slice();
-    var n = e.map(function (s, l) {
-      return L(t[l], s);
+    var n = e.map(function (o, l) {
+      return P(t[l], o);
     });
     return n.concat(t.slice(e.length));
   }
@@ -762,51 +762,51 @@ function L(a, e) {
     var r = a && typeof a == 'object' && !Array.isArray(a) ? a : {},
       i = {};
     return (
-      Object.keys(r).forEach(function (s) {
-        i[s] = r[s];
+      Object.keys(r).forEach(function (o) {
+        i[o] = r[o];
       }),
-      Object.keys(e).forEach(function (s) {
-        i[s] = L(r[s], e[s]);
+      Object.keys(e).forEach(function (o) {
+        i[o] = P(r[o], e[o]);
       }),
       i
     );
   }
   return e == null || (typeof e == 'string' && !e.trim()) ? (a === void 0 ? '' : a) : e;
 }
-function se() {
+function oe() {
   (document
     .querySelectorAll('#formPanel input[readonly], #formPanel textarea[readonly]')
     .forEach(function (a) {
       (a.removeAttribute('readonly'), a.setAttribute('title', window.tr('form.ai_f_tooltip')));
     }),
-    Object.keys(O).forEach(function (a) {
+    Object.keys(B).forEach(function (a) {
       var e = d(a);
       !e ||
         e.dataset.manualBound ||
         ((e.dataset.manualBound = 'true'),
         e.addEventListener('input', function () {
-          ((o = o && typeof o == 'object' ? o : {}),
-            z(o, O[a], e.value),
+          ((s = s && typeof s == 'object' ? s : {}),
+            z(s, B[a], e.value),
             e.classList.add('border-sky-400'),
             w());
         }));
     }));
 }
 function le(a, e, t, n) {
-  (Array.isArray(o[a]) || (o[a] = []), o[a][e] || (o[a][e] = {}), (o[a][e][t] = n), w());
+  (Array.isArray(s[a]) || (s[a] = []), s[a][e] || (s[a][e] = {}), (s[a][e][t] = n), w());
 }
 function de(a) {
-  ((o = o && typeof o == 'object' ? o : {}), Array.isArray(o[a]) || (o[a] = []));
+  ((s = s && typeof s == 'object' ? s : {}), Array.isArray(s[a]) || (s[a] = []));
   var e = {};
   (Da[a].forEach(function (t) {
     e[t[0]] = '';
   }),
-    o[a].push(e),
+    s[a].push(e),
     x(),
     w());
 }
 function fe(a, e) {
-  Array.isArray(o[a]) && (o[a].splice(e, 1), x(), w());
+  Array.isArray(s[a]) && (s[a].splice(e, 1), x(), w());
 }
 function J() {
   var a = String(g.wa || 'baru').replace(/\D/g, ''),
@@ -814,10 +814,10 @@ function J() {
   return 'asj_qween_cv_data_' + a + '_' + e;
 }
 function ce() {
-  o = o && typeof o == 'object' ? o : {};
-  var a = o.identitas || {};
-  (!a.nama_lengkap && g.nama && z(o, 'identitas.nama_lengkap', g.nama),
-    !a.hp && g.wa && z(o, 'identitas.hp', g.wa));
+  s = s && typeof s == 'object' ? s : {};
+  var a = s.identitas || {};
+  (!a.nama_lengkap && g.nama && z(s, 'identitas.nama_lengkap', g.nama),
+    !a.hp && g.wa && z(s, 'identitas.hp', g.wa));
   var e =
     g.flow === 'apply'
       ? 'Lamaran ' + (g.job || 'umum') + ' tersambung ke portal.'
@@ -852,21 +852,15 @@ function Ma(a) {
     window
       .callAPI('getDrafCvMaster', [a])
       .then(function (e) {
-        if ((d('aiTypingStatus') && d('aiTypingStatus').classList.add('hidden'), e)) {
-          if (e.AIDATAJSON && typeof e.AIDATAJSON == 'string')
-            try {
-              var t = JSON.parse(e.AIDATAJSON);
-              e = L(e, t);
-            } catch (r) {
-              console.warn('Failed to parse AIDATAJSON', r);
-            }
-          if (((o = L(e, o)), x(), w(), k.length === 0)) {
-            d('chatBox').innerHTML = '';
-            var n = _e(o);
-            (y('ai', n),
-              k.push({ role: 'assistant', content: JSON.stringify({ reply: n, data: {} }) }),
-              w());
-          }
+        if (
+          (d('aiTypingStatus') && d('aiTypingStatus').classList.add('hidden'),
+          e && ((s = P(e, s)), x(), w(), k.length === 0))
+        ) {
+          d('chatBox').innerHTML = '';
+          var t = _e(s);
+          (A('ai', t),
+            k.push({ role: 'assistant', content: JSON.stringify({ reply: t, data: {} }) }),
+            w());
         }
       })
       .catch(function (e) {
@@ -880,23 +874,23 @@ function me() {
     var a = document.getElementById('lang-btn-ai');
     a && (a.textContent = window.CURRENT_LANG === 'jp' ? 'ID' : 'JP');
   }
-  (se(), typeof window.bersihkanDraftLamaBase64 == 'function' && window.bersihkanDraftLamaBase64());
+  (oe(), typeof window.bersihkanDraftLamaBase64 == 'function' && window.bersihkanDraftLamaBase64());
   var e = localStorage.getItem(J());
   if (e)
     try {
       var t = JSON.parse(e);
       ((k = t.chatHistory || []),
-        (o = t.latestCandidateData || {}),
+        (s = t.latestCandidateData || {}),
         (h = t.currentPhotoBase64 || ''),
+        (S = ''),
         (T = ''),
-        (I = ''),
-        (E = null),
-        (F = null));
+        (I = null),
+        (E = null));
     } catch {
       localStorage.removeItem(J());
     }
   ce();
-  var n = g.wa || (o.identitas && o.identitas.hp);
+  var n = g.wa || (s.identitas && s.identitas.hp);
   (n && g.flow === 'master'
     ? pe(n).then(function (r) {
         if (!r) {
@@ -919,11 +913,11 @@ function me() {
       (d('compressStatus').innerHTML =
         '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved')),
       d('compressStatus').classList.remove('hidden')),
-    T &&
+    S &&
       ((d('status_jft').innerHTML =
         '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto')),
       d('status_jft').classList.remove('hidden')),
-    I &&
+    T &&
       ((d('status_ssw').innerHTML =
         '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto')),
       d('status_ssw').classList.remove('hidden')),
@@ -945,26 +939,26 @@ function _e(a) {
       t.bb || i.push(window.tr('form.chat_missing_bb')),
       (!a.pendidikan || !a.pendidikan.length) && i.push(window.tr('form.chat_missing_pendidikan')),
       (!a.pekerjaan || !a.pekerjaan.length) && i.push(window.tr('form.chat_missing_pekerjaan')));
-    var s = window.tr('form.chat_welcome_named_intro').replace('{nama}', r);
+    var o = window.tr('form.chat_welcome_named_intro').replace('{nama}', r);
     return (
       i.length > 0
-        ? (s += window
+        ? (o += window
             .tr('form.chat_welcome_missing')
             .replace('{missing}', i.slice(0, 2).join(' & ')))
-        : (s += window.tr('form.chat_welcome_complete')),
-      s
+        : (o += window.tr('form.chat_welcome_complete')),
+      o
     );
   } else return window.tr('form.chat_welcome_nameless');
 }
 function ge() {
   var a = window.tr('form.chat_welcome_nameless');
-  (y('ai', a), k.push({ role: 'assistant', content: JSON.stringify({ reply: a, data: {} }) }), w());
+  (A('ai', a), k.push({ role: 'assistant', content: JSON.stringify({ reply: a, data: {} }) }), w());
 }
 function w() {
   try {
     localStorage.setItem(
       J(),
-      JSON.stringify({ chatHistory: k, latestCandidateData: o, currentPhotoBase64: h }),
+      JSON.stringify({ chatHistory: k, latestCandidateData: s, currentPhotoBase64: h }),
     );
   } catch (a) {
     console.warn('Penyimpanan lokal penuh; data teks tetap tersimpan di halaman saat ini.', a);
@@ -1000,7 +994,7 @@ function ve() {
 function he(a) {
   a.key === 'Enter' && (a.preventDefault(), Na());
 }
-function y(a, e) {
+function A(a, e) {
   var t = a === 'user',
     n = v(e).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'),
     r = '<i class="fas fa-user"></i>';
@@ -1020,14 +1014,14 @@ function y(a, e) {
         i.src +
         `" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=&quot;fas fa-user&quot;></i>'">`);
   }
-  var s = '<img src="' + ne + '" alt="" class="w-full h-full object-cover rounded-full">',
+  var o = '<img src="' + ne + '" alt="" class="w-full h-full object-cover rounded-full">',
     l =
       '<div class="flex gap-2 ' +
       (t ? 'flex-row-reverse' : '') +
       ' fade-in"><div class="w-8 h-8 rounded-full overflow-hidden ' +
       (t ? 'bg-sky-500' : 'bg-amber-500 p-0.5') +
       ' flex-shrink-0 flex items-center justify-center text-xs text-white shadow">' +
-      (t ? r : s) +
+      (t ? r : o) +
       '</div><div class="bg-slate-800 p-2.5 rounded-xl ' +
       (t
         ? 'rounded-tr-none text-sky-100 bg-sky-900/40 border border-sky-800'
@@ -1045,7 +1039,7 @@ function Na() {
     e = d('sendBtn'),
     t = a.value.trim();
   if (t) {
-    (y('user', t),
+    (A('user', t),
       (a.value = ''),
       k.push({ role: 'user', content: t }),
       w(),
@@ -1057,7 +1051,7 @@ function Na() {
     var n = {
       flow: g.flow,
       history: k,
-      currentData: o,
+      currentData: s,
       lang: typeof window.CURRENT_LANG < 'u' ? window.CURRENT_LANG : 'id',
     };
     window
@@ -1070,29 +1064,29 @@ function Na() {
           d('aiTypingStatus').classList.add('hidden'),
           r.success === !1)
         ) {
-          y('ai', r.error || window.tr('ui.toast_ai_cv_locked'));
+          A('ai', r.error || window.tr('ui.toast_ai_cv_locked'));
           return;
         }
         if (r.reply) {
           var i = r.reply;
           if (typeof r.reply == 'string' && r.reply.startsWith('{'))
             try {
-              var s = JSON.parse(r.reply.replace(/\n/g, '\\n'));
-              (s.reply && (i = s.reply), s.data && (r.data = Object.assign({}, r.data, s.data)));
+              var o = JSON.parse(r.reply.replace(/\n/g, '\\n'));
+              (o.reply && (i = o.reply), o.data && (r.data = Object.assign({}, r.data, o.data)));
             } catch {
               var l = r.reply.match(/"reply"\s*:\s*"([^]*?)"\s*,/);
               l && l[1] && (i = l[1]);
             }
-          (y('ai', i),
+          (A('ai', i),
             k.push({ role: 'assistant', content: typeof r == 'string' ? r : JSON.stringify(r) }));
         }
-        (r.data && ((o = L(o, r.data)), x()), w());
+        (r.data && ((s = P(s, r.data)), x()), w());
       })
       .catch(function (r) {
         ((a.disabled = !1),
           (e.disabled = !1),
           d('aiTypingStatus').classList.add('hidden'),
-          y('ai', window.tr('form.ai_chat_error')));
+          A('ai', window.tr('form.ai_chat_error')));
       });
   }
 }
@@ -1114,10 +1108,10 @@ function be(a, e) {
   return (
     e.forEach(function (r) {
       var i = Array.isArray(r) ? r[0] : r,
-        s = Array.isArray(r) ? r[1] : r;
+        o = Array.isArray(r) ? r[1] : r;
       String(a) === String(i)
-        ? ((n = !0), (t += '<option value="' + v(i) + '" selected>' + v(s) + '</option>'))
-        : (t += '<option value="' + v(i) + '">' + v(s) + '</option>');
+        ? ((n = !0), (t += '<option value="' + v(i) + '" selected>' + v(o) + '</option>'))
+        : (t += '<option value="' + v(i) + '">' + v(o) + '</option>');
     }),
     a && !n && (t = '<option value="' + v(a) + '">' + v(a) + '</option>' + t),
     t
@@ -1125,16 +1119,16 @@ function be(a, e) {
 }
 function K(a, e) {
   var t = d(e),
-    n = Array.isArray(o[a]) ? o[a] : [],
+    n = Array.isArray(s[a]) ? s[a] : [],
     r = Da[a],
     i = n
-      .map(function (s, l) {
+      .map(function (o, l) {
         var u = r
           .map(function (c) {
             var p = c[0],
               _ = window.tr(c[1]),
               b = c[2],
-              P = c[3];
+              O = c[3];
             return b === 'select'
               ? '<div><label class="label-micro">' +
                   _ +
@@ -1145,13 +1139,13 @@ function K(a, e) {
                   ",'" +
                   p +
                   `',this.value)">` +
-                  be(s[p], P) +
+                  be(o[p], O) +
                   '</select></div>'
               : b === 'datalist'
                 ? '<div><label class="label-micro">' +
                   _ +
                   '</label><input type="text" class="input-micro" list="pekerjaan-options" value="' +
-                  v(s[p]) +
+                  v(o[p]) +
                   `" oninput="updateArrayField('` +
                   a +
                   "'," +
@@ -1162,7 +1156,7 @@ function K(a, e) {
                 : '<div><label class="label-micro">' +
                   _ +
                   '</label><input type="text" class="input-micro" value="' +
-                  v(s[p]) +
+                  v(o[p]) +
                   `" oninput="updateArrayField('` +
                   a +
                   "'," +
@@ -1203,38 +1197,38 @@ function K(a, e) {
       '</button>'));
 }
 function x() {
-  ((o = o && typeof o == 'object' ? o : {}),
-    Object.keys(O).forEach(function (t) {
-      we(t, W(o, O[t]));
+  ((s = s && typeof s == 'object' ? s : {}),
+    Object.keys(B).forEach(function (t) {
+      we(t, W(s, B[t]));
     }),
     K('pendidikan', 'c_pendidikan'),
     K('pekerjaan', 'c_pekerjaan'),
     K('keluarga', 'c_keluarga'));
-  var a = o.pas_photo || W(o, 'uploads.photo'),
+  var a = s.pas_photo || W(s, 'uploads.photo'),
     e = d('previewFoto');
   (a && a !== '-' && !h && e && ((e.src = a), e.classList.remove('hidden')),
     [
-      ['jft', 'status_jft', !!T],
-      ['ssw', 'status_ssw', !!I],
-      ['ktp', 'status_ktp', !!M],
-      ['kk', 'status_kk', !!C],
-      ['ijazahSd', 'status_ijazahSd', !!D],
-      ['ijazahSmp', 'status_ijazahSmp', !!R],
-      ['ijazahSma', 'status_ijazahSma', !!N],
-      ['univ', 'status_univ', !!B],
+      ['jft', 'status_jft', !!S],
+      ['ssw', 'status_ssw', !!T],
+      ['ktp', 'status_ktp', !!F],
+      ['kk', 'status_kk', !!M],
+      ['ijazahSd', 'status_ijazahSd', !!C],
+      ['ijazahSmp', 'status_ijazahSmp', !!D],
+      ['ijazahSma', 'status_ijazahSma', !!R],
+      ['univ', 'status_univ', !!N],
     ].forEach(function (t) {
       var n = t[0],
         r = t[1],
         i = t[2],
-        s = W(o, 'uploads.' + n),
+        o = W(s, 'uploads.' + n),
         l = d(r);
-      if (!(!l || i) && s && s !== '-') {
-        var u = v((s.split('/').pop() || n.toUpperCase()).replace(/_+/g, ' '));
+      if (!(!l || i) && o && o !== '-') {
+        var u = v((o.split('/').pop() || n.toUpperCase()).replace(/_+/g, ' '));
         ((l.innerHTML =
           '<i class="fas fa-check-circle"></i> ' +
           window.tr('form.ai_status_existing') +
           ': <a href="' +
-          v(s) +
+          v(o) +
           '" target="_blank" rel="noopener" class="underline hover:text-amber-300">' +
           u +
           '</a>'),
@@ -1252,18 +1246,18 @@ function ke(a) {
     var r = new FileReader();
     (r.readAsDataURL(e),
       (r.onload = function (i) {
-        var s = new Image();
-        ((s.src = i.target.result),
-          (s.onload = function () {
+        var o = new Image();
+        ((o.src = i.target.result),
+          (o.onload = function () {
             var l = document.createElement('canvas'),
               u = l.getContext('2d'),
-              c = s.width,
-              p = s.height,
+              c = o.width,
+              p = o.height,
               _ = 600;
             (c > p && c > _ ? ((p *= _ / c), (c = _)) : p > _ && ((c *= _ / p), (p = _)),
               (l.width = c),
               (l.height = p),
-              u.drawImage(s, 0, 0, c, p));
+              u.drawImage(o, 0, 0, c, p));
             var b = l.toDataURL('image/jpeg', 0.6);
             ((n.src = b),
               n.classList.remove('hidden'),
@@ -1275,20 +1269,20 @@ function ke(a) {
       }));
   }
 }
-function Ae(a, e, t, n) {
+function je(a, e, t, n) {
   var r = new FileReader();
   ((r.onerror = function () {
     n({ data: '', name: a.name, mime: a.type || 'application/octet-stream' });
   }),
     (r.onload = function (i) {
-      var s = i.target.result.split(',')[1];
+      var o = i.target.result.split(',')[1];
       if (
         !a.type ||
         !a.type.startsWith('image/') ||
         a.type === 'image/svg+xml' ||
         a.type === 'image/gif'
       )
-        return n({ data: s, name: a.name, mime: a.type || 'application/octet-stream' });
+        return n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
       var l = new Image();
       ((l.onload = function () {
         var u = document.createElement('canvas'),
@@ -1300,11 +1294,11 @@ function Ae(a, e, t, n) {
           (u.width = p),
           (u.height = _),
           c.drawImage(l, 0, 0, p, _));
-        var P = u.toDataURL('image/jpeg', t || 0.8),
-          H = P.split(',')[1],
+        var O = u.toDataURL('image/jpeg', t || 0.8),
+          H = O.split(',')[1],
           Ba = Math.floor((H.length / 4) * 3);
         if (!H || Ba >= a.size)
-          return n({ data: s, name: a.name, mime: a.type || 'application/octet-stream' });
+          return n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
         n({
           data: H,
           name: String(a.name || 'scan').replace(/\.[^/.]+$/, '') + '.jpg',
@@ -1312,38 +1306,38 @@ function Ae(a, e, t, n) {
         });
       }),
         (l.onerror = function () {
-          n({ data: s, name: a.name, mime: a.type || 'application/octet-stream' });
+          n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
         }),
         (l.src = i.target.result));
     }),
     r.readAsDataURL(a));
 }
-function je(a, e) {
+function ye(a, e) {
   var t = a.target.files[0];
   if (t && window.cekUploadFile(a.target, { maxMb: 3 })) {
     var n = d('status_' + e);
     (n.classList.remove('hidden'),
       (n.innerHTML =
         '<i class="fas fa-spinner fa-spin text-amber-400"></i> ' + window.tr('form.ai_f_membaca')),
-      Ae(t, 800, 0.8, function (r) {
-        (e === 'jft' && ((T = r.data), (E = r)),
-          e === 'ssw' && ((I = r.data), (F = r)),
-          e === 'ktp' && (M = r),
-          e === 'kk' && (C = r),
-          e === 'ijazahSd' && (D = r),
-          e === 'ijazahSmp' && (R = r),
-          e === 'ijazahSma' && (N = r),
-          e === 'univ' && (B = r),
+      je(t, 800, 0.8, function (r) {
+        (e === 'jft' && ((S = r.data), (I = r)),
+          e === 'ssw' && ((T = r.data), (E = r)),
+          e === 'ktp' && (F = r),
+          e === 'kk' && (M = r),
+          e === 'ijazahSd' && (C = r),
+          e === 'ijazahSmp' && (D = r),
+          e === 'ijazahSma' && (R = r),
+          e === 'univ' && (N = r),
           (n.innerHTML = '<i class="fas fa-check-circle"></i> File: ' + r.name),
           w());
       }));
   }
 }
-function ye(a, e) {
+function Ae(a, e) {
   for (var t = atob(a), n = [], r = 0; r < t.length; r += 512) {
-    for (var i = t.slice(r, r + 512), s = new Array(i.length), l = 0; l < i.length; l++)
-      s[l] = i.charCodeAt(l);
-    n.push(new Uint8Array(s));
+    for (var i = t.slice(r, r + 512), o = new Array(i.length), l = 0; l < i.length; l++)
+      o[l] = i.charCodeAt(l);
+    n.push(new Uint8Array(o));
   }
   return new Blob(n, { type: e });
 }
@@ -1354,15 +1348,15 @@ async function xe(a, e) {
   if (t.length === 0) return {};
   for (var n = {}, r = 0; r < t.length; r++) {
     var i = t[r],
-      s = a[i],
-      l = ye(s.data, s.mime),
-      u = new File([l], s.name || i + '.jpg', { type: s.mime || 'application/octet-stream' });
+      o = a[i],
+      l = Ae(o.data, o.mime),
+      u = new File([l], o.name || i + '.jpg', { type: o.mime || 'application/octet-stream' });
     n[i] = await te(u);
   }
   return n;
 }
 async function Le() {
-  if (!o.identitas || !o.identitas.nama_lengkap) {
+  if (!s.identitas || !s.identitas.nama_lengkap) {
     (window.showToast(window.tr('form.ai_empty_chat_hint'), 'info'),
       window.innerWidth < 768 && q('chat'));
     return;
@@ -1373,14 +1367,14 @@ async function Le() {
       '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.ai_saving_db') + '\u2026'));
   for (
     var e = [
+        { f: I, t: 'doc' },
         { f: E, t: 'doc' },
-        { f: F, t: 'doc' },
+        { f: F, t: 'foto' },
         { f: M, t: 'foto' },
-        { f: C, t: 'foto' },
+        { f: C, t: 'doc' },
         { f: D, t: 'doc' },
         { f: R, t: 'doc' },
         { f: N, t: 'doc' },
-        { f: B, t: 'doc' },
       ].filter(function (c) {
         return !!c.f;
       }),
@@ -1404,28 +1398,28 @@ async function Le() {
     }
   }
   try {
-    var i = 'master/' + o.identitas.nama_lengkap.toUpperCase().replace(/[^A-Z0-9_-]/g, '_'),
-      s = {
+    var i = 'master/' + s.identitas.nama_lengkap.toUpperCase().replace(/[^A-Z0-9_-]/g, '_'),
+      o = {
         fotoFile: h ? { data: h, name: 'PAS_PHOTO.jpg', mime: 'image/jpeg' } : null,
-        jftFile: E,
-        sswFile: F,
-        ktpFile: M,
-        kkFile: C,
-        ijazahSdFile: D,
-        ijazahSmpFile: R,
-        ijazahSmaFile: N,
-        univFile: B,
+        jftFile: I,
+        sswFile: E,
+        ktpFile: F,
+        kkFile: M,
+        ijazahSdFile: C,
+        ijazahSmpFile: D,
+        ijazahSmaFile: R,
+        univFile: N,
       },
-      l = await xe(s, i),
+      l = await xe(o, i),
       u = {
-        identitas: o.identitas,
-        fisik: o.fisik,
-        medis: o.medis,
-        pendidikan: o.pendidikan,
-        pekerjaan: o.pekerjaan,
-        sertifikasi: o.sertifikasi,
-        keluarga: o.keluarga,
-        wawancara: o.wawancara,
+        identitas: s.identitas,
+        fisik: s.fisik,
+        medis: s.medis,
+        pendidikan: s.pendidikan,
+        pekerjaan: s.pekerjaan,
+        sertifikasi: s.sertifikasi,
+        keluarga: s.keluarga,
+        wawancara: s.wawancara,
         context: g,
         fotoFile: l.fotoFile || null,
         jftFile: l.jftFile || null,
@@ -1471,7 +1465,7 @@ ee({
   sendMessage: Na,
   updateFormUI: x,
   compressImage: ke,
-  handleDocUpload: je,
+  handleDocUpload: ye,
   saveToDatabase: Le,
   updateArrayField: le,
   removeArrayItem: fe,
@@ -1480,7 +1474,7 @@ ee({
 export {
   de as addArrayItem,
   ke as compressImage,
-  je as handleDocUpload,
+  ye as handleDocUpload,
   he as handleEnter,
   me as initApp,
   fe as removeArrayItem,

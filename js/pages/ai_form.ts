@@ -374,6 +374,14 @@ function jalankanAutoFill(targetWa) {
     .then(function (masterData) {
       if ($('aiTypingStatus')) $('aiTypingStatus').classList.add('hidden');
       if (masterData) {
+        if (masterData.AIDATAJSON && typeof masterData.AIDATAJSON === 'string') {
+          try {
+            var aiParsed = JSON.parse(masterData.AIDATAJSON);
+            masterData = mergeCandidateData(masterData, aiParsed);
+          } catch (e) {
+            console.warn('Failed to parse AIDATAJSON', e);
+          }
+        }
         latestCandidateData = mergeCandidateData(masterData, latestCandidateData);
         updateFormUI();
         saveToLocal();

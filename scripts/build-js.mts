@@ -136,7 +136,11 @@ const externalizeSharedDeps = {
     buildPlugin.onResolve({ filter: /.ts$/ }, (args) => {
       // Don't externalize entry points
       if (entryAbsPaths.has(args.path) || args.kind === 'entry-point') return undefined;
-      return { path: args.path.replace(/.ts$/, '.js'), external: true };
+      // Only externalize specific shared modules
+      if (args.path.endsWith('/bridge.ts') || args.path.endsWith('/cloudinary.ts')) {
+        return { path: args.path.replace(/\.ts$/, '.js'), external: true };
+      }
+      return undefined;
     });
     // Handle extensionless imports (pwa.ts uses './js/core/bridge' without .ts)
     buildPlugin.onResolve({ filter: /bridge$/ }, (args) => {

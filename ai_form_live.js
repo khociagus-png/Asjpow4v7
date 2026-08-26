@@ -1,0 +1,908 @@
+import { registerSeamAliases as G } from '../core/bridge.js';
+import '../init/util.js';
+import { uploadToCloudinary as X } from '../cloudinary.js';
+(function () {
+  function a(n) {
+    if (!n) return '';
+    var t = String(n).replace(/\D/g, '');
+    return (
+      t.startsWith('0') ? (t = '62' + t.substring(1)) : t.startsWith('8') && (t = '62' + t),
+      t
+    );
+  }
+  var e = new URLSearchParams(window.location.search),
+    i = (e.get('flow') || 'master').toLowerCase() === 'apply' ? 'apply' : 'master';
+  window.AI_FORM_CONTEXT = {
+    flow: i,
+    job: (e.get('job') || '').trim(),
+    bidang: (e.get('bidang') || '').trim(),
+    wa: a(e.get('wa') || ''),
+    nama: (e.get('nama') || '').trim(),
+  };
+})();
+function f(a) {
+  return document.getElementById(a);
+}
+var v = [],
+  r = {},
+  w = '',
+  j = '',
+  y = '',
+  S = null,
+  A = null,
+  x = null,
+  L = null,
+  T = null,
+  F = null,
+  I = null,
+  M = null,
+  Z =
+    'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/logo_asj.png',
+  $ =
+    'https://gdwvffmevwtwnzrapjwy.supabase.co/storage/v1/object/public/asj-files/assets/jeklin.png',
+  p = window.AI_FORM_CONTEXT || {},
+  C = {
+    f_nama: 'identitas.nama_lengkap',
+    f_katakana: 'identitas.katakana',
+    f_panggilan: 'identitas.panggilan',
+    f_panggilan_katakana: 'identitas.panggilan_katakana',
+    f_tmplahir: 'identitas.tempat_lahir',
+    f_tgllahir: 'identitas.tgl_lahir',
+    f_umur: 'identitas.umur',
+    f_gender: 'identitas.gender',
+    f_agama: 'identitas.agama',
+    f_goldar: 'identitas.golongan_darah',
+    f_status: 'identitas.status_nikah',
+    f_anak: 'identitas.anak',
+    f_email: 'identitas.email',
+    f_alamat: 'identitas.alamat',
+    f_hp: 'identitas.hp',
+    f_hpdarurat: 'identitas.hp_darurat',
+    f_ktp: 'identitas.ktp',
+    f_paspor: 'identitas.paspor',
+    f_sim: 'identitas.sim',
+    f_tb: 'fisik.tb',
+    f_bb: 'fisik.bb',
+    f_topi: 'fisik.topi',
+    f_baju: 'fisik.baju',
+    f_sepatu: 'fisik.sepatu',
+    f_tangan: 'fisik.tangan_dominan',
+    f_tahan_ac: 'fisik.tahan_ac',
+    f_matakanan: 'medis.mata_kanan',
+    f_matakiri: 'medis.mata_kiri',
+    f_kacamata: 'medis.kacamata',
+    f_butawarna: 'medis.buta_warna',
+    f_tato: 'medis.tato',
+    f_rokok: 'medis.rokok',
+    f_alkohol: 'medis.alkohol',
+    f_alergi_id: 'medis.alergi_id',
+    f_alergi_jp: 'medis.alergi_jp',
+    f_medis_id: 'medis.riwayat_medis_id',
+    f_medis_jp: 'medis.riwayat_medis_jp',
+    f_laka_id: 'medis.riwayat_kecelakaan_id',
+    f_laka_jp: 'medis.riwayat_kecelakaan_jp',
+    f_keinginan_id: 'wawancara.keinginan_id',
+    f_keinginan_jp: 'wawancara.keinginan_jp',
+    f_tujuan_id: 'wawancara.tujuan_ke_jepang',
+    f_tujuan_jp: 'wawancara.tujuan_ke_jepang_jp',
+    f_riwayatjepang: 'wawancara.riwayat_jepang',
+    f_promo_id: 'wawancara.promosi_id',
+    f_promo_jp: 'wawancara.promosi_jp',
+    f_lebih_id: 'wawancara.kelebihan_id',
+    f_lebih_jp: 'wawancara.kelebihan_jp',
+    f_kurang_id: 'wawancara.kekurangan_id',
+    f_kurang_jp: 'wawancara.kekurangan_jp',
+    f_hobi_id: 'wawancara.hobi_id',
+    f_hobi_jp: 'wawancara.hobi_jp',
+    f_keahlian_id: 'wawancara.keahlian_id',
+    f_keahlian_jp: 'wawancara.keahlian_jp',
+    f_moti_id: 'wawancara.motivasi_id',
+    f_moti_jp: 'wawancara.motivasi_jp',
+    f_alasan_id: 'wawancara.alasan_bidang_id',
+    f_alasan_jp: 'wawancara.alasan_bidang_jp',
+    f_pulang_id: 'wawancara.rencana_pulang_id',
+    f_pulang_jp: 'wawancara.rencana_pulang_jp',
+    f_lama: 'wawancara.lama_di_jepang',
+    f_gaji_yen: 'wawancara.harapan_gaji',
+    f_tabungan: 'wawancara.harapan_tabungan',
+    f_bhs_jepang: 'sertifikasi.bahasa_jepang',
+    f_nilai: 'sertifikasi.nilai',
+    f_lisensi: 'sertifikasi.lisensi',
+    f_kenalan_nama_id: 'kenalan_jepang.nama_id',
+    f_kenalan_nama_jp: 'kenalan_jepang.nama_jp',
+    f_kenalan_hub_id: 'kenalan_jepang.hubungan_id',
+    f_kenalan_hub_jp: 'kenalan_jepang.hubungan_jp',
+    f_kenalan_kerja_id: 'kenalan_jepang.pekerjaan_id',
+    f_kenalan_kerja_jp: 'kenalan_jepang.pekerjaan_jp',
+    f_kenalan_usia: 'kenalan_jepang.usia',
+    f_kenalan_alamat_id: 'kenalan_jepang.alamat_id',
+    f_kenalan_alamat_jp: 'kenalan_jepang.alamat_jp',
+  },
+  V = ['SD', 'SMP', 'SMA/SMK', 'D3/S1', 'LPK BAHASA'],
+  Y = ['AYAH', 'IBU', 'SUAMI', 'ISTRI', 'ANAK', 'KAKAK', 'ADIK'],
+  K = {
+    pendidikan: [
+      ['tingkat', 'form.ai_f_tingkat', 'select', V],
+      ['sekolah_id', 'form.ai_f_sekolah_id'],
+      ['sekolah_jp', 'form.ai_f_sekolah_jp'],
+      ['jurusan_id', 'form.ai_f_jurusan_id'],
+      ['jurusan_jp', 'form.ai_f_jurusan_jp'],
+      ['masuk', 'form.ai_f_masuk'],
+      ['lulus', 'form.ai_f_lulus'],
+    ],
+    pekerjaan: [
+      ['perusahaan_id', 'form.ai_f_perusahaan_id'],
+      ['perusahaan_jp', 'form.ai_f_perusahaan_jp'],
+      ['jabatan_id', 'form.ai_f_jabatan_id', 'datalist'],
+      ['jabatan_jp', 'form.ai_f_jabatan_jp'],
+      ['masuk', 'form.ai_f_mulai'],
+      ['keluar', 'form.ai_f_selesai'],
+      ['gaji', 'form.ai_f_gaji'],
+    ],
+    keluarga: [
+      ['hubungan_id', 'form.ai_f_hubungan_id', 'select', Y],
+      ['hubungan_jp', 'form.ai_f_hubungan_jp'],
+      ['nama', 'form.ai_f_nama'],
+      ['katakana', 'form.ai_f_katakana'],
+      ['umur', 'form.ai_f_umur'],
+      ['pekerjaan_id', 'form.ai_f_pekerjaan_id', 'datalist'],
+      ['pekerjaan_jp', 'form.ai_f_pekerjaan_jp'],
+      ['gaji', 'form.ai_f_gaji'],
+    ],
+  };
+function D(a, e) {
+  return e.split('.').reduce(function (i, n) {
+    return i && i[n] !== void 0 ? i[n] : '';
+  }, a || {});
+}
+function z(a, e, i) {
+  var n = e.split('.'),
+    t = a;
+  (n.slice(0, -1).forEach(function (s) {
+    ((!t[s] || typeof t[s] != 'object') && (t[s] = {}), (t = t[s]));
+  }),
+    (t[n[n.length - 1]] = i));
+}
+function m(a) {
+  return String(a ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+function H(a, e) {
+  if (Array.isArray(e)) {
+    var i = Array.isArray(a) ? a : [];
+    if (!e.length) return i.slice();
+    var n = e.map(function (o, l) {
+      return H(i[l], o);
+    });
+    return n.concat(i.slice(e.length));
+  }
+  if (e && typeof e == 'object') {
+    var t = a && typeof a == 'object' && !Array.isArray(a) ? a : {},
+      s = {};
+    return (
+      Object.keys(t).forEach(function (o) {
+        s[o] = t[o];
+      }),
+      Object.keys(e).forEach(function (o) {
+        s[o] = H(t[o], e[o]);
+      }),
+      s
+    );
+  }
+  return e == null || (typeof e == 'string' && !e.trim()) ? (a === void 0 ? '' : a) : e;
+}
+function Q() {
+  (document
+    .querySelectorAll('#formPanel input[readonly], #formPanel textarea[readonly]')
+    .forEach(function (a) {
+      (a.removeAttribute('readonly'), a.setAttribute('title', window.tr('form.ai_f_tooltip')));
+    }),
+    Object.keys(C).forEach(function (a) {
+      var e = f(a);
+      !e ||
+        e.dataset.manualBound ||
+        ((e.dataset.manualBound = 'true'),
+        e.addEventListener('input', function () {
+          ((r = r && typeof r == 'object' ? r : {}),
+            z(r, C[a], e.value),
+            e.classList.add('border-sky-400'),
+            h());
+        }));
+    }));
+}
+function aa(a, e, i, n) {
+  (Array.isArray(r[a]) || (r[a] = []), r[a][e] || (r[a][e] = {}), (r[a][e][i] = n), h());
+}
+function ea(a) {
+  ((r = r && typeof r == 'object' ? r : {}), Array.isArray(r[a]) || (r[a] = []));
+  var e = {};
+  (K[a].forEach(function (i) {
+    e[i[0]] = '';
+  }),
+    r[a].push(e),
+    k(),
+    h());
+}
+function ta(a, e) {
+  Array.isArray(r[a]) && (r[a].splice(e, 1), k(), h());
+}
+function N() {
+  var a = String(p.wa || 'baru').replace(/\D/g, ''),
+    e = String(p.job || p.flow || 'master').replace(/[^a-z0-9_-]/gi, '_');
+  return 'asj_qween_cv_data_' + a + '_' + e;
+}
+function ia() {
+  r = r && typeof r == 'object' ? r : {};
+  var a = r.identitas || {};
+  (!a.nama_lengkap && p.nama && z(r, 'identitas.nama_lengkap', p.nama),
+    !a.hp && p.wa && z(r, 'identitas.hp', p.wa));
+  var e =
+    p.flow === 'apply'
+      ? 'Lamaran ' + (p.job || 'umum') + ' tersambung ke portal.'
+      : 'CV Master tersambung ke profil portal.';
+  f('formModeLabel') && (f('formModeLabel').textContent = e);
+}
+function na(a) {
+  var e = a || '';
+  return e.includes('[VIP]') || !!e.match(/\[(?:KELAS\s*[A-Z0-9]+|[A-Z0-9]+)\]/i);
+}
+function ra(a) {
+  return localStorage.getItem('asj_admin_login') === 'sukses' ||
+    localStorage.getItem('asj_kandidat_login') !== 'sukses'
+    ? Promise.resolve(!0)
+    : window
+        .callAPI('getAppData', ['kandidat', a])
+        .then(function (e) {
+          if (e && e.sessionInvalid) return !0;
+          var i = e && Array.isArray(e.candidates) ? e.candidates[0] : null,
+            n = i ? String(i.catatanInt || i.catatan || '') : '';
+          return (!n && e && e.myData && (n = String(e.myData.catatanInt || '')), na(n));
+        })
+        .catch(function () {
+          return !0;
+        });
+}
+function O(a) {
+  (f('aiTypingStatus') &&
+    (f('aiTypingStatus').classList.remove('hidden'),
+    (f('aiTypingStatus').innerHTML =
+      '<i class="fas fa-sync fa-spin mr-2"></i> ' + window.tr('form.ai_loading_master'))),
+    window
+      .callAPI('getDrafCvMaster', [a])
+      .then(function (e) {
+        if (
+          (f('aiTypingStatus') && f('aiTypingStatus').classList.add('hidden'),
+          e && ((r = H(e, r)), k(), h(), v.length === 0))
+        ) {
+          f('chatBox').innerHTML = '';
+          var i = oa(r);
+          (b('ai', i),
+            v.push({ role: 'assistant', content: JSON.stringify({ reply: i, data: {} }) }),
+            h());
+        }
+      })
+      .catch(function (e) {
+        (f('aiTypingStatus') && f('aiTypingStatus').classList.add('hidden'),
+          console.error('Gagal Auto-Fill Master:', e));
+      }));
+}
+function sa() {
+  if (((f('logoAsj').src = Z), typeof window.renderLanguageLight == 'function')) {
+    window.renderLanguageLight();
+    var a = document.getElementById('lang-btn-ai');
+    a && (a.textContent = window.CURRENT_LANG === 'jp' ? 'ID' : 'JP');
+  }
+  (Q(), typeof window.bersihkanDraftLamaBase64 == 'function' && window.bersihkanDraftLamaBase64());
+  var e = localStorage.getItem(N());
+  if (e)
+    try {
+      var i = JSON.parse(e);
+      ((v = i.chatHistory || []),
+        (r = i.latestCandidateData || {}),
+        (w = i.currentPhotoBase64 || ''),
+        (j = ''),
+        (y = ''),
+        (S = null),
+        (A = null));
+    } catch {
+      localStorage.removeItem(N());
+    }
+  ia();
+  var n = p.wa || (r.identitas && r.identitas.hp);
+  (n && p.flow === 'master'
+    ? ra(n).then(function (t) {
+        if (!t) {
+          window.location.href =
+            '/master-full.html?wa=' +
+            encodeURIComponent(n) +
+            '&nama=' +
+            encodeURIComponent(p.nama || '');
+          return;
+        }
+        O(n);
+      })
+    : n
+      ? O(n)
+      : v.length === 0 && la(),
+    k(),
+    w &&
+      ((f('previewFoto').src = 'data:image/jpeg;base64,' + w),
+      f('previewFoto').classList.remove('hidden'),
+      (f('compressStatus').innerHTML =
+        '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved')),
+      f('compressStatus').classList.remove('hidden')),
+    j &&
+      ((f('status_jft').innerHTML =
+        '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto')),
+      f('status_jft').classList.remove('hidden')),
+    y &&
+      ((f('status_ssw').innerHTML =
+        '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_status_saved_auto')),
+      f('status_ssw').classList.remove('hidden')),
+    window.addEventListener('resize', fa));
+}
+function oa(a) {
+  var e = (a && a.identitas) || {},
+    i = (a && a.fisik) || {},
+    n = (a && a.wawancara) || {},
+    t = e.panggilan || e.nama_lengkap || p.nama || '';
+  if (t) {
+    var s = [];
+    (e.ktp || s.push(window.tr('form.chat_missing_ktp')),
+      e.paspor || s.push(window.tr('form.chat_missing_paspor')),
+      !n.promosi_jp && n.promosi_id && s.push(window.tr('form.chat_missing_jiko')),
+      i.topi || s.push(window.tr('form.chat_missing_topi')),
+      i.tahan_ac || s.push(window.tr('form.chat_missing_ac')),
+      i.tb || s.push(window.tr('form.chat_missing_tb')),
+      i.bb || s.push(window.tr('form.chat_missing_bb')),
+      (!a.pendidikan || !a.pendidikan.length) && s.push(window.tr('form.chat_missing_pendidikan')),
+      (!a.pekerjaan || !a.pekerjaan.length) && s.push(window.tr('form.chat_missing_pekerjaan')));
+    var o = window.tr('form.chat_welcome_named_intro').replace('{nama}', t);
+    return (
+      s.length > 0
+        ? (o += window
+            .tr('form.chat_welcome_missing')
+            .replace('{missing}', s.slice(0, 2).join(' & ')))
+        : (o += window.tr('form.chat_welcome_complete')),
+      o
+    );
+  } else return window.tr('form.chat_welcome_nameless');
+}
+function la() {
+  var a = window.tr('form.chat_welcome_nameless');
+  (b('ai', a), v.push({ role: 'assistant', content: JSON.stringify({ reply: a, data: {} }) }), h());
+}
+function h() {
+  try {
+    localStorage.setItem(
+      N(),
+      JSON.stringify({ chatHistory: v, latestCandidateData: r, currentPhotoBase64: w }),
+    );
+  } catch (a) {
+    console.warn('Penyimpanan lokal penuh; data teks tetap tersimpan di halaman saat ini.', a);
+  }
+}
+var J = 'chat',
+  U = window.innerWidth >= 768;
+function R(a) {
+  if (((J = a), !(window.innerWidth >= 768))) {
+    var e = f('chatPanel'),
+      i = f('formPanel'),
+      n = f('btnTabChat'),
+      t = f('btnTabForm');
+    a === 'chat'
+      ? (e.classList.remove('hidden'),
+        i.classList.add('hidden'),
+        (n.className =
+          'flex-1 py-3 text-xs font-bold bg-amber-600/20 text-amber-400 border-b-2 border-amber-500 transition-colors'),
+        (t.className =
+          'flex-1 py-3 text-xs font-bold text-slate-400 border-b-2 border-transparent transition-colors'))
+      : (e.classList.add('hidden'),
+        i.classList.remove('hidden'),
+        (t.className =
+          'flex-1 py-3 text-xs font-bold bg-amber-600/20 text-amber-400 border-b-2 border-amber-500 transition-colors'),
+        (n.className =
+          'flex-1 py-3 text-xs font-bold text-slate-400 border-b-2 border-transparent transition-colors'));
+  }
+}
+function fa() {
+  var a = window.innerWidth >= 768;
+  a !== U && ((U = a), a || R(J));
+}
+function da(a) {
+  a.key === 'Enter' && (a.preventDefault(), W());
+}
+function b(a, e) {
+  var i = a === 'user',
+    n = m(e).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'),
+    t = '<i class="fas fa-user"></i>';
+  if (typeof w < 'u' && w)
+    t =
+      '<img src="data:image/jpeg;base64,' +
+      w +
+      `" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=&quot;fas fa-user&quot;></i>'">`;
+  else {
+    var s = document.getElementById('previewFoto');
+    s &&
+      s.src &&
+      s.src.length > 20 &&
+      !s.classList.contains('hidden') &&
+      (t =
+        '<img src="' +
+        s.src +
+        `" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=&quot;fas fa-user&quot;></i>'">`);
+  }
+  var o = '<img src="' + $ + '" alt="" class="w-full h-full object-cover rounded-full">',
+    l =
+      '<div class="flex gap-2 ' +
+      (i ? 'flex-row-reverse' : '') +
+      ' fade-in"><div class="w-8 h-8 rounded-full overflow-hidden ' +
+      (i ? 'bg-sky-500' : 'bg-amber-500 p-0.5') +
+      ' flex-shrink-0 flex items-center justify-center text-xs text-white shadow">' +
+      (i ? t : o) +
+      '</div><div class="bg-slate-800 p-2.5 rounded-xl ' +
+      (i
+        ? 'rounded-tr-none text-sky-100 bg-sky-900/40 border border-sky-800'
+        : 'rounded-tl-none text-slate-200 border border-slate-700') +
+      ' text-[11px] md:text-xs max-w-[85%] shadow leading-relaxed whitespace-pre-wrap">' +
+      n +
+      '</div></div>';
+  ((f('chatBox').innerHTML += l),
+    setTimeout(function () {
+      f('chatBox').scrollTop = f('chatBox').scrollHeight;
+    }, 100));
+}
+function W() {
+  var a = f('userInput'),
+    e = f('sendBtn'),
+    i = a.value.trim();
+  if (i) {
+    (b('user', i),
+      (a.value = ''),
+      v.push({ role: 'user', content: i }),
+      h(),
+      (a.disabled = !0),
+      (e.disabled = !0),
+      (f('aiTypingStatus').innerHTML =
+        '<i class="fas fa-magic fa-spin mr-2"></i> ' + window.tr('form.ai_chat_typing')),
+      f('aiTypingStatus').classList.remove('hidden'));
+    var n = {
+      flow: p.flow,
+      history: v,
+      currentData: r,
+      lang: typeof window.CURRENT_LANG < 'u' ? window.CURRENT_LANG : 'id',
+    };
+    window
+      .callAPI('processAIChat', n)
+      .then(function (t) {
+        if (
+          ((a.disabled = !1),
+          (e.disabled = !1),
+          a.focus(),
+          f('aiTypingStatus').classList.add('hidden'),
+          t.success === !1)
+        ) {
+          b('ai', t.error || window.tr('ui.toast_ai_cv_locked'));
+          return;
+        }
+        if (t.reply) {
+          var s = t.reply;
+          if (typeof t.reply == 'string' && t.reply.startsWith('{'))
+            try {
+              var o = JSON.parse(t.reply.replace(/\n/g, '\\n'));
+              (o.reply && (s = o.reply), o.data && (t.data = Object.assign({}, t.data, o.data)));
+            } catch {
+              var l = t.reply.match(/"reply"\s*:\s*"([^]*?)"\s*,/);
+              l && l[1] && (s = l[1]);
+            }
+          (b('ai', s),
+            v.push({ role: 'assistant', content: typeof t == 'string' ? t : JSON.stringify(t) }));
+        }
+        (t.data && ((r = H(r, t.data)), k()), h());
+      })
+      .catch(function (t) {
+        ((a.disabled = !1),
+          (e.disabled = !1),
+          f('aiTypingStatus').classList.add('hidden'),
+          b('ai', window.tr('form.ai_chat_error')));
+      });
+  }
+}
+function ca(a, e) {
+  var i = f(a);
+  if (i) {
+    var n = e == null ? '' : String(e);
+    i.value !== n &&
+      ((i.value = n),
+      i.classList.add('border-amber-500', 'bg-amber-900/30'),
+      setTimeout(function () {
+        i.classList.remove('border-amber-500', 'bg-amber-900/30');
+      }, 1500));
+  }
+}
+function ua(a, e) {
+  var i = '<option value="">' + window.tr('form.ai_f_pilih') + '</option>',
+    n = !1;
+  return (
+    e.forEach(function (t) {
+      var s = Array.isArray(t) ? t[0] : t,
+        o = Array.isArray(t) ? t[1] : t;
+      String(a) === String(s)
+        ? ((n = !0), (i += '<option value="' + m(s) + '" selected>' + m(o) + '</option>'))
+        : (i += '<option value="' + m(s) + '">' + m(o) + '</option>');
+    }),
+    a && !n && (i = '<option value="' + m(a) + '">' + m(a) + '</option>' + i),
+    i
+  );
+}
+function E(a, e) {
+  var i = f(e),
+    n = Array.isArray(r[a]) ? r[a] : [],
+    t = K[a],
+    s = n
+      .map(function (o, l) {
+        var u = t
+          .map(function (d) {
+            var c = d[0],
+              _ = window.tr(d[1]),
+              g = d[2],
+              P = d[3];
+            return g === 'select'
+              ? '<div><label class="label-micro">' +
+                  _ +
+                  `</label><select class="input-micro" onchange="updateArrayField('` +
+                  a +
+                  "'," +
+                  l +
+                  ",'" +
+                  c +
+                  `',this.value)">` +
+                  ua(o[c], P) +
+                  '</select></div>'
+              : g === 'datalist'
+                ? '<div><label class="label-micro">' +
+                  _ +
+                  '</label><input type="text" class="input-micro" list="pekerjaan-options" value="' +
+                  m(o[c]) +
+                  `" oninput="updateArrayField('` +
+                  a +
+                  "'," +
+                  l +
+                  ",'" +
+                  c +
+                  `',this.value)"></div>`
+                : '<div><label class="label-micro">' +
+                  _ +
+                  '</label><input type="text" class="input-micro" value="' +
+                  m(o[c]) +
+                  `" oninput="updateArrayField('` +
+                  a +
+                  "'," +
+                  l +
+                  ",'" +
+                  c +
+                  `',this.value)"></div>`;
+          })
+          .join('');
+        return (
+          '<div class="bg-slate-800 p-2 rounded border border-slate-700 text-[9px] mb-1.5"><div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-300">' +
+          window.tr('form.ai_f_data') +
+          ' ' +
+          (l + 1) +
+          `</span><button type="button" class="text-rose-300 hover:text-rose-200" onclick="removeArrayItem('` +
+          a +
+          "'," +
+          l +
+          ')"><i class="fas fa-trash"></i> ' +
+          window.tr('form.ai_f_hapus') +
+          '</button></div><div class="grid grid-cols-2 gap-1.5">' +
+          u +
+          '</div></div>'
+        );
+      })
+      .join('');
+  (s ||
+    (s =
+      '<div class="text-[9px] text-slate-500 italic py-1">' +
+      window.tr('form.txt_belum_data') +
+      '</div>'),
+    (i.innerHTML =
+      s +
+      `<button type="button" class="w-full mt-1 py-1 text-[9px] font-bold rounded border border-dashed border-slate-600 text-slate-300 hover:bg-slate-800" onclick="addArrayItem('` +
+      a +
+      `')"><i class="fas fa-plus mr-1"></i>` +
+      window.tr('form.ai_f_tambah') +
+      '</button>'));
+}
+function k() {
+  ((r = r && typeof r == 'object' ? r : {}),
+    Object.keys(C).forEach(function (i) {
+      ca(i, D(r, C[i]));
+    }),
+    E('pendidikan', 'c_pendidikan'),
+    E('pekerjaan', 'c_pekerjaan'),
+    E('keluarga', 'c_keluarga'));
+  var a = r.pas_photo || D(r, 'uploads.photo'),
+    e = f('previewFoto');
+  (a && a !== '-' && !w && e && ((e.src = a), e.classList.remove('hidden')),
+    [
+      ['jft', 'status_jft', !!j],
+      ['ssw', 'status_ssw', !!y],
+      ['ktp', 'status_ktp', !!x],
+      ['kk', 'status_kk', !!L],
+      ['ijazahSd', 'status_ijazahSd', !!T],
+      ['ijazahSmp', 'status_ijazahSmp', !!F],
+      ['ijazahSma', 'status_ijazahSma', !!I],
+      ['univ', 'status_univ', !!M],
+    ].forEach(function (i) {
+      var n = i[0],
+        t = i[1],
+        s = i[2],
+        o = D(r, 'uploads.' + n),
+        l = f(t);
+      if (!(!l || s) && o && o !== '-') {
+        var u = m((o.split('/').pop() || n.toUpperCase()).replace(/_+/g, ' '));
+        ((l.innerHTML =
+          '<i class="fas fa-check-circle"></i> ' +
+          window.tr('form.ai_status_existing') +
+          ': <a href="' +
+          m(o) +
+          '" target="_blank" rel="noopener" class="underline hover:text-amber-300">' +
+          u +
+          '</a>'),
+          l.classList.remove('hidden'));
+      }
+    }));
+}
+function _a(a) {
+  var e = a.target.files[0];
+  if (e && window.cekUploadFile(a.target, { maxMb: 10 })) {
+    var i = f('compressStatus'),
+      n = f('previewFoto');
+    (i.classList.remove('hidden'),
+      (i.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.ai_f_proses')));
+    var t = new FileReader();
+    (t.readAsDataURL(e),
+      (t.onload = function (s) {
+        var o = new Image();
+        ((o.src = s.target.result),
+          (o.onload = function () {
+            var l = document.createElement('canvas'),
+              u = l.getContext('2d'),
+              d = o.width,
+              c = o.height,
+              _ = 600;
+            (d > c && d > _ ? ((c *= _ / d), (d = _)) : c > _ && ((d *= _ / c), (c = _)),
+              (l.width = d),
+              (l.height = c),
+              u.drawImage(o, 0, 0, d, c));
+            var g = l.toDataURL('image/jpeg', 0.6);
+            ((n.src = g),
+              n.classList.remove('hidden'),
+              (i.innerHTML =
+                '<i class="fas fa-check-circle"></i> ' + window.tr('form.ai_f_berhasil')),
+              (w = g.split(',')[1]),
+              h());
+          }));
+      }));
+  }
+}
+function pa(a, e, i, n) {
+  var t = new FileReader();
+  ((t.onerror = function () {
+    n({ data: '', name: a.name, mime: a.type || 'application/octet-stream' });
+  }),
+    (t.onload = function (s) {
+      var o = s.target.result.split(',')[1];
+      if (
+        !a.type ||
+        !a.type.startsWith('image/') ||
+        a.type === 'image/svg+xml' ||
+        a.type === 'image/gif'
+      )
+        return n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
+      var l = new Image();
+      ((l.onload = function () {
+        var u = document.createElement('canvas'),
+          d = u.getContext('2d'),
+          c = l.width,
+          _ = l.height,
+          g = e || 800;
+        (c > g && ((_ = Math.round((_ * g) / c)), (c = g)),
+          (u.width = c),
+          (u.height = _),
+          d.drawImage(l, 0, 0, c, _));
+        var P = u.toDataURL('image/jpeg', i || 0.8),
+          B = P.split(',')[1],
+          q = Math.floor((B.length / 4) * 3);
+        if (!B || q >= a.size)
+          return n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
+        n({
+          data: B,
+          name: String(a.name || 'scan').replace(/\.[^/.]+$/, '') + '.jpg',
+          mime: 'image/jpeg',
+        });
+      }),
+        (l.onerror = function () {
+          n({ data: o, name: a.name, mime: a.type || 'application/octet-stream' });
+        }),
+        (l.src = s.target.result));
+    }),
+    t.readAsDataURL(a));
+}
+function ma(a, e) {
+  var i = a.target.files[0];
+  if (i && window.cekUploadFile(a.target, { maxMb: 3 })) {
+    var n = f('status_' + e);
+    (n.classList.remove('hidden'),
+      (n.innerHTML =
+        '<i class="fas fa-spinner fa-spin text-amber-400"></i> ' + window.tr('form.ai_f_membaca')),
+      pa(i, 800, 0.8, function (t) {
+        (e === 'jft' && ((j = t.data), (S = t)),
+          e === 'ssw' && ((y = t.data), (A = t)),
+          e === 'ktp' && (x = t),
+          e === 'kk' && (L = t),
+          e === 'ijazahSd' && (T = t),
+          e === 'ijazahSmp' && (F = t),
+          e === 'ijazahSma' && (I = t),
+          e === 'univ' && (M = t),
+          (n.innerHTML = '<i class="fas fa-check-circle"></i> File: ' + t.name),
+          h());
+      }));
+  }
+}
+function wa(a, e) {
+  for (var i = atob(a), n = [], t = 0; t < i.length; t += 512) {
+    for (var s = i.slice(t, t + 512), o = new Array(s.length), l = 0; l < s.length; l++)
+      o[l] = s.charCodeAt(l);
+    n.push(new Uint8Array(o));
+  }
+  return new Blob(n, { type: e });
+}
+async function ha(a, e) {
+  var i = Object.keys(a).filter(function (d) {
+    return a[d] && a[d].data;
+  });
+  if (i.length === 0) return {};
+  for (var n = {}, t = 0; t < i.length; t++) {
+    var s = i[t],
+      o = a[s],
+      l = wa(o.data, o.mime),
+      u = new File([l], o.name || s + '.jpg', { type: o.mime || 'application/octet-stream' });
+    n[s] = await X(u);
+  }
+  return n;
+}
+async function ga() {
+  if (!r.identitas || !r.identitas.nama_lengkap) {
+    (window.showToast(window.tr('form.ai_empty_chat_hint'), 'info'),
+      window.innerWidth < 768 && R('chat'));
+    return;
+  }
+  var a = f('btnSaveDB');
+  ((a.disabled = !0),
+    (a.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> ' + window.tr('form.ai_saving_db') + '\u2026'));
+  for (
+    var e = [
+        { f: S, t: 'doc' },
+        { f: A, t: 'doc' },
+        { f: x, t: 'foto' },
+        { f: L, t: 'foto' },
+        { f: T, t: 'doc' },
+        { f: F, t: 'doc' },
+        { f: I, t: 'doc' },
+        { f: M, t: 'doc' },
+      ].filter(function (d) {
+        return !!d.f;
+      }),
+      i = 0;
+    i < e.length;
+    i++
+  ) {
+    var n = String(e[i].f.name || '')
+        .split('.')
+        .pop()
+        .toLowerCase(),
+      t = e[i].t === 'foto' ? ['pdf', 'jpg', 'jpeg', 'png'] : ['pdf'];
+    if (t.indexOf(n) === -1) {
+      ((a.disabled = !1),
+        (a.innerHTML = window.tr('form.ai_save_db')),
+        window.showToast(
+          window.tr('form.ai_ext_check_bad').replace('{file}', e[i].f.name || 'file'),
+          'error',
+        ));
+      return;
+    }
+  }
+  try {
+    var s = 'master/' + r.identitas.nama_lengkap.toUpperCase().replace(/[^A-Z0-9_-]/g, '_'),
+      o = {
+        fotoFile: w ? { data: w, name: 'PAS_PHOTO.jpg', mime: 'image/jpeg' } : null,
+        jftFile: S,
+        sswFile: A,
+        ktpFile: x,
+        kkFile: L,
+        ijazahSdFile: T,
+        ijazahSmpFile: F,
+        ijazahSmaFile: I,
+        univFile: M,
+      },
+      l = await ha(o, s),
+      u = {
+        identitas: r.identitas,
+        fisik: r.fisik,
+        medis: r.medis,
+        pendidikan: r.pendidikan,
+        pekerjaan: r.pekerjaan,
+        sertifikasi: r.sertifikasi,
+        keluarga: r.keluarga,
+        wawancara: r.wawancara,
+        context: p,
+        fotoFile: l.fotoFile || null,
+        jftFile: l.jftFile || null,
+        sswFile: l.sswFile || null,
+        ktpFile: l.ktpFile || null,
+        kkFile: l.kkFile || null,
+        ijazahSdFile: l.ijazahSdFile || null,
+        ijazahSmpFile: l.ijazahSmpFile || null,
+        ijazahSmaFile: l.ijazahSmaFile || null,
+        univFile: l.univFile || null,
+      };
+    window
+      .callAPI('submitDataAsj', u)
+      .then(function (d) {
+        ((a.disabled = !1),
+          d.success
+            ? ((a.innerHTML =
+                '<i class="fas fa-check"></i> ' + window.tr('form.ai_save_success_btn')),
+              a.classList.replace('bg-emerald-600', 'bg-sky-600'),
+              window.showToast(window.tr('form.ai_save_success'), 'success'))
+            : (window.showToast(
+                window.tr('form.ai_save_failed') + ' ' + (d.message || ''),
+                'error',
+              ),
+              (a.innerHTML =
+                '<i class="fas fa-cloud-upload-alt"></i> ' + window.tr('form.ai_save_db'))));
+      })
+      .catch(function (d) {
+        ((a.disabled = !1),
+          (a.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SIMPAN DB'),
+          window.showToast(window.tr('form.ai_chat_error'), 'error'));
+      });
+  } catch (d) {
+    ((a.disabled = !1),
+      (a.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> SIMPAN DB'),
+      window.showToast(window.tr('form.ai_upload_failed') + ' ' + (d.message || ''), 'error'));
+  }
+}
+G({
+  initApp: sa,
+  switchTab: R,
+  handleEnter: da,
+  sendMessage: W,
+  updateFormUI: k,
+  compressImage: _a,
+  handleDocUpload: ma,
+  saveToDatabase: ga,
+  updateArrayField: aa,
+  removeArrayItem: ta,
+  addArrayItem: ea,
+});
+export {
+  ea as addArrayItem,
+  _a as compressImage,
+  ma as handleDocUpload,
+  da as handleEnter,
+  sa as initApp,
+  ta as removeArrayItem,
+  ga as saveToDatabase,
+  W as sendMessage,
+  R as switchTab,
+  aa as updateArrayField,
+  k as updateFormUI,
+};

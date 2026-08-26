@@ -12,12 +12,14 @@
 ## Sesi 2026-08-26 — Fix missing window.showToast in standalone pages (AI Agent)
 
 ### Commits
-| Hash | Isi | Status |
-|---|---|---|
+
+| Hash      | Isi                                                         | Status    |
+| --------- | ----------------------------------------------------------- | --------- |
 | `283b340` | fix: externalizeSharedDeps incorrectly externalized util.ts | ✅ Pushed |
 
 ### Yang Dikerjakan:
-1. **Fix `window.showToast` Error on Live Site**: 
+
+1. **Fix `window.showToast` Error on Live Site**:
    - **Root Cause**: The `externalizeSharedDeps` plugin in `scripts/build-js.mts` was blindly replacing ALL `*.ts` imports with `*.js` and marking them as `external: true`. This caused `import '../init/util.ts'` in `ai_form.ts` and `siswa_baru.ts` to be externalized.
    - **Why it failed on live but worked locally**: Locally, `serve-static.mts` transpiled `util.ts` on the fly to `util.js`. On the Netlify live site, since `util.js` is not pre-built, it returned a 404 (HTML page). However, for users with an older Service Worker cache, they received an old `util.js` as an ES module, which failed to attach `showToast` to `window`, triggering the `TypeError: window.showToast is not a function`.
    - **Fix**: Modified `build-js.mts` so `externalizeSharedDeps` explicitly targets only `bridge.ts` and `cloudinary.ts`, and correctly bundles `util.ts` into the standalone pages.
