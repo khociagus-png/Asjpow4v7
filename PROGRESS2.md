@@ -5,7 +5,27 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-26 — dikerjakan oleh **AI Agent** — **Fix missing window.showToast in standalone pages and Cloudinary CSP** (`5d3a7f0`)
+**Update terakhir:** sesi 2026-08-26 — dikerjakan oleh **AI Agent** — **Fix missing window.showToast in standalone pages** (`283b340`)
+
+---
+
+## Sesi 2026-08-26 — Fix missing window.showToast in standalone pages (AI Agent)
+
+### Commits
+| Hash | Isi | Status |
+|---|---|---|
+| `283b340` | fix: externalizeSharedDeps incorrectly externalized util.ts | ✅ Pushed |
+
+### Yang Dikerjakan:
+1. **Fix `window.showToast` Error on Live Site**: 
+   - **Root Cause**: The `externalizeSharedDeps` plugin in `scripts/build-js.mts` was blindly replacing ALL `*.ts` imports with `*.js` and marking them as `external: true`. This caused `import '../init/util.ts'` in `ai_form.ts` and `siswa_baru.ts` to be externalized.
+   - **Why it failed on live but worked locally**: Locally, `serve-static.mts` transpiled `util.ts` on the fly to `util.js`. On the Netlify live site, since `util.js` is not pre-built, it returned a 404 (HTML page). However, for users with an older Service Worker cache, they received an old `util.js` as an ES module, which failed to attach `showToast` to `window`, triggering the `TypeError: window.showToast is not a function`.
+   - **Fix**: Modified `build-js.mts` so `externalizeSharedDeps` explicitly targets only `bridge.ts` and `cloudinary.ts`, and correctly bundles `util.ts` into the standalone pages.
+2. **Rebuilt & Deployed**: Ran full `bun run build` and initiated deployment to Netlify live site.
+3. **Fix PWA Push Notifications (FCM)**:
+   - **Issue**: Firebase Push Notifications to Candidate HP were silently failing on the live site.
+   - **Root Cause**: The `FIREBASE_SERVICE_ACCOUNT` environment variable was entirely missing on Netlify (likely due to previous Free Plan API blocks).
+   - **Fix**: Set the JSON service account credential directly in Netlify via Netlify CLI, persisted it in `.env.local` locally, and triggered a live redeploy so the Netlify Functions have access to the credentials.
 
 ---
 
