@@ -5,7 +5,7 @@
 > konteks lama). Mulai sesi ini, entri baru dicatat DI SINI supaya file riwayat
 > tidak terus membengkak. Lihat juga `CHANGELOG2.md` untuk riwayat per commit.
 
-**Update terakhir:** sesi 2026-08-22 (sore) — dikerjakan oleh **Buffy** (AI agent) — **Fix laporan bulanan + Regression tests + Security review** (`b317d57`)
+**Update terakhir:** sesi 2026-08-26 — dikerjakan oleh **AI Agent** — **Fix missing window.showToast in standalone pages and Cloudinary CSP** (`5d3a7f0`)
 
 ---
 
@@ -583,3 +583,18 @@ Build:       npm run build → clean (0 errors)
 | CV Master (`master-full.html`) | `getMasterDataByWa` → `master_database_candidate`                      | 100+ fields (full profile)                                         |
 | CV AI (`ai_form.html`)         | `getDrafCvMaster` → `master_database_candidate`                        | 100+ fields (full profile)                                         |
 | Apply (`apply-full.html`)      | `cekDataPelamar` → `database_asj_form` + `database_candidate` fallback | nama, gender, usia, tb, bb, **email** ✅, pasPhoto, jftUrl, sswUrl |
+
+---
+
+## Sesi 2026-08-26 — dikerjakan oleh AI Agent
+
+### Commits
+
+| Hash      | Isi                                                 | Status    |
+| --------- | --------------------------------------------------- | --------- |
+| `5d3a7f0` | fix(core): import util.ts di ai_form, whitelist CSP | ✅ Pushed |
+
+### Yang Dikerjakan:
+
+- Import `util.ts` pada standalone pages `ai_form.ts` dan `siswa_baru.ts` yang kehilangan method `window.showToast` setelah migrasi ESM.
+- Menambahkan URL origin `https://api.cloudinary.com` ke header `connect-src` CSP pada `netlify.toml` untuk mengizinkan unggahan dari plugin Cloudinary.

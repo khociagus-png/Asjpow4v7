@@ -331,3 +331,13 @@
 - **Audit staleness bundle**: bundle `assets/app-23d620bb08.js` pertama dibuat di commit `26f2a91` (sebelum prettier `dcb6938`), tapi KARENA esbuild `minify:true` (hash = sha1 output minified), reformat prettier yang hanya mengubah whitespace menghasilkan output byte-identik → bundle committed TIDAK basi, reproducible dari sumber `3134395` (dibuktikan rebuild idempoten di 2 worktree, `git diff` kosong). Warning LF→CRLF murni artefak autocrlf Windows, bukan bukti staleness.
 - **Fix E2E `upload-check.mjs`** — setelah migrasi Cloudinary, E2E gagal 6 asersi karena: (1) PDF dummy `%PDF-1.4` minimal DITOLAK Cloudinary (HTTP 400 "Invalid image file" — Cloudinary memvalidasi isi, Supabase Storage tidak); (2) asersi masih mengharapkan URL berisi `KTP.pdf` persis, padahal Cloudinary menghasilkan `KTP_<acak>.pdf`; (3) bug laten `JSON.stringify(undefined).slice()` di argumen diagnostik `check()`. Fix: PDF minimal VALID (xref offset benar, 587 B), asersi pakai `KTP_`/`KK_`, dan `(JSON.stringify(x)||'')` defensif. Hasil: E2E upload **SEMUA LULUS** di preview lokal `3134395` (11 asersi).
 - **E2E regresi penuh di preview lokal**: `login-check` LULUS, `biodata-check` LULUS, `upload-check` LULUS, `undang-grup-kelas` LULUS (20 asersi). Unit test vitest `296/296` lulus.
+
+---
+
+## 2026-08-26 — `5d3a7f0` fix(core): import util.ts di ai_form, whitelist CSP
+
+### Ringkasan
+
+- **Bug window.showToast undefined**: Pada migrasi halaman standalone (Fase 3 ESM), file `js/pages/ai_form.ts` dan `js/pages/siswa_baru.ts` kehilangan global fungsi util (seperti `window.showToast`) karena tidak lagi memuat bundel JS utama.
+- **Fix util.ts**: Menambahkan `import '../init/util.ts';` ke `ai_form.ts` dan `siswa_baru.ts`.
+- **Cloudinary CSP**: Menambahkan origin `https://api.cloudinary.com` ke directive `connect-src` di file konfigurasi `netlify.toml` untuk mengizinkan Fetch API mengunggah berkas kandidat menggunakan plugin upload Cloudinary dari frontend klien.
