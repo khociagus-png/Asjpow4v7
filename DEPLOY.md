@@ -128,6 +128,7 @@ GROQ_API_KEY, LOG_DRAIN_TOKEN    # ditambahkan 2026-08-18 (whitelist env.js suda
 1. ✅ `git pull` → pastikan di commit terbaru `main`
 2. ✅ Kalau menyentuh frontend/partial/css: `bun run build` + **commit asset**
    (`assets/*` hasil build wajib ikut repo — Netlify tidak menjalankan build)
+   > ⚠️ **ATURAN CACHE BUSTING (WAJIB):** Jika `bun run build` gagal/tidak bisa dijalankan secara lokal (karena error `node_modules` dsb), dan Anda mengedit file JS/CSS secara manual, Anda **WAJIB** mengganti nama file tersebut (misal `app-xxx.js` menjadi `app-yyy.js`), lalu perbarui referensinya di `index.html`, `admin.html`, dan `sw.js`. Jika tidak diganti namanya, browser akan menggunakan cache lama dan deploy Netlify akan sia-sia.
 3. ✅ Env vars lengkap (daftar §3) — `npx netlify-cli env:list`
 4. ✅ Site visibility **Public**
 5. ✅ Verifikasi setelah deploy:
