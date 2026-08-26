@@ -15,6 +15,7 @@ var re = '/.netlify/functions',
     'simpanHasilWawancara',
     'processAIChat',
     'submitDataAsj',
+    'registerFcmToken',
   ]),
   oe = new Set([
     'approveForm',

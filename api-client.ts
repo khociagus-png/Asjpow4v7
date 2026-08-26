@@ -42,6 +42,8 @@ const CANDIDATE_ACTIONS = new Set([
   // Backend ai-form-submit.ts memvalidasi: admin valid ATAU kandidat pemilik WA
   // itu — selainnya 401 (anti spoof WA: tanpa sesi, data tidak bisa ditimpa).
   'submitDataAsj',
+  // FCM Token Registration
+  'registerFcmToken',
 ]);
 
 const ADMIN_ACTIONS = new Set([

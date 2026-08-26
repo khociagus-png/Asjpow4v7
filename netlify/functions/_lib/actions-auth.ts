@@ -353,17 +353,23 @@ async function registerFcmToken(payload, sessionToken) {
   const [waStr, token, deviceInfo] = payload;
   const waRaw = String(waStr || '').trim();
   let wa = normalizeWa(waRaw);
-  if (waRaw === 'ADMIN') wa = 'ADMIN'; // bypass for admin
+
+  let ident: any = null;
+  if (sessionToken) {
+    ident = session.verifyToken(sessionToken);
+  }
+
+  // Bypass normalisasi untuk admin (agar nama admin spt 'khoci' tidak terhapus jd string kosong)
+  if (ident && ident.role === 'admin') {
+    wa = waRaw || 'ADMIN';
+  } else if (waRaw === 'ADMIN') {
+    wa = 'ADMIN';
+  }
 
   if (!wa || !token) return { success: false, message: 'Invalid data' };
 
-  // Validasi sesi
-  if (sessionToken) {
-    const ident = session.verifyToken(sessionToken);
-    // Boleh admin atau kandidat (yang WA-nya sesuai)
-    if (ident && ident.role === 'kandidat' && ident.wa !== wa) {
-      return { success: false, message: 'Unauthorized FCM registration' };
-    }
+  if (ident && ident.role === 'kandidat' && ident.wa !== wa) {
+    return { success: false, message: 'Unauthorized FCM registration' };
   }
 
   try {
