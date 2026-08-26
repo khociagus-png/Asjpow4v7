@@ -40,7 +40,7 @@ node serve-static.mjs  # preview lokal :3000 (backend in-process)
 3. **WAJIB `bun run build`** setelah ubah JS/HTML/CSS — artefak di-commit (hosting tidak build).
 4. **Modal**: edit hanya di `partials/modals-shared.html`.
 5. **Upload file**: browser → Cloudinary (`js/cloudinary.js`) → kirim URL string ke backend. Jangan kirim base64.
-6. **Normalisasi WA** wajib (`628…`, gate `/^628\d{9,10}$/`) — jangan pernah longgarkan.
+6. **Normalisasi WA** wajib (`628…`, gate `/^628\d{9,11}$/`) — jangan pernah longgarkan.
 
 ## Peta dokumen (baca sesuai kebutuhan)
 

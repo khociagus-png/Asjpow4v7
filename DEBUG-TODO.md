@@ -58,7 +58,7 @@
 - [x] Hash-based routing: guarded by `_hashChangeInit` flag ✅
 - [x] Session check: token kosong → clear + reload with toast ✅### B2. `js/04_auth.js` (319 baris) — Authentication ✅ DIVERIFIKASI (2026-08-20)
 - [x] `normalizeWaInput()` → shared/wa-rules.js → 628xxx format — benar
-- [x] `isValidWaInput()` → regex `/^628\d{9,10}$/` — benar
+- [x] `isValidWaInput()` → regex `/^628\d{9,11}$/` — benar
 - [x] Login flow: admin 3-step + kandidat WA+PIN — benar
 - [x] Session storage: server-generated HMAC token — benar
 - [x] Auto-login guard: clear + reload — benar

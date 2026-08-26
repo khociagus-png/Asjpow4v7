@@ -23,7 +23,7 @@ function normalizeWa(v) {
 
 // Gate login/daftar: hanya nomor HP Indonesia (62 + 8xx, total 12-13 digit).
 function isValidWaFormat(wa) {
-  return /^628\d{9,10}$/.test(normalizeWa(wa));
+  return /^628\d{9,11}$/.test(normalizeWa(wa));
 }
 
 export { normalizeWa, isValidWaFormat };

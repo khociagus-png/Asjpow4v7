@@ -447,7 +447,7 @@ function Be(e) {
   let t = e.value.replace(/\D/g, '');
   (t.startsWith('0') ? (t = '62' + t.substring(1)) : t.startsWith('8') && (t = '62' + t),
     (e.value = t.length > 0 ? '+' + t : ''));
-  let a = /^628\d{9,10}$/.test(t);
+  let a = /^628\d{9,11}$/.test(t);
   (e.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-500'),
     t.length > 0 && !a
       ? (e.classList.add('ring-2', 'ring-red-500'), (e.title = window.toastWaFormat()))

@@ -133,7 +133,7 @@
 
 ## 📋 Aturan Penting (JANGAN LUPA)
 
-1. **WA format:** selalu `628xxxxxxxxxx` (13 digit) — gate `/^628\d{9,10}$/`
+1. **WA format:** selalu `628xxxxxxxxxxxx` (maksimal 14 digit) — gate `/^628\d{9,11}$/`
 2. **Upload:** browser → Cloudinary → URL string ke backend. JANGAN base64 ke server.
 3. **Modal:** edit HANYA di `partials/modals-shared.html`
 4. **i18n:** semua teks UI lewat `tr('ui.key')`

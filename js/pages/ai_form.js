@@ -447,7 +447,7 @@ function Ya(a) {
   let e = a.value.replace(/\D/g, '');
   (e.startsWith('0') ? (e = '62' + e.substring(1)) : e.startsWith('8') && (e = '62' + e),
     (a.value = e.length > 0 ? '+' + e : ''));
-  let t = /^628\d{9,10}$/.test(e);
+  let t = /^628\d{9,11}$/.test(e);
   (a.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-500'),
     e.length > 0 && !t
       ? (a.classList.add('ring-2', 'ring-red-500'), (a.title = window.toastWaFormat()))

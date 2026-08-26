@@ -227,7 +227,7 @@ export function formatInputWA(el) {
   el.value = val.length > 0 ? '+' + val : '';
   // Gate WA: tandai nomor yang bukan HP Indonesia (62 8xx, total 12-13 digit)
   // supaya typo seperti 6223... (bukan 6282...) langsung kelihatan.
-  const valid = /^628\d{9,10}$/.test(val);
+  const valid = /^628\d{9,11}$/.test(val);
   el.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-500');
   if (val.length > 0 && !valid) {
     el.classList.add('ring-2', 'ring-red-500');

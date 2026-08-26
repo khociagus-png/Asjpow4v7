@@ -164,7 +164,7 @@ export function parseDaftarOrtu(text) {
       const wa = window.normalizeWaInput
         ? window.normalizeWaInput(waRaw)
         : waRaw.replace(/\D/g, '');
-      const ok = window.isValidWaInput ? window.isValidWaInput(wa) : /^628\d{9,10}$/.test(wa);
+      const ok = window.isValidWaInput ? window.isValidWaInput(wa) : /^628\d{9,11}$/.test(wa);
       if (!ok || !wa) {
         invalid += 1;
         return;

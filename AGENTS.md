@@ -15,7 +15,7 @@ chat AI, upload berkas, admin kelola pipeline & pemberkasan).
 
 **Aturan singkat:**
 
-1. WA: selalu `628xxxxxxxxxx` (13 digit)
+1. WA: selalu `628xxxxxxxxxxxx` (12-14 digit)
 2. Upload: browser → Cloudinary → URL string
 3. Modal: edit di `partials/modals-shared.html` saja
 4. Build: `bun run build` setelah ubah JS/HTML/CSS
@@ -109,9 +109,9 @@ Tabel utama di Supabase (`netlify/functions/_lib/supabase.js`):
 **Normalisasi WA — JANGAN PERNAH dilanggar:**
 
 - `supabase.normalizeWa(v)` (di `supabase.js`): buang non-digit, `0xx…` → `62xx…`.
-- Format baku tersimpan: **`628…`** (13 digit, awalan HP) — registrasi baru selalu disimpan format ini.
+- Format baku tersimpan: **`628…`** (12-14 digit, awalan HP) — registrasi baru selalu disimpan format ini.
 - **Gate login/daftar** (`isValidWaFormat` di `handlers.js` + `normalizeWaInput`/`isValidWaInput`
-  di `js/04_auth.js`): hanya menerima `/^628\d{9,10}$/`. WA typo (mis. `6223…` vs `6282…`)
+  di `js/04_auth.js`): hanya menerima `/^628\d{9,11}$/`. WA typo (mis. `6223…` vs `6282…`)
   **ditolak** — ini mencegah kandidat duplikat (kasus SATRIA, 2026-08-15).
 - Jangan buat kandidat/lamaran dengan WA format bebas — selalu lewat normalisasi.
 
